@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo apt-get install build-essential cmake cmake-curses-gui libqt4-core libqt4-gui libqt4-dev libqtmultimediakit1
+
+#build-essential: for gcc compiler

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cd /home/visore/Visore/
+rm -r install
+mkdir install
+rm -r build
+mkdir build
+cd /home/visore/Visore/build
+ccmake ../project/code -DCMAKE_INSTALL_PREFIX=/home/visore/Visore/install -DCMAKE_BUILD_TYPE=Debug
+make install
+cd /home/visore/Visore/install
+./Visore

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+getFiles()
+{
+	for i in "$1"/*; do
+		if [ -d "$i" ];then
+			getFiles "$i"
+		elif [ -f "$i" ]; then
+			st=$(echo "$i"|grep '~')
+			len=$(echo ${#st})
+			if [ $len -lt 1 ]; then
+				array[$counter]=$(echo "$i")
+				counter=$[counter+1]
+			fi
+		fi
+	done
+}
+
+if [ $# -ne 1 ]; then
+	echo "Please provide a commit message enclosed in quotation marks."
+else
+	array=()
+	counter=0
+	getFiles .
+	for (( i=0; i<${#array[@]}; i++ )); do
+		git add ${array[$i]}
+	done
+	git commit -m "$1"
+	git push -u origin master
+fi
+
+
+

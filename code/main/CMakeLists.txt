@@ -1,0 +1,18 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Initiate main files
+FILE(GLOB MAIN_HEADERS ${HEADERS}/*.h)
+FILE(GLOB MAIN_SOURCES ${SOURCES}/*.cpp)
+
+ADD_EXECUTABLE(Visore ${MAIN_HEADERS} ${MAIN_SOURCES})
+
+#Link Visore to Qt
+TARGET_LINK_LIBRARIES(Visore ${QT_LIBRARIES})
+
+#Install file
+INSTALL(TARGETS Visore DESTINATION .)
+
+

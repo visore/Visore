@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd /home/visore/Visore/build
+make install
+cd /home/visore/Visore/install/
+./Visore
