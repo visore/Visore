@@ -7,6 +7,7 @@ rm -r build
 mkdir build
 cd /home/visore/Visore/build
 ccmake ../project/code -DCMAKE_INSTALL_PREFIX=/home/visore/Visore/install -DCMAKE_BUILD_TYPE=Debug
+make
 make install
 cd /home/visore/Visore/install
-./Visore
+$1 $2 $3 $4 $5 ./visore

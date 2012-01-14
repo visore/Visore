@@ -1,0 +1,20 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Include header directory
+INCLUDE_DIRECTORIES(${HEADERS})
+
+#Initiate source files
+FILE(GLOB VI_FFTREAL_HEADERS ${HEADERS}/*.h)
+FILE(GLOB VI_FFTREAL_SOURCES ${SOURCES}/*.hpp)
+
+#Create library
+ADD_LIBRARY(vifftreal SHARED ${VI_FFTREAL_HEADERS} ${VI_FFTREAL_SOURCES})
+
+#Set language
+SET_TARGET_PROPERTIES(vifftreal PROPERTIES LINKER_LANGUAGE C)
+
+#Install file
+INSTALL(TARGETS vifftreal DESTINATION external)
