@@ -9,16 +9,18 @@ class ViMainWindow : public QMainWindow
 		ViMainWindow(QWidget *parent = 0);
 };
 
-#ifdef __cplusplus
-extern "C" {
 #endif
 
-QMainWindow* create(){
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+QMainWindow* create()
+{
    return new ViMainWindow;
 }
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

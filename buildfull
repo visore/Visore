@@ -10,4 +10,4 @@ ccmake ../project/code -DCMAKE_INSTALL_PREFIX=/home/visore/Visore/install -DCMAK
 make
 make install
 cd /home/visore/Visore/install
-$1 $2 $3 $4 $5 ./visore
+#$1 $2 $3 $4 $5 ./visore

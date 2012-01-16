@@ -5,9 +5,6 @@ SET(RESOURCES ${ROOT}/resources)
 SET(HEADERS ${ROOT}/headers)
 SET(SOURCES ${ROOT}/sources)
 
-#Include header directory
-INCLUDE_DIRECTORIES(${HEADERS})
-
 #Initiate source files
 FILE(GLOB VI_MAINWINDOW_HEADERS ${HEADERS}/*.h)
 FILE(GLOB VI_MAINWINDOW_SOURCES ${SOURCES}/*.cpp)
