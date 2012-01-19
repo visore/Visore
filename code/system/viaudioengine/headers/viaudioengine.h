@@ -1,12 +1,42 @@
 #ifndef VIAUDIOENGINE_H
 #define VIAUDIOENGINE_H
 
-#include "vistreaminput.h"
-#include "vifileinput.h"
-#include "vistreamoutput.h"
+#include "viaudiobuffer.h"
+#include "viaudioinput.h"
+#include "viaudiooutput.h"
 #include "vispectrumanalyser.h"
-#include <QFile>
-#include <QBuffer>
+#include <QList>
+
+#include "wavfile.h"
+
+struct ViAudioInputDevice
+{
+	public:
+		ViAudioInputDevice(QString name = "", QString description = "")
+		{
+			mName = name;
+			mDescription = description;
+		}
+		QString name()
+		{
+			return mName;
+		}
+		QString description()
+		{
+			return mDescription;
+		}
+		void setName(QString name)
+		{
+			mName = name;
+		}
+		void setDescription(QString description)
+		{
+			mDescription = description;
+		}
+	private:
+		QString mName;
+		QString mDescription;
+};
 
 class ViAudioEngine : public QObject
 {
@@ -17,59 +47,28 @@ class ViAudioEngine : public QObject
 		{
 			None = 0,
 			File = 1,
-			Stream = 2
+			Stream = 2,
+			FileAndStream = 3
 		};
 
-	signals:
-		/**
-		* Format of audio data has changed
-		*/
-		void formatChanged(const QAudioFormat &format);
-
-		/**
-		* Length of buffer has changed.
-		* \param duration Duration in microseconds
-		*/
-		void bufferLengthChanged(qint64 duration);
-
-		/**
-		* Amount of data in buffer has changed.
-		* \param Length of data in bytes
-		*/
-		void dataLengthChanged(qint64 duration);
-
-		/**
-		* Position of the audio input device has changed.
-		* \param position Position in bytes
-		*/
-		void recordPositionChanged(qint64 position);
-
-		/**
-		* Position of the audio output device has changed.
-		* \param position Position in bytes
-		*/
-		void playPositionChanged(qint64 position);
-
 	private slots:
-		void receiveNotification();
+		void changeReceived(int startIndex, int size);
 
 	public:
-		ViAudioEngine(QObject *parent = 0);
+		ViAudioEngine();
 		~ViAudioEngine();
+		//void setInputDevice
 
 	private:
-		void initializeInput(QString filePath, QAudioFormat format);
-		void initializeOutput(QAudioDeviceInfo deviceInfo, QAudioFormat format);
-		void calculateSpectrum(qint64 position);
-		void setPlayPosition(qint64 position, bool forceEmit = false);
-		void setFormat(QAudioFormat format);
+		/*void initializeInputStream(QAudioDeviceInfo deviceInfo, QAudioFormat format);
+		void initializeInputFile(QString filePath);
+		void initializeOutputStream();
+		void initializeOutputFile();*/
 
 	private:
+		ViAudioBuffer *mBuffer;
 		ViAudioInput *mAudioInput;
-		ViAudioOutput *mAudioOutput;
-		qint64 mPlayPosition;
-		int mSpectrumBufferLength;
-		qint64 mDataLength;
+		QList<ViAudioOutput*> mAudioOutputs;
 		ViAudioEngine::ViAudioType mInputAudioType;
 		ViAudioEngine::ViAudioType mOutputAudioType;
 };

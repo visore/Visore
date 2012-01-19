@@ -1,157 +1,175 @@
 #include "viaudioengine.h"
 
-ViAudioEngine::ViAudioEngine(QObject *parent)
-	: QObject(parent)
+#include <QDir>
+#include <QCoreApplication>
+#include "vifileinput.h"
+
+ViAudioEngine::ViAudioEngine()
+	: QObject()
 {
+	mBuffer = new ViAudioBuffer();
 	mAudioInput = NULL;
-	mAudioOutput = NULL;
-	mPlayPosition = 0;
-	mSpectrumBufferLength = 0;
-	mDataLength = 0;
-	mInputAudioType = ViAudioEngine::None;
-	mOutputAudioType = ViAudioEngine::None;
+
+
+	/*format.setFrequency(8000);
+	format.setChannels(1);
+	format.setSampleSize(8);
+	format.setCodec("audio/pcm");
+	format.setByteOrder(QAudioFormat::LittleEndian);
+	format.setSampleType(QAudioFormat::UnSignedInt);*/
+
+QAudioFormat format;
+WavFile w;
+w.open("/home/visore/Desktop/a.wav");
+format = w.fileFormat();
+ViLogger::debug(QString::number(format.frequency()));
+ViLogger::debug(QString::number(format.channels()));
+ViLogger::debug(QString::number(format.sampleSize()));
+ViLogger::debug(format.codec());
+ViLogger::debug(QString::number(format.byteOrder()==QAudioFormat::LittleEndian));
+ViLogger::debug(QString::number(format.sampleType()==QAudioFormat::SignedInt));
+
+
+
+
+ViLibrary<ViFileInput> *loader = new ViLibrary<ViFileInput>(QCoreApplication::applicationDirPath()+"/system/connections/libvibassconnection.so");
+if(!loader->open()) ViLogger::debug("Library cannot be loaded! ");
+ViFileInput *input = loader->create("createFileInput");
+input->setBuffer(mBuffer);
+input->setFilePath("/home/visore/Desktop/a.mp3");
+input->start();
+
+/*ViLibrary<ViFileInput> loader(QCoreApplication::applicationDirPath()+"/system/connections/libvibassconnection.so");
+if(!loader.open()) ViLogger::debug("Library cannot be loaded! ");
+ViFileInput *input = loader.create("createFileInput"mBuffer, "/home/visore/Desktop/a.wav");*/
+////input->start();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	//Test
-	QAudioFormat format;
+	
+	/*QAudioFormat format;
+	// set up the format you want, eg.
+WavFile w;
+w.open("/home/visore/Desktop/a.wav");
+format = w.fileFormat();
+
 	format.setFrequency(8000);
 	format.setChannels(1);
 	format.setSampleSize(8);
 	format.setCodec("audio/pcm");
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	format.setSampleType(QAudioFormat::UnSignedInt);
-	mInputAudioType = ViAudioEngine::File;
-	initializeInput("/tmp/test.raw", format);
 
-	mOutputAudioType = ViAudioEngine::Stream;
-	initializeOutput(QAudioDeviceInfo::defaultOutputDevice(), format);
-	mAudioOutput->start();
+	QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
+	if (!info.isFormatSupported(format)) {
+		format = info.nearestFormat(format);
+ViLogger::debug("999999999998888888888");
+		}
+*/
+	//initializeInputStream(info, format);
+	//initializeInputFile("/home/visore/Desktop/test.raw");
+//	initializeOutputStream();
+//	mAudioInput->start();
 }
 
 ViAudioEngine::~ViAudioEngine()
 {
 	if(mAudioInput != NULL)
 	{
+		ViObject::disconnect(mAudioInput, SIGNAL(changed(int, int)), this, SLOT(changeReceived(int, int)));
 		delete mAudioInput;
 		mAudioInput = NULL;
 	}
-	if(mAudioOutput != NULL)
+	if(mAudioOutputs.size() != 0)
 	{
-		delete mAudioOutput;
-		ViObject::disconnect(mAudioOutput, SIGNAL(notify()), this, SLOT(receiveNotification()));
-		mAudioOutput = NULL;
+		for(int i = 0; i < mAudioOutputs.size(); ++i)
+		{
+			delete mAudioOutputs[i];
+			ViObject::disconnect(mAudioOutputs[i], SIGNAL(changed(int, int)), this, SLOT(changeReceived(int, int)));
+			mAudioOutputs[i] = NULL;
+		}
+	}
+	if(mBuffer != NULL)
+	{
+		delete mBuffer;
+		mBuffer = NULL;
 	}
 }
-
-void ViAudioEngine::initializeInput(QString filePath, QAudioFormat format)
+/*
+void ViAudioEngine::initializeInputStream(QAudioDeviceInfo deviceInfo, QAudioFormat format)
 {
-	if(mInputAudioType == ViAudioEngine::Stream)
+	if(mAudioInput != NULL)
 	{
-		//mAudioInput = new ViStreamInput(device, deviceInfo, format);
+		ViObject::disconnect(mAudioInput, SIGNAL(changed(int, int)), this, SLOT(changeReceived(int, int)));
+		delete mAudioInput;
 	}
-	else if(mInputAudioType == ViAudioEngine::File)
-	{
-		mAudioInput = new ViFileInput(filePath, format);
-	}
+	mInputAudioType = ViAudioEngine::Stream;
+	//mAudioInput = new ViStreamInput(mBuffer, deviceInfo, format);
+	ViObject::connect(mAudioInput, SIGNAL(changed(int, int)), this, SLOT(changeReceived(int, int)));
 }
 
-void ViAudioEngine::initializeOutput(QAudioDeviceInfo deviceInfo, QAudioFormat format)
+void ViAudioEngine::initializeInputFile(QString filePath)
+{
+	if(mAudioInput != NULL)
+	{
+		ViObject::disconnect(mAudioInput, SIGNAL(changed(int, int)), this, SLOT(changeReceived(int, int)));
+		delete mAudioInput;
+	}
+	mInputAudioType = ViAudioEngine::File;
+	//mAudioInput = new ViFileInput(mBuffer, filePath);
+	ViObject::connect(mAudioInput, SIGNAL(changed(int, int)), this, SLOT(changeReceived(int, int)));
+}
+
+void ViAudioEngine::initializeOutputStream()
+{
+	if(mOutputAudioType == ViAudioEngine::File)
+	{
+		mOutputAudioType = ViAudioEngine::FileAndStream;
+	}
+	else if(mOutputAudioType == ViAudioEngine::None)
+	{
+		mOutputAudioType = ViAudioEngine::Stream;
+	}
+	//mAudioOutputs.append(new ViStreamOutput(mBuffer));
+}
+
+void ViAudioEngine::initializeOutputFile()
 {
 	if(mOutputAudioType == ViAudioEngine::Stream)
 	{
-		mAudioOutput = new ViStreamOutput(mAudioInput, deviceInfo, format);
-		ViObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(receiveNotification()));
+		mOutputAudioType = ViAudioEngine::FileAndStream;
 	}
-	else if(mOutputAudioType == ViAudioEngine::File)
+	else if(mOutputAudioType == ViAudioEngine::None)
 	{
-
+		mOutputAudioType = ViAudioEngine::File;
 	}
-}
+	//mAudioOutputs.append(new ViStreamOutput(mBuffer));
+}*/
 
-void ViAudioEngine::setPlayPosition(qint64 position, bool forceEmit)
+void ViAudioEngine::changeReceived(int startIndex, int size)
 {
-	const bool changed = (mPlayPosition != position);
-	mPlayPosition = position;
-	if (changed || forceEmit)
-	{
-		emit playPositionChanged(mPlayPosition);
-	}
+	//ViLogger::debug("Data received: index "+QString::number(startIndex)+" size "+QString::number(size));
+	//ViLogger::debug("yyyyy: "+QString::number(mBuffer->size()));
+	//mAudioOutputs[0]->start();
 }
 
-void ViAudioEngine::setFormat(QAudioFormat format)
-{
-	const bool changed = (format != mAudioOutput->format());	
-	mAudioOutput->setFormat(format);
-	mSpectrumBufferLength = cSpectrumLengthSamples * (format.sampleSize() / 8) * format.channels();
-	if(changed)
-	{
-		emit formatChanged(format);
-	}
-}
-
-void ViAudioEngine::receiveNotification()
-{
-	const qint64 playPosition = mAudioOutput->audioLength(mAudioOutput->secondsProcessed());
-	setPlayPosition(qMin(mAudioOutput->bufferLength(), playPosition));
-	const qint64 levelPosition = playPosition - mAudioOutput->levelBufferLength();
-	const qint64 spectrumPosition = playPosition - mSpectrumBufferLength;
-	
-	if(mInputAudioType == ViAudioEngine::File)
-	{
-		if(levelPosition > mAudioOutput->bufferPosition() || spectrumPosition > mAudioOutput->bufferPosition() || qMax(mAudioOutput->levelBufferLength(), mSpectrumBufferLength) > mDataLength)
-		{
-			mAudioOutput->setBufferPosition(0);
-			mDataLength = 0;
-			// Data needs to be read into m_buffer in order to be analysed
-			const qint64 readPos = qMax(qint64(0), qMin(levelPosition, spectrumPosition));
-			const qint64 readEnd = qMin(mAudioInput->size(), qMax(levelPosition + mAudioOutput->levelBufferLength(), spectrumPosition + mSpectrumBufferLength));
-			const qint64 readLen = readEnd - readPos + mAudioOutput->audioLength(cWaveformWindowDuration);
-		}
-	}
-            
-           /* if (m_file) {
-                if (levelPosition > m_bufferPosition ||
-                    spectrumPosition > m_bufferPosition ||
-                    qMax(m_levelBufferLength, m_spectrumBufferLength) > m_dataLength) {
-                    m_bufferPosition = 0;
-                    m_dataLength = 0;
-                    // Data needs to be read into m_buffer in order to be analysed
-                    const qint64 readPos = qMax(qint64(0), qMin(levelPosition, spectrumPosition));
-                    const qint64 readEnd = qMin(m_analysisFile->size(), qMax(levelPosition + m_levelBufferLength, spectrumPosition + m_spectrumBufferLength));
-                    const qint64 readLen = readEnd - readPos + audioLength(m_format, WaveformWindowDuration);
-                    if (m_analysisFile->seek(readPos + m_analysisFile->headerLength())) {
-                        m_buffer.resize(readLen);
-                        m_bufferPosition = readPos;
-                        m_dataLength = m_analysisFile->read(m_buffer.data(), readLen);
-                    }
-                    emit bufferChanged(m_bufferPosition, m_dataLength, m_buffer);
-                }
-            } else {
-                if (playPosition >= m_dataLength)
-                    stopPlayback();
-            }*/
-         /*   if (levelPosition >= 0 && levelPosition + m_levelBufferLength < m_bufferPosition + m_dataLength)
-                calculateLevel(levelPosition, m_levelBufferLength);
-            if (spectrumPosition >= 0 && spectrumPosition + m_spectrumBufferLength < m_bufferPosition + m_dataLength)
-                calculateSpectrum(spectrumPosition);
-        */
-}
-
-
-void ViAudioEngine::calculateSpectrum(qint64 position)
-{
-
-   /* Q_ASSERT(position + m_spectrumBufferLength <= m_bufferPosition + m_dataLength);
-    Q_ASSERT(0 == m_spectrumBufferLength % 2); // constraint of FFT algorithm
-
-    // QThread::currentThread is marked 'for internal use only', but
-    // we're only using it for debug output here, so it's probably OK :)
-    ENGINE_DEBUG << "Engine::calculateSpectrum" << QThread::currentThread()
-                 << "count" << m_count << "pos" << position << "len" << m_spectrumBufferLength
-                 << "spectrumAnalyser.isReady" << m_spectrumAnalyser.isReady();
-
-    if(m_spectrumAnalyser.isReady()) {
-        m_spectrumBuffer = QByteArray::fromRawData(m_buffer.constData() + position - m_bufferPosition,
-                                                   m_spectrumBufferLength);
-        m_spectrumPosition = position;
-        m_spectrumAnalyser.calculate(m_spectrumBuffer, m_format);*/
-}

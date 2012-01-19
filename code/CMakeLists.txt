@@ -16,7 +16,7 @@ SET(EXTERNAL ${ROOT}/external)
 SET(ESSENTIALS ${ROOT}/essentials)
 
 #Set the module path
-set(CMAKE_MODULE_PATH ${ROOT}/cmake)
+SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
 
 #Setup Qt
 FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui REQUIRED)
@@ -28,13 +28,17 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_BINARY_DIR}
 	${QTMOBILITY_INCLUDE_DIRS}
 	${EXTERNAL}/fftreal/headers
-	${ESSENTIALS}
+	${EXTERNAL}/bass/headers
+	${ESSENTIALS}/headers
+	${SYSTEM}/viaudioformats/headers
 	${SYSTEM}/viaudioengine/headers
+	${SYSTEM}/viaudioconnection/headers
 	${INTERFACE}/vimainwindow/headers
 )
 
 #Unix version for installing shared libraries and linking them to the executable
 SET(CMAKE_INSTALL_RPATH
+	"${CMAKE_INSTALL_PREFIX}/essentials"
 	"${CMAKE_INSTALL_PREFIX}/system"
 	"${CMAKE_INSTALL_PREFIX}/external"
 	"${CMAKE_INSTALL_PREFIX}/interface"
@@ -45,3 +49,4 @@ ADD_SUBDIRECTORY(${EXTERNAL})
 ADD_SUBDIRECTORY(${SYSTEM})
 ADD_SUBDIRECTORY(${INTERFACE})
 ADD_SUBDIRECTORY(${MAIN})
+ADD_SUBDIRECTORY(${ESSENTIALS})

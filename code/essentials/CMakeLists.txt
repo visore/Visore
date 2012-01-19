@@ -1,0 +1,14 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Initiate source files
+FILE(GLOB VI_ESSENTIALS_HEADERS ${HEADERS}/*.h)
+FILE(GLOB VI_ESSENTIALS_SOURCES ${SOURCES}/*.cpp)
+
+#Create library
+ADD_LIBRARY(viessentials SHARED ${VI_ESSENTIALS_HEADERS} ${VI_ESSENTIALS_SOURCES})
+
+#Install file
+INSTALL(TARGETS viessentials DESTINATION essentials)

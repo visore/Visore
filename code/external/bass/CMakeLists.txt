@@ -1,0 +1,22 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(LIBRARIES ${ROOT}/libraries)
+SET(LIBRARYLOCATION ${CMAKE_INSTALL_PREFIX}/external/bass)
+SET(PLUGINLOCATION ${CMAKE_INSTALL_PREFIX}/external/bass/plugin)
+
+IF(WIN32)
+	SET(VI_BASS_LIBRARY_INSTALL ${LIBRARYLOCATION}/bass.dll CACHE INTERNAL "Bass library install location")
+	SET(VI_BASS_LIBRARY_CURRENT ${LIBRARIES}/bass.dll)
+ELSEIF(APPLE)
+	SET(VI_BASS_LIBRARY_INSTALL ${LIBRARYLOCATION}/libbass.dylib CACHE INTERNAL "Bass library install location")
+	SET(VI_BASS_LIBRARY_CURRENT ${LIBRARIES}/libbass.dylib)
+ELSEIF(UNIX)
+	SET(VI_BASS_LIBRARY_INSTALL ${LIBRARYLOCATION}/libbass.so CACHE INTERNAL "Bass library install location")
+	SET(VI_BASS_LIBRARY_CURRENT ${LIBRARIES}/libbass.so)
+ELSE()
+	MESSAGE(ERROR "The Bass library can only be installed on Unix, Apple and Windows systems.")
+ENDIF()
+
+#Install file
+FILE(COPY ${VI_BASS_LIBRARY_CURRENT} DESTINATION ${LIBRARYLOCATION})
