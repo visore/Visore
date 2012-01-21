@@ -30,17 +30,20 @@ INCLUDE_DIRECTORIES(
 	${EXTERNAL}/fftreal/headers
 	${EXTERNAL}/bass/headers
 	${ESSENTIALS}/headers
-	${SYSTEM}/viaudioformats/headers
 	${SYSTEM}/viaudioengine/headers
-	${SYSTEM}/viaudioconnection/headers
+	${SYSTEM}/viaudioengine/viaudioformats/headers
+	${SYSTEM}/viaudioengine/viaudioconnections/headers
+	${SYSTEM}/viaudioengine/viaudioconnections/vibassconnection/headers
 	${INTERFACE}/vimainwindow/headers
 )
 
 #Unix version for installing shared libraries and linking them to the executable
 SET(CMAKE_INSTALL_RPATH
 	"${CMAKE_INSTALL_PREFIX}/essentials"
-	"${CMAKE_INSTALL_PREFIX}/system"
-	"${CMAKE_INSTALL_PREFIX}/external"
+	"${CMAKE_INSTALL_PREFIX}/system/audioengine"
+	"${CMAKE_INSTALL_PREFIX}/system/audioengine/audioconnections"
+	"${CMAKE_INSTALL_PREFIX}/system/audioengine/audioformats"
+	"${CMAKE_INSTALL_PREFIX}/external/bass"
 	"${CMAKE_INSTALL_PREFIX}/interface"
 )
 

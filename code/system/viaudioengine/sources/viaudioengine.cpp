@@ -1,14 +1,56 @@
 #include "viaudioengine.h"
 
-#include <QDir>
-#include <QCoreApplication>
-#include "vifileinput.h"
+
 
 ViAudioEngine::ViAudioEngine()
 	: QObject()
 {
 	mBuffer = new ViAudioBuffer();
 	mAudioInput = NULL;
+
+
+
+
+
+
+/*
+
+cout<<"gfdfgdfgdfgdfg1000000000: "<<endl;
+	if(!BASS_RecordInit(-1))
+	{
+		//setErrorParameters("ViBassStreamInput - Initializing Error", "Could not initialize the Bass recording device", ViErrorInfo::Fatal);
+		//return;
+cout<<"info999999999999: "<<endl;	
+	}
+
+   BASS_DEVICEINFO info;
+DWORD a = BASS_RecordGetDevice();
+if(a < 0)cout<<"error 1"<<endl;	
+if(!BASS_RecordGetDeviceInfo(0, &info))cout<<"error 2"<<endl;	
+
+
+cout<<"gfdfgdfgdfgdfg111111111111: "<<BASS_ErrorGetCode()<<endl;	
+cout<<"info: "<<info.driver<<endl;	
+
+
+
+	HRECORD recordHandle = BASS_RecordStart(44100, 2, 0, 0, 0);
+	if(!recordHandle)
+	{
+		//mParent->setErrorParameters("ViBassStreamInput - Stream Input Error", "The stream could not be opened", ViErrorInfo::Fatal);
+		//return;
+	}
+cout<<"infox: "<<BASS_ErrorGetCode()<<endl;
+
+
+
+
+
+
+
+
+
+
 
 
 	/*format.setFrequency(8000);
@@ -18,26 +60,81 @@ ViAudioEngine::ViAudioEngine()
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	format.setSampleType(QAudioFormat::UnSignedInt);*/
 
-QAudioFormat format;
-WavFile w;
-w.open("/home/visore/Desktop/a.wav");
-format = w.fileFormat();
-ViLogger::debug(QString::number(format.frequency()));
-ViLogger::debug(QString::number(format.channels()));
-ViLogger::debug(QString::number(format.sampleSize()));
-ViLogger::debug(format.codec());
-ViLogger::debug(QString::number(format.byteOrder()==QAudioFormat::LittleEndian));
-ViLogger::debug(QString::number(format.sampleType()==QAudioFormat::SignedInt));
+mAudioConnectionLoader = new ViLibrary<ViAudioConnection>(QCoreApplication::applicationDirPath()+"/system/audioengine/audioconnections/libvibassconnection.so");
+if(!mAudioConnectionLoader->open()) ViLogger::debug("Library cannot be loaded! ");
+mAudioConnection = mAudioConnectionLoader->createObject("createConnection");
+/*mAudioConnection = new ViBassConnection();
+ViAudioMetaData *metaData = new ViAudioMetaData();
+ViAudioDevice inputDevice = mAudioConnection->defaultDevice(ViAudioDevice::Input);
+ViStreamInput *input = new ViBassStreamInput(mBuffer, metaData, NULL);
+input->start();*/
 
 
 
+ViAudioMetaData *metaData = new ViAudioMetaData();
 
-ViLibrary<ViFileInput> *loader = new ViLibrary<ViFileInput>(QCoreApplication::applicationDirPath()+"/system/connections/libvibassconnection.so");
-if(!loader->open()) ViLogger::debug("Library cannot be loaded! ");
-ViFileInput *input = loader->create("createFileInput");
-input->setBuffer(mBuffer);
-input->setFilePath("/home/visore/Desktop/a.mp3");
+//mAudioConnection = new ViBassConnection();
+//ViAudioDevice inputDevice = mAudioConnection->defaultDevice(ViAudioDevice::Input);
+cout<<"dfgdfgd999"<<endl;
+ViStreamInput *input = mAudioConnection->streamInput(mBuffer, metaData, NULL);
+//ViFileInput *input = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wav");
+ViStreamOutput *output = mAudioConnection->streamOutput(mBuffer, metaData, NULL);
+//ViStreamOutput *output = mAudioConnection->streamOutput(mBuffer, metaData, &outputDevice);
 input->start();
+output->start();
+
+
+
+
+
+
+
+
+
+/*
+ViAudioMetaData *metaData = new ViAudioMetaData();
+
+mAudioConnectionLoader = new ViLibrary<ViAudioConnection>(QCoreApplication::applicationDirPath()+"/system/audioengine/audioconnections/libvibassconnection.so");
+if(!mAudioConnectionLoader->open()) ViLogger::debug("Library cannot be loaded! ");
+mAudioConnection = mAudioConnectionLoader->createObject("createConnection");
+
+ViAudioDevice inputDevice = mAudioConnection->defaultDevice(ViAudioDevice::Input);
+*/
+
+/*
+ViLibrary<ViBassStreamInput> *m = new ViLibrary<ViBassStreamInput>(QCoreApplication::applicationDirPath()+"/system/audioengine/audioconnections/libvibassconnection.so");
+if(!m->open()) ViLogger::debug("Library cannot be loaded! ");
+ViBassStreamInput *ii = m->createObject("createC");*/
+//ii->start();
+//ViAudioDevice outputDevice = mAudioConnection->defaultDevice(ViAudioDevice::Output);
+
+//ViFileInput *input = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wav");
+//ViStreamInput *input = mAudioConnection->streamInput(mBuffer, metaData, &inputDevice);
+//ViStreamOutput *output = mAudioConnection->streamOutput(mBuffer, metaData, &outputDevice);
+
+//input->start();
+//output->start();
+
+/*ViAudioMetaData *metaData = new ViAudioMetaData();
+ViBassStreamInput *input = new ViBassStreamInput(mBuffer, metaData, 0);
+
+input->start();
+*/
+
+
+//BASS_Free();
+
+
+
+
+
+
+
+
+//ToDo: Make sure metadata is set beofre conitueng - eg: signal
+/*output->setDevice(ViAudioDevice::defaultDevice(ViAudioDevice::Output));*/
+//output->setMetaData(input->metaData());
+//output->start();
 
 /*ViLibrary<ViFileInput> loader(QCoreApplication::applicationDirPath()+"/system/connections/libvibassconnection.so");
 if(!loader.open()) ViLogger::debug("Library cannot be loaded! ");
@@ -94,6 +191,12 @@ ViLogger::debug("999999999998888888888");
 
 ViAudioEngine::~ViAudioEngine()
 {
+	if(mAudioConnectionLoader != NULL)
+	{
+		mAudioConnectionLoader->deleteObject("deleteConnection", mAudioConnection);
+		delete mAudioConnectionLoader;
+		mAudioConnectionLoader = NULL;
+	}
 	if(mAudioInput != NULL)
 	{
 		ViObject::disconnect(mAudioInput, SIGNAL(changed(int, int)), this, SLOT(changeReceived(int, int)));

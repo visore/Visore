@@ -1,6 +1,6 @@
 #include "viessentials.h"
 
-#include "viaudioengine.h"
+
 #include <QApplication>
 
 #include <QUrl>
@@ -12,11 +12,41 @@
 
 #include <QMainWindow>
 
+
+//#include "vibassconnection.h"
+#include "viaudioengine.h"
+
 void run();
 
 int main(int argc, char *argv[])
 {
 	QApplication application(argc, argv);
+
+
+/*
+ViAudioConnection *mAudioConnection;
+ViLibrary<ViAudioConnection> *mAudioConnectionLoader;
+ViAudioBuffer *mBuffer = new ViAudioBuffer();
+ViAudioInput *mAudioInput;
+
+mAudioConnection = new ViBassConnection();
+ViAudioMetaData *metaData = new ViAudioMetaData();
+//ViAudioDevice inputDevice = mAudioConnection->defaultDevice(ViAudioDevice::Input);
+ViBassStreamInput *input = new ViBassStreamInput(mBuffer, metaData, NULL);
+input->start();*/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 // Audio only recording

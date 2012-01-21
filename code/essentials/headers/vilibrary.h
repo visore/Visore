@@ -12,7 +12,8 @@ class ViLibrary : public ViError
 		ViLibrary(QString path);
 		~ViLibrary();
 		bool open();
-		T* create(QString functionName = "create");
+		T* createObject(QString functionName = "createObject");
+		void deleteObject(QString functionName = "deleteObject", void *object = NULL);
 
 	private:
 		QString mPath;

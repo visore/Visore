@@ -1,13 +1,9 @@
 #ifndef VIAUDIOENGINE_H
 #define VIAUDIOENGINE_H
 
-#include "viaudiobuffer.h"
-#include "viaudioinput.h"
-#include "viaudiooutput.h"
-#include "vispectrumanalyser.h"
+#include "viaudioconnection.h"
 #include <QList>
-
-#include "wavfile.h"
+#include <QCoreApplication>
 
 struct ViAudioInputDevice
 {
@@ -66,6 +62,8 @@ class ViAudioEngine : public QObject
 		void initializeOutputFile();*/
 
 	private:
+		ViAudioConnection *mAudioConnection;
+		ViLibrary<ViAudioConnection> *mAudioConnectionLoader;
 		ViAudioBuffer *mBuffer;
 		ViAudioInput *mAudioInput;
 		QList<ViAudioOutput*> mAudioOutputs;

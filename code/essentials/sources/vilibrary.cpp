@@ -30,15 +30,28 @@ bool ViLibrary<T>::open()
 }
 
 template <class T>
-T* ViLibrary<T>::create(QString functionName)
+T* ViLibrary<T>::createObject(QString functionName)
 {
 	if(mHandle == NULL)
 	{
+		setErrorParameters("ViLibrary - Library Error", "Please open the library first", ViErrorInfo::Fatal);
 		return NULL;
 	}
 	typedef T* (*createObject)();
 	createObject creator = (createObject) dlsym(mHandle, functionName.toUtf8().data());
 	return creator();
+}
+
+template <class T>
+void ViLibrary<T>::deleteObject(QString functionName, void *object)
+{
+	if(mHandle == NULL)
+	{
+		setErrorParameters("ViLibrary - Library Error", "Please open the library first", ViErrorInfo::Fatal);
+	}
+	typedef void (*deleteObject)(void*);
+	deleteObject deleter = (deleteObject) dlsym(mHandle, functionName.toUtf8().data());
+	deleter(object);
 }
 
 #endif

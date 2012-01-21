@@ -1,27 +1,22 @@
 #include "vibassfileinput.h"
 
-ViBassFileInputThread::ViBassFileInputThread(ViBassFileInput *parent, ViAudioBuffer *buffer, QString filePath, ViAudioMetaData *metaData)
+ViBassFileInputThread::ViBassFileInputThread(ViBassFileInput *parent, ViAudioBuffer *buffer, ViAudioMetaData *metaData, QString filePath)
 {
 	mParent = parent;
 	mBuffer = buffer;
-	mFilePath = filePath;
 	mMetaData = metaData;
+	mFilePath = filePath;
 }
 
 void ViBassFileInputThread::run()
 {
-	/*if(!BASS_Init(-1, 44100, 0, 0, 0))
-	{
-		mParent->setErrorParameters("ViBassFileInput - Device Error", "Can't initialize Bass device", ViErrorInfo::Fatal);
-		return;
-	}*/
 	HSTREAM fileHandle = BASS_StreamCreateFile(false, mFilePath.toUtf8().data(), 0, 0, BASS_STREAM_DECODE);	
-	if(fileHandle == 0)
+	if(!fileHandle)
 	{
 		mParent->setErrorParameters("ViBassFileInput - File Input Error", "The file(" + mFilePath + ") could not be opened", ViErrorInfo::Fatal);
 		return;
 	}
-	//readMetaData(fileHandle);
+	readMetaData(fileHandle);
 	while(!kbHit() && BASS_ChannelIsActive(fileHandle))
 	{
 		char *array = new char[BUFFERSIZE];
@@ -31,25 +26,14 @@ void ViBassFileInputThread::run()
 			mParent->setErrorParameters("ViBassFileInput - Buffer Read Error", "The supporting buffer could not be read", ViErrorInfo::Fatal);
 			return;
 		}
-		//auto_ptr<ViAudioBufferChunk> chunk(new ViAudioBufferChunk(array));
-		ViAudioBufferChunk *i = new ViAudioBufferChunk(array);
-		mBuffer->write(i, BUFFERSIZE);
+		ViAudioBufferChunk chunk(array);
+		mBuffer->write(&chunk, BUFFERSIZE);
 	}
-
-
 	if(!BASS_StreamFree(fileHandle))
 	{
 		mParent->setErrorParameters("ViBassFileInput - Memory Release Error", "The supporting Bass handle could not be released", ViErrorInfo::Fatal);
 		return;
 	}
-	/*if(!BASS_Free())
-	{
-		mParent->setErrorParameters("ViBassFileInput - Memory Release Error", "The Bass resources could not be released", ViErrorInfo::Fatal);
-		return;
-	}*/
-
-
-
 }
 
 int ViBassFileInputThread::kbHit()
@@ -100,7 +84,7 @@ void ViBassFileInputThread::readMetaData(DWORD handle)
 			mMetaData->setMilliseconds(time * 1000);
 		}
 	}
-	DWORD level = BASS_ChannelGetLevel(handle);
+	/*DWORD level = BASS_ChannelGetLevel(handle);
 	if(level == -1)
 	{
 		mParent->setErrorParameters("ViBassFileInput - Metadata Level Error", "Can't retrieve the level(peek amplitude) from the specified file(" + mFilePath + ")", ViErrorInfo::NonFatal);
@@ -111,13 +95,13 @@ void ViBassFileInputThread::readMetaData(DWORD handle)
 		DWORD right = HIWORD(level);
 		ViAudioLevel audioLevel(left, right);
 		mMetaData->setLevel(audioLevel);
-	}
+	}*/
 }
 
-ViBassFileInput::ViBassFileInput()
-	: ViFileInput()
+ViBassFileInput::ViBassFileInput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QString filePath)
+	: ViFileInput(buffer, metaData, filePath)
 {
-	mThread = NULL;
+	mThread = new ViBassFileInputThread(this, mBuffer, mMetaData, mFilePath);
 }
 
 ViBassFileInput::~ViBassFileInput()
@@ -135,26 +119,5 @@ ViBassFileInput::~ViBassFileInput()
 
 void ViBassFileInput::start()
 {
-if(!BASS_Init(-1, 44100, 0, 0, 0))
-	{
-		setErrorParameters("ViBassFileInput - Device Error", "Can't initialize Bass device", ViErrorInfo::Fatal);
-		return;
-	}
-	
-QObject::connect(mBuffer, SIGNAL(changed(int , int)), this, SLOT(s(int , int)), Qt::BlockingQueuedConnection);
-hh = BASS_StreamCreate(44100,2, 0, STREAMPROC_PUSH, 0);
-BASS_ChannelPlay(hh, false);
-	mThread = new ViBassFileInputThread(this, mBuffer, "/home/visore/Desktop/a.mp3", &mMetaData);
 	mThread->start();
-/*while(mThread->isRunning());
-BASS_Free();*/
-}
-
-
-void ViBassFileInput::ha(int startIndex, int size)
-{
-	ViAudioBufferChunk c;
-	mBuffer->read(&c, size);
-	DWORD d = BASS_StreamPutData(hh, c.data(), size);
-
 }

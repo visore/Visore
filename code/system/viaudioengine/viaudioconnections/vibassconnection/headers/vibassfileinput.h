@@ -3,7 +3,6 @@
 
 #define BUFFERSIZE 1000
 
-#include "viaudiometadata.h"
 #include "vifileinput.h"
 #include "bass.h"
 #include <termios.h>
@@ -14,7 +13,7 @@ class ViBassFileInput;
 class ViBassFileInputThread : public QThread
 {
 	public:
-		ViBassFileInputThread(ViBassFileInput *parent, ViAudioBuffer *buffer, QString filePath, ViAudioMetaData *metaData);
+		ViBassFileInputThread(ViBassFileInput *parent, ViAudioBuffer *buffer, ViAudioMetaData *metaData, QString filePath);
 		void run();
 
 	private:
@@ -32,17 +31,13 @@ class ViBassFileInput : public ViFileInput
 {
 	Q_OBJECT
 
-	private slots:
-		void s(int startIndex, int size);
-
 	public:
-		ViBassFileInput();
+		ViBassFileInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, QString filePath = "");
 		~ViBassFileInput();
 		void start();
 
 	private:
 		ViBassFileInputThread *mThread;
-		ViAudioMetaData mMetaData;
 };
 
 #endif
