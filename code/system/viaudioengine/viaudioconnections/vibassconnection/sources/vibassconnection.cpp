@@ -42,7 +42,7 @@ ViStreamOutput* ViBassConnection::streamOutput(ViAudioBuffer *buffer, ViAudioMet
 
 void ViBassConnection::initialize()
 {
-	if(!BASS_Init(-1, 44100, 0, 0, 0))
+	if(!BASS_Init(0, 44100, 0, 0, 0) || !BASS_Init(1, 44100, 0, 0, 0))
 	{
 		setErrorParameters("ViBassConnection - Initializing Error", "Could not initialize Bass resources", ViErrorInfo::Fatal);
 	}

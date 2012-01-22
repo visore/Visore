@@ -21,10 +21,18 @@ void ViBassStreamOutputReceiver::changeReceived(int startIndex, int size)
 ViBassStreamOutput::ViBassStreamOutput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, ViAudioDevice *device)
 	: ViStreamOutput(buffer, metaData, device)
 {
+	/*if(!BASS_SetDevice(3))
+	{
+		setErrorParameters("ViBassStreamOutput - Device Error", "Cannot stream to the selected output device", ViErrorInfo::Fatal);
+	}*/
 	mHandle = BASS_StreamCreate(mMetaData->frequency(), mMetaData->channels(), 0, STREAMPROC_PUSH, 0);
 	if(mHandle == 0)
 	{
 		setErrorParameters("ViBassStreamOutput - Output Error", "The stream could not be opened", ViErrorInfo::Fatal);
+	}
+	if(!BASS_ChannelSetDevice(mHandle, 2))
+	{cout<<"rrr: "<<BASS_ErrorGetCode()<<endl;
+		setErrorParameters("ViBassStreamOutput - Device Error", "Cannot stream to the selected output device", ViErrorInfo::Fatal);
 	}
 	mReceiver = new ViBassStreamOutputReceiver(this, mBuffer, mHandle);
 }

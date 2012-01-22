@@ -60,4 +60,14 @@ void ViLibrary<T, P1>::deleteObject(QString functionName, P1 *object)
 	deleter(object);
 }
 
+QList<QString> ViLibrary::detectLibraries(QString dirPath)
+{
+
+}
+
+QList<QString> ViLibrary::detectLibraries(QDir dirPath)
+{
+
+}
+
 #endif

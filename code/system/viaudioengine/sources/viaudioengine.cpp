@@ -75,8 +75,8 @@ ViAudioMetaData *metaData = new ViAudioMetaData();
 
 //mAudioConnection = new ViBassConnection();
 cout<<"dfgdfgd999"<<endl;
-mAudioInput = mAudioConnection->streamInput(mBuffer, metaData, NULL);
-//mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wav");
+//mAudioInput = mAudioConnection->streamInput(mBuffer, metaData, NULL);
+mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wma");
 //ViFileInput *input = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wav");
 /*
 ViLogger::debug("frequency: "+metaData->frequency());
