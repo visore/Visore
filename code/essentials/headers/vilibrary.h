@@ -4,8 +4,6 @@
 #include "vierror.h"
 #include <dlfcn.h>
 #include <stdlib.h>
-#include <QList>
-#include <QDir>
 
 template <class T, class P1 = ViObject>
 class ViLibrary : public ViError
@@ -16,8 +14,6 @@ class ViLibrary : public ViError
 		bool open();
 		T* createObject(QString functionName = "createObject", P1 *object = NULL);
 		void deleteObject(QString functionName = "deleteObject", P1 *object = NULL);
-		static QList<QString> detectLibraries(QString dirPath);
-		static QList<QString> detectLibraries(QDir dirPath);
 
 	private:
 		QString mPath;
