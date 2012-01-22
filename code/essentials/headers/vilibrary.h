@@ -5,15 +5,15 @@
 #include <dlfcn.h>
 #include <stdlib.h>
 
-template <class T>
+template <class T, class P1 = ViObject>
 class ViLibrary : public ViError
 {
 	public:
 		ViLibrary(QString path);
 		~ViLibrary();
 		bool open();
-		T* createObject(QString functionName = "createObject");
-		void deleteObject(QString functionName = "deleteObject", void *object = NULL);
+		T* createObject(QString functionName = "createObject", P1 *object = NULL);
+		void deleteObject(QString functionName = "deleteObject", P1 *object = NULL);
 
 	private:
 		QString mPath;

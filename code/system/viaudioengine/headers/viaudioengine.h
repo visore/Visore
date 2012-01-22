@@ -1,6 +1,7 @@
 #ifndef VIAUDIOENGINE_H
 #define VIAUDIOENGINE_H
 
+#include "viobject.h"
 #include "viaudioconnection.h"
 #include <QList>
 #include <QCoreApplication>
@@ -34,7 +35,7 @@ struct ViAudioInputDevice
 		QString mDescription;
 };
 
-class ViAudioEngine : public QObject
+class ViAudioEngine : public QObject, public ViError
 {
     Q_OBJECT
 
@@ -47,8 +48,13 @@ class ViAudioEngine : public QObject
 			FileAndStream = 3
 		};
 
-	private slots:
-		void changeReceived(int startIndex, int size);
+	public slots:
+		void startInput();
+		void pauseInput();
+		void stopInput();
+		void startOutput();
+		void pauseOutput();
+		void stopOutput();
 
 	public:
 		ViAudioEngine();

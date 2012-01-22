@@ -2,6 +2,7 @@
 #define VIERROR_H
 
 #include "vilogger.h"
+#include "viobject.h"
 #include <QList>
 
 struct ViErrorInfo
@@ -29,9 +30,9 @@ struct ViErrorInfo
 		ViErrorInfo::ViErrorType mType;
 };
 
-class ViError
+class ViError : public ViObject
 {
-	public:	
+	public:
 		void setErrorParameters(QString name = "", QString description = "", ViErrorInfo::ViErrorType type = ViErrorInfo::MediumFatal, bool debugPrint = true);
 		ViErrorInfo error(int index = 0);
 		int numberOfErrors();

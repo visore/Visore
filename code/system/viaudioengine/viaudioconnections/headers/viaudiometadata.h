@@ -3,40 +3,6 @@
 
 #include "viaudioformat.h"
 
-struct ViAudioLevel
-{
-	public:
-		ViAudioLevel(int left = 0, int right = 0)
-		{
-			mLeft = left;
-			mRight = right;
-		}
-		
-		void setLeft(int left)
-		{
-			mLeft = left;
-		}
-
-		void setRight(int right)
-		{
-			mRight = right;
-		}
-
-		int left()
-		{
-			return mLeft;
-		}
-
-		int right()
-		{
-			return mRight;
-		}
-
-	private:
-		int mLeft;
-		int mRight;
-};
-
 class ViAudioMetaData
 {
 	public:
@@ -70,11 +36,6 @@ class ViAudioMetaData
 			mMilliseconds = seconds * 1000;
 		}
 
-		void setLevel(ViAudioLevel level)
-		{
-			mLevel = level;
-		}
-
 		ViAudioFormat format()
 		{
 			return mFormat;
@@ -105,18 +66,12 @@ class ViAudioMetaData
 			return mMilliseconds / 1000;
 		}
 
-		ViAudioLevel level()
-		{
-			return mLevel;
-		}
-
 	private:
 		ViAudioFormat mFormat;
 		int mFrequency;
 		int mChannels;
 		qint64 mBytes;
 		qint64 mMilliseconds;
-		ViAudioLevel mLevel;
 };
 
 #endif

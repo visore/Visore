@@ -38,13 +38,15 @@ void ViAudioBufferChunk::setData(char *data)
 	mData = data;
 }
 
-ViAudioBuffer::ViAudioBuffer(QObject *parent)
+ViAudioBuffer::ViAudioBuffer(QObject *parent, int bufferHeadStart)
 	: QObject(parent)
 {
 	mData = new QByteArray();
 	mReadStream = new QDataStream(mData, QIODevice::ReadOnly);
 	mWriteStream = new QDataStream(mData, QIODevice::WriteOnly);
 	mOldSize = 0;
+	mBufferHeadStart = bufferHeadStart;
+	mHasHeadStart = false;
 }
 
 ViAudioBuffer::~ViAudioBuffer()
@@ -68,7 +70,6 @@ ViAudioBuffer::~ViAudioBuffer()
 
 int ViAudioBuffer::write(ViAudioBufferChunk* chunk, int length)
 {
-	mOldSize = mData->size();
 	int written = mWriteStream->writeRawData(chunk->data(), length);
 	emitChanges();
 	return written;
@@ -84,14 +85,76 @@ int ViAudioBuffer::read(ViAudioBufferChunk* chunk, int length)
 
 int ViAudioBuffer::size()
 {
+	if(mData == NULL)
+	{
+		return 0;
+	}
 	return mData->size();
+}
+
+void ViAudioBuffer::setBufferHeadStart(int bufferHeadStart)
+{
+	mBufferHeadStart = bufferHeadStart;
+}
+
+int ViAudioBuffer::bufferHeadStart()
+{
+	return mBufferHeadStart;
 }
 
 void ViAudioBuffer::emitChanges()
 {
-	if(mOldSize != mData->size())
+	if(mHasHeadStart)
 	{
-		emit changed(mOldSize, mData->size()-mOldSize);
-		mOldSize = mData->size();
+		if(mData->size() != mOldSize)
+		{
+			emit changed(mOldSize, mData->size() - mOldSize);
+			mOldSize = mData->size();
+		}
 	}
+	else
+	{
+		if((mData->size() - mOldSize) >= mBufferHeadStart)
+		{
+			emit changed(mOldSize, mData->size() - mOldSize);
+			mOldSize = mData->size();
+			mHasHeadStart = true;
+		}
+	}
+}
+
+void ViAudioBuffer::clear()
+{
+	if(mData != NULL)
+	{
+		delete mData;
+		mData = NULL;
+	}
+	restartRead();
+	restartWrite();
+}
+
+void ViAudioBuffer::restartRead()
+{
+	if(mReadStream != NULL)
+	{
+		delete mReadStream;
+		mReadStream = NULL;
+	}
+	mOldSize = 0;
+	mHasHeadStart = false;
+	mReadStream = new QDataStream(mData, QIODevice::ReadOnly);
+	emitChanges();
+}
+
+void ViAudioBuffer::restartWrite()
+{
+	if(mWriteStream != NULL)
+	{
+		delete mWriteStream;
+		mWriteStream = NULL;
+	}
+	mOldSize = 0;
+	mHasHeadStart = false;
+	mWriteStream = new QDataStream(mData, QIODevice::WriteOnly);
 }

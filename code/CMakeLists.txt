@@ -31,9 +31,8 @@ INCLUDE_DIRECTORIES(
 	${EXTERNAL}/bass/headers
 	${ESSENTIALS}/headers
 	${SYSTEM}/viaudioengine/headers
-	${SYSTEM}/viaudioengine/viaudioformats/headers
 	${SYSTEM}/viaudioengine/viaudioconnections/headers
-	${SYSTEM}/viaudioengine/viaudioconnections/vibassconnection/headers
+	${SYSTEM}/viaudioengine/viaudioformats/headers
 	${INTERFACE}/vimainwindow/headers
 )
 
@@ -41,8 +40,6 @@ INCLUDE_DIRECTORIES(
 SET(CMAKE_INSTALL_RPATH
 	"${CMAKE_INSTALL_PREFIX}/essentials"
 	"${CMAKE_INSTALL_PREFIX}/system/audioengine"
-	"${CMAKE_INSTALL_PREFIX}/system/audioengine/audioconnections"
-	"${CMAKE_INSTALL_PREFIX}/system/audioengine/audioformats"
 	"${CMAKE_INSTALL_PREFIX}/external/bass"
 	"${CMAKE_INSTALL_PREFIX}/interface"
 )

@@ -88,11 +88,11 @@ ViLogger::debug("*: "+a[i]);
 
 ViAudioEngine *e = new ViAudioEngine();
 	//ViLibrary<ViAudioEngine> interface("/home/visore/Visore/install/system/libviaudioengine.so");
-	//ViLibrary<QMainWindow> interface("/home/visore/Visore/install/interface/libvimainwindow.so");
-	//if(!interface.open()) ViLogger::debug("Library cannot be loaded!");
+	ViLibrary<QMainWindow, ViAudioEngine> interface("/home/visore/Visore/install/interface/libvimainwindow.so");
+	if(!interface.open()) ViLogger::debug("Library cannot be loaded!");
 	//ViAudioEngine *engine = interface.create();
-	//QMainWindow *window = interface.create();
-	//window->show();
+	QMainWindow *window = interface.createObject("createObject", e);
+	window->show();
 	//delete window;
 //ViAudioEngine *e = new ViAudioEngine();
 

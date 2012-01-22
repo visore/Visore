@@ -6,33 +6,38 @@ ViBassFileInputThread::ViBassFileInputThread(ViBassFileInput *parent, ViAudioBuf
 	mBuffer = buffer;
 	mMetaData = metaData;
 	mFilePath = filePath;
-}
-
-void ViBassFileInputThread::run()
-{
-	HSTREAM fileHandle = BASS_StreamCreateFile(false, mFilePath.toUtf8().data(), 0, 0, BASS_STREAM_DECODE);	
-	if(!fileHandle)
+	mFileHandle = BASS_StreamCreateFile(false, mFilePath.toUtf8().data(), 0, 0, BASS_STREAM_DECODE);	
+	if(!mFileHandle)
 	{
 		mParent->setErrorParameters("ViBassFileInput - File Input Error", "The file(" + mFilePath + ") could not be opened", ViErrorInfo::Fatal);
 		return;
 	}
-	readMetaData(fileHandle);
-	while(!kbHit() && BASS_ChannelIsActive(fileHandle))
+}
+
+ViBassFileInputThread::~ViBassFileInputThread()
+{
+	if(!BASS_StreamFree(mFileHandle))
 	{
-		char *array = new char[BUFFERSIZE];
-		DWORD result = BASS_ChannelGetData(fileHandle, array, BUFFERSIZE);
+		mParent->setErrorParameters("ViBassFileInput - Memory Release Error", "The supporting Bass handle could not be released", ViErrorInfo::Fatal);
+		return;
+	}
+}
+
+void ViBassFileInputThread::run()
+{
+	int bufferSize = mBuffer->bufferHeadStart();
+	bufferSize = pow(2, ceil(log(bufferSize) / log(2))); //Make sure it is a power of 2
+	while(!kbHit() && BASS_ChannelIsActive(mFileHandle))
+	{
+		char *array = new char[bufferSize];
+		DWORD result = BASS_ChannelGetData(mFileHandle, array, bufferSize);
 		if(BASS_ErrorGetCode() != BASS_OK)
 		{
 			mParent->setErrorParameters("ViBassFileInput - Buffer Read Error", "The supporting buffer could not be read", ViErrorInfo::Fatal);
 			return;
 		}
 		ViAudioBufferChunk chunk(array);
-		mBuffer->write(&chunk, BUFFERSIZE);
-	}
-	if(!BASS_StreamFree(fileHandle))
-	{
-		mParent->setErrorParameters("ViBassFileInput - Memory Release Error", "The supporting Bass handle could not be released", ViErrorInfo::Fatal);
-		return;
+		mBuffer->write(&chunk, bufferSize);
 	}
 }
 
@@ -54,10 +59,10 @@ int ViBassFileInputThread::kbHit()
 	return result;
 }
 
-void ViBassFileInputThread::readMetaData(DWORD handle)
+void ViBassFileInputThread::readMetaData()
 {
 	BASS_CHANNELINFO info;
-	if(!BASS_ChannelGetInfo(handle, &info))
+	if(!BASS_ChannelGetInfo(mFileHandle, &info))
 	{
 		mParent->setErrorParameters("ViBassFileInput - Metadata Error", "Can't retrieve the metadata info from the specified file(" + mFilePath + ")", ViErrorInfo::NonFatal);
 	}
@@ -66,7 +71,7 @@ void ViBassFileInputThread::readMetaData(DWORD handle)
 		mMetaData->setFrequency(info.freq);
 		mMetaData->setChannels(info.chans);
 	}
-	QWORD length = BASS_ChannelGetLength(handle, BASS_POS_BYTE);
+	QWORD length = BASS_ChannelGetLength(mFileHandle, BASS_POS_BYTE);
 	if(length == -1)
 	{
 		mParent->setErrorParameters("ViBassFileInput - Metadata Length Error", "Can't retrieve the length(bytes) of the specified file(" + mFilePath + ")", ViErrorInfo::NonFatal);
@@ -74,7 +79,7 @@ void ViBassFileInputThread::readMetaData(DWORD handle)
 	else
 	{
 		mMetaData->setBytes(length);
-		double time = BASS_ChannelBytes2Seconds(handle, length);
+		double time = BASS_ChannelBytes2Seconds(mFileHandle, length);
 		if(time < 0)
 		{
 			mParent->setErrorParameters("ViBassFileInput - Metadata Length Error", "Can't retrieve the length(seconds) of the specified file(" + mFilePath + ")", ViErrorInfo::NonFatal);
@@ -84,24 +89,13 @@ void ViBassFileInputThread::readMetaData(DWORD handle)
 			mMetaData->setMilliseconds(time * 1000);
 		}
 	}
-	/*DWORD level = BASS_ChannelGetLevel(handle);
-	if(level == -1)
-	{
-		mParent->setErrorParameters("ViBassFileInput - Metadata Level Error", "Can't retrieve the level(peek amplitude) from the specified file(" + mFilePath + ")", ViErrorInfo::NonFatal);
-	}
-	else
-	{
-		DWORD left = LOWORD(level);
-		DWORD right = HIWORD(level);
-		ViAudioLevel audioLevel(left, right);
-		mMetaData->setLevel(audioLevel);
-	}*/
 }
 
 ViBassFileInput::ViBassFileInput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QString filePath)
 	: ViFileInput(buffer, metaData, filePath)
 {
 	mThread = new ViBassFileInputThread(this, mBuffer, mMetaData, mFilePath);
+	mThread->readMetaData();
 }
 
 ViBassFileInput::~ViBassFileInput()

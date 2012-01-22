@@ -8,9 +8,6 @@ class ViStreamOutput : public ViAudioOutput
 {
     Q_OBJECT
 
-	private slots:
-		virtual void changeReceived(int startIndex, int size) = 0;
-
 	public:
 		ViStreamOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData* metaData = NULL, ViAudioDevice *device = NULL)
 			: ViAudioOutput(buffer, metaData)
@@ -33,6 +30,8 @@ class ViStreamOutput : public ViAudioOutput
 		}
 
 		virtual void start() = 0;
+		virtual void stop() = 0;
+		virtual void pause() = 0;
 
 	protected:
 		ViAudioDevice *mDevice;

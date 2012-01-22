@@ -7,9 +7,6 @@ class ViAudioOutput : public ViAudioTransmission
 {
     Q_OBJECT
 
-	private slots:
-		virtual void changeReceived(int startIndex, int size) = 0;
-
 	public:
 		ViAudioOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL)
 			: ViAudioTransmission(buffer, metaData)
@@ -17,6 +14,8 @@ class ViAudioOutput : public ViAudioTransmission
 		}
 
 		virtual void start() = 0;
+		virtual void stop() = 0;
+		virtual void pause() = 0;
 };
 
 #endif

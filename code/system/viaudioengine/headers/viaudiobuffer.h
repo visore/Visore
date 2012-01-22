@@ -5,27 +5,6 @@
 #include <QByteArray>
 #include "viessentials.h"
 
-/*
-
-HSTREAM hh;
-void ViBassFileInput::start()
-{
-QObject::connect(mBuffer, SIGNAL(changed(int , int)), this, SLOT(s(int , int)), Qt::BlockingQueuedConnection);
-
-hh = BASS_StreamCreate(44100,2, 0, STREAMPROC_PUSH, 0);
-BASS_ChannelPlay(hh, false);
-}
-
-
-void ViBassFileInput::s(int startIndex, int size)
-{
-	ViAudioBufferChunk c;
-	mBuffer->read(&c, size);
-	DWORD d = BASS_StreamPutData(hh, c.data(), size);
-}
-
-*/
-
 class ViAudioBufferChunk
 {
 	public:
@@ -45,14 +24,19 @@ class ViAudioBuffer : public QObject
 
 	signals:
 		//startIndex = index of the first new byte added (chunk start index), size = chunk size added to buffer
-		void changed(int startIndex, int size);
+		void changed(int startIndex, int size);;
 
 	public:
-		ViAudioBuffer(QObject *parent = 0);
+		ViAudioBuffer(QObject *parent = 0, int bufferHeadStart = 100000);
 		~ViAudioBuffer();
 		int write(ViAudioBufferChunk *chunk, int length);
 		int read(ViAudioBufferChunk *chunk, int length);
 		int size();
+		void setBufferHeadStart(int bufferHeadStart);
+		int bufferHeadStart();
+		void clear(); //Clears all data from the stream
+		void restartRead(); //Starts reading from the front of the stream again
+		void restartWrite(); //Starts writing to the front of the stream again
 
 	private:
 		void emitChanges();
@@ -61,8 +45,9 @@ class ViAudioBuffer : public QObject
 		QByteArray *mData;
 		QDataStream *mReadStream;
 		QDataStream *mWriteStream;
-		int mOldSize;
-
+		qint64 mOldSize;
+		int mBufferHeadStart;
+		bool mHasHeadStart;
 };
 
 #endif
