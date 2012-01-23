@@ -18,7 +18,7 @@ bool ViLibrary<T, P1>::open(QString path)
 	mHandle = dlopen(path.toUtf8().data(), RTLD_NOW);
 	if(mHandle == NULL)
 	{
-		setErrorParameters("ViLibrary - Library Error", "Can't open the specified library(" + mPath + "): " + QString(dlerror()), ViErrorInfo::Fatal);
+		setErrorParameters("ViLibrary - Library Error", "Can't open the specified library(" + path + "): " + QString(dlerror()), ViErrorInfo::Fatal);
 		return false;
 	}
 	return true;

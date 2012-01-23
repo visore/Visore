@@ -27,12 +27,11 @@ FIND_PACKAGE(QtMobility REQUIRED)
 INCLUDE_DIRECTORIES(
 	${CMAKE_BINARY_DIR}
 	${QTMOBILITY_INCLUDE_DIRS}
-	${EXTERNAL}/fftreal/headers
 	${ESSENTIALS}/headers
-	${ENGINE}/headers
-	${ENGINE}/viaudioconnections/headers
-	${ENGINE}/viaudioformats/headers
 	${INTERFACE}/vimainwindow/headers
+	${ENGINE}/viaudioengine/headers
+	${ENGINE}/viaudioconnections/viaudioconnection/headers
+	${ENGINE}/viaudioformats/viaudioformat/headers
 )
 
 #Unix version for installing shared libraries and linking them to the executable
