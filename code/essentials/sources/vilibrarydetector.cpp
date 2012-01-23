@@ -19,7 +19,7 @@ QList<QString> ViLibraryDetector::detectLibraries(QDir dir)
 	#endif
 	QFileInfoList list = dir.entryInfoList(filters, QDir::Files);
 	QList<QString> result;
-	for(int i = 0; list.length(); ++i)
+	for(int i = 0; i < list.length(); ++i)
 	{
 		result.append(list[i].absoluteFilePath());
 	}

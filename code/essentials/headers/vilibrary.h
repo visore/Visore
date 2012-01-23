@@ -9,11 +9,12 @@ template <class T, class P1 = ViObject>
 class ViLibrary : public ViError
 {
 	public:
-		ViLibrary(QString path);
+		ViLibrary();
 		~ViLibrary();
-		bool open();
+		bool open(QString path);
+		void close();
 		T* createObject(QString functionName = "createObject", P1 *object = NULL);
-		void deleteObject(QString functionName = "deleteObject", P1 *object = NULL);
+		void deleteObject(QString functionName = "deleteObject", T *object = NULL);
 
 	private:
 		QString mPath;

@@ -10,10 +10,10 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 #Setup directory paths
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 SET(MAIN ${ROOT}/main)
-SET(SYSTEM ${ROOT}/system)
-SET(INTERFACE ${ROOT}/interface)
-SET(EXTERNAL ${ROOT}/external)
-SET(ESSENTIALS ${ROOT}/essentials)
+SET(ENGINE ${ROOT}/engine CACHE INTERNAL "Engine directory")
+SET(INTERFACE ${ROOT}/interface CACHE INTERNAL "Interface directory")
+SET(EXTERNAL ${ROOT}/external CACHE INTERNAL "External directory")
+SET(ESSENTIALS ${ROOT}/essentials CACHE INTERNAL "Essentials directory")
 
 #Set the module path
 SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
@@ -28,25 +28,25 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_BINARY_DIR}
 	${QTMOBILITY_INCLUDE_DIRS}
 	${EXTERNAL}/fftreal/headers
-	${EXTERNAL}/bass/headers
 	${ESSENTIALS}/headers
-	${SYSTEM}/viaudioengine/headers
-	${SYSTEM}/viaudioengine/viaudioconnections/headers
-	${SYSTEM}/viaudioengine/viaudioformats/headers
+	${ENGINE}/headers
+	${ENGINE}/viaudioconnections/headers
+	${ENGINE}/viaudioformats/headers
 	${INTERFACE}/vimainwindow/headers
 )
 
 #Unix version for installing shared libraries and linking them to the executable
 SET(CMAKE_INSTALL_RPATH
 	"${CMAKE_INSTALL_PREFIX}/essentials"
-	"${CMAKE_INSTALL_PREFIX}/system/audioengine"
-	"${CMAKE_INSTALL_PREFIX}/external/bass"
+	"${CMAKE_INSTALL_PREFIX}/engine"
+	"${CMAKE_INSTALL_PREFIX}/engine/connections"
+	"${CMAKE_INSTALL_PREFIX}/engine/formats"
 	"${CMAKE_INSTALL_PREFIX}/interface"
 )
 
 #Initiate sub-directories
 ADD_SUBDIRECTORY(${EXTERNAL})
-ADD_SUBDIRECTORY(${SYSTEM})
+ADD_SUBDIRECTORY(${ENGINE})
 ADD_SUBDIRECTORY(${INTERFACE})
 ADD_SUBDIRECTORY(${MAIN})
 ADD_SUBDIRECTORY(${ESSENTIALS})
