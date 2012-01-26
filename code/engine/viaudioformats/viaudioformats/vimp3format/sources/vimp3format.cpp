@@ -1,6 +1,7 @@
 #include "vimp3format.h"
 
 ViMp3Format::ViMp3Format()
+	: ViAudioFormat()
 {
 	mCompression = ViAudioFormat::Lossy;
 

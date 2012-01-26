@@ -13,11 +13,13 @@ class ViAudioFormat
 			Lossless = 1,
 			Variable = 3
 		};
+		ViAudioFormat();
 		ViAudioFormat::ViAudioFormatCompression compression();
 		QString abbreviation();
 		QString name();
 		QList<QString> extensions();
 		QList<QString> starExtensions();
+		bool operator ==(const ViAudioFormat &other) const;
 
 	protected:
 		ViAudioFormat::ViAudioFormatCompression mCompression;

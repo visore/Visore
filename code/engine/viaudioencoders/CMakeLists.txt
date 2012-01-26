@@ -1,0 +1,8 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(VI_AUDIOENCODER ${ROOT}/viaudioencoder)
+SET(VI_AUDIOENCODERS ${ROOT}/viaudioencoders)
+
+#Initiate sub-directories
+ADD_SUBDIRECTORY(${VI_AUDIOENCODER})
+ADD_SUBDIRECTORY(${VI_AUDIOENCODERS})

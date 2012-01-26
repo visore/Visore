@@ -1,5 +1,12 @@
 #include "viaudioformat.h"
 
+ViAudioFormat::ViAudioFormat()
+{
+	mCompression = ViAudioFormat::Lossy;
+	mAbbreviation = "";
+	mName = "";
+}
+
 ViAudioFormat::ViAudioFormatCompression ViAudioFormat::compression()
 {
 	return mCompression;
@@ -28,4 +35,9 @@ QList<QString> ViAudioFormat::starExtensions()
 		list.append("*." + mExtensions[i]);
 	}
 	return list;
+}
+
+bool ViAudioFormat::operator ==(const ViAudioFormat &other) const
+{
+	return mAbbreviation == other.mAbbreviation;
 }

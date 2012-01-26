@@ -1,6 +1,7 @@
 #include "viwaveformat.h"
 
 ViWaveFormat::ViWaveFormat()
+	: ViAudioFormat()
 {
 	mCompression = ViAudioFormat::Variable;
 
