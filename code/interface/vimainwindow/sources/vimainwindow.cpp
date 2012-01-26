@@ -10,6 +10,7 @@ ViMainWindow::ViMainWindow(QWidget *parent)
 	m4 = new QPushButton("Start Output");
 	m5 = new QPushButton("Pause Output");
 	m6 = new QPushButton("Stop Output");
+	m7 = new QPushButton("Position Output");
 	mLayout->addWidget(m1);
 	mLayout->addWidget(m2);
 	mLayout->addWidget(m3);
@@ -17,6 +18,7 @@ ViMainWindow::ViMainWindow(QWidget *parent)
 	mLayout->addWidget(m4);
 	mLayout->addWidget(m5);
 	mLayout->addWidget(m6);
+	mLayout->addWidget(m7);
 	mWidget = new QWidget();
 	mWidget->setLayout(mLayout);
 	mWidget->resize(800,800);
@@ -33,6 +35,12 @@ void ViMainWindow::setEngine(ViAudioEngine *engine)
 	QObject::connect(m4, SIGNAL(clicked()), mEngine, SLOT(startOutput()));
 	QObject::connect(m5, SIGNAL(clicked()), mEngine, SLOT(pauseOutput()));
 	QObject::connect(m6, SIGNAL(clicked()), mEngine, SLOT(stopOutput()));
+	QObject::connect(m7, SIGNAL(clicked()), this, SLOT(changeOutputPosition()));
+}
+
+void ViMainWindow::changeOutputPosition()
+{
+	mEngine->setPosition(60000);
 }
 
 #ifdef __cplusplus

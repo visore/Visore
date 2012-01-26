@@ -10,6 +10,9 @@ class ViMainWindow : public QMainWindow
 {
 	Q_OBJECT
 
+	private slots:
+		void changeOutputPosition();
+
 	public:
 		ViMainWindow(QWidget *parent = 0);
 		void setEngine(ViAudioEngine *engine);
@@ -23,6 +26,7 @@ class ViMainWindow : public QMainWindow
 		QPushButton *m4;
 		QPushButton *m5;
 		QPushButton *m6;
+		QPushButton *m7;
 		QWidget *mWidget;
 };
 

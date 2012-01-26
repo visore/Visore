@@ -55,6 +55,7 @@ class ViAudioEngine : public QObject, public ViError
 		void startOutput();
 		void pauseOutput();
 		void stopOutput();
+		void setPosition(qint64 position);
 
 	public:
 		ViAudioEngine();

@@ -1,4 +1,5 @@
 #include "viaudioengine.h"
+#include "vibassconnection.h"
 
 #include <QTimer>
 
@@ -7,16 +8,20 @@ ViAudioEngine::ViAudioEngine()
 {
 	mBuffer = new ViAudioBuffer();
 	mAudioInput = NULL;
-
-
+/*
 mAudioConnectionLoader = new ViLibrary<ViAudioConnection>();
 if(!mAudioConnectionLoader->open(QCoreApplication::applicationDirPath()+"/engine/connections/libvibassconnection.so")) ViLogger::debug("Library cannot be loaded! ");
 mAudioConnection = mAudioConnectionLoader->createObject("createConnection");
+*/
+
+mAudioConnection = new ViBassConnection();
+
 
 
 ViAudioMetaData *metaData = new ViAudioMetaData();
 
-mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.mp3");
+mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.aac");
+//mAudioInput = mAudioConnection->streamInput(mBuffer, metaData);
 
 ViAudioDevice outputDevice;
 outputDevice.setId(-1);
@@ -128,9 +133,9 @@ void ViAudioEngine::stopInput()
 
 void ViAudioEngine::startOutput()
 {
-	if(mAudioInput != NULL)
+	for(int i = 0; i < mAudioOutputs.size(); ++i)
 	{
-		for(int i = 0; i < mAudioOutputs.size(); ++i)
+		if(mAudioOutputs[i] != NULL)
 		{
 			mAudioOutputs[i]->start();
 		}
@@ -139,9 +144,9 @@ void ViAudioEngine::startOutput()
 
 void ViAudioEngine::pauseOutput()
 {
-	if(mAudioInput != NULL)
+	for(int i = 0; i < mAudioOutputs.size(); ++i)
 	{
-		for(int i = 0; i < mAudioOutputs.size(); ++i)
+		if(mAudioOutputs[i] != NULL)
 		{
 			mAudioOutputs[i]->pause();
 		}
@@ -150,11 +155,22 @@ void ViAudioEngine::pauseOutput()
 
 void ViAudioEngine::stopOutput()
 {
-	if(mAudioInput != NULL)
+	for(int i = 0; i < mAudioOutputs.size(); ++i)
 	{
-		for(int i = 0; i < mAudioOutputs.size(); ++i)
+		if(mAudioOutputs[i] != NULL)
 		{
 			mAudioOutputs[i]->stop();
+		}
+	}
+}
+
+void ViAudioEngine::setPosition(qint64 position)
+{
+	for(int i = 0; i < mAudioOutputs.size(); ++i)
+	{
+		if(mAudioOutputs[i] != NULL)
+		{
+			mAudioOutputs[i]->setPosition(ViAudioTransmission::Milliseconds, position);
 		}
 	}
 }

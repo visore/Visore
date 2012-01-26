@@ -2,9 +2,11 @@
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 SET(HEADERS ${ROOT}/headers)
 SET(SOURCES ${ROOT}/sources)
+SET(VI_BASSCONNECTION_HEADERS ${ENGINE}/viaudioconnections/viaudioconnections/vibassconnection/headers)
+SET(BASS_HEADERS ${EXTERNAL}/bass/headers)
 
 #Include common headers
-INCLUDE_DIRECTORIES(${HEADERS})
+INCLUDE_DIRECTORIES(${HEADERS} ${VI_BASSCONNECTION_HEADERS} ${BASS_HEADERS})
 
 #Initiate source files
 FILE(GLOB VI_AUDIOENGINE_SOURCES ${SOURCES}/*.cpp)
@@ -25,7 +27,7 @@ QT4_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_AUDIOENGINE_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(viaudioengine SHARED ${VI_AUDIOENGINE_HEADERS} ${VI_AUDIOENGINE_SOURCES} ${VI_WRAPPER_HEADERS})
-TARGET_LINK_LIBRARIES(viaudioengine ${QT_LIBRARIES} viessentials viaudioconnection)
+TARGET_LINK_LIBRARIES(viaudioengine ${QT_LIBRARIES} viessentials viaudioconnection vibassconnection)
 
 #Install file
 INSTALL(TARGETS viaudioengine DESTINATION engine)

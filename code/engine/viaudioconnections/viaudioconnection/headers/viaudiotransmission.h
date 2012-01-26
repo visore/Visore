@@ -16,6 +16,12 @@ class ViAudioTransmission : public QObject, public ViError
 			Stopped = 2,
 			Paused = 3
 		};
+		enum ViTransmissionType
+		{
+			Bytes = 0,
+			Seconds = 1,
+			Milliseconds = 2
+		};
 
 		ViAudioTransmission(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL);
 		~ViAudioTransmission();

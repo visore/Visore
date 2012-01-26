@@ -136,25 +136,38 @@ void ViAudioBuffer::clear()
 
 void ViAudioBuffer::restartRead()
 {
-	if(mReadStream != NULL)
-	{
-		delete mReadStream;
-		mReadStream = NULL;
-	}
 	mOldSize = 0;
 	mHasHeadStart = false;
-	mReadStream = new QDataStream(mData, QIODevice::ReadOnly);
+	mReadStream->device()->reset();
 	emitChanges();
 }
 
 void ViAudioBuffer::restartWrite()
 {
-	if(mWriteStream != NULL)
-	{
-		delete mWriteStream;
-		mWriteStream = NULL;
-	}
 	mOldSize = 0;
 	mHasHeadStart = false;
-	mWriteStream = new QDataStream(mData, QIODevice::WriteOnly);
+	mWriteStream->device()->reset();
+}
+
+bool ViAudioBuffer::isValidPosition(qint64 position)
+{
+	return mReadStream->device()->size() >= position;
+}
+
+qint64 ViAudioBuffer::setPosition(qint64 position)
+{
+	if(!isValidPosition(position))
+	{
+		return -1;
+	}
+	qint64 read = mReadStream->device()->seek(position);
+	mOldSize = 0;
+	mHasHeadStart = false;
+	emitChanges();
+	return read;
+}
+
+qint64 ViAudioBuffer::position()
+{
+	return mReadStream->device()->pos();
 }

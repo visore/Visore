@@ -28,7 +28,12 @@ ViBassStreamOutput::ViBassStreamOutput(ViAudioBuffer *buffer, ViAudioMetaData *m
 	mHandle = BASS_StreamCreate(mMetaData->frequency(), mMetaData->channels(), 0, STREAMPROC_PUSH, 0);
 	if(mHandle == 0)
 	{
+		mSecondsInByte = -1;
 		setErrorParameters("ViBassStreamOutput - Output Error", "The stream could not be opened", ViErrorInfo::Fatal);
+	}
+	else
+	{
+		mSecondsInByte = BASS_ChannelBytes2Seconds(mHandle, 1);
 	}
 	/*if(!BASS_ChannelSetDevice(mHandle, 2))
 	{cout<<"rrr: "<<BASS_ErrorGetCode()<<endl;
@@ -94,4 +99,58 @@ void ViBassStreamOutput::pause()
 		return;
 	}
 	mStatus = ViAudioTransmission::Paused;
+}
+
+qint64 ViBassStreamOutput::setPosition(ViAudioTransmission::ViTransmissionType type, qint64 position)
+{
+	if(type == ViAudioTransmission::Seconds)
+	{
+		position = position/mSecondsInByte;
+	}
+	else if(type == ViAudioTransmission::Milliseconds)
+	{
+		position = position/(mSecondsInByte*1000.0);
+	}
+	if(position % 2 != 0) //Bass can only play even bytes
+	{
+		position -= 1;
+	}
+	if(!mBuffer->isValidPosition(position))
+	{
+		setErrorParameters("ViBassStreamOutput - Position Error", "The position could not be set", ViErrorInfo::MediumFatal);
+		return -1;
+	}
+
+	bool playing = false;
+	if(mStatus == ViAudioTransmission::Running) //Only start playing if the stream wasn't stopped in the first place
+	{
+		playing = true;
+	}
+	if(!BASS_ChannelStop(mHandle))
+	{
+		setErrorParameters("ViBassStreamOutput - Position Error", "The palyback stream could not be stopped", ViErrorInfo::MediumFatal);
+		return -1;
+	}
+	mStatus = ViAudioTransmission::Stopped;
+
+	qint64 read = mBuffer->setPosition(position);
+	if(read < 0)
+	{
+		setErrorParameters("ViBassStreamOutput - Position Error", "The position could not be set", ViErrorInfo::MediumFatal);
+	}
+	else if(playing)
+	{
+		if(!BASS_ChannelPlay(mHandle, false))
+		{
+			setErrorParameters("ViBassStreamOutput - Position Error", "The palyback stream could not be started", ViErrorInfo::MediumFatal);
+			return -1;
+		}
+		mStatus = ViAudioTransmission::Running;
+	}
+	return read;
+}
+
+qint64 ViBassStreamOutput::position(ViAudioTransmission::ViTransmissionType type)
+{
+
 }

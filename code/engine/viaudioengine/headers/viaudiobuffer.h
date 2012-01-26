@@ -37,6 +37,9 @@ class ViAudioBuffer : public QObject
 		void clear(); //Clears all data from the stream
 		void restartRead(); //Starts reading from the front of the stream again
 		void restartWrite(); //Starts writing to the front of the stream again
+		bool isValidPosition(qint64 position);
+		qint64 setPosition(qint64 position);
+		qint64 position();
 
 	private:
 		void emitChanges();
