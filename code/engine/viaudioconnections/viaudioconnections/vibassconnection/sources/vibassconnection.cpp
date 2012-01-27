@@ -29,7 +29,14 @@ ViStreamInput* ViBassConnection::streamInput(ViAudioBuffer *buffer, ViAudioMetaD
 	return mStreamInput;
 }
 
-//ViFileOutput* ViBassConnection::fileOutput(ViAudioBuffer *buffer, ViAudioMetaData* metaData, QString filePath);
+ViFileOutput* ViBassConnection::fileOutput(ViAudioBuffer *buffer, ViAudioMetaData* metaData, QString filePath)
+{
+	if(mFileOutput == NULL)
+	{
+		mFileOutput = new ViBassFileOutput(buffer, metaData, filePath);
+	}
+	return mFileOutput;
+}
 
 ViStreamOutput* ViBassConnection::streamOutput(ViAudioBuffer *buffer, ViAudioMetaData* metaData, ViAudioDevice *device)
 {
@@ -42,8 +49,7 @@ ViStreamOutput* ViBassConnection::streamOutput(ViAudioBuffer *buffer, ViAudioMet
 
 void ViBassConnection::initialize()
 {
-	mFormatManager = ViAudioFormatManager::initialize();
-	//populateInputFormats();
+	populateInputFormats();
 	//populateOutputFormats();
 	QList<QString> pluginPaths = ViLibraryDetector::detectLibraries(QString(BASSPLUGINSLOCATION));
 	for(int i = 0; i < pluginPaths.length(); ++i)
@@ -66,7 +72,7 @@ void ViBassConnection::initialize()
 
 void ViBassConnection::close()
 {
-	ViAudioFormatManager::close();
+	//ViFormatManager::close();
 	if(!BASS_Free())
 	{
 		setErrorParameters("ViBassConnection - Closing Error", "Could not close Bass resources", ViErrorInfo::Fatal);
@@ -85,7 +91,7 @@ void ViBassConnection::populateInputFormats()
 	QList<QString> formats;
 	formats.append("MP3");
 	formats.append("WAVE");
-	mInputFormats = mFormatManager->formats(formats);
+	mInputFormats = ViFormatManager::formats(formats);
 }
 
 void ViBassConnection::populateOutputFormats()
@@ -93,7 +99,7 @@ void ViBassConnection::populateOutputFormats()
 	QList<QString> formats;
 	formats.append("MP3");
 	formats.append("WAVE");
-	mOutputFormats = mFormatManager->formats(formats);
+	//mOutputFormats = mFormatManager->formats(formats);
 }
 
 QList<ViAudioDevice> ViBassConnection::devices(ViAudioDevice::ViAudioDeviceType type)

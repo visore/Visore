@@ -1,9 +1,10 @@
 #include "viencoderparameter.h"
 
-ViEncoderParameter::ViEncoderParameter(ViEncoderParameter::ViParameterType type, QString name, QString flag, QString value)
+ViEncoderParameter::ViEncoderParameter(ViEncoderParameter::ViParameterType type, QString name, QString units, QString flag, QString value)
 {
 	mType = type;
 	mName = name;
+	mUnits = units;
 	mFlag = flag;
 	mValue = value;
 }
@@ -16,6 +17,11 @@ ViEncoderParameter::ViParameterType ViEncoderParameter::type()
 QString ViEncoderParameter::name()
 {
 	return mName;
+}
+
+QString ViEncoderParameter::units()
+{
+	return mUnits;
 }
 
 QString ViEncoderParameter::flag()
@@ -36,6 +42,11 @@ void ViEncoderParameter::setType(ViEncoderParameter::ViParameterType type)
 void ViEncoderParameter::setName(QString name)
 {
 	mName = name;
+}
+
+void ViEncoderParameter::setUnits(QString units)
+{
+	mUnits = units;
 }
 
 void ViEncoderParameter::setFlag(QString flag)
@@ -67,12 +78,12 @@ void ViEncoderParameter::setValue(bool value)
 	mValue = "false";
 }
 
-QList<QString> ViEncoderParameter::possibleValues()
+QMap<QString, QString> ViEncoderParameter::possibleValues()
 {
 	return mPossibleValues;
 }
 
-void ViEncoderParameter::setPossibleValues(QList<QString> possibleValues)
+void ViEncoderParameter::setPossibleValues(QMap<QString, QString> possibleValues)
 {
 	if(mType == ViEncoderParameter::Enumeration)
 	{
@@ -80,21 +91,21 @@ void ViEncoderParameter::setPossibleValues(QList<QString> possibleValues)
 	}
 }
 
-void ViEncoderParameter::addPossibleValue(QString value)
+void ViEncoderParameter::addPossibleValue(QString name, QString value)
 {
 	if(mType == ViEncoderParameter::Enumeration)
 	{
-		mPossibleValues.append(value);
+		mPossibleValues.insert(name, value);
 	}
 }
 
 QString ViEncoderParameter::string()
 {
-	if(mType == ViEncoderParameter::Enumeration && mValue == "true")
+	if(mType == ViEncoderParameter::Bool && mValue == "true")
 	{
 		return mFlag.trimmed();
 	}
-	else if(mType == ViEncoderParameter::Enumeration && mValue == "false")
+	else if(mType == ViEncoderParameter::Bool && mValue == "false")
 	{
 		return "";
 	}

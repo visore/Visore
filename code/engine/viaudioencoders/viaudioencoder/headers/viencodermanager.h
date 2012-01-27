@@ -6,8 +6,9 @@
 class ViEncoderManager
 {
 	public:
-		static QList<ViAudioEncoder*> findEncoder(ViAudioFormat *format);
-		static ViAudioEncoder* findEncoder(QString name);
+		static QList<ViAudioEncoder*> encoder(ViAudioFormat *format);
+		static ViAudioEncoder* encoder(QString name);
+		~ViEncoderManager(); //Must be public for QSharedPointer
 		
 	protected:
 		ViEncoderManager();
@@ -15,6 +16,7 @@ class ViEncoderManager
 
 	protected:
 		QList<ViAudioEncoder*> mEncoders;
+		QList<ViLibrary<ViAudioEncoder>*> mLibraries;
 		static QSharedPointer<ViEncoderManager> mInstance;
 };
 

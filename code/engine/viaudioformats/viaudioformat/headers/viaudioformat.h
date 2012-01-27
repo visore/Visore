@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QList>
+#include <QSharedPointer>
 
 class ViAudioFormat
 {
@@ -13,7 +14,7 @@ class ViAudioFormat
 			Lossless = 1,
 			Variable = 3
 		};
-		ViAudioFormat();
+		static ViAudioFormat* instance();
 		ViAudioFormat::ViAudioFormatCompression compression();
 		QString abbreviation();
 		QString name();
@@ -22,6 +23,10 @@ class ViAudioFormat
 		bool operator ==(const ViAudioFormat &other) const;
 
 	protected:
+		ViAudioFormat();
+
+	protected:
+		static QSharedPointer<ViAudioFormat> mInstance;
 		ViAudioFormat::ViAudioFormatCompression mCompression;
 		QString mAbbreviation;
 		QString mName;

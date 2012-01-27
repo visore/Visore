@@ -2,7 +2,7 @@
 #define VIAUDIOENCODER_H
 
 #include "viencoderparameter.h"
-#include "viaudioformat.h"
+#include "viformatmanager.h"
 #include <QSharedPointer>
 
 class ViAudioEncoder
@@ -12,9 +12,10 @@ class ViAudioEncoder
 		QString name();
 		QString path();
 		QList<ViEncoderParameter*> parameters();
-		//ViAudioFormat* format();
+		ViAudioFormat* format();
 		ViEncoderParameter* parameter(QString name);
 		void setPath(QString path);
+		virtual QString string(QString filePath) = 0;
 		~ViAudioEncoder(); //Must be public due to QSharedPointer
 		
 	protected:
@@ -25,6 +26,7 @@ class ViAudioEncoder
 		QList<ViEncoderParameter*> mParameters;
 		QString mName;
 		QString mPath;
+		ViAudioFormat *mFormat;
 };
 
 #endif

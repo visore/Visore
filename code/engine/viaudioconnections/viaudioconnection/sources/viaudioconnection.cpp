@@ -4,7 +4,7 @@ ViAudioConnection::ViAudioConnection()
 {
 	mFileInput = NULL;
 	mStreamInput = NULL;
-	//mFileOutput = NULL;
+	mFileOutput = NULL;
 	mStreamOutput = NULL;
 }
 
@@ -20,11 +20,11 @@ ViAudioConnection::~ViAudioConnection()
 		delete mStreamInput;
 		mStreamInput = NULL;
 	}
-	/*if(mFileOutput != NULL)
+	if(mFileOutput != NULL)
 	{
 		delete mFileOutput;
 		mFileOutput = NULL;
-	}*/
+	}
 	if(mStreamOutput != NULL)
 	{
 		delete mStreamOutput;
@@ -32,12 +32,12 @@ ViAudioConnection::~ViAudioConnection()
 	}
 }
 
-QList<ViAudioFormat*>* ViAudioConnection::supportedInputFormats()
+QList<ViAudioFormat*> ViAudioConnection::supportedInputFormats()
 {
 	return mInputFormats;
 }
 
-QList<ViAudioFormat*>* ViAudioConnection::supportedOutputFormats()
+QList<ViAudioFormat*> ViAudioConnection::supportedOutputFormats()
 {
 	return mOutputFormats;
 }

@@ -6,6 +6,9 @@
 class ViMp3Format : public ViAudioFormat
 {
 	public:
+		static ViAudioFormat* instance();
+
+	protected:
 		ViMp3Format();
 };
 

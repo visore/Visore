@@ -1,5 +1,7 @@
 #include "vimp3format.h"
 
+//QSharedPointer<ViAudioFormat> ViAudioFormat::mInstance;
+
 ViMp3Format::ViMp3Format()
 	: ViAudioFormat()
 {
@@ -13,6 +15,15 @@ ViMp3Format::ViMp3Format()
 	mExtensions.append("bit");
 }
 
+ViAudioFormat* ViMp3Format::instance()
+{
+	if(mInstance.isNull())
+	{
+		mInstance = QSharedPointer<ViMp3Format>(new ViMp3Format()).dynamicCast<ViAudioFormat>();
+	}
+	return mInstance.data();
+}
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -20,12 +31,7 @@ extern "C"
 
 ViAudioFormat* createFormat()
 {
-   return new ViMp3Format();
-}
-
-void deleteFormat(ViAudioFormat *format)
-{
-   delete format;
+   return ViMp3Format::instance();
 }
 
 #ifdef __cplusplus

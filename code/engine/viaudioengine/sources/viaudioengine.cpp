@@ -19,13 +19,15 @@ mAudioConnection = new ViBassConnection();
 
 
 ViAudioMetaData *metaData = new ViAudioMetaData();
+metaData->setFormat(ViFormatManager::format("MP3"));
 
 mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.aac");
 //mAudioInput = mAudioConnection->streamInput(mBuffer, metaData);
 
 ViAudioDevice outputDevice;
 outputDevice.setId(-1);
-mAudioOutputs.append(mAudioConnection->streamOutput(mBuffer, metaData, &outputDevice));
+//mAudioOutputs.append(mAudioConnection->streamOutput(mBuffer, metaData, &outputDevice));
+mAudioOutputs.append(mAudioConnection->fileOutput(mBuffer, metaData, "/home/visore/Desktop/testrec.mp3"));
 
 }
 

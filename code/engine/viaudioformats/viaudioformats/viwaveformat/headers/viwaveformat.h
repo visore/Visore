@@ -6,6 +6,9 @@
 class ViWaveFormat : public ViAudioFormat
 {
 	public:
+		static ViAudioFormat* instance();
+
+	public:
 		ViWaveFormat();
 };
 

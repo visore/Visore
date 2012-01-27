@@ -1,10 +1,17 @@
 #include "viaudioformat.h"
 
+QSharedPointer<ViAudioFormat> ViAudioFormat::mInstance;
+
 ViAudioFormat::ViAudioFormat()
 {
 	mCompression = ViAudioFormat::Lossy;
 	mAbbreviation = "";
 	mName = "";
+}
+
+ViAudioFormat* ViAudioFormat::instance()
+{
+	return NULL;
 }
 
 ViAudioFormat::ViAudioFormatCompression ViAudioFormat::compression()

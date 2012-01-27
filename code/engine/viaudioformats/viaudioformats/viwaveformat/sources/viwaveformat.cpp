@@ -13,6 +13,16 @@ ViWaveFormat::ViWaveFormat()
 	mExtensions.append("wave");
 }
 
+ViAudioFormat* ViWaveFormat::instance()
+{
+	if(mInstance.isNull())
+	{
+		mInstance = QSharedPointer<ViWaveFormat>(new ViWaveFormat()).dynamicCast<ViAudioFormat>();
+	}
+	return mInstance.data();
+}
+
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -20,12 +30,7 @@ extern "C"
 
 ViAudioFormat* createFormat()
 {
-   return new ViWaveFormat();
-}
-
-void deleteFormat(ViAudioFormat *format)
-{
-   delete format;
+   return ViWaveFormat::instance();
 }
 
 #ifdef __cplusplus

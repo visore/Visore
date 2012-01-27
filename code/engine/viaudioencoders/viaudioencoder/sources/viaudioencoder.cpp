@@ -1,9 +1,12 @@
 #include "viaudioencoder.h"
 
+QSharedPointer<ViAudioEncoder> ViAudioEncoder::mInstance;
+
 ViAudioEncoder::ViAudioEncoder()
 {
 	mName = "";
 	mPath = "";
+	mFormat = NULL;
 }
 
 ViAudioEncoder::~ViAudioEncoder()
@@ -36,6 +39,11 @@ QString ViAudioEncoder::path()
 QList<ViEncoderParameter*> ViAudioEncoder::parameters()
 {
 	return mParameters;
+}
+
+ViAudioFormat* ViAudioEncoder::format()
+{
+	return mFormat;
 }
 
 ViEncoderParameter* ViAudioEncoder::parameter(QString name)

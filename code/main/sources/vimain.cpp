@@ -86,16 +86,22 @@ ViLogger::debug("*: "+a[i]);
 
 
 
-ViAudioEngine *e = new ViAudioEngine();
+ViAudioEngine e;
 	//ViLibrary<ViAudioEngine> interface("/home/visore/Visore/install/system/libviaudioengine.so");
 	ViLibrary<QMainWindow, ViAudioEngine> interface;
 	if(!interface.open("/home/visore/Visore/install/interface/libvimainwindow.so")) ViLogger::debug("Library cannot be loaded!");
 	//ViAudioEngine *engine = interface.create();
-	QMainWindow *window = interface.createObject("createObject", e);
+	QMainWindow *window = interface.createObject("createObject", &e);
 	window->show();
 	//delete window;
 //ViAudioEngine *e = new ViAudioEngine();
 
-	return application.exec();
+	int ex = application.exec();
+
+delete window;
+
+
+
+	return ex;
 }
 

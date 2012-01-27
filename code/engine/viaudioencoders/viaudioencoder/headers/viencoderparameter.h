@@ -2,7 +2,7 @@
 #define VIENCODERPARAMETER_H
 
 #include <QString>
-#include <QList>
+#include <QMap>
 
 class ViEncoderParameter
 {
@@ -15,29 +15,32 @@ class ViEncoderParameter
 			String = 3,
 			Enumeration = 4
 		};
-		ViEncoderParameter(ViEncoderParameter::ViParameterType type, QString name, QString flag, QString value = "");
+		ViEncoderParameter(ViEncoderParameter::ViParameterType type, QString name, QString units, QString flag, QString value = "");
 		ViEncoderParameter::ViParameterType type();
 		QString name();
+		QString units();
 		QString flag();
 		QString value();
 		void setType(ViEncoderParameter::ViParameterType type);
 		void setName(QString name);
+		void setUnits(QString units);
 		void setFlag(QString flag);
 		void setValue(QString value);
 		void setValue(int value);
 		void setValue(double value);
 		void setValue(bool value);
-		QList<QString> possibleValues();
-		void setPossibleValues(QList<QString> possibleValues);
-		void addPossibleValue(QString value);
+		QMap<QString, QString> possibleValues();
+		void setPossibleValues(QMap<QString, QString> possibleValues);
+		void addPossibleValue(QString name, QString value);
 		QString string();
 
 	protected:
 		ViEncoderParameter::ViParameterType mType;
 		QString mName;
+		QString mUnits;
 		QString mFlag;
 		QString mValue;
-		QList<QString> mPossibleValues;
+		QMap<QString, QString> mPossibleValues;
 };
 
 #endif

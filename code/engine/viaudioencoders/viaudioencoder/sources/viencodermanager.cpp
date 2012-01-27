@@ -1,8 +1,31 @@
 #include "viencodermanager.h"
 
+QSharedPointer<ViEncoderManager> ViEncoderManager::mInstance;
+
 ViEncoderManager::ViEncoderManager()
 {
+	QList<QString> libraries = ViLibraryDetector::detectLibraries(VIAUDIOENCODERSLOCATION);
+	for(int i = 0; i < libraries.length(); ++i)
+	{			
+		ViLibrary<ViAudioEncoder> *library = new ViLibrary<ViAudioEncoder>();
+		if(library->open(libraries[i]))
+		{
+			mLibraries.append(library);
+			mEncoders.append(library->createObject("createEncoder"));
+		}
+	}
+}
 
+ViEncoderManager::~ViEncoderManager()
+{
+	for(int i = 0; i < mLibraries.size(); ++i)
+	{
+		if(mLibraries[i] != NULL)
+		{
+			delete mLibraries[i];
+			mLibraries[i] = NULL;
+		}
+	}
 }
 
 ViEncoderManager* ViEncoderManager::instance()
@@ -14,29 +37,29 @@ ViEncoderManager* ViEncoderManager::instance()
 	return mInstance.data();
 }
 
-QList<ViAudioEncoder*> ViEncoderManager::findEncoder(ViAudioFormat *format)
+QList<ViAudioEncoder*> ViEncoderManager::encoder(ViAudioFormat *format)
 {
-	/*ViEncoderManager *manager = ViEncoderManager::instance();
+	ViEncoderManager *manager = ViEncoderManager::instance();
 	QList<ViAudioEncoder*> result;
-	for(int i = 0; i < manager->encoders().size(); ++i)
+	for(int i = 0; i < manager->mEncoders.size(); ++i)
 	{
-		if(format == manager->encoders()[i]->format())
+		if(format == manager->mEncoders[i]->format())
 		{
-			result.append(manager->encoders()[i]);
+			result.append(manager->mEncoders[i]);
 		}
 	}
-	return result;*/
+	return result;
 }
 
-ViAudioEncoder* ViEncoderManager::findEncoder(QString name)
+ViAudioEncoder* ViEncoderManager::encoder(QString name)
 {
-	/*ViEncoderManager *manager = ViEncoderManager::instance();
-	for(int i = 0; i < manager->encoders().size(); ++i)
+	ViEncoderManager *manager = ViEncoderManager::instance();
+	for(int i = 0; i < manager->mEncoders.size(); ++i)
 	{
-		if(name == manager->encoders()[i]->name())
+		if(name == manager->mEncoders[i]->name())
 		{
-			return manager->encoders()[i];
+			return manager->mEncoders[i];
 		}
 	}
-	return NULL;*/
+	return NULL;
 }

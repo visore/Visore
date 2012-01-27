@@ -1,6 +1,6 @@
 #include "viaudiometadata.h"
 
-void ViAudioMetaData::setFormat(ViAudioFormat format)
+void ViAudioMetaData::setFormat(ViAudioFormat *format)
 {
 	mFormat = format;
 }
@@ -30,7 +30,7 @@ void ViAudioMetaData::setSeconds(qint64 seconds)
 	mMilliseconds = seconds * 1000;
 }
 
-ViAudioFormat ViAudioMetaData::format()
+ViAudioFormat* ViAudioMetaData::format()
 {
 	return mFormat;
 }
