@@ -71,7 +71,7 @@ QString ViLameEncoder::string(QString filePath)
 	{
 		result += " " + parameter("Variable Bitrate")->string() + " " + parameter("Maximum Variable Bitrate")->string() + " " + parameter("Minimum Variable Bitrate")->string();
 	}
-	result += " " + parameter("Mode")->string() + " " + parameter("Sample Frequency")->string() + " " + filePath;
+	result += " -r " + parameter("Mode")->string() + " " + parameter("Sample Frequency")->string() + " " + filePath;
 	return result;
 }
 

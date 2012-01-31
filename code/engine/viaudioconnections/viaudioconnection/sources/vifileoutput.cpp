@@ -20,3 +20,7 @@ qint64 ViFileOutput::position(ViAudioTransmission::ViTransmissionType type)
 {
 	return -1;
 }
+
+void ViFileOutput::bufferChanged(int startIndex, int size)
+{
+}

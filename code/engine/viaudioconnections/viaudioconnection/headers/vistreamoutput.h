@@ -8,6 +8,9 @@ class ViStreamOutput : public ViAudioOutput
 {
     Q_OBJECT
 
+	public slots:
+		virtual void bufferChanged(int startIndex, int size);
+
 	public:
 		ViStreamOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData* metaData = NULL, ViAudioDevice *device = NULL);
 		~ViStreamOutput();

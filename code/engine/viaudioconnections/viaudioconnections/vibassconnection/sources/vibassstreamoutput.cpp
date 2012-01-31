@@ -1,17 +1,18 @@
 #include "vibassstreamoutput.h"
 
-ViBassStreamOutputReceiver::ViBassStreamOutputReceiver(ViBassStreamOutput *parent, ViAudioBuffer *buffer, HSTREAM handle)
+ViBassStreamOutputReceiver::ViBassStreamOutputReceiver(ViBassStreamOutput *parent, ViAudioBuffer *buffer, ViAudioBufferStream *stream, HSTREAM handle)
 {
 	mParent = parent;
-	mBuffer = buffer;
+	mStream = stream;
 	mHandle = handle;
+	mBuffer = buffer;
 	ViObject::connectDirect(mBuffer, SIGNAL(changed(int, int)), this, SLOT(changeReceived(int, int)));
 }
 
 void ViBassStreamOutputReceiver::changeReceived(int startIndex, int size)
 {
 	ViAudioBufferChunk chunk;
-	mBuffer->read(&chunk, size);
+	mStream->read(&chunk, size);
 	if(BASS_StreamPutData(mHandle, chunk.data(), size) == -1)
 	{
 		mParent->setErrorParameters("ViBassStreamOutput - Stream Error", "The specified data could not be written to the stream", ViErrorInfo::Fatal);
@@ -39,7 +40,8 @@ ViBassStreamOutput::ViBassStreamOutput(ViAudioBuffer *buffer, ViAudioMetaData *m
 	{cout<<"rrr: "<<BASS_ErrorGetCode()<<endl;
 		setErrorParameters("ViBassStreamOutput - Device Error", "Cannot stream to the selected output device", ViErrorInfo::Fatal);
 	}*/
-	mReceiver = new ViBassStreamOutputReceiver(this, mBuffer, mHandle);
+	mReceiver = new ViBassStreamOutputReceiver(this, mBuffer, mStream, mHandle);
+	//ViObject::connectDirect(this, SIGNAL(changeReceived(int, int)), mReceiver, SLOT(changeReceived(int, int)));
 }
 
 ViBassStreamOutput::~ViBassStreamOutput()
@@ -53,6 +55,12 @@ ViBassStreamOutput::~ViBassStreamOutput()
 		delete mReceiver;
 		mReceiver = NULL;
 	}
+}
+
+void ViBassStreamOutput::bufferChanged(int startIndex, int size)
+{
+	//mReceiver->changeReceived(startIndex, size);
+	//emit changeReceived(startIndex, size);
 }
 
 void ViBassStreamOutput::start()
@@ -83,7 +91,7 @@ void ViBassStreamOutput::stop()
 		return;
 	}
 	mStatus = ViAudioTransmission::Stopped;
-	mBuffer->restartRead();
+	mStream->restart();
 }
 
 void ViBassStreamOutput::pause()
@@ -115,7 +123,7 @@ qint64 ViBassStreamOutput::setPosition(ViAudioTransmission::ViTransmissionType t
 	{
 		position -= 1;
 	}
-	if(!mBuffer->isValidPosition(position))
+	if(!mStream->isValidPosition(position))
 	{
 		setErrorParameters("ViBassStreamOutput - Position Error", "The position could not be set", ViErrorInfo::MediumFatal);
 		return -1;
@@ -133,7 +141,7 @@ qint64 ViBassStreamOutput::setPosition(ViAudioTransmission::ViTransmissionType t
 	}
 	mStatus = ViAudioTransmission::Stopped;
 
-	qint64 read = mBuffer->setPosition(position);
+	qint64 read = mStream->setPosition(position);
 	if(read < 0)
 	{
 		setErrorParameters("ViBassStreamOutput - Position Error", "The position could not be set", ViErrorInfo::MediumFatal);

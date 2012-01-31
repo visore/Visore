@@ -4,16 +4,17 @@ ViAudioTransmission::ViAudioTransmission(ViAudioBuffer *buffer, ViAudioMetaData 
 	: QObject()
 {
 	mBuffer = buffer;
+	mStream = NULL;
 	mMetaData = metaData;
 	mStatus = ViAudioTransmission::None;
 }
 
 ViAudioTransmission::~ViAudioTransmission()
 {
-	if(mBuffer != NULL)
+	if(mStream != NULL)
 	{
-		delete mBuffer;
-		mBuffer = NULL;
+		delete mStream;
+		mStream = NULL;
 	}
 	if(mMetaData != NULL)
 	{

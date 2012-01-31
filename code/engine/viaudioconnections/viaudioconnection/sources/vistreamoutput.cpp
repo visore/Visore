@@ -19,3 +19,7 @@ void ViStreamOutput::setDevice(ViAudioDevice *device)
 {
 	mDevice = device;
 }
+
+void ViStreamOutput::bufferChanged(int startIndex, int size)
+{
+}

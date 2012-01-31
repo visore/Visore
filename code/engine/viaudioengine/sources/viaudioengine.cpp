@@ -6,8 +6,10 @@
 ViAudioEngine::ViAudioEngine()
 	: QObject()
 {
-	mBuffer = new ViAudioBuffer();
-	mAudioInput = NULL;
+	mStreamInput = NULL;
+	mFileInput = NULL;
+	mStreamOutput = NULL;
+	mFileOutput = NULL;
 /*
 mAudioConnectionLoader = new ViLibrary<ViAudioConnection>();
 if(!mAudioConnectionLoader->open(QCoreApplication::applicationDirPath()+"/engine/connections/libvibassconnection.so")) ViLogger::debug("Library cannot be loaded! ");
@@ -20,14 +22,28 @@ mAudioConnection = new ViBassConnection();
 
 ViAudioMetaData *metaData = new ViAudioMetaData();
 metaData->setFormat(ViFormatManager::format("MP3"));
+metaData->setFrequency(44100);
+metaData->setChannels(1);
 
-mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.aac");
-//mAudioInput = mAudioConnection->streamInput(mBuffer, metaData);
+//mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wav");
+
 
 ViAudioDevice outputDevice;
 outputDevice.setId(-1);
-//mAudioOutputs.append(mAudioConnection->streamOutput(mBuffer, metaData, &outputDevice));
-mAudioOutputs.append(mAudioConnection->fileOutput(mBuffer, metaData, "/home/visore/Desktop/testrec.mp3"));
+
+//mFileOutput = mAudioConnection->fileOutput(mBuffer, metaData, "/home/visore/Desktop/testrec.mp3");
+
+mProcessingChain = new ViAudioProcessingChain();
+
+mStreamInput = mAudioConnection->streamInput(mProcessingChain->originalBuffer(), metaData);
+mFileInput = mAudioConnection->fileInput(mProcessingChain->originalBuffer(), metaData, "/home/visore/Desktop/a.wav");
+mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->correctedBuffer(), metaData, &outputDevice);
+
+mProcessingChain->attachInput(mStreamInput);
+mProcessingChain->attachInput(mFileInput);
+mProcessingChain->attachStreamOutput(mStreamOutput);
+
+//mFileInput->start();
 
 }
 
@@ -109,70 +125,67 @@ void ViAudioEngine::initializeOutputFile()
 	//mAudioOutputs.append(new ViStreamOutput(mBuffer));
 }*/
 
-void ViAudioEngine::startInput()
+void ViAudioEngine::startPlayback()
 {
-	if(mAudioInput != NULL)
+	if(mStreamOutput != NULL)
 	{
-		mAudioInput->start();
+		mStreamOutput->start();
 	}
 }
 
-void ViAudioEngine::pauseInput()
+void ViAudioEngine::stopPlayback()
 {
-	if(mAudioInput != NULL)
+	if(mStreamOutput != NULL)
 	{
-		mAudioInput->pause();
+		mStreamOutput->stop();
 	}
 }
 
-void ViAudioEngine::stopInput()
+void ViAudioEngine::pausePlayback()
 {
-	if(mAudioInput != NULL)
+	if(mStreamOutput != NULL)
 	{
-		mAudioInput->stop();
+		mStreamOutput->pause();
 	}
 }
 
-void ViAudioEngine::startOutput()
+void ViAudioEngine::startRecording()
 {
-	for(int i = 0; i < mAudioOutputs.size(); ++i)
+	if(mStreamInput != NULL)
 	{
-		if(mAudioOutputs[i] != NULL)
-		{
-			mAudioOutputs[i]->start();
-		}
+		mProcessingChain->reset();
+		mStreamInput->start();
 	}
 }
 
-void ViAudioEngine::pauseOutput()
+void ViAudioEngine::stopRecording()
 {
-	for(int i = 0; i < mAudioOutputs.size(); ++i)
+	if(mStreamInput != NULL)
 	{
-		if(mAudioOutputs[i] != NULL)
-		{
-			mAudioOutputs[i]->pause();
-		}
+		mStreamInput->stop();
 	}
 }
 
-void ViAudioEngine::stopOutput()
+void ViAudioEngine::setStreamPosition(qint64 position)
 {
-	for(int i = 0; i < mAudioOutputs.size(); ++i)
+	if(mStreamInput != NULL)
 	{
-		if(mAudioOutputs[i] != NULL)
-		{
-			mAudioOutputs[i]->stop();
-		}
+		mStreamOutput->setPosition(ViAudioTransmission::Milliseconds, position);
 	}
 }
 
-void ViAudioEngine::setPosition(qint64 position)
+void ViAudioEngine::startOutputFile()
 {
-	for(int i = 0; i < mAudioOutputs.size(); ++i)
+	if(mFileOutput != NULL)
 	{
-		if(mAudioOutputs[i] != NULL)
-		{
-			mAudioOutputs[i]->setPosition(ViAudioTransmission::Milliseconds, position);
-		}
+		mFileOutput->start();
+	}
+}
+
+void ViAudioEngine::stopOutputFile()
+{
+	if(mFileOutput != NULL)
+	{
+		mFileOutput->stop();
 	}
 }

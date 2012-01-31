@@ -1,13 +1,13 @@
 #include "vibassstreaminput.h"
 
-ViAudioBuffer *globalBuffer = NULL;
+ViAudioBufferStream *globalStream = NULL;
 
 BOOL CALLBACK recordingCallback(HRECORD handle, const void *buffer, DWORD length, void *user)
 {
 	char *newBuffer = new char[length];
 	memcpy (newBuffer, buffer, length);
 	ViAudioBufferChunk chunk(newBuffer);
-	globalBuffer->write(&chunk, length);
+	globalStream->write(&chunk, length);
 	return true;
 }
 
@@ -18,10 +18,8 @@ ViBassStreamInput::ViBassStreamInput(ViAudioBuffer *buffer, ViAudioMetaData *met
 	{
 		setErrorParameters("ViBassStreamInput - Initializing Error", "Could not initialize the Bass recording device", ViErrorInfo::Fatal);
 	}
-	metaData->setFrequency(44100);
-	metaData->setChannels(2);
-	mRecordHandle = BASS_RecordStart(metaData->frequency(), metaData->channels(), BASS_RECORD_PAUSE, &recordingCallback, 0);
-	globalBuffer = mBuffer;
+	globalStream = mStream;
+	mRecordHandle = BASS_RecordStart(mMetaData->frequency(), mMetaData->channels(), BASS_RECORD_PAUSE, &recordingCallback, 0);
 }
 
 ViBassStreamInput::~ViBassStreamInput()
@@ -38,36 +36,47 @@ ViBassStreamInput::~ViBassStreamInput()
 
 void ViBassStreamInput::start()
 {
-	if(BASS_ChannelIsActive(mRecordHandle) == BASS_ACTIVE_PLAYING)
+	if(mStatus == ViAudioTransmission::Running)
 	{
 		setErrorParameters("ViBassStreamInput - Start Error", "The device is already recording", ViErrorInfo::NonFatal);
+		return;
 	}
-	else if(!BASS_ChannelPlay(mRecordHandle, false))
+	else if(mStatus == ViAudioTransmission::Stopped)
+	{
+		mStream->restart();
+		mRecordHandle = BASS_RecordStart(mMetaData->frequency(), mMetaData->channels(), BASS_RECORD_PAUSE, &recordingCallback, 0);
+	}
+	if(!BASS_ChannelPlay(mRecordHandle, false))
 	{
 		setErrorParameters("ViBassStreamInput - Start Error", "The recording stream could not be started", ViErrorInfo::MediumFatal);
 	}
+	mStatus = ViAudioTransmission::Running;
 }
 
 void ViBassStreamInput::stop()
 {
-	if(BASS_ChannelIsActive(mRecordHandle) == BASS_ACTIVE_STOPPED)
+	if(mStatus == ViAudioTransmission::Stopped)
 	{
 		setErrorParameters("ViBassStreamInput - Stop Error", "The device is already stopped", ViErrorInfo::NonFatal);
+		return;
 	}
-	else if(!BASS_ChannelStop(mRecordHandle))
+	if(!BASS_ChannelStop(mRecordHandle))
 	{
 		setErrorParameters("ViBassStreamInput - Stop Error", "The recording stream could not be stopped", ViErrorInfo::MediumFatal);
 	}
+	mStatus = ViAudioTransmission::Stopped;
 }
 
 void ViBassStreamInput::pause()
 {
-	if(BASS_ChannelIsActive(mRecordHandle) == BASS_ACTIVE_PAUSED)
+	if(mStatus == ViAudioTransmission::Paused)
 	{
 		setErrorParameters("ViBassStreamInput - Pause Error", "The device is already paused", ViErrorInfo::NonFatal);
+		return;
 	}
-	else if(!BASS_ChannelPause(mRecordHandle))
+	if(!BASS_ChannelPause(mRecordHandle))
 	{
 		setErrorParameters("ViBassStreamInput - Pause Error", "The recording stream could not be paused", ViErrorInfo::MediumFatal);
 	}
+	mStatus = ViAudioTransmission::Paused;
 }

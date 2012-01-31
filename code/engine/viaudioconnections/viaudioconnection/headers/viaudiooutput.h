@@ -7,6 +7,9 @@ class ViAudioOutput : public ViAudioTransmission
 {
     Q_OBJECT
 
+	public slots:
+		virtual void bufferChanged(int startIndex, int size) = 0;
+
 	public:
 		ViAudioOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL);
 

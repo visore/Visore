@@ -4,5 +4,5 @@ SET(FFTREAL ${ROOT}/fftreal)
 SET(BASS ${ROOT}/bass)
 
 #Initiate sub-directories
-ADD_SUBDIRECTORY(${FFTREAL})
+#ADD_SUBDIRECTORY(${FFTREAL})
 ADD_SUBDIRECTORY(${BASS})

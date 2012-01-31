@@ -3,6 +3,7 @@
 
 #include "viobject.h"
 #include "viaudioconnection.h"
+#include "viaudioprocessingchain.h"
 #include <QList>
 #include <QCoreApplication>
 
@@ -49,13 +50,14 @@ class ViAudioEngine : public QObject, public ViError
 		};
 
 	public slots:
-		void startInput();
-		void pauseInput();
-		void stopInput();
-		void startOutput();
-		void pauseOutput();
-		void stopOutput();
-		void setPosition(qint64 position);
+		void startPlayback();
+		void stopPlayback();
+		void pausePlayback();
+		void startRecording();
+		void stopRecording();
+		void setStreamPosition(qint64 position);
+		void startOutputFile();
+		void stopOutputFile();
 
 	public:
 		ViAudioEngine();
@@ -71,11 +73,11 @@ class ViAudioEngine : public QObject, public ViError
 	private:
 		ViAudioConnection *mAudioConnection;
 		ViLibrary<ViAudioConnection> *mAudioConnectionLoader;
-		ViAudioBuffer *mBuffer;
-		ViAudioInput *mAudioInput;
-		QList<ViAudioOutput*> mAudioOutputs;
-		ViAudioEngine::ViAudioType mInputAudioType;
-		ViAudioEngine::ViAudioType mOutputAudioType;
+		ViAudioInput *mStreamInput;
+		ViAudioInput *mFileInput;
+		ViAudioOutput *mStreamOutput;
+		ViAudioOutput *mFileOutput;
+		ViAudioProcessingChain *mProcessingChain;
 };
 
 #endif

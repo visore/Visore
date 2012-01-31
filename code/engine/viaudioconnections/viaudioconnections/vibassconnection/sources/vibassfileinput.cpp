@@ -1,9 +1,9 @@
 #include "vibassfileinput.h"
 
-ViBassFileInputThread::ViBassFileInputThread(ViBassFileInput *parent, ViAudioBuffer *buffer, ViAudioMetaData *metaData, QString filePath)
+ViBassFileInputThread::ViBassFileInputThread(ViBassFileInput *parent, ViAudioBufferStream *stream, ViAudioMetaData *metaData, QString filePath)
 {
 	mParent = parent;
-	mBuffer = buffer;
+	mStream = stream;
 	mMetaData = metaData;
 	mFilePath = filePath;
 	mFileHandle = BASS_StreamCreateFile(false, mFilePath.toUtf8().data(), 0, 0, BASS_STREAM_DECODE);	
@@ -24,7 +24,7 @@ ViBassFileInputThread::~ViBassFileInputThread()
 void ViBassFileInputThread::run()
 {
 	mPaused = false;
-	int bufferSize = mBuffer->bufferHeadStart();
+	int bufferSize = mStream->bufferHeadStart();
 	bufferSize = pow(2, ceil(log(bufferSize) / log(2))); //Make sure it is a power of 2
 	while(!kbHit() && BASS_ChannelIsActive(mFileHandle))
 	{
@@ -36,7 +36,7 @@ void ViBassFileInputThread::run()
 			return;
 		}
 		ViAudioBufferChunk chunk(array);
-		mBuffer->write(&chunk, bufferSize);
+		mStream->write(&chunk, bufferSize);
 		if(mPaused)
 		{
 			return;
@@ -102,7 +102,7 @@ void ViBassFileInputThread::readMetaData()
 ViBassFileInput::ViBassFileInput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QString filePath)
 	: ViFileInput(buffer, metaData, filePath)
 {
-	mThread = new ViBassFileInputThread(this, mBuffer, mMetaData, mFilePath);
+	mThread = new ViBassFileInputThread(this, mStream, mMetaData, mFilePath);
 	mThread->readMetaData();
 }
 
@@ -128,7 +128,7 @@ void ViBassFileInput::start()
 	}
 	else if(mStatus == ViAudioTransmission::Stopped)
 	{
-		mThread = new ViBassFileInputThread(this, mBuffer, mMetaData, mFilePath);
+		mThread = new ViBassFileInputThread(this, mStream, mMetaData, mFilePath);
 	}
 	mStatus = ViAudioTransmission::Running;
 	mThread->start();	
@@ -146,7 +146,7 @@ void ViBassFileInput::stop()
 	while(!mThread->isFinished());
 	delete mThread;
 	mThread = NULL;
-	mBuffer->restartWrite();
+	mStream->restart();
 }
 
 void ViBassFileInput::pause()

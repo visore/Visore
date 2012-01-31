@@ -12,7 +12,7 @@ FILE(GLOB VI_AUDIOCONNECTION_HEADERS ${HEADERS}/*.h)
 
 #Create library
 ADD_LIBRARY(viaudioconnection SHARED ${VI_AUDIOCONNECTION_HEADERS} ${VI_AUDIOCONNECTION_SOURCES})
-TARGET_LINK_LIBRARIES(viaudioconnection ${QT_LIBRARIES} viaudioencoder viaudioformat)
+TARGET_LINK_LIBRARIES(viaudioconnection ${QT_LIBRARIES} viaudioencoder viaudioformat viaudiobuffer)
 
 #Install file
 INSTALL(TARGETS viaudioconnection DESTINATION engine)

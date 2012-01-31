@@ -6,28 +6,41 @@
 #include <QBoxLayout>
 #include "viaudioengine.h"
 
+namespace Ui
+{
+    class ViMainWindow;
+}
+
 class ViMainWindow : public QMainWindow
 {
 	Q_OBJECT
 
 	private slots:
-		void changeOutputPosition();
+		void reset();
+		void record();
+		void save();
+		void play();
+		void pause();
+		void stop();
 
 	public:
 		ViMainWindow(QWidget *parent = 0);
+		~ViMainWindow();
 		void setEngine(ViAudioEngine *engine);
 
 	private:
+		void setRecording(bool active);
+		void setPlaying(bool active);
+		void setPausing(bool active);
+
+	private:
+		Ui::ViMainWindow *mUi;
+
+	private:
 		ViAudioEngine *mEngine;
-		QBoxLayout *mLayout;
-		QPushButton *m1;
-		QPushButton *m2;
-		QPushButton *m3;
-		QPushButton *m4;
-		QPushButton *m5;
-		QPushButton *m6;
-		QPushButton *m7;
-		QWidget *mWidget;
+		bool mIsRecording;
+		bool mIsPlaying;
+		bool mIsPaused;
 };
 
 #endif

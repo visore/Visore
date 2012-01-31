@@ -10,20 +10,26 @@ class ViBassStreamOutputReceiver : public QObject
 {
 	Q_OBJECT
 
-	private slots:
+	public slots:
 		void changeReceived(int startIndex, int size);
 
 	public:
-		ViBassStreamOutputReceiver(ViBassStreamOutput *parent, ViAudioBuffer *buffer, HSTREAM handle);
+		ViBassStreamOutputReceiver(ViBassStreamOutput *parent, ViAudioBuffer *buffer, ViAudioBufferStream *stream, HSTREAM handle);
 
 	private:
-		ViBassStreamOutput *mParent;
 		ViAudioBuffer *mBuffer;
+		ViBassStreamOutput *mParent;
+		ViAudioBufferStream *mStream;
 		HSTREAM mHandle;
 };
 
 class ViBassStreamOutput : public ViStreamOutput
 {
+	Q_OBJECT
+
+	public slots:
+		void bufferChanged(int startIndex, int size);
+
 	public:
 		ViBassStreamOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, ViAudioDevice *device = NULL);
 		~ViBassStreamOutput();

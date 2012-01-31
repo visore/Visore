@@ -1,46 +1,126 @@
 #include "vimainwindow.h"
+#include "ui_vimainwindow.h"
 
 ViMainWindow::ViMainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
-	mLayout = new QBoxLayout(QBoxLayout::TopToBottom);
-	m1 = new QPushButton("Start Input");
-	m2 = new QPushButton("Pause Input");
-	m3 = new QPushButton("Stop Input");
-	m4 = new QPushButton("Start Output");
-	m5 = new QPushButton("Pause Output");
-	m6 = new QPushButton("Stop Output");
-	m7 = new QPushButton("Position Output");
-	mLayout->addWidget(m1);
-	mLayout->addWidget(m2);
-	mLayout->addWidget(m3);
-	mLayout->addSpacing(60);
-	mLayout->addWidget(m4);
-	mLayout->addWidget(m5);
-	mLayout->addWidget(m6);
-	mLayout->addWidget(m7);
-	mWidget = new QWidget();
-	mWidget->setLayout(mLayout);
-	mWidget->resize(800,800);
-	setCentralWidget(mWidget);
-	resize(800,800);
+	mUi = new Ui::ViMainWindow();
+	mUi->setupUi(this);
+
+	QObject::connect(mUi->resetButton, SIGNAL(clicked()), this, SLOT(reset()));
+	QObject::connect(mUi->recordButton, SIGNAL(clicked()), this, SLOT(record()));
+	QObject::connect(mUi->saveButton, SIGNAL(clicked()), this, SLOT(save()));
+	QObject::connect(mUi->playButton, SIGNAL(clicked()), this, SLOT(play()));
+	QObject::connect(mUi->pauseButton, SIGNAL(clicked()), this, SLOT(pause()));
+	QObject::connect(mUi->stopButton, SIGNAL(clicked()), this, SLOT(stop()));
+
+	mIsRecording = false;
+	mIsPlaying = false;
+	mIsPaused = false;
+}
+
+ViMainWindow::~ViMainWindow()
+{
+	delete mUi;
 }
 
 void ViMainWindow::setEngine(ViAudioEngine *engine)
 {
 	mEngine = engine;
-	QObject::connect(m1, SIGNAL(clicked()), mEngine, SLOT(startInput()));
-	QObject::connect(m2, SIGNAL(clicked()), mEngine, SLOT(pauseInput()));
-	QObject::connect(m3, SIGNAL(clicked()), mEngine, SLOT(stopInput()));
-	QObject::connect(m4, SIGNAL(clicked()), mEngine, SLOT(startOutput()));
-	QObject::connect(m5, SIGNAL(clicked()), mEngine, SLOT(pauseOutput()));
-	QObject::connect(m6, SIGNAL(clicked()), mEngine, SLOT(stopOutput()));
-	QObject::connect(m7, SIGNAL(clicked()), this, SLOT(changeOutputPosition()));
 }
 
-void ViMainWindow::changeOutputPosition()
+void ViMainWindow::reset()
 {
-	mEngine->setPosition(60000);
+	setPausing(false);
+	setPlaying(false);
+	setRecording(false);
+}
+
+void ViMainWindow::record()
+{
+	if(!mIsRecording)
+	{
+		mEngine->startRecording();
+	}
+	else
+	{
+		mEngine->stopRecording();
+	}	
+	setRecording(!mIsRecording);
+}
+
+void ViMainWindow::save()
+{
+
+}
+
+void ViMainWindow::play()
+{
+	if(!mIsPlaying)
+	{
+		mEngine->startPlayback();
+		setPausing(false);
+		setPlaying(!mIsPlaying);
+	}
+}
+
+void ViMainWindow::pause()
+{
+	if(!mIsPaused)
+	{
+		mEngine->pausePlayback();
+		setPlaying(false);
+		setPausing(!mIsPaused);
+	}
+}
+
+void ViMainWindow::stop()
+{
+	mEngine->stopPlayback();
+	setPausing(false);
+	setPlaying(false);
+}
+
+void ViMainWindow::setRecording(bool active)
+{
+	if(active)
+	{
+		mIsRecording = true;
+		mUi->recordButton->setIcon(QIcon(":/vimainwindow/icons/recordselected.png"));
+	}
+	else
+	{
+		mIsRecording = false;
+		mUi->recordButton->setIcon(QIcon(":/vimainwindow/icons/recordnormal.png"));
+	}
+}
+
+void ViMainWindow::setPlaying(bool active)
+{
+	if(active)
+	{
+		mIsPlaying = true;
+		mUi->playButton->setIcon(QIcon(":/vimainwindow/icons/playselected.png"));
+	}
+	else
+	{
+		mIsPlaying = false;
+		mUi->playButton->setIcon(QIcon(":/vimainwindow/icons/playnormal.png"));
+	}
+}
+
+void ViMainWindow::setPausing(bool active)
+{
+	if(active)
+	{
+		mIsPaused = true;
+		mUi->pauseButton->setIcon(QIcon(":/vimainwindow/icons/pauseselected.png"));
+	}
+	else
+	{
+		mIsPaused = false;
+		mUi->pauseButton->setIcon(QIcon(":/vimainwindow/icons/pausenormal.png"));
+	}
 }
 
 #ifdef __cplusplus

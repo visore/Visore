@@ -9,6 +9,9 @@ class ViFileOutput : public ViAudioOutput
 {
     Q_OBJECT
 
+	public slots:
+		virtual void bufferChanged(int startIndex, int size);
+
 	public:
 		ViFileOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, QString filePath = "");
 		virtual void setFilePath(QString filePath);

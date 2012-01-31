@@ -37,6 +37,7 @@ class ViAudioTransmission : public QObject, public ViError
 
 	protected:
 		ViAudioBuffer *mBuffer;
+		ViAudioBufferStream *mStream;
 		ViAudioMetaData *mMetaData;
 		ViAudioTransmission::ViTransmissionStatus mStatus;
 };

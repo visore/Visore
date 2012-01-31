@@ -9,7 +9,7 @@ FILE(GLOB VI_MAIN_SOURCES ${SOURCES}/*.cpp)
 ADD_EXECUTABLE(visore ${VI_MAIN_SOURCES})
 
 #Link Visore to Qt
-TARGET_LINK_LIBRARIES(visore ${QT_LIBRARIES} viaudioengine)
+TARGET_LINK_LIBRARIES(visore ${QT_LIBRARIES} viaudioengine vimainwindow)
 
 #Install file
 INSTALL(TARGETS visore RUNTIME DESTINATION .)

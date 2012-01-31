@@ -1,27 +1,10 @@
 #ifndef VIBASSFILEOUTPUT_H
 #define VIBASSFILEOUTPUT_H
 
+#define FILE_CHUNK_SIZE 10000
+
 #include "vifileoutput.h"
-#include "bass.h"
-#include "bassenc.h"
-
-class ViBassFileOutput;
-
-class ViBassFileOutputReceiver : public QObject
-{
-	Q_OBJECT
-
-	private slots:
-		void changeReceived(int startIndex, int size);
-
-	public:
-		ViBassFileOutputReceiver(ViBassFileOutput *parent, ViAudioBuffer *buffer, HSTREAM handle);
-
-	private:
-		ViBassFileOutput *mParent;
-		ViAudioBuffer *mBuffer;
-		HSTREAM mHandle;
-};
+#include <QProcess>
 
 class ViBassFileOutput : public ViFileOutput
 {
@@ -35,8 +18,7 @@ class ViBassFileOutput : public ViFileOutput
 		void pause();
 
 	private:
-		HSTREAM mHandle;
-		ViBassFileOutputReceiver *mReceiver;
+		QProcess mProcess;
 };
 
 #endif
