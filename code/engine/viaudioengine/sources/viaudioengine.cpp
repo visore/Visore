@@ -37,7 +37,7 @@ mProcessingChain = new ViAudioProcessingChain();
 
 mStreamInput = mAudioConnection->streamInput(mProcessingChain->originalBuffer(), metaData);
 mFileInput = mAudioConnection->fileInput(mProcessingChain->originalBuffer(), metaData, "/home/visore/Desktop/a.wav");
-mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->correctedBuffer(), metaData, &outputDevice);
+mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->originalBuffer(), metaData, &outputDevice);
 
 mProcessingChain->attachInput(mStreamInput);
 mProcessingChain->attachInput(mFileInput);
