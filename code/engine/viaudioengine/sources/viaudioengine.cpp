@@ -23,7 +23,7 @@ mAudioConnection = new ViBassConnection();
 ViAudioMetaData *metaData = new ViAudioMetaData();
 metaData->setFormat(ViFormatManager::format("MP3"));
 metaData->setFrequency(44100);
-metaData->setChannels(1);
+metaData->setChannels(2);
 
 //mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wav");
 
@@ -35,12 +35,13 @@ outputDevice.setId(-1);
 
 mProcessingChain = new ViAudioProcessingChain();
 
+//Make sure the file input is created before the stream input
+mFileInput = mAudioConnection->fileInput(mProcessingChain->originalBuffer(), metaData);
 mStreamInput = mAudioConnection->streamInput(mProcessingChain->originalBuffer(), metaData);
-mFileInput = mAudioConnection->fileInput(mProcessingChain->originalBuffer(), metaData, "/home/visore/Desktop/a.wav");
-mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->originalBuffer(), metaData, &outputDevice);
+mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->correctedBuffer(), metaData, &outputDevice);
 
-mProcessingChain->attachInput(mStreamInput);
 mProcessingChain->attachInput(mFileInput);
+mProcessingChain->attachInput(mStreamInput);
 mProcessingChain->attachStreamOutput(mStreamOutput);
 
 //mFileInput->start();
@@ -125,67 +126,54 @@ void ViAudioEngine::initializeOutputFile()
 	//mAudioOutputs.append(new ViStreamOutput(mBuffer));
 }*/
 
+void ViAudioEngine::setInputFilePath(QString filePath)
+{
+	mFileInput->setFilePath(filePath);
+	mFileInput->start();
+}
+
+void ViAudioEngine::reset()
+{
+	mProcessingChain->reset();
+}
+
 void ViAudioEngine::startPlayback()
 {
-	if(mStreamOutput != NULL)
-	{
-		mStreamOutput->start();
-	}
+	mStreamOutput->start();
 }
 
 void ViAudioEngine::stopPlayback()
 {
-	if(mStreamOutput != NULL)
-	{
-		mStreamOutput->stop();
-	}
+	mStreamOutput->stop();
 }
 
 void ViAudioEngine::pausePlayback()
 {
-	if(mStreamOutput != NULL)
-	{
-		mStreamOutput->pause();
-	}
+	mStreamOutput->pause();
 }
 
 void ViAudioEngine::startRecording()
 {
-	if(mStreamInput != NULL)
-	{
-		mProcessingChain->reset();
-		mStreamInput->start();
-	}
+	mProcessingChain->reset();
+	mStreamInput->start();
 }
 
 void ViAudioEngine::stopRecording()
 {
-	if(mStreamInput != NULL)
-	{
-		mStreamInput->stop();
-	}
+	mStreamInput->stop();
 }
 
 void ViAudioEngine::setStreamPosition(qint64 position)
 {
-	if(mStreamInput != NULL)
-	{
-		mStreamOutput->setPosition(ViAudioTransmission::Milliseconds, position);
-	}
+	mStreamOutput->setPosition(ViAudioTransmission::Milliseconds, position);
 }
 
 void ViAudioEngine::startOutputFile()
 {
-	if(mFileOutput != NULL)
-	{
-		mFileOutput->start();
-	}
+	mFileOutput->start();
 }
 
 void ViAudioEngine::stopOutputFile()
 {
-	if(mFileOutput != NULL)
-	{
-		mFileOutput->stop();
-	}
+	mFileOutput->stop();
 }

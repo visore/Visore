@@ -62,7 +62,8 @@ class ViAudioEngine : public QObject, public ViError
 	public:
 		ViAudioEngine();
 		~ViAudioEngine();
-		//void setInputDevice
+		void setInputFilePath(QString filePath);
+		void reset();
 
 	private:
 		/*void initializeInputStream(QAudioDeviceInfo deviceInfo, QAudioFormat format);
@@ -73,10 +74,10 @@ class ViAudioEngine : public QObject, public ViError
 	private:
 		ViAudioConnection *mAudioConnection;
 		ViLibrary<ViAudioConnection> *mAudioConnectionLoader;
-		ViAudioInput *mStreamInput;
-		ViAudioInput *mFileInput;
-		ViAudioOutput *mStreamOutput;
-		ViAudioOutput *mFileOutput;
+		ViStreamInput *mStreamInput;
+		ViFileInput *mFileInput;
+		ViStreamOutput *mStreamOutput;
+		ViFileOutput *mFileOutput;
 		ViAudioProcessingChain *mProcessingChain;
 };
 

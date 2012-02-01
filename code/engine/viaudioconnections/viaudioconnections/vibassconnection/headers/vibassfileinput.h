@@ -12,8 +12,9 @@ class ViBassFileInput;
 class ViBassFileInputThread : public QThread
 {
 	public:
-		ViBassFileInputThread(ViBassFileInput *parent, ViAudioBufferStream *stream, ViAudioMetaData *metaData, QString filePath);
-		~ViBassFileInputThread();		
+		ViBassFileInputThread(ViBassFileInput *parent, ViAudioBufferStream *stream, ViAudioMetaData *metaData);
+		~ViBassFileInputThread();
+		void setFilePath(QString filePath);	
 		void run();
 		void readMetaData();
 		void pause();
@@ -26,6 +27,7 @@ class ViBassFileInputThread : public QThread
 		ViBassFileInput *mParent;
 		ViAudioBufferStream *mStream;
 		QString mFilePath;
+		bool mMetaDataRead;
 		ViAudioMetaData *mMetaData;
 		HSTREAM mFileHandle;
 };

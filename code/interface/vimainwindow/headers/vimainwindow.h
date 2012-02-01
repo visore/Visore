@@ -22,6 +22,8 @@ class ViMainWindow : public QMainWindow
 		void play();
 		void pause();
 		void stop();
+		void selectLineInput();
+		void selectFileInput();
 
 	public:
 		ViMainWindow(QWidget *parent = 0);

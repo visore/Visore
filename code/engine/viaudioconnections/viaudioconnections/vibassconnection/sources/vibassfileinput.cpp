@@ -1,16 +1,11 @@
 #include "vibassfileinput.h"
 
-ViBassFileInputThread::ViBassFileInputThread(ViBassFileInput *parent, ViAudioBufferStream *stream, ViAudioMetaData *metaData, QString filePath)
+ViBassFileInputThread::ViBassFileInputThread(ViBassFileInput *parent, ViAudioBufferStream *stream, ViAudioMetaData *metaData)
 {
 	mParent = parent;
 	mStream = stream;
 	mMetaData = metaData;
-	mFilePath = filePath;
-	mFileHandle = BASS_StreamCreateFile(false, mFilePath.toUtf8().data(), 0, 0, BASS_STREAM_DECODE);	
-	if(!mFileHandle)
-	{
-		mParent->setErrorParameters("ViBassFileInput - File Input Error", "The file(" + mFilePath + ") could not be opened", ViErrorInfo::Fatal);
-	}
+	mMetaDataRead = false;
 }
 
 ViBassFileInputThread::~ViBassFileInputThread()
@@ -21,8 +16,24 @@ ViBassFileInputThread::~ViBassFileInputThread()
 	}
 }
 
+void ViBassFileInputThread::setFilePath(QString filePath)
+{
+	BASS_StreamFree(mFileHandle);
+	mFilePath = filePath;
+	mFileHandle = BASS_StreamCreateFile(false, mFilePath.toUtf8().data(), 0, 0, BASS_STREAM_DECODE);	
+	if(!mFileHandle)
+	{
+		mParent->setErrorParameters("ViBassFileInput - File Input Error", "The file(" + mFilePath + ") could not be opened", ViErrorInfo::Fatal);
+	}
+}
+
 void ViBassFileInputThread::run()
 {
+	if(!mMetaDataRead)
+	{
+		mMetaDataRead = true;
+		readMetaData();
+	}
 	mPaused = false;
 	int bufferSize = mStream->bufferHeadStart();
 	bufferSize = pow(2, ceil(log(bufferSize) / log(2))); //Make sure it is a power of 2
@@ -102,8 +113,7 @@ void ViBassFileInputThread::readMetaData()
 ViBassFileInput::ViBassFileInput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QString filePath)
 	: ViFileInput(buffer, metaData, filePath)
 {
-	mThread = new ViBassFileInputThread(this, mStream, mMetaData, mFilePath);
-	mThread->readMetaData();
+	mThread = new ViBassFileInputThread(this, mStream, mMetaData);
 }
 
 ViBassFileInput::~ViBassFileInput()
@@ -128,9 +138,10 @@ void ViBassFileInput::start()
 	}
 	else if(mStatus == ViAudioTransmission::Stopped)
 	{
-		mThread = new ViBassFileInputThread(this, mStream, mMetaData, mFilePath);
+		mThread = new ViBassFileInputThread(this, mStream, mMetaData);
 	}
 	mStatus = ViAudioTransmission::Running;
+	mThread->setFilePath(mFilePath);
 	mThread->start();	
 }
 

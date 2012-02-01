@@ -46,6 +46,7 @@ void ViAudioProcessingChain::originalBufferChanged(int startIndex, int size)
 void ViAudioProcessingChain::correctedBufferChanged(int startIndex, int size)
 {
 	//emit changeFinished(startIndex, size);
+	mStreamOutput->bufferChanged(startIndex, size);
 }
 
 void ViAudioProcessingChain::attachInput(ViAudioInput *input)

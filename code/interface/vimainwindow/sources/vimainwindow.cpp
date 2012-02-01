@@ -13,6 +13,8 @@ ViMainWindow::ViMainWindow(QWidget *parent)
 	QObject::connect(mUi->playButton, SIGNAL(clicked()), this, SLOT(play()));
 	QObject::connect(mUi->pauseButton, SIGNAL(clicked()), this, SLOT(pause()));
 	QObject::connect(mUi->stopButton, SIGNAL(clicked()), this, SLOT(stop()));
+	QObject::connect(mUi->lineInput, SIGNAL(clicked()), this, SLOT(selectLineInput()));
+	QObject::connect(mUi->fileInput, SIGNAL(clicked()), this, SLOT(selectFileInput()));
 
 	mIsRecording = false;
 	mIsPlaying = false;
@@ -31,9 +33,9 @@ void ViMainWindow::setEngine(ViAudioEngine *engine)
 
 void ViMainWindow::reset()
 {
-	setPausing(false);
-	setPlaying(false);
+	stop();
 	setRecording(false);
+	mEngine->reset();
 }
 
 void ViMainWindow::record()
@@ -79,6 +81,17 @@ void ViMainWindow::stop()
 	mEngine->stopPlayback();
 	setPausing(false);
 	setPlaying(false);
+}
+
+void ViMainWindow::selectLineInput()
+{
+	mUi->recordButton->setEnabled(true);
+}
+
+void ViMainWindow::selectFileInput()
+{
+	mUi->recordButton->setEnabled(false);
+	mEngine->setInputFilePath("/home/visore/Desktop/a.wav");
 }
 
 void ViMainWindow::setRecording(bool active)
