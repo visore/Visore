@@ -12,7 +12,7 @@ class ViBassStreamOutputReceiver : public QObject
 
 	public:
 		ViBassStreamOutputReceiver(ViBassStreamOutput *parent, ViAudioBufferStream *stream, HSTREAM handle);
-		void changeReceived(int startIndex, int size);
+		void changeReceived(int size);
 
 	private:
 		ViBassStreamOutput *mParent;
@@ -32,7 +32,7 @@ class ViBassStreamOutput : public ViStreamOutput
 		void pause();
 		qint64 setPosition(ViAudioTransmission::ViTransmissionType type, qint64 position);
 		qint64 position(ViAudioTransmission::ViTransmissionType type);
-		void bufferChanged(int startIndex, int size);
+		void bufferChanged(int size);
 
 	private:
 		HSTREAM mHandle;

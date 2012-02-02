@@ -27,8 +27,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include	"ffft/OscSinCos.h"
-
+#include	"OscSinCos.h"
+#include	"FFTRealUseTrigo.h"
 
 
 namespace ffft

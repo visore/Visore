@@ -38,11 +38,15 @@ mProcessingChain = new ViAudioProcessingChain();
 //Make sure the file input is created before the stream input
 mFileInput = mAudioConnection->fileInput(mProcessingChain->originalBuffer(), metaData);
 mStreamInput = mAudioConnection->streamInput(mProcessingChain->originalBuffer(), metaData);
+mFileOutput = mAudioConnection->fileOutput(mProcessingChain->correctedBuffer(), metaData);
 mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->correctedBuffer(), metaData, &outputDevice);
 
 mProcessingChain->attachInput(mFileInput);
 mProcessingChain->attachInput(mStreamInput);
+mProcessingChain->attachFileOutput(mFileOutput);
 mProcessingChain->attachStreamOutput(mStreamOutput);
+
+mProcessingChain->attachOriginalProcessor(new ViWaveFormer(), ViProcessorList::Parallel);
 
 //mFileInput->start();
 
@@ -130,6 +134,11 @@ void ViAudioEngine::setInputFilePath(QString filePath)
 {
 	mFileInput->setFilePath(filePath);
 	mFileInput->start();
+}
+
+void ViAudioEngine::setOutputFilePath(QString filePath)
+{
+	mFileOutput->setFilePath(filePath);
 }
 
 void ViAudioEngine::reset()

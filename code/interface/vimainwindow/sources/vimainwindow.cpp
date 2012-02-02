@@ -53,7 +53,8 @@ void ViMainWindow::record()
 
 void ViMainWindow::save()
 {
-
+	mEngine->setOutputFilePath("/home/visore/Desktop/visore.mp3");
+	mEngine->startOutputFile();
 }
 
 void ViMainWindow::play()

@@ -2,7 +2,8 @@
 #define VIFORMATMANAGER_H
 
 #include "viaudioformat.h"
-#include "viessentials.h"
+#include "vilibrary.h"
+#include "vilibrarydetector.h"
 
 class ViFormatManager
 {

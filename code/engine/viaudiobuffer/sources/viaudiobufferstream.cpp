@@ -9,10 +9,10 @@ ViAudioBufferStream::ViAudioBufferStream(ViAudioBuffer *buffer, QIODevice::OpenM
 	mHasHeadStart = false;
 }
 
-int ViAudioBufferStream::write(ViAudioBufferChunk *chunk, int length)
+int ViAudioBufferStream::write(ViAudioBufferChunk *chunk, int length, int id)
 {
 	int written = writeRawData(chunk->data(), length);
-	change();
+	change(id);
 	return written;
 }
 
@@ -39,20 +39,18 @@ int ViAudioBufferStream::bufferHeadStart()
 	return mBufferHeadStart;
 }
 
-void ViAudioBufferStream::change()
+void ViAudioBufferStream::change(int id)
 {
 	if(mHasHeadStart && mBuffer->size() != mOldSize)
 	{
 		int oldSize = mBuffer->size() - mOldSize;
-		emit changed(mOldSize, oldSize);
-		mBuffer->change(mOldSize, oldSize);
+		mBuffer->change(oldSize, id);
 		mOldSize = mBuffer->size();
 	}
 	else if(mBuffer->size() - mOldSize >= mBufferHeadStart)
 	{
 		int oldSize = mBuffer->size() - mOldSize;
-		emit changed(mOldSize, oldSize);
-		mBuffer->change(mOldSize, oldSize);
+		mBuffer->change(oldSize, id);
 		mOldSize = mBuffer->size();
 		mHasHeadStart = true;
 	}

@@ -7,7 +7,7 @@ ViBassStreamOutputReceiver::ViBassStreamOutputReceiver(ViBassStreamOutput *paren
 	mHandle = handle;
 }
 
-void ViBassStreamOutputReceiver::changeReceived(int startIndex, int size)
+void ViBassStreamOutputReceiver::changeReceived(int size)
 {
 	ViAudioBufferChunk chunk;
 	mStream->read(&chunk, size);
@@ -54,9 +54,9 @@ ViBassStreamOutput::~ViBassStreamOutput()
 	}
 }
 
-void ViBassStreamOutput::bufferChanged(int startIndex, int size)
+void ViBassStreamOutput::bufferChanged(int size)
 {
-	mReceiver->changeReceived(startIndex, size);
+	mReceiver->changeReceived(size);
 }
 
 void ViBassStreamOutput::start()

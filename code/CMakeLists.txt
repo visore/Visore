@@ -34,6 +34,7 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/viaudioformats/viaudioformat/headers
 	${ENGINE}/viaudioencoders/viaudioencoder/headers
 	${ENGINE}/viaudiobuffer/headers
+	${ENGINE}/viwaveformer/headers
 )
 
 #Unix version for installing shared libraries and linking them to the executable

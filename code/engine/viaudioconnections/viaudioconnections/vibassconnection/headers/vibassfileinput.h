@@ -3,7 +3,6 @@
 
 #include "vifileinput.h"
 #include "bass.h"
-#include <termios.h>
 #include <math.h>
 #include <QThread>
 
@@ -18,9 +17,6 @@ class ViBassFileInputThread : public QThread
 		void run();
 		void readMetaData();
 		void pause();
-
-	private:
-		int kbHit();
 	
 	private:
 		bool mPaused;

@@ -29,9 +29,9 @@ QByteArray* ViAudioBuffer::data()
 	return mData;
 }
 
-int ViAudioBuffer::write(ViAudioBufferStream *stream, ViAudioBufferChunk *chunk, int length)
+int ViAudioBuffer::write(ViAudioBufferStream *stream, ViAudioBufferChunk *chunk, int length, int id)
 {
-	return stream->write(chunk, length);
+	return stream->write(chunk, length, id);
 }
 
 int ViAudioBuffer::read(ViAudioBufferStream *stream, ViAudioBufferChunk *chunk, int length)
@@ -74,7 +74,7 @@ void ViAudioBuffer::clear()
 	}
 }
 
-void ViAudioBuffer::change(int startIndex, int size)
+void ViAudioBuffer::change(int size, int id)
 {
-	emit changed(startIndex, size);
+	emit changed(size, id);
 }

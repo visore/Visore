@@ -4,6 +4,7 @@
 #include "viobject.h"
 #include "viaudioconnection.h"
 #include "viaudioprocessingchain.h"
+#include "viwaveformer.h"
 #include <QList>
 #include <QCoreApplication>
 
@@ -63,6 +64,7 @@ class ViAudioEngine : public QObject, public ViError
 		ViAudioEngine();
 		~ViAudioEngine();
 		void setInputFilePath(QString filePath);
+		void setOutputFilePath(QString filePath);
 		void reset();
 
 	private:

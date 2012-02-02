@@ -6,8 +6,8 @@ ViAudioProcessingChain::ViAudioProcessingChain::ViAudioProcessingChain()
 	mCorrectedBuffer = new ViAudioBuffer();
 	mOriginalReadStream = mOriginalBuffer->createReadStream();
 	mCorrectedWriteStream = mCorrectedBuffer->createWriteStream();
-	ViObject::connect(mOriginalBuffer, SIGNAL(changed(int, int)), this, SLOT(originalBufferChanged(int, int)));
-	ViObject::connect(mCorrectedBuffer, SIGNAL(changed(int, int)), this, SLOT(correctedBufferChanged(int, int)));
+	ViObject::connectDirect(mOriginalBuffer, SIGNAL(changed(int, int)), this, SLOT(originalBufferChanged(int, int)));
+	ViObject::connectDirect(mCorrectedBuffer, SIGNAL(changed(int, int)), this, SLOT(correctedBufferChanged(int, int)));
 }
 
 ViAudioProcessingChain::~ViAudioProcessingChain()
@@ -36,17 +36,31 @@ ViAudioBuffer* ViAudioProcessingChain::correctedBuffer()
 	return mCorrectedBuffer;
 }
 
-void ViAudioProcessingChain::originalBufferChanged(int startIndex, int size)
+void ViAudioProcessingChain::originalBufferChanged(int size, int id)
 {
-	ViAudioBufferChunk chunk;
-	mOriginalReadStream->read(&chunk, size);
-	mCorrectedWriteStream->write(&chunk, size);
+	++id;
+	bool lastParallel = false;
+	if(id < mOriginalProcessors.size())
+	{
+		QList<ViProcessor*> processors;
+		lastParallel = mOriginalProcessors.processors(id, &processors);
+		for(int i = 0; i < processors.size(); ++i)
+		{
+			processors[i]->update(size);
+		}
+	}
+	if(lastParallel || id >= mOriginalProcessors.size())
+	{
+		ViAudioBufferChunk chunk;
+		mOriginalReadStream->read(&chunk, size);
+		mCorrectedWriteStream->write(&chunk, size);
+	}
 }
 
-void ViAudioProcessingChain::correctedBufferChanged(int startIndex, int size)
+void ViAudioProcessingChain::correctedBufferChanged(int size, int id)
 {
 	//emit changeFinished(startIndex, size);
-	mStreamOutput->bufferChanged(startIndex, size);
+	mStreamOutput->bufferChanged(size);
 }
 
 void ViAudioProcessingChain::attachInput(ViAudioInput *input)
@@ -62,6 +76,18 @@ void ViAudioProcessingChain::attachStreamOutput(ViAudioOutput *output)
 void ViAudioProcessingChain::attachFileOutput(ViAudioOutput *output)
 {
 	mFileOutput = output;
+}
+
+void ViAudioProcessingChain::attachOriginalProcessor(ViProcessor *processor, ViProcessorList::ViProcessorExecution execution)
+{
+	processor->initialize(mOriginalBuffer);
+	mOriginalProcessors.append(processor, execution);
+}
+
+void ViAudioProcessingChain::attachCorrectedProcessor(ViProcessor *processor, ViProcessorList::ViProcessorExecution execution)
+{
+	processor->initialize(mCorrectedBuffer);
+	mCorrectedProcessors.append(processor, execution);
 }
 
 void ViAudioProcessingChain::reset()

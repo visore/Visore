@@ -62,7 +62,7 @@ ViAudioEncoder* ViLameEncoder::instance()
 
 QString ViLameEncoder::string(QString filePath)
 {
-	QString result = mPath;
+	QString result = mPath + " -r ";
 	if(parameter("Constant Bitrate")->value() == "true")
 	{
 		result += " " + parameter("Constant Bitrate")->string() + " " + parameter("Bitrate")->string();
@@ -71,7 +71,7 @@ QString ViLameEncoder::string(QString filePath)
 	{
 		result += " " + parameter("Variable Bitrate")->string() + " " + parameter("Maximum Variable Bitrate")->string() + " " + parameter("Minimum Variable Bitrate")->string();
 	}
-	result += " -r " + parameter("Mode")->string() + " " + parameter("Sample Frequency")->string() + " " + filePath;
+	result += " " + parameter("Mode")->string() + " " + parameter("Sample Frequency")->string() + " - " + filePath;
 	return result;
 }
 

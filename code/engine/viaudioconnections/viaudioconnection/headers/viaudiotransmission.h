@@ -2,6 +2,7 @@
 #define VIAUDIOTRANSMISSION_H
 
 #include "viaudiobuffer.h"
+#include "vierror.h"
 #include "viaudiometadata.h"
 
 class ViAudioTransmission : public QObject, public ViError

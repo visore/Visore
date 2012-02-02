@@ -37,7 +37,7 @@ void ViBassFileInputThread::run()
 	mPaused = false;
 	int bufferSize = mStream->bufferHeadStart();
 	bufferSize = pow(2, ceil(log(bufferSize) / log(2))); //Make sure it is a power of 2
-	while(!kbHit() && BASS_ChannelIsActive(mFileHandle))
+	while(BASS_ChannelIsActive(mFileHandle))
 	{
 		char *array = new char[bufferSize];
 		DWORD result = BASS_ChannelGetData(mFileHandle, array, bufferSize);
@@ -58,24 +58,6 @@ void ViBassFileInputThread::run()
 void ViBassFileInputThread::pause()
 {
 	mPaused = true;
-}
-
-int ViBassFileInputThread::kbHit()
-{
-	int result;
-	fd_set rfds;
-	struct timeval tv;
-	struct termios term, oterm;
-	tcgetattr(0, &oterm);
-	memcpy(&term, &oterm, sizeof(term));
-	cfmakeraw(&term);
-	tcsetattr(0, TCSANOW, &term);
-	FD_ZERO(&rfds);
-	FD_SET(0, &rfds);
-	tv.tv_sec = tv.tv_usec = 0;
-	result = select(1, &rfds, NULL, NULL, &tv);
-	tcsetattr(0, TCSANOW, &oterm);
-	return result;
 }
 
 void ViBassFileInputThread::readMetaData()
