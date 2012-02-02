@@ -20,11 +20,36 @@ void ViBassStreamOutputReceiver::changeReceived(int size)
 ViBassStreamOutput::ViBassStreamOutput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, ViAudioDevice *device)
 	: ViStreamOutput(buffer, metaData, device)
 {
+	mHandle = 0;
+	mReceiver = NULL;
+}
+
+ViBassStreamOutput::~ViBassStreamOutput()
+{
+	free();
+}
+
+void ViBassStreamOutput::initialize()
+{
+	free();
 	/*if(!BASS_SetDevice(3))
 	{
 		setErrorParameters("ViBassStreamOutput - Device Error", "Cannot stream to the selected output device", ViErrorInfo::Fatal);
 	}*/
-	mHandle = BASS_StreamCreate(mMetaData->frequency(), mMetaData->channels(), 0, STREAMPROC_PUSH, 0);
+	DWORD flags = 0;
+	if(mMetaData->bitDepth() == 8)
+	{
+		flags = BASS_SAMPLE_8BITS;
+	}
+	else if(mMetaData->bitDepth() == 32)
+	{
+		flags = BASS_SAMPLE_FLOAT;
+	}
+	else if(mMetaData->bitDepth() != 16)
+	{
+		setErrorParameters("ViBassStreamOutput - Bit Depth", "A bit depth of " + QString::number(mMetaData->bitDepth()) + " is not supported", ViErrorInfo::Fatal);
+	}
+	mHandle = BASS_StreamCreate(mMetaData->frequency(), mMetaData->channels(), flags, STREAMPROC_PUSH, 0);
 	if(mHandle == 0)
 	{
 		mSecondsInByte = -1;
@@ -41,16 +66,16 @@ ViBassStreamOutput::ViBassStreamOutput(ViAudioBuffer *buffer, ViAudioMetaData *m
 	mReceiver = new ViBassStreamOutputReceiver(this, mStream, mHandle);
 }
 
-ViBassStreamOutput::~ViBassStreamOutput()
+void ViBassStreamOutput::free()
 {
-	if(!BASS_StreamFree(mHandle))
-	{
-		setErrorParameters("ViBassStreamOutput - Memory Release Error", "The supporting Bass handle could not be released", ViErrorInfo::Fatal);
-	}
 	if(mReceiver != NULL)
 	{
 		delete mReceiver;
 		mReceiver = NULL;
+	}
+	if(!BASS_StreamFree(mHandle) && mHandle != 0)
+	{
+		setErrorParameters("ViBassStreamOutput - Memory Release Error", "The supporting Bass handle could not be released", ViErrorInfo::Fatal);
 	}
 }
 

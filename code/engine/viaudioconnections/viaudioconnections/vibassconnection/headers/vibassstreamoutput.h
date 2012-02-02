@@ -30,9 +30,13 @@ class ViBassStreamOutput : public ViStreamOutput
 		void start();
 		void stop();
 		void pause();
+		void initialize();
 		qint64 setPosition(ViAudioTransmission::ViTransmissionType type, qint64 position);
 		qint64 position(ViAudioTransmission::ViTransmissionType type);
 		void bufferChanged(int size);
+
+	protected:
+		void free();
 
 	private:
 		HSTREAM mHandle;

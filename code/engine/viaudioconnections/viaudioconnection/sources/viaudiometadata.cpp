@@ -30,6 +30,11 @@ void ViAudioMetaData::setSeconds(qint64 seconds)
 	mMilliseconds = seconds * 1000;
 }
 
+void ViAudioMetaData::setBitDepth(int depth)
+{
+	mBitDepth = depth;
+}
+
 ViAudioFormat* ViAudioMetaData::format()
 {
 	return mFormat;
@@ -58,4 +63,9 @@ qint64 ViAudioMetaData::milliseconds()
 qint64 ViAudioMetaData::seconds()
 {
 	return mMilliseconds / 1000;
+}
+
+int ViAudioMetaData::bitDepth()
+{
+	return mBitDepth;
 }

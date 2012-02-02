@@ -9,6 +9,14 @@ ViBassFileOutput::~ViBassFileOutput()
 {
 }
 
+void ViBassFileOutput::initialize()
+{
+}
+
+void ViBassFileOutput::free()
+{
+}
+
 void ViBassFileOutput::start()
 {
 	if(mStatus == ViAudioTransmission::Running)

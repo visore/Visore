@@ -15,6 +15,10 @@ class ViFileInput : public ViAudioInput
 		virtual void start() = 0;
 		virtual void stop() = 0;
 		virtual void pause() = 0;
+		virtual void initialize() = 0;
+
+	protected:
+		virtual void free() = 0;
 
 	protected:
 		QString mFilePath;

@@ -20,11 +20,8 @@ mAudioConnection = new ViBassConnection();
 
 
 
-ViAudioMetaData *metaData = new ViAudioMetaData();
-metaData->setFormat(ViFormatManager::format("MP3"));
-metaData->setFrequency(44100);
-metaData->setChannels(2);
-
+mMetaData = new ViAudioMetaData();
+resetMetaData();
 //mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wav");
 
 
@@ -36,17 +33,19 @@ outputDevice.setId(-1);
 mProcessingChain = new ViAudioProcessingChain();
 
 //Make sure the file input is created before the stream input
-mFileInput = mAudioConnection->fileInput(mProcessingChain->originalBuffer(), metaData);
-mStreamInput = mAudioConnection->streamInput(mProcessingChain->originalBuffer(), metaData);
-mFileOutput = mAudioConnection->fileOutput(mProcessingChain->correctedBuffer(), metaData);
-mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->correctedBuffer(), metaData, &outputDevice);
+mFileInput = mAudioConnection->fileInput(mProcessingChain->originalBuffer(), mMetaData);
+mStreamInput = mAudioConnection->streamInput(mProcessingChain->originalBuffer(), mMetaData);
+mFileOutput = mAudioConnection->fileOutput(mProcessingChain->correctedBuffer(), mMetaData);
+mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->correctedBuffer(), mMetaData, &outputDevice);
 
-mProcessingChain->attachInput(mFileInput);
-mProcessingChain->attachInput(mStreamInput);
+//mProcessingChain->attachInput(mFileInput);
+//mProcessingChain->attachInput(mStreamInput);
 mProcessingChain->attachFileOutput(mFileOutput);
 mProcessingChain->attachStreamOutput(mStreamOutput);
 
-mProcessingChain->attachOriginalProcessor(new ViWaveFormer(), ViProcessorList::Parallel);
+ViWaveFormer *wave = new ViWaveFormer();
+ViObject::connectDirect(wave, SIGNAL(completed(QList<double>)), this, SLOT(t(QList<double>)));
+mProcessingChain->attachOriginalProcessor(wave, ViProcessorList::Parallel);
 
 //mFileInput->start();
 
@@ -132,7 +131,14 @@ void ViAudioEngine::initializeOutputFile()
 
 void ViAudioEngine::setInputFilePath(QString filePath)
 {
+	resetMetaData();
 	mFileInput->setFilePath(filePath);
+	mProcessingChain->attachInput(mFileInput);
+
+	//Required to ensure that the write metadata (aka bit depth is passed to Bass)
+	mFileOutput->initialize();
+	mStreamOutput->initialize();
+
 	mFileInput->start();
 }
 
@@ -164,6 +170,13 @@ void ViAudioEngine::pausePlayback()
 void ViAudioEngine::startRecording()
 {
 	mProcessingChain->reset();
+	resetMetaData();
+	mProcessingChain->attachInput(mStreamInput);
+
+	//Required to ensure that the write metadata (aka bit depth is passed to Bass)
+	mFileOutput->initialize();
+	mStreamOutput->initialize();
+
 	mStreamInput->start();
 }
 
@@ -185,4 +198,12 @@ void ViAudioEngine::startOutputFile()
 void ViAudioEngine::stopOutputFile()
 {
 	mFileOutput->stop();
+}
+
+void ViAudioEngine::resetMetaData()
+{
+	mMetaData->setFormat(ViFormatManager::format("MP3"));
+	mMetaData->setFrequency(44100);
+	mMetaData->setChannels(2);
+	mMetaData->setBitDepth(16);
 }

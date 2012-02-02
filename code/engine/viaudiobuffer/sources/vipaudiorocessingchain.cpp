@@ -66,16 +66,19 @@ void ViAudioProcessingChain::correctedBufferChanged(int size, int id)
 void ViAudioProcessingChain::attachInput(ViAudioInput *input)
 {
 	mInput = input;
+	mInput->initialize();
 }
 
 void ViAudioProcessingChain::attachStreamOutput(ViAudioOutput *output)
 {
 	mStreamOutput = output;
+	mStreamOutput->initialize();
 }
 
 void ViAudioProcessingChain::attachFileOutput(ViAudioOutput *output)
 {
 	mFileOutput = output;
+	mFileOutput->initialize();
 }
 
 void ViAudioProcessingChain::attachOriginalProcessor(ViProcessor *processor, ViProcessorList::ViProcessorExecution execution)

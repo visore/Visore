@@ -14,24 +14,49 @@ BOOL CALLBACK recordingCallback(HRECORD handle, const void *buffer, DWORD length
 ViBassStreamInput::ViBassStreamInput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, ViAudioDevice *device)
 	: ViStreamInput(buffer, metaData, device)
 {
+	mRecordHandle = 0;
+}
+
+ViBassStreamInput::~ViBassStreamInput()
+{
+	free();
+}
+
+void ViBassStreamInput::initialize()
+{
+	free();
 	if(!BASS_RecordInit(-1))
 	{
 		setErrorParameters("ViBassStreamInput - Initializing Error", "Could not initialize the Bass recording device", ViErrorInfo::Fatal);
 	}
 	globalStream = mStream;
-	mRecordHandle = BASS_RecordStart(mMetaData->frequency(), mMetaData->channels(), BASS_RECORD_PAUSE, &recordingCallback, 0);
+	DWORD flags = 0;
+	if(mMetaData->bitDepth() == 8)
+	{
+		flags = BASS_RECORD_PAUSE|BASS_SAMPLE_8BITS;
+	}
+	else if(mMetaData->bitDepth() == 16)
+	{
+		flags = BASS_RECORD_PAUSE;
+	}
+	else if(mMetaData->bitDepth() == 32)
+	{
+		flags = BASS_RECORD_PAUSE|BASS_SAMPLE_FLOAT;
+	}
+	else
+	{
+		setErrorParameters("ViBassStreamInput - Bit Depth", "A bit depth of " + QString::number(mMetaData->bitDepth()) + " is not supported", ViErrorInfo::Fatal);
+	}
+	mRecordHandle = BASS_RecordStart(mMetaData->frequency(), mMetaData->channels(), flags, &recordingCallback, 0);
 }
 
-ViBassStreamInput::~ViBassStreamInput()
+void ViBassStreamInput::free()
 {
-	if(!BASS_StreamFree(mRecordHandle))
+	if(!BASS_StreamFree(mRecordHandle) && mRecordHandle != 0)
 	{
 		setErrorParameters("ViBassStreamInput - Memory Release Error", "The supporting Bass handle could not be released", ViErrorInfo::Fatal);
 	}
-	if(!BASS_RecordFree())
-	{
-		setErrorParameters("ViBassStreamInput - Recording Memory Release Error", "The supporting Bass recording device could not be released", ViErrorInfo::Fatal);
-	}
+	BASS_RecordFree();
 }
 
 void ViBassStreamInput::start()

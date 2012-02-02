@@ -23,7 +23,6 @@ class ViBassFileInputThread : public QThread
 		ViBassFileInput *mParent;
 		ViAudioBufferStream *mStream;
 		QString mFilePath;
-		bool mMetaDataRead;
 		ViAudioMetaData *mMetaData;
 		HSTREAM mFileHandle;
 };
@@ -38,6 +37,10 @@ class ViBassFileInput : public ViFileInput
 		void start();
 		void stop();
 		void pause();
+		void initialize();
+
+	protected:
+		void free();
 
 	private:
 		ViBassFileInputThread *mThread;

@@ -11,11 +11,12 @@ class ViProcessorThread : public QThread
 	Q_OBJECT
 
 	public:
-		ViProcessorThread(ViAudioBuffer *buffer);
-		virtual void update(int size) = 0;
+		ViProcessorThread(ViAudioBuffer *buffer, QList<int> *sizes);
+		virtual void run() = 0;
 		
 	protected:
 		ViAudioBuffer *mBuffer;
+		QList<int> *mSizes;
 		ViAudioBufferStream *mReadStream;
 		ViAudioBufferStream *mWriteStream;
 };
@@ -34,6 +35,7 @@ class ViProcessor : public QObject
 	protected:
 		ViProcessorThread *mThread;
 		int mId;
+		QList<int> mSizes;
 };
 
 #endif

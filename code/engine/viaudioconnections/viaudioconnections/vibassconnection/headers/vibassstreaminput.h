@@ -17,6 +17,10 @@ class ViBassStreamInput : public ViStreamInput
 		void start();
 		void stop();
 		void pause();
+		void initialize();
+
+	protected:
+		void free();
 
 	private:
 		HRECORD mRecordHandle;

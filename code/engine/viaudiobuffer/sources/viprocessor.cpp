@@ -1,9 +1,10 @@
 #include "viprocessor.h"
 
-ViProcessorThread::ViProcessorThread(ViAudioBuffer *buffer)
+ViProcessorThread::ViProcessorThread(ViAudioBuffer *buffer, QList<int> *sizes)
 	: QThread()
 {
 	mBuffer = buffer;
+	mSizes = sizes;
 	mReadStream = mBuffer->createReadStream();
 	mWriteStream = mBuffer->createWriteStream();
 }
@@ -32,5 +33,9 @@ int ViProcessor::id()
 
 void ViProcessor::update(int size)
 {
-	mThread->update(size);
+	mSizes.append(size);
+	if(!mThread->isRunning())
+	{
+		mThread->start();
+	}
 }

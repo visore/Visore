@@ -16,6 +16,10 @@ class ViBassFileOutput : public ViFileOutput
 		void start();
 		void stop();
 		void pause();
+		void initialize();
+
+	protected:
+		void free();
 
 	private:
 		QProcess mProcess;

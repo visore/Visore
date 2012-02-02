@@ -3,6 +3,7 @@
 
 #include "viprocessor.h"
 #include "viobject.h"
+#include "vipcmconverter.h"
 #include <QList>
 
 class ViWaveFormerThread : public ViProcessorThread
@@ -10,11 +11,11 @@ class ViWaveFormerThread : public ViProcessorThread
 	Q_OBJECT
 
 	signals:
-		void completed(QList<int> values);
+		void completed(QList<double> values);
 
 	public:
-		ViWaveFormerThread(ViAudioBuffer *buffer);
-		void update(int size);
+		ViWaveFormerThread(ViAudioBuffer *buffer, QList<int> *sizes);
+		void run();
 };
 
 class ViWaveFormer : public ViProcessor
@@ -22,7 +23,7 @@ class ViWaveFormer : public ViProcessor
 	Q_OBJECT
 
 	signals:
-		void completed(QList<int> values);
+		void completed(QList<double> values);
 
 	public:
 		ViWaveFormer();

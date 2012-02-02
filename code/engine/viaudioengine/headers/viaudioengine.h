@@ -59,6 +59,10 @@ class ViAudioEngine : public QObject, public ViError
 		void setStreamPosition(qint64 position);
 		void startOutputFile();
 		void stopOutputFile();
+void t(QList<double> p)
+{
+
+}
 
 	public:
 		ViAudioEngine();
@@ -72,6 +76,7 @@ class ViAudioEngine : public QObject, public ViError
 		void initializeInputFile(QString filePath);
 		void initializeOutputStream();
 		void initializeOutputFile();*/
+		void resetMetaData();
 
 	private:
 		ViAudioConnection *mAudioConnection;
@@ -81,6 +86,7 @@ class ViAudioEngine : public QObject, public ViError
 		ViStreamOutput *mStreamOutput;
 		ViFileOutput *mFileOutput;
 		ViAudioProcessingChain *mProcessingChain;
+		ViAudioMetaData *mMetaData;
 };
 
 #endif
