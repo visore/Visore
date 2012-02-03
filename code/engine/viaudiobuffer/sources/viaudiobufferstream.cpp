@@ -1,5 +1,8 @@
 #include "viaudiobufferstream.h"
 
+#include <iostream>
+using namespace std;
+
 ViAudioBufferStream::ViAudioBufferStream(ViAudioBuffer *buffer, QIODevice::OpenMode mode, int bufferHeadStart)
 	: QDataStream(buffer->data(), mode)
 {
@@ -20,7 +23,7 @@ int ViAudioBufferStream::read(ViAudioBufferChunk *chunk, int length)
 {
 	char *data = new char[length];
 	int read = readRawData(data, length);
-	chunk->setData(data);
+	chunk->setData(data);	
 	return read;
 }
 

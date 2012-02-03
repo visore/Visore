@@ -28,7 +28,11 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_BINARY_DIR}
 	${QTMOBILITY_INCLUDE_DIRS}
 	${ESSENTIALS}/headers
+
 	${INTERFACE}/vimainwindow/headers
+	${INTERFACE}/viwidgets/viwidget/headers
+	${INTERFACE}/viwidgets/viwidgets/viwaveformwidget/headers
+
 	${ENGINE}/viaudioengine/headers
 	${ENGINE}/viaudioconnections/viaudioconnection/headers
 	${ENGINE}/viaudioformats/viaudioformat/headers

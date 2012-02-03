@@ -5,6 +5,7 @@
 #include <QThread>
 #include "viaudiobuffer.h"
 #include "viprocessormanager.h"
+#include "viaudiometadata.h"
 
 class ViProcessorThread : public QThread
 {

@@ -59,10 +59,9 @@ class ViAudioEngine : public QObject, public ViError
 		void setStreamPosition(qint64 position);
 		void startOutputFile();
 		void stopOutputFile();
-void t(QList<double> p)
-{
 
-}
+	signals:
+		void waveFormChanged(QList<double>);
 
 	public:
 		ViAudioEngine();

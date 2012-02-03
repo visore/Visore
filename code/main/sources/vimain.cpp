@@ -7,8 +7,7 @@ int main(int argc, char *argv[])
 	QApplication application(argc, argv);
 
 	ViAudioEngine engine;
-	ViMainWindow window;
-	window.setEngine(&engine);
+	ViMainWindow window(&engine);
 	window.show();
 
 	return application.exec();

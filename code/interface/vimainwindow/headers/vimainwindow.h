@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QBoxLayout>
 #include "viaudioengine.h"
+#include "viwaveformwidget.h"
 
 namespace Ui
 {
@@ -26,9 +27,8 @@ class ViMainWindow : public QMainWindow
 		void selectFileInput();
 
 	public:
-		ViMainWindow(QWidget *parent = 0);
+		ViMainWindow(ViAudioEngine *engine, QWidget *parent = 0);
 		~ViMainWindow();
-		void setEngine(ViAudioEngine *engine);
 
 	private:
 		void setRecording(bool active);
@@ -40,6 +40,7 @@ class ViMainWindow : public QMainWindow
 
 	private:
 		ViAudioEngine *mEngine;
+		ViWaveFormWidget *mWaveFormWidget;
 		bool mIsRecording;
 		bool mIsPlaying;
 		bool mIsPaused;

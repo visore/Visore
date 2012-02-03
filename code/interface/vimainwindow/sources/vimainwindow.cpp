@@ -1,11 +1,16 @@
 #include "vimainwindow.h"
 #include "ui_vimainwindow.h"
 
-ViMainWindow::ViMainWindow(QWidget *parent)
+ViMainWindow::ViMainWindow(ViAudioEngine *engine, QWidget *parent)
 	: QMainWindow(parent)
 {
+	mEngine = engine;
+
 	mUi = new Ui::ViMainWindow();
 	mUi->setupUi(this);
+
+	//mWaveFormWidget = new ViWaveFormWidget(mEngine/*, mUi->waveFormContainer*/);
+	//mUi->waveFormContainer->layout()->addWidget(mWaveFormWidget);
 
 	QObject::connect(mUi->resetButton, SIGNAL(clicked()), this, SLOT(reset()));
 	QObject::connect(mUi->recordButton, SIGNAL(clicked()), this, SLOT(record()));
@@ -24,11 +29,7 @@ ViMainWindow::ViMainWindow(QWidget *parent)
 ViMainWindow::~ViMainWindow()
 {
 	delete mUi;
-}
-
-void ViMainWindow::setEngine(ViAudioEngine *engine)
-{
-	mEngine = engine;
+	delete mWaveFormWidget;
 }
 
 void ViMainWindow::reset()
@@ -136,19 +137,3 @@ void ViMainWindow::setPausing(bool active)
 		mUi->pauseButton->setIcon(QIcon(":/vimainwindow/icons/pausenormal.png"));
 	}
 }
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-QMainWindow* createObject(ViAudioEngine *engine)
-{
-	ViMainWindow *window = new ViMainWindow();
-	window->setEngine(engine);
-	return window;
-}
-
-#ifdef __cplusplus
-}
-#endif

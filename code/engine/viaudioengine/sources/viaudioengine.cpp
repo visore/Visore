@@ -43,8 +43,8 @@ mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->correctedBuffer
 mProcessingChain->attachFileOutput(mFileOutput);
 mProcessingChain->attachStreamOutput(mStreamOutput);
 
-ViWaveFormer *wave = new ViWaveFormer();
-ViObject::connectDirect(wave, SIGNAL(completed(QList<double>)), this, SLOT(t(QList<double>)));
+ViWaveFormer *wave = new ViWaveFormer(mMetaData);
+ViObject::connectDirect(wave, SIGNAL(completed(QList<double>)), this, SIGNAL(waveFormChanged(QList<double>)));
 mProcessingChain->attachOriginalProcessor(wave, ViProcessorList::Parallel);
 
 //mFileInput->start();
