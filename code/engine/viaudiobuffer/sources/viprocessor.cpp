@@ -36,6 +36,6 @@ void ViProcessor::update(int size)
 	mSizes.append(size);
 	if(!mThread->isRunning())
 	{
-		mThread->start();
+		mThread->run();
 	}
 }

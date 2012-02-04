@@ -4,6 +4,7 @@
 #include <QDataStream>
 #include "viaudiobufferchunk.h"
 #include "viaudiobuffer.h"
+#include "viaudiobuffermutex.h"
 
 class ViAudioBuffer;
 
@@ -25,6 +26,8 @@ class ViAudioBufferStream : public QObject, public QDataStream
 		qint64 position();
 
 	private:
+		ViAudioBufferMutex *mReadMutex;
+		ViAudioBufferMutex *mWriteMutex;
 		ViAudioBuffer *mBuffer;
 		qint64 mOldSize;
 		int mBufferHeadStart;

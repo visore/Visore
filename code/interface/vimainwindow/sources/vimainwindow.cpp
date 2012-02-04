@@ -29,7 +29,7 @@ ViMainWindow::ViMainWindow(ViAudioEngine *engine, QWidget *parent)
 ViMainWindow::~ViMainWindow()
 {
 	delete mUi;
-	delete mWaveFormWidget;
+	//delete mWaveFormWidget;
 }
 
 void ViMainWindow::reset()

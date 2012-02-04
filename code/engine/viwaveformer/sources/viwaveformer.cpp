@@ -27,15 +27,15 @@ void ViWaveFormerThread::run()
 		ViAudioBufferChunk chunk;
 		mReadStream->read(&chunk, size);
 
-		char *base = chunk.data();
+		/*char *base = chunk.data();
 		QList<double> result;
 
 		for(int i = 0; i < size; ++i)
 		{
-			result.append((this->*pcmToReal)(base[i]));
+			//result.append((this->*pcmToReal)(base[i]));
 		}
 
-		emit completed(result);
+		emit completed(result);*/
 	}
 }
 

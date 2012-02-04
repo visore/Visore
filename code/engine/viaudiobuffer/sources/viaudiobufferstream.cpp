@@ -10,11 +10,15 @@ ViAudioBufferStream::ViAudioBufferStream(ViAudioBuffer *buffer, QIODevice::OpenM
 	mOldSize = 0;
 	mBufferHeadStart = bufferHeadStart;
 	mHasHeadStart = false;
+	mReadMutex = ViAudioBufferMutex::readInstance();
+	mWriteMutex = ViAudioBufferMutex::writeInstance();
 }
 
 int ViAudioBufferStream::write(ViAudioBufferChunk *chunk, int length, int id)
 {
+	mWriteMutex->lock();
 	int written = writeRawData(chunk->data(), length);
+	mWriteMutex->unlock();
 	change(id);
 	return written;
 }
@@ -22,7 +26,9 @@ int ViAudioBufferStream::write(ViAudioBufferChunk *chunk, int length, int id)
 int ViAudioBufferStream::read(ViAudioBufferChunk *chunk, int length)
 {
 	char *data = new char[length];
+	mReadMutex->lock();
 	int read = readRawData(data, length);
+	mReadMutex->unlock();
 	chunk->setData(data);	
 	return read;
 }
