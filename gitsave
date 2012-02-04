@@ -23,7 +23,7 @@ else
 	counter=0
 	getFiles .
 	for (( i=0; i<${#array[@]}; i++ )); do
-		git add ${array[$i]}
+		git add -u ${array[$i]}
 	done
 	git commit -m "$1"
 	git push -u origin master
