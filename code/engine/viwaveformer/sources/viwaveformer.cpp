@@ -1,5 +1,8 @@
 #include "viwaveformer.h"
 
+#include <iostream>
+using namespace std;
+
 ViWaveFormerThread::ViWaveFormerThread(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QList<int> *sizes)
 	: ViProcessorThread(buffer, sizes)
 {
@@ -25,33 +28,46 @@ void ViWaveFormerThread::run()
 		int size = mSizes->first();
 		mSizes->removeFirst();
 		ViAudioBufferChunk chunk;
-		mReadStream->read(&chunk, size);
-
-		/*char *base = chunk.data();
-		QList<double> result;
-
-		for(int i = 0; i < size; ++i)
-		{
-			//result.append((this->*pcmToReal)(base[i]));
-		}
-
-		emit completed(result);*/
+		size = mReadStream->read(&chunk, size);
+		qint16 *base = reinterpret_cast<qint16*>(chunk.data());
+		QList<double> result = (this->*pcmToReal)(chunk.data(), size);
+		emit completed(result);
 	}
 }
 
-double ViWaveFormerThread::pcmToReal8(char character)
+QList<double> ViWaveFormerThread::pcmToReal8(char* buffer, int size)
 {
-	return ViPcmConverter::pcmToReal8((qint8) character);
+	qint8 *base = reinterpret_cast<qint8*>(buffer);
+	QList<double> result;
+	for(int i = 0; i < size; ++i)
+	{
+		result.append(ViPcmConverter::pcmToReal8(base[i]));
+	}
+	return result;
 }
 
-double ViWaveFormerThread::pcmToReal16(char character)
+QList<double> ViWaveFormerThread::pcmToReal16(char* buffer, int size)
 {
-	return ViPcmConverter::pcmToReal16((qint16) character);
+	size /= 2; //char is only 8bit
+	qint16 *base = reinterpret_cast<qint16*>(buffer);
+	QList<double> result;
+	for(int i = 0; i < size; ++i)
+	{
+		result.append(ViPcmConverter::pcmToReal16(base[i]));
+	}
+	return result;
 }
 
-double ViWaveFormerThread::pcmToReal32(char character)
+QList<double> ViWaveFormerThread::pcmToReal32(char* buffer, int size)
 {
-	return ViPcmConverter::pcmToReal32((qint32) character);
+	size /= 4; //char is only 8bit
+	qint32 *base = reinterpret_cast<qint32*>(buffer);
+	QList<double> result;
+	for(int i = 0; i < size; ++i)
+	{
+		result.append(ViPcmConverter::pcmToReal32(base[i]));
+	}
+	return result;
 }
 
 ViWaveFormer::ViWaveFormer(ViAudioMetaData *metaData)
@@ -71,5 +87,5 @@ ViWaveFormer::~ViWaveFormer()
 void ViWaveFormer::initialize(ViAudioBuffer *buffer)
 {
 	mThread = new ViWaveFormerThread(buffer, mMetaData, &mSizes);
-	ViObject::connect(mThread, SIGNAL(completed(QList<double>)), this, SIGNAL(completed(QList<double>)));
+	ViObject::connectDirect(mThread, SIGNAL(completed(QList<double>)), this, SIGNAL(completed(QList<double>)));
 }

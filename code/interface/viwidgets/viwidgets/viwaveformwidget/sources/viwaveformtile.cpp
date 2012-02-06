@@ -3,38 +3,43 @@
 #include <iostream>
 using namespace std;
 
-ViWaveFormTile::ViWaveFormTile(QList<double> values)
+ViWaveFormTile::ViWaveFormTile()
 {
-	mValues = values;
 	mTile = NULL;
+	mPainter = NULL;
 }
 
 ViWaveFormTile::~ViWaveFormTile()
-{
-	free();
-}
-
-void ViWaveFormTile::free()
 {
 	if(mTile != NULL)
 	{
 		delete mTile;
 		mTile = NULL;
 	}
+	if(mPainter != NULL)
+	{
+		delete mPainter;
+		mPainter = NULL;
+	}
 }
 
-void ViWaveFormTile::draw(int height)
+void ViWaveFormTile::draw(QList<double> values, int height)
 {
-	free();
-	mTile = new QImage(mValues.size(), height, QImage::Format_RGB32);
-	QPainter painter(mTile);
-	painter.fillRect(mTile->rect(), Qt::black);
+	mTile = new QImage(values.size(), height, QImage::Format_RGB32);
+	mPainter = new QPainter(mTile);
+	mPainter->fillRect(mTile->rect(), Qt::black);
 	QPen pen(Qt::white);
-    painter.setPen(pen);
+    mPainter->setPen(pen);
 	int halfHeight = height / 2;
-	for(int i = 0; i < mValues.size(); ++i)
+	mPreviousX = 0;
+	mPreviousY = 0;
+	for(int i = 0; i < values.size(); ++i)
 	{
-		painter.drawLine(i, halfHeight, i, halfHeight - (halfHeight * mValues[i]));
+		int x = i;
+		int y = halfHeight - (halfHeight * values[i]);
+		mPainter->drawLine(mPreviousX, mPreviousY, x, y);
+		mPreviousX = x;
+		mPreviousY = y;
 	}
 }
 

@@ -1,8 +1,11 @@
 #ifndef VIBASSSTREAMOUTPUT_H
 #define VIBASSSTREAMOUTPUT_H
 
+#define POSITION_CHECK_INTERVAL 100 //Check the position every n milliseconds
+
 #include "vistreamoutput.h"
 #include "bass.h"
+#include <QTimer>
 
 class ViBassStreamOutput;
 
@@ -24,6 +27,9 @@ class ViBassStreamOutput : public ViStreamOutput
 {
 	Q_OBJECT
 
+	private slots:
+		void checkPosition();
+
 	public:
 		ViBassStreamOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, ViAudioDevice *device = NULL);
 		~ViBassStreamOutput();
@@ -42,6 +48,8 @@ class ViBassStreamOutput : public ViStreamOutput
 		HSTREAM mHandle;
 		ViBassStreamOutputReceiver *mReceiver;
 		double mSecondsInByte;
+		QTimer *mTimer;
+		qint64 mOldPosition;
 };
 
 #endif

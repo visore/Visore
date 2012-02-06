@@ -9,9 +9,9 @@ ViMainWindow::ViMainWindow(ViAudioEngine *engine, QWidget *parent)
 	mUi = new Ui::ViMainWindow();
 	mUi->setupUi(this);
 
-	//mWaveFormWidget = new ViWaveFormWidget(mEngine/*, mUi->waveFormContainer*/);
-	//mUi->waveFormContainer->layout()->addWidget(mWaveFormWidget);
-
+	mWaveFormWidget = new ViWaveFormWidget(mEngine/*, mUi->waveFormContainer*/);
+	mUi->waveFormContainer->layout()->addWidget(mWaveFormWidget);
+selectFileInput();
 	QObject::connect(mUi->resetButton, SIGNAL(clicked()), this, SLOT(reset()));
 	QObject::connect(mUi->recordButton, SIGNAL(clicked()), this, SLOT(record()));
 	QObject::connect(mUi->saveButton, SIGNAL(clicked()), this, SLOT(save()));
@@ -29,7 +29,7 @@ ViMainWindow::ViMainWindow(ViAudioEngine *engine, QWidget *parent)
 ViMainWindow::~ViMainWindow()
 {
 	delete mUi;
-	//delete mWaveFormWidget;
+	delete mWaveFormWidget;
 }
 
 void ViMainWindow::reset()
@@ -93,7 +93,7 @@ void ViMainWindow::selectLineInput()
 void ViMainWindow::selectFileInput()
 {
 	mUi->recordButton->setEnabled(false);
-	mEngine->setInputFilePath("/home/visore/Desktop/a.wav");
+	mEngine->setInputFilePath("/home/visore/Desktop/testbit.wav");
 }
 
 void ViMainWindow::setRecording(bool active)

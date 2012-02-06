@@ -8,17 +8,16 @@
 class ViWaveFormTile
 {
 	public:
-		ViWaveFormTile(QList<double> values);
+		ViWaveFormTile();
 		~ViWaveFormTile();
-		void draw(int height);
+		void draw(QList<double> values, int height);
 		QImage* tile();
-
-	private:
-		void free();
 		
 	private:
 		QImage *mTile;
-		QList<double> mValues;
+		QPainter *mPainter;
+		int mPreviousX;
+		int mPreviousY;
 };
 
 #endif

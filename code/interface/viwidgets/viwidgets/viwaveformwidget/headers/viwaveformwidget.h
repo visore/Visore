@@ -19,6 +19,7 @@ class ViWaveFormWidgetThread : public QThread
 
 	private slots:
 		void changed(QList<double> list);
+		void positionChanged(qint64 bytes, qint64 milliseconds);
 
 	public:
 		ViWaveFormWidgetThread(ViWaveFormWidget *widget);
@@ -29,25 +30,32 @@ class ViWaveFormWidgetThread : public QThread
 		ViWaveFormWidget *mWidget;
 		QList<ViWaveFormTile*> mTiles;
 		QList<QList<double> > mLists;
+		qint64 mPosition;
 };
 
 class ViWaveFormWidget : public ViWidget
 {
 	Q_OBJECT
 
-	private slots:
-		void receiveTile();
-
 	public:
+		enum ViWaveForm
+		{
+			Combined = 0,
+			Seperated = 1
+		};
 		ViWaveFormWidget(ViAudioEngine *engine, QWidget *parent = 0);
 		~ViWaveFormWidget();
+		ViWaveFormWidget::ViWaveForm waveForm();
+		void setWaveForm(ViWaveFormWidget::ViWaveForm form);
 
 	protected:
 		void paintEvent(QPaintEvent *event);
 
 	private:
 		ViWaveFormWidgetThread *mThread;
-		
+		ViWaveFormWidget::ViWaveForm mWaveForm;
+		int mCurrentX;
+		QPainter *mPainter;
 };
 
 #endif

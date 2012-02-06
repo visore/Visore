@@ -9,6 +9,7 @@ class ViObject
 		static void connect(const QObject *sender, const char *signal, const QObject *receiver, const char *method);
 		static void disconnect(const QObject *sender, const char *signal, const QObject *receiver, const char *method);
 		static void connectDirect(const QObject *sender, const char *signal, const QObject *receiver, const char *method);
+		static void connectQueued(const QObject *sender, const char *signal, const QObject *receiver, const char *method);
 };
 
 #endif

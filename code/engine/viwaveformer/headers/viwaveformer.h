@@ -1,6 +1,8 @@
 #ifndef VIWAVEFORMER_H
 #define VIWAVEFORMER_H
 
+#define COMPRESSION_LEVEL 200 //Combine every n milliseonds
+
 #include "viprocessor.h"
 #include "viobject.h"
 #include "vipcmconverter.h"
@@ -18,13 +20,13 @@ class ViWaveFormerThread : public ViProcessorThread
 		void run();
 
 	private:
-		double pcmToReal8(char character);
-		double pcmToReal16(char character);
-		double pcmToReal32(char character);
+		QList<double> pcmToReal8(char* buffer, int size);
+		QList<double> pcmToReal16(char* buffer, int size);
+		QList<double> pcmToReal32(char* buffer, int size);
 
 	private:
 		ViAudioMetaData *mMetaData;
-		double (ViWaveFormerThread::*pcmToReal)(char); //Function pointer
+		QList<double> (ViWaveFormerThread::*pcmToReal)(char*, int); //Function pointer
 };
 
 class ViWaveFormer : public ViProcessor

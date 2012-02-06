@@ -22,6 +22,7 @@ ViBassStreamOutput::ViBassStreamOutput(ViAudioBuffer *buffer, ViAudioMetaData *m
 {
 	mHandle = 0;
 	mReceiver = NULL;
+	mTimer = NULL;
 }
 
 ViBassStreamOutput::~ViBassStreamOutput()
@@ -32,6 +33,7 @@ ViBassStreamOutput::~ViBassStreamOutput()
 void ViBassStreamOutput::initialize()
 {
 	free();
+	mOldPosition = -1;
 	/*if(!BASS_SetDevice(3))
 	{
 		setErrorParameters("ViBassStreamOutput - Device Error", "Cannot stream to the selected output device", ViErrorInfo::Fatal);
@@ -64,6 +66,9 @@ void ViBassStreamOutput::initialize()
 		setErrorParameters("ViBassStreamOutput - Device Error", "Cannot stream to the selected output device", ViErrorInfo::Fatal);
 	}*/
 	mReceiver = new ViBassStreamOutputReceiver(this, mStream, mHandle);
+	mTimer = new QTimer(this);
+	ViObject::connect(mTimer, SIGNAL(timeout()), this, SLOT(checkPosition()));
+	mTimer->start(POSITION_CHECK_INTERVAL);
 }
 
 void ViBassStreamOutput::free()
@@ -76,6 +81,13 @@ void ViBassStreamOutput::free()
 	if(!BASS_StreamFree(mHandle) && mHandle != 0)
 	{
 		setErrorParameters("ViBassStreamOutput - Memory Release Error", "The supporting Bass handle could not be released", ViErrorInfo::Fatal);
+	}
+	if(mTimer != NULL)
+	{
+		mTimer->stop();
+		ViObject::disconnect(mTimer, SIGNAL(timeout()), this, SLOT(checkPosition()));
+		delete mTimer;
+		mTimer = NULL;
 	}
 }
 
@@ -181,5 +193,29 @@ qint64 ViBassStreamOutput::setPosition(ViAudioTransmission::ViTransmissionType t
 
 qint64 ViBassStreamOutput::position(ViAudioTransmission::ViTransmissionType type)
 {
+	QWORD position = BASS_ChannelGetPosition(mHandle, BASS_POS_BYTE);
+	if(position == -1)
+	{
+		setErrorParameters("ViBassStreamOutput - Position Error", "The palyback position could not be retrieved", ViErrorInfo::MediumFatal);
+		return -1;
+	}
+	if(type == ViAudioTransmission::Seconds)
+	{
+		return position * mSecondsInByte;
+	}
+	else if(type == ViAudioTransmission::Milliseconds)
+	{
+		return position * mSecondsInByte * 1000.0;
+	}
+	return position;
+}
 
+void ViBassStreamOutput::checkPosition()
+{
+	qint64 pos = position(ViAudioTransmission::Bytes);
+	if(pos != mOldPosition)
+	{
+		mOldPosition = pos;
+		emit positionChanged(pos, pos * mSecondsInByte * 1000.0);
+	}
 }

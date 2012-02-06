@@ -62,6 +62,7 @@ class ViAudioEngine : public QObject, public ViError
 
 	signals:
 		void waveFormChanged(QList<double>);
+		void positionChanged(qint64 bytes, qint64 milliseconds);
 
 	public:
 		ViAudioEngine();

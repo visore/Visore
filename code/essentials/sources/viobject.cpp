@@ -14,6 +14,10 @@ void ViObject::disconnect(const QObject *sender, const char *signal, const QObje
 
 void ViObject::connectDirect(const QObject *sender, const char *signal, const QObject *receiver, const char *method)
 {
-	//Only connect a slot if it isn't already connected
 	QObject::connect(sender, signal, receiver, method, Qt::DirectConnection);
+}
+
+void ViObject::connectQueued(const QObject *sender, const char *signal, const QObject *receiver, const char *method)
+{
+	QObject::connect(sender, signal, receiver, method, Qt::QueuedConnection);
 }
