@@ -93,7 +93,7 @@ void ViMainWindow::selectLineInput()
 void ViMainWindow::selectFileInput()
 {
 	mUi->recordButton->setEnabled(false);
-	mEngine->setInputFilePath("/home/visore/Desktop/testbit.wav");
+	mEngine->setInputFilePath("/home/visore/Desktop/a.wav");
 }
 
 void ViMainWindow::setRecording(bool active)
