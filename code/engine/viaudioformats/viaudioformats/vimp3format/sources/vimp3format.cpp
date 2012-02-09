@@ -1,7 +1,5 @@
 #include "vimp3format.h"
 
-//QSharedPointer<ViAudioFormat> ViAudioFormat::mInstance;
-
 ViMp3Format::ViMp3Format()
 	: ViAudioFormat()
 {

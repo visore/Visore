@@ -7,26 +7,59 @@
 #include "viobject.h"
 #include "vipcmconverter.h"
 #include <QList>
+#include <QMetaType>
+
+#include <iostream>
+using namespace std;
+
+struct ViWaveFormChunk
+{
+	ViWaveFormChunk()
+	{
+		mData = NULL;
+		mSize = 0;
+	}
+	ViWaveFormChunk(double *data, int size)
+	{
+		mData = data;
+		mSize = size;
+	}
+	~ViWaveFormChunk()
+	{
+		clear();
+	}
+	void clear()
+	{
+		if(mData != NULL)
+		{
+			delete [] mData;
+			mData = NULL;
+		}
+		mSize = 0;
+	}
+	double *mData;
+	int mSize;
+};
 
 class ViWaveFormerThread : public ViProcessorThread
 {
 	Q_OBJECT
 
 	signals:
-		void completed(QList<double> values);
+		void completed(ViWaveFormChunk *chunk);
 
 	public:
 		ViWaveFormerThread(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QList<int> *sizes);
 		void run();
 
 	private:
-		QList<double> pcmToReal8(char* buffer, int size);
-		QList<double> pcmToReal16(char* buffer, int size);
-		QList<double> pcmToReal32(char* buffer, int size);
+		int pcmToReal8(char* buffer, double *result, int size);
+		int pcmToReal16(char* buffer, double *result, int size);
+		int pcmToReal32(char* buffer, double *result, int size);
 
 	private:
 		ViAudioMetaData *mMetaData;
-		QList<double> (ViWaveFormerThread::*pcmToReal)(char*, int); //Function pointer
+		int (ViWaveFormerThread::*pcmToReal)(char*, double*, int); //Function pointer
 };
 
 class ViWaveFormer : public ViProcessor
@@ -34,7 +67,7 @@ class ViWaveFormer : public ViProcessor
 	Q_OBJECT
 
 	signals:
-		void completed(QList<double> values);
+		void completed(ViWaveFormChunk *chunk);
 
 	public:
 		ViWaveFormer(ViAudioMetaData *metaData);

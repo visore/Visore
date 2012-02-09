@@ -25,7 +25,7 @@ QT4_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_WIDGET_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(viwidget SHARED ${VI_WRAPPER_HEADERS} ${VI_WIDGET_SOURCES})
-TARGET_LINK_LIBRARIES(viwidget ${QT_LIBRARIES} viaudioengine)
+TARGET_LINK_LIBRARIES(viwidget ${QT_LIBRARIES} viaudioengine vitheme)
 
 #Install file
 INSTALL(TARGETS viwidget DESTINATION interface)

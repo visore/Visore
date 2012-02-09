@@ -8,7 +8,7 @@ class ViAudioOutput : public ViAudioTransmission
     Q_OBJECT
 
 	signals:
-		void positionChanged(qint64 bytes, qint64 milliseconds);
+		void positionChanged(qint64 bytes, qint64 milliseconds, qint8 bits);
 
 	public slots:
 		virtual void bufferChanged(int size) = 0;

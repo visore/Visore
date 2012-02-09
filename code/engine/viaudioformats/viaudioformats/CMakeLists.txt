@@ -2,7 +2,6 @@
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 SET(VI_MP3FORMAT ${ROOT}/vimp3format)
 SET(VI_WAVEFORMAT ${ROOT}/viwaveformat)
-SET(VI_AUDIOFORMATS_LOCATION ${CMAKE_INSTALL_PREFIX}/engine/formats CACHE INTERNAL "Audio formats install directory")
 
 #Initiate sub-directories
 ADD_SUBDIRECTORY(${VI_MP3FORMAT})

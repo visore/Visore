@@ -9,9 +9,10 @@ ViMainWindow::ViMainWindow(ViAudioEngine *engine, QWidget *parent)
 	mUi = new Ui::ViMainWindow();
 	mUi->setupUi(this);
 
-	mWaveFormWidget = new ViWaveFormWidget(mEngine/*, mUi->waveFormContainer*/);
-	mUi->waveFormContainer->layout()->addWidget(mWaveFormWidget);
-selectFileInput();
+mUi->waveFormContainer->resize(580, 100);
+	mWaveFormWidget = new ViWaveFormWidget(mEngine, mUi->waveFormContainer);
+
+//selectFileInput();
 	QObject::connect(mUi->resetButton, SIGNAL(clicked()), this, SLOT(reset()));
 	QObject::connect(mUi->recordButton, SIGNAL(clicked()), this, SLOT(record()));
 	QObject::connect(mUi->saveButton, SIGNAL(clicked()), this, SLOT(save()));

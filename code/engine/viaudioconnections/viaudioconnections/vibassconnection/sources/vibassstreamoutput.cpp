@@ -216,6 +216,6 @@ void ViBassStreamOutput::checkPosition()
 	if(pos != mOldPosition)
 	{
 		mOldPosition = pos;
-		emit positionChanged(pos, pos * mSecondsInByte * 1000.0);
+		emit positionChanged(pos, pos * mSecondsInByte * 1000.0, mMetaData->bitDepth());
 	}
 }

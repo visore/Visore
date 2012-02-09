@@ -179,21 +179,19 @@
      </widget>
     </item>
     <item row="2" column="5">
-     <widget class="QWidget" name="waveFormContainer" native="true">
-      <property name="styleSheet">
-       <string notr="true"/>
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>PushButton</string>
       </property>
+     </widget>
+    </item>
+    <item row="3" column="5">
+     <widget class="QWidget" name="widget_3" native="true">
       <layout class="QGridLayout" name="gridLayout_4">
-       <property name="margin">
-        <number>0</number>
-       </property>
-       <property name="spacing">
-        <number>0</number>
-       </property>
        <item row="0" column="0">
-        <widget class="QPushButton" name="pushButton">
-         <property name="text">
-          <string>PushButton</string>
+        <widget class="QWidget" name="waveFormContainer" native="true">
+         <property name="styleSheet">
+          <string notr="true"/>
          </property>
         </widget>
        </item>

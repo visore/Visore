@@ -61,8 +61,8 @@ class ViAudioEngine : public QObject, public ViError
 		void stopOutputFile();
 
 	signals:
-		void waveFormChanged(QList<double>);
-		void positionChanged(qint64 bytes, qint64 milliseconds);
+		void waveFormChanged(ViWaveFormChunk *chunk);
+		void positionChanged(qint64 bytes, qint64 milliseconds, qint8 bits);
 
 	public:
 		ViAudioEngine();

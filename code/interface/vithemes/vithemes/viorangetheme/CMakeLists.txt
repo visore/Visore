@@ -1,0 +1,18 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Include common headers
+INCLUDE_DIRECTORIES(${HEADERS})
+
+#Initiate source files
+FILE(GLOB VI_ORANGETHEME_SOURCES ${SOURCES}/*.cpp)
+FILE(GLOB VI_ORANGETHEME_HEADERS ${HEADERS}/*.h)
+
+#Create library
+ADD_LIBRARY(viorangetheme SHARED ${VI_ORANGETHEME_HEADERS} ${VI_ORANGETHEME_SOURCES})
+TARGET_LINK_LIBRARIES(viorangetheme ${QT_LIBRARIES} vitheme)
+
+#Install file
+INSTALL(TARGETS viorangetheme DESTINATION ${VI_THEMES_LOCATION})

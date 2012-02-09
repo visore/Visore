@@ -5,165 +5,177 @@ ViWaveFormWidgetThread::ViWaveFormWidgetThread(ViWaveFormWidget *widget)
 {
 	mWidget = widget;
 	mPosition = -1;
-}
-
-ViWaveFormWidgetThread::~ViWaveFormWidgetThread()
-{
-	/*for(int i = 0; i < mTiles.size(); ++i)
-	{
-		if(mTiles[i] != NULL)
-		{
-			delete mTiles[i];
-			mTiles[i] = NULL;
-		}
-	}*/
+	mRemains = new ViWaveFormChunk();
 }
 
 void ViWaveFormWidgetThread::run()
 {
-	while(!mLists.isEmpty())
+	mMutex.lock();
+	while(!mChunks.isEmpty())
 	{
-		QList<double> list = mLists.first();
-		mLists.removeFirst();
-		for(int i = 0; i < list.size(); i += 100)
+		ViWaveFormChunk *chunk = mChunks.takeFirst();
+
+		double array[chunk->mSize + mRemains->mSize];
+		for(int i = 0; i < mRemains->mSize; ++i)
 		{
-			ViWaveFormTile *tile = new ViWaveFormTile();
-			tile->draw(list.mid(i, 100), mWidget->height());
-			mTiles.append(tile);
+			array[i] = mRemains->mData[i];
 		}
-		emit tileAvailable();
+		for(int i = 0; i < chunk->mSize; ++i)
+		{
+			array[mRemains->mSize + i] = chunk->mData[i];
+		}
+
+		int size = mRemains->mSize + chunk->mSize;
+
+		delete chunk;
+
+		for(int i = 0; i < size; i += COMPRESSION_LEVEL_3)
+		{
+			int remains = size - i;
+			if(remains < COMPRESSION_LEVEL_3)
+			{
+				double *remainsData = new double[remains];
+				//Not enough samples avialable to create another summarized amplitude
+				for(int j = 0; j < remains; ++j)
+				{
+					remainsData[j] = array[i + j]; 
+				}
+				delete mRemains;
+				mRemains = new ViWaveFormChunk(remainsData, remains);
+				break;
+			}
+			double averageMaximum = 0;
+			double averageMinimum = 0;
+			double maximum = -1;
+			double minimum = 1;
+			int counterMaximum = 0;
+			int counterMinimum = 0;
+			for(int j = 0; j < COMPRESSION_LEVEL_3; ++j)
+			{
+				double number = array[i + j];
+				if(number < 0)
+				{
+					averageMinimum += number;
+					++counterMinimum;
+				}
+				else if(number > 0)
+				{
+					averageMaximum += number;
+					++counterMaximum;
+				}
+				if(number > maximum)
+				{
+					maximum = number;
+				}
+				else if(number < minimum)
+				{
+					minimum = number;
+				}
+			}
+			if(counterMaximum) //Make sure not to devide by 0
+			{
+				averageMaximum /= counterMaximum;
+			}
+			if(counterMinimum) //Make sure not to devide by 0
+			{
+				averageMinimum /= counterMinimum;
+			}
+			mAmplitudes.append(ViWaveAmplitude(maximum, minimum, averageMaximum, averageMinimum));
+		}
 	}
+	mMutex.unlock();
+	emit tileAvailable();
 }
 
-void ViWaveFormWidgetThread::changed(QList<double> list)
+void ViWaveFormWidgetThread::changed(ViWaveFormChunk *chunk)
 {
-	mLists.append(list);
+	mMutex.lock();
+	mChunks.append(chunk);
+	mMutex.unlock();
 	if(!isRunning())
 	{
 		start();
 	}
 }
 
-void ViWaveFormWidgetThread::positionChanged(qint64 bytes, qint64 milliseconds)
+void ViWaveFormWidgetThread::positionChanged(qint64 bytes, qint64 milliseconds, qint8 bits)
 {
-	mPosition = bytes / 200;
-	//emit tileAvailable();
+	if(bits == 16)
+	{
+		bits = 2;
+	}
+	else if(bits == 32)
+	{
+		bits = 4;
+	}
+	else
+	{
+		bits = 1;
+	}
+	mPosition = bytes / (COMPRESSION_LEVEL_3 * bits);
+	emit tileAvailable();
 }
-
 
 ViWaveFormWidget::ViWaveFormWidget(ViAudioEngine *engine, QWidget *parent)
 	: ViWidget(engine, parent)
 {
-	mCurrentX = 0;
-mPainter = NULL;
-	mWaveForm = ViWaveFormWidget::Combined;
+	resize(parent->width(), parent->height());
 	mThread = new ViWaveFormWidgetThread(this);
-	ViObject::connect(mEngine, SIGNAL(waveFormChanged(QList<double>)), mThread, SLOT(changed(QList<double>)));
-	ViObject::connect(mEngine, SIGNAL(positionChanged(qint64, qint64)), mThread, SLOT(positionChanged(qint64, qint64)));
-	//ViObject::connect(mThread, SIGNAL(tileAvailable()), this, SLOT(receiveTile()));
-	QObject::connect(mThread, SIGNAL(tileAvailable()), this, SLOT(update()), Qt::QueuedConnection);
-	//mThread->start();
+	ViObject::connect(mEngine, SIGNAL(waveFormChanged(ViWaveFormChunk*)), mThread, SLOT(changed(ViWaveFormChunk*)));
+	ViObject::connect(mEngine, SIGNAL(positionChanged(qint64, qint64, qint8)), mThread, SLOT(positionChanged(qint64, qint64, qint8)));
+	ViObject::connectQueued(mThread, SIGNAL(tileAvailable()), this, SLOT(repaint()));
 }
 
 ViWaveFormWidget::~ViWaveFormWidget()
 {
-	//delete mThread;
-//delete mPainter;
+	delete mThread;
 }
 
 void ViWaveFormWidget::paintEvent(QPaintEvent *event)
 {
+	QPainter painter(this);
+	painter.fillRect(rect(), ViThemeManager::color(0));
 
-/*QPainter painter(this);
-QPen pen(Qt::white);
-painter.setPen(pen);
-painter.fillRect(rect(), Qt::black);
-int halfHeight = height() / 2;
-		int i = mThread->mPosition - 100;
-		if(i < 0)
-		{
-			i = 0;
-		}
+	static QPen penNormal(ViThemeManager::color(15));
+	static QPen penAverage(ViThemeManager::color(14));
+	static QPen penPosition(ViThemeManager::color(12));
 
-		int j = mThread->mPosition + 100;
-		if(j > mThread->mList.size())
-		{
-			j = mThread->mList.size();
-		}
-
-		int counter = 0;
-		if(mWaveForm == ViWaveFormWidget::Combined)
-		{
-			for(i; i < j; ++i)
-			{
-				painter.drawLine(counter, halfHeight, counter, halfHeight - (1000 * halfHeight * mThread->mList[i]));
-				if(i % 2 != 0)
-				{
-					++counter;
-				}
-			}
-		}
-		else
-		{
-			for(i; i < j; ++i)
-			{
-				painter.drawLine(counter, halfHeight, counter, halfHeight - (halfHeight * mThread->mList[i]));
-				++counter;
-			}
-		}
-
-QPen pen2(Qt::red);
-painter.setPen(pen2);
-painter.drawLine(100, 0, 100, height());*/
-
-
-
-
-if(mPainter == NULL)
-{
-	mPainter = new QPainter(this);
-}
-
-
-
-	while(!mThread->mTiles.isEmpty())
-	{
-		QPixmap pixmap;
-		ViWaveFormTile *tile = mThread->mTiles.first();
-		pixmap.convertFromImage(*tile->tile());
-		mPainter->drawPixmap(mCurrentX, 0, pixmap);
-		mCurrentX += tile->tile()->width();
-		mThread->mTiles.removeFirst();
-	}
-	//}
-/*
-while(!mThread->mLists.isEmpty())
-{
-	QPen pen(Qt::white);
-	painter.setPen(pen);
 	int halfHeight = height() / 2;
-	QList<double> list = mThread->mLists.first();
-//	mThread->mLists.removeFirst();
-cout<<mThread->mLists.size()<<endl;
-	for(int i = 0; i < list.size(); ++i)
+	int halfWidth = width() / 2;
+	int position = mThread->mPosition;
+	int start = position - halfWidth;
+	int end = position + halfWidth;
+	if(start < 0)
 	{
-		//painter.drawLine(i, halfHeight, i, halfHeight - (halfHeight * list[i]));
-		//QList<double> mValues = list.mid(i, 100);
-		for(int j = 0; j < mValues.size(); ++j)
-		{
-			painter.drawLine(j, halfHeight, j, halfHeight - (halfHeight * 100*mValues[j]));
-		}
+		start = 0;
 	}
-}*/
+	if(end > mThread->mAmplitudes.size())
+	{
+		end = mThread->mAmplitudes.size();
+	}
+	int drawStart = halfWidth + (start - position);
 
-}
+	for(int i = start; i < end; ++i)
+	{
+		ViWaveAmplitude amplitude = mThread->mAmplitudes[i];
 
-ViWaveFormWidget::ViWaveForm ViWaveFormWidget::waveForm()
-{
-	return mWaveForm;
-}
+		painter.setPen(penNormal);
+		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * amplitude.mMaximum));
+		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * amplitude.mMinimum));
 
-void ViWaveFormWidget::setWaveForm(ViWaveFormWidget::ViWaveForm form)
-{
-	mWaveForm = form;
+		painter.setPen(penAverage);
+		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * amplitude.mAverageMaximum));
+		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * amplitude.mAverageMinimum));
+		drawStart++;
+	}
+
+	painter.setPen(penPosition);
+	painter.drawLine(0, halfHeight, width(), halfHeight);
+
+	QRect rectangle(0, 0, halfWidth, height());
+	QColor color = ViThemeManager::color(11);
+	color = QColor(color.red(), color.green(), color.blue(), 100);
+	painter.fillRect(rectangle, color);
+
+	painter.drawLine(halfWidth, 0, halfWidth, height());
 }
