@@ -1,7 +1,11 @@
 #ifndef VIWAVEFORMWIDGET_H
 #define VIWAVEFORMWIDGET_H
 
-#define COMPRESSION_LEVEL_3 3500
+#define COMPRESSION_LEVEL_1 1
+#define COMPRESSION_LEVEL_2 1000
+#define COMPRESSION_LEVEL_3 5000
+#define COMPRESSION_LEVEL_4 10000
+#define COMPRESSION_LEVEL_5 50000
 
 #include <QWidget>
 #include <QPainter>
@@ -11,21 +15,7 @@
 #include "viwidget.h"
 #include "viobject.h"
 #include "vithememanager.h"
-
-struct ViWaveAmplitude
-{
-	ViWaveAmplitude(double maximum, double minimum, double averageMaximum, double averageMinimum)
-	{
-		mMaximum = maximum;
-		mMinimum = minimum;
-		mAverageMaximum = averageMaximum;
-		mAverageMinimum = averageMinimum;
-	}
-	double mMaximum;
-	double mMinimum;
-	double mAverageMaximum;
-	double mAverageMinimum;
-};
+#include "viwavecollection.h"
 
 class ViWaveFormWidget;
 
@@ -49,7 +39,7 @@ class ViWaveFormWidgetThread : public QThread
 		QList<ViWaveFormChunk*> mChunks;
 		ViWaveFormChunk *mRemains;
 		qint64 mPosition;
-		QList<ViWaveAmplitude> mAmplitudes;
+		ViWaveCollection mCollection;
 		QMutex mMutex;
 };
 
@@ -66,6 +56,7 @@ class ViWaveFormWidget : public ViWidget
 
 	private:
 		ViWaveFormWidgetThread *mThread;
+		QWidget *mParent;
 };
 
 #endif
