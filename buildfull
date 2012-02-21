@@ -1,13 +1,13 @@
 #!/bin/bash
 
-cd /home/visore/Visore/
+cd /home/visore/Project/Code
 rm -r install
 mkdir install
 rm -r build
 mkdir build
-cd /home/visore/Visore/build
-ccmake ../project/code -DCMAKE_INSTALL_PREFIX=/home/visore/Visore/install -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=32bit
+cd /home/visore/Project/Code/build
+ccmake ../Visore/code -DCMAKE_INSTALL_PREFIX=/home/visore/Project/Code/install -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit
 make
 make install
-cd /home/visore/Visore/install
+cd /home/visore/Project/Code/install
 #$1 $2 $3 $4 $5 ./visore

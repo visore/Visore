@@ -1,7 +1,0 @@
-#!/bin/bash
-
-cd /home/visore/Visore/build
-make
-make install
-cd /home/visore/Visore/install/
-#$1 $2 $3 $4 $5 ./visore
