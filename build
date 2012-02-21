@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd /home/visore/Project/Code/build
+make
+make install
+cd /home/visore/Project/Code/install/
+$1 $2 $3 $4 $5 ./visore
