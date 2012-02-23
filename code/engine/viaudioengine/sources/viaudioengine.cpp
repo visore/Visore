@@ -46,7 +46,7 @@ mProcessingChain->attachStreamOutput(mStreamOutput);
 ViWaveFormer *wave = new ViWaveFormer(mMetaData);
 mProcessingChain->attachOriginalProcessor(wave, ViProcessorList::Parallel);
 
-ViObject::connectDirect(mStreamOutput, SIGNAL(positionChanged(qint64, qint64, qint8)), this, SIGNAL(positionChanged(qint64, qint64, qint8)));
+ViObject::connectDirect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
 ViObject::connectDirect(wave, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(waveFormChanged(ViWaveFormChunk*)));
 
 }
@@ -185,9 +185,9 @@ void ViAudioEngine::stopRecording()
 	mStreamInput->stop();
 }
 
-void ViAudioEngine::setStreamPosition(qint64 position)
+void ViAudioEngine::setStreamPosition(ViAudioPosition position)
 {
-	mStreamOutput->setPosition(ViAudioTransmission::Milliseconds, position);
+	mStreamOutput->setPosition(position);
 }
 
 void ViAudioEngine::startOutputFile()
@@ -202,7 +202,7 @@ void ViAudioEngine::stopOutputFile()
 
 void ViAudioEngine::resetMetaData()
 {
-	mMetaData->setFormat(ViFormatManager::format("MP3"));
+	mMetaData->setFormat(ViFormatManager::selected("MP3"));
 	mMetaData->setFrequency(44100);
 	mMetaData->setChannels(2);
 	mMetaData->setBitDepth(16);

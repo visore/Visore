@@ -3,9 +3,9 @@
 
 #include <QString>
 #include <QList>
-#include <QSharedPointer>
+#include "visingleton.h"
 
-class ViAudioFormat
+class ViAudioFormat : public ViSingleton
 {
 	public:
 		enum ViAudioFormatCompression

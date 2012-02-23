@@ -4,28 +4,7 @@ QSharedPointer<ViFormatManager> ViFormatManager::mInstance;
 
 ViFormatManager::ViFormatManager()
 {
-	QList<QString> libraries = ViLibraryDetector::detectLibraries(VIAUDIOFORMATSLOCATION);
-	for(int i = 0; i < libraries.length(); ++i)
-	{			
-		ViLibrary<ViAudioFormat> *library = new ViLibrary<ViAudioFormat>();
-		if(library->open(libraries[i]))
-		{
-			mLibraries.append(library);
-			mFormats.append(library->createObject("createFormat"));
-		}
-	}
-}
-
-ViFormatManager::~ViFormatManager()
-{
-	for(int i = 0; i < mLibraries.size(); ++i)
-	{
-		if(mLibraries[i] != NULL)
-		{
-			delete mLibraries[i];
-			mLibraries[i] = NULL;
-		}
-	}
+	mManager.searchPath(VIAUDIOFORMATSLOCATION);
 }
 
 ViFormatManager* ViFormatManager::instance()
@@ -37,31 +16,20 @@ ViFormatManager* ViFormatManager::instance()
 	return mInstance.data();
 }
 
-ViAudioFormat* ViFormatManager::format(QString name)
+QList<ViAudioFormat*> ViFormatManager::all()
 {
 	ViFormatManager *manager = ViFormatManager::instance();
-	for(int i = 0; i < manager->mFormats.length(); ++i)
-	{
-		if(manager->mFormats[i]->name() == name)
-		{
-			return manager->mFormats[i];
-		}
-	}
+	return manager->mManager.all();
 }
 
-QList<ViAudioFormat*> ViFormatManager::formats(QList<QString> names)
+QList<ViAudioFormat*> ViFormatManager::selected(QList<QString> names)
 {
 	ViFormatManager *manager = ViFormatManager::instance();
-	QList<ViAudioFormat*> formats;
-	for(int i = 0; i < manager->mFormats.length(); ++i)
-	{
-		for(int j = 0; j < names.length(); ++j)
-		{
-			if(names[i] == manager->mFormats[i]->name())
-			{
-				formats.append(manager->mFormats[i]);
-			}
-		}
-	}
-	return formats;
+	return manager->mManager.selected(names);
+}
+
+ViAudioFormat* ViFormatManager::selected(QString name)
+{
+	ViFormatManager *manager = ViFormatManager::instance();
+	return manager->mManager.selected(name);
 }

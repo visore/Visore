@@ -29,7 +29,7 @@ void ViWaveFormerThread::run()
 		size = mReadStream->read(&chunk, size);
 		double *result = new double[size];
 		size = (this->*pcmToReal)(chunk.data(), result, size);
-		emit completed(new ViWaveFormChunk(result, size));
+		emit completed(new ViWaveFormChunk(result, size, mMetaData));
 	}
 }
 

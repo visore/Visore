@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
 
-ViAudioFormat* createFormat()
+ViAudioFormat* create()
 {
    return ViMp3Format::instance();
 }

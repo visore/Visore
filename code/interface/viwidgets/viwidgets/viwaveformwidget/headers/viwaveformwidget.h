@@ -1,12 +1,6 @@
 #ifndef VIWAVEFORMWIDGET_H
 #define VIWAVEFORMWIDGET_H
 
-#define COMPRESSION_LEVEL_1 1
-#define COMPRESSION_LEVEL_2 1000
-#define COMPRESSION_LEVEL_3 5000
-#define COMPRESSION_LEVEL_4 10000
-#define COMPRESSION_LEVEL_5 50000
-
 #include <QWidget>
 #include <QPainter>
 #include <QThread>
@@ -28,7 +22,7 @@ class ViWaveFormWidgetThread : public QThread
 
 	private slots:
 		void changed(ViWaveFormChunk *chunk);
-		void positionChanged(qint64 bytes, qint64 milliseconds, qint8 bits);
+		void positionChanged(ViAudioPosition position);
 
 	public:
 		ViWaveFormWidgetThread(ViWaveFormWidget *widget);

@@ -3,7 +3,7 @@
 ViLameEncoder::ViLameEncoder()
 	: ViAudioEncoder()
 {
-	mFormat = ViFormatManager::format("MP3");
+	mFormat = ViFormatManager::selected("MP3");
 	mName = "Lame";
 	mPath = "lame";
 
@@ -80,7 +80,7 @@ extern "C"
 {
 #endif
 
-ViAudioEncoder* createEncoder()
+ViAudioEncoder* create()
 {
    return ViLameEncoder::instance();
 }

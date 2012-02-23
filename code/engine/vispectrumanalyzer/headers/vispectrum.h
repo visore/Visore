@@ -2,6 +2,7 @@
 #define VISPECTRUM_H
 
 #include "vispectrumelement.h"
+#include <QVector>
 
 class ViSpectrum
 {

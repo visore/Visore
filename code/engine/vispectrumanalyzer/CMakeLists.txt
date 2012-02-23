@@ -26,7 +26,7 @@ QT4_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_SPECTRUMANALYZER_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(vispectrumanalyzer SHARED ${VI_SPECTRUMANALYZER_HEADERS} ${VI_SPECTRUMANALYZER_SOURCES} ${VI_WRAPPER_HEADERS})
-TARGET_LINK_LIBRARIES(vispectrumanalyzer ${QT_LIBRARIES} viessentials fftreal)
+TARGET_LINK_LIBRARIES(vispectrumanalyzer ${QT_LIBRARIES} viwindowfunction fftreal)
 
 #Install file
 INSTALL(TARGETS vispectrumanalyzer DESTINATION engine)

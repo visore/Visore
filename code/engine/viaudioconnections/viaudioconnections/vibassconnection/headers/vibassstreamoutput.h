@@ -37,8 +37,8 @@ class ViBassStreamOutput : public ViStreamOutput
 		void stop();
 		void pause();
 		void initialize();
-		qint64 setPosition(ViAudioTransmission::ViTransmissionType type, qint64 position);
-		qint64 position(ViAudioTransmission::ViTransmissionType type);
+		bool setPosition(ViAudioPosition position);
+		ViAudioPosition position();
 		void bufferChanged(int size);
 
 	protected:
@@ -49,7 +49,7 @@ class ViBassStreamOutput : public ViStreamOutput
 		ViBassStreamOutputReceiver *mReceiver;
 		double mSecondsInByte;
 		QTimer *mTimer;
-		qint64 mOldPosition;
+		ViAudioPosition mOldPosition;
 };
 
 #endif

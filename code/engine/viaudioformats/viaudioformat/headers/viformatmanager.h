@@ -2,24 +2,23 @@
 #define VIFORMATMANAGER_H
 
 #include "viaudioformat.h"
-#include "vilibrary.h"
-#include "vilibrarydetector.h"
+#include "visingletonmanager.h"
+#include <QSharedPointer>
 
 class ViFormatManager
 {
 	public:
-		static QList<ViAudioFormat*> formats(QList<QString> names); 
-		static ViAudioFormat* format(QString name);
-		~ViFormatManager(); //Must be public for QSharedPointer
+		static QList<ViAudioFormat*> all();
+		static QList<ViAudioFormat*> selected(QList<QString> names);
+		static ViAudioFormat* selected(QString name);
 		
 	protected:
 		ViFormatManager();
 		static ViFormatManager* instance();
 
 	protected:
-		QList<ViAudioFormat*> mFormats;
-		QList<ViLibrary<ViAudioFormat>*> mLibraries;
 		static QSharedPointer<ViFormatManager> mInstance;
+		ViSingletonManager<ViAudioFormat> mManager;
 };
 
 #endif

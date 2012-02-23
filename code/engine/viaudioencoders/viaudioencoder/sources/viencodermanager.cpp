@@ -4,62 +4,47 @@ QSharedPointer<ViEncoderManager> ViEncoderManager::mInstance;
 
 ViEncoderManager::ViEncoderManager()
 {
-	QList<QString> libraries = ViLibraryDetector::detectLibraries(VIAUDIOENCODERSLOCATION);
-	for(int i = 0; i < libraries.length(); ++i)
-	{			
-		ViLibrary<ViAudioEncoder> *library = new ViLibrary<ViAudioEncoder>();
-		if(library->open(libraries[i]))
-		{
-			mLibraries.append(library);
-			mEncoders.append(library->createObject("createEncoder"));
-		}
-	}
-}
-
-ViEncoderManager::~ViEncoderManager()
-{
-	for(int i = 0; i < mLibraries.size(); ++i)
-	{
-		if(mLibraries[i] != NULL)
-		{
-			delete mLibraries[i];
-			mLibraries[i] = NULL;
-		}
-	}
+	mManager.searchPath(VIAUDIOENCODERSLOCATION);
 }
 
 ViEncoderManager* ViEncoderManager::instance()
 {
 	if(mInstance.isNull())
 	{
-		mInstance = QSharedPointer<ViEncoderManager>(new ViEncoderManager);
+		mInstance = QSharedPointer<ViEncoderManager>(new ViEncoderManager());
 	}
 	return mInstance.data();
 }
 
-QList<ViAudioEncoder*> ViEncoderManager::encoder(ViAudioFormat *format)
+QList<ViAudioEncoder*> ViEncoderManager::all()
+{
+	ViEncoderManager *manager = ViEncoderManager::instance();
+	return manager->mManager.all();
+}
+
+QList<ViAudioEncoder*> ViEncoderManager::selected(QList<QString> names)
+{
+	ViEncoderManager *manager = ViEncoderManager::instance();
+	return manager->mManager.selected(names);
+}
+
+ViAudioEncoder* ViEncoderManager::selected(QString name)
+{
+	ViEncoderManager *manager = ViEncoderManager::instance();
+	return manager->mManager.selected(name);
+}
+
+QList<ViAudioEncoder*> ViEncoderManager::selected(ViAudioFormat *format)
 {
 	ViEncoderManager *manager = ViEncoderManager::instance();
 	QList<ViAudioEncoder*> result;
-	for(int i = 0; i < manager->mEncoders.size(); ++i)
+	QList<ViAudioEncoder*> *all = manager->mManager.singletons();
+	for(int i = 0; i < all->size(); ++i)
 	{
-		if(format == manager->mEncoders[i]->format())
+		if(format == (*all)[i]->format())
 		{
-			result.append(manager->mEncoders[i]);
+			result.append((*all)[i]);
 		}
 	}
 	return result;
-}
-
-ViAudioEncoder* ViEncoderManager::encoder(QString name)
-{
-	ViEncoderManager *manager = ViEncoderManager::instance();
-	for(int i = 0; i < manager->mEncoders.size(); ++i)
-	{
-		if(name == manager->mEncoders[i]->name())
-		{
-			return manager->mEncoders[i];
-		}
-	}
-	return NULL;
 }

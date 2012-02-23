@@ -142,21 +142,14 @@ void ViBassStreamOutput::pause()
 	mStatus = ViAudioTransmission::Paused;
 }
 
-qint64 ViBassStreamOutput::setPosition(ViAudioTransmission::ViTransmissionType type, qint64 position)
+bool ViBassStreamOutput::setPosition(ViAudioPosition position)
 {
-	if(type == ViAudioTransmission::Seconds)
+	qint64 pos = position.bytes();
+	if(pos % 2 != 0) //Bass can only play even bytes
 	{
-		position = position/mSecondsInByte;
+		pos -= 1;
 	}
-	else if(type == ViAudioTransmission::Milliseconds)
-	{
-		position = position/(mSecondsInByte*1000.0);
-	}
-	if(position % 2 != 0) //Bass can only play even bytes
-	{
-		position -= 1;
-	}
-	if(!mStream->isValidPosition(position))
+	if(!mStream->isValidPosition(pos))
 	{
 		setErrorParameters("ViBassStreamOutput - Position Error", "The position could not be set", ViErrorInfo::MediumFatal);
 		return -1;
@@ -174,7 +167,11 @@ qint64 ViBassStreamOutput::setPosition(ViAudioTransmission::ViTransmissionType t
 	}
 	mStatus = ViAudioTransmission::Stopped;
 
-	qint64 read = mStream->setPosition(position);
+	bool result = true;
+	if(mStream->setPosition(pos) < 0)
+	{
+		result = false;
+	}
 	if(read < 0)
 	{
 		setErrorParameters("ViBassStreamOutput - Position Error", "The position could not be set", ViErrorInfo::MediumFatal);
@@ -188,10 +185,10 @@ qint64 ViBassStreamOutput::setPosition(ViAudioTransmission::ViTransmissionType t
 		}
 		mStatus = ViAudioTransmission::Running;
 	}
-	return read;
+	return result;
 }
 
-qint64 ViBassStreamOutput::position(ViAudioTransmission::ViTransmissionType type)
+ViAudioPosition ViBassStreamOutput::position()
 {
 	QWORD position = BASS_ChannelGetPosition(mHandle, BASS_POS_BYTE);
 	if(position == -1)
@@ -199,23 +196,15 @@ qint64 ViBassStreamOutput::position(ViAudioTransmission::ViTransmissionType type
 		setErrorParameters("ViBassStreamOutput - Position Error", "The palyback position could not be retrieved", ViErrorInfo::MediumFatal);
 		return -1;
 	}
-	if(type == ViAudioTransmission::Seconds)
-	{
-		return position * mSecondsInByte;
-	}
-	else if(type == ViAudioTransmission::Milliseconds)
-	{
-		return position * mSecondsInByte * 1000.0;
-	}
-	return position;
+	return ViAudioPosition(position, mMetaData->bitDepth(), mSecondsInByte);
 }
 
 void ViBassStreamOutput::checkPosition()
 {
-	qint64 pos = position(ViAudioTransmission::Bytes);
+	ViAudioPosition pos = position();
 	if(pos != mOldPosition)
 	{
 		mOldPosition = pos;
-		emit positionChanged(pos, pos * mSecondsInByte * 1000.0, mMetaData->bitDepth());
+		emit positionChanged(pos);
 	}
 }

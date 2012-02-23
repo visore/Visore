@@ -3,9 +3,10 @@
 
 #include "viencoderparameter.h"
 #include "viformatmanager.h"
+#include "visingleton.h"
 #include <QSharedPointer>
 
-class ViAudioEncoder
+class ViAudioEncoder : public ViSingleton
 {
 	public:
 		static ViAudioEncoder* instance();

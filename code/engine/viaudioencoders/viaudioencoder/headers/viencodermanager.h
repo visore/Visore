@@ -2,22 +2,24 @@
 #define VIENCODERMANAGER_H
 
 #include "viaudioencoder.h"
+#include "visingletonmanager.h"
+#include <QSharedPointer>
 
 class ViEncoderManager
 {
 	public:
-		static QList<ViAudioEncoder*> encoder(ViAudioFormat *format);
-		static ViAudioEncoder* encoder(QString name);
-		~ViEncoderManager(); //Must be public for QSharedPointer
+		static QList<ViAudioEncoder*> all();
+		static QList<ViAudioEncoder*> selected(ViAudioFormat *format);
+		static QList<ViAudioEncoder*> selected(QList<QString> names);
+		static ViAudioEncoder* selected(QString name);
 		
 	protected:
 		ViEncoderManager();
 		static ViEncoderManager* instance();
 
 	protected:
-		QList<ViAudioEncoder*> mEncoders;
-		QList<ViLibrary<ViAudioEncoder>*> mLibraries;
 		static QSharedPointer<ViEncoderManager> mInstance;
+		ViSingletonManager<ViAudioEncoder> mManager;
 };
 
 #endif

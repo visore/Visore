@@ -28,7 +28,7 @@ extern "C"
 {
 #endif
 
-ViAudioFormat* createFormat()
+ViAudioFormat* create()
 {
    return ViWaveFormat::instance();
 }

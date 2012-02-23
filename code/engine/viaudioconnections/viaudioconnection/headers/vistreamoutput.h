@@ -21,8 +21,8 @@ class ViStreamOutput : public ViAudioOutput
 		virtual void pause() = 0;
 		virtual void initialize() = 0;
 
-		virtual qint64 setPosition(ViAudioTransmission::ViTransmissionType type, qint64 position) = 0; //returns negative number if position is invalid
-		virtual qint64 position(ViAudioTransmission::ViTransmissionType type) = 0;
+		virtual bool setPosition(ViAudioPosition position) = 0; //returns negative number if position is invalid
+		virtual ViAudioPosition position() = 0;
 
 	protected:
 		virtual void free() = 0;

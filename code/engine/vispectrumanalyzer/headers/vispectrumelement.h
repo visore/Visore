@@ -2,6 +2,7 @@
 #define VISPECTRUMELEMENT_H
 
 #include "math.h"
+#include <QtGlobal>
 
 class ViSpectrumElement
 {

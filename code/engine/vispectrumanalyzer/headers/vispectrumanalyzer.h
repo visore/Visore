@@ -4,23 +4,43 @@
 #include "vifourierwrapper.h"
 #include "viprocessor.h"
 #include "vierror.h"
+#include "vispectrum.h"
+#include "vispectrumwindow.h"
+#include "viwaveformchunk.h"
+#include <QThread>
+
+class ViSpectrumAnalyzerThread : public QThread
+{
+	Q_OBJECT
+
+	public:
+		void start();
+		void setWindowFunction(ViWindowFunction *windowFunction);
+		void addChunk(ViWaveFormChunk *chunk);
+
+	private:
+		void addWindow(qint64 size);
+
+	private:
+		ViWindowFunction *mWindowFunction;
+		QList<ViSpectrumWindow*> mWindows;
+		QList<ViWaveFormChunk*> mChunks;
+		qint64 mNumberOfSamples;
+};
 
 class ViSpectrumAnalyzer : public ViProcessor, public ViError
 {
-    Q_OBJECT
+	Q_OBJECT
 
 	signals:
-		void spectrumChanged(const ViFrequencySpectrum &spectrum);
-
-	private slots:
-		void calculationComplete(const ViFrequencySpectrum &spectrum);
+		void spectrumChanged(const ViSpectrum &spectrum);
 
 	public:
-		ViSpectrumAnalyzer(QObject *parent = 0);
+		ViSpectrumAnalyzer();
 		~ViSpectrumAnalyzer();
 
-		void setWindowFunction(ViWindowFunction type);
-		void start(QByteArray &buffer, QAudioFormat &format);
+		void setWindowFunction(ViWindowFunction *windowFunction);
+		void start(ViWaveFormChunk *chunk);
 		void stop();
 		bool isReady();
 
@@ -32,10 +52,8 @@ class ViSpectrumAnalyzer : public ViProcessor, public ViError
 			Cancelled
 		};
 
-		void calculateWindow();
-
 	private:
-		ViSpectrumAnalyzerThread* mThread;
+		ViSpectrumAnalyzerThread *mThread;
 		ViProcessState mState;
 };
 

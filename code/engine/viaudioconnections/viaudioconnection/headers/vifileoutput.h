@@ -21,8 +21,8 @@ class ViFileOutput : public ViAudioOutput
 		virtual void pause() = 0;
 		virtual void initialize() = 0;
 
-		qint64 setPosition(ViAudioTransmission::ViTransmissionType type, qint64 position);
-		qint64 position(ViAudioTransmission::ViTransmissionType type);
+		bool setPosition(ViAudioPosition position);
+		ViAudioPosition position();
 
 	protected:
 		virtual void free() = 0;

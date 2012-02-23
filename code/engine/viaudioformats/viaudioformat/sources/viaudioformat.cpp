@@ -3,10 +3,10 @@
 QSharedPointer<ViAudioFormat> ViAudioFormat::mInstance;
 
 ViAudioFormat::ViAudioFormat()
+	: ViSingleton()
 {
 	mCompression = ViAudioFormat::Lossy;
 	mAbbreviation = "";
-	mName = "";
 }
 
 ViAudioFormat* ViAudioFormat::instance()

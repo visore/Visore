@@ -56,13 +56,13 @@ class ViAudioEngine : public QObject, public ViError
 		void pausePlayback();
 		void startRecording();
 		void stopRecording();
-		void setStreamPosition(qint64 position);
+		void setStreamPosition(ViAudioPosition position);
 		void startOutputFile();
 		void stopOutputFile();
 
 	signals:
 		void waveFormChanged(ViWaveFormChunk *chunk);
-		void positionChanged(qint64 bytes, qint64 milliseconds, qint8 bits);
+		void positionChanged(ViAudioPosition position);
 
 	public:
 		ViAudioEngine();

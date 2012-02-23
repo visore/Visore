@@ -24,7 +24,7 @@ void ViBassFileOutput::start()
 		setErrorParameters("ViBassFileOutput - Start Error", "The file is already being written", ViErrorInfo::NonFatal);
 		return;
 	}
-	ViAudioEncoder *encoder = ViEncoderManager::encoder(mMetaData->format())[0];
+	ViAudioEncoder *encoder = ViEncoderManager::selected(mMetaData->format())[0];
 	mStatus = ViAudioTransmission::Running;
 	mProcess.start(encoder->string(mFilePath));
 	for(int i = 0; i < mBuffer->size(); i += FILE_CHUNK_SIZE)

@@ -91,7 +91,7 @@ void ViBassConnection::populateInputFormats()
 	QList<QString> formats;
 	formats.append("MP3");
 	formats.append("WAVE");
-	mInputFormats = ViFormatManager::formats(formats);
+	mInputFormats = ViFormatManager::selected(formats);
 }
 
 void ViBassConnection::populateOutputFormats()

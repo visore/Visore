@@ -1,45 +1,12 @@
 #ifndef VIWAVEFORMER_H
 #define VIWAVEFORMER_H
 
-#define COMPRESSION_LEVEL 200 //Combine every n milliseonds
-
 #include "viprocessor.h"
 #include "viobject.h"
 #include "vipcmconverter.h"
+#include "viwaveformchunk.h"
 #include <QList>
 #include <QMetaType>
-
-#include <iostream>
-using namespace std;
-
-struct ViWaveFormChunk
-{
-	ViWaveFormChunk()
-	{
-		mData = NULL;
-		mSize = 0;
-	}
-	ViWaveFormChunk(double *data, int size)
-	{
-		mData = data;
-		mSize = size;
-	}
-	~ViWaveFormChunk()
-	{
-		clear();
-	}
-	void clear()
-	{
-		if(mData != NULL)
-		{
-			delete [] mData;
-			mData = NULL;
-		}
-		mSize = 0;
-	}
-	double *mData;
-	int mSize;
-};
 
 class ViWaveFormerThread : public ViProcessorThread
 {

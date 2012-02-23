@@ -39,6 +39,8 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/viaudioformats/viaudioformat/headers
 	${ENGINE}/viaudioencoders/viaudioencoder/headers
 	${ENGINE}/viaudiobuffer/headers
+	${ENGINE}/viwindowfunctions/viwindowfunction/headers
+	${ENGINE}/vispectrumanalyzer/headers
 	${ENGINE}/viwaveformer/headers
 )
 

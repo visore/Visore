@@ -3,6 +3,7 @@
 QSharedPointer<ViAudioEncoder> ViAudioEncoder::mInstance;
 
 ViAudioEncoder::ViAudioEncoder()
+	: ViSingleton()
 {
 	mName = "";
 	mPath = "";

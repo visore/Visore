@@ -2,7 +2,7 @@
 
 ViSpectrum::ViSpectrum(int numberOfPoints)
 {
-	mElements(numberOfPoints);
+	mElements = QVector<ViSpectrumElement>(numberOfPoints);
 	initialize();
 }
 
@@ -26,29 +26,29 @@ const ViSpectrumElement& ViSpectrum::operator[](int index) const
 	return mElements[index];
 }
 
-ViSpectrumIterator ViSpectrum::begin()
+ViSpectrum::ViSpectrumIterator ViSpectrum::begin()
 {
 	return mElements.begin();
 }
 
-ViSpectrumIterator ViSpectrum::end()
+ViSpectrum::ViSpectrumIterator ViSpectrum::end()
 {
 	return mElements.end();
 }
 
-ViSpectrumConstIterator ViSpectrum::begin() const
+ViSpectrum::ViSpectrumConstIterator ViSpectrum::begin() const
 {
 	return mElements.begin();
 }
 
-ViSpectrumConstIterator ViSpectrum::end() const
+ViSpectrum::ViSpectrumConstIterator ViSpectrum::end() const
 {
 	return mElements.end();
 }
 
 void ViSpectrum::initialize()
 {
-	ViSpectrumConstIterator iterator = begin();
+	ViSpectrumIterator iterator = begin();
     for (; iterator != end(); ++iterator)
         *iterator = ViSpectrumElement();
 }

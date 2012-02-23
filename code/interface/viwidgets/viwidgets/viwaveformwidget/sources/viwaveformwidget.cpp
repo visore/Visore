@@ -14,9 +14,10 @@ void ViWaveFormWidgetThread::run()
 	while(!mChunks.isEmpty())
 	{
 		ViWaveFormChunk *chunk = mChunks.takeFirst();
-		for(int i = 0; i < chunk->mSize; ++i)
+		qreal *data = chunk->data();
+		for(int i = 0; i < chunk->size(); ++i)
 		{
-			mCollection.append(chunk->mData[i]);
+			mCollection.append(data[i]);
 		}
 		delete chunk;
 		emit tileAvailable();
@@ -35,21 +36,9 @@ void ViWaveFormWidgetThread::changed(ViWaveFormChunk *chunk)
 	}
 }
 
-void ViWaveFormWidgetThread::positionChanged(qint64 bytes, qint64 milliseconds, qint8 bits)
+void ViWaveFormWidgetThread::positionChanged(ViAudioPosition position)
 {
-	if(bits == 16)
-	{
-		bits = 2;
-	}
-	else if(bits == 32)
-	{
-		bits = 4;
-	}
-	else
-	{
-		bits = 1;
-	}
-	mPosition = bytes / bits;
+	mPosition = position.sample();
 	emit tileAvailable();
 }
 
@@ -59,7 +48,7 @@ ViWaveFormWidget::ViWaveFormWidget(ViAudioEngine *engine, QWidget *parent)
 	mParent = parent;
 	mThread = new ViWaveFormWidgetThread(this);
 	ViObject::connect(mEngine, SIGNAL(waveFormChanged(ViWaveFormChunk*)), mThread, SLOT(changed(ViWaveFormChunk*)));
-	ViObject::connect(mEngine, SIGNAL(positionChanged(qint64, qint64, qint8)), mThread, SLOT(positionChanged(qint64, qint64, qint8)));
+	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), mThread, SLOT(positionChanged(ViAudioPosition)));
 	ViObject::connectQueued(mThread, SIGNAL(tileAvailable()), this, SLOT(repaint()));
 }
 
