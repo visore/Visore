@@ -17,6 +17,7 @@ class ViWaveFormerThread : public ViProcessorThread
 
 	public:
 		ViWaveFormerThread(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QList<int> *sizes);
+		void addTask(qint64 start, qint64 length);
 		void run();
 
 	private:
@@ -25,7 +26,10 @@ class ViWaveFormerThread : public ViProcessorThread
 		int pcmToReal32(char* buffer, double *result, int size);
 
 	private:
+		QList<qint64> mStarts;
+		QList<qint64> mLengths;
 		ViAudioMetaData *mMetaData;
+		QMutex mMutex;
 		int (ViWaveFormerThread::*pcmToReal)(char*, double*, int); //Function pointer
 };
 
@@ -40,6 +44,7 @@ class ViWaveFormer : public ViProcessor
 		ViWaveFormer(ViAudioMetaData *metaData);
 		~ViWaveFormer();
 		void initialize(ViAudioBuffer *buffer);
+		void analyze(qint64 start, qint64 length);
 
 	private:
 		ViAudioMetaData *mMetaData;

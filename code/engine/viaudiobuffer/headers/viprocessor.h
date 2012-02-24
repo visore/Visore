@@ -13,6 +13,7 @@ class ViProcessorThread : public QThread
 
 	public:
 		ViProcessorThread(ViAudioBuffer *buffer, QList<int> *sizes);
+		virtual void addTask(qint64 start, qint64 length) = 0;
 		virtual void run() = 0;
 		
 	protected:

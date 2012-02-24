@@ -63,6 +63,7 @@ class ViAudioEngine : public QObject, public ViError
 	signals:
 		void waveFormChanged(ViWaveFormChunk *chunk);
 		void positionChanged(ViAudioPosition position);
+		void inputChanged(int size);
 
 	public:
 		ViAudioEngine();
@@ -70,6 +71,8 @@ class ViAudioEngine : public QObject, public ViError
 		void setInputFilePath(QString filePath);
 		void setOutputFilePath(QString filePath);
 		void reset();
+
+		void calculateWaveForm(qint64 start, qint64 length);
 
 	private:
 		/*void initializeInputStream(QAudioDeviceInfo deviceInfo, QAudioFormat format);
@@ -87,6 +90,8 @@ class ViAudioEngine : public QObject, public ViError
 		ViFileOutput *mFileOutput;
 		ViAudioProcessingChain *mProcessingChain;
 		ViAudioMetaData *mMetaData;
+
+		ViWaveFormer *mWaveFormer;
 };
 
 #endif

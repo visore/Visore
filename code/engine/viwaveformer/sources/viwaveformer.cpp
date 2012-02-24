@@ -1,5 +1,8 @@
 #include "viwaveformer.h"
 
+#include <iostream>
+using namespace std;
+
 ViWaveFormerThread::ViWaveFormerThread(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QList<int> *sizes)
 	: ViProcessorThread(buffer, sizes)
 {
@@ -19,9 +22,21 @@ ViWaveFormerThread::ViWaveFormerThread(ViAudioBuffer *buffer, ViAudioMetaData *m
 	}
 }
 
+void ViWaveFormerThread::addTask(qint64 start, qint64 length)
+{
+	mMutex.lock();
+	mStarts.append(start);
+	mLengths.append(length);
+	mMutex.unlock();
+	if(!isRunning())
+	{
+		this->start();
+	}
+}
+
 void ViWaveFormerThread::run()
 {
-	while(!mSizes->isEmpty())
+	/*while(!mSizes->isEmpty())
 	{
 		int size = mSizes->first();
 		mSizes->removeFirst();
@@ -30,7 +45,39 @@ void ViWaveFormerThread::run()
 		double *result = new double[size];
 		size = (this->*pcmToReal)(chunk.data(), result, size);
 		emit completed(new ViWaveFormChunk(result, size, mMetaData));
+	}*/
+	//
+	mMutex.lock();
+	while(!mStarts.isEmpty())
+	{
+		
+		qint64 start = mStarts.takeFirst();
+		qint64 length = mLengths.takeFirst();
+
+		/*if(mReadStream->position() + length > )
+		{
+			mMutex.unlock();
+			return;
+		}*/
+		/*if(mReadStream->position() > start)
+		{
+			mReadStream->restart();
+		}*/
+		/*if(mReadStream->position() < start)
+		{
+
+			mReadStream->skipRawData(start);
+		}*/
+		ViAudioBufferChunk chunk;
+		length = mReadStream->read(&chunk, length);
+		double *result = new double[length];
+		length = (this->*pcmToReal)(chunk.data(), result, length);
+
+		emit completed(new ViWaveFormChunk(result, length, mMetaData));
+		
 	}
+	mMutex.unlock();
+	
 }
 
 int ViWaveFormerThread::pcmToReal8(char* buffer, double *result, int size)
@@ -83,4 +130,9 @@ void ViWaveFormer::initialize(ViAudioBuffer *buffer)
 {
 	mThread = new ViWaveFormerThread(buffer, mMetaData, &mSizes);
 	ViObject::connectDirect(mThread, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(completed(ViWaveFormChunk*)));
+}
+
+void ViWaveFormer::analyze(qint64 start, qint64 length)
+{
+	mThread->addTask(start, length);
 }

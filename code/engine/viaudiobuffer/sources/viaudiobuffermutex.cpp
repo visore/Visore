@@ -1,27 +1,17 @@
 #include "viaudiobuffermutex.h"
 
-QSharedPointer<ViAudioBufferMutex> ViAudioBufferMutex::mReadInstance;
-QSharedPointer<ViAudioBufferMutex> ViAudioBufferMutex::mWriteInstance;
+QSharedPointer<ViAudioBufferMutex> ViAudioBufferMutex::mInstance;
 
 ViAudioBufferMutex::ViAudioBufferMutex()
 	: QMutex()
 {
 }
 
-ViAudioBufferMutex* ViAudioBufferMutex::readInstance()
+ViAudioBufferMutex* ViAudioBufferMutex::instance()
 {
-	if(mReadInstance.isNull())
+	if(mInstance.isNull())
 	{
-		mReadInstance = QSharedPointer<ViAudioBufferMutex>(new ViAudioBufferMutex());
+		mInstance = QSharedPointer<ViAudioBufferMutex>(new ViAudioBufferMutex());
 	}
-	return mReadInstance.data();
-}
-
-ViAudioBufferMutex* ViAudioBufferMutex::writeInstance()
-{
-	if(mWriteInstance.isNull())
-	{
-		mWriteInstance = QSharedPointer<ViAudioBufferMutex>(new ViAudioBufferMutex());
-	}
-	return mWriteInstance.data();
+	return mInstance.data();
 }

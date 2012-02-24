@@ -33,10 +33,10 @@ int ViProcessor::id()
 
 void ViProcessor::update(int size)
 {
-	mSizes.append(size);
+	/*mSizes.append(size);
 	if(!mThread->isRunning())
 	{
-		mThread->run();
-		//mThread->start();
-	}
+		//mThread->run();
+		mThread->start();
+	}*/
 }

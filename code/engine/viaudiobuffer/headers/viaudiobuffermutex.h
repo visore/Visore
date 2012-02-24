@@ -7,15 +7,13 @@
 class ViAudioBufferMutex : public QMutex
 {
 	public:
-		static ViAudioBufferMutex* readInstance();
-		static ViAudioBufferMutex* writeInstance();
+		static ViAudioBufferMutex* instance();
 
 	protected:
 		ViAudioBufferMutex();
 
 	private:
-		static QSharedPointer<ViAudioBufferMutex> mReadInstance;
-		static QSharedPointer<ViAudioBufferMutex> mWriteInstance;
+		static QSharedPointer<ViAudioBufferMutex> mInstance;
 };
 
 #endif

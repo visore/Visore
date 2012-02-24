@@ -7,9 +7,6 @@ class ViAudioInput : public ViAudioTransmission
 {
     Q_OBJECT
 
-	signals:
-		void changed(int startIndex, int size);
-
 	public:
 		ViAudioInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL);
 

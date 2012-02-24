@@ -1,6 +1,6 @@
 #include "viaudioposition.h"
 
-ViAudioPosition::ViAudioPosition(qint64 bytes, qint8 bitDepth, qint16 secondsInByte)
+ViAudioPosition::ViAudioPosition(qint64 bytes, qint8 bitDepth, qreal secondsInByte)
 {
 	mBytes = bytes;
 	mBitDepth = bitDepth;
@@ -12,16 +12,8 @@ ViAudioPosition::ViAudioPosition(qint64 bytes, qint8 bitDepth, qint16 secondsInB
 	{
 		mSample = mBytes / (mBitDepth / 8);
 	}
-	if(secondsInByte <= 0)
-	{
-		mSeconds = 0;
-		mMilliseconds = 0;
-	}
-	else
-	{
-		mSeconds = mBytes / secondsInByte;
-		mMilliseconds = mSeconds * 1000;
-	}
+	mSeconds = mBytes * secondsInByte;
+	mMilliseconds = mSeconds * 1000;
 }
 
 qint64 ViAudioPosition::seconds()

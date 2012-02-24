@@ -26,8 +26,7 @@ class ViAudioBufferStream : public QObject, public QDataStream
 		qint64 position();
 
 	private:
-		ViAudioBufferMutex *mReadMutex;
-		ViAudioBufferMutex *mWriteMutex;
+		ViAudioBufferMutex *mMutex;
 		ViAudioBuffer *mBuffer;
 		qint64 mOldSize;
 		int mBufferHeadStart;

@@ -196,6 +196,11 @@ ViAudioPosition ViBassStreamOutput::position()
 		setErrorParameters("ViBassStreamOutput - Position Error", "The palyback position could not be retrieved", ViErrorInfo::MediumFatal);
 		return -1;
 	}
+	//Ensures that the position is not 0 if no data is available
+	if(mBuffer->size() == 0)
+	{
+		position = -1;
+	}
 	return ViAudioPosition(position, mMetaData->bitDepth(), mSecondsInByte);
 }
 

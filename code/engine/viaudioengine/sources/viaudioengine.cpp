@@ -24,13 +24,24 @@ mMetaData = new ViAudioMetaData();
 resetMetaData();
 //mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wav");
 
-
 ViAudioDevice outputDevice;
 outputDevice.setId(-1);
 
 //mFileOutput = mAudioConnection->fileOutput(mBuffer, metaData, "/home/visore/Desktop/testrec.mp3");
 
 mProcessingChain = new ViAudioProcessingChain();
+
+
+
+
+mWaveFormer = new ViWaveFormer(mMetaData);
+mWaveFormer->initialize(mProcessingChain->originalBuffer());
+ViObject::connectDirect(mWaveFormer, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(waveFormChanged(ViWaveFormChunk*)));
+
+
+
+
+
 
 //Make sure the file input is created before the stream input
 mFileInput = mAudioConnection->fileInput(mProcessingChain->originalBuffer(), mMetaData);
@@ -43,11 +54,12 @@ mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->correctedBuffer
 mProcessingChain->attachFileOutput(mFileOutput);
 mProcessingChain->attachStreamOutput(mStreamOutput);
 
-ViWaveFormer *wave = new ViWaveFormer(mMetaData);
-mProcessingChain->attachOriginalProcessor(wave, ViProcessorList::Parallel);
+//ViWaveFormer *wave = new ViWaveFormer(mMetaData);
+//mProcessingChain->attachOriginalProcessor(wave, ViProcessorList::Parallel);
 
 ViObject::connectDirect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
-ViObject::connectDirect(wave, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(waveFormChanged(ViWaveFormChunk*)));
+ViObject::connectDirect(mProcessingChain->originalBuffer(), SIGNAL(changed(int)), this, SIGNAL(inputChanged(int)));
+//ViObject::connectDirect(wave, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(waveFormChanged(ViWaveFormChunk*)));
 
 }
 
@@ -206,4 +218,9 @@ void ViAudioEngine::resetMetaData()
 	mMetaData->setFrequency(44100);
 	mMetaData->setChannels(2);
 	mMetaData->setBitDepth(16);
+}
+
+void ViAudioEngine::calculateWaveForm(qint64 start, qint64 length)
+{
+	mWaveFormer->analyze(start, length);
 }
