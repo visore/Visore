@@ -1,22 +1,21 @@
 #ifndef VIWAVEFORMWIDGET_H
 #define VIWAVEFORMWIDGET_H
 
-#define COMPRESSION_LEVEL_1 1
-#define COMPRESSION_LEVEL_2 10
-#define COMPRESSION_LEVEL_3 100
-#define COMPRESSION_LEVEL_4 500
-#define COMPRESSION_LEVEL_5 1000
-#define COMPRESSION_LEVEL_6 2500
-#define COMPRESSION_LEVEL_7 5000
-#define COMPRESSION_LEVEL_8 7500
-#define COMPRESSION_LEVEL_9 10000
-#define COMPRESSION_LEVEL_10 15000
-#define COMPRESSION_LEVEL_11 20000
-#define COMPRESSION_LEVEL_12 30000
-#define COMPRESSION_LEVEL_13 40000
-#define COMPRESSION_LEVEL_14 50000
-#define COMPRESSION_LEVEL_15 70000
-#define COMPRESSION_LEVEL_16 100000
+#define COMPRESSIONS 14
+#define COMPRESSION_LEVEL_14 100
+#define COMPRESSION_LEVEL_13 500
+#define COMPRESSION_LEVEL_12 1000
+#define COMPRESSION_LEVEL_11 2500
+#define COMPRESSION_LEVEL_10 5000
+#define COMPRESSION_LEVEL_9 7500
+#define COMPRESSION_LEVEL_8 10000
+#define COMPRESSION_LEVEL_7 15000
+#define COMPRESSION_LEVEL_6 20000
+#define COMPRESSION_LEVEL_5 30000
+#define COMPRESSION_LEVEL_4 40000
+#define COMPRESSION_LEVEL_3 50000
+#define COMPRESSION_LEVEL_2 70000
+#define COMPRESSION_LEVEL_1 100000
 
 #include <QWidget>
 #include <QPainter>
@@ -27,13 +26,14 @@
 #include "viobject.h"
 #include "vithememanager.h"
 #include "viwaveform.h"
+#include "viwidgettoolbar.h"
 
 class ViWaveFormWidget;
 
 class ViWaveFormWidgetThread : public QThread
 {
 	Q_OBJECT
-
+		
 	signals:
 		void tileAvailable();
 
@@ -42,19 +42,18 @@ class ViWaveFormWidgetThread : public QThread
 
 	private slots:
 		void changed(ViWaveFormChunk *chunk);
+		void analyze(int size);
 
 	public:
 		ViWaveFormWidgetThread(ViWaveFormWidget *widget);
 		void run();
-		void changeSize();
-		void setCompression(qint32 compression);
 
 	public:
+		QList<qint32> mCompressionLevels;
 		ViWaveFormWidget *mWidget;
 		QList<ViWaveFormChunk*> mChunks;
-		ViWaveFormChunk *mRemains;
 		qint64 mPosition;
-		ViWaveForm mForm;
+		QList<ViWaveForm> mForms;
 		QMutex mMutex;
 };
 
@@ -65,20 +64,19 @@ class ViWaveFormWidget : public ViWidget
 	public:
 		ViWaveFormWidget(ViAudioEngine *engine, QWidget *parent = 0);
 		~ViWaveFormWidget();
-		void analyze();
 		void zoomIn();
 		void zoomOut();
 
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
+		void enterEvent(QEvent *event);
+		void leaveEvent(QEvent *event);
 
-	private:
+	public:
+		ViWidgetToolbar *mToolbar;
 		ViWaveFormWidgetThread *mThread;
-		QWidget *mParent;
-		QList<qint32> mCompressionLevels;
 		qint8 mCurrentCompressionLevel;
-		qint32 mOldPosition;
 };
 
 #endif

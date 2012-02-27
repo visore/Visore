@@ -68,3 +68,7 @@ QColor ViThemeManager::color(int index)
 	return manager->mCurrentTheme->colors()->color(index);
 }
 
+QIcon ViThemeManager::icon(QString name)
+{
+	return QIcon(":/icons/" + name);
+}

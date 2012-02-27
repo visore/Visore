@@ -5,7 +5,25 @@ ViWaveFormWidgetThread::ViWaveFormWidgetThread(ViWaveFormWidget *widget)
 {
 	mWidget = widget;
 	mPosition = -1;
-	mRemains = new ViWaveFormChunk();
+	mCompressionLevels.append(COMPRESSION_LEVEL_1);
+	mCompressionLevels.append(COMPRESSION_LEVEL_2);
+	mCompressionLevels.append(COMPRESSION_LEVEL_3);
+	mCompressionLevels.append(COMPRESSION_LEVEL_4);
+	mCompressionLevels.append(COMPRESSION_LEVEL_5);
+	mCompressionLevels.append(COMPRESSION_LEVEL_6);
+	mCompressionLevels.append(COMPRESSION_LEVEL_7);
+	mCompressionLevels.append(COMPRESSION_LEVEL_8);
+	mCompressionLevels.append(COMPRESSION_LEVEL_9);
+	mCompressionLevels.append(COMPRESSION_LEVEL_10);
+	mCompressionLevels.append(COMPRESSION_LEVEL_11);
+	mCompressionLevels.append(COMPRESSION_LEVEL_12);
+	mCompressionLevels.append(COMPRESSION_LEVEL_13);
+	mCompressionLevels.append(COMPRESSION_LEVEL_14);
+	for(int i = 0; i < COMPRESSIONS; ++i)
+	{
+		mForms.append(ViWaveForm());
+		mForms[i].setCompression(mCompressionLevels[i]);
+	}
 }
 
 void ViWaveFormWidgetThread::run()
@@ -14,28 +32,24 @@ void ViWaveFormWidgetThread::run()
 	while(!mChunks.isEmpty())
 	{
 		ViWaveFormChunk *chunk = mChunks.takeFirst();
+		mMutex.unlock();
 		qreal *data = chunk->data();
 		for(int i = 0; i < chunk->size(); ++i)
 		{
-			mForm.append(data[i]);
+			for(int j = 0; j < mForms.size(); ++j)
+			{
+				mForms[j].append(data[i]);
+			}
 		}
 		delete chunk;
 		emit tileAvailable();
 	}
-	mWidget->analyze();
 	mMutex.unlock();
 }
 
-void ViWaveFormWidgetThread::changeSize()
+void ViWaveFormWidgetThread::analyze(int size)
 {
-	//quit();
-	//mForm.reset();
-	mWidget->analyze();
-}
-
-void ViWaveFormWidgetThread::setCompression(qint32 compression)
-{
-	mForm.setCompression(compression);
+	mWidget->mEngine->calculateWaveForm(mPosition, size);
 }
 
 void ViWaveFormWidgetThread::changed(ViWaveFormChunk *chunk)
@@ -52,87 +66,32 @@ void ViWaveFormWidgetThread::changed(ViWaveFormChunk *chunk)
 void ViWaveFormWidgetThread::positionChanged(ViAudioPosition position)
 {
 	mPosition = position.sample();
-	mWidget->analyze();
 	emit tileAvailable();
 }
 
 ViWaveFormWidget::ViWaveFormWidget(ViAudioEngine *engine, QWidget *parent)
 	: ViWidget(engine, parent)
 {
-	mParent = parent;
+	mToolbar = new ViWidgetToolbar(ViWidgetToolbar::Right, engine, parent);
+	mToolbar->addButton("Zoom In", ViThemeManager::icon("zoomin.png"));
+	mToolbar->addButton("Zoom Out", ViThemeManager::icon("zoomout.png"));
 	mThread = new ViWaveFormWidgetThread(this);
 	ViObject::connect(mEngine, SIGNAL(waveFormChanged(ViWaveFormChunk*)), mThread, SLOT(changed(ViWaveFormChunk*)));
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), mThread, SLOT(positionChanged(ViAudioPosition)));
+	ViObject::connect(mEngine, SIGNAL(inputChanged(int)), mThread, SLOT(analyze(int)));
 	ViObject::connectQueued(mThread, SIGNAL(tileAvailable()), this, SLOT(repaint()));
-	mCompressionLevels.append(COMPRESSION_LEVEL_1);
-	mCompressionLevels.append(COMPRESSION_LEVEL_2);
-	mCompressionLevels.append(COMPRESSION_LEVEL_3);
-	mCompressionLevels.append(COMPRESSION_LEVEL_4);
-	mCompressionLevels.append(COMPRESSION_LEVEL_5);
-	mCompressionLevels.append(COMPRESSION_LEVEL_6);
-	mCompressionLevels.append(COMPRESSION_LEVEL_7);
-	mCompressionLevels.append(COMPRESSION_LEVEL_8);
-	mCompressionLevels.append(COMPRESSION_LEVEL_9);
-	mCompressionLevels.append(COMPRESSION_LEVEL_10);
-	mCompressionLevels.append(COMPRESSION_LEVEL_11);
-	mCompressionLevels.append(COMPRESSION_LEVEL_12);
-	mCompressionLevels.append(COMPRESSION_LEVEL_13);
-	mCompressionLevels.append(COMPRESSION_LEVEL_14);
-	mCompressionLevels.append(COMPRESSION_LEVEL_15);
-	mCompressionLevels.append(COMPRESSION_LEVEL_16);
-	mCurrentCompressionLevel = 4;
-	mThread->setCompression(mCompressionLevels[mCurrentCompressionLevel]);
-	mOldPosition = 0;
+	mCurrentCompressionLevel = 10;
 }
 
 ViWaveFormWidget::~ViWaveFormWidget()
 {
 	mThread->quit();
 	delete mThread;
-}
-
-void ViWaveFormWidget::analyze()
-{
-	int realPosition = mThread->mPosition / mCompressionLevels[mCurrentCompressionLevel];
-	if(mThread->mPosition >= 0)
-	{
-		/*int dif = realPosition - mOldPosition;
-		while(dif > 0 && realPosition / mCompressionLevels[mCurrentCompressionLevel] > width() / 2)
-		{
-			cout<<"remove: "<<dif/ mCompressionLevels[mCurrentCompressionLevel]<<endl;
-			mThread->mForm.removeFirst();
-			mOldPosition = realPosition;
-			//analyze();
-		}*/
-	//	cout<<mThread->mForm.size()<<"  "<<width()<<endl;
-		if(realPosition < width() / 2 && mThread->mForm.size() <= width() / 2)
-		{cout<<mThread->mForm.size()<<"  "<<width()<<endl;
-			mEngine->calculateWaveForm(mThread->mPosition, mCompressionLevels[mCurrentCompressionLevel]);
-			
-		}
-		else if(realPosition >= width() / 2)
-		{
-			cout<<realPosition - mOldPosition<<endl;
-			int dif = realPosition - mOldPosition;
-			if(dif >= 1)
-			{
-				mEngine->calculateWaveForm(mThread->mPosition, mCompressionLevels[mCurrentCompressionLevel]);
-			}
-			mOldPosition = realPosition;
-		}
-	}
-}
-
-void ViWaveFormWidget::resizeEvent(QResizeEvent *event)
-{
-	mThread->mForm.setBufferSize(width());
-	mThread->changeSize();
+	delete mToolbar;
 }
 
 void ViWaveFormWidget::paintEvent(QPaintEvent *event)
 {
-	mThread->mForm.setBufferSize(width());
-
 	resize(mParent->width(), mParent->height());
 	QPainter painter(this);
 	painter.fillRect(rect(), ViThemeManager::color(0));
@@ -143,27 +102,28 @@ void ViWaveFormWidget::paintEvent(QPaintEvent *event)
 
 	int halfHeight = height() / 2;
 	int halfWidth = width() / 2;
-	int position = mThread->mPosition / mCompressionLevels[mCurrentCompressionLevel];
+	int position = mThread->mPosition / mThread->mCompressionLevels[mCurrentCompressionLevel];
 	int start = position - halfWidth;
 	int end = position + halfWidth;
 	if(start < 0)
 	{
 		start = 0;
 	}
-	if(end > mThread->mForm.size())
+	if(end > mThread->mForms[mCurrentCompressionLevel].size())
 	{
-		end = mThread->mForm.size();
+		end = mThread->mForms[mCurrentCompressionLevel].size();
 	}
 	int drawStart = halfWidth + (start - position);
+
 	for(int i = start; i < end; ++i)
 	{
 		painter.setPen(penNormal);
-		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForm.maximum(i)));
-		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForm.minimum(i)));
+		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForms[mCurrentCompressionLevel].maximum(i)));
+		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForms[mCurrentCompressionLevel].minimum(i)));
 
 		painter.setPen(penAverage);
-		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForm.maximumAverage(i)));
-		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForm.minimumAverage(i)));
+		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForms[mCurrentCompressionLevel].maximumAverage(i)));
+		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForms[mCurrentCompressionLevel].minimumAverage(i)));
 		drawStart++;
 	}
 
@@ -178,22 +138,40 @@ void ViWaveFormWidget::paintEvent(QPaintEvent *event)
 	painter.drawLine(halfWidth, 0, halfWidth, height());
 }
 
+void ViWaveFormWidget::resizeEvent(QResizeEvent *event)
+{
+	mToolbar->refresh();
+}
+
+void ViWaveFormWidget::enterEvent(QEvent *event)
+{
+	mToolbar->show();
+}
+
+void ViWaveFormWidget::leaveEvent(QEvent *event)
+{
+	QPoint mouse = QCursor::pos();
+	QPoint position = mapToGlobal(pos());
+	if(mouse.x() < position.x() || mouse.x() > position.x() + width() || mouse.y() < position.y() || mouse.y() > position.y() + height())
+	{
+		mToolbar->hide();
+	}
+}
+
 void ViWaveFormWidget::zoomIn()
 {
 	qint8 level = mCurrentCompressionLevel - 1;
 	if(level >= 0)
 	{
 		mCurrentCompressionLevel = level;
-		mThread->setCompression(mCompressionLevels[mCurrentCompressionLevel]);
 	}
 }
 
 void ViWaveFormWidget::zoomOut()
 {
 	qint8 level = mCurrentCompressionLevel + 1;
-	if(level < mCompressionLevels.size())
+	if(level < mThread->mCompressionLevels.size())
 	{
 		mCurrentCompressionLevel = level;
-		mThread->setCompression(mCompressionLevels[mCurrentCompressionLevel]);
 	}
 }

@@ -4,6 +4,7 @@
 #include "vitheme.h"
 #include "vilibrary.h"
 #include "vilibrarydetector.h"
+#include <QIcon>
 
 class ViThemeManager
 {
@@ -13,6 +14,7 @@ class ViThemeManager
 		~ViThemeManager(); //Must be public for QSharedPointer
 
 		static QColor color(int index);
+		static QIcon icon(QString name);
 		
 	protected:
 		ViThemeManager();

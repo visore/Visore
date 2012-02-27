@@ -28,7 +28,7 @@ QT4_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_WAVEFORMWIDGET_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(viwaveformwidget SHARED ${VI_WRAPPER_HEADERS} ${VI_WAVEFORMWIDGET_SOURCES})
-TARGET_LINK_LIBRARIES(viwaveformwidget ${QT_LIBRARIES} viwidget)
+TARGET_LINK_LIBRARIES(viwaveformwidget ${QT_LIBRARIES} viwidget viwidgettoolbar)
 
 #Install file
 INSTALL(TARGETS viwaveformwidget DESTINATION interface)

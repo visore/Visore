@@ -3,7 +3,6 @@
 ViWaveForm::ViWaveForm()
 {
 	mCompression = 0;
-	mBufferSize = 0;
 	reset();
 }
 
@@ -37,10 +36,6 @@ void ViWaveForm::append(qreal value)
 		if(mMinimumCounter > 0)
 		{
 			mAverageMinimum /= mMinimumCounter;
-		}
-		if(size() >= mBufferSize)
-		{
-			mWave.removeFirst();
 		}
 		mWave.append(new ViAmplitude(mMaximum, mMinimum, mAverageMaximum, mAverageMinimum));
 		reset();
@@ -86,11 +81,6 @@ void ViWaveForm::reset()
 	mMaximumCounter = 0;
 	mMinimumCounter = 0;
 	mTotalCounter = 0;
-}
-
-qreal ViWaveForm::setBufferSize(qint32 size)
-{
-	mBufferSize = size;
 }
 
 void ViWaveForm::removeFirst()

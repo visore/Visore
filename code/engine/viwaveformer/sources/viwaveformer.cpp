@@ -69,7 +69,7 @@ void ViWaveFormerThread::run()
 			mReadStream->skipRawData(start);
 		}*/
 		ViAudioBufferChunk chunk;
-		length = mReadStream->read(&chunk, length);
+		length = mReadStream->read(&chunk, length * mMetaData->bitDepth() / 8);
 		double *result = new double[length];
 		length = (this->*pcmToReal)(chunk.data(), result, length);
 

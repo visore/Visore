@@ -7,10 +7,14 @@
 class ViWidget : public QWidget
 {
 	public:
-		ViWidget(ViAudioEngine *engine ,QWidget *parent = 0);
+		ViWidget(ViAudioEngine *engine, QWidget *parent = 0);
 	 
-	protected:
+	public:
 		ViAudioEngine *mEngine;
+		virtual void refresh();
+
+	protected:
+		QWidget *mParent;
 };
 
 #endif

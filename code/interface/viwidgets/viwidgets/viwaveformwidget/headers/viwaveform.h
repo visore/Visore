@@ -3,9 +3,6 @@
 
 #include "viwave.h"
 
-#include <iostream>
-using namespace std;
-
 class ViWaveForm
 {
 	public:
@@ -16,7 +13,6 @@ class ViWaveForm
 		qreal minimum(qint32 position);
 		qreal maximumAverage(qint32 position);
 		qreal minimumAverage(qint32 position);
-		qreal setBufferSize(qint32 size);
 		void setCompression(qint32 compression);
 		void reset();
 		void removeFirst();
@@ -30,7 +26,6 @@ class ViWaveForm
 		qint64 mMaximumCounter;
 		qint64 mMinimumCounter;
 		qint32 mTotalCounter;
-		qint32 mBufferSize;
 		qint32 mCompression;
 };
 
