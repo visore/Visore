@@ -40,6 +40,8 @@ class ViBassStreamOutput : public ViStreamOutput
 		bool setPosition(ViAudioPosition position);
 		ViAudioPosition position();
 		void bufferChanged(int size);
+		qreal volume();
+		void setVolume(qreal volume);
 
 	protected:
 		void free();

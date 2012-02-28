@@ -4,6 +4,7 @@ ViStreamOutput::ViStreamOutput(ViAudioBuffer *buffer, ViAudioMetaData* metaData,
 	: ViAudioOutput(buffer, metaData)
 {
 	mDevice = device;
+	mVolume = 0;
 }
 
 ViStreamOutput::~ViStreamOutput()

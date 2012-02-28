@@ -168,6 +168,16 @@ void ViAudioEngine::reset()
 	mProcessingChain->reset();
 }
 
+int ViAudioEngine::volume()
+{
+	return mStreamOutput->volume() * 100;
+}
+
+void ViAudioEngine::setVolume(int volume)
+{
+	mStreamOutput->setVolume(volume / 100.0);
+}
+
 void ViAudioEngine::startPlayback()
 {
 	mStreamOutput->start();

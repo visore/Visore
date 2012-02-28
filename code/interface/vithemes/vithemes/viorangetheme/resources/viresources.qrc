@@ -1,7 +1,10 @@
 <RCC>
     <qresource prefix="/">
+
         <file>icons/zoomin.png</file>
         <file>icons/zoomout.png</file>
+        <file>icons/mute.png</file>
+        <file>icons/unmute.png</file>
 		<file>icons/pausenormal.png</file>
 		<file>icons/pauseselected.png</file>
 		<file>icons/playnormal.png</file>
@@ -14,5 +17,8 @@
 		<file>icons/saveselected.png</file>
 		<file>icons/stopnormal.png</file>
 		<file>icons/stopselected.png</file>
+
+		<file>backgrounds/tile.png</file>
+
     </qresource>
 </RCC>

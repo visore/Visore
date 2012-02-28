@@ -7,7 +7,6 @@
 #include "viwidget.h"
 #include "viwidget.h"
 #include "vithememanager.h"
-#include "viwidgettoolbarbutton.h"
 
 class ViWidgetToolbar : public ViWidget
 {
@@ -35,7 +34,7 @@ class ViWidgetToolbar : public ViWidget
 		QBoxLayout *mLayout;
 		QWidget *mCentralWidget;
 		ViWidgetToolbar::ViWidgetToolbarAlign mAlign;
-		QList<ViWidgetToolbarButton*> mButtons;
+		QList<QToolButton*> mButtons;
 };
 
 #endif

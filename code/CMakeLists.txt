@@ -34,6 +34,7 @@ INCLUDE_DIRECTORIES(
 	${INTERFACE}/vithemes/vitheme/headers
 	${INTERFACE}/viwidgets/viwidgets/viwaveformwidget/headers
 	${INTERFACE}/viwidgets/viwidgets/viwidgettoolbar/headers
+	${INTERFACE}/viwidgets/viwidgets/vivolumewidget/headers
 
 	${ENGINE}/viaudioengine/headers
 	${ENGINE}/viaudioconnections/viaudioconnection/headers

@@ -8,9 +8,17 @@ ViMainWindow::ViMainWindow(ViAudioEngine *engine, QWidget *parent)
 
 	mUi = new Ui::ViMainWindow();
 	mUi->setupUi(this);
+	mUi->centralwidget->setStyleSheet("QWidget#centralwidget{ background-image: url(" + ViThemeManager::background("tile.png") + "); }");
 
+	//Wave forms
 	mOriginalWaveWidget = new ViWaveFormWidget(mEngine, ViAudioBuffer::Original, mUi->originalWaveContainer);
+	mUi->originalWaveContainer->layout()->addWidget(mOriginalWaveWidget);
 	mCorrectedWaveWidget = new ViWaveFormWidget(mEngine, ViAudioBuffer::Corrected, mUi->correctedWaveContainer);
+	mUi->correctedWaveContainer->layout()->addWidget(mCorrectedWaveWidget);
+
+	//Volume widget
+	mVolumeWidget = new ViVolumeWidget(mEngine, mUi->volumeContainer);
+	mUi->volumeContainer->layout()->addWidget(mVolumeWidget);
 
 	QObject::connect(mUi->resetButton, SIGNAL(clicked()), this, SLOT(reset()));
 	QObject::connect(mUi->recordButton, SIGNAL(clicked()), this, SLOT(record()));
@@ -34,6 +42,7 @@ ViMainWindow::~ViMainWindow()
 	delete mUi;
 	delete mOriginalWaveWidget;
 	delete mCorrectedWaveWidget;
+	delete mVolumeWidget;
 }
 
 void ViMainWindow::reset()

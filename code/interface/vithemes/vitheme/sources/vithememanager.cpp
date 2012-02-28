@@ -72,3 +72,8 @@ QIcon ViThemeManager::icon(QString name)
 {
 	return QIcon(":/icons/" + name);
 }
+
+QString ViThemeManager::background(QString name)
+{
+	return ":/backgrounds/" + name;
+}

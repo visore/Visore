@@ -213,3 +213,19 @@ void ViBassStreamOutput::checkPosition()
 		emit positionChanged(pos);
 	}
 }
+
+qreal ViBassStreamOutput::volume()
+{
+	float result;
+	if(!BASS_ChannelGetAttribute(mHandle, BASS_ATTRIB_VOL, &result))
+	{
+		setErrorParameters("ViBassStreamOutput - Volume Error", "The volume could not be retrieved", ViErrorInfo::MediumFatal);
+		return -1;
+	}
+	return result;
+}
+
+void ViBassStreamOutput::setVolume(qreal volume)
+{
+	BASS_ChannelSetAttribute(mHandle, BASS_ATTRIB_VOL, volume);
+}

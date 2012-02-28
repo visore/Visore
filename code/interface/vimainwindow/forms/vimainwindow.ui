@@ -15,7 +15,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="5">
+    <item row="0" column="5" colspan="2">
      <widget class="QWidget" name="widget" native="true">
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="1">
@@ -148,22 +148,23 @@
       </layout>
      </widget>
     </item>
-    <item row="2" column="5">
-     <widget class="QPushButton" name="pushButton">
-      <property name="text">
-       <string>PushButton</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="5">
+    <item row="2" column="5" colspan="2">
      <widget class="QWidget" name="originalWaveContainer" native="true">
       <property name="styleSheet">
        <string notr="true"/>
       </property>
+      <layout class="QGridLayout" name="gridLayout_4"/>
      </widget>
     </item>
-    <item row="4" column="5">
-     <widget class="QWidget" name="correctedWaveContainer" native="true"/>
+    <item row="1" column="6">
+     <widget class="QWidget" name="volumeContainer" native="true">
+      <layout class="QGridLayout" name="gridLayout_6"/>
+     </widget>
+    </item>
+    <item row="3" column="5" colspan="2">
+     <widget class="QWidget" name="correctedWaveContainer" native="true">
+      <layout class="QGridLayout" name="gridLayout_5"/>
+     </widget>
     </item>
    </layout>
   </widget>

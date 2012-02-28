@@ -6,6 +6,7 @@
 #include <QBoxLayout>
 #include "viaudioengine.h"
 #include "viwaveformwidget.h"
+#include "vivolumewidget.h"
 #include "vithememanager.h"
 
 namespace Ui
@@ -41,8 +42,11 @@ class ViMainWindow : public QMainWindow
 
 	private:
 		ViAudioEngine *mEngine;
+
 		ViWaveFormWidget *mOriginalWaveWidget;
 		ViWaveFormWidget *mCorrectedWaveWidget;
+		ViVolumeWidget *mVolumeWidget;
+
 		bool mIsRecording;
 		bool mIsPlaying;
 		bool mIsPaused;

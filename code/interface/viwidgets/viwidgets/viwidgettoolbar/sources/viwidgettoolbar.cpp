@@ -22,6 +22,20 @@ ViWidgetToolbar::ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, Vi
 			border-width: 3px;\
 			background: rgba(" + QString::number(ViThemeManager::color(1).red()) + ", " + QString::number(ViThemeManager::color(1).green()) + ", " + QString::number(ViThemeManager::color(1).blue()) + ", 175);\
 		}\
+		.QToolButton{\
+			border-radius: 7px;\
+			border-style: solid;\
+			border-width: 2px;\
+			border-color: transparent;\
+			padding: 5px;\
+			background: transparent;\
+		}\
+		.QToolButton:hover{\
+			border-color: rgb(" + QString::number(ViThemeManager::color(15).red()) + ", " + QString::number(ViThemeManager::color(15).green()) + ", " + QString::number(ViThemeManager::color(15).blue()) + ");\
+		}\
+		.QToolButton:pressed{\
+			background: rgba(" + QString::number(ViThemeManager::color(15).red()) + ", " + QString::number(ViThemeManager::color(15).green()) + ", " + QString::number(ViThemeManager::color(15).blue()) + ", 80);\
+		}\
 	");
 	mLayout->setContentsMargins(5, 5, 5, 5);
 	hide();
@@ -63,7 +77,7 @@ void ViWidgetToolbar::refresh()
 
 void ViWidgetToolbar::addButton(QString text, QIcon icon, ViWidget *widget, const char *function)
 {
-	ViWidgetToolbarButton *button = new ViWidgetToolbarButton(mButtons.size(), mCentralWidget);
+	QToolButton *button = new QToolButton(mCentralWidget);
 	ViObject::connect(button, SIGNAL(clicked()), widget, function);
 	button->setIcon(icon);
 	button->setText(text);

@@ -59,6 +59,7 @@ class ViAudioEngine : public QObject, public ViError
 		void setStreamPosition(ViAudioPosition position);
 		void startOutputFile();
 		void stopOutputFile();
+		void setVolume(int volume);
 
 	signals:
 		void originalWaveChanged(ViWaveFormChunk *chunk);
@@ -73,6 +74,7 @@ class ViAudioEngine : public QObject, public ViError
 		void setInputFilePath(QString filePath);
 		void setOutputFilePath(QString filePath);
 		void reset();
+		int volume();
 
 		void calculateWaveForm(ViAudioBuffer::ViAudioBufferType type, qint64 start, qint64 length);
 
