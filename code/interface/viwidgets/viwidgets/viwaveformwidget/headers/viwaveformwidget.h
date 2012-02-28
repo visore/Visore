@@ -33,7 +33,9 @@ class ViWaveFormWidget;
 class ViWaveFormWidgetThread : public QThread
 {
 	Q_OBJECT
-		
+
+	friend class ViWaveFormWidget;
+
 	signals:
 		void tileAvailable();
 
@@ -48,7 +50,7 @@ class ViWaveFormWidgetThread : public QThread
 		ViWaveFormWidgetThread(ViWaveFormWidget *widget);
 		void run();
 
-	public:
+	private:
 		QList<qint32> mCompressionLevels;
 		ViWaveFormWidget *mWidget;
 		QList<ViWaveFormChunk*> mChunks;
@@ -76,7 +78,7 @@ class ViWaveFormWidget : public ViWidget
 		void enterEvent(QEvent *event);
 		void leaveEvent(QEvent *event);
 
-	public:
+	private:
 		ViWidgetToolbar *mToolbar;
 		ViWaveFormWidgetThread *mThread;
 		qint8 mCurrentCompressionLevel;
