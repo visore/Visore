@@ -55,17 +55,20 @@ class ViWaveFormWidgetThread : public QThread
 		qint64 mPosition;
 		QList<ViWaveForm> mForms;
 		QMutex mMutex;
+		ViAudioBuffer::ViAudioBufferType mBufferType;
 };
 
 class ViWaveFormWidget : public ViWidget
 {
 	Q_OBJECT
 
-	public:
-		ViWaveFormWidget(ViAudioEngine *engine, QWidget *parent = 0);
-		~ViWaveFormWidget();
+	public slots:
 		void zoomIn();
 		void zoomOut();
+
+	public:
+		ViWaveFormWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent = 0);
+		~ViWaveFormWidget();
 
 	protected:
 		void paintEvent(QPaintEvent *event);

@@ -14,14 +14,16 @@ ViWidgetToolbar::ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, Vi
 		mLayout = new QVBoxLayout(mCentralWidget);
 	}
 	setStyleSheet
-	(".QWidget{\
-		border-radius: 10px;\
-		border-style: solid;\
-		border-color: rgb(" + QString::number(ViThemeManager::color(1).red()) + ", " + QString::number(ViThemeManager::color(1).green()) + ", " + QString::number(ViThemeManager::color(1).blue()) + ");\
-		border-width: 3px;\
-		background: rgba(" + QString::number(ViThemeManager::color(2).red()) + ", " + QString::number(ViThemeManager::color(2).green()) + ", " + QString::number(ViThemeManager::color(2).blue()) + ", 80);\
-	}");
-	mLayout->setContentsMargins(10, 10, 10, 10);
+	("\
+		.QWidget{\
+			border-radius: 10px;\
+			border-style: solid;\
+			border-color: rgb(" + QString::number(ViThemeManager::color(1).red()) + ", " + QString::number(ViThemeManager::color(1).green()) + ", " + QString::number(ViThemeManager::color(1).blue()) + ");\
+			border-width: 3px;\
+			background: rgba(" + QString::number(ViThemeManager::color(1).red()) + ", " + QString::number(ViThemeManager::color(1).green()) + ", " + QString::number(ViThemeManager::color(1).blue()) + ", 175);\
+		}\
+	");
+	mLayout->setContentsMargins(5, 5, 5, 5);
 	hide();
 }
 
@@ -31,6 +33,7 @@ ViWidgetToolbar::~ViWidgetToolbar()
 	delete mCentralWidget;
 	for(int i = 0; i < mButtons.size(); ++i)
 	{
+		ViObject::disconnect(mButtons[i], SIGNAL(clickedWithId(qint8)), this, SIGNAL(buttonClicked(qint8)));
 		delete mButtons[i];
 	}
 }
@@ -58,15 +61,13 @@ void ViWidgetToolbar::refresh()
 	}
 }
 
-void ViWidgetToolbar::addButton(QString text, QIcon icon)
+void ViWidgetToolbar::addButton(QString text, QIcon icon, ViWidget *widget, const char *function)
 {
-cout<<icon.name().toAscii().data()<<endl;
-
-
-	QToolButton *button = new QToolButton(mCentralWidget);
+	ViWidgetToolbarButton *button = new ViWidgetToolbarButton(mButtons.size(), mCentralWidget);
+	ViObject::connect(button, SIGNAL(clicked()), widget, function);
 	button->setIcon(icon);
 	button->setText(text);
-	button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	button->setToolButtonStyle(Qt::ToolButtonIconOnly);
 	mLayout->addWidget(button);
 	mButtons.append(button);
 	refresh();

@@ -9,10 +9,9 @@ ViMainWindow::ViMainWindow(ViAudioEngine *engine, QWidget *parent)
 	mUi = new Ui::ViMainWindow();
 	mUi->setupUi(this);
 
-mUi->waveFormContainer->resize(580, 100);
-	mWaveFormWidget = new ViWaveFormWidget(mEngine, mUi->waveFormContainer);
+	mOriginalWaveWidget = new ViWaveFormWidget(mEngine, ViAudioBuffer::Original, mUi->originalWaveContainer);
+	mCorrectedWaveWidget = new ViWaveFormWidget(mEngine, ViAudioBuffer::Corrected, mUi->correctedWaveContainer);
 
-//selectFileInput();
 	QObject::connect(mUi->resetButton, SIGNAL(clicked()), this, SLOT(reset()));
 	QObject::connect(mUi->recordButton, SIGNAL(clicked()), this, SLOT(record()));
 	QObject::connect(mUi->saveButton, SIGNAL(clicked()), this, SLOT(save()));
@@ -25,12 +24,16 @@ mUi->waveFormContainer->resize(580, 100);
 	mIsRecording = false;
 	mIsPlaying = false;
 	mIsPaused = false;
+	setRecording(mIsRecording);
+	setPlaying(mIsPlaying);
+	setPausing(mIsPaused);
 }
 
 ViMainWindow::~ViMainWindow()
 {
 	delete mUi;
-	delete mWaveFormWidget;
+	delete mOriginalWaveWidget;
+	delete mCorrectedWaveWidget;
 }
 
 void ViMainWindow::reset()
@@ -102,12 +105,12 @@ void ViMainWindow::setRecording(bool active)
 	if(active)
 	{
 		mIsRecording = true;
-		mUi->recordButton->setIcon(QIcon(":/vimainwindow/icons/recordselected.png"));
+		mUi->recordButton->setIcon(ViThemeManager::icon("recordselected.png"));
 	}
 	else
 	{
 		mIsRecording = false;
-		mUi->recordButton->setIcon(QIcon(":/vimainwindow/icons/recordnormal.png"));
+		mUi->recordButton->setIcon(ViThemeManager::icon("recordnormal.png"));
 	}
 }
 
@@ -116,12 +119,12 @@ void ViMainWindow::setPlaying(bool active)
 	if(active)
 	{
 		mIsPlaying = true;
-		mUi->playButton->setIcon(QIcon(":/vimainwindow/icons/playselected.png"));
+		mUi->playButton->setIcon(ViThemeManager::icon("playselected.png"));
 	}
 	else
 	{
 		mIsPlaying = false;
-		mUi->playButton->setIcon(QIcon(":/vimainwindow/icons/playnormal.png"));
+		mUi->playButton->setIcon(ViThemeManager::icon("playnormal.png"));
 	}
 }
 
@@ -130,11 +133,11 @@ void ViMainWindow::setPausing(bool active)
 	if(active)
 	{
 		mIsPaused = true;
-		mUi->pauseButton->setIcon(QIcon(":/vimainwindow/icons/pauseselected.png"));
+		mUi->pauseButton->setIcon(ViThemeManager::icon("pauseselected.png"));
 	}
 	else
 	{
 		mIsPaused = false;
-		mUi->pauseButton->setIcon(QIcon(":/vimainwindow/icons/pausenormal.png"));
+		mUi->pauseButton->setIcon(ViThemeManager::icon("pausenormal.png"));
 	}
 }

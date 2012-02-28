@@ -5,10 +5,9 @@
 #include <QVBoxLayout>
 #include <QToolButton>
 #include "viwidget.h"
+#include "viwidget.h"
 #include "vithememanager.h"
-
-#include <iostream>
-using namespace std;
+#include "viwidgettoolbarbutton.h"
 
 class ViWidgetToolbar : public ViWidget
 {
@@ -28,13 +27,15 @@ class ViWidgetToolbar : public ViWidget
 		ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, ViAudioEngine *engine, QWidget *parent = 0);
 		~ViWidgetToolbar();
 		void refresh();
-		void addButton(QString text, QIcon icon);
+
+		//Specify the widget and the function to call on the widget. Use SLOT(...) as last parameter
+		void addButton(QString text, QIcon icon, ViWidget *widget, const char *function);
 
 	private:
 		QBoxLayout *mLayout;
 		QWidget *mCentralWidget;
 		ViWidgetToolbar::ViWidgetToolbarAlign mAlign;
-		QList<QToolButton*> mButtons;
+		QList<ViWidgetToolbarButton*> mButtons;
 };
 
 #endif

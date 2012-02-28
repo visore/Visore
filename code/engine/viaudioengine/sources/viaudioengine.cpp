@@ -34,9 +34,12 @@ mProcessingChain = new ViAudioProcessingChain();
 
 
 
-mWaveFormer = new ViWaveFormer(mMetaData);
-mWaveFormer->initialize(mProcessingChain->originalBuffer());
-ViObject::connectDirect(mWaveFormer, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(waveFormChanged(ViWaveFormChunk*)));
+mOriginalWaveFormer = new ViWaveFormer(mMetaData);
+mCorrectedWaveFormer = new ViWaveFormer(mMetaData);
+mOriginalWaveFormer->initialize(mProcessingChain->originalBuffer());
+mCorrectedWaveFormer->initialize(mProcessingChain->correctedBuffer());
+ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(originalWaveChanged(ViWaveFormChunk*)));
+ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(correctedWaveChanged(ViWaveFormChunk*)));
 
 
 
@@ -58,7 +61,8 @@ mProcessingChain->attachStreamOutput(mStreamOutput);
 //mProcessingChain->attachOriginalProcessor(wave, ViProcessorList::Parallel);
 
 ViObject::connectDirect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
-ViObject::connectDirect(mProcessingChain->originalBuffer(), SIGNAL(changed(int)), this, SIGNAL(inputChanged(int)));
+ViObject::connectDirect(mProcessingChain->originalBuffer(), SIGNAL(changed(int)), this, SIGNAL(originalBufferChanged(int)));
+ViObject::connectDirect(mProcessingChain->correctedBuffer(), SIGNAL(changed(int)), this, SIGNAL(correctedBufferChanged(int)));
 //ViObject::connectDirect(wave, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(waveFormChanged(ViWaveFormChunk*)));
 
 }
@@ -220,7 +224,14 @@ void ViAudioEngine::resetMetaData()
 	mMetaData->setBitDepth(16);
 }
 
-void ViAudioEngine::calculateWaveForm(qint64 start, qint64 length)
+void ViAudioEngine::calculateWaveForm(ViAudioBuffer::ViAudioBufferType type, qint64 start, qint64 length)
 {
-	mWaveFormer->analyze(start, length);
+	if(type == ViAudioBuffer::Original)
+	{
+		mOriginalWaveFormer->analyze(start, length);
+	}
+	else
+	{
+		mCorrectedWaveFormer->analyze(start, length);
+	}
 }

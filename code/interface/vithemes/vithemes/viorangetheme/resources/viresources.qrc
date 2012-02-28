@@ -2,5 +2,17 @@
     <qresource prefix="/">
         <file>icons/zoomin.png</file>
         <file>icons/zoomout.png</file>
+		<file>icons/pausenormal.png</file>
+		<file>icons/pauseselected.png</file>
+		<file>icons/playnormal.png</file>
+		<file>icons/playselected.png</file>
+		<file>icons/recordnormal.png</file>
+		<file>icons/recordselected.png</file>
+		<file>icons/resetnormal.png</file>
+		<file>icons/resetselected.png</file>
+		<file>icons/savenormal.png</file>
+		<file>icons/saveselected.png</file>
+		<file>icons/stopnormal.png</file>
+		<file>icons/stopselected.png</file>
     </qresource>
 </RCC>

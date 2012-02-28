@@ -14,6 +14,11 @@ class ViAudioBuffer : public QObject
 		void changed(int size, int id = -1);
 
 	public:
+		enum ViAudioBufferType
+		{
+			Original = 0,
+			Corrected= 1
+		};
 		ViAudioBuffer(QObject *parent = 0, int bufferHeadStart = 100000);
 		~ViAudioBuffer();
 		QByteArray* data();

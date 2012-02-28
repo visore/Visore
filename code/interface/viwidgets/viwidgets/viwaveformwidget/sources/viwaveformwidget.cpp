@@ -49,7 +49,7 @@ void ViWaveFormWidgetThread::run()
 
 void ViWaveFormWidgetThread::analyze(int size)
 {
-	mWidget->mEngine->calculateWaveForm(mPosition, size);
+	mWidget->mEngine->calculateWaveForm(mBufferType, mPosition, size);
 }
 
 void ViWaveFormWidgetThread::changed(ViWaveFormChunk *chunk)
@@ -69,16 +69,27 @@ void ViWaveFormWidgetThread::positionChanged(ViAudioPosition position)
 	emit tileAvailable();
 }
 
-ViWaveFormWidget::ViWaveFormWidget(ViAudioEngine *engine, QWidget *parent)
+ViWaveFormWidget::ViWaveFormWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
 	: ViWidget(engine, parent)
 {
 	mToolbar = new ViWidgetToolbar(ViWidgetToolbar::Right, engine, parent);
-	mToolbar->addButton("Zoom In", ViThemeManager::icon("zoomin.png"));
-	mToolbar->addButton("Zoom Out", ViThemeManager::icon("zoomout.png"));
+	mToolbar->addButton("Zoom In", ViThemeManager::icon("zoomin.png"), this, SLOT(zoomIn()));
+	mToolbar->addButton("Zoom Out", ViThemeManager::icon("zoomout.png"), this, SLOT(zoomOut()));
 	mThread = new ViWaveFormWidgetThread(this);
-	ViObject::connect(mEngine, SIGNAL(waveFormChanged(ViWaveFormChunk*)), mThread, SLOT(changed(ViWaveFormChunk*)));
+	mThread->mBufferType = type;
+
+	if(type == ViAudioBuffer::Original)
+	{
+		ViObject::connect(mEngine, SIGNAL(originalWaveChanged(ViWaveFormChunk*)), mThread, SLOT(changed(ViWaveFormChunk*)));
+		ViObject::connect(mEngine, SIGNAL(originalBufferChanged(int)), mThread, SLOT(analyze(int)));
+	}
+	else
+	{
+		ViObject::connect(mEngine, SIGNAL(correctedWaveChanged(ViWaveFormChunk*)), mThread, SLOT(changed(ViWaveFormChunk*)));
+		ViObject::connect(mEngine, SIGNAL(correctedBufferChanged(int)), mThread, SLOT(analyze(int)));
+	}
+
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), mThread, SLOT(positionChanged(ViAudioPosition)));
-	ViObject::connect(mEngine, SIGNAL(inputChanged(int)), mThread, SLOT(analyze(int)));
 	ViObject::connectQueued(mThread, SIGNAL(tileAvailable()), this, SLOT(repaint()));
 	mCurrentCompressionLevel = 10;
 }
@@ -160,18 +171,20 @@ void ViWaveFormWidget::leaveEvent(QEvent *event)
 
 void ViWaveFormWidget::zoomIn()
 {
-	qint8 level = mCurrentCompressionLevel - 1;
-	if(level >= 0)
-	{
-		mCurrentCompressionLevel = level;
-	}
-}
-
-void ViWaveFormWidget::zoomOut()
-{
 	qint8 level = mCurrentCompressionLevel + 1;
 	if(level < mThread->mCompressionLevels.size())
 	{
 		mCurrentCompressionLevel = level;
 	}
+	repaint();
+}
+
+void ViWaveFormWidget::zoomOut()
+{
+	qint8 level = mCurrentCompressionLevel - 1;
+	if(level >= 0)
+	{
+		mCurrentCompressionLevel = level;
+	}
+	repaint();
 }
