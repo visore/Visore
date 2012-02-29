@@ -3,10 +3,10 @@
 ViButton::ViButton(QWidget *parent)
 	: QWidget(parent)
 {
-	setSize(46, 46);
 	mIsHover = false;
 	mIsCheckable = false;
 	mIsChecked = false;
+	mIsPressed = false;
 }
 
 ViButton::~ViButton()
@@ -19,16 +19,27 @@ void ViButton::setSize(int width, int height)
 	setMaximumSize(width, height);
 }
 
+void ViButton::setCheckable()
+{
+	mIsCheckable = true;
+}
+
+void ViButton::setChecked(bool checked)
+{
+	mIsChecked = checked;
+	repaint();
+}
+
 void ViButton::setNormalIcon(QImage image)
 {
 	mNormalImage = image;
+	setSize(mNormalImage.width() + 8, mNormalImage.height() + 8);
 	repaint();
 }
 
 void ViButton::setCheckedIcon(QImage image)
 {
 	mCheckedImage = image;
-	mIsCheckable = true;
 	repaint();
 }
 
@@ -40,74 +51,25 @@ void ViButton::paintEvent(QPaintEvent *event)
 
 	if(mIsHover)
 	{
-		painter.setPen(Qt::NoPen);
-		painter.setRenderHint(QPainter::Antialiasing, true);
-
-		QColor color = ViThemeManager::color(14);
-		color.setAlpha(150);
-		QGradient gradient;
-		gradient.setColorAt(1, Qt::transparent);
-		gradient.setColorAt(0.8, ViThemeManager::color(14));
-		gradient.setColorAt(0.7, color);
-		gradient.setColorAt(0, color);
-
-		QLinearGradient linearGradient;
-
-		QPainterPath clip;
-		clip.moveTo(0, 0);
-		clip.lineTo(width(), 0);
-		clip.lineTo(0, height());
-		clip.lineTo(width(), height());
-		clip.closeSubpath();
-		painter.setClipPath(clip);
-
-		linearGradient = QLinearGradient(0, 0, width(), halfHeight);
-		linearGradient.setStops(gradient.stops());
-		linearGradient.setStart(halfWidth, halfHeight);
-		linearGradient.setFinalStop(halfWidth, 0);
-		painter.setBrush(linearGradient);
-		painter.drawRect(0, 0, width(), halfHeight);
-
-		linearGradient = QLinearGradient(0, 0, width(), halfHeight);
-		linearGradient.setStops(gradient.stops());
-		linearGradient.setStart(halfWidth, halfHeight);
-		linearGradient.setFinalStop(halfWidth, height());
-		painter.setBrush(linearGradient);
-		painter.drawRect(0, halfHeight, width(), halfHeight);
-
-		QPainterPath clip2;
-		clip2.moveTo(width(), 0);
-		clip2.lineTo(width(), height());
-		clip2.lineTo(0, 0);
-		clip2.lineTo(0, height());
-		clip2.closeSubpath();
-		painter.setClipPath(clip2);
-
-		linearGradient = QLinearGradient(0, 0, halfWidth, height());
-		linearGradient.setStops(gradient.stops());
-		linearGradient.setStart(halfWidth, halfHeight);
-		linearGradient.setFinalStop(width(), halfHeight);
-		painter.setBrush(linearGradient);
-		painter.drawRect(halfWidth, 0, width(), height());
-
-		linearGradient = QLinearGradient(0, 0, halfWidth, height());
-		linearGradient.setStops(gradient.stops());
-		linearGradient.setStart(halfWidth, halfHeight);
-		linearGradient.setFinalStop(0, halfHeight);
-		painter.setBrush(linearGradient);
-		painter.drawRect(0, 0, halfWidth, height());
-
-		painter.setClipRect(0, 0, width(), height());
+		QImage gradient = ViGradientCreator::createGradient(ViGradientCreator::Rectangle, width(), height());
+		painter.drawImage(rect(), gradient, gradient.rect());
 	}
 
-	if(!mIsChecked || !mIsCheckable)
+	if(mIsPressed)
 	{
-		QRect rectangle(halfWidth - mNormalImage.width() / 2, halfHeight- mNormalImage.height() / 2, mNormalImage.width(), mNormalImage.height());
+		int smallerWidth = (mCheckedImage.width() - mCheckedImage.width() * 0.02);
+		int smallerHeight = (mCheckedImage.height() - mCheckedImage.height() * 0.02);
+		QRect rectangle(halfWidth - smallerWidth / 2, halfHeight - smallerHeight / 2, smallerWidth, smallerHeight);
+		painter.drawImage(rectangle, mCheckedImage, mCheckedImage.rect());
+	}
+	else if(!mIsChecked || !mIsCheckable)
+	{
+		QRect rectangle(halfWidth - mNormalImage.width() / 2, halfHeight - mNormalImage.height() / 2, mNormalImage.width(), mNormalImage.height());
 		painter.drawImage(rectangle, mNormalImage, mNormalImage.rect());
 	}
 	else
 	{
-		QRect rectangle(halfWidth - mCheckedImage.width() / 2, halfHeight- mCheckedImage.height() / 2, mCheckedImage.width(), mCheckedImage.height());
+		QRect rectangle(halfWidth - mCheckedImage.width() / 2, halfHeight - mCheckedImage.height() / 2, mCheckedImage.width(), mCheckedImage.height());
 		painter.drawImage(rectangle, mCheckedImage, mCheckedImage.rect());
 	}
 }
@@ -126,14 +88,21 @@ void ViButton::leaveEvent(QEvent *event)
 
 void ViButton::mouseReleaseEvent(QMouseEvent *event)
 {
+	mIsPressed = false;
 	if(mIsCheckable)
 	{
 		mIsChecked = !mIsChecked;
 		emit clicked(mIsChecked);
-		repaint();
 	}
 	else
 	{
 		emit clicked();
 	}
+	repaint();
+}
+
+void ViButton::mousePressEvent(QMouseEvent *event)
+{
+	mIsPressed = true;
+	repaint();
 }

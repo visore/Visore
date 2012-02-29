@@ -4,10 +4,7 @@
 #include <QWidget>
 #include <QPainter>
 #include <QLinearGradient>
-#include "vithememanager.h"
-
-#include <iostream>
-using namespace std;
+#include "vigradientcreator.h"
 
 class ViButton : public QWidget
 {
@@ -20,6 +17,8 @@ class ViButton : public QWidget
 		ViButton(QWidget *parent = 0);
 		~ViButton();
 		void setSize(int width, int height);
+		void setCheckable();
+		void setChecked(bool checked);
 		void setNormalIcon(QImage image);
 		void setCheckedIcon(QImage image);
 
@@ -28,6 +27,7 @@ class ViButton : public QWidget
 		void enterEvent(QEvent *event);
 		void leaveEvent(QEvent *event);
 		void mouseReleaseEvent(QMouseEvent *event);
+		void mousePressEvent(QMouseEvent *event);
 
 	private:
 		QImage mNormalImage;
@@ -35,6 +35,7 @@ class ViButton : public QWidget
 		bool mIsHover;
 		bool mIsCheckable;
 		bool mIsChecked;
+		bool mIsPressed;
 };
 
 #endif

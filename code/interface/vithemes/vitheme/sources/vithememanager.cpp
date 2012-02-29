@@ -70,15 +70,18 @@ QColor ViThemeManager::color(int index)
 
 QIcon ViThemeManager::icon(QString name)
 {
+	ViThemeManager::instance();
 	return QIcon(":/icons/" + name);
 }
 
 QImage ViThemeManager::image(QString name)
 {
+	ViThemeManager::instance();
 	return QImage(":/icons/" + name);
 }
 
 QString ViThemeManager::background(QString name)
 {
+	ViThemeManager::instance();
 	return ":/backgrounds/" + name;
 }

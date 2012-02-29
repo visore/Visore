@@ -7,6 +7,7 @@
 #include "viaudioengine.h"
 #include "viwaveformwidget.h"
 #include "vivolumewidget.h"
+#include "viplaybackwidget.h"
 #include "vithememanager.h"
 
 namespace Ui
@@ -19,12 +20,6 @@ class ViMainWindow : public QMainWindow
 	Q_OBJECT
 
 	private slots:
-		void reset();
-		void record();
-		void save();
-		void play();
-		void pause();
-		void stop();
 		void selectLineInput();
 		void selectFileInput();
 
@@ -33,23 +28,15 @@ class ViMainWindow : public QMainWindow
 		~ViMainWindow();
 
 	private:
-		void setRecording(bool active);
-		void setPlaying(bool active);
-		void setPausing(bool active);
-
-	private:
 		Ui::ViMainWindow *mUi;
 
 	private:
 		ViAudioEngine *mEngine;
 
+		ViPlaybackWidget *mPlaybackWidget;
 		ViWaveFormWidget *mOriginalWaveWidget;
 		ViWaveFormWidget *mCorrectedWaveWidget;
 		ViVolumeWidget *mVolumeWidget;
-
-		bool mIsRecording;
-		bool mIsPlaying;
-		bool mIsPaused;
 };
 
 #endif

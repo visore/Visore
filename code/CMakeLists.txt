@@ -30,12 +30,14 @@ INCLUDE_DIRECTORIES(
 	${ESSENTIALS}/headers
 
 	${INTERFACE}/vimainwindow/headers
+	${INTERFACE}/vigradientcreator/headers
 	${INTERFACE}/viwidgets/viwidget/headers
 	${INTERFACE}/vithemes/vitheme/headers
 	${INTERFACE}/viwidgets/viwidgets/viwaveformwidget/headers
 	${INTERFACE}/viwidgets/viwidgets/viwidgettoolbar/headers
 	${INTERFACE}/viwidgets/viwidgets/vivolumewidget/headers
 	${INTERFACE}/viwidgets/viwidgets/vibutton/headers
+	${INTERFACE}/viwidgets/viwidgets/viplaybackwidget/headers
 
 	${ENGINE}/viaudioengine/headers
 	${ENGINE}/viaudioconnections/viaudioconnection/headers
