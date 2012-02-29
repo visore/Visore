@@ -37,6 +37,7 @@ INCLUDE_DIRECTORIES(
 	${INTERFACE}/viwidgets/viwidgets/viwidgettoolbar/headers
 	${INTERFACE}/viwidgets/viwidgets/vivolumewidget/headers
 	${INTERFACE}/viwidgets/viwidgets/vibutton/headers
+	${INTERFACE}/viwidgets/viwidgets/vidialer/headers
 	${INTERFACE}/viwidgets/viwidgets/viplaybackwidget/headers
 
 	${ENGINE}/viaudioengine/headers
@@ -56,6 +57,7 @@ SET(CMAKE_INSTALL_RPATH
 	"${CMAKE_INSTALL_PREFIX}/engine/connections"
 	"${CMAKE_INSTALL_PREFIX}/engine/formats"
 	"${CMAKE_INSTALL_PREFIX}/interface"
+	"${CMAKE_INSTALL_PREFIX}/interface/widgets"
 )
 
 #Initiate sub-directories

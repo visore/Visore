@@ -9,8 +9,11 @@ ViVolumeWidget::ViVolumeWidget(ViAudioEngine *engine, QWidget *parent)
 	ViObject::connect(mUi->volumeDial, SIGNAL(valueChanged(int)), mEngine, SLOT(setVolume(int)));
 	ViObject::connect(mUi->volumeDial, SIGNAL(valueChanged(int)), this, SLOT(volumeChanged(int)));
 	volumeChanged();
+	mUi->volumeDial->setSize(80, 80);
 	mUi->muteButton->setNormalIcon(ViThemeManager::image("unmute.png"));
 	mUi->muteButton->setCheckedIcon(ViThemeManager::image("mute.png"));
+	setMinimumSize(100, 120);
+	setMaximumSize(100, 120);
 }
 
 ViVolumeWidget::~ViVolumeWidget()

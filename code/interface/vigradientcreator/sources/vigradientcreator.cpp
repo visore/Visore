@@ -87,5 +87,25 @@ QImage ViGradientCreator::rectangleGradient(int width, int height)
 
 QImage ViGradientCreator::radialGradient(int width, int height)
 {
+	QImage::Format format = QImage::Format_ARGB32;
+    QImage buffer(qCeil(width), qCeil(height), format);
+	buffer.fill(qRgba(255, 255, 255, 0));
 
+	QPainter painter(&buffer);
+	painter.setPen(Qt::NoPen);
+	painter.setRenderHint(QPainter::Antialiasing, true);
+
+	QRadialGradient radialGradient(QPointF(width / 2, height /2), qMax(width, height) / 2);
+	QColor color = ViThemeManager::color(14);
+	color.setAlpha(150);
+	radialGradient.setColorAt(1, Qt::transparent);
+	radialGradient.setColorAt(0.8, ViThemeManager::color(14));
+	radialGradient.setColorAt(0.7, color);
+	radialGradient.setColorAt(0, color);
+
+	painter.setBrush(radialGradient);
+	painter.drawRect(0, 0, width, height);
+
+	painter.end();
+    return buffer;
 }

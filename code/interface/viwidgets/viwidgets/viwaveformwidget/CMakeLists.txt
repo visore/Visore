@@ -28,4 +28,4 @@ ADD_LIBRARY(viwaveformwidget SHARED ${VI_WRAPPER_HEADERS} ${VI_WAVEFORMWIDGET_SO
 TARGET_LINK_LIBRARIES(viwaveformwidget ${QT_LIBRARIES} viwidget viwidgettoolbar)
 
 #Install file
-INSTALL(TARGETS viwaveformwidget DESTINATION interface)
+INSTALL(TARGETS viwaveformwidget DESTINATION ${VI_WIDGETSS_LOCATION})

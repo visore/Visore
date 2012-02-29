@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item row="0" column="0" rowspan="2" colspan="3">
-    <widget class="QDial" name="volumeDial">
+    <widget class="ViDialer" name="volumeDial">
      <property name="maximum">
       <number>100</number>
      </property>
@@ -103,6 +103,11 @@
    <extends>QWidget</extends>
    <header>vibutton.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ViDialer</class>
+   <extends>QDial</extends>
+   <header>vidialer.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -31,4 +31,4 @@ ADD_LIBRARY(viplaybackwidget SHARED ${VI_WRAPPER_HEADERS} ${VI_WRAPPER_FORMS} ${
 TARGET_LINK_LIBRARIES(viplaybackwidget ${QT_LIBRARIES} viwidget vibutton)
 
 #Install file
-INSTALL(TARGETS viplaybackwidget DESTINATION interface)
+INSTALL(TARGETS viplaybackwidget DESTINATION ${VI_WIDGETSS_LOCATION})
