@@ -15,6 +15,7 @@ class ViThemeManager
 
 		static QColor color(int index);
 		static QIcon icon(QString name);
+		static QImage image(QString name);
 		static QString background(QString name);
 		
 	protected:
