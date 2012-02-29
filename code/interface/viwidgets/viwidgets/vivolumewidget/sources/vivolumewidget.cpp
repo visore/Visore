@@ -14,6 +14,7 @@ ViVolumeWidget::ViVolumeWidget(ViAudioEngine *engine, QWidget *parent)
 	mUi->muteButton->setCheckedIcon(ViThemeManager::image("mute.png"));
 	setMinimumSize(100, 120);
 	setMaximumSize(100, 120);
+cout<<"ppp: "<<1.234<<endl;
 }
 
 ViVolumeWidget::~ViVolumeWidget()
