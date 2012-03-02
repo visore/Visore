@@ -1,28 +1,28 @@
-#include "vivolumewidget.h"
-#include "ui_vivolumewidget.h"
+#include "vivolumedialwidget.h"
+#include "ui_vivolumedialwidget.h"
 
-ViVolumeWidget::ViVolumeWidget(ViAudioEngine *engine, QWidget *parent)
+ViVolumeDialWidget::ViVolumeDialWidget(ViAudioEngine *engine, QWidget *parent)
 	: ViWidget(engine, parent)
 {
-	mUi = new Ui::ViVolumeWidget();
+	mUi = new Ui::ViVolumeDialWidget();
 	mUi->setupUi(this);
 	ViObject::connect(mUi->volumeDial, SIGNAL(valueChanged(int)), mEngine, SLOT(setVolume(int)));
 	ViObject::connect(mUi->volumeDial, SIGNAL(valueChanged(int)), this, SLOT(volumeChanged(int)));
 	volumeChanged();
 	mUi->volumeDial->setSize(80, 80);
+	mUi->muteButton->setCheckable();
 	mUi->muteButton->setNormalIcon(ViThemeManager::image("unmute.png"));
 	mUi->muteButton->setCheckedIcon(ViThemeManager::image("mute.png"));
 	setMinimumSize(100, 120);
 	setMaximumSize(100, 120);
-cout<<"ppp: "<<1.234<<endl;
 }
 
-ViVolumeWidget::~ViVolumeWidget()
+ViVolumeDialWidget::~ViVolumeDialWidget()
 {
 	delete mUi;
 }
 
-void ViVolumeWidget::volumeChanged(int volume)
+void ViVolumeDialWidget::volumeChanged(int volume)
 {
 	volume = mEngine->volume();
 	mUi->volumeDial->setValue(volume);

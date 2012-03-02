@@ -28,7 +28,7 @@ QT4_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_MAINWINDOW_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(vimainwindow SHARED ${VI_WRAPPER_FORMS} ${VI_WRAPPER_HEADERS} ${VI_MAINWINDOW_SOURCES})
-TARGET_LINK_LIBRARIES(vimainwindow ${QT_LIBRARIES} vitheme viwaveformwidget vivolumewidget viplaybackwidget)
+TARGET_LINK_LIBRARIES(vimainwindow ${QT_LIBRARIES} vitheme viwaveformwidget vivolumedialwidget vivolumebarwidget viplaybackwidget)
 
 #Install file
 INSTALL(TARGETS vimainwindow DESTINATION interface)

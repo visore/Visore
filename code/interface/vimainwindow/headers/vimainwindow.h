@@ -6,7 +6,8 @@
 #include <QBoxLayout>
 #include "viaudioengine.h"
 #include "viwaveformwidget.h"
-#include "vivolumewidget.h"
+#include "vivolumedialwidget.h"
+#include "vivolumebarwidget.h"
 #include "viplaybackwidget.h"
 #include "vithememanager.h"
 
@@ -36,7 +37,8 @@ class ViMainWindow : public QMainWindow
 		ViPlaybackWidget *mPlaybackWidget;
 		ViWaveFormWidget *mOriginalWaveWidget;
 		ViWaveFormWidget *mCorrectedWaveWidget;
-		ViVolumeWidget *mVolumeWidget;
+		//ViVolumeDialWidget *mVolumeWidget;
+		ViVolumeBarWidget *mVolumeWidget;
 };
 
 #endif

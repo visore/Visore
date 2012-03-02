@@ -178,6 +178,11 @@ void ViAudioEngine::setVolume(int volume)
 	mStreamOutput->setVolume(volume / 100.0);
 }
 
+void ViAudioEngine::mute(bool value)
+{
+	mStreamOutput->mute(value);
+}
+
 void ViAudioEngine::startPlayback()
 {
 	mStreamOutput->start();

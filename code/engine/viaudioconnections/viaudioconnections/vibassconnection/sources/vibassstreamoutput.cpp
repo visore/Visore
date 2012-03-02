@@ -69,6 +69,8 @@ void ViBassStreamOutput::initialize()
 	mTimer = new QTimer(this);
 	ViObject::connect(mTimer, SIGNAL(timeout()), this, SLOT(checkPosition()));
 	mTimer->start(POSITION_CHECK_INTERVAL);
+	mPreMuteVolume = volume();
+	mIsMute = false;
 }
 
 void ViBassStreamOutput::free()
@@ -227,5 +229,26 @@ qreal ViBassStreamOutput::volume()
 
 void ViBassStreamOutput::setVolume(qreal volume)
 {
-	BASS_ChannelSetAttribute(mHandle, BASS_ATTRIB_VOL, volume);
+	if(mIsMute)
+	{
+		mPreMuteVolume = volume;
+	}
+	else
+	{
+		BASS_ChannelSetAttribute(mHandle, BASS_ATTRIB_VOL, volume);
+	}
+}
+
+void ViBassStreamOutput::mute(bool value)
+{
+	mIsMute = value;
+	if(value)
+	{
+		mPreMuteVolume = volume();
+		BASS_ChannelSetAttribute(mHandle, BASS_ATTRIB_VOL, 0);
+	}
+	else
+	{
+		setVolume(mPreMuteVolume);
+	}
 }

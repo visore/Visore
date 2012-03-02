@@ -42,6 +42,7 @@ class ViBassStreamOutput : public ViStreamOutput
 		void bufferChanged(int size);
 		qreal volume();
 		void setVolume(qreal volume);
+		void mute(bool value);
 
 	protected:
 		void free();
@@ -52,6 +53,8 @@ class ViBassStreamOutput : public ViStreamOutput
 		double mSecondsInByte;
 		QTimer *mTimer;
 		ViAudioPosition mOldPosition;
+		qreal mPreMuteVolume;
+		bool mIsMute;
 };
 
 #endif

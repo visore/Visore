@@ -74,6 +74,12 @@ QIcon ViThemeManager::icon(QString name)
 	return QIcon(":/icons/" + name);
 }
 
+QString ViThemeManager::iconPath(QString name)
+{
+	ViThemeManager::instance();
+	return ":/icons/" + name;
+}
+
 QImage ViThemeManager::image(QString name)
 {
 	ViThemeManager::instance();

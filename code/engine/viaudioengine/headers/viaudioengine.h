@@ -60,6 +60,7 @@ class ViAudioEngine : public QObject, public ViError
 		void startOutputFile();
 		void stopOutputFile();
 		void setVolume(int volume);
+		void mute(bool value = true);
 
 	signals:
 		void originalWaveChanged(ViWaveFormChunk *chunk);

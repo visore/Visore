@@ -21,7 +21,9 @@ ViMainWindow::ViMainWindow(ViAudioEngine *engine, QWidget *parent)
 	mUi->correctedWaveContainer->layout()->addWidget(mCorrectedWaveWidget);
 
 	//Volume widget
-	mVolumeWidget = new ViVolumeWidget(mEngine, mUi->volumeContainer);
+	//mVolumeWidget = new ViVolumeDialWidget(mEngine, mUi->volumeContainer);
+	//mUi->volumeContainer->layout()->addWidget(mVolumeWidget);
+	mVolumeWidget = new ViVolumeBarWidget(mEngine, mUi->volumeContainer);
 	mUi->volumeContainer->layout()->addWidget(mVolumeWidget);
 
 	QObject::connect(mUi->lineInput, SIGNAL(clicked()), this, SLOT(selectLineInput()));

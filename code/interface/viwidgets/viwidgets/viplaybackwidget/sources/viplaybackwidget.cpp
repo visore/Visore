@@ -58,7 +58,6 @@ void ViPlaybackWidget::play(bool checked)
 		mEngine->startPlayback();
 	}
 	mUi->pauseButton->setChecked(false);
-	mUi->playButton->setChecked(mIsPlaying);
 }
 
 void ViPlaybackWidget::pause(bool checked)
@@ -72,6 +71,7 @@ void ViPlaybackWidget::pause(bool checked)
 	}
 	else
 	{
+		mUi->playButton->setChecked(mIsPlaying);
 		play(true);
 	}
 	mUi->pauseButton->setChecked(mIsPausing);
@@ -81,4 +81,5 @@ void ViPlaybackWidget::stop(bool checked)
 {
 	mEngine->stopPlayback();
 	play(false);
+	mUi->playButton->setChecked(mIsPlaying);
 }

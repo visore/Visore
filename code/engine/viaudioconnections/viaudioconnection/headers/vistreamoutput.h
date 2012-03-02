@@ -24,6 +24,7 @@ class ViStreamOutput : public ViAudioOutput
 		virtual bool setPosition(ViAudioPosition position) = 0; //returns negative number if position is invalid
 		virtual ViAudioPosition position() = 0;
 
+		virtual void mute(bool value) = 0;
 		virtual qreal volume() = 0;
 		virtual void setVolume(qreal volume) = 0;
 
