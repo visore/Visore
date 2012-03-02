@@ -43,7 +43,7 @@ class ViWaveWidgetThread : public QThread
 		void positionChanged(ViAudioPosition position);
 
 	private slots:
-		void changed(ViWaveFormChunk *chunk);
+		void changed(QSharedPointer<ViWaveFormChunk> chunk);
 		void analyze(int size);
 
 	public:
@@ -54,7 +54,7 @@ class ViWaveWidgetThread : public QThread
 	private:
 		QList<qint32> mCompressionLevels;
 		ViWaveWidget *mWidget;
-		QList<ViWaveFormChunk*> mChunks;
+		QList<QSharedPointer<ViWaveFormChunk> > mChunks;
 		qint64 mPosition;
 		QList<ViWaveForm> mForms;
 		QMutex mMutex;

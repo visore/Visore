@@ -38,11 +38,13 @@ mOriginalWaveFormer = new ViWaveFormer(mMetaData);
 mCorrectedWaveFormer = new ViWaveFormer(mMetaData);
 mOriginalWaveFormer->initialize(mProcessingChain->originalBuffer());
 mCorrectedWaveFormer->initialize(mProcessingChain->correctedBuffer());
-ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(originalWaveChanged(ViWaveFormChunk*)));
-ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(correctedWaveChanged(ViWaveFormChunk*)));
+ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(originalWaveChanged(QSharedPointer<ViWaveFormChunk>)));
+ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(correctedWaveChanged(QSharedPointer<ViWaveFormChunk>)));
 
 
-
+mOriginalSpectrumAnalyzer = new ViSpectrumAnalyzer();
+mOriginalSpectrumAnalyzer->setWindowFunction(ViWindowFunctionManager::selected("Hann Window Function"));
+ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), mOriginalSpectrumAnalyzer, SLOT(start(QSharedPointer<ViWaveFormChunk>)));
 
 
 

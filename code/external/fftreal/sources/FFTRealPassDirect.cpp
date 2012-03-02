@@ -28,7 +28,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include	"FFTRealUseTrigo.h"
-#include	"FFTRealPassDirect.h"
+//#include	"FFTRealPassDirect.h"
 
 
 namespace ffft

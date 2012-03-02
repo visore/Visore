@@ -87,7 +87,7 @@ private:
 
 
 
-//#include	"Array.cpp"
+#include	"Array.cpp"
 
 
 

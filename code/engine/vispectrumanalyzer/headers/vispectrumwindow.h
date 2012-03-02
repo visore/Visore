@@ -3,7 +3,7 @@
 
 #include <QList>
 #include <QtGlobal>
-#include "viwindowfunction.h"
+#include "viwindowfunctionmanager.h"
 
 class ViSpectrumWindow : public QList<qreal>
 {

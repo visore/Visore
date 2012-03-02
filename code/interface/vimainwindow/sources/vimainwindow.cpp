@@ -45,5 +45,5 @@ void ViMainWindow::selectLineInput()
 
 void ViMainWindow::selectFileInput()
 {
-	mEngine->setInputFilePath("/home/visore/Desktop/a.wav");
+	mEngine->setInputFilePath("/home/visore/Desktop/testbit2.wav");
 }

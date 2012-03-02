@@ -50,6 +50,9 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/viwindowfunctions/viwindowfunction/headers
 	${ENGINE}/vispectrumanalyzer/headers
 	${ENGINE}/viwaveformer/headers
+
+	${EXTERNAL}/fftreal/sources
+	${EXTERNAL}/fftreal/headers
 )
 
 #Unix version for installing shared libraries and linking them to the executable
@@ -58,8 +61,10 @@ SET(CMAKE_INSTALL_RPATH
 	"${CMAKE_INSTALL_PREFIX}/engine"
 	"${CMAKE_INSTALL_PREFIX}/engine/connections"
 	"${CMAKE_INSTALL_PREFIX}/engine/formats"
+	"${CMAKE_INSTALL_PREFIX}/engine/windowfunctions"
 	"${CMAKE_INSTALL_PREFIX}/interface"
 	"${CMAKE_INSTALL_PREFIX}/interface/widgets"
+	"${CMAKE_INSTALL_PREFIX}/external/fftreal"
 )
 
 #Initiate sub-directories

@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include	<cassert>
 #include	<cmath>
-#include	"FFTReal.h"
+//#include	"FFTReal.h"
 
 
 namespace ffft

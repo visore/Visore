@@ -23,7 +23,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #if ! defined (ffft_FFTRealSelect_CODEHEADER_INCLUDED)
 #define	ffft_FFTRealSelect_CODEHEADER_INCLUDED
 
-#include	"FFTRealSelect.h"
+//#include	"FFTRealSelect.h"
 
 namespace ffft
 {

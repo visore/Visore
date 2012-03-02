@@ -6,7 +6,6 @@ using namespace std;
 ViWaveFormerThread::ViWaveFormerThread(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QList<int> *sizes)
 	: ViProcessorThread(buffer, sizes)
 {
-	qRegisterMetaType<ViWaveFormChunk>("ViWaveFormChunk"); //Ensure ViWaveFormChunk works with signal and slots
 	mMetaData = metaData;
 	if(mMetaData->bitDepth() == 8)
 	{
@@ -73,7 +72,8 @@ void ViWaveFormerThread::run()
 		double *result = new double[length];
 		length = (this->*pcmToReal)(chunk.data(), result, length);
 
-		emit completed(new ViWaveFormChunk(result, length, mMetaData));
+		emit completed(QSharedPointer<ViWaveFormChunk>(new ViWaveFormChunk(result, length, mMetaData)));
+		//emit completed(new ViWaveFormChunk(result, length, mMetaData));
 		
 	}
 	mMutex.unlock();
@@ -129,7 +129,7 @@ ViWaveFormer::~ViWaveFormer()
 void ViWaveFormer::initialize(ViAudioBuffer *buffer)
 {
 	mThread = new ViWaveFormerThread(buffer, mMetaData, &mSizes);
-	ViObject::connectDirect(mThread, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(completed(ViWaveFormChunk*)));
+	ViObject::connectDirect(mThread, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)));
 }
 
 void ViWaveFormer::analyze(qint64 start, qint64 length)

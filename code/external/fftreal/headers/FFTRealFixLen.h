@@ -120,7 +120,7 @@ private:
 
 
 
-//#include	"FFTRealFixLen.cpp"
+#include	"FFTRealFixLen.cpp"
 
 
 

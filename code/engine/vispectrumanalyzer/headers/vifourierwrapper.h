@@ -4,12 +4,6 @@
 #include <QtGlobal>
 #include "FFTRealFixLen.h"
 
-#if defined(FFTREAL_LIBRARY)
-#  define FFTREAL_EXPORT Q_DECL_EXPORT
-#else
-#  define FFTREAL_EXPORT Q_DECL_IMPORT
-#endif
-
 #if defined Q_CC_MSVC
 #    pragma warning(disable:4100)
 #elif defined Q_CC_GNU
@@ -19,15 +13,15 @@
 #endif
 
 // Each pass of the FFT processes 2^X samples, where X is the number below.
-static const int FFTLengthPowerOfTwo = 12;
+static const int FFT_POWER_OF_TWO = 12;
 
 class ViFourierWrapperPrivate
 {
 	public:
-		ffft::FFTRealFixLen<FFTLengthPowerOfTwo> mFourierTransform;
+		ffft::FFTRealFixLen<FFT_POWER_OF_TWO> mFourierTransform;
 };
 
-class FFTREAL_EXPORT ViFourierWrapper
+class ViFourierWrapper
 {
 	public:
 		ViFourierWrapper();

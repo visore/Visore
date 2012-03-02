@@ -13,7 +13,7 @@ class ViWaveFormerThread : public ViProcessorThread
 	Q_OBJECT
 
 	signals:
-		void completed(ViWaveFormChunk *chunk);
+		void completed(QSharedPointer<ViWaveFormChunk> chunk);
 
 	public:
 		ViWaveFormerThread(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QList<int> *sizes);
@@ -38,7 +38,7 @@ class ViWaveFormer : public ViProcessor
 	Q_OBJECT
 
 	signals:
-		void completed(ViWaveFormChunk *chunk);
+		void completed(QSharedPointer<ViWaveFormChunk> chunk);
 
 	public:
 		ViWaveFormer(ViAudioMetaData *metaData);

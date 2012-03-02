@@ -96,7 +96,7 @@ private:
 
 
 
-//#include	"OscSinCos.cpp"
+#include	"OscSinCos.cpp"
 
 
 

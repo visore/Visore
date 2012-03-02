@@ -90,7 +90,7 @@ private:
 
 
 
-//#include	"DynArray.cpp"
+#include	"DynArray.cpp"
 
 
 

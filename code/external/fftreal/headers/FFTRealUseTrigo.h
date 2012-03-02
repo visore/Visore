@@ -88,7 +88,7 @@ private:
 
 
 
-//#include	"FFTRealUseTrigo.cpp"
+#include	"FFTRealUseTrigo.cpp"
 
 
 

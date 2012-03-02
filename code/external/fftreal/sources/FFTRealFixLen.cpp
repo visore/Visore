@@ -31,7 +31,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include	"FFTRealPassDirect.h"
 #include	"FFTRealPassInverse.h"
 #include	"FFTRealSelect.h"
-#include	"FFTRealFixLen.h"
+//#include	"FFTRealFixLen.h"
 
 #include	<cassert>
 #include	<cmath>
