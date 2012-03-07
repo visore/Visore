@@ -25,6 +25,7 @@ class ViThemeManager
 		static QString iconPath(QString name, ViThemeManager::ViIconType type = ViThemeManager::Normal);
 		static QImage image(QString name, ViThemeManager::ViIconType type = ViThemeManager::Normal);
 		static QImage background(QString name);
+		static QString backgroundPath(QString name);
 		
 	protected:
 		ViThemeManager();

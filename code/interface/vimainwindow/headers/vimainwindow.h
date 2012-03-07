@@ -2,7 +2,9 @@
 #define VIMAINWINDOW_H
 
 #include <QMainWindow>
-#include "vicontentwidget.h"
+#include "viwaveformwidget.h"
+#include "vicontrolwidget.h"
+#include "viinputwidget.h"
 
 namespace Ui
 {
@@ -18,7 +20,17 @@ class ViMainWindow : public QMainWindow
 		~ViMainWindow();
 
 	private:
+		void initialize();
+
+	private:
 		Ui::ViMainWindow *mUi;
+		ViAudioEngine *mEngine;
+
+		ViWaveFormWidget *mOriginalWaveWidget;
+		ViWaveFormWidget *mCorrectedWaveWidget;
+
+		ViControlWidget *mControlWidget;
+		ViInputWidget *mInputWidget;
 };
 
 #endif

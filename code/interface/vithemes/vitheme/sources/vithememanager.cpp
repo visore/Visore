@@ -108,3 +108,9 @@ QImage ViThemeManager::background(QString name)
 	ViThemeManager::instance();
 	return QImage(":/backgrounds/" + name);
 }
+
+QString ViThemeManager::backgroundPath(QString name)
+{
+	ViThemeManager::instance();
+	return ":/backgrounds/" + name;
+}

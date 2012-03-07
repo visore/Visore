@@ -18,8 +18,9 @@ class ViVolumeBarWidget : public ViWidget
 		void mute(bool value);
 
 	public:
-		ViVolumeBarWidget(ViAudioEngine *engine, QWidget *parent = 0);
+		ViVolumeBarWidget(QWidget *parent = 0);
 		~ViVolumeBarWidget();
+		void setEngine(ViAudioEngine *engine);
 
 	private:
 		Ui::ViVolumeBarWidget *mUi;

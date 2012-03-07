@@ -1,12 +1,22 @@
 #include "viwidget.h"
 
-ViWidget::ViWidget(ViAudioEngine *engine, QWidget *parent)
+ViWidget::ViWidget(QWidget *parent)
 	: QWidget(parent)
 {
 	mParent = parent;
-	mEngine = engine;
+	mEngine = NULL;
 }
 
 void ViWidget::refresh()
 {
+}
+
+void ViWidget::setEngine(ViAudioEngine *engine)
+{
+	mEngine = engine;
+}
+
+ViAudioEngine* ViWidget::engine()
+{
+	return mEngine;
 }

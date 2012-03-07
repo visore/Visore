@@ -1,7 +1,7 @@
 #include "viwidgettoolbar.h"
 
-ViWidgetToolbar::ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, ViAudioEngine *engine, QWidget *parent)
-	: ViWidget(engine, parent)
+ViWidgetToolbar::ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, QWidget *parent)
+	: ViWidget(parent)
 {
 	mCentralWidget = new QWidget(this);
 	mAlign = align;

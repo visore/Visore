@@ -17,7 +17,7 @@ class ViVolumeDialWidget : public ViWidget
 		void volumeChanged(int volume = 0);
 
 	public:
-		ViVolumeDialWidget(ViAudioEngine *engine, QWidget *parent = 0);
+		ViVolumeDialWidget(QWidget *parent = 0);
 		~ViVolumeDialWidget();
 
 	private:

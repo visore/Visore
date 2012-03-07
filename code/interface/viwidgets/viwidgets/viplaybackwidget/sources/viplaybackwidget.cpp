@@ -1,8 +1,8 @@
 #include "viplaybackwidget.h"
 #include "ui_viplaybackwidget.h"
 
-ViPlaybackWidget::ViPlaybackWidget(ViAudioEngine *engine, QWidget *parent)
-	: ViWidget(engine, parent)
+ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
+	: ViWidget(parent)
 {
 	mUi = new Ui::ViPlaybackWidget();
 	mUi->setupUi(this);

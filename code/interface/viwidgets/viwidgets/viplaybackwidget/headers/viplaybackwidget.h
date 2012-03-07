@@ -20,7 +20,7 @@ class ViPlaybackWidget : public ViWidget
 		void stop(bool checked);
 
 	public:
-		ViPlaybackWidget(ViAudioEngine *engine, QWidget *parent = 0);
+		ViPlaybackWidget(QWidget *parent = 0);
 		~ViPlaybackWidget();
 
 	private:

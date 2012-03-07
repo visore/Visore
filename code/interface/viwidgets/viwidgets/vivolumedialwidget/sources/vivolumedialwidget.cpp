@@ -1,8 +1,8 @@
 #include "vivolumedialwidget.h"
 #include "ui_vivolumedialwidget.h"
 
-ViVolumeDialWidget::ViVolumeDialWidget(ViAudioEngine *engine, QWidget *parent)
-	: ViWidget(engine, parent)
+ViVolumeDialWidget::ViVolumeDialWidget(QWidget *parent)
+	: ViWidget(parent)
 {
 	mUi = new Ui::ViVolumeDialWidget();
 	mUi->setupUi(this);

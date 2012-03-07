@@ -57,7 +57,7 @@ void ViWaveWidgetThread::run()
 
 void ViWaveWidgetThread::analyze(int size)
 {
-	mWidget->mEngine->calculateWaveForm(mBufferType, mPosition, size);
+	mWidget->engine()->calculateWaveForm(mBufferType, mPosition, size);
 }
 
 void ViWaveWidgetThread::changed(QSharedPointer<ViWaveFormChunk> chunk)
@@ -78,9 +78,11 @@ void ViWaveWidgetThread::positionChanged(ViAudioPosition position)
 }
 
 ViWaveWidget::ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
-	: ViWidget(engine, parent)
+	: ViWidget(parent)
 {
-	mToolbar = new ViWidgetToolbar(ViWidgetToolbar::Right, engine, parent);
+	setEngine(engine);
+	mToolbar = new ViWidgetToolbar(ViWidgetToolbar::Right, parent);
+	mToolbar->setEngine(engine);
 	mToolbar->addButton("Zoom In", ViThemeManager::icon("zoomin.png"), this, SLOT(zoomIn()));
 	mToolbar->addButton("Zoom Out", ViThemeManager::icon("zoomout.png"), this, SLOT(zoomOut()));
 	mThread = new ViWaveWidgetThread(this);

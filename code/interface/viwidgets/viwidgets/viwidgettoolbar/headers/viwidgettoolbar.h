@@ -23,7 +23,7 @@ class ViWidgetToolbar : public ViWidget
 			Right = 2,
 			Left = 3
 		};
-		ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, ViAudioEngine *engine, QWidget *parent = 0);
+		ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, QWidget *parent = 0);
 		~ViWidgetToolbar();
 		void refresh();
 
