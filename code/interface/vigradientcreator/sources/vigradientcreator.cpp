@@ -1,18 +1,18 @@
 #include "vigradientcreator.h"
 
-QImage ViGradientCreator::createGradient(ViGradientCreator::ViGradientType type, int width, int height)
+QImage ViGradientCreator::createGradient(ViGradientCreator::ViGradientType type, int width, int height, QColor color)
 {
 	if(type == ViGradientCreator::Rectangle)
 	{
-		return rectangleGradient(width, height);
+		return rectangleGradient(width, height, color);
 	}
 	else if(type == ViGradientCreator::Circle)
 	{
-		return radialGradient(width, height);
+		return radialGradient(width, height, color);
 	}
 }
 
-QImage ViGradientCreator::rectangleGradient(int width, int height)
+QImage ViGradientCreator::rectangleGradient(int width, int height, QColor color)
 {
 	qreal halfHeight = height / 2;
 	qreal halfWidth = width / 2;
@@ -27,13 +27,13 @@ QImage ViGradientCreator::rectangleGradient(int width, int height)
 	painter.setPen(Qt::NoPen);
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
-	QColor color = ViThemeManager::color(14);
-	color.setAlpha(150);
+	QColor newColor = color;
+	newColor.setAlpha(150);
 	QGradient gradient;
 	gradient.setColorAt(1, Qt::transparent);
-	gradient.setColorAt(0.8, ViThemeManager::color(14));
-	gradient.setColorAt(0.7, color);
-	gradient.setColorAt(0, color);
+	gradient.setColorAt(0.8, color);
+	gradient.setColorAt(0.7, newColor);
+	gradient.setColorAt(0, newColor);
 
 	QLinearGradient linearGradient;
 
@@ -85,7 +85,7 @@ QImage ViGradientCreator::rectangleGradient(int width, int height)
     return buffer;
 }
 
-QImage ViGradientCreator::radialGradient(int width, int height)
+QImage ViGradientCreator::radialGradient(int width, int height, QColor color)
 {
 	QImage::Format format = QImage::Format_ARGB32;
     QImage buffer(qCeil(width), qCeil(height), format);
@@ -96,12 +96,12 @@ QImage ViGradientCreator::radialGradient(int width, int height)
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
 	QRadialGradient radialGradient(QPointF(width / 2, height /2), qMax(width, height) / 2);
-	QColor color = ViThemeManager::color(14);
-	color.setAlpha(150);
+	QColor newColor = color;
+	newColor.setAlpha(150);
 	radialGradient.setColorAt(1, Qt::transparent);
-	radialGradient.setColorAt(0.8, ViThemeManager::color(14));
-	radialGradient.setColorAt(0.7, color);
-	radialGradient.setColorAt(0, color);
+	radialGradient.setColorAt(0.8, color);
+	radialGradient.setColorAt(0.7, newColor);
+	radialGradient.setColorAt(0, newColor);
 
 	painter.setBrush(radialGradient);
 	painter.drawRect(0, 0, width, height);

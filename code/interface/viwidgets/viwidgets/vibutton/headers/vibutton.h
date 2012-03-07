@@ -20,7 +20,9 @@ class ViButton : public QWidget
 		void setCheckable();
 		void setChecked(bool checked);
 		void setNormalIcon(QImage image);
-		void setCheckedIcon(QImage image);
+		void setHoverIcon(QImage image);
+		void setSelectedIcon(QImage image);
+		void setGlow(QColor color, ViGradientCreator::ViGradientType type = ViGradientCreator::Rectangle, int x = -1, int y = -1, int width = -1, int height = -1);
 
 	protected:
 		void paintEvent(QPaintEvent *event);
@@ -31,11 +33,21 @@ class ViButton : public QWidget
 
 	private:
 		QImage mNormalImage;
-		QImage mCheckedImage;
+		QImage mHoverImage;
+		QImage mSelectedImage;
+
 		bool mIsHover;
 		bool mIsCheckable;
 		bool mIsChecked;
 		bool mIsPressed;
+		bool mHasGradient;
+
+		QColor mGlowColor;
+		ViGradientCreator::ViGradientType mGlowType;
+		int mGlowX;
+		int mGlowY;
+		int mGlowWidth;
+		int mGlowHeight;
 };
 
 #endif

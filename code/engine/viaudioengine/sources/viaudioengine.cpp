@@ -44,7 +44,7 @@ ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(QSharedPointer<Vi
 
 mOriginalSpectrumAnalyzer = new ViSpectrumAnalyzer();
 mOriginalSpectrumAnalyzer->setWindowFunction(ViWindowFunctionManager::selected("Hann Window Function"));
-ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), mOriginalSpectrumAnalyzer, SLOT(start(QSharedPointer<ViWaveFormChunk>)));
+//ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), mOriginalSpectrumAnalyzer, SLOT(start(QSharedPointer<ViWaveFormChunk>)));
 
 
 

@@ -15,6 +15,7 @@ class ViVolumeBarWidget : public ViWidget
 
 	private slots:
 		void volumeChanged(int volume = 0);
+		void mute(bool value);
 
 	public:
 		ViVolumeBarWidget(ViAudioEngine *engine, QWidget *parent = 0);

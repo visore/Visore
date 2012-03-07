@@ -46,10 +46,6 @@ void ViSpectrumAnalyzerThread::setWindowFunction(ViWindowFunction *windowFunctio
 void ViSpectrumAnalyzerThread::addChunk(QSharedPointer<ViWaveFormChunk> chunk)
 {
 	mChunks.append(chunk);
-		for(int i = 0; i < 10; ++i)
-		{
-			cout<<chunk->data()[i]<<endl;
-		}
 	while(enoughSamplesAvailable())
 	{
 		float *data = new float[SPECTRUM_SAMPLES];

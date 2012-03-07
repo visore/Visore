@@ -10,14 +10,16 @@ ViVolumeBarWidget::ViVolumeBarWidget(ViAudioEngine *engine, QWidget *parent)
 	volumeChanged();
 
 	mUi->muteButton->setCheckable();
-	mUi->muteButton->setNormalIcon(ViThemeManager::image("unmute.png"));
-	mUi->muteButton->setCheckedIcon(ViThemeManager::image("mute.png"));
+	mUi->muteButton->setNormalIcon(ViThemeManager::image("mute.png", ViThemeManager::Normal));
+	mUi->muteButton->setHoverIcon(ViThemeManager::image("mute.png", ViThemeManager::Hover));
+	mUi->muteButton->setSelectedIcon(ViThemeManager::image("unmute.png", ViThemeManager::Selected));
+
 	setMinimumSize(100, 30);
 	setMaximumSize(100, 30);
 	mUi->volumeBar->setSize(70, 30);
 
 	ViObject::connect(mUi->volumeBar, SIGNAL(valueChanged(int)), mEngine, SLOT(setVolume(int)));
-	ViObject::connect(mUi->muteButton, SIGNAL(clicked(bool)), mEngine, SLOT(mute(bool)));
+	ViObject::connect(mUi->muteButton, SIGNAL(clicked(bool)), this, SLOT(mute(bool)));
 }
 
 ViVolumeBarWidget::~ViVolumeBarWidget()
@@ -28,4 +30,17 @@ ViVolumeBarWidget::~ViVolumeBarWidget()
 void ViVolumeBarWidget::volumeChanged(int volume)
 {
 	volume = mEngine->volume();
+}
+
+void ViVolumeBarWidget::mute(bool value)
+{
+	mEngine->mute(value);
+	if(value)
+	{
+		mUi->muteButton->setHoverIcon(ViThemeManager::image("mute.png", ViThemeManager::Hover));
+	}
+	else
+	{
+		mUi->muteButton->setHoverIcon(ViThemeManager::image("unmute.png", ViThemeManager::Hover));
+	}
 }

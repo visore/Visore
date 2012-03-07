@@ -7,6 +7,8 @@ ViButton::ViButton(QWidget *parent)
 	mIsCheckable = false;
 	mIsChecked = false;
 	mIsPressed = false;
+	setGlow(ViThemeManager::color(14));
+	mHasGradient = false;
 }
 
 ViButton::~ViButton()
@@ -37,10 +39,27 @@ void ViButton::setNormalIcon(QImage image)
 	repaint();
 }
 
-void ViButton::setCheckedIcon(QImage image)
+void ViButton::setHoverIcon(QImage image)
 {
-	mCheckedImage = image;
+	mHoverImage = image;
 	repaint();
+}
+
+void ViButton::setSelectedIcon(QImage image)
+{
+	mSelectedImage = image;
+	repaint();
+}
+
+void ViButton::setGlow(QColor color, ViGradientCreator::ViGradientType type, int x, int y, int width, int height)
+{
+	mHasGradient = true;
+	mGlowColor = color;
+	mGlowType = type;
+	mGlowX = x;
+	mGlowY = y;
+	mGlowWidth = width;
+	mGlowHeight = height;
 }
 
 void ViButton::paintEvent(QPaintEvent *event)
@@ -49,18 +68,43 @@ void ViButton::paintEvent(QPaintEvent *event)
 	int halfHeight = height() / 2;
 	int halfWidth = width() / 2;
 
-	if(mIsHover)
+	if(mIsHover && mHasGradient)
 	{
-		QImage gradient = ViGradientCreator::createGradient(ViGradientCreator::Rectangle, width(), height());
-		painter.drawImage(rect(), gradient, gradient.rect());
+		int glowX = mGlowX;
+		int glowY = mGlowY;
+		int glowWidth = mGlowWidth;
+		int glowHeight = mGlowHeight;
+		if(glowX < 0)
+		{
+			glowX = rect().x() + 3;
+		}
+		if(glowY < 0)
+		{
+			glowY = rect().y() + 3;
+		}
+		if(glowWidth < 0)
+		{
+			glowWidth = width() - 6;
+		}
+		if(glowHeight < 0)
+		{
+			glowHeight = height() - 6;
+		}
+		QImage gradient = ViGradientCreator::createGradient(mGlowType, glowWidth, glowHeight, mGlowColor);
+		painter.drawImage(QRect(glowX, glowY, glowWidth, glowHeight), gradient, gradient.rect());
 	}
 
-	if(mIsPressed)
+	if(mIsHover && mHoverImage.width() > 0)
 	{
-		int smallerWidth = (mCheckedImage.width() - mCheckedImage.width() * 0.02);
-		int smallerHeight = (mCheckedImage.height() - mCheckedImage.height() * 0.02);
+		QRect rectangle(halfWidth - mHoverImage.width() / 2, halfHeight - mHoverImage.height() / 2, mHoverImage.width(), mHoverImage.height());
+		painter.drawImage(rectangle, mHoverImage, mHoverImage.rect());
+	}
+	else if(mIsPressed)
+	{
+		int smallerWidth = (mSelectedImage.width() - mSelectedImage.width() * 0.02);
+		int smallerHeight = (mSelectedImage.height() - mSelectedImage.height() * 0.02);
 		QRect rectangle(halfWidth - smallerWidth / 2, halfHeight - smallerHeight / 2, smallerWidth, smallerHeight);
-		painter.drawImage(rectangle, mCheckedImage, mCheckedImage.rect());
+		painter.drawImage(rectangle, mSelectedImage, mSelectedImage.rect());
 	}
 	else if(!mIsChecked || !mIsCheckable)
 	{
@@ -69,8 +113,8 @@ void ViButton::paintEvent(QPaintEvent *event)
 	}
 	else
 	{
-		QRect rectangle(halfWidth - mCheckedImage.width() / 2, halfHeight - mCheckedImage.height() / 2, mCheckedImage.width(), mCheckedImage.height());
-		painter.drawImage(rectangle, mCheckedImage, mCheckedImage.rect());
+		QRect rectangle(halfWidth - mSelectedImage.width() / 2, halfHeight - mSelectedImage.height() / 2, mSelectedImage.width(), mSelectedImage.height());
+		painter.drawImage(rectangle, mSelectedImage, mSelectedImage.rect());
 	}
 }
 

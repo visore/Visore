@@ -41,6 +41,8 @@ INCLUDE_DIRECTORIES(
 	${INTERFACE}/viwidgets/viwidgets/vidialer/headers
 	${INTERFACE}/viwidgets/viwidgets/vivolumebar/headers
 	${INTERFACE}/viwidgets/viwidgets/viplaybackwidget/headers
+	${INTERFACE}/viwidgets/viwidgets/viwindow/headers
+	${INTERFACE}/viwidgets/viwidgets/vicontentwidget/headers
 
 	${ENGINE}/viaudioengine/headers
 	${ENGINE}/viaudioconnections/viaudioconnection/headers

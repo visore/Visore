@@ -15,11 +15,11 @@ class ViGradientCreator
 			Rectangle = 0,
 			Circle = 1
 		};
-		static QImage createGradient(ViGradientCreator::ViGradientType type, int width, int height);
+		static QImage createGradient(ViGradientCreator::ViGradientType type, int width, int height, QColor color);
 
 	private:
-		static QImage rectangleGradient(int width, int height);
-		static QImage radialGradient(int width, int height);
+		static QImage rectangleGradient(int width, int height, QColor color);
+		static QImage radialGradient(int width, int height, QColor color);
 		
 };
 

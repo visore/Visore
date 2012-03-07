@@ -62,32 +62,49 @@ void ViThemeManager::setTheme(QString name)
 	}
 }
 
+QString ViThemeManager::typeString(ViThemeManager::ViIconType type)
+{
+	if(type == ViThemeManager::Normal)
+	{
+		return "normal/";
+	}
+	else if(type == ViThemeManager::Hover)
+	{
+		return "hover/";
+	}
+	else if(type == ViThemeManager::Selected)
+	{
+		return "selected/";
+	}
+	return "";
+}
+
 QColor ViThemeManager::color(int index)
 {
 	ViThemeManager *manager = ViThemeManager::instance();
 	return manager->mCurrentTheme->colors()->color(index);
 }
 
-QIcon ViThemeManager::icon(QString name)
+QIcon ViThemeManager::icon(QString name, ViThemeManager::ViIconType type)
 {
 	ViThemeManager::instance();
-	return QIcon(":/icons/" + name);
+	return QIcon(":/icons/" + ViThemeManager::typeString(type) + name);
 }
 
-QString ViThemeManager::iconPath(QString name)
+QString ViThemeManager::iconPath(QString name, ViThemeManager::ViIconType type)
 {
 	ViThemeManager::instance();
-	return ":/icons/" + name;
+	return ":/icons/" + ViThemeManager::typeString(type) + name;
 }
 
-QImage ViThemeManager::image(QString name)
+QImage ViThemeManager::image(QString name, ViThemeManager::ViIconType type)
 {
 	ViThemeManager::instance();
-	return QImage(":/icons/" + name);
+	return QImage(":/icons/" + ViThemeManager::typeString(type) + name);
 }
 
-QString ViThemeManager::background(QString name)
+QImage ViThemeManager::background(QString name)
 {
 	ViThemeManager::instance();
-	return ":/backgrounds/" + name;
+	return QImage(":/backgrounds/" + name);
 }
