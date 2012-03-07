@@ -19,7 +19,6 @@ class ViMainWindow : public QMainWindow
 
 	private:
 		Ui::ViMainWindow *mUi;
-		ViContentWidget *mContentWidget;
 };
 
 #endif

@@ -6,13 +6,10 @@ ViMainWindow::ViMainWindow(ViAudioEngine *engine, QWidget *parent)
 {
 	mUi = new Ui::ViMainWindow();
 	mUi->setupUi(this);
-	mContentWidget = new ViContentWidget();
-	mContentWidget->initialize(engine);	
-	mUi->centralWidget->setContent(mContentWidget);
+	mUi->centralWidget->initialize(engine);	
 }
 
 ViMainWindow::~ViMainWindow()
 {
 	delete mUi;
-	delete mContentWidget;
 }

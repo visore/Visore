@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Visore</string>
   </property>
-  <widget class="ViWindow" name="centralWidget">
+  <widget class="ViContentWidget" name="centralWidget">
    <property name="styleSheet">
     <string notr="true"/>
    </property>
@@ -21,9 +21,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ViWindow</class>
+   <class>ViContentWidget</class>
    <extends>QWidget</extends>
-   <header>viwindow.h</header>
+   <header>vicontentwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
