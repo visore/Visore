@@ -7,8 +7,7 @@ ViButton::ViButton(QWidget *parent)
 	mIsCheckable = false;
 	mIsChecked = false;
 	mIsPressed = false;
-	setGlow(ViThemeManager::color(14));
-	mHasGradient = false;
+	mHasGlow = false;
 }
 
 ViButton::~ViButton()
@@ -32,6 +31,19 @@ void ViButton::setChecked(bool checked)
 	repaint();
 }
 
+void ViButton::setIcons(QImage normalImage, QImage selectedImage)
+{
+	setNormalIcon(normalImage);
+	setSelectedIcon(selectedImage);
+}
+
+void ViButton::setIcons(QImage normalImage, QImage hoverImage, QImage selectedImage)
+{
+	setNormalIcon(normalImage);
+	setHoverIcon(hoverImage);
+	setSelectedIcon(selectedImage);
+}
+
 void ViButton::setNormalIcon(QImage image)
 {
 	mNormalImage = image;
@@ -53,7 +65,7 @@ void ViButton::setSelectedIcon(QImage image)
 
 void ViButton::setGlow(QColor color, ViGradientCreator::ViGradientType type, int x, int y, int width, int height)
 {
-	mHasGradient = true;
+	mHasGlow = true;
 	mGlowColor = color;
 	mGlowType = type;
 	mGlowX = x;
@@ -68,7 +80,7 @@ void ViButton::paintEvent(QPaintEvent *event)
 	int halfHeight = height() / 2;
 	int halfWidth = width() / 2;
 
-	if(mIsHover && mHasGradient)
+	if(mIsHover && mHasGlow)
 	{
 		int glowX = mGlowX;
 		int glowY = mGlowY;
