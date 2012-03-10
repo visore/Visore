@@ -6,6 +6,12 @@ ViWaveForm::ViWaveForm()
 	reset();
 }
 
+ViWaveForm::~ViWaveForm()
+{
+	//qDeleteAll(mTiles);
+	mTiles.clear();
+}
+
 void ViWaveForm::append(qreal value)
 {
 	++mTotalCounter;
@@ -37,9 +43,43 @@ void ViWaveForm::append(qreal value)
 		{
 			mAverageMinimum /= mMinimumCounter;
 		}
-		mWave.append(new ViAmplitude(mMaximum, mMinimum, mAverageMaximum, mAverageMinimum));
+		mWave.append(ViAmplitude(mMaximum, mMinimum, mAverageMaximum, mAverageMinimum));
+		//createTile();
 		reset();
 	}
+}
+
+void ViWaveForm::createTile()
+{
+	if(mWave.size() == TILE_WIDTH)
+	{
+		mTiles.append(new ViWaveFormTile(&mWave));
+		//qDeleteAll(mWave);
+		mWave.clear();
+	}
+}
+
+QList<QImage*> ViWaveForm::tiles(qint64 from, qint64 to, qint32 *offset)
+{
+	QList<QImage*> result;
+	qint64 start = qFloor(qreal(from) / TILE_WIDTH);
+	qint64 end = qCeil(qreal(to) / TILE_WIDTH);
+	*offset = int((qreal(from) / TILE_WIDTH) - start) % TILE_WIDTH;
+
+	if(start > mTiles.size())
+	{
+		start = mTiles.size();
+	}
+	if(end > mTiles.size())
+	{
+		end = mTiles.size();
+	}
+
+	for(int i = start; i < end; ++i)
+	{
+		result.append(mTiles[i]->tile());
+	}
+	return result;
 }
 
 qint32 ViWaveForm::size()
@@ -49,22 +89,22 @@ qint32 ViWaveForm::size()
 
 qreal ViWaveForm::maximum(qint32 position)
 {
-	return mWave[position]->maximum();
+	return mWave[position].maximum();
 }
 
 qreal ViWaveForm::minimum(qint32 position)
 {
-	return mWave[position]->minimum();
+	return mWave[position].minimum();
 }
 
 qreal ViWaveForm::maximumAverage(qint32 position)
 {
-	return mWave[position]->maximumAverage();
+	return mWave[position].maximumAverage();
 }
 
 qreal ViWaveForm::minimumAverage(qint32 position)
 {
-	return mWave[position]->minimumAverage();
+	return mWave[position].minimumAverage();
 }
 
 void ViWaveForm::setCompression(qint32 compression)

@@ -55,11 +55,6 @@ void ViWaveWidgetThread::run()
 	}
 }
 
-void ViWaveWidgetThread::analyze(int size)
-{
-	mWidget->engine()->calculateWaveForm(mBufferType, mPosition, size);
-}
-
 void ViWaveWidgetThread::changed(QSharedPointer<ViWaveFormChunk> chunk)
 {
 	mMutex.lock();
@@ -91,17 +86,15 @@ ViWaveWidget::ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferTy
 	if(type == ViAudioBuffer::Original)
 	{
 		ViObject::connect(mEngine, SIGNAL(originalWaveChanged(QSharedPointer<ViWaveFormChunk>)), mThread, SLOT(changed(QSharedPointer<ViWaveFormChunk>)));
-		ViObject::connect(mEngine, SIGNAL(originalBufferChanged(int)), mThread, SLOT(analyze(int)));
 	}
 	else
 	{
 		ViObject::connect(mEngine, SIGNAL(correctedWaveChanged(QSharedPointer<ViWaveFormChunk>)), mThread, SLOT(changed(QSharedPointer<ViWaveFormChunk>)));
-		ViObject::connect(mEngine, SIGNAL(correctedBufferChanged(int)), mThread, SLOT(analyze(int)));
 	}
 
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), mThread, SLOT(positionChanged(ViAudioPosition)));
 	ViObject::connectQueued(mThread, SIGNAL(tileAvailable()), this, SLOT(repaint()));
-	mCurrentCompressionLevel = 10;
+	mCurrentCompressionLevel = 0;
 }
 
 ViWaveWidget::~ViWaveWidget()
@@ -160,6 +153,36 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 	painter.fillRect(rectangle, color);
 
 	painter.drawLine(halfWidth, 0, halfWidth, height());
+
+
+/*
+halfHeight = 50;
+	QImage::Format format = QImage::Format_ARGB32;
+    QImage ii(100, halfHeight*2, format);
+ii.fill(qRgba(255, 255, 255, 0));
+	QPainter p(&ii);
+	//p.begin();
+	for(int i = 0; i < 100; ++i)
+	{
+		p.setPen(penNormal);
+int v = ( rand() % halfHeight*2 + 1 );
+cout<<v<<endl;
+		p.drawLine(i, 0, i, v);
+	}
+	p.end();
+
+	painter.drawImage(QRect(10, 10, 100, halfHeight*800), ii, ii.rect());*/
+
+	/*qint32 offset = 0;
+	QList<QImage*> tiles = mThread->mForms[mCurrentCompressionLevel].tiles(start, end*100, &offset);
+	for(int i = 0; i < tiles.size(); ++i)
+	{
+		//cout<<"pp: "<<offset<<" "<<drawStart<<endl;
+		//tiles[0]->rect();
+		painter.drawImage(QRect(drawStart - offset + (i * 1), 0, 1, height()), *tiles[i], tiles[i]->rect());
+		//painter.drawImage(QRect(10, 10, 400, 400), *(tiles[0]), tiles[0]->rect());
+		//cout<<"pp2: "<<endl;
+	}*/
 }
 
 void ViWaveWidget::resizeEvent(QResizeEvent *event)

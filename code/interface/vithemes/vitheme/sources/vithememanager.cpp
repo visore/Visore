@@ -68,13 +68,9 @@ QString ViThemeManager::typeString(ViThemeManager::ViIconType type)
 	{
 		return "normal/";
 	}
-	else if(type == ViThemeManager::Hover)
+	else if(type == ViThemeManager::Colored)
 	{
-		return "hover/";
-	}
-	else if(type == ViThemeManager::Selected)
-	{
-		return "selected/";
+		return "colored/";
 	}
 	return "";
 }

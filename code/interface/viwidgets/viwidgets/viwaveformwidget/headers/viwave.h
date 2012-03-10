@@ -4,7 +4,7 @@
 #include <QList>
 #include "viamplitude.h"
 
-class ViWave : public QList<ViAmplitude*>
+class ViWave : public QList<ViAmplitude>
 {
 	public:
 		ViWave();

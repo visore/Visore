@@ -19,7 +19,7 @@ class ViProcessorList
 		int size();
 
 	protected:
-		QList<ViProcessorExecution> mExecutions;
+		QList<ViProcessorList::ViProcessorExecution> mExecutions;
 		QList<ViProcessor*> mProcessors;
 };
 

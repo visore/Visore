@@ -36,10 +36,12 @@ mProcessingChain = new ViAudioProcessingChain();
 
 mOriginalWaveFormer = new ViWaveFormer(mMetaData);
 mCorrectedWaveFormer = new ViWaveFormer(mMetaData);
-mOriginalWaveFormer->initialize(mProcessingChain->originalBuffer());
-mCorrectedWaveFormer->initialize(mProcessingChain->correctedBuffer());
+
+mProcessingChain->attachOriginalProcessor(mOriginalWaveFormer, ViProcessorList::Parallel);
 ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(originalWaveChanged(QSharedPointer<ViWaveFormChunk>)));
-ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(correctedWaveChanged(QSharedPointer<ViWaveFormChunk>)));
+
+//mProcessingChain->attachCorrectedProcessor(mCorrectedWaveFormer, ViProcessorList::Parallel);
+//ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(correctedWaveChanged(QSharedPointer<ViWaveFormChunk>)));
 
 
 mOriginalSpectrumAnalyzer = new ViSpectrumAnalyzer();
@@ -243,12 +245,12 @@ void ViAudioEngine::resetMetaData()
 
 void ViAudioEngine::calculateWaveForm(ViAudioBuffer::ViAudioBufferType type, qint64 start, qint64 length)
 {
-	if(type == ViAudioBuffer::Original)
+	/*if(type == ViAudioBuffer::Original)
 	{
 		mOriginalWaveFormer->analyze(start, length);
 	}
 	else
 	{
 		mCorrectedWaveFormer->analyze(start, length);
-	}
+	}*/
 }

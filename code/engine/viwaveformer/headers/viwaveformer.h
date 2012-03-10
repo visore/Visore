@@ -37,6 +37,9 @@ class ViWaveFormer : public ViProcessor
 {
 	Q_OBJECT
 
+	private slots:
+		void analyze(int length);
+
 	signals:
 		void completed(QSharedPointer<ViWaveFormChunk> chunk);
 
@@ -44,7 +47,6 @@ class ViWaveFormer : public ViProcessor
 		ViWaveFormer(ViAudioMetaData *metaData);
 		~ViWaveFormer();
 		void initialize(ViAudioBuffer *buffer);
-		void analyze(qint64 start, qint64 length);
 
 	private:
 		ViAudioMetaData *mMetaData;

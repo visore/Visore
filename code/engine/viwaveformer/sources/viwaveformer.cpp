@@ -130,9 +130,10 @@ void ViWaveFormer::initialize(ViAudioBuffer *buffer)
 {
 	mThread = new ViWaveFormerThread(buffer, mMetaData, &mSizes);
 	ViObject::connectDirect(mThread, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)));
+	ViObject::connectDirect(buffer, SIGNAL(changed(int)), this, SLOT(analyze(int)));
 }
 
-void ViWaveFormer::analyze(qint64 start, qint64 length)
+void ViWaveFormer::analyze(int length)
 {
-	mThread->addTask(start, length);
+	mThread->addTask(0, length);
 }

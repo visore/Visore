@@ -33,15 +33,15 @@ ViWindow::ViWindow(QMainWindow *parent)
 	mUi->maximizeButton->setNormalIcon(ViThemeManager::image("maximize.png", ViThemeManager::Normal));
 	mUi->minimizeButton->setNormalIcon(ViThemeManager::image("minimize.png", ViThemeManager::Normal));
 
-	mUi->closeButton->setHoverIcon(ViThemeManager::image("close.png", ViThemeManager::Selected));
-	mUi->fullscreenButton->setHoverIcon(ViThemeManager::image("fullscreen.png", ViThemeManager::Selected));
-	mUi->maximizeButton->setHoverIcon(ViThemeManager::image("maximize.png", ViThemeManager::Selected));
-	mUi->minimizeButton->setHoverIcon(ViThemeManager::image("minimize.png", ViThemeManager::Selected));
+	mUi->closeButton->setHoverIcon(ViThemeManager::image("close.png", ViThemeManager::Colored));
+	mUi->fullscreenButton->setHoverIcon(ViThemeManager::image("fullscreen.png", ViThemeManager::Colored));
+	mUi->maximizeButton->setHoverIcon(ViThemeManager::image("maximize.png", ViThemeManager::Colored));
+	mUi->minimizeButton->setHoverIcon(ViThemeManager::image("minimize.png", ViThemeManager::Colored));
 
-	mUi->closeButton->setSelectedIcon(ViThemeManager::image("close.png", ViThemeManager::Selected));
-	mUi->fullscreenButton->setSelectedIcon(ViThemeManager::image("fullscreen.png", ViThemeManager::Selected));
-	mUi->maximizeButton->setSelectedIcon(ViThemeManager::image("maximize.png", ViThemeManager::Selected));
-	mUi->minimizeButton->setSelectedIcon(ViThemeManager::image("minimize.png", ViThemeManager::Selected));
+	mUi->closeButton->setSelectedIcon(ViThemeManager::image("close.png", ViThemeManager::Colored));
+	mUi->fullscreenButton->setSelectedIcon(ViThemeManager::image("fullscreen.png", ViThemeManager::Colored));
+	mUi->maximizeButton->setSelectedIcon(ViThemeManager::image("maximize.png", ViThemeManager::Colored));
+	mUi->minimizeButton->setSelectedIcon(ViThemeManager::image("minimize.png", ViThemeManager::Colored));
 
 	mUi->maximizeButton->setCheckable();
 	mUi->fullscreenButton->setCheckable();

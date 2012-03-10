@@ -12,8 +12,7 @@ class ViThemeManager
 		enum ViIconType
 		{
 			Normal = 0,
-			Hover = 1,
-			Selected = 2
+			Colored = 1
 		};
 
 		static QList<QString> themes(); 

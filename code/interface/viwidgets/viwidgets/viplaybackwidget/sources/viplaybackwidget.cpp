@@ -17,19 +17,19 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mUi->stopButton->setGlow(ViThemeManager::color(14));
 
 	mUi->recordButton->setNormalIcon(ViThemeManager::image("record.png", ViThemeManager::Normal));
-	mUi->recordButton->setSelectedIcon(ViThemeManager::image("record.png", ViThemeManager::Selected));
+	mUi->recordButton->setSelectedIcon(ViThemeManager::image("record.png", ViThemeManager::Colored));
 	mUi->recordButton->setCheckable();
 
 	mUi->playButton->setNormalIcon(ViThemeManager::image("play.png", ViThemeManager::Normal));
-	mUi->playButton->setSelectedIcon(ViThemeManager::image("play.png", ViThemeManager::Selected));
+	mUi->playButton->setSelectedIcon(ViThemeManager::image("play.png", ViThemeManager::Colored));
 	mUi->playButton->setCheckable();
 
 	mUi->pauseButton->setNormalIcon(ViThemeManager::image("pause.png", ViThemeManager::Normal));
-	mUi->pauseButton->setSelectedIcon(ViThemeManager::image("pause.png", ViThemeManager::Selected));
+	mUi->pauseButton->setSelectedIcon(ViThemeManager::image("pause.png", ViThemeManager::Colored));
 	mUi->pauseButton->setCheckable();
 
 	mUi->stopButton->setNormalIcon(ViThemeManager::image("stop.png", ViThemeManager::Normal));
-	mUi->stopButton->setSelectedIcon(ViThemeManager::image("stop.png", ViThemeManager::Selected));
+	mUi->stopButton->setSelectedIcon(ViThemeManager::image("stop.png", ViThemeManager::Colored));
 
 	ViObject::connect(mUi->recordButton, SIGNAL(clicked(bool)), this, SLOT(record(bool)));
 	ViObject::connect(mUi->playButton, SIGNAL(clicked(bool)), this, SLOT(play(bool)));

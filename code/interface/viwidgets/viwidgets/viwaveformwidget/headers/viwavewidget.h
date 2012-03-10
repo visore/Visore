@@ -44,12 +44,10 @@ class ViWaveWidgetThread : public QThread
 
 	private slots:
 		void changed(QSharedPointer<ViWaveFormChunk> chunk);
-		void analyze(int size);
 
 	public:
 		ViWaveWidgetThread(ViWaveWidget *widget);
 		void run();
-		
 
 	private:
 		QList<qint32> mCompressionLevels;
