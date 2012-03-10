@@ -1,15 +1,30 @@
 #include "viwaveform.h"
 
-ViWaveForm::ViWaveForm()
+#include <iostream>
+using namespace std;
+
+ViWaveForm::ViWaveForm(qint16 level)
 {
-	mCompression = 0;
+	mLevel = level;
+	if(mLevel < MAXIMUM_ZOOM_LEVELS)
+	{
+		mNextLevel = new ViWaveForm(mLevel + 1);
+	}
+	else
+	{
+		mNextLevel = NULL;
+	}
 	reset();
+	mIsUnderCutoff = FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, level) <= SUMMARY_CUTOFF;
 }
 
 ViWaveForm::~ViWaveForm()
 {
-	//qDeleteAll(mTiles);
-	mTiles.clear();
+	if(mNextLevel != NULL)
+	{
+		delete mNextLevel;
+		mNextLevel = NULL;
+	}
 }
 
 void ViWaveForm::append(qreal value)
@@ -33,7 +48,7 @@ void ViWaveForm::append(qreal value)
 		++mMinimumCounter;
 		mAverageMinimum += value;
 	}
-	if(mTotalCounter == mCompression)
+	if(mTotalCounter == FIRST_ZOOM_LEVEL)
 	{
 		if(mMaximumCounter > 0)
 		{
@@ -43,79 +58,127 @@ void ViWaveForm::append(qreal value)
 		{
 			mAverageMinimum /= mMinimumCounter;
 		}
-		mWave.append(ViAmplitude(mMaximum, mMinimum, mAverageMaximum, mAverageMinimum));
-		//createTile();
-		reset();
+		if(mLevel < MAXIMUM_ZOOM_LEVELS)
+		{
+			mNextLevel->appendValues(mMaximum, mMinimum, mAverageMaximum, mAverageMinimum);
+		}
+		appendResults();
 	}
 }
 
-void ViWaveForm::createTile()
+void ViWaveForm::scaleValues(qreal *maximum, qreal *minimum, qreal *averageMaximum, qreal *averageMinimum)
 {
-	if(mWave.size() == TILE_WIDTH)
+	*maximum = UNSIGNED_CHAR_HALF_VALUE - (UNSIGNED_CHAR_HALF_VALUE * (*maximum));
+	*minimum = UNSIGNED_CHAR_HALF_VALUE - (UNSIGNED_CHAR_HALF_VALUE * (*minimum));
+	*averageMaximum = UNSIGNED_CHAR_HALF_VALUE - (UNSIGNED_CHAR_HALF_VALUE * (*averageMaximum));
+	*averageMinimum = UNSIGNED_CHAR_HALF_VALUE - (UNSIGNED_CHAR_HALF_VALUE * (*averageMinimum));
+}
+
+void ViWaveForm::appendValues(qreal maximum, qreal minimum, qreal averageMaximum, qreal averageMinimum)
+{
+	++mTotalCounter;
+	if(maximum > mMaximum)
 	{
-		mTiles.append(new ViWaveFormTile(&mWave));
-		//qDeleteAll(mWave);
-		mWave.clear();
+		mMaximum = maximum;
 	}
-}
-
-QList<QImage*> ViWaveForm::tiles(qint64 from, qint64 to, qint32 *offset)
-{
-	QList<QImage*> result;
-	qint64 start = qFloor(qreal(from) / TILE_WIDTH);
-	qint64 end = qCeil(qreal(to) / TILE_WIDTH);
-	*offset = int((qreal(from) / TILE_WIDTH) - start) % TILE_WIDTH;
-
-	if(start > mTiles.size())
+	if(minimum < mMinimum)
 	{
-		start = mTiles.size();
+		mMinimum = minimum;
 	}
-	if(end > mTiles.size())
+	if(averageMaximum > 0)
 	{
-		end = mTiles.size();
+		++mMaximumCounter;
+		mAverageMaximum += averageMaximum;
 	}
-
-	for(int i = start; i < end; ++i)
+	if(averageMinimum < 0)
 	{
-		result.append(mTiles[i]->tile());
+		++mMinimumCounter;
+		mAverageMinimum += averageMinimum;
 	}
-	return result;
+	if(mTotalCounter == ZOOM_LEVEL_INCREASE)
+	{
+		if(mMaximumCounter > 0)
+		{
+			mAverageMaximum /= mMaximumCounter;
+		}
+		if(mMinimumCounter > 0)
+		{
+			mAverageMinimum /= mMinimumCounter;
+		}
+		if(mLevel < MAXIMUM_ZOOM_LEVELS)
+		{
+			mNextLevel->appendValues(mMaximum, mMinimum, mAverageMaximum, mAverageMinimum);
+		}
+		appendResults();
+	}
 }
 
-qint32 ViWaveForm::size()
+void ViWaveForm::appendResults()
 {
-	return mWave.size();
+	scaleValues(&mMaximum, &mMinimum, &mAverageMaximum, &mAverageMinimum);
+	if(mIsUnderCutoff)
+	{
+		mMaximums.push_back((mMaximum + mMinimum) / 2);
+	}
+	else
+	{
+		mMaximums.push_back(mMaximum);
+		mMinimums.push_back(mMinimum);
+		mAverageMaximums.push_back(mAverageMaximum);
+		mAverageMinimums.push_back(mAverageMinimum);
+	}
+	reset();
 }
 
-qreal ViWaveForm::maximum(qint32 position)
+qint32 ViWaveForm::size(qint16 level)
 {
-	return mWave[position].maximum();
+	if(level != mLevel)
+	{
+		return mNextLevel->size(level);
+	}
+	return mMaximums.size();
 }
 
-qreal ViWaveForm::minimum(qint32 position)
+unsigned char ViWaveForm::maximum(qint32 position, qint16 level)
 {
-	return mWave[position].minimum();
+	if(level != mLevel)
+	{
+		return mNextLevel->maximum(position, level);
+	}
+	return mMaximums[position];
 }
 
-qreal ViWaveForm::maximumAverage(qint32 position)
+unsigned char ViWaveForm::minimum(qint32 position, qint16 level)
 {
-	return mWave[position].maximumAverage();
+	if(level != mLevel)
+	{
+		return mNextLevel->minimum(position, level);
+	}
+	return mMinimums[position];
 }
 
-qreal ViWaveForm::minimumAverage(qint32 position)
+unsigned char ViWaveForm::maximumAverage(qint32 position, qint16 level)
 {
-	return mWave[position].minimumAverage();
+	if(level != mLevel)
+	{
+		return mNextLevel->maximumAverage(position, level);
+	}
+	return mAverageMaximums[position];
 }
 
-void ViWaveForm::setCompression(qint32 compression)
+unsigned char ViWaveForm::minimumAverage(qint32 position, qint16 level)
 {
-	mCompression = compression;
+	if(level != mLevel)
+	{
+		return mNextLevel->minimumAverage(position, level);
+	}
+	return mAverageMinimums[position];
 }
 
 void ViWaveForm::reset()
 {
-	mMaximum = -1;
-	mMinimum = 1;
+	mMaximum = 0;
+	mMinimum = 0;
 	mAverageMaximum = 0;
 	mAverageMinimum = 0;
 	mMaximumCounter = 0;
@@ -123,8 +186,11 @@ void ViWaveForm::reset()
 	mTotalCounter = 0;
 }
 
-void ViWaveForm::removeFirst()
+bool ViWaveForm::isUnderCutoff(qint16 level)
 {
-	mWave.removeFirst();
+	if(level != mLevel)
+	{
+		return mNextLevel->isUnderCutoff(level);
+	}
+	return mIsUnderCutoff;
 }
-

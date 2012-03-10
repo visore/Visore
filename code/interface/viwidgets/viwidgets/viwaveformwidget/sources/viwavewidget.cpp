@@ -5,25 +5,6 @@ ViWaveWidgetThread::ViWaveWidgetThread(ViWaveWidget *widget)
 {
 	mWidget = widget;
 	mPosition = -1;
-	mCompressionLevels.append(COMPRESSION_LEVEL_1);
-	mCompressionLevels.append(COMPRESSION_LEVEL_2);
-	mCompressionLevels.append(COMPRESSION_LEVEL_3);
-	mCompressionLevels.append(COMPRESSION_LEVEL_4);
-	mCompressionLevels.append(COMPRESSION_LEVEL_5);
-	mCompressionLevels.append(COMPRESSION_LEVEL_6);
-	mCompressionLevels.append(COMPRESSION_LEVEL_7);
-	mCompressionLevels.append(COMPRESSION_LEVEL_8);
-	mCompressionLevels.append(COMPRESSION_LEVEL_9);
-	mCompressionLevels.append(COMPRESSION_LEVEL_10);
-	mCompressionLevels.append(COMPRESSION_LEVEL_11);
-	mCompressionLevels.append(COMPRESSION_LEVEL_12);
-	mCompressionLevels.append(COMPRESSION_LEVEL_13);
-	mCompressionLevels.append(COMPRESSION_LEVEL_14);
-	for(int i = 0; i < COMPRESSIONS; ++i)
-	{
-		mForms.append(ViWaveForm());
-		mForms[i].setCompression(mCompressionLevels[i]);
-	}
 }
 
 void ViWaveWidgetThread::run()
@@ -41,11 +22,14 @@ void ViWaveWidgetThread::run()
 		for(int i = 0; i < chunk->size(); ++i)
 		{
 			mFormMutex.lock();
+			mForm.append(data[i]);
+			mFormMutex.unlock();
+			/*mFormMutex.lock();
 			for(int j = 0; j < mForms.size(); ++j)
 			{
 				mForms[j].append(data[i]);
 			}
-			mFormMutex.unlock();
+			mFormMutex.unlock();*/
 		}
 
 		emit tileAvailable();
@@ -53,6 +37,11 @@ void ViWaveWidgetThread::run()
 		isEmpty = mChunks.isEmpty();
 		mMutex.unlock();
 	}
+}
+
+void ViWaveWidgetThread::analyze(int size)
+{
+	//mWidget->mEngine->calculateWaveForm(mBufferType, mPosition, size);
 }
 
 void ViWaveWidgetThread::changed(QSharedPointer<ViWaveFormChunk> chunk)
@@ -86,15 +75,17 @@ ViWaveWidget::ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferTy
 	if(type == ViAudioBuffer::Original)
 	{
 		ViObject::connect(mEngine, SIGNAL(originalWaveChanged(QSharedPointer<ViWaveFormChunk>)), mThread, SLOT(changed(QSharedPointer<ViWaveFormChunk>)));
+		ViObject::connect(mEngine, SIGNAL(originalBufferChanged(int)), mThread, SLOT(analyze(int)));
 	}
 	else
 	{
 		ViObject::connect(mEngine, SIGNAL(correctedWaveChanged(QSharedPointer<ViWaveFormChunk>)), mThread, SLOT(changed(QSharedPointer<ViWaveFormChunk>)));
+		ViObject::connect(mEngine, SIGNAL(correctedBufferChanged(int)), mThread, SLOT(analyze(int)));
 	}
 
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), mThread, SLOT(positionChanged(ViAudioPosition)));
 	ViObject::connectQueued(mThread, SIGNAL(tileAvailable()), this, SLOT(repaint()));
-	mCurrentCompressionLevel = 0;
+	mZoomLevel = 0;
 }
 
 ViWaveWidget::~ViWaveWidget()
@@ -113,35 +104,55 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 	static QPen penAverage(ViThemeManager::color(14));
 	static QPen penPosition(ViThemeManager::color(12));
 
+	qreal ratio = UNSIGNED_CHAR_HALF_VALUE / (height() / 2.0);
+
 	int halfHeight = height() / 2;
 	int halfWidth = width() / 2;
-	int position = mThread->mPosition / mThread->mCompressionLevels[mCurrentCompressionLevel];
+	int position = mThread->mPosition / (FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel)); //(FIRST_ZOOM_LEVEL * (mZoomLevel + 1));
 	int start = position - halfWidth;
 	int end = position + halfWidth;
 	if(start < 0)
 	{
 		start = 0;
 	}
-	if(end > mThread->mForms[mCurrentCompressionLevel].size())
+	if(end > mThread->mForm.size(mZoomLevel))
 	{
-		end = mThread->mForms[mCurrentCompressionLevel].size();
+		end = mThread->mForm.size(mZoomLevel);
 	}
 	int drawStart = halfWidth + (start - position);
 
-	for(int i = start; i < end; ++i)
-	{
-		painter.setPen(penNormal);
-		mThread->mFormMutex.lock();
-		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForms[mCurrentCompressionLevel].maximum(i)));
-		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForms[mCurrentCompressionLevel].minimum(i)));
-		mThread->mFormMutex.unlock();
 
-		painter.setPen(penAverage);
-		mThread->mFormMutex.lock();
-		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForms[mCurrentCompressionLevel].maximumAverage(i)));
-		painter.drawLine(drawStart, halfHeight, drawStart, halfHeight - (halfHeight * mThread->mForms[mCurrentCompressionLevel].minimumAverage(i)));
-		mThread->mFormMutex.unlock();
-		drawStart++;
+	if(mThread->mForm.isUnderCutoff(mZoomLevel))
+	{
+		int previous = halfHeight;
+		for(int i = start; i < end; ++i)
+		{
+			painter.setPen(penNormal);
+			mThread->mFormMutex.lock();
+			int now = mThread->mForm.maximum(i, mZoomLevel) / ratio;
+			painter.drawLine(drawStart, previous, drawStart, now);
+			previous = now;
+			mThread->mFormMutex.unlock();
+			drawStart++;
+		}
+	}
+	else
+	{
+		for(int i = start; i < end; ++i)
+		{
+			painter.setPen(penNormal);
+			mThread->mFormMutex.lock();
+			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.maximum(i, mZoomLevel) / ratio);
+			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.minimum(i, mZoomLevel) / ratio);
+			mThread->mFormMutex.unlock();
+
+			painter.setPen(penAverage);
+			mThread->mFormMutex.lock();
+			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.maximumAverage(i, mZoomLevel) / ratio);
+			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.minimumAverage(i, mZoomLevel) / ratio);
+			mThread->mFormMutex.unlock();
+			drawStart++;
+		}
 	}
 
 	painter.setPen(penPosition);
@@ -153,36 +164,6 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 	painter.fillRect(rectangle, color);
 
 	painter.drawLine(halfWidth, 0, halfWidth, height());
-
-
-/*
-halfHeight = 50;
-	QImage::Format format = QImage::Format_ARGB32;
-    QImage ii(100, halfHeight*2, format);
-ii.fill(qRgba(255, 255, 255, 0));
-	QPainter p(&ii);
-	//p.begin();
-	for(int i = 0; i < 100; ++i)
-	{
-		p.setPen(penNormal);
-int v = ( rand() % halfHeight*2 + 1 );
-cout<<v<<endl;
-		p.drawLine(i, 0, i, v);
-	}
-	p.end();
-
-	painter.drawImage(QRect(10, 10, 100, halfHeight*800), ii, ii.rect());*/
-
-	/*qint32 offset = 0;
-	QList<QImage*> tiles = mThread->mForms[mCurrentCompressionLevel].tiles(start, end*100, &offset);
-	for(int i = 0; i < tiles.size(); ++i)
-	{
-		//cout<<"pp: "<<offset<<" "<<drawStart<<endl;
-		//tiles[0]->rect();
-		painter.drawImage(QRect(drawStart - offset + (i * 1), 0, 1, height()), *tiles[i], tiles[i]->rect());
-		//painter.drawImage(QRect(10, 10, 400, 400), *(tiles[0]), tiles[0]->rect());
-		//cout<<"pp2: "<<endl;
-	}*/
 }
 
 void ViWaveWidget::resizeEvent(QResizeEvent *event)
@@ -207,20 +188,20 @@ void ViWaveWidget::leaveEvent(QEvent *event)
 
 void ViWaveWidget::zoomIn()
 {
-	qint8 level = mCurrentCompressionLevel + 1;
-	if(level < mThread->mCompressionLevels.size())
+	qint8 level = mZoomLevel - 1;
+	if(level >= 0)
 	{
-		mCurrentCompressionLevel = level;
+		mZoomLevel = level;
 	}
 	repaint();
 }
 
 void ViWaveWidget::zoomOut()
 {
-	qint8 level = mCurrentCompressionLevel - 1;
-	if(level >= 0)
+	qint8 level = mZoomLevel + 1;
+	if(level < MAXIMUM_ZOOM_LEVELS)
 	{
-		mCurrentCompressionLevel = level;
+		mZoomLevel = level;
 	}
 	repaint();
 }

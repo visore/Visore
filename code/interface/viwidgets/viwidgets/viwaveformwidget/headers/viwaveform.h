@@ -1,35 +1,35 @@
 #ifndef ViWaveForm_H
 #define ViWaveForm_H
 
-#define TILE_WIDTH 500
+#define ZOOM_LEVEL_INCREASE 2
+#define MAXIMUM_ZOOM_LEVELS 17
+#define FIRST_ZOOM_LEVEL 2
+#define UNSIGNED_CHAR_HALF_VALUE 127
+#define SUMMARY_CUTOFF 200
 
-#include "viwaveformtile.h"
+#include <QVector>
 #include <qmath.h>
 
 class ViWaveForm
 {
 	public:
-		ViWaveForm();
+		ViWaveForm(qint16 level = 0);
 		~ViWaveForm();
 		void append(qreal value);
-		qint32 size();
-		qreal maximum(qint32 position);
-		qreal minimum(qint32 position);
-		qreal maximumAverage(qint32 position);
-		qreal minimumAverage(qint32 position);
-		void setCompression(qint32 compression);
+		qint32 size(qint16 level);
+		unsigned char maximum(qint32 position, qint16 level);
+		unsigned char minimum(qint32 position, qint16 level);
+		unsigned char maximumAverage(qint32 position, qint16 level);
+		unsigned char minimumAverage(qint32 position, qint16 level);
 		void reset();
-		void removeFirst();
-		QList<ViWaveFormTile*> mTiles;
-		//Retrieves all tiles from "from", to "to" and chnages the value of offset to the value of pixels/samples of the first tile that isn't part of the range [from, to]
-		QList<QImage*> tiles(qint64 from, qint64 to, qint32 *offset);
+		bool isUnderCutoff(qint16 level);
 
 	private:
-		void createTile();
+		void scaleValues(qreal *maximum, qreal *minimum, qreal *averageMaximum, qreal *averageMinimum);
+		void appendValues(qreal maximum, qreal minimum, qreal averageMaximum, qreal averageMinimum);
+		void appendResults();
 
 	private:
-		//QList<ViWaveFormTile*> mTiles;
-		ViWave mWave;
 		qreal mMaximum;
 		qreal mMinimum;
 		qreal mAverageMaximum;
@@ -37,7 +37,14 @@ class ViWaveForm
 		qint64 mMaximumCounter;
 		qint64 mMinimumCounter;
 		qint32 mTotalCounter;
-		qint32 mCompression;
+		ViWaveForm *mNextLevel;
+		qint16 mLevel;
+		bool mIsUnderCutoff;
+
+		QVector<unsigned char> mMaximums;
+		QVector<unsigned char> mMinimums;
+		QVector<unsigned char> mAverageMaximums;
+		QVector<unsigned char> mAverageMinimums;
 };
 
 #endif
