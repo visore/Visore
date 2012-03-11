@@ -2,6 +2,7 @@
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 SET(VI_AUDIOCONNECTION ${ROOT}/viaudioconnection)
 SET(VI_AUDIOCONNECTIONS ${ROOT}/viaudioconnections)
+SET(VI_AUDIOCONNECTIONS_LOCATION ${CMAKE_INSTALL_PREFIX}/engine/connections CACHE INTERNAL "Audio connections install directory")
 
 #Initiate sub-directories
 ADD_SUBDIRECTORY(${VI_AUDIOCONNECTION})

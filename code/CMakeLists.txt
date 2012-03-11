@@ -18,10 +18,15 @@ SET(ESSENTIALS ${ROOT}/essentials CACHE INTERNAL "Essentials directory")
 #Set the module path
 SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
 
+#Set flags for Windows and MinGW auto-import
+IF(WIN32)
+	SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-auto-import")
+	SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS} -Wl,--enable-auto-import")
+ENDIF()
+
 #Setup Qt
 FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui REQUIRED)
 INCLUDE(${QT_USE_FILE})
-FIND_PACKAGE(QtMobility REQUIRED)
 
 #Include common headers
 INCLUDE_DIRECTORIES(
@@ -58,6 +63,10 @@ INCLUDE_DIRECTORIES(
 	${EXTERNAL}/fftreal/sources
 	${EXTERNAL}/fftreal/headers
 )
+
+IF(WIN32)
+	INCLUDE_DIRECTORIES(${EXTERNAL}/dlfcn/headers)
+ENDIF()
 
 #Unix version for installing shared libraries and linking them to the executable
 SET(CMAKE_INSTALL_RPATH

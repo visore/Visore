@@ -6,7 +6,13 @@ SET(SOURCES ${ROOT}/sources)
 FILE(GLOB VI_MAIN_SOURCES ${SOURCES}/*.cpp)
 
 #Create executable
-ADD_EXECUTABLE(visore ${VI_MAIN_SOURCES})
+IF(CMAKE_BUILD_TYPE STREQUAL "Release")
+	#Ensures that the console is not shown in Windows
+	ADD_EXECUTABLE(visore WIN32 ${VI_MAIN_SOURCES})
+ELSE()
+	ADD_EXECUTABLE(visore ${VI_MAIN_SOURCES})
+ENDIF()
+
 
 #Link Visore to Qt
 TARGET_LINK_LIBRARIES(visore ${QT_LIBRARIES} viaudioengine vimainwindow)

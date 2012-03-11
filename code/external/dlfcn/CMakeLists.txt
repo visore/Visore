@@ -1,0 +1,15 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Initiate source files
+FILE(GLOB DLFCN_HEADERS ${HEADERS}/*.h)
+FILE(GLOB DLFCN_SOURCES ${SOURCES}/*.cpp)
+
+#Create library
+ADD_LIBRARY(dlfcn SHARED ${DLFCN_HEADERS} ${DLFCN_SOURCES})
+SET_TARGET_PROPERTIES(dlfcn PROPERTIES LINKER_LANGUAGE C)
+
+#Install file
+INSTALL(TARGETS dlfcn DESTINATION external/dlfcn)

@@ -174,7 +174,7 @@ bool ViBassStreamOutput::setPosition(ViAudioPosition position)
 	{
 		result = false;
 	}
-	if(read < 0)
+	if(pos < 0)
 	{
 		setErrorParameters("ViBassStreamOutput - Position Error", "The position could not be set", ViErrorInfo::MediumFatal);
 	}
