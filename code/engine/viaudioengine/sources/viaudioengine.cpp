@@ -40,8 +40,8 @@ mCorrectedWaveFormer = new ViWaveFormer(mMetaData);
 mProcessingChain->attachOriginalProcessor(mOriginalWaveFormer, ViProcessorList::Parallel);
 ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(originalWaveChanged(QSharedPointer<ViWaveFormChunk>)));
 
-//mProcessingChain->attachCorrectedProcessor(mCorrectedWaveFormer, ViProcessorList::Parallel);
-//ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(correctedWaveChanged(QSharedPointer<ViWaveFormChunk>)));
+mProcessingChain->attachCorrectedProcessor(mCorrectedWaveFormer, ViProcessorList::Parallel);
+ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(correctedWaveChanged(QSharedPointer<ViWaveFormChunk>)));
 
 
 mOriginalSpectrumAnalyzer = new ViSpectrumAnalyzer();
