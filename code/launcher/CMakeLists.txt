@@ -1,0 +1,18 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(SOURCES ${ROOT}/sources)
+
+#Initiate source files
+FILE(GLOB VI_LAUNCHER_SOURCES ${SOURCES}/*.cpp)
+
+#Create executable
+IF(WIN32)
+	ADD_DEFINITIONS(-static-libgcc)
+	ADD_EXECUTABLE(launcher WIN32 ${VI_LAUNCHER_SOURCES})
+	SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc")
+ELSE()
+	ADD_EXECUTABLE(launcher ${VI_LAUNCHER_SOURCES})
+ENDIF()
+
+#Install file
+INSTALL(TARGETS launcher RUNTIME DESTINATION .)

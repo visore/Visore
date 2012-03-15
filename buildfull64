@@ -1,13 +1,17 @@
 #!/bin/bash
 
-cd /home/visore/Project/Code
-rm -r install
-mkdir install
-rm -r build
-mkdir build
-cd /home/visore/Project/Code/build
-ccmake ../Visore/code -DCMAKE_INSTALL_PREFIX=/home/visore/Project/Code/install -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit
+current_directory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source_code_directory="$current_directory"/code
+build_directory="$current_directory"/../build
+install_directory="$current_directory"/../install
+
+export PATH=$PATH:"$source_code_directory"/external/bass/libraries/64bit
+rm -r "$install_directory"
+mkdir "$install_directory"
+rm -r "$build_directory"
+mkdir "$build_directory"
+cd "$build_directory"
+ccmake "$source_code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit
 make
 make install
-cd /home/visore/Project/Code/install
-#$1 $2 $3 $4 $5 ./visore

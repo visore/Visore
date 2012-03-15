@@ -10,10 +10,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 #Setup directory paths
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 SET(MAIN ${ROOT}/main)
+SET(LAUNCHER ${ROOT}/launcher)
 SET(ENGINE ${ROOT}/engine CACHE INTERNAL "Engine directory")
 SET(INTERFACE ${ROOT}/interface CACHE INTERNAL "Interface directory")
 SET(EXTERNAL ${ROOT}/external CACHE INTERNAL "External directory")
 SET(ESSENTIALS ${ROOT}/essentials CACHE INTERNAL "Essentials directory")
+
+SET(CMAKE_PREFIX_PATH ${PROJECT_BINARY_DIR}/external/bass)
+SET(CMAKE_LIBRARY_PATH ${PROJECT_BINARY_DIR}/external/bass)
 
 #Set the module path
 SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
@@ -64,25 +68,31 @@ INCLUDE_DIRECTORIES(
 	${EXTERNAL}/fftreal/headers
 )
 
+link_directories(
+${CMAKE_INSTALL_PREFIX}
+)
+
 IF(WIN32)
 	INCLUDE_DIRECTORIES(${EXTERNAL}/dlfcn/headers)
 ENDIF()
 
 #Unix version for installing shared libraries and linking them to the executable
 SET(CMAKE_INSTALL_RPATH
-	"${CMAKE_INSTALL_PREFIX}/essentials"
-	"${CMAKE_INSTALL_PREFIX}/engine"
-	"${CMAKE_INSTALL_PREFIX}/engine/connections"
-	"${CMAKE_INSTALL_PREFIX}/engine/formats"
-	"${CMAKE_INSTALL_PREFIX}/engine/windowfunctions"
-	"${CMAKE_INSTALL_PREFIX}/interface"
-	"${CMAKE_INSTALL_PREFIX}/interface/widgets"
-	"${CMAKE_INSTALL_PREFIX}/external/fftreal"
+#	"${CMAKE_INSTALL_PREFIX}/essentials"
+#	"${CMAKE_INSTALL_PREFIX}/engine"
+#	"${CMAKE_INSTALL_PREFIX}/engine/connections"
+#	"${CMAKE_INSTALL_PREFIX}/engine/formats"
+#	"${CMAKE_INSTALL_PREFIX}/engine/windowfunctions"
+#	"${CMAKE_INSTALL_PREFIX}/interface"
+#	"${CMAKE_INSTALL_PREFIX}/interface/widgets"
+#	"${CMAKE_INSTALL_PREFIX}/external/fftreal"
+"${CMAKE_INSTALL_PREFIX}/external/bass"
 )
 
 #Initiate sub-directories
 ADD_SUBDIRECTORY(${EXTERNAL})
 ADD_SUBDIRECTORY(${ENGINE})
 ADD_SUBDIRECTORY(${INTERFACE})
-ADD_SUBDIRECTORY(${MAIN})
 ADD_SUBDIRECTORY(${ESSENTIALS})
+ADD_SUBDIRECTORY(${MAIN})
+ADD_SUBDIRECTORY(${LAUNCHER})
