@@ -3,6 +3,7 @@
 #include <string>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 
 #ifndef MAX_PATH
 	#define MAX_PATH 8192
@@ -37,33 +38,42 @@ void getdir (string directory, vector<string> &files)
 
 int main()
 {
-	char buffer[MAX_PATH];
+    #if !(defined WINDOWS || defined MACOSX || defined LINUX)
+        cout << "Visore is currently only supported for Windows, Linux and Mac OS X." << endl;
+        return -1;
+    #endif
+
+    char buffer[MAX_PATH];
 	getcwd(buffer, MAX_PATH);
 	string currentDirectory = string(buffer);
 	vector<string> files = vector<string>();
 	getdir(currentDirectory, files);
-
-	string command = "";
+    cout<<"current: "<<currentDirectory<<endl;
+    string command = "";
 	char separator;
-	#ifdef WIN32
+	#ifdef WINDOWS
 		separator = ';';
 		command += "@echo off && cd " + currentDirectory + " && set PATH=%PATH%" + separator;
-	#else
+    #elif defined MACOSX
+        separator = ':';
+        command += "cd " + currentDirectory + " && export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" + separator;
+    #elif defined LINUX
 		separator = ':';
-		command += "cd " + currentDirectory + " && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" + separator;
-	#endif
+        command += "cd " + currentDirectory + " && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" + separator;
+    #endif
 
 	for(int i = 0; i < files.size(); ++i)
 	{
 		command += files[i] + separator;
 	}
 
-	#ifdef WIN32
+	#ifdef WINDOWS
 		command += " && start visore.exe";
 	#else
 		command += " && ./visore";
 	#endif
 
-	system(command.c_str());
+    system(command.c_str());
+
     return 0;
 }

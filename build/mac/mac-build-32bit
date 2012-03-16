@@ -1,0 +1,43 @@
+#!/bin/sh
+
+current_directory=`dirname "$0"`
+
+source_code_directory="$current_directory"/../../code
+build_directory="$current_directory"/../../../build
+install_directory="$current_directory"/../../../install
+qmake_directory=/Users/visore/QtSDK/Desktop/Qt/4.8.0/gcc/bin
+
+export PATH=$PATH:"$source_code_directory"/external/bass/libraries/32bit
+export CMAKE_PREFIX_PATH=$qmake_directory
+
+build_full=false;
+build_small=false;
+run_afterwards=false;
+for i in $*
+do
+	if [ $i = "full" ]; then
+		build_full=true;
+	elif [ $i = "small" ]; then
+		build_small=true;
+	elif [ $i = "run" ]; then
+		run_afterwards=true;
+	fi
+done
+
+if $build_full; then
+	rm -r "$install_directory"
+	mkdir "$install_directory"
+	rm -r "$build_directory"
+	mkdir "$build_directory"
+	cd "$build_directory"
+	ccmake --no-warn-unused-cli "$source_code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=32bit
+	make install
+elif $build_small; then
+	cd "$build_directory"
+	make install
+fi
+
+if $run_afterwards; then
+	cd $install_directory
+	./launcher
+fi

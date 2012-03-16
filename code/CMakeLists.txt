@@ -1,11 +1,18 @@
 #Setup Visore
 PROJECT(Visore)
 
-#Make a debug version. Remove this statement to remove all debug outputs
-ADD_DEFINITIONS(-DDEBUG)
-
 #Setup CMake
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+#Set System
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	SET(MACOSX 1)
+	ADD_DEFINITIONS(-DMACOSX)
+ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+	ADD_DEFINITIONS(-DLINUX)
+ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	ADD_DEFINITIONS(-DWINDOWS)
+ENDIF()
 
 #Setup directory paths
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
@@ -25,7 +32,7 @@ SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
 #Set flags for Windows and MinGW auto-import
 IF(WIN32)
 	SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-auto-import")
-	SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS} -Wl,--enable-auto-import")
+	SET(CMAKE/Users/visore/Documents/Project/Code/Visore/buildfull32_SHARED_LIBRARY_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS} -Wl,--enable-auto-import")
 ENDIF()
 
 #Setup Qt
