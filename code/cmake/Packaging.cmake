@@ -72,6 +72,7 @@ SET(CPACK_DEBIAN_PACKAGE_RECOMMENDS "lame (>= 3.98), flac (>= 1.2)")
 #############################################################################################
 # Redhat package information (.rpm)
 #############################################################################################
+SET(CPACK_RPM_PACKAGE_PROVIDES "libbass.so")
 SET(CPACK_RPM_PACKAGE_SUMMARY ${SHORT_DESCRIPTION})
 SET(CPACK_RPM_PACKAGE_ARCHITECTURE ${PACKAGE_ARCHITECTURE})
 SET(CPACK_RPM_PACKAGE_LICENSE ${LICENSE})
