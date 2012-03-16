@@ -56,7 +56,7 @@ Email: ${EMAIL}
 Website: ${HOMEPAGE}
 ----------------------------------------------------------------------------
 
-COPYRIGHT
+${LICENSE}
 "
 )
 INSTALL(FILES ${COPYRIGHT_FILE} DESTINATION .)

@@ -12,6 +12,7 @@ SET(MAINTAINER "Christoph Stallmann")
 SET(EMAIL "info@visore.org")
 SET(HOMEPAGE "http://www.visore.org")
 SET(INSTALL_LOCATION "/usr/local/visore")
+SET(LICENSE "Copyright (c) 2011-2012 Christoph Stallmann")
 SET(PACKAGE_ARCHITECTURE "i386")
 IF(${ARCHITECTURE} MATCHES "64bit")
 	IF(${SYSTEM} MATCHES "LINUX")
@@ -53,7 +54,7 @@ SET(CPACK_RESOURCE_FILE_README ${README_FILE})
 
 
 #############################################################################################
-# Debian package information
+# Debian package information (.deb)
 #############################################################################################
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${MAINTAINER} <${EMAIL}>")
 SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${PACKAGE_ARCHITECTURE})
@@ -65,6 +66,10 @@ Homepage: ${HOMEPAGE}")
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt4-core (>= 4.7), libqt4-gui (>= 4.7)")
 SET(CPACK_DEBIAN_PACKAGE_RECOMMENDS "lame (>= 3.98), flac (>= 1.2)")
 #############################################################################################
+
+
+
+
 
 
 
