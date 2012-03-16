@@ -12,7 +12,8 @@ SET(MAINTAINER "Christoph Stallmann")
 SET(EMAIL "info@visore.org")
 SET(HOMEPAGE "http://www.visore.org")
 SET(INSTALL_LOCATION "/usr/local/visore")
-SET(LICENSE "Copyright (c) 2011-2012 Christoph Stallmann")
+SET(LICENSE "LGPLv2.1")
+SET(COPYRIGHT "Copyright (c) 2011-2012 Christoph Stallmann")
 SET(PACKAGE_ARCHITECTURE "i386")
 IF(${ARCHITECTURE} MATCHES "64bit")
 	IF(${SYSTEM} MATCHES "LINUX")
@@ -30,8 +31,7 @@ INCLUDE(PackagingFiles)
 #############################################################################################
 # Basic package information
 #############################################################################################
-#SET(CPACK_GENERATOR "DEB;RPM;TGZ")
-SET(CPACK_GENERATOR "DEB")
+SET(CPACK_GENERATOR "DEB;RPM")
 SET(CPACK_PACKAGING_INSTALL_PREFIX ${INSTALL_LOCATION})
 SET(CPACK_PACKAGE_EXECUTABLES launcher;visore)
 SET(CPACK_PACKAGE_DESCRIPTION_FILE ${README_FILE})
@@ -69,7 +69,17 @@ SET(CPACK_DEBIAN_PACKAGE_RECOMMENDS "lame (>= 3.98), flac (>= 1.2)")
 
 
 
-
+#############################################################################################
+# Redhat package information (.rpm)
+#############################################################################################
+SET(CPACK_RPM_PACKAGE_SUMMARY ${SHORT_DESCRIPTION})
+SET(CPACK_RPM_PACKAGE_ARCHITECTURE ${PACKAGE_ARCHITECTURE})
+SET(CPACK_RPM_PACKAGE_LICENSE ${LICENSE})
+SET(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
+SET(CPACK_RPM_PACKAGE_DESCRIPTION "${SHORT_DESCRIPTION}
+${LONG_DESCRIPTION}")
+#set(CPACK_RPM_PACKAGE_REQUIRES "python >= 2.5.0, cmake >= 2.8")
+#############################################################################################
 
 
 
