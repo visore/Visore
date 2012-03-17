@@ -69,7 +69,6 @@ int main(int argc, char** argv)
 	for(int i = 0; i < files.size(); ++i)
 	{
 		command += files[i] + separator;
-cout<<"*"<<files[i]<<"*"<<endl;
 	}
 
 	#ifdef WINDOWS

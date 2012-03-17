@@ -21,6 +21,7 @@ class ViTabButton : public QWidget
 		ViTabButton(QString title, qint8 id, QWidget *parent = 0);
 		void select(bool select);
 		void setSize(int width, int height);
+		void setRounding(qint8 angle);
 		qint8 id();
 
 	protected:
@@ -32,6 +33,7 @@ class ViTabButton : public QWidget
 	private:
 		QString mTitle;
 		qint8 mId;
+		qint8 mAngle;
 		bool mIsHover;
 		bool mIsSelected;
 };

@@ -13,7 +13,6 @@
         <file>icons/normal/unmute.png</file>
         <file>icons/normal/zoomin.png</file>
         <file>icons/normal/zoomout.png</file>
-        <file>icons/normal/logo.gif</file>
         <file>icons/colored/close.png</file>
         <file>icons/colored/fullscreen.png</file>
         <file>icons/colored/maximize.png</file>
@@ -24,5 +23,9 @@
         <file>icons/colored/record.png</file>
         <file>icons/colored/stop.png</file>
         <file>icons/colored/unmute.png</file>
+        <file>icons/colored/fileinput.png</file>
+        <file>icons/colored/vinylinput.png</file>
+        <file>icons/normal/fileinput.png</file>
+        <file>icons/normal/vinylinput.png</file>
     </qresource>
 </RCC>

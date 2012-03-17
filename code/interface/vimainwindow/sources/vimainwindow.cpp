@@ -29,7 +29,9 @@ void ViMainWindow::initialize()
 	mCorrectedWaveWidget = new ViWaveFormWidget(mEngine, ViAudioBuffer::Corrected, mUi->correctedWaveContainer);
 	mUi->correctedWaveContainer->layout()->addWidget(mCorrectedWaveWidget);
 
-	mUi->tabWidget->setHeight(200);
+	mUi->tabWidget->setHeight(120);
+	mUi->tabWidget->setRounding(0, 5);
+	mUi->tabWidget->setTabOffset(5);
 
 	mInputWidget = new ViInputWidget(mUi->tabWidget);
 	mInputWidget->setEngine(mEngine);

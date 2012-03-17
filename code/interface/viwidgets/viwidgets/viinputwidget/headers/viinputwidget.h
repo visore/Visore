@@ -1,6 +1,7 @@
 #ifndef VIINPUTWIDGET_H
 #define VIINPUTWIDGET_H
 
+#include <QFileDialog>
 #include "vithememanager.h"
 #include "viwidget.h"
 

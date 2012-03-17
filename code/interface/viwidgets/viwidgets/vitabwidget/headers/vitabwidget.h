@@ -26,6 +26,8 @@ class ViTabWidget : public QWidget
 		void setSize(int width, int height);
 		void setWidth(int width);
 		void setHeight(int height);
+		void setRounding(qint8 mainAngle, qint8 buttonAngle);
+		void setTabOffset(int offset);
 		void selectTab(qint8 index);
 
 	protected:
@@ -35,6 +37,8 @@ class ViTabWidget : public QWidget
 		Ui::ViTabWidget *mUi;
 		QList<ViTabButton*> mButtons;
 		qint8 mCurrentId;
+		qint8 mMainAngle;
+		qint8 mButtonAngle;
 };
 
 #endif
