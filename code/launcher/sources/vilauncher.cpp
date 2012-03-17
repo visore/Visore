@@ -28,7 +28,9 @@ void getdir(string directory, vector<string> &files)
 		string file = path.substr(lastindex + 1, strlen(dirp->d_name));
 		if(file.find(".") == -1)
 		{
-			files.push_back(path);
+			char absolutePath[MAX_PATH]; 
+        	realpath(path.c_str(), absolutePath); 
+			files.push_back(absolutePath);
 			getdir(path, files);
 		}
 	}
@@ -67,6 +69,7 @@ int main(int argc, char** argv)
 	for(int i = 0; i < files.size(); ++i)
 	{
 		command += files[i] + separator;
+cout<<"*"<<files[i]<<"*"<<endl;
 	}
 
 	#ifdef WINDOWS

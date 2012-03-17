@@ -22,54 +22,24 @@
   <property name="styleSheet">
    <string/>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="margin">
     <number>0</number>
    </property>
-   <property name="spacing">
-    <number>0</number>
-   </property>
-   <item row="0" column="0">
-    <widget class="QWidget" name="widget" native="true">
+   <item>
+    <widget class="ViVolumeBar" name="volumeBar" native="true"/>
+   </item>
+   <item>
+    <widget class="ViButton" name="muteButton" native="true">
      <property name="minimumSize">
       <size>
        <width>0</width>
        <height>0</height>
       </size>
      </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <property name="margin">
-       <number>0</number>
-      </property>
-      <property name="spacing">
-       <number>6</number>
-      </property>
-      <item row="0" column="0" colspan="2">
-       <widget class="ViVolumeBar" name="volumeBar" native="true">
-        <zorder>muteButton</zorder>
-        <zorder>muteButton</zorder>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="ViButton" name="muteButton" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </widget>
    </item>
   </layout>
