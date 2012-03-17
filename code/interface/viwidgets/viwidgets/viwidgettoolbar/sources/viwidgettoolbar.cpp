@@ -43,13 +43,13 @@ ViWidgetToolbar::ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, QW
 
 ViWidgetToolbar::~ViWidgetToolbar()
 {
-	delete mLayout;
+	/*delete mLayout;
 	delete mCentralWidget;
 	for(int i = 0; i < mButtons.size(); ++i)
 	{
 		ViObject::disconnect(mButtons[i], SIGNAL(clickedWithId(qint8)), this, SIGNAL(buttonClicked(qint8)));
 		delete mButtons[i];
-	}
+	}*/
 }
 
 void ViWidgetToolbar::refresh()

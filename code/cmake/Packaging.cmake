@@ -16,11 +16,7 @@ SET(LICENSE "LGPLv2.1")
 SET(COPYRIGHT "Copyright (c) 2011-2012 Christoph Stallmann")
 SET(PACKAGE_ARCHITECTURE "i386")
 IF(${ARCHITECTURE} MATCHES "64bit")
-	IF(${SYSTEM} MATCHES "LINUX")
-		SET(PACKAGE_ARCHITECTURE "amd64")
-	ELSEIF(${SYSTEM} MATCHES "MACOSX")
-		SET(PACKAGE_ARCHITECTURE "x86_64")
-	ENDIF()
+	SET(PACKAGE_ARCHITECTURE "amd64")
 ENDIF()
 
 INCLUDE(PackagingFiles)
@@ -32,11 +28,9 @@ INCLUDE(PackagingFiles)
 # Basic package information
 #############################################################################################
 IF(${DISTRO} STREQUAL "Debian")
-	SET(CPACK_GENERATOR "DEB;TGZ")
+	SET(CPACK_GENERATOR "DEB")
 ELSEIF(${DISTRO} STREQUAL "Redhat")
-	SET(CPACK_GENERATOR "RPM;TGZ")
-ELSEIF(${SYSTEM} MATCHES "MACOSX")
-	SET(CPACK_GENERATOR "RPM;TGZ")
+	SET(CPACK_GENERATOR "RPM")
 ENDIF()
 SET(CPACK_PACKAGING_INSTALL_PREFIX ${INSTALL_LOCATION})
 SET(CPACK_PACKAGE_EXECUTABLES launcher;visore)
@@ -60,7 +54,7 @@ SET(CPACK_RESOURCE_FILE_README ${README_FILE})
 
 
 #############################################################################################
-# Debian package information (.deb)
+# Specific package information
 #############################################################################################
 IF(${DISTRO} STREQUAL "Debian")
 	SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${MAINTAINER} <${EMAIL}>")
@@ -72,15 +66,7 @@ IF(${DISTRO} STREQUAL "Debian")
 	Homepage: ${HOMEPAGE}")
 	SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt4-core (>= 4.7), libqt4-gui (>= 4.7)")
 	SET(CPACK_DEBIAN_PACKAGE_RECOMMENDS "lame (>= 3.98), flac (>= 1.2)")
-ENDIF()
-#############################################################################################
-
-
-
-#############################################################################################
-# Redhat package information (.rpm)
-#############################################################################################
-IF(${DISTRO} STREQUAL "Redhat")
+ELSEIF(${DISTRO} STREQUAL "Redhat")
 	SET(CPACK_RPM_PACKAGE_PROVIDES "libbass.so")
 	SET(CPACK_RPM_PACKAGE_SUMMARY ${SHORT_DESCRIPTION})
 	SET(CPACK_RPM_PACKAGE_ARCHITECTURE ${PACKAGE_ARCHITECTURE})
