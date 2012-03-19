@@ -1,21 +1,23 @@
 #############################################################################################
 # Debian desktop/menu shortcut file
 #############################################################################################
-SET(DEBIAN_DESKTOP_FILE ${CMAKE_BINARY_DIR}/cpack/Visore.desktop)
-FILE(WRITE ${DEBIAN_DESKTOP_FILE}
-"[Desktop Entry]
-Name=${NAME}
-Version=${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
-Exec=${INSTALL_LOCATION}/launcher
-Comment=${SHORT_DESCRIPTION}
-Icon=${INSTALL_LOCATION}/logo256.png
-Type=Application
-Terminal=false
-StartupNotify=true
-Encoding=UTF-8
-Categories=Audio;AudioVideo;"
-)
-INSTALL(FILES ${DEBIAN_DESKTOP_FILE} DESTINATION ../../share/applications)
+IF(${SYSTEM} MATCHES "LINUX")
+	SET(DESKTOP_FILE ${CMAKE_BINARY_DIR}/cpack/Visore.desktop)
+	FILE(WRITE ${DESKTOP_FILE}
+	"[Desktop Entry]
+	Name=${NAME}
+	Version=${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
+	Exec=${INSTALL_LOCATION}/launcher
+	Comment=${SHORT_DESCRIPTION}
+	Icon=${INSTALL_LOCATION}/logo256.png
+	Type=Application
+	Terminal=false
+	StartupNotify=true
+	Encoding=UTF-8
+	Categories=Audio;AudioVideo;"
+	)
+	INSTALL(FILES ${DESKTOP_FILE} DESTINATION ../../share/applications)
+ENDIF()
 #############################################################################################
 
 
