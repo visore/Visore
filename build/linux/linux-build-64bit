@@ -1,6 +1,7 @@
 #!/bin/sh
 
 current_directory=`dirname "$0"`
+current_directory=`cd $current_directory; pwd`
 
 source_code_directory="$current_directory"/../../code
 build_directory="$current_directory"/../../../build
