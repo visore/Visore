@@ -28,9 +28,13 @@ void getdir(string directory, vector<string> &files)
 		string file = path.substr(lastindex + 1, strlen(dirp->d_name));
 		if(file.find(".") == -1)
 		{
-			char absolutePath[MAX_PATH]; 
-        	realpath(path.c_str(), absolutePath); 
-			files.push_back(absolutePath);
+			#ifdef WINDOWS
+				files.push_back(path);
+			#else
+				char absolutePath[MAX_PATH];
+				realpath(path.c_str(), absolutePath);
+				files.push_back(absolutePath);
+			#endif
 			getdir(path, files);
 		}
 	}
@@ -45,15 +49,21 @@ int main(int argc, char** argv)
 		return -1;
 	#endif
 
-    char buffer[MAX_PATH];
-	getcwd(buffer, MAX_PATH);
 	vector<string> files = vector<string>();
-	string currentDirectory = string(argv[0]);
-	int lastindex = currentDirectory.find_last_of("/");
-	currentDirectory = currentDirectory.substr(0, lastindex);
+	string currentDirectory = "";
+	#ifdef WINDOWS
+		char buffer[MAX_PATH];
+		getcwd(buffer, MAX_PATH);
+		currentDirectory = string(buffer);
+	#else
+		currentDirectory = string(argv[0]);
+		int lastindex = currentDirectory.find_last_of("/");
+		currentDirectory = currentDirectory.substr(0, lastindex);
+	#endif
+	
 	getdir(currentDirectory, files);
-
-    string command = "";
+	
+	string command = "";
 	char separator;
 	#ifdef WINDOWS
 		separator = ';';
@@ -64,7 +74,7 @@ int main(int argc, char** argv)
 	#elif defined LINUX
 		separator = ':';
 		command += "cd " + currentDirectory + " && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" + separator;
-    #endif
+	#endif
 
 	for(int i = 0; i < files.size(); ++i)
 	{
@@ -77,7 +87,6 @@ int main(int argc, char** argv)
 		command += " && ./visore";
 	#endif
 
-    system(command.c_str());
-
-    return 0;
+	system(command.c_str());
+	return 0;
 }

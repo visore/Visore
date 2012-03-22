@@ -38,7 +38,7 @@ SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
 #Set flags for Windows and MinGW auto-import
 IF(WIN32)
 	SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-auto-import")
-	SET(CMAKE/Users/visore/Documents/Project/Code/Visore/buildfull32_SHARED_LIBRARY_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS} -Wl,--enable-auto-import")
+	SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS} -Wl,--enable-auto-import")
 ENDIF()
 
 #Setup Qt
