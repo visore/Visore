@@ -47,8 +47,7 @@ class ViAudioEngine : public QObject, public ViError
 		{
 			None = 0,
 			File = 1,
-			Stream = 2,
-			FileAndStream = 3
+			Stream = 2
 		};
 
 	public slots:
@@ -69,10 +68,12 @@ class ViAudioEngine : public QObject, public ViError
 		void originalBufferChanged(int size);
 		void correctedBufferChanged(int size);
 		void positionChanged(ViAudioPosition position);
+		void inputChanged(ViAudioEngine::ViAudioType type);
 
 	public:
 		ViAudioEngine();
 		~ViAudioEngine();
+		void setInput(ViAudioEngine::ViAudioType type);
 		void setInputFilePath(QString filePath);
 		void setOutputFilePath(QString filePath);
 		void reset();
@@ -100,6 +101,8 @@ class ViAudioEngine : public QObject, public ViError
 		ViWaveFormer *mOriginalWaveFormer;
 		ViWaveFormer *mCorrectedWaveFormer;
 		ViSpectrumAnalyzer *mOriginalSpectrumAnalyzer;
+
+		ViAudioEngine::ViAudioType mInputType;
 };
 
 #endif

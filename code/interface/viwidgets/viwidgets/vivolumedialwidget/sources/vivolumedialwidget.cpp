@@ -11,8 +11,8 @@ ViVolumeDialWidget::ViVolumeDialWidget(QWidget *parent)
 	volumeChanged();
 	mUi->volumeDial->setSize(80, 80);
 	mUi->muteButton->setCheckable();
-	mUi->muteButton->setNormalIcon(ViThemeManager::image("unmute.png"));
-	mUi->muteButton->setSelectedIcon(ViThemeManager::image("mute.png"));
+	mUi->muteButton->setIcon(ViThemeManager::image("unmute.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	mUi->muteButton->setIcon(ViThemeManager::image("mute.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Selected);
 	setMinimumSize(100, 120);
 	setMaximumSize(100, 120);
 }

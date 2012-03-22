@@ -41,12 +41,12 @@ if $cmake; then
 	else
 		ccmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=32bit
 	fi
-	make install
+	make -j4 install -j4
 fi
 
 if $build; then
 	cd "$build_directory"
-	make install
+	make -j4 install -j4
 fi
 
 if $package; then

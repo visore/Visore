@@ -18,10 +18,12 @@ class ViPlaybackWidget : public ViWidget
 		void play(bool checked);
 		void pause(bool checked);
 		void stop(bool checked);
+		void inputChanged(ViAudioEngine::ViAudioType type);
 
 	public:
 		ViPlaybackWidget(QWidget *parent = 0);
 		~ViPlaybackWidget();
+		void setEngine(ViAudioEngine *engine);
 
 	private:
 		Ui::ViPlaybackWidget *mUi;

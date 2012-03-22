@@ -10,6 +10,7 @@ ViAudioEngine::ViAudioEngine()
 	mFileInput = NULL;
 	mStreamOutput = NULL;
 	mFileOutput = NULL;
+	mInputType = ViAudioEngine::None;
 /*
 mAudioConnectionLoader = new ViLibrary<ViAudioConnection>();
 if(!mAudioConnectionLoader->open(QCoreApplication::applicationDirPath()+"/engine/connections/libvibassconnection.so")) ViLogger::debug("Library cannot be loaded! ");
@@ -148,6 +149,12 @@ void ViAudioEngine::initializeOutputFile()
 	}
 	//mAudioOutputs.append(new ViStreamOutput(mBuffer));
 }*/
+
+void ViAudioEngine::setInput(ViAudioEngine::ViAudioType type)
+{
+	mInputType = type;
+	emit inputChanged(mInputType);
+}
 
 void ViAudioEngine::setInputFilePath(QString filePath)
 {

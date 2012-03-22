@@ -6,12 +6,12 @@ ViInputWidget::ViInputWidget(QWidget *parent)
 {
 	mUi = new Ui::ViInputWidget();
 	mUi->setupUi(this);
-	mUi->vinylInputButton->setNormalIcon(ViThemeManager::image("vinylinput.png", ViThemeManager::Normal));
-	mUi->fileInputButton->setSelectedIcon(ViThemeManager::image("fileinput.png", ViThemeManager::Normal));
-	mUi->vinylInputButton->setSelectedIcon(ViThemeManager::image("vinylinput.png", ViThemeManager::Colored));
-	mUi->fileInputButton->setNormalIcon(ViThemeManager::image("fileinput.png", ViThemeManager::Colored));
-	mUi->vinylInputButton->setCheckable();
-	mUi->fileInputButton->setCheckable();
+	mUi->vinylInputButton->setIcon(ViThemeManager::image("vinylinput.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	mUi->fileInputButton->setIcon(ViThemeManager::image("fileinput.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	mUi->vinylInputButton->setIcon(ViThemeManager::image("vinylinput.png", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Selected);
+	mUi->fileInputButton->setIcon(ViThemeManager::image("fileinput.png", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Selected);
+	mUi->vinylInputButton->setCheckable(true);
+	mUi->fileInputButton->setCheckable(true);
 	mUi->vinylInputButton->setGlow(ViThemeManager::color(14));
 	mUi->fileInputButton->setGlow(ViThemeManager::color(14));
 }
@@ -30,6 +30,9 @@ void ViInputWidget::setEngine(ViAudioEngine *engine)
 
 void ViInputWidget::selectLineInput()
 {
+	mUi->fileInputButton->setChecked(false);
+	mEngine->reset();
+	mEngine->setInput(ViAudioEngine::Stream);
 }
 
 void ViInputWidget::selectFileInput()
@@ -37,6 +40,13 @@ void ViInputWidget::selectFileInput()
 	QString file = QFileDialog::getOpenFileName(this, "Open Audio File", QDir::homePath());
 	if(file != "")
 	{
+		mUi->vinylInputButton->setChecked(false);
+		mEngine->reset();
 		mEngine->setInputFilePath(file);
+		mEngine->setInput(ViAudioEngine::File);
+	}
+	else
+	{
+		mUi->fileInputButton->setChecked(false);
 	}
 }

@@ -8,9 +8,9 @@ ViVolumeBarWidget::ViVolumeBarWidget(QWidget *parent)
 	mUi->setupUi(this);
 
 	mUi->muteButton->setCheckable();
-	mUi->muteButton->setNormalIcon(ViThemeManager::image("mute.png", ViThemeManager::Normal));
-	mUi->muteButton->setHoverIcon(ViThemeManager::image("mute.png", ViThemeManager::Colored));
-	mUi->muteButton->setSelectedIcon(ViThemeManager::image("unmute.png", ViThemeManager::Normal));
+	mUi->muteButton->setIcon(ViThemeManager::image("mute.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	mUi->muteButton->setIcon(ViThemeManager::image("mute.png", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Hovered);
+	mUi->muteButton->setIcon(ViThemeManager::image("unmute.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Selected);
 
 	setMinimumSize(100, 30);
 	setMaximumSize(100, 30);
@@ -43,10 +43,10 @@ void ViVolumeBarWidget::mute(bool value)
 	mEngine->mute(value);
 	if(value)
 	{
-		mUi->muteButton->setHoverIcon(ViThemeManager::image("unmute.png", ViThemeManager::Colored));
+		mUi->muteButton->setIcon(ViThemeManager::image("unmute.png", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Hovered);
 	}
 	else
 	{
-		mUi->muteButton->setHoverIcon(ViThemeManager::image("mute.png", ViThemeManager::Colored));
+		mUi->muteButton->setIcon(ViThemeManager::image("mute.png", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Hovered);
 	}
 }

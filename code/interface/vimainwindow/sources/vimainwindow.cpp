@@ -15,13 +15,13 @@ ViMainWindow::~ViMainWindow()
 	delete mUi;
 	delete mOriginalWaveWidget;
 	delete mCorrectedWaveWidget;
-	delete mInputWidget;
-	delete mControlWidget;
+	delete mInputContainer;
+	delete mControlContainer;
 }
 
 void ViMainWindow::initialize()
 {
-	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::backgroundPath("tile.png") + ") repeat-x;}");
+	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile.png", ViThemeImage::Normal, ViThemeManager::Background).path() + ") repeat-x;}");
 
 	//Wave forms
 	mOriginalWaveWidget = new ViWaveFormWidget(mEngine, ViAudioBuffer::Original, mUi->originalWaveContainer);
@@ -33,15 +33,11 @@ void ViMainWindow::initialize()
 	mUi->tabWidget->setRounding(0, 5);
 	mUi->tabWidget->setTabOffset(5);
 
-	mInputWidget = new ViInputWidget(mUi->tabWidget);
-	mInputWidget->setEngine(mEngine);
-	mUi->tabWidget->addTab("Input", mInputWidget);
+	mInputContainer = new ViInputContainer(mUi->tabWidget);
+	mInputContainer->setEngine(mEngine);
+	mUi->tabWidget->addTab("Input", mInputContainer);
 
-	mControlWidget = new ViControlWidget(mUi->tabWidget);
-	mControlWidget->setEngine(mEngine);
-	mUi->tabWidget->addTab("Control", mControlWidget);
-
-
-	//mUi->tabWidget->addTab("Number 2");
-	//mUi->tabWidget->addTab("Again");
+	mControlContainer = new ViControlContainer(mUi->tabWidget);
+	mControlContainer->setEngine(mEngine);
+	mUi->tabWidget->addTab("Control", mControlContainer);
 }

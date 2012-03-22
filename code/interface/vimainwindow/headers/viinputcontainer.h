@@ -1,5 +1,5 @@
-#ifndef VICONTROLWIDGET_H
-#define VICONTROLWIDGET_H
+#ifndef VIINPUTCONTAINER_H
+#define VIINPUTCONTAINER_H
 
 #include "vivolumebarwidget.h"
 #include "viplaybackwidget.h"
@@ -8,20 +8,20 @@
 
 namespace Ui
 {
-    class ViControlWidget;
+    class ViInputContainer;
 }
 
-class ViControlWidget : public ViWidget
+class ViInputContainer : public ViWidget
 {
 	Q_OBJECT
 
 	public:
-		ViControlWidget(QWidget *parent = 0);
-		~ViControlWidget();
+		ViInputContainer(QWidget *parent = 0);
+		~ViInputContainer();
 		void setEngine(ViAudioEngine *engine);
 
 	private:
-		Ui::ViControlWidget *mUi;
+		Ui::ViInputContainer *mUi;
 };
 
 #endif

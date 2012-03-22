@@ -62,15 +62,19 @@ void ViThemeManager::setTheme(QString name)
 	}
 }
 
-QString ViThemeManager::typeString(ViThemeManager::ViIconType type)
+QString ViThemeManager::stateString(ViThemeImage::State state)
 {
-	if(type == ViThemeManager::Normal)
+	if(state ==ViThemeImage::Normal)
 	{
 		return "normal/";
 	}
-	else if(type == ViThemeManager::Colored)
+	else if(state == ViThemeImage::Selected)
 	{
-		return "colored/";
+		return "selected/";
+	}
+	else if(state == ViThemeImage::Disabled)
+	{
+		return "disabled/";
 	}
 	return "";
 }
@@ -81,32 +85,20 @@ QColor ViThemeManager::color(int index)
 	return manager->mCurrentTheme->colors()->color(index);
 }
 
-QIcon ViThemeManager::icon(QString name, ViThemeManager::ViIconType type)
+ViThemeImage ViThemeManager::image(QString name, ViThemeImage::State state, ViThemeManager::Type type)
 {
 	ViThemeManager::instance();
-	return QIcon(":/icons/" + ViThemeManager::typeString(type) + name);
-}
-
-QString ViThemeManager::iconPath(QString name, ViThemeManager::ViIconType type)
-{
-	ViThemeManager::instance();
-	return ":/icons/" + ViThemeManager::typeString(type) + name;
-}
-
-QImage ViThemeManager::image(QString name, ViThemeManager::ViIconType type)
-{
-	ViThemeManager::instance();
-	return QImage(":/icons/" + ViThemeManager::typeString(type) + name);
-}
-
-QImage ViThemeManager::background(QString name)
-{
-	ViThemeManager::instance();
-	return QImage(":/backgrounds/" + name);
-}
-
-QString ViThemeManager::backgroundPath(QString name)
-{
-	ViThemeManager::instance();
-	return ":/backgrounds/" + name;
+	QString prefix = ":/";
+	QString statePrefix = "";
+	if(type == ViThemeManager::Icon)
+	{
+		prefix = ":/icons/";
+		statePrefix = ViThemeManager::stateString(state);
+	}
+	else if(type == ViThemeManager::Background)
+	{
+		prefix = ":/backgrounds/";
+	}
+	ViThemeImage image(prefix + statePrefix + name, state);
+	return image;
 }

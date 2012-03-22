@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ViControlWidget</class>
- <widget class="QWidget" name="ViControlWidget">
+ <class>ViInputContainer</class>
+ <widget class="QWidget" name="ViInputContainer">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -24,12 +24,9 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">
-    <widget class="ViPlaybackWidget" name="playbackWidget" native="true"/>
+    <widget class="ViInputWidget" name="inputWidget" native="true"/>
    </item>
    <item row="1" column="1">
-    <widget class="ViVolumeBarWidget" name="volumeWidget" native="true"/>
-   </item>
-   <item row="1" column="2">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -46,15 +43,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ViVolumeBarWidget</class>
+   <class>ViInputWidget</class>
    <extends>QWidget</extends>
-   <header>vivolumebarwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ViPlaybackWidget</class>
-   <extends>QWidget</extends>
-   <header>viplaybackwidget.h</header>
+   <header>viinputwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

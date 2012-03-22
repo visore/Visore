@@ -13,19 +13,23 @@
         <file>icons/normal/unmute.png</file>
         <file>icons/normal/zoomin.png</file>
         <file>icons/normal/zoomout.png</file>
-        <file>icons/colored/close.png</file>
-        <file>icons/colored/fullscreen.png</file>
-        <file>icons/colored/maximize.png</file>
-        <file>icons/colored/minimize.png</file>
-        <file>icons/colored/mute.png</file>
-        <file>icons/colored/pause.png</file>
-        <file>icons/colored/play.png</file>
-        <file>icons/colored/record.png</file>
-        <file>icons/colored/stop.png</file>
-        <file>icons/colored/unmute.png</file>
-        <file>icons/colored/fileinput.png</file>
-        <file>icons/colored/vinylinput.png</file>
         <file>icons/normal/fileinput.png</file>
         <file>icons/normal/vinylinput.png</file>
+        <file>icons/selected/close.png</file>
+        <file>icons/selected/fileinput.png</file>
+        <file>icons/selected/fullscreen.png</file>
+        <file>icons/selected/maximize.png</file>
+        <file>icons/selected/minimize.png</file>
+        <file>icons/selected/mute.png</file>
+        <file>icons/selected/pause.png</file>
+        <file>icons/selected/play.png</file>
+        <file>icons/selected/record.png</file>
+        <file>icons/selected/stop.png</file>
+        <file>icons/selected/unmute.png</file>
+        <file>icons/selected/vinylinput.png</file>
+        <file>icons/disabled/pause.png</file>
+        <file>icons/disabled/play.png</file>
+        <file>icons/disabled/record.png</file>
+        <file>icons/disabled/stop.png</file>
     </qresource>
 </RCC>

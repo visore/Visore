@@ -3,8 +3,8 @@
 
 #include <QMainWindow>
 #include "viwaveformwidget.h"
-#include "vicontrolwidget.h"
-#include "viinputwidget.h"
+#include "vicontrolcontainer.h"
+#include "viinputcontainer.h"
 
 namespace Ui
 {
@@ -29,8 +29,8 @@ class ViMainWindow : public QMainWindow
 		ViWaveFormWidget *mOriginalWaveWidget;
 		ViWaveFormWidget *mCorrectedWaveWidget;
 
-		ViControlWidget *mControlWidget;
-		ViInputWidget *mInputWidget;
+		ViControlContainer *mControlContainer;
+		ViInputContainer *mInputContainer;
 };
 
 #endif
