@@ -42,7 +42,7 @@ IF(WIN32)
 ENDIF()
 
 #Setup Qt
-FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
 #Include common headers
@@ -79,6 +79,8 @@ INCLUDE_DIRECTORIES(
 
 	${EXTERNAL}/fftreal/sources
 	${EXTERNAL}/fftreal/headers
+	${EXTERNAL}/qjson/headers
+	${EXTERNAL}/echonest/headers
 )
 
 link_directories(
