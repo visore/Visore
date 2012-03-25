@@ -76,33 +76,15 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/viwindowfunctions/viwindowfunction/headers
 	${ENGINE}/vispectrumanalyzer/headers
 	${ENGINE}/viwaveformer/headers
+	${ENGINE}/visongdetector/headers
 
 	${EXTERNAL}/fftreal/sources
 	${EXTERNAL}/fftreal/headers
-	${EXTERNAL}/qjson/headers
-	${EXTERNAL}/echonest/headers
-)
-
-link_directories(
-${CMAKE_INSTALL_PREFIX}
 )
 
 IF(WIN32)
 	INCLUDE_DIRECTORIES(${EXTERNAL}/dlfcn/headers)
 ENDIF()
-
-#Unix version for installing shared libraries and linking them to the executable
-SET(CMAKE_INSTALL_RPATH
-#	"${CMAKE_INSTALL_PREFIX}/essentials"
-#	"${CMAKE_INSTALL_PREFIX}/engine"
-#	"${CMAKE_INSTALL_PREFIX}/engine/connections"
-#	"${CMAKE_INSTALL_PREFIX}/engine/formats"
-#	"${CMAKE_INSTALL_PREFIX}/engine/windowfunctions"
-#	"${CMAKE_INSTALL_PREFIX}/interface"
-#	"${CMAKE_INSTALL_PREFIX}/interface/widgets"
-#	"${CMAKE_INSTALL_PREFIX}/external/fftreal"
-"${CMAKE_INSTALL_PREFIX}/external/bass"
-)
 
 #Initiate sub-directories
 ADD_SUBDIRECTORY(${EXTERNAL})

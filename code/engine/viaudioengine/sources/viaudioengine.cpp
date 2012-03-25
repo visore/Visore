@@ -70,6 +70,20 @@ ViObject::connectDirect(mProcessingChain->originalBuffer(), SIGNAL(changed(int))
 ViObject::connectDirect(mProcessingChain->correctedBuffer(), SIGNAL(changed(int)), this, SIGNAL(correctedBufferChanged(int)));
 //ViObject::connectDirect(wave, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(waveFormChanged(ViWaveFormChunk*)));
 
+
+
+
+
+
+
+mSongDetector = new ViSongDetector(mStreamOutput);
+mSongDetector->setKey("G1TZBE4IHJAYUSNCN");
+
+
+
+
+
+
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -99,6 +113,14 @@ ViAudioEngine::~ViAudioEngine()
 		mBuffer = NULL;
 	}*/
 }
+
+ViAudioProcessingChain* ViAudioEngine::processingChain()
+{
+	return mProcessingChain;
+}
+
+
+
 /*
 void ViAudioEngine::initializeInputStream(QAudioDeviceInfo deviceInfo, QAudioFormat format)
 {

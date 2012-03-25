@@ -6,6 +6,7 @@
 #include "viaudioprocessingchain.h"
 #include "viwaveformer.h"
 #include "vispectrumanalyzer.h"
+#include "visongdetector.h"
 #include <QList>
 #include <QCoreApplication>
 
@@ -73,12 +74,12 @@ class ViAudioEngine : public QObject, public ViError
 	public:
 		ViAudioEngine();
 		~ViAudioEngine();
+		ViAudioProcessingChain* processingChain();
 		void setInput(ViAudioEngine::ViAudioType type);
 		void setInputFilePath(QString filePath);
 		void setOutputFilePath(QString filePath);
 		void reset();
 		int volume();
-
 		void calculateWaveForm(ViAudioBuffer::ViAudioBufferType type, qint64 start, qint64 length);
 
 	private:
@@ -103,6 +104,8 @@ class ViAudioEngine : public QObject, public ViError
 		ViSpectrumAnalyzer *mOriginalSpectrumAnalyzer;
 
 		ViAudioEngine::ViAudioType mInputType;
+
+		ViSongDetector *mSongDetector;
 };
 
 #endif

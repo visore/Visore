@@ -28,6 +28,11 @@ void ViAudioTransmission::setBuffer(ViAudioBuffer *buffer)
 	mBuffer = buffer;
 }
 
+ViAudioBuffer* ViAudioTransmission::buffer()
+{
+	return mBuffer;
+}
+
 ViAudioMetaData* ViAudioTransmission::metaData()
 {
 	return mMetaData;

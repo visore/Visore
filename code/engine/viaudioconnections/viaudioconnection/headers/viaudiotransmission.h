@@ -21,6 +21,7 @@ class ViAudioTransmission : public QObject, public ViError
 		ViAudioTransmission(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL);
 		~ViAudioTransmission();
 		virtual void setBuffer(ViAudioBuffer *buffer);
+		virtual ViAudioBuffer* buffer();
 		virtual ViAudioMetaData* metaData();
 		virtual void setMetaData(ViAudioMetaData *metaData);
 		virtual void setStatus(ViAudioTransmission::ViTransmissionStatus status);
