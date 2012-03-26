@@ -9,23 +9,64 @@ class ViSongInfo
 	public:
 		ViSongInfo();
 
-		QString title();
-		QString artist();
+		QString message();
+		qint16 score();
 		QString description();
-		qint16 rating();
+
+		QString songId();
+		QString songTitle();
+		qint16 songHotness();
+		qint16 songDanceability();
+		qint16 songEnergy();
+		double songDuration();
+		double songTempo();
+		double songLoudness();
+
+		QString artistId();
+		QString artistName();
+		qint16 artistHotness();
+		qint16 artistFamiliarity();
+
 		QImage image();
 
-		void setTitle(QString title);
-		void setArtist(QString artist);
+		void setMessage(QString message);
+		void setScore(qint16 score);
 		void setDescription(QString description);
-		void setRating(qint16 rating);
+
+		void setSongId(QString id);
+		void setSongTitle(QString title);
+		void setSongHotness(qint16 hotness);
+		void setSongDanceability(qint16 danceability);
+		void setSongEnergy(qint16 energy);
+		void setSongDuration(double duration);
+		void setSongTempo(double tempo);
+		void setSongLoudness(double loudness);
+
+		void setArtistId(QString id);
+		void setArtistName(QString name);
+		void setArtistHotness(qint16 hotness);
+		void setArtistFamiliarity(qint16 familiarity);
+
 		void setImagePath(QString path);
 
+		QString toString();
+
 	private:
-		QString mTitle;
-		QString mArtist;
+		QString mMessage;
+		qint16 mScore;
+		QString mSongId;
+		QString mSongTitle;
+		qint16 mSongHotness;
+		qint16 mSongDanceability;
+		qint16 mSongEnergy;
+		qreal mSongDuration;
+		qreal mSongTempo;
+		qreal mSongLoudness;
+		QString mArtistId;
+		QString mArtistName;
+		qint16 mArtistHotness;
+		qint16 mArtistFamiliarity;
 		QString mDescription;
-		qint16 mRating;
 		QString mImagePath;
 		
 };

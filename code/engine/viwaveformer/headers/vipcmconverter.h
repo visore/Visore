@@ -21,6 +21,9 @@ class ViPcmConverter
 		static qint16 realToPcm16(double real);
 		static double pcmToReal32(qint32 pcm);
 		static qint32 realToPcm32(double real);
+		static int pcmToReal8(char* buffer, double *result, int size);
+		static int pcmToReal16(char* buffer, double *result, int size);
+		static int pcmToReal32(char* buffer, double *result, int size);
 };
 
 #endif

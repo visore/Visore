@@ -27,6 +27,7 @@ class ViAudioBuffer : public QObject
 		int read(ViAudioBufferStream *stream, ViAudioBufferChunk *chunk, int length);
 		ViAudioBufferStream* createWriteStream();
 		ViAudioBufferStream* createReadStream();
+		void deleteStream(ViAudioBufferStream* stream);
 		
 		int size();
 		void clear(); //Clears all data from the stream

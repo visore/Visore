@@ -53,6 +53,20 @@ ViAudioBufferStream* ViAudioBuffer::createReadStream()
 	return stream;
 }
 
+void ViAudioBuffer::deleteStream(ViAudioBufferStream* stream)
+{
+	for(int i = 0; i < mStreams.size(); ++i)
+	{
+		if(stream == mStreams[i])
+		{
+			delete mStreams[i];
+			mStreams[i] = NULL;
+			mStreams.removeAt(i);
+			return;
+		}
+	}
+}
+
 int ViAudioBuffer::size()
 {
 	if(mData == NULL)

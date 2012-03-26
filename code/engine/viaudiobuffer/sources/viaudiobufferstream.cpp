@@ -47,6 +47,14 @@ int ViAudioBufferStream::bufferHeadStart()
 	return mBufferHeadStart;
 }
 
+int ViAudioBufferStream::bufferSize()
+{
+	mMutex->lock();
+	int size = mBuffer->size();
+	mMutex->unlock();
+	return size;
+}
+
 void ViAudioBufferStream::change(int id)
 {
 	if(mHasHeadStart && mBuffer->size() != mOldSize)
@@ -61,8 +69,7 @@ void ViAudioBufferStream::change(int id)
 		mBuffer->change(oldSize, id);
 		mOldSize = mBuffer->size();
 		mHasHeadStart = true;
-	}
-	
+	}	
 }
 
 void ViAudioBufferStream::restart()

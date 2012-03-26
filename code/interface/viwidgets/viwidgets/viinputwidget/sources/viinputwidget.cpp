@@ -37,7 +37,8 @@ void ViInputWidget::selectLineInput()
 
 void ViInputWidget::selectFileInput()
 {
-	QString file = QFileDialog::getOpenFileName(this, "Open Audio File", QDir::homePath());
+	//QString file = QFileDialog::getOpenFileName(this, "Open Audio File", QDir::homePath());
+	QString file = "/home/visore/a.wav";
 	if(file != "")
 	{
 		mUi->vinylInputButton->setChecked(false);

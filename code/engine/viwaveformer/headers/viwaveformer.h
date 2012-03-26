@@ -26,7 +26,6 @@ class ViWaveFormerThread : public ViProcessorThread
 		int pcmToReal32(char* buffer, double *result, int size);
 
 	private:
-		QList<qint64> mStarts;
 		QList<qint64> mLengths;
 		ViAudioMetaData *mMetaData;
 		QMutex mMutex;

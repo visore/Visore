@@ -11,27 +11,31 @@
 #include "viaudioposition.h"
 #include "visonginfo.h"
 #include "viobject.h"
+#include "vipcmconverter.h"
+#include "viechonestresponse.h"
 
 //Interval (milliseconds) use to request info
-#define MAXIMUM_REQUESTS 3
-#define REQUEST_INTERVAL_1 500
-#define REQUEST_INTERVAL_2 7000
-#define REQUEST_INTERVAL_3 10000
+#define REQUEST_SAMPLES_1 20000
+#define REQUEST_SAMPLES_2 100000
+#define REQUEST_SAMPLES_3 200000
 
 class ViSongCodeGeneratorThread : public QThread
 {
 	Q_OBJECT
 
 	signals:
-		void finished(QString code, QString version);
+		void finished(QString code, QString version, int codeLength);
 
 	public:
-		ViSongCodeGeneratorThread(ViAudioBuffer *buffer, QObject *parent = 0);
+		ViSongCodeGeneratorThread(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QObject *parent = 0);
 		void setOffset(int offset);
+
+	protected:
 		void run();
 
 	private:
 		ViAudioBuffer *mBuffer;
+		ViAudioMetaData *mMetaData;
 		int mOffset;
 };
 
@@ -60,9 +64,11 @@ class ViSongDetector : public QObject
 		void stateChanged(ViSongDetector::State state);
 
 	private slots:
-		void positionChanged(ViAudioPosition position);
-		void codeFinished(QString code, QString version);
-		void replyFinished(QNetworkReply *reply);
+		void bufferChanged(int size);
+		void codeFinished(QString code, QString version, int codeLength);
+
+		void songIdentifyFinished(QNetworkReply *reply);
+		void songSearchFinished(QNetworkReply *reply);
 
 	public:
 		ViSongDetector(ViAudioOutput *output);
@@ -74,13 +80,17 @@ class ViSongDetector : public QObject
 		ViSongInfo songInfo();
 
 	private:
-		
+		void createNetworkManagers();
 
 	private:
+		ViEchoNestResponse mResponse;
 		ViSongCodeGeneratorThread *mThread;
 		ViAudioOutput *mOutput;
-		QNetworkAccessManager *mNetworkManager;
-		bool mKeyWasSet;
+
+		QMap<QString, QNetworkAccessManager*> mNetworkManagers;
+
+		QString mKey;
+		qint64 mBufferSize;
 		ViSongDetector::State mState;
 		ViSongDetector::Result mResult;
 		ViSongInfo mSongInfo;

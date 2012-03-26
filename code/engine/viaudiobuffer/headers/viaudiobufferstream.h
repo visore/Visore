@@ -19,6 +19,7 @@ class ViAudioBufferStream : public QObject, public QDataStream
 		void setBufferHeadStart(int bufferHeadStart);
 		void setHasBufferHeadStart(bool hasHeadStart);
 		int bufferHeadStart();
+		int bufferSize();
 		void change(int id = -1);
 		void restart();
 		bool isValidPosition(qint64 position);
