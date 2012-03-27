@@ -3,7 +3,6 @@
 
 #include "viaudiooutput.h"
 #include "viaudiometadata.h"
-#include "viencodermanager.h"
 
 class ViFileOutput : public ViAudioOutput
 {

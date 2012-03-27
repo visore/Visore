@@ -22,6 +22,7 @@ class ViAudioBuffer : public QObject
 		ViAudioBuffer(QObject *parent = 0, int bufferHeadStart = 100000);
 		~ViAudioBuffer();
 		QByteArray* data();
+		void setData(QByteArray *data);
 		
 		int write(ViAudioBufferStream *stream, ViAudioBufferChunk *chunk, int length, int id = -1);
 		int read(ViAudioBufferStream *stream, ViAudioBufferChunk *chunk, int length);

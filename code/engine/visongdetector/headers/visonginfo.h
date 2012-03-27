@@ -2,7 +2,6 @@
 #define VISONGINFO_H
 
 #include <QString>
-#include <QImage>
 
 class ViSongInfo
 {
@@ -27,7 +26,7 @@ class ViSongInfo
 		qint16 artistHotness();
 		qint16 artistFamiliarity();
 
-		QImage image();
+		QString imagePath();
 
 		void setMessage(QString message);
 		void setScore(qint16 score);

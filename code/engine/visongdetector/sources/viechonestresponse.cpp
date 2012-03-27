@@ -10,7 +10,7 @@ ViEchoNestResponse::ViEchoNestResponse()
 	mHasError = false;
 }
 
-void ViEchoNestResponse::analyzeSongIdentify(QByteArray json)
+void ViEchoNestResponse::analyze(QByteArray json)
 {
 	QJson::Parser parser;
 	bool ok;
@@ -21,57 +21,43 @@ void ViEchoNestResponse::analyzeSongIdentify(QByteArray json)
 	}
 	QVariantMap response = result["response"].toMap();
 	QVariantMap status = response["status"].toMap();
-	mVersion = response["version"].toString();
-	mCode = response["code"].toString();
-	mMessage = response["message"].toString();
+	mVersion = status["version"].toString();
+	mCode = status["code"].toString();
+	mMessage = status["message"].toString();
 	QVariantList songs = response["songs"].toList();
 	for(int i = 0; i < songs.size(); ++i)
 	{
 		QVariantMap song = songs[i].toMap();
 		ViSongInfo info;
+
 		info.setScore(song["score"].toInt());
 		info.setMessage(song["message"].toString());
 		info.setSongId(song["id"].toString());
 		info.setSongTitle(song["title"].toString());
 		info.setArtistId(song["artist_id"].toString());
 		info.setArtistName(song["artist_name"].toString());
+
+		info.setArtistHotness(song["artist_hotttnesss"].toDouble() * 100);
+		info.setSongHotness(song["song_hotttnesss"].toDouble() * 100);
+		info.setArtistFamiliarity(song["artist_familiarity"].toDouble() * 100);
+		QVariantMap summary = song["audio_summary"].toMap();
+		info.setSongDuration(summary["duration"].toDouble());
+		info.setSongLoudness(summary["loudness"].toDouble());
+		info.setSongEnergy(summary["energy"].toDouble() * 100);
+		info.setSongTempo(summary["tempo"].toDouble());
+		info.setSongDanceability(summary["danceability"].toDouble() * 100);
+		QVariantList tracks = song["tracks"].toList();
+		if(tracks.size() > 0)
+		{
+			QVariantMap track = tracks[0].toMap();
+			info.setImagePath(track["release_image"].toString());
+		}
+
 		mSongs.append(info);
 	}
 	if(mSongs.size() > 0)
 	{
 		mCurrentSong = 0;
-	}
-}
-
-void ViEchoNestResponse::analyzeSongSearch(QByteArray json)
-{
-	QJson::Parser parser;
-	bool ok;
-	QVariantMap result = parser.parse(json, &ok).toMap();
-	if(!ok)
-	{
-		mHasError = true;
-	}
-	QVariantMap response = result["response"].toMap();
-	QVariantList songs = response["songs"].toList();
-	if(songs.size() > 0)
-	{
-		QVariantMap song = songs[0].toMap();
-		mSongs[mCurrentSong].setArtistHotness(song["artist_hotttnesss"].toDouble() * 100);
-		mSongs[mCurrentSong].setSongHotness(song["song_hotttnesss"].toDouble() * 100);
-		mSongs[mCurrentSong].setArtistFamiliarity(song["artist_familiarity"].toDouble() * 100);
-		QVariantMap summary = song["audio_summary"].toMap();
-		mSongs[mCurrentSong].setSongDuration(summary["duration"].toDouble());
-		mSongs[mCurrentSong].setSongLoudness(summary["loudness"].toDouble());
-		mSongs[mCurrentSong].setSongEnergy(summary["energy"].toDouble() * 100);
-		mSongs[mCurrentSong].setSongTempo(summary["tempo"].toDouble());
-		mSongs[mCurrentSong].setSongDanceability(summary["danceability"].toDouble() * 100);
-		QVariantList tracks = song["tracks"].toList();
-		if(tracks.size() > 0)
-		{
-			QVariantMap track = tracks[0].toMap();
-			mSongs[mCurrentSong].setImagePath(track["release_image"].toString());
-		}
 	}
 }
 

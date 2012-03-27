@@ -98,9 +98,9 @@ qint16 ViSongInfo::artistFamiliarity()
 	return mArtistFamiliarity;
 }
 
-QImage ViSongInfo::image()
+QString ViSongInfo::imagePath()
 {
-	return QImage(mImagePath);
+	return mImagePath;
 }
 
 void ViSongInfo::setMessage(QString message)

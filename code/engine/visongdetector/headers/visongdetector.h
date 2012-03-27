@@ -2,6 +2,7 @@
 #define VISONGDETECTOR_H
 
 #include <QUrl>
+#include <QFile>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QNetworkProxy>
@@ -66,9 +67,8 @@ class ViSongDetector : public QObject
 	private slots:
 		void bufferChanged(int size);
 		void codeFinished(QString code, QString version, int codeLength);
-
-		void songIdentifyFinished(QNetworkReply *reply);
-		void songSearchFinished(QNetworkReply *reply);
+		void replyFinished(QNetworkReply *reply);
+		void downloadFinished(QNetworkReply *reply);
 
 	public:
 		ViSongDetector(ViAudioOutput *output);
@@ -80,14 +80,11 @@ class ViSongDetector : public QObject
 		ViSongInfo songInfo();
 
 	private:
-		void createNetworkManagers();
-
-	private:
 		ViEchoNestResponse mResponse;
 		ViSongCodeGeneratorThread *mThread;
 		ViAudioOutput *mOutput;
 
-		QMap<QString, QNetworkAccessManager*> mNetworkManagers;
+		QNetworkAccessManager *mNetworkManager;
 
 		QString mKey;
 		qint64 mBufferSize;

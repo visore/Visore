@@ -225,6 +225,7 @@ void ViAudioEngine::startPlayback()
 void ViAudioEngine::stopPlayback()
 {
 	mStreamOutput->stop();
+cout<<"*ssss: "<<ViAudioCodecs::encode(mProcessingChain->correctedBuffer(), "/tmp/visoretest.mp3")<<endl;
 }
 
 void ViAudioEngine::pausePlayback()

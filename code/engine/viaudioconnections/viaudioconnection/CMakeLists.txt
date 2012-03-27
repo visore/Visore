@@ -25,7 +25,7 @@ QT4_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_AUDIOCONNECTION_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(viaudioconnection SHARED ${VI_WRAPPER_HEADERS} ${VI_AUDIOCONNECTION_SOURCES})
-TARGET_LINK_LIBRARIES(viaudioconnection ${QT_LIBRARIES} viaudioencoder viaudioformat viaudiobuffer)
+TARGET_LINK_LIBRARIES(viaudioconnection ${QT_LIBRARIES} viaudioformat viaudiobuffer)
 
 #Install file
 INSTALL(TARGETS viaudioconnection DESTINATION engine)

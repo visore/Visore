@@ -21,7 +21,7 @@ ELSE()
 ENDIF()
 
 #Link Visore to Qt
-TARGET_LINK_LIBRARIES(visore ${QT_LIBRARIES} viaudioengine vimainwindow)
+TARGET_LINK_LIBRARIES(visore viaudioengine vimainwindow)
 
 #Install file
 INSTALL(TARGETS visore RUNTIME DESTINATION .)

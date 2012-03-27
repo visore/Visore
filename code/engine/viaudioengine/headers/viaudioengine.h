@@ -7,6 +7,7 @@
 #include "viwaveformer.h"
 #include "vispectrumanalyzer.h"
 #include "visongdetector.h"
+#include "viaudiocodecs.h"
 #include <QList>
 #include <QCoreApplication>
 

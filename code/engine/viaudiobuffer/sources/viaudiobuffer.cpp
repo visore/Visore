@@ -29,6 +29,12 @@ QByteArray* ViAudioBuffer::data()
 	return mData;
 }
 
+void ViAudioBuffer::setData(QByteArray *data)
+{
+	delete mData;
+	mData = data;
+}
+
 int ViAudioBuffer::write(ViAudioBufferStream *stream, ViAudioBufferChunk *chunk, int length, int id)
 {
 	return stream->write(chunk, length, id);

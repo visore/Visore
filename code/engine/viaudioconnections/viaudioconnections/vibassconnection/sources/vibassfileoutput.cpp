@@ -19,7 +19,7 @@ void ViBassFileOutput::free()
 
 void ViBassFileOutput::start()
 {
-	if(mStatus == ViAudioTransmission::Running)
+	/*if(mStatus == ViAudioTransmission::Running)
 	{
 		setErrorParameters("ViBassFileOutput - Start Error", "The file is already being written", ViErrorInfo::NonFatal);
 		return;
@@ -35,7 +35,7 @@ void ViBassFileOutput::start()
 		mProcess.waitForBytesWritten();
 	}
 	mProcess.close();
-	mStatus = ViAudioTransmission::Stopped;
+	mStatus = ViAudioTransmission::Stopped;*/
 }
 
 void ViBassFileOutput::stop()

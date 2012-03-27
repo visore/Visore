@@ -10,10 +10,7 @@ class ViEchoNestResponse
 {
 	public:
 		ViEchoNestResponse();
-
-		void analyzeSongIdentify(QByteArray json);
-		void analyzeSongSearch(QByteArray json);
-
+		void analyze(QByteArray json);
 		QString version();
 		QString code();
 		QString message();

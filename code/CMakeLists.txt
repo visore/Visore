@@ -29,8 +29,8 @@ SET(EXTERNAL ${ROOT}/external CACHE INTERNAL "External directory")
 SET(ESSENTIALS ${ROOT}/essentials CACHE INTERNAL "Essentials directory")
 SET(COMMON ${ROOT}/common CACHE INTERNAL "Common directory")
 
-SET(CMAKE_PREFIX_PATH ${PROJECT_BINARY_DIR}/external/bass)
-SET(CMAKE_LIBRARY_PATH ${PROJECT_BINARY_DIR}/external/bass)
+#SET(CMAKE_PREFIX_PATH ${PROJECT_BINARY_DIR}/external/bass)
+#SET(CMAKE_LIBRARY_PATH ${PROJECT_BINARY_DIR}/external/bass)
 
 #Set the module path
 SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
@@ -45,10 +45,12 @@ ENDIF()
 FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
+#Setup FFMPEG
+FIND_PACKAGE(FFMPEG REQUIRED)
+
 #Include common headers
 INCLUDE_DIRECTORIES(
 	${CMAKE_BINARY_DIR}
-	${QTMOBILITY_INCLUDE_DIRS}
 	${ESSENTIALS}/headers
 
 	${INTERFACE}/vimainwindow/headers
@@ -71,12 +73,12 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/viaudioengine/headers
 	${ENGINE}/viaudioconnections/viaudioconnection/headers
 	${ENGINE}/viaudioformats/viaudioformat/headers
-	${ENGINE}/viaudioencoders/viaudioencoder/headers
 	${ENGINE}/viaudiobuffer/headers
 	${ENGINE}/viwindowfunctions/viwindowfunction/headers
 	${ENGINE}/vispectrumanalyzer/headers
 	${ENGINE}/viwaveformer/headers
 	${ENGINE}/visongdetector/headers
+	${ENGINE}/viaudiocodecs/headers
 
 	${EXTERNAL}/fftreal/sources
 	${EXTERNAL}/fftreal/headers
