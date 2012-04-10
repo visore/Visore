@@ -35,21 +35,18 @@ SET(COMMON ${ROOT}/common CACHE INTERNAL "Common directory")
 #Set the module path
 SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
 
+#Setup Qt5
+FIND_PACKAGE(Qt5 COMPONENTS Core Widgets Gui)
+
 #Set flags for Windows and MinGW auto-import
 IF(WIN32)
-	SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-auto-import")
+	SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-auto-import")
 	SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS} -Wl,--enable-auto-import")
 ENDIF()
 
-#Setup Qt
-FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
-INCLUDE(${QT_USE_FILE})
-
-#Setup FFMPEG
-FIND_PACKAGE(FFMPEG REQUIRED)
-
 #Include common headers
 INCLUDE_DIRECTORIES(
+	
 	${CMAKE_BINARY_DIR}
 	${ESSENTIALS}/headers
 
@@ -77,8 +74,6 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/viwindowfunctions/viwindowfunction/headers
 	${ENGINE}/vispectrumanalyzer/headers
 	${ENGINE}/viwaveformer/headers
-	${ENGINE}/visongdetector/headers
-	${ENGINE}/viaudiocodecs/headers
 
 	${EXTERNAL}/fftreal/sources
 	${EXTERNAL}/fftreal/headers

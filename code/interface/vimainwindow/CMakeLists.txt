@@ -23,12 +23,12 @@ FOREACH(HEADER ${VI_MAINWINDOW_HEADERS_ALL})
 ENDFOREACH()
 
 #Wrap Qt files
-QT4_WRAP_UI(VI_WRAPPER_FORMS ${VI_MAINWINDOW_FORMS})
-QT4_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_MAINWINDOW_MOC_HEADERS})
+QT5_WRAP_UI(VI_WRAPPER_FORMS ${VI_MAINWINDOW_FORMS})
+QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_MAINWINDOW_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(vimainwindow SHARED ${VI_WRAPPER_FORMS} ${VI_WRAPPER_HEADERS} ${VI_MAINWINDOW_SOURCES})
-TARGET_LINK_LIBRARIES(vimainwindow ${QT_LIBRARIES} vitabwidget viwaveformwidget viinputwidget viplaybackwidget vivolumebarwidget)
+TARGET_LINK_LIBRARIES(vimainwindow ${Qt5Gui_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Widgets_LIBRARIES} vitabwidget viwaveformwidget viinputwidget viplaybackwidget vivolumebarwidget)
 
 #Install file
 INSTALL(TARGETS vimainwindow DESTINATION interface)

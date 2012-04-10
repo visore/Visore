@@ -6,7 +6,7 @@
 #include "viaudioprocessingchain.h"
 #include "viwaveformer.h"
 #include "vispectrumanalyzer.h"
-#include "visongdetector.h"
+//#include "visongdetector.h"
 #include <QList>
 #include <QCoreApplication>
 
@@ -105,7 +105,7 @@ class ViAudioEngine : public QObject, public ViError
 
 		ViAudioEngine::ViAudioType mInputType;
 
-		ViSongDetector *mSongDetector;
+		//ViSongDetector *mSongDetector;
 };
 
 #endif

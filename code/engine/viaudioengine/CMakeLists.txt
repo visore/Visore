@@ -23,11 +23,11 @@ FOREACH(HEADER ${VI_AUDIOENGINE_HEADERS_ALL})
 ENDFOREACH()
 
 #Wrap Qt files
-QT4_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_AUDIOENGINE_MOC_HEADERS})
+QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_AUDIOENGINE_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(viaudioengine SHARED ${VI_AUDIOENGINE_HEADERS} ${VI_AUDIOENGINE_SOURCES} ${VI_WRAPPER_HEADERS})
-TARGET_LINK_LIBRARIES(viaudioengine ${QT_LIBRARIES} viessentials viaudioconnection vibassconnection viwaveformer vispectrumanalyzer visongdetector viaudiocodecs)
+TARGET_LINK_LIBRARIES(viaudioengine ${QT_LIBRARIES} viessentials viaudioconnection vibassconnection viwaveformer vispectrumanalyzer)
 
 #Install file
 INSTALL(TARGETS viaudioengine DESTINATION engine)
