@@ -14,16 +14,16 @@ void ViAudioCodecs::initlialize()
 ViAudioCodecs::Result ViAudioCodecs::encode(ViAudioBuffer *bufferIn, ViAudioBuffer *bufferOut)
 {
 	ViAudioCodecs::initlialize();
-	AVCodec *codec = avcodec_find_encoder(CODEC_ID_MP2);
+	AVCodec *codec = avcodec_find_encoder(CODEC_ID_PCM_S16LE);
 	if(!codec)
 	{
 		return ViAudioCodecs::CodecNotFound;
 	}
 
 	AVCodecContext *context = avcodec_alloc_context3(codec);
-	context->bit_rate = 64000;
-	context->sample_rate = 44100;
-	context->channels = 2;
+	//context->bit_rate = 64000;
+	context->sample_rate = 22050;
+	context->channels = 1;
 	context->sample_fmt = AV_SAMPLE_FMT_S16;
 
 	if(avcodec_open2(context, codec, NULL) < 0)
@@ -31,7 +31,7 @@ ViAudioCodecs::Result ViAudioCodecs::encode(ViAudioBuffer *bufferIn, ViAudioBuff
 		return ViAudioCodecs::CodecNotOpened;
 	}
 
-	static const int OUTPUT_BUFFER_SIZE = 10240;
+	static const int OUTPUT_BUFFER_SIZE = 102400;
 	ViAudioBufferStream *readStream = bufferIn->createReadStream();
 	ViAudioBufferStream *writeStream = bufferOut->createWriteStream();
 
@@ -43,6 +43,11 @@ ViAudioCodecs::Result ViAudioCodecs::encode(ViAudioBuffer *bufferIn, ViAudioBuff
 		ViAudioBufferChunk inChunk;
 		readStream->read(&inChunk, OUTPUT_BUFFER_SIZE);
 		int size = avcodec_encode_audio(context, outputData, OUTPUT_BUFFER_SIZE, reinterpret_cast<const short int*>(inChunk.data()));
+		if(size < 0)
+		{
+			ViAudioCodecs::EncodingProblem;
+			return;
+		}
 		ViAudioBufferChunk outChunk(reinterpret_cast<char*>(outputData));
 		writeStream->write(&outChunk, size);
 	}

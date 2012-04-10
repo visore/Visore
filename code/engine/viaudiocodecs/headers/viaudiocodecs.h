@@ -16,7 +16,8 @@ class ViAudioCodecs : public QObject
 			Success = 0,
 			CodecNotFound = 1,
 			CodecNotOpened = 2,
-			FileNotOpened = 3
+			FileNotOpened = 3,
+			EncodingProblem = 4
 		};
 
 	public:

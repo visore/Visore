@@ -14,6 +14,7 @@
 #include "viobject.h"
 #include "vipcmconverter.h"
 #include "viechonestresponse.h"
+#include "viaudiocodecs.h"
 
 //Interval (milliseconds) use to request info
 #define REQUEST_SAMPLES_1 20000

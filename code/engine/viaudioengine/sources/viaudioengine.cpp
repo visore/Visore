@@ -77,7 +77,7 @@ ViObject::connectDirect(mProcessingChain->correctedBuffer(), SIGNAL(changed(int)
 
 
 mSongDetector = new ViSongDetector(mStreamOutput);
-//mSongDetector->setProxy(QNetworkProxy::HttpProxy, "137.215.6.53", 8080, "p04416376", "Rd28jRX");
+mSongDetector->setProxy(QNetworkProxy::HttpProxy, "137.215.6.53", 8080, "p04416376", "Rd28jRX");
 mSongDetector->setKey("G1TZBE4IHJAYUSNCN");
 
 
@@ -225,7 +225,6 @@ void ViAudioEngine::startPlayback()
 void ViAudioEngine::stopPlayback()
 {
 	mStreamOutput->stop();
-cout<<"*ssss: "<<ViAudioCodecs::encode(mProcessingChain->correctedBuffer(), "/tmp/visoretest.mp3")<<endl;
 }
 
 void ViAudioEngine::pausePlayback()
