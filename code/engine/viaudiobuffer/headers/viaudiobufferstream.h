@@ -16,6 +16,7 @@ class ViAudioBufferStream : public QObject, public QDataStream
 		ViAudioBufferStream(ViAudioBuffer *buffer, QIODevice::OpenMode mode, int bufferHeadStart);
 		int read(ViAudioBufferChunk *chunk, int length);
 		int write(ViAudioBufferChunk *chunk, int length, int id = -1);
+		int write(QByteArray *data);
 		void setBufferHeadStart(int bufferHeadStart);
 		void setHasBufferHeadStart(bool hasHeadStart);
 		int bufferHeadStart();

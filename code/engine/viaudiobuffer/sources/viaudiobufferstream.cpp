@@ -22,6 +22,15 @@ int ViAudioBufferStream::write(ViAudioBufferChunk *chunk, int length, int id)
 	return written;
 }
 
+int ViAudioBufferStream::write(QByteArray *data)
+{
+	mMutex->lock();
+	int written = writeRawData(data->data(), data->size());
+	mMutex->unlock();
+	change(-1);
+	return written;
+}
+
 int ViAudioBufferStream::read(ViAudioBufferChunk *chunk, int length)
 {
 	char *data = new char[length];

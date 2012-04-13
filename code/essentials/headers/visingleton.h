@@ -8,7 +8,7 @@ class ViSingleton
 {
 	public:
 		static ViSingleton* instance();
-		virtual QString name() = 0;
+		virtual QString name();
 
 	protected:
 		ViSingleton();

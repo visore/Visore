@@ -1,5 +1,6 @@
 #include "viaudioengine.h"
 #include "vibassconnection.h"
+#include "viqtconnection.h"
 
 #include <QTimer>
 
@@ -18,6 +19,7 @@ mAudioConnection = mAudioConnectionLoader->createObject("createConnection");
 */
 
 mAudioConnection = new ViBassConnection();
+ViAudioConnection *mAudioConnection2 = new ViQtConnection();
 
 
 
@@ -52,7 +54,7 @@ mOriginalSpectrumAnalyzer->setWindowFunction(ViWindowFunctionManager::selected("
 
 
 //Make sure the file input is created before the stream input
-mFileInput = mAudioConnection->fileInput(mProcessingChain->originalBuffer(), mMetaData);
+mFileInput = mAudioConnection2->fileInput(mProcessingChain->originalBuffer(), mMetaData);
 mStreamInput = mAudioConnection->streamInput(mProcessingChain->originalBuffer(), mMetaData);
 mFileOutput = mAudioConnection->fileOutput(mProcessingChain->correctedBuffer(), mMetaData);
 mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->correctedBuffer(), mMetaData, &outputDevice);

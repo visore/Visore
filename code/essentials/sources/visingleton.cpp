@@ -9,3 +9,8 @@ ViSingleton* ViSingleton::instance()
 {
 	return NULL;
 }
+
+QString ViSingleton::name()
+{
+	return mName;
+}

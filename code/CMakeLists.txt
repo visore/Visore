@@ -36,7 +36,11 @@ SET(COMMON ${ROOT}/common CACHE INTERNAL "Common directory")
 SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
 
 #Setup Qt5
-FIND_PACKAGE(Qt5 COMPONENTS Core Widgets Gui)
+FIND_PACKAGE(Qt5 COMPONENTS Multimedia Core Widgets Gui)
+
+#Setup FFMPEG
+FIND_PACKAGE(Ffmpeg)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__STDC_CONSTANT_MACROS")
 
 #Set flags for Windows and MinGW auto-import
 IF(WIN32)
@@ -74,6 +78,7 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/viwindowfunctions/viwindowfunction/headers
 	${ENGINE}/vispectrumanalyzer/headers
 	${ENGINE}/viwaveformer/headers
+	${ENGINE}/vicodecs/headers
 
 	${EXTERNAL}/fftreal/sources
 	${EXTERNAL}/fftreal/headers
