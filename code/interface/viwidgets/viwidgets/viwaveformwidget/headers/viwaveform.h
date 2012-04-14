@@ -8,6 +8,7 @@
 #define SUMMARY_CUTOFF 200
 
 #include <QVector>
+#include <QMutex>
 #include <qmath.h>
 
 class ViWaveForm
@@ -40,6 +41,8 @@ class ViWaveForm
 		ViWaveForm *mNextLevel;
 		qint16 mLevel;
 		bool mIsUnderCutoff;
+
+		QMutex mMutex;
 
 		QVector<unsigned char> mMaximums;
 		QVector<unsigned char> mMinimums;

@@ -70,6 +70,7 @@ INCLUDE_DIRECTORIES(
 	${INTERFACE}/viwidgets/viwidgets/viinputwidget/headers
 	${INTERFACE}/viwidgets/viwidgets/vitabwidget/headers
 	${INTERFACE}/viwidgets/viwidgets/vicontrolwidget/headers
+	${INTERFACE}/viwidgets/viwidgets/viloadingwidget/headers
 
 	${ENGINE}/viaudioengine/headers
 	${ENGINE}/viaudioconnections/viaudioconnection/headers

@@ -52,8 +52,7 @@ former.pcmToReal(&chunk, &wave);
 		isEmpty = mSizes.isEmpty();
 		mMutex.unlock();
 	}
-cout<<"popi: "<<mForm.size(0)<<endl;
-	emit tileAvailable();
+	//emit tileAvailable();
 }
 
 void ViWaveWidgetThread::analyze(int size)
@@ -102,7 +101,7 @@ mThread->s = engine->mProcessingChain->originalBuffer()->createReadStream();
 
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), mThread, SLOT(positionChanged(ViAudioPosition)));
 	ViObject::connectQueued(mThread, SIGNAL(tileAvailable()), this, SLOT(repaint()));
-	mZoomLevel = 0;
+	mZoomLevel = 15;
 }
 
 ViWaveWidget::~ViWaveWidget()
@@ -128,28 +127,33 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 	int position = mThread->mPosition / (FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel)); //(FIRST_ZOOM_LEVEL * (mZoomLevel + 1));
 	int start = position - halfWidth;
 	int end = position + halfWidth;
+
+	//mThread->mFormMutex.lock();
+	int zoomSize = mThread->mForm.size(mZoomLevel);
+	bool underCutOff = mThread->mForm.isUnderCutoff(mZoomLevel);
+	//mThread->mFormMutex.unlock();
+
 	if(start < 0)
 	{
 		start = 0;
 	}
-	if(end > mThread->mForm.size(mZoomLevel))
+	if(end > zoomSize)
 	{
-		end = mThread->mForm.size(mZoomLevel);
+		end = zoomSize;
 	}
 	int drawStart = halfWidth + (start - position);
 
-
-	if(mThread->mForm.isUnderCutoff(mZoomLevel))
+	if(underCutOff)
 	{
 		int previous = halfHeight;
 		for(int i = start; i < end; ++i)
 		{
 			painter.setPen(penNormal);
-			mThread->mFormMutex.lock();
+			//mThread->mFormMutex.lock();
 			int now = mThread->mForm.maximum(i, mZoomLevel) / ratio;
-			painter.drawLine(drawStart, previous, drawStart, now);
+			//mThread->mFormMutex.unlock();
+			painter.drawLine(drawStart, previous, drawStart + 1, now);
 			previous = now;
-			mThread->mFormMutex.unlock();
 			drawStart++;
 		}
 	}
@@ -158,16 +162,16 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 		for(int i = start; i < end; ++i)
 		{
 			painter.setPen(penNormal);
-			mThread->mFormMutex.lock();
+			//mThread->mFormMutex.lock();
 			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.maximum(i, mZoomLevel) / ratio);
 			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.minimum(i, mZoomLevel) / ratio);
-			mThread->mFormMutex.unlock();
+			//mThread->mFormMutex.unlock();
 
 			painter.setPen(penAverage);
-			mThread->mFormMutex.lock();
+			//mThread->mFormMutex.lock();
 			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.maximumAverage(i, mZoomLevel) / ratio);
 			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.minimumAverage(i, mZoomLevel) / ratio);
-			mThread->mFormMutex.unlock();
+			//mThread->mFormMutex.unlock();
 			drawStart++;
 		}
 	}

@@ -116,6 +116,7 @@ void ViWaveForm::appendValues(qreal maximum, qreal minimum, qreal averageMaximum
 void ViWaveForm::appendResults()
 {
 	scaleValues(&mMaximum, &mMinimum, &mAverageMaximum, &mAverageMinimum);
+	mMutex.lock();
 	if(mIsUnderCutoff)
 	{
 		mMaximums.push_back((mMaximum + mMinimum) / 2);
@@ -127,6 +128,7 @@ void ViWaveForm::appendResults()
 		mAverageMaximums.push_back(mAverageMaximum);
 		mAverageMinimums.push_back(mAverageMinimum);
 	}
+	mMutex.unlock();
 	reset();
 }
 
@@ -136,7 +138,10 @@ qint32 ViWaveForm::size(qint16 level)
 	{
 		return mNextLevel->size(level);
 	}
-	return mMaximums.size();
+	mMutex.lock();
+	qint32 size = mMaximums.size();
+	mMutex.unlock();
+	return size;
 }
 
 unsigned char ViWaveForm::maximum(qint32 position, qint16 level)
@@ -145,7 +150,10 @@ unsigned char ViWaveForm::maximum(qint32 position, qint16 level)
 	{
 		return mNextLevel->maximum(position, level);
 	}
-	return mMaximums[position];
+	mMutex.lock();
+	unsigned char result = mMaximums[position];
+	mMutex.unlock();
+	return result;
 }
 
 unsigned char ViWaveForm::minimum(qint32 position, qint16 level)
@@ -154,7 +162,10 @@ unsigned char ViWaveForm::minimum(qint32 position, qint16 level)
 	{
 		return mNextLevel->minimum(position, level);
 	}
-	return mMinimums[position];
+	mMutex.lock();
+	unsigned char result = mMinimums[position];
+	mMutex.unlock();
+	return result;
 }
 
 unsigned char ViWaveForm::maximumAverage(qint32 position, qint16 level)
@@ -163,7 +174,10 @@ unsigned char ViWaveForm::maximumAverage(qint32 position, qint16 level)
 	{
 		return mNextLevel->maximumAverage(position, level);
 	}
-	return mAverageMaximums[position];
+	mMutex.lock();
+	unsigned char result = mAverageMaximums[position];
+	mMutex.unlock();
+	return result;
 }
 
 unsigned char ViWaveForm::minimumAverage(qint32 position, qint16 level)
@@ -172,7 +186,10 @@ unsigned char ViWaveForm::minimumAverage(qint32 position, qint16 level)
 	{
 		return mNextLevel->minimumAverage(position, level);
 	}
-	return mAverageMinimums[position];
+	mMutex.lock();
+	unsigned char result = mAverageMinimums[position];
+	mMutex.unlock();
+	return result;
 }
 
 void ViWaveForm::reset()
@@ -192,5 +209,8 @@ bool ViWaveForm::isUnderCutoff(qint16 level)
 	{
 		return mNextLevel->isUnderCutoff(level);
 	}
-	return mIsUnderCutoff;
+	mMutex.lock();
+	bool result = mIsUnderCutoff;
+	mMutex.unlock();
+	return result;
 }

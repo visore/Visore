@@ -17,10 +17,25 @@ ViMainWindow::~ViMainWindow()
 	delete mCorrectedWaveWidget;
 	delete mInputContainer;
 	delete mControlContainer;
+	delete mLoadingWidget;
+}
+
+void ViMainWindow::resizeEvent(QResizeEvent *event)
+{
+	mLoadingWidget->resize(event->size());
+    event->accept();
+}
+
+void ViMainWindow::setLoading(bool load)
+{
+	mLoadingWidget->setVisible(load);
 }
 
 void ViMainWindow::initialize()
 {
+	mLoadingWidget = new ViLoadingWidget(centralWidget());
+	setLoading(true);
+
 	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile.png", ViThemeImage::Normal, ViThemeManager::Background).path() + ") repeat-x;}");
 
 	//Wave forms

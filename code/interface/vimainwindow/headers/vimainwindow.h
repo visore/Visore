@@ -2,9 +2,11 @@
 #define VIMAINWINDOW_H
 
 #include <QMainWindow>
+#include <QResizeEvent>
 #include "viwaveformwidget.h"
 #include "vicontrolcontainer.h"
 #include "viinputcontainer.h"
+#include "viloadingwidget.h"
 
 namespace Ui
 {
@@ -18,6 +20,10 @@ class ViMainWindow : public QMainWindow
 	public:
 		ViMainWindow(ViAudioEngine *engine, QWidget *parent = 0);
 		~ViMainWindow();
+		void setLoading(bool load);
+
+	protected:
+		void resizeEvent(QResizeEvent *event);
 
 	private:
 		void initialize();
@@ -25,6 +31,7 @@ class ViMainWindow : public QMainWindow
 	private:
 		Ui::ViMainWindow *mUi;
 		ViAudioEngine *mEngine;
+		ViLoadingWidget *mLoadingWidget;
 
 		ViWaveFormWidget *mOriginalWaveWidget;
 		ViWaveFormWidget *mCorrectedWaveWidget;
