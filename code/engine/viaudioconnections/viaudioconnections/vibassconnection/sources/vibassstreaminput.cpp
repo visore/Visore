@@ -6,8 +6,8 @@ BOOL CALLBACK recordingCallback(HRECORD handle, const void *buffer, DWORD length
 {
 	char *newBuffer = new char[length];
 	memcpy(newBuffer, buffer, length);
-	ViAudioBufferChunk chunk(newBuffer);
-	globalStream->write(&chunk, length);
+	ViAudioBufferChunk chunk(newBuffer, length);
+	globalStream->write(&chunk);
 	return true;
 }
 

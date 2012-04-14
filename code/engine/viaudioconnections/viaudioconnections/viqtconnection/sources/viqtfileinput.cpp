@@ -26,16 +26,7 @@ void ViQtFileInput::free()
 
 void ViQtFileInput::start()
 {
-	QFile file(mFilePath);
-if (!file.open(QIODevice::ReadOnly))
-         return;
-
-     QByteArray inData = file.readAll();
-	QByteArray outData;
-
-cout<<"Codec status: "<<ViCodecs::decode(&inData, &outData, ViCodecs::codecId(mFilePath))<<"  *"<<mFilePath.toAscii().data()<<"*"<<endl;
-mStream->write(&outData);
-
+	ViCodecs::decode(mFilePath, mBuffer);
 }
 
 void ViQtFileInput::stop()

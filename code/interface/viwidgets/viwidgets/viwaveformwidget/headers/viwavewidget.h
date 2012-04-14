@@ -9,6 +9,7 @@
 #include "viobject.h"
 #include "vithememanager.h"
 #include "viwaveform.h"
+#include "viwaveformer.h"
 #include "viwidgettoolbar.h"
 
 class ViWaveWidget;
@@ -32,10 +33,13 @@ class ViWaveWidgetThread : public QThread
 	public:
 		ViWaveWidgetThread(ViWaveWidget *widget);
 		void run();
-		
+
+	ViAudioBufferStream *s;	
+ViWaveFormer former;
+
 	private:
 		ViWaveWidget *mWidget;
-		QList<QSharedPointer<ViWaveFormChunk> > mChunks;
+		QList<int> mSizes;
 		qint64 mPosition;
 		ViWaveForm mForm;
 		QMutex mMutex;

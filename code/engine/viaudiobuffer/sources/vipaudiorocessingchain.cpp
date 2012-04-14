@@ -6,21 +6,21 @@ ViAudioProcessingChain::ViAudioProcessingChain::ViAudioProcessingChain()
 	mCorrectedBuffer = new ViAudioBuffer();
 	mOriginalReadStream = mOriginalBuffer->createReadStream();
 	mCorrectedWriteStream = mCorrectedBuffer->createWriteStream();
-	ViObject::connectDirect(mOriginalBuffer, SIGNAL(changed(int, int)), this, SLOT(originalBufferChanged(int, int)));
-	ViObject::connectDirect(mCorrectedBuffer, SIGNAL(changed(int, int)), this, SLOT(correctedBufferChanged(int, int)));
+	ViObject::connectDirect(mOriginalBuffer, SIGNAL(changed(int)), this, SLOT(originalBufferChanged(int)));
+	ViObject::connectDirect(mCorrectedBuffer, SIGNAL(changed(int)), this, SLOT(correctedBufferChanged(int)));
 }
 
 ViAudioProcessingChain::~ViAudioProcessingChain()
 {
 	if(mOriginalBuffer != NULL)
 	{
-		ViObject::disconnect(mOriginalBuffer, SIGNAL(changed(int, int)), this, SLOT(originalBufferChanged(int, int)));
+		ViObject::disconnect(mOriginalBuffer, SIGNAL(changed(int)), this, SLOT(originalBufferChanged(int)));
 		delete mOriginalBuffer;
 		mOriginalBuffer = NULL;
 	}
 	if(mCorrectedBuffer != NULL)
 	{
-		ViObject::disconnect(mCorrectedBuffer, SIGNAL(changed(int, int)), this, SLOT(correctedBufferChanged(int, int)));
+		ViObject::disconnect(mCorrectedBuffer, SIGNAL(changed(int)), this, SLOT(correctedBufferChanged(int)));
 		delete mCorrectedBuffer;
 		mCorrectedBuffer = NULL;
 	}
@@ -36,8 +36,9 @@ ViAudioBuffer* ViAudioProcessingChain::correctedBuffer()
 	return mCorrectedBuffer;
 }
 
-void ViAudioProcessingChain::originalBufferChanged(int size, int id)
+void ViAudioProcessingChain::originalBufferChanged(int size)
 {
+int id = -1;
 	++id;
 	bool lastParallel = false;
 	if(id < mOriginalProcessors.size())
@@ -57,7 +58,7 @@ void ViAudioProcessingChain::originalBufferChanged(int size, int id)
 	}
 }
 
-void ViAudioProcessingChain::correctedBufferChanged(int size, int id)
+void ViAudioProcessingChain::correctedBufferChanged(int size)
 {
 	//emit changeFinished(startIndex, size);
 	mStreamOutput->bufferChanged(size);

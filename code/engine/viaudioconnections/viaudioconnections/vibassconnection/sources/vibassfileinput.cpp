@@ -41,8 +41,8 @@ void ViBassFileInputThread::run()
 			mParent->setErrorParameters("ViBassFileInput - Buffer Read Error", "The supporting buffer could not be read", ViErrorInfo::Fatal);
 			return;
 		}
-		ViAudioBufferChunk chunk(array);
-		mStream->write(&chunk, bufferSize);
+		ViAudioBufferChunk chunk(array, bufferSize);
+		mStream->write(&chunk);
 		if(mPaused)
 		{
 			return;

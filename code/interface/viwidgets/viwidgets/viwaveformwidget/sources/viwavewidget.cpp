@@ -10,20 +10,34 @@ ViWaveWidgetThread::ViWaveWidgetThread(ViWaveWidget *widget)
 void ViWaveWidgetThread::run()
 {
 	mMutex.lock();
-	bool isEmpty = mChunks.isEmpty();
+	bool isEmpty = mSizes.isEmpty();
 	mMutex.unlock();
 	while(!isEmpty)
 	{
-		mMutex.lock();
-		QSharedPointer<ViWaveFormChunk> chunk = mChunks.takeFirst();
-		mMutex.unlock();
-		qreal *data = chunk->data();
 
-		for(int i = 0; i < chunk->size(); ++i)
+		mMutex.lock();
+//cout<<"p1: "<<mChunks.size();
+		int size = mSizes.takeFirst();
+mMutex.unlock();
+
+ViAudioBufferChunk chunk;
+s->read(&chunk, size);
+ViWaveFormChunk wave;
+former.pcmToReal(&chunk, &wave);
+
+
+
+//cout<<"   p2: "<<mChunks.size()<<endl;
+	
+
+		qreal *data = wave.data();
+		int chunkSize = wave.size();
+
+		for(int i = 0; i < chunkSize; ++i)
 		{
-			mFormMutex.lock();
+			//mFormMutex.lock();
 			mForm.append(data[i]);
-			mFormMutex.unlock();
+			//mFormMutex.unlock();
 			/*mFormMutex.lock();
 			for(int j = 0; j < mForms.size(); ++j)
 			{
@@ -32,27 +46,30 @@ void ViWaveWidgetThread::run()
 			mFormMutex.unlock();*/
 		}
 
-		emit tileAvailable();
+
+		//emit tileAvailable();
 		mMutex.lock();
-		isEmpty = mChunks.isEmpty();
+		isEmpty = mSizes.isEmpty();
 		mMutex.unlock();
 	}
+cout<<"popi: "<<mForm.size(0)<<endl;
+	emit tileAvailable();
 }
 
 void ViWaveWidgetThread::analyze(int size)
 {
-	//mWidget->mEngine->calculateWaveForm(mBufferType, mPosition, size);
-}
-
-void ViWaveWidgetThread::changed(QSharedPointer<ViWaveFormChunk> chunk)
-{
 	mMutex.lock();
-	mChunks.append(chunk);
+	mSizes.append(size);
 	mMutex.unlock();
 	if(!isRunning())
 	{
 		start();
 	}
+}
+
+void ViWaveWidgetThread::changed(QSharedPointer<ViWaveFormChunk> chunk)
+{
+
 }
 
 void ViWaveWidgetThread::positionChanged(ViAudioPosition position)
@@ -72,14 +89,14 @@ ViWaveWidget::ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferTy
 	mThread = new ViWaveWidgetThread(this);
 	mThread->mBufferType = type;
 
+mThread->s = engine->mProcessingChain->originalBuffer()->createReadStream();
+
 	if(type == ViAudioBuffer::Original)
 	{
-		ViObject::connect(mEngine, SIGNAL(originalWaveChanged(QSharedPointer<ViWaveFormChunk>)), mThread, SLOT(changed(QSharedPointer<ViWaveFormChunk>)));
 		ViObject::connect(mEngine, SIGNAL(originalBufferChanged(int)), mThread, SLOT(analyze(int)));
 	}
 	else
 	{
-		ViObject::connect(mEngine, SIGNAL(correctedWaveChanged(QSharedPointer<ViWaveFormChunk>)), mThread, SLOT(changed(QSharedPointer<ViWaveFormChunk>)));
 		ViObject::connect(mEngine, SIGNAL(correctedBufferChanged(int)), mThread, SLOT(analyze(int)));
 	}
 

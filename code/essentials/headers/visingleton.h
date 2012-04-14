@@ -4,7 +4,7 @@
 #include <QString>
 #include <QSharedPointer>
 
-class ViSingleton
+class ViSingleton : public QObject
 {
 	public:
 		static ViSingleton* instance();

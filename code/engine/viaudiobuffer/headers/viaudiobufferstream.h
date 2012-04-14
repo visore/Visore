@@ -2,9 +2,11 @@
 #define VIAUDIOBUFFERSTREAM_H
 
 #include <QDataStream>
-#include "viaudiobufferchunk.h"
 #include "viaudiobuffer.h"
 #include "viaudiobuffermutex.h"
+#include "vichunk.h"
+
+typedef ViChunk<char> ViAudioBufferChunk;
 
 class ViAudioBuffer;
 
@@ -14,14 +16,20 @@ class ViAudioBufferStream : public QObject, public QDataStream
 
 	public:
 		ViAudioBufferStream(ViAudioBuffer *buffer, QIODevice::OpenMode mode, int bufferHeadStart);
+
+		int read(char *data, int length);
 		int read(ViAudioBufferChunk *chunk, int length);
-		int write(ViAudioBufferChunk *chunk, int length, int id = -1);
-		int write(QByteArray *data);
+		int read(ViAudioBufferChunk *chunk);
+
+		int write(char *data, int length);
+		int write(ViAudioBufferChunk *chunk, int length);
+		int write(ViAudioBufferChunk *chunk);
+
 		void setBufferHeadStart(int bufferHeadStart);
 		void setHasBufferHeadStart(bool hasHeadStart);
 		int bufferHeadStart();
 		int bufferSize();
-		void change(int id = -1);
+		void change();
 		void restart();
 		bool isValidPosition(qint64 position);
 		qint64 setPosition(qint64 position);

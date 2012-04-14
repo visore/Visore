@@ -12,8 +12,8 @@ class ViAudioProcessingChain : public QObject, public ViError
     Q_OBJECT
 
 	private slots:
-		void originalBufferChanged(int size, int id);
-		void correctedBufferChanged(int size, int id);
+		void originalBufferChanged(int size);
+		void correctedBufferChanged(int size);
 
 	public:
 		ViAudioProcessingChain();

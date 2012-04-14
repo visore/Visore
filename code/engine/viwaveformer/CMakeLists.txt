@@ -25,7 +25,7 @@ QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_WAVEFORMER_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(viwaveformer SHARED ${VI_WAVEFORMER_SOURCES} ${VI_WRAPPER_HEADERS})
-TARGET_LINK_LIBRARIES(viwaveformer ${QT_LIBRARIES} viessentials viaudioformat viaudiobuffer)
+TARGET_LINK_LIBRARIES(viwaveformer ${QT_LIBRARIES} viessentials viaudiobuffer)
 
 #Install file
 INSTALL(TARGETS viwaveformer DESTINATION engine)

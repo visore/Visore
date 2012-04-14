@@ -5,7 +5,8 @@
 #include "viaudioconnection.h"
 #include "viaudioprocessingchain.h"
 #include "viwaveformer.h"
-#include "vispectrumanalyzer.h"
+#include "vilibrary.h"
+//#include "vispectrumanalyzer.h"
 //#include "visongdetector.h"
 #include <QList>
 #include <QCoreApplication>
@@ -64,8 +65,6 @@ class ViAudioEngine : public QObject, public ViError
 		void mute(bool value = true);
 
 	signals:
-		void originalWaveChanged(QSharedPointer<ViWaveFormChunk> chunk);
-		void correctedWaveChanged(QSharedPointer<ViWaveFormChunk> chunk);
 		void originalBufferChanged(int size);
 		void correctedBufferChanged(int size);
 		void positionChanged(ViAudioPosition position);
@@ -89,7 +88,8 @@ class ViAudioEngine : public QObject, public ViError
 		void initializeOutputFile();*/
 		void resetMetaData();
 
-	private:
+	//private:
+public:
 		ViAudioConnection *mAudioConnection;
 		ViLibrary<ViAudioConnection> *mAudioConnectionLoader;
 		ViStreamInput *mStreamInput;
@@ -99,9 +99,7 @@ class ViAudioEngine : public QObject, public ViError
 		ViAudioProcessingChain *mProcessingChain;
 		ViAudioMetaData *mMetaData;
 
-		ViWaveFormer *mOriginalWaveFormer;
-		ViWaveFormer *mCorrectedWaveFormer;
-		ViSpectrumAnalyzer *mOriginalSpectrumAnalyzer;
+		//ViSpectrumAnalyzer *mOriginalSpectrumAnalyzer;
 
 		ViAudioEngine::ViAudioType mInputType;
 

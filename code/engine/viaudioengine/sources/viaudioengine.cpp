@@ -36,7 +36,7 @@ mProcessingChain = new ViAudioProcessingChain();
 
 
 
-
+/*
 mOriginalWaveFormer = new ViWaveFormer(mMetaData);
 mCorrectedWaveFormer = new ViWaveFormer(mMetaData);
 
@@ -45,10 +45,10 @@ ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(QSharedPointer<ViW
 
 mProcessingChain->attachCorrectedProcessor(mCorrectedWaveFormer, ViProcessorList::Parallel);
 ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(correctedWaveChanged(QSharedPointer<ViWaveFormChunk>)));
+*/
 
-
-mOriginalSpectrumAnalyzer = new ViSpectrumAnalyzer();
-mOriginalSpectrumAnalyzer->setWindowFunction(ViWindowFunctionManager::selected("Hann Window Function"));
+//mOriginalSpectrumAnalyzer = new ViSpectrumAnalyzer();
+//mOriginalSpectrumAnalyzer->setWindowFunction(ViWindowFunctionManager::selected("Hann Window Function"));
 //ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), mOriginalSpectrumAnalyzer, SLOT(start(QSharedPointer<ViWaveFormChunk>)));
 
 

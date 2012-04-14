@@ -25,7 +25,7 @@ QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_WAVEFORMWIDGET_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(viwaveformwidget SHARED ${VI_WRAPPER_HEADERS} ${VI_WAVEFORMWIDGET_SOURCES})
-TARGET_LINK_LIBRARIES(viwaveformwidget ${QT_LIBRARIES} viwidget viwidgettoolbar)
+TARGET_LINK_LIBRARIES(viwaveformwidget ${QT_LIBRARIES} viwidget viwidgettoolbar viwaveformer)
 
 #Install file
 INSTALL(TARGETS viwaveformwidget DESTINATION ${VI_WIDGETSS_LOCATION})

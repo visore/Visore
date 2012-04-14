@@ -13,32 +13,44 @@ ViAudioBufferStream::ViAudioBufferStream(ViAudioBuffer *buffer, QIODevice::OpenM
 	mMutex = ViAudioBufferMutex::instance();
 }
 
-int ViAudioBufferStream::write(ViAudioBufferChunk *chunk, int length, int id)
+int ViAudioBufferStream::read(char *data, int length)
 {
 	mMutex->lock();
-	int written = writeRawData(chunk->data(), length);
+	int read = readRawData(data, length);
 	mMutex->unlock();
-	change(id);
-	return written;
-}
-
-int ViAudioBufferStream::write(QByteArray *data)
-{
-	mMutex->lock();
-	int written = writeRawData(data->data(), data->size());
-	mMutex->unlock();
-	change(-1);
-	return written;
+	return read;
 }
 
 int ViAudioBufferStream::read(ViAudioBufferChunk *chunk, int length)
 {
 	char *data = new char[length];
+	int dataRead = read(data, length);
+	chunk->setData(data, length);
+	return dataRead;
+}
+
+int ViAudioBufferStream::read(ViAudioBufferChunk *chunk)
+{
+	return read(chunk, chunk->size());
+}
+
+int ViAudioBufferStream::write(char *data, int length)
+{
 	mMutex->lock();
-	int read = readRawData(data, length);
+	int dataWritten = writeRawData(data, length);
 	mMutex->unlock();
-	chunk->setData(data);
-	return read;
+	change();
+	return dataWritten;
+}
+
+int ViAudioBufferStream::write(ViAudioBufferChunk *chunk, int length)
+{
+	return write(chunk->data(), length);
+}
+
+int ViAudioBufferStream::write(ViAudioBufferChunk *chunk)
+{
+	return write(chunk, chunk->size());
 }
 
 void ViAudioBufferStream::setBufferHeadStart(int bufferHeadStart)
@@ -64,18 +76,18 @@ int ViAudioBufferStream::bufferSize()
 	return size;
 }
 
-void ViAudioBufferStream::change(int id)
+void ViAudioBufferStream::change()
 {
 	if(mHasHeadStart && mBuffer->size() != mOldSize)
 	{
 		int oldSize = mBuffer->size() - mOldSize;
-		mBuffer->change(oldSize, id);
+		mBuffer->change(oldSize);
 		mOldSize = mBuffer->size();
 	}
 	else if(mBuffer->size() - mOldSize >= mBufferHeadStart)
 	{
 		int oldSize = mBuffer->size() - mOldSize;
-		mBuffer->change(oldSize, id);
+		mBuffer->change(oldSize);
 		mOldSize = mBuffer->size();
 		mHasHeadStart = true;
 	}	
