@@ -34,7 +34,7 @@ void ViMainWindow::setLoading(bool load)
 void ViMainWindow::initialize()
 {
 	mLoadingWidget = new ViLoadingWidget(centralWidget());
-	setLoading(true);
+	setLoading(false);
 
 	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile.png", ViThemeImage::Normal, ViThemeManager::Background).path() + ") repeat-x;}");
 

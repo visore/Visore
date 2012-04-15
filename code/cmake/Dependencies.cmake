@@ -1,0 +1,1 @@
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ROOT}/cmake/dependencies)

@@ -4,6 +4,21 @@ PROJECT(Visore)
 #Setup CMake
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(MAIN ${ROOT}/main)
+SET(LAUNCHER ${ROOT}/launcher)
+SET(ENGINE ${ROOT}/engine CACHE INTERNAL "Engine directory")
+SET(INTERFACE ${ROOT}/interface CACHE INTERNAL "Interface directory")
+SET(EXTERNAL ${ROOT}/external CACHE INTERNAL "External directory")
+SET(ESSENTIALS ${ROOT}/essentials CACHE INTERNAL "Essentials directory")
+SET(COMMON ${ROOT}/common CACHE INTERNAL "Common directory")
+
+#Setup CMake
+SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
+INCLUDE(Version)
+INCLUDE(Dependencies)
+
 #Set System
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	SET(MACOSX 1)
@@ -18,22 +33,6 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	SET(SYSTEM "WINDOWS" CACHE INTERNAL "Current system")
     SET(DISTRO " " CACHE INTERNAL "Linux distrobution")
 ENDIF()
-
-#Setup directory paths
-SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-SET(MAIN ${ROOT}/main)
-SET(LAUNCHER ${ROOT}/launcher)
-SET(ENGINE ${ROOT}/engine CACHE INTERNAL "Engine directory")
-SET(INTERFACE ${ROOT}/interface CACHE INTERNAL "Interface directory")
-SET(EXTERNAL ${ROOT}/external CACHE INTERNAL "External directory")
-SET(ESSENTIALS ${ROOT}/essentials CACHE INTERNAL "Essentials directory")
-SET(COMMON ${ROOT}/common CACHE INTERNAL "Common directory")
-
-#SET(CMAKE_PREFIX_PATH ${PROJECT_BINARY_DIR}/external/bass)
-#SET(CMAKE_LIBRARY_PATH ${PROJECT_BINARY_DIR}/external/bass)
-
-#Set the module path
-SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
 
 #Setup Qt5
 FIND_PACKAGE(Qt5 COMPONENTS Multimedia Core Widgets Gui)
@@ -58,19 +57,8 @@ INCLUDE_DIRECTORIES(
 	${INTERFACE}/vigradientcreator/headers
 	${INTERFACE}/viwidgets/viwidget/headers
 	${INTERFACE}/vithemes/vitheme/headers
-	${INTERFACE}/viwidgets/viwidgets/viwaveformwidget/headers
-	${INTERFACE}/viwidgets/viwidgets/viwidgettoolbar/headers
-	${INTERFACE}/viwidgets/viwidgets/vivolumedialwidget/headers
-	${INTERFACE}/viwidgets/viwidgets/vivolumebarwidget/headers
-	${INTERFACE}/viwidgets/viwidgets/vibutton/headers
-	${INTERFACE}/viwidgets/viwidgets/vidialer/headers
-	${INTERFACE}/viwidgets/viwidgets/vivolumebar/headers
-	${INTERFACE}/viwidgets/viwidgets/viplaybackwidget/headers
-	${INTERFACE}/viwidgets/viwidgets/viwindow/headers
-	${INTERFACE}/viwidgets/viwidgets/viinputwidget/headers
-	${INTERFACE}/viwidgets/viwidgets/vitabwidget/headers
-	${INTERFACE}/viwidgets/viwidgets/vicontrolwidget/headers
-	${INTERFACE}/viwidgets/viwidgets/viloadingwidget/headers
+	${INTERFACE}/visimplewidgets/headers
+	${INTERFACE}/vicomposedwidgets/headers
 
 	${ENGINE}/viaudioengine/headers
 	${ENGINE}/viaudioconnections/viaudioconnection/headers
