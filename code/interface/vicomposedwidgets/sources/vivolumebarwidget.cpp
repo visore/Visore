@@ -7,7 +7,7 @@ ViVolumeBarWidget::ViVolumeBarWidget(QWidget *parent)
 	mUi = new Ui::ViVolumeBarWidget();
 	mUi->setupUi(this);
 
-	mUi->muteButton->setCheckable();
+	mUi->muteButton->setCheckable(true);
 	mUi->muteButton->setIcon(ViThemeManager::image("mute.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 	mUi->muteButton->setIcon(ViThemeManager::image("mute.png", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Hovered);
 	mUi->muteButton->setIcon(ViThemeManager::image("unmute.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Selected);

@@ -3,49 +3,9 @@
 
 #include <QWidget>
 #include <QPainter>
-#include <QThread>
-#include <QMutex>
 #include "viwidget.h"
-#include "viobject.h"
 #include "vithememanager.h"
-#include "viwaveform.h"
-#include "viwaveformer.h"
 #include "viwidgettoolbar.h"
-
-class ViWaveWidget;
-
-class ViWaveWidgetThread : public QThread
-{
-	Q_OBJECT
-
-	friend class ViWaveWidget;
-
-	signals:
-		void tileAvailable();
-
-	public slots:
-		void positionChanged(ViAudioPosition position);
-
-	private slots:
-		void changed(QSharedPointer<ViWaveFormChunk> chunk);
-		void analyze(int size);
-
-	public:
-		ViWaveWidgetThread(ViWaveWidget *widget);
-		void run();
-
-	ViAudioBufferStream *s;	
-ViWaveFormer former;
-
-	private:
-		ViWaveWidget *mWidget;
-		QList<int> mSizes;
-		qint64 mPosition;
-		ViWaveForm mForm;
-		QMutex mMutex;
-		QMutex mFormMutex;
-		ViAudioBuffer::ViAudioBufferType mBufferType;
-};
 
 class ViWaveWidget : public ViWidget
 {
@@ -54,6 +14,9 @@ class ViWaveWidget : public ViWidget
 	public slots:
 		void zoomIn();
 		void zoomOut();
+
+	private slots:
+		void positionChanged(ViAudioPosition position);
 
 	public:
 		ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent = 0);
@@ -66,9 +29,10 @@ class ViWaveWidget : public ViWidget
 		void leaveEvent(QEvent *event);
 
 	private:
+		ViWaveForm *mForm;
 		ViWidgetToolbar *mToolbar;
-		ViWaveWidgetThread *mThread;
-		qint8 mZoomLevel;
+		qint16 mZoomLevel;
+		qint64 mPosition;
 };
 
 #endif

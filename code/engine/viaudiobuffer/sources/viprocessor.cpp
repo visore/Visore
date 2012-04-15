@@ -1,12 +1,22 @@
 #include "viprocessor.h"
 
-ViProcessorThread::ViProcessorThread(ViAudioBuffer *buffer, QList<int> *sizes)
+ViProcessorThread::ViProcessorThread(ViAudioBuffer *buffer)
 	: QThread()
 {
 	mBuffer = buffer;
-	mSizes = sizes;
 	mReadStream = mBuffer->createReadStream();
 	mWriteStream = mBuffer->createWriteStream();
+}
+
+void ViProcessorThread::update(int size)
+{
+	mSizesMutex.lock();
+	mSizes.append(size);
+	mSizesMutex.unlock();
+	if(!isRunning())
+	{
+		start();
+	}
 }
 
 ViProcessor::ViProcessor()
@@ -31,12 +41,15 @@ int ViProcessor::id()
 	return mId;
 }
 
+void ViProcessor::initialize(ViAudioBuffer *buffer)
+{
+	if(mThread != NULL)
+	{
+		ViObject::connect(mThread, SIGNAL(changed()), this, SIGNAL(changed()));
+	}
+}
+
 void ViProcessor::update(int size)
 {
-	/*mSizes.append(size);
-	if(!mThread->isRunning())
-	{
-		//mThread->run();
-		mThread->start();
-	}*/
+	mThread->update(size);
 }

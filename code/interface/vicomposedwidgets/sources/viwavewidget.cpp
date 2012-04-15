@@ -1,82 +1,5 @@
 #include "viwavewidget.h"
 
-ViWaveWidgetThread::ViWaveWidgetThread(ViWaveWidget *widget)
-	: QThread()
-{
-	mWidget = widget;
-	mPosition = -1;
-}
-
-void ViWaveWidgetThread::run()
-{
-	mMutex.lock();
-	bool isEmpty = mSizes.isEmpty();
-	mMutex.unlock();
-	while(!isEmpty)
-	{
-
-		mMutex.lock();
-//cout<<"p1: "<<mChunks.size();
-		int size = mSizes.takeFirst();
-mMutex.unlock();
-
-ViAudioBufferChunk chunk;
-s->read(&chunk, size);
-ViWaveFormChunk wave;
-former.pcmToReal(&chunk, &wave);
-
-
-
-//cout<<"   p2: "<<mChunks.size()<<endl;
-	
-
-		qreal *data = wave.data();
-		int chunkSize = wave.size();
-
-		for(int i = 0; i < chunkSize; ++i)
-		{
-			//mFormMutex.lock();
-			mForm.append(data[i]);
-			//mFormMutex.unlock();
-			/*mFormMutex.lock();
-			for(int j = 0; j < mForms.size(); ++j)
-			{
-				mForms[j].append(data[i]);
-			}
-			mFormMutex.unlock();*/
-		}
-
-
-		emit tileAvailable();
-		mMutex.lock();
-		isEmpty = mSizes.isEmpty();
-		mMutex.unlock();
-	}
-	//emit tileAvailable();
-}
-
-void ViWaveWidgetThread::analyze(int size)
-{
-	mMutex.lock();
-	mSizes.append(size);
-	mMutex.unlock();
-	if(!isRunning())
-	{
-		start();
-	}
-}
-
-void ViWaveWidgetThread::changed(QSharedPointer<ViWaveFormChunk> chunk)
-{
-
-}
-
-void ViWaveWidgetThread::positionChanged(ViAudioPosition position)
-{
-	mPosition = position.sample();
-	emit tileAvailable();
-}
-
 ViWaveWidget::ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
 	: ViWidget(parent)
 {
@@ -85,29 +8,24 @@ ViWaveWidget::ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferTy
 	mToolbar->setEngine(engine);
 	mToolbar->addButton("Zoom In", ViThemeManager::image("zoomin.png", ViThemeImage::Normal, ViThemeManager::Icon).icon(), this, SLOT(zoomIn()));
 	mToolbar->addButton("Zoom Out", ViThemeManager::image("zoomout.png", ViThemeImage::Normal, ViThemeManager::Icon).icon(), this, SLOT(zoomOut()));
-	mThread = new ViWaveWidgetThread(this);
-	mThread->mBufferType = type;
 
-mThread->s = engine->mProcessingChain->originalBuffer()->createReadStream();
-
+	mForm = mEngine->waveSummary(type);
 	if(type == ViAudioBuffer::Original)
 	{
-		ViObject::connect(mEngine, SIGNAL(originalBufferChanged(int)), mThread, SLOT(analyze(int)));
+		ViObject::connect(mEngine, SIGNAL(originalWaveChanged()), this, SLOT(repaint()));
 	}
 	else
 	{
-		ViObject::connect(mEngine, SIGNAL(correctedBufferChanged(int)), mThread, SLOT(analyze(int)));
+		ViObject::connect(mEngine, SIGNAL(correctedWaveChanged()), this, SLOT(repaint()));
 	}
-
-	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), mThread, SLOT(positionChanged(ViAudioPosition)));
-	ViObject::connectQueued(mThread, SIGNAL(tileAvailable()), this, SLOT(repaint()));
+	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
+	
+	mPosition = 0;
 	mZoomLevel = 15;
 }
 
 ViWaveWidget::~ViWaveWidget()
 {
-	mThread->quit();
-	delete mThread;
 	delete mToolbar;
 }
 
@@ -124,14 +42,12 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 
 	int halfHeight = height() / 2;
 	int halfWidth = width() / 2;
-	int position = mThread->mPosition / (FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel)); //(FIRST_ZOOM_LEVEL * (mZoomLevel + 1));
+	int position = mPosition / (FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel));
 	int start = position - halfWidth;
 	int end = position + halfWidth;
 
-	//mThread->mFormMutex.lock();
-	int zoomSize = mThread->mForm.size(mZoomLevel);
-	bool underCutOff = mThread->mForm.isUnderCutoff(mZoomLevel);
-	//mThread->mFormMutex.unlock();
+	int zoomSize = mForm->size(mZoomLevel);
+	bool underCutOff = mForm->isUnderCutoff(mZoomLevel);
 
 	if(start < 0)
 	{
@@ -149,9 +65,7 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 		for(int i = start; i < end; ++i)
 		{
 			painter.setPen(penNormal);
-			//mThread->mFormMutex.lock();
-			int now = mThread->mForm.maximum(i, mZoomLevel) / ratio;
-			//mThread->mFormMutex.unlock();
+			int now = mForm->maximum(i, mZoomLevel) / ratio;
 			painter.drawLine(drawStart, previous, drawStart + 1, now);
 			previous = now;
 			drawStart++;
@@ -162,16 +76,12 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 		for(int i = start; i < end; ++i)
 		{
 			painter.setPen(penNormal);
-			//mThread->mFormMutex.lock();
-			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.maximum(i, mZoomLevel) / ratio);
-			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.minimum(i, mZoomLevel) / ratio);
-			//mThread->mFormMutex.unlock();
+			painter.drawLine(drawStart, halfHeight, drawStart, mForm->maximum(i, mZoomLevel) / ratio);
+			painter.drawLine(drawStart, halfHeight, drawStart, mForm->minimum(i, mZoomLevel) / ratio);
 
 			painter.setPen(penAverage);
-			//mThread->mFormMutex.lock();
-			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.maximumAverage(i, mZoomLevel) / ratio);
-			painter.drawLine(drawStart, halfHeight, drawStart, mThread->mForm.minimumAverage(i, mZoomLevel) / ratio);
-			//mThread->mFormMutex.unlock();
+			painter.drawLine(drawStart, halfHeight, drawStart, mForm->maximumAverage(i, mZoomLevel) / ratio);
+			painter.drawLine(drawStart, halfHeight, drawStart, mForm->minimumAverage(i, mZoomLevel) / ratio);
 			drawStart++;
 		}
 	}
@@ -224,5 +134,11 @@ void ViWaveWidget::zoomOut()
 	{
 		mZoomLevel = level;
 	}
+	repaint();
+}
+
+void ViWaveWidget::positionChanged(ViAudioPosition position)
+{
+	mPosition = position.sample();
 	repaint();
 }

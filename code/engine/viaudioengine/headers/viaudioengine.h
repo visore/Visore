@@ -6,6 +6,7 @@
 #include "viaudioprocessingchain.h"
 #include "viwaveformer.h"
 #include "vilibrary.h"
+#include "viwavesummarizer.h"
 //#include "vispectrumanalyzer.h"
 //#include "visongdetector.h"
 #include <QList>
@@ -70,6 +71,9 @@ class ViAudioEngine : public QObject, public ViError
 		void positionChanged(ViAudioPosition position);
 		void inputChanged(ViAudioEngine::ViAudioType type);
 
+		void originalWaveChanged();
+		void correctedWaveChanged();
+
 	public:
 		ViAudioEngine();
 		~ViAudioEngine();
@@ -79,7 +83,8 @@ class ViAudioEngine : public QObject, public ViError
 		void setOutputFilePath(QString filePath);
 		void reset();
 		int volume();
-		void calculateWaveForm(ViAudioBuffer::ViAudioBufferType type, qint64 start, qint64 length);
+
+		ViWaveForm* waveSummary(ViAudioBuffer::ViAudioBufferType type);
 
 	private:
 		/*void initializeInputStream(QAudioDeviceInfo deviceInfo, QAudioFormat format);
@@ -99,9 +104,10 @@ public:
 		ViAudioProcessingChain *mProcessingChain;
 		ViAudioMetaData *mMetaData;
 
-		//ViSpectrumAnalyzer *mOriginalSpectrumAnalyzer;
-
 		ViAudioEngine::ViAudioType mInputType;
+
+		ViWaveSummarizer mOriginalWaveSummarizer;
+		ViWaveSummarizer mCorrectedWaveSummarizer;
 
 		//ViSongDetector *mSongDetector;
 };

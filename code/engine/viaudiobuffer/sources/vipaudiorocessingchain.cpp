@@ -38,7 +38,7 @@ ViAudioBuffer* ViAudioProcessingChain::correctedBuffer()
 
 void ViAudioProcessingChain::originalBufferChanged(int size)
 {
-int id = -1;
+	int id = -1;
 	++id;
 	bool lastParallel = false;
 	if(id < mOriginalProcessors.size())
@@ -62,6 +62,18 @@ void ViAudioProcessingChain::correctedBufferChanged(int size)
 {
 	//emit changeFinished(startIndex, size);
 	mStreamOutput->bufferChanged(size);
+	int id = -1;
+	++id;
+	bool lastParallel = false;
+	if(id < mOriginalProcessors.size())
+	{
+		QList<ViProcessor*> processors;
+		lastParallel = mCorrectedProcessors.processors(id, &processors);
+		for(int i = 0; i < processors.size(); ++i)
+		{
+			processors[i]->update(size);
+		}
+	}
 }
 
 void ViAudioProcessingChain::attachInput(ViAudioInput *input)

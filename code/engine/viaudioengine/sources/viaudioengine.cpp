@@ -84,8 +84,10 @@ mSongDetector->setKey("G1TZBE4IHJAYUSNCN");*/
 
 
 
-
-
+mProcessingChain->attachOriginalProcessor(&mOriginalWaveSummarizer, ViProcessorList::Parallel);
+mProcessingChain->attachCorrectedProcessor(&mCorrectedWaveSummarizer, ViProcessorList::Parallel);
+ViObject::connect(&mOriginalWaveSummarizer, SIGNAL(changed()), this, SIGNAL(originalWaveChanged()));
+ViObject::connect(&mCorrectedWaveSummarizer, SIGNAL(changed()), this, SIGNAL(correctedWaveChanged()));
 
 }
 
@@ -275,14 +277,14 @@ void ViAudioEngine::resetMetaData()
 	mMetaData->setBitDepth(16);
 }
 
-void ViAudioEngine::calculateWaveForm(ViAudioBuffer::ViAudioBufferType type, qint64 start, qint64 length)
+ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)
 {
-	/*if(type == ViAudioBuffer::Original)
+	if(type == ViAudioBuffer::Original)
 	{
-		mOriginalWaveFormer->analyze(start, length);
+		return mOriginalWaveSummarizer.waveSummary();
 	}
-	else
+	else if(type == ViAudioBuffer::Corrected)
 	{
-		mCorrectedWaveFormer->analyze(start, length);
-	}*/
+		return mCorrectedWaveSummarizer.waveSummary();
+	}
 }
