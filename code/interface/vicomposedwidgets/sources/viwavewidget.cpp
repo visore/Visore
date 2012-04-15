@@ -47,7 +47,7 @@ former.pcmToReal(&chunk, &wave);
 		}
 
 
-		//emit tileAvailable();
+		emit tileAvailable();
 		mMutex.lock();
 		isEmpty = mSizes.isEmpty();
 		mMutex.unlock();
