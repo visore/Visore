@@ -43,6 +43,8 @@ void ViMainWindow::initialize()
 	mUi->originalWaveContainer->layout()->addWidget(mOriginalWaveWidget);
 	mCorrectedWaveWidget = new ViWaveFormWidget(mEngine, ViAudioBuffer::Corrected, mUi->correctedWaveContainer);
 	mUi->correctedWaveContainer->layout()->addWidget(mCorrectedWaveWidget);
+	ViObject::connect(mOriginalWaveWidget, SIGNAL(pointerMoved(qint32)), mCorrectedWaveWidget, SLOT(setPointer(qint32)));
+	ViObject::connect(mCorrectedWaveWidget, SIGNAL(pointerMoved(qint32)), mOriginalWaveWidget, SLOT(setPointer(qint32)));
 
 	mUi->tabWidget->setHeight(120);
 	mUi->tabWidget->setRounding(0, 5);

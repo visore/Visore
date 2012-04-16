@@ -29,6 +29,8 @@ ViWaveForm::~ViWaveForm()
 
 void ViWaveForm::append(qreal value)
 {
+	value = ceilf(value * 1000000) / 1000000;
+//cout<<"*"<<value-nvalue<<"*"<<endl;
 	++mTotalCounter;
 	if(value > mMaximum)
 	{

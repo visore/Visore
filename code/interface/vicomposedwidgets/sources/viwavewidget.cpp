@@ -4,10 +4,7 @@ ViWaveWidget::ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferTy
 	: ViWidget(parent)
 {
 	setEngine(engine);
-	mToolbar = new ViWidgetToolbar(ViWidgetToolbar::Right, parent);
-	mToolbar->setEngine(engine);
-	mToolbar->addButton("Zoom In", ViThemeManager::image("zoomin.png", ViThemeImage::Normal, ViThemeManager::Icon).icon(), this, SLOT(zoomIn()));
-	mToolbar->addButton("Zoom Out", ViThemeManager::image("zoomout.png", ViThemeImage::Normal, ViThemeManager::Icon).icon(), this, SLOT(zoomOut()));
+	setMouseTracking(true);
 
 	mForm = mEngine->waveSummary(type);
 	if(type == ViAudioBuffer::Original)
@@ -21,33 +18,20 @@ ViWaveWidget::ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferTy
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 	
 	mPosition = 0;
-	mZoomLevel = 15;
-}
-
-ViWaveWidget::~ViWaveWidget()
-{
-	delete mToolbar;
+	mZoomLevel = 0;
 }
 
 void ViWaveWidget::paintEvent(QPaintEvent *event)
 {
-	resize(mParent->width(), mParent->height());
 	QPainter painter(this);
 
 	static QPen penNormal(ViThemeManager::color(15));
 	static QPen penAverage(ViThemeManager::color(14));
-	static QPen penPosition(ViThemeManager::color(12));
 
-	qreal ratio = UNSIGNED_CHAR_HALF_VALUE / (height() / 2.0);
-
-	int halfHeight = height() / 2;
-	int halfWidth = width() / 2;
 	int position = mPosition / (FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel));
-	int start = position - halfWidth;
-	int end = position + halfWidth;
-
+	int start = position - mHalfWidth;
+	int end = position + mHalfWidth;
 	int zoomSize = mForm->size(mZoomLevel);
-	bool underCutOff = mForm->isUnderCutoff(mZoomLevel);
 
 	if(start < 0)
 	{
@@ -57,15 +41,15 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 	{
 		end = zoomSize;
 	}
-	int drawStart = halfWidth + (start - position);
+	int drawStart = mHalfWidth + (start - position);
 
-	if(underCutOff)
+	if(mUnderCutOff)
 	{
-		int previous = halfHeight;
+		int previous = mHalfHeight;
 		for(int i = start; i < end; ++i)
 		{
 			painter.setPen(penNormal);
-			int now = mForm->maximum(i, mZoomLevel) / ratio;
+			int now = mForm->maximum(i, mZoomLevel) / mRatio;
 			painter.drawLine(drawStart, previous, drawStart + 1, now);
 			previous = now;
 			drawStart++;
@@ -76,69 +60,88 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 		for(int i = start; i < end; ++i)
 		{
 			painter.setPen(penNormal);
-			painter.drawLine(drawStart, halfHeight, drawStart, mForm->maximum(i, mZoomLevel) / ratio);
-			painter.drawLine(drawStart, halfHeight, drawStart, mForm->minimum(i, mZoomLevel) / ratio);
+			painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->maximum(i, mZoomLevel) / mRatio);
+			painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->minimum(i, mZoomLevel) / mRatio);
 
 			painter.setPen(penAverage);
-			painter.drawLine(drawStart, halfHeight, drawStart, mForm->maximumAverage(i, mZoomLevel) / ratio);
-			painter.drawLine(drawStart, halfHeight, drawStart, mForm->minimumAverage(i, mZoomLevel) / ratio);
+			painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->maximumAverage(i, mZoomLevel) / mRatio);
+			painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->minimumAverage(i, mZoomLevel) / mRatio);
 			drawStart++;
 		}
 	}
-
-	painter.setPen(penPosition);
-	painter.drawLine(0, halfHeight, width(), halfHeight);
-
-	QRect rectangle(0, 0, halfWidth, height());
-	QColor color = ViThemeManager::color(11);
-	color = QColor(color.red(), color.green(), color.blue(), 100);
-	painter.fillRect(rectangle, color);
-
-	painter.drawLine(halfWidth, 0, halfWidth, height());
-}
-
-void ViWaveWidget::resizeEvent(QResizeEvent *event)
-{
-	mToolbar->refresh();
-}
-
-void ViWaveWidget::enterEvent(QEvent *event)
-{
-	mToolbar->show();
-}
-
-void ViWaveWidget::leaveEvent(QEvent *event)
-{
-	QPoint mouse = QCursor::pos();
-	QPoint position = mapToGlobal(pos());
-	if(mouse.x() < position.x() || mouse.x() > position.x() + width() || mouse.y() < position.y() || mouse.y() > position.y() + height())
-	{
-		mToolbar->hide();
-	}
-}
-
-void ViWaveWidget::zoomIn()
-{
-	qint8 level = mZoomLevel - 1;
-	if(level >= 0)
-	{
-		mZoomLevel = level;
-	}
-	repaint();
-}
-
-void ViWaveWidget::zoomOut()
-{
-	qint8 level = mZoomLevel + 1;
-	if(level < MAXIMUM_ZOOM_LEVELS)
-	{
-		mZoomLevel = level;
-	}
-	repaint();
 }
 
 void ViWaveWidget::positionChanged(ViAudioPosition position)
 {
 	mPosition = position.sample();
 	repaint();
+}
+
+void ViWaveWidget::setZoomLevel(qint16 level)
+{
+	mZoomLevel = level;
+	mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
+	repaint();
+}
+
+qint64 ViWaveWidget::position()
+{
+	return mPosition;
+}
+
+void ViWaveWidget::resizeEvent(QResizeEvent *event)
+{
+	mHalfWidth = width() / 2;
+	mHalfHeight = height() / 2;
+	mRatio = UNSIGNED_CHAR_HALF_VALUE / (height() / 2.0);
+}
+
+void ViWaveWidget::mouseMoveEvent(QMouseEvent *event)
+{
+
+qreal ratio = UNSIGNED_CHAR_HALF_VALUE / (height() / 2.0);
+qreal position = mPosition / mRatio;
+qreal start = position - mHalfWidth;
+qreal end = position + mHalfWidth;
+
+	
+
+qreal pos = (event->x() - mHalfWidth + position) / double(FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel));
+
+
+start+=event->x();
+pos=start;
+//if(pos < 0) pos = 0;
+//if(pos < mForm->size(mZoomLevel)) 
+
+//cout<<int(mForm->maximum(pos, mZoomLevel))<<" "<<(127-int(mForm->maximum(pos, mZoomLevel)))/255.0<<"  "<<pos<<endl;
+
+
+
+
+
+pos*=double(FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel));
+emit pointerMoved(pos);
+}
+
+qreal ViWaveWidget::maximum(qint64 position)
+{
+	if(position >= mForm->size(mZoomLevel))
+	{
+		return mHalfHeight;
+	}
+	return mForm->maximum(position, mZoomLevel) / mRatio;
+}
+
+qreal ViWaveWidget::minimum(qint64 position)
+{
+	if(mUnderCutOff)
+	{
+		return maximum(position);
+	}
+	else if(position >= mForm->size(mZoomLevel))
+	{
+		return mHalfHeight;
+	}
+	return mForm->minimum(position, mZoomLevel) / mRatio;
 }
