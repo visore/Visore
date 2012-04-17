@@ -5,9 +5,11 @@
 ViWaveFormWidget::ViWaveFormWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
 	: ViWidget(parent)
 {
-	mWidget = new ViWaveWidget(engine, type, this);
-	ViObject::connect(mWidget, SIGNAL(pointerMoved(qint32)), this, SIGNAL(pointerMoved(qint32)));
-	ViObject::connect(mWidget, SIGNAL(pointerMoved(qint32)), this, SLOT(setPointer(qint32)));
+	mBaseWidget = new ViWaveBaseWidget(engine, type, this);
+
+	mOverlayWidget = new ViWaveOverlayWidget(engine, type, this);
+	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SIGNAL(pointerMoved(qint32)));
+	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SLOT(setPointer(qint32)));
 
 	parent->setObjectName("parent");
 	parent->setStyleSheet("\
@@ -20,63 +22,56 @@ ViWaveFormWidget::ViWaveFormWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudio
 	");
 	parent->setContentsMargins(CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN);
 
-	mToolbar = new ViWidgetToolbar(ViWidgetToolbar::Right, this);
-	mToolbar->setEngine(engine);
-	mToolbar->addButton("Zoom In", ViThemeManager::image("zoomin.png", ViThemeImage::Normal, ViThemeManager::Icon).icon(), this, SLOT(zoomIn()));
-	mToolbar->addButton("Zoom Out", ViThemeManager::image("zoomout.png", ViThemeImage::Normal, ViThemeManager::Icon).icon(), this, SLOT(zoomOut()));
+	mControlToolbar = new ViWidgetToolbar(Qt::AlignCenter | Qt::AlignRight, this);
+	mControlToolbar->setEngine(engine);
 
-	mPointerPosition = 0;
-	mPointerPosition2 = 0;
+	ViObject::connect(&mZoomInButton, SIGNAL(clicked()), this, SLOT(zoomIn()));
+	mZoomInButton.setIcon(ViThemeManager::image("zoomin.png", ViThemeImage::Normal, ViThemeManager::Icon).icon());
+	mZoomInButton.setText("Zoom In");
+	mZoomInButton.setToolButtonStyle(Qt::ToolButtonIconOnly);
+	mControlToolbar->addWidget(&mZoomInButton);
+
+	ViObject::connect(&mZoomOutButton, SIGNAL(clicked()), this, SLOT(zoomOut()));
+	mZoomOutButton.setIcon(ViThemeManager::image("zoomout.png", ViThemeImage::Normal, ViThemeManager::Icon).icon());
+	mZoomOutButton.setText("Zoom Out");
+	mZoomOutButton.setToolButtonStyle(Qt::ToolButtonIconOnly);
+	mControlToolbar->addWidget(&mZoomOutButton);
+
+	mInfoToolbar = new ViWidgetToolbar(Qt::AlignLeft | Qt::AlignBottom, this);
+	mInfoToolbar->setEngine(engine);
+
+	mMinLabel1.setTextFormat(Qt::RichText);
+	mMaxLabel1.insertHtml("Positive &#x2205; :");
+	mMinLabel1.setText(trUtf8("Σ"));
+
+	mMaxAvgLabel1.setText("Positive \u2191:");
+	mMinAvgLabel1.setText("");
+	mMaxLabel2.setText("0");
+	mMinLabel2.setText("0");
+	mMaxAvgLabel2.setText("0");
+	mMinAvgLabel2.setText("0");
+
+	mInfoLayout.addWidget(&mMaxLabel1, 0, 0); 
+	mInfoLayout.addWidget(&mMaxLabel2, 0, 1); 
+	mInfoLayout.addWidget(&mMinLabel1, 1, 0); 
+	mInfoLayout.addWidget(&mMinLabel2, 1, 1); 
+	mInfoLayout.addWidget(&mMaxAvgLabel1, 0, 2); 
+	mInfoLayout.addWidget(&mMaxAvgLabel2, 0, 3); 
+	mInfoLayout.addWidget(&mMinAvgLabel1, 1, 2); 
+	mInfoLayout.addWidget(&mMinAvgLabel2, 1, 3); 
+
+	mInfoWidget.setLayout(&mInfoLayout);
+	mInfoToolbar->addWidget(&mInfoWidget);
+
 	setZoomLevel(6);
 
 }
 
 ViWaveFormWidget::~ViWaveFormWidget()
 {
-	delete mToolbar;
-	delete mWidget;
-}
-
-void ViWaveFormWidget::paintEvent(QPaintEvent *event)
-{
-	QPainter painter(this);
-	painter.setRenderHint(QPainter::Antialiasing);
-
-	static QPen penPosition(ViThemeManager::color(12));
-	static QPen penPointer(ViThemeManager::color(16), 2);
-
-	painter.setPen(penPosition);
-	painter.drawLine(0, mHalfHeight, width(), mHalfHeight);
-
-	QRect rectangle(0, 0, mHalfWidth, height());
-	QColor color = ViThemeManager::color(11);
-	color = QColor(color.red(), color.green(), color.blue(), 100);
-	painter.fillRect(rectangle, color);
-
-	painter.drawLine(mHalfWidth, 0, mHalfWidth, height());
-
-	painter.setPen(penPointer);
-
-	int position = mPointerPosition2 / mRatio;
-	int maximum = mHalfHeight;
-	int minimum = mHalfHeight;
-	if(mPointerPosition2 >= 0)
-	{
-		maximum = mWidget->maximum(position);
-		minimum = mWidget->minimum(position);
-	}
-	painter.drawLine(mPointerPosition + 1, 0, mPointerPosition + 1, maximum - 4);
-	painter.drawEllipse(mPointerPosition - 3, maximum - 3, 8, 8);
-	if(maximum + 4 < minimum - 4)
-	{
-		painter.drawLine(mPointerPosition + 1, maximum + 5, mPointerPosition + 1, minimum - 4);
-		painter.drawEllipse(mPointerPosition - 3, minimum - 3, 8, 8);
-		painter.drawLine(mPointerPosition + 1, minimum + 5, mPointerPosition + 1, height());
-	}
-	else
-	{
-		painter.drawLine(mPointerPosition + 1, maximum + 6, mPointerPosition + 1, height());
-	}
+	delete mControlToolbar;
+	delete mBaseWidget;
+	delete mOverlayWidget;
 }
 
 void ViWaveFormWidget::setZoomLevel(qint16 level)
@@ -85,19 +80,14 @@ void ViWaveFormWidget::setZoomLevel(qint16 level)
 	{
 		mZoomLevel = level;
 	}
-	mWidget->setZoomLevel(mZoomLevel);
-	mRatio = FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel);
-	repaint();
+	mBaseWidget->setZoomLevel(mZoomLevel);
+	mOverlayWidget->setZoomLevel(mZoomLevel);
 }
 
 void ViWaveFormWidget::setPointer(qint32 position)
 {
-	mPointerPosition2 = position;
-	mPointerPosition = ((position - mWidget->position()) / mRatio) + mHalfWidth;
-	update();
+	mOverlayWidget->setPointer(position);
 }
-
-
 
 void ViWaveFormWidget::zoomIn()
 {
@@ -111,15 +101,15 @@ void ViWaveFormWidget::zoomOut()
 
 void ViWaveFormWidget::resizeEvent(QResizeEvent *event)
 {
-	mHalfWidth = (width() / 2);
-	mHalfHeight = (height() / 2);
-	mWidget->resize(event->size());
-	mToolbar->refresh();
+	mBaseWidget->resize(event->size());
+	mOverlayWidget->resize(event->size());
+	mControlToolbar->refresh();
 }
 
 void ViWaveFormWidget::enterEvent(QEvent *event)
 {
-	mToolbar->show();
+	mControlToolbar->show();
+	mInfoToolbar->show();
 }
 
 void ViWaveFormWidget::leaveEvent(QEvent *event)
@@ -128,6 +118,7 @@ void ViWaveFormWidget::leaveEvent(QEvent *event)
 	QPoint position = mapToGlobal(pos());
 	if(mouse.x() < position.x() || mouse.x() > position.x() + width() || mouse.y() < position.y() || mouse.y() > position.y() + height())
 	{
-		mToolbar->hide();
+		mControlToolbar->hide();
+		mInfoToolbar->hide();
 	}
 }

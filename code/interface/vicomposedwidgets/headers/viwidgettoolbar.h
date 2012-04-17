@@ -3,7 +3,6 @@
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QToolButton>
 #include "viwidget.h"
 #include "viwidget.h"
 #include "vithememanager.h"
@@ -23,18 +22,18 @@ class ViWidgetToolbar : public ViWidget
 			Right = 2,
 			Left = 3
 		};
-		ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, QWidget *parent = 0);
+		ViWidgetToolbar(Qt::Alignment align, QWidget *parent = 0);
 		~ViWidgetToolbar();
 		void refresh();
-
-		//Specify the widget and the function to call on the widget. Use SLOT(...) as last parameter
-		void addButton(QString text, QIcon icon, ViWidget *widget, const char *function);
+		void addWidget(QWidget *widget);
+		void show();
+		void hide();
+		void setVisible(bool visible);
 
 	private:
 		QBoxLayout *mLayout;
 		QWidget *mCentralWidget;
-		ViWidgetToolbar::ViWidgetToolbarAlign mAlign;
-		QList<QToolButton*> mButtons;
+		Qt::Alignment mAlign;
 };
 
 #endif

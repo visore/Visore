@@ -1,10 +1,9 @@
-#include "viwavewidget.h"
+#include "viwavebasewidget.h"
 
-ViWaveWidget::ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
+ViWaveBaseWidget::ViWaveBaseWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
 	: ViWidget(parent)
 {
 	setEngine(engine);
-	setMouseTracking(true);
 
 	mForm = mEngine->waveSummary(type);
 	if(type == ViAudioBuffer::Original)
@@ -21,7 +20,7 @@ ViWaveWidget::ViWaveWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferTy
 	mZoomLevel = 0;
 }
 
-void ViWaveWidget::paintEvent(QPaintEvent *event)
+void ViWaveBaseWidget::paintEvent(QPaintEvent *event)
 {
 	QPainter painter(this);
 
@@ -71,77 +70,22 @@ void ViWaveWidget::paintEvent(QPaintEvent *event)
 	}
 }
 
-void ViWaveWidget::positionChanged(ViAudioPosition position)
+void ViWaveBaseWidget::positionChanged(ViAudioPosition position)
 {
 	mPosition = position.sample();
 	repaint();
 }
 
-void ViWaveWidget::setZoomLevel(qint16 level)
+void ViWaveBaseWidget::setZoomLevel(qint16 level)
 {
 	mZoomLevel = level;
 	mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
 	repaint();
 }
 
-qint64 ViWaveWidget::position()
-{
-	return mPosition;
-}
-
-void ViWaveWidget::resizeEvent(QResizeEvent *event)
+void ViWaveBaseWidget::resizeEvent(QResizeEvent *event)
 {
 	mHalfWidth = width() / 2;
 	mHalfHeight = height() / 2;
 	mRatio = UNSIGNED_CHAR_HALF_VALUE / (height() / 2.0);
-}
-
-void ViWaveWidget::mouseMoveEvent(QMouseEvent *event)
-{
-
-qreal ratio = UNSIGNED_CHAR_HALF_VALUE / (height() / 2.0);
-qreal position = mPosition / mRatio;
-qreal start = position - mHalfWidth;
-qreal end = position + mHalfWidth;
-
-	
-
-qreal pos = (event->x() - mHalfWidth + position) / double(FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel));
-
-
-start+=event->x();
-pos=start;
-//if(pos < 0) pos = 0;
-//if(pos < mForm->size(mZoomLevel)) 
-
-//cout<<int(mForm->maximum(pos, mZoomLevel))<<" "<<(127-int(mForm->maximum(pos, mZoomLevel)))/255.0<<"  "<<pos<<endl;
-
-
-
-
-
-pos*=double(FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel));
-emit pointerMoved(pos);
-}
-
-qreal ViWaveWidget::maximum(qint64 position)
-{
-	if(position >= mForm->size(mZoomLevel))
-	{
-		return mHalfHeight;
-	}
-	return mForm->maximum(position, mZoomLevel) / mRatio;
-}
-
-qreal ViWaveWidget::minimum(qint64 position)
-{
-	if(mUnderCutOff)
-	{
-		return maximum(position);
-	}
-	else if(position >= mForm->size(mZoomLevel))
-	{
-		return mHalfHeight;
-	}
-	return mForm->minimum(position, mZoomLevel) / mRatio;
 }

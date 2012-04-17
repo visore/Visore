@@ -22,5 +22,5 @@ ViOrangeThemeColors::ViOrangeThemeColors()
 	mColors[15] = QColor(255, 130, 0);
 	mColors[16] = QColor(245, 150, 10);
 	mColors[17] = QColor(205, 125, 10);
-
+	mColors[18] = QColor(255, 215, 110);
 }

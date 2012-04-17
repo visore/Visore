@@ -1,21 +1,23 @@
 #include "viwidgettoolbar.h"
 
-ViWidgetToolbar::ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, QWidget *parent)
+ViWidgetToolbar::ViWidgetToolbar(Qt::Alignment align, QWidget *parent)
 	: ViWidget(parent)
 {
 	mCentralWidget = new QWidget(this);
 	mAlign = align;
-	if(mAlign == ViWidgetToolbar::Top || mAlign == ViWidgetToolbar::Bottom)
+	if(mAlign & Qt::AlignTop || mAlign & Qt::AlignBottom)
 	{
 		mLayout = new QHBoxLayout(mCentralWidget);
 	}
-	else if(mAlign == ViWidgetToolbar::Right || mAlign == ViWidgetToolbar::Left)
+	else if(mAlign & Qt::AlignRight || mAlign & Qt::AlignLeft || mAlign & Qt::AlignCenter)
 	{
 		mLayout = new QVBoxLayout(mCentralWidget);
 	}
+
+	setObjectName("toolbar");
 	setStyleSheet
 	("\
-		.QWidget{\
+		QWidget#toolbar{\
 			border-radius: 10px;\
 			border-style: solid;\
 			border-color: rgb(" + QString::number(ViThemeManager::color(1).red()) + ", " + QString::number(ViThemeManager::color(1).green()) + ", " + QString::number(ViThemeManager::color(1).blue()) + ");\
@@ -43,10 +45,6 @@ ViWidgetToolbar::ViWidgetToolbar(ViWidgetToolbar::ViWidgetToolbarAlign align, QW
 
 ViWidgetToolbar::~ViWidgetToolbar()
 {
-	for(int i = 0; i < mButtons.size(); ++i)
-	{
-		delete mButtons[i];
-	}
 	delete mLayout;
 	delete mCentralWidget;
 }
@@ -56,32 +54,54 @@ void ViWidgetToolbar::refresh()
 	static qint8 offset = 5;
 	mCentralWidget->adjustSize();
 	adjustSize();
-	if(mAlign == ViWidgetToolbar::Top)
+
+	if(mAlign & Qt::AlignLeft)
 	{
-		move((mParent->width() / 2) - (width() / 2), offset);
+		move(offset, pos().y());
 	}
-	else if(mAlign == ViWidgetToolbar::Bottom)
+	else if(mAlign & Qt::AlignRight)
 	{
-		move((mParent->width() / 2) - (width() / 2), mParent->height() - height() - offset);
+		move(mParent->width() - width() - offset, pos().y());
 	}
-	else if(mAlign == ViWidgetToolbar::Left)
+	else if(mAlign & Qt::AlignCenter)
 	{
-		move(offset, (mParent->height() / 2) - (height() / 2));
+		move((mParent->width() / 2) - (width() / 2), pos().y());
 	}
-	else if(mAlign == ViWidgetToolbar::Right)
+
+	if(mAlign & Qt::AlignTop)
 	{
-		move(mParent->width() - width() - offset, (mParent->height() / 2) - (height() / 2));
+		move(pos().x(), offset);
+	}
+	else if(mAlign & Qt::AlignBottom)
+	{
+		move(pos().x(), mParent->height() - height() - offset);
+	}
+	else if(mAlign & Qt::AlignCenter)
+	{
+		move(pos().x(), (mParent->height() / 2) - (height() / 2));
 	}
 }
 
-void ViWidgetToolbar::addButton(QString text, QIcon icon, ViWidget *widget, const char *function)
+void ViWidgetToolbar::addWidget(QWidget *widget)
 {
-	QToolButton *button = new QToolButton(mCentralWidget);
-	ViObject::connect(button, SIGNAL(clicked()), widget, function);
-	button->setIcon(icon);
-	button->setText(text);
-	button->setToolButtonStyle(Qt::ToolButtonIconOnly);
-	mLayout->addWidget(button);
-	mButtons.append(button);
+	mLayout->addWidget(widget);
 	refresh();
+}
+
+void ViWidgetToolbar::show()
+{
+	refresh();
+	ViWidget::show();
+}
+
+void ViWidgetToolbar::hide()
+{
+	refresh();
+	ViWidget::hide();
+}
+
+void ViWidgetToolbar::setVisible(bool visible)
+{
+	refresh();
+	ViWidget::setVisible(visible);
 }

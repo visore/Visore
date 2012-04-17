@@ -1,9 +1,14 @@
 #ifndef VIWAVEFORMWIDGET_H
 #define VIWAVEFORMWIDGET_H
 
+#include <QLabel>
+#include <QToolButton>
+#include <QTextEdit>
+#include <QGridLayout>
 #include <QResizeEvent>
 #include "viwidgettoolbar.h"
-#include "viwavewidget.h"
+#include "viwavebasewidget.h"
+#include "viwaveoverlaywidget.h"
 
 class ViWaveFormWidget : public ViWidget
 {
@@ -23,22 +28,32 @@ class ViWaveFormWidget : public ViWidget
 		void setZoomLevel(qint16 level);
 
 	protected:
-		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
 		void enterEvent(QEvent *event);
 		void leaveEvent(QEvent *event);
 
 	private:
-		ViWaveWidget *mWidget;
-		ViWidgetToolbar *mToolbar;
+		ViWaveBaseWidget *mBaseWidget;
+		ViWaveOverlayWidget *mOverlayWidget;
+		
 		qint16 mZoomLevel;
-		qint32 mPointerPosition;
 
-qint32 mPointerPosition2;
+		ViWidgetToolbar *mControlToolbar;
+		QToolButton mZoomInButton;
+		QToolButton mZoomOutButton;
 
-		qint32 mHalfWidth;
-		qint32 mHalfHeight;
-		qreal mRatio;
+		ViWidgetToolbar *mInfoToolbar;
+		QWidget mInfoWidget;
+		QGridLayout mInfoLayout;
+		QTextEdit mMaxLabel1;
+		QLabel mMinLabel1;
+		QLabel mMaxAvgLabel1;
+		QLabel mMinAvgLabel1;
+		QLabel mMaxLabel2;
+		QLabel mMinLabel2;
+		QLabel mMaxAvgLabel2;
+		QLabel mMinAvgLabel2;
+		
 };
 
 #endif
