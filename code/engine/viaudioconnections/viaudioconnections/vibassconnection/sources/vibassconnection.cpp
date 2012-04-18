@@ -49,9 +49,9 @@ ViStreamOutput* ViBassConnection::streamOutput(ViAudioBuffer *buffer, ViAudioMet
 
 void ViBassConnection::initialize()
 {
-	populateInputFormats();
+	//populateInputFormats();
 	//populateOutputFormats();
-	QList<QString> pluginPaths = ViLibraryDetector::detectLibraries(QString(BASSPLUGINSLOCATION));
+	/*QList<QString> pluginPaths = ViLibraryDetector::detectLibraries(QString(BASSPLUGINSLOCATION));
 	for(int i = 0; i < pluginPaths.length(); ++i)
 	{
 		HPLUGIN plugin = BASS_PluginLoad(pluginPaths[i].toUtf8().data(), 0);
@@ -63,7 +63,7 @@ void ViBassConnection::initialize()
 		{
 			mPlugins.append(plugin);
 		}
-	}
+	}*/
 	if(!BASS_Init(-1, 44100, 0, 0, 0))
 	{
 		setErrorParameters("ViBassConnection - Initializing Error", "Could not initialize Bass resources", ViErrorInfo::Fatal);

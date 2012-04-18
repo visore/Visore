@@ -41,7 +41,10 @@ ViStreamOutput* ViQtConnection::streamOutput(ViAudioBuffer *buffer, ViAudioMetaD
 
 void ViQtConnection::initialize()
 {
-
+	mStreamInput = NULL;
+	mFileInput = NULL;
+	mStreamOutput = NULL;
+	mFileOutput = NULL;
 }
 
 void ViQtConnection::close()

@@ -1,8 +1,5 @@
 #include "viwaveform.h"
 
-#include <iostream>
-using namespace std;
-
 ViWaveForm::ViWaveForm(qint16 level)
 {
 	mLevel = level;
@@ -29,8 +26,6 @@ ViWaveForm::~ViWaveForm()
 
 void ViWaveForm::append(qreal value)
 {
-	value = ceilf(value * 1000000) / 1000000;
-//cout<<"*"<<value-nvalue<<"*"<<endl;
 	++mTotalCounter;
 	if(value > mMaximum)
 	{
@@ -121,7 +116,14 @@ void ViWaveForm::appendResults()
 	mMutex.lock();
 	if(mIsUnderCutoff)
 	{
-		mMaximums.push_back((mMaximum + mMinimum) / 2);
+		if((UNSIGNED_CHAR_HALF_VALUE - mMinimum) * -1 > UNSIGNED_CHAR_HALF_VALUE - mMaximum)
+		{
+			mMaximums.push_back(mMinimum);
+		}
+		else
+		{
+			mMaximums.push_back(mMaximum);
+		}
 	}
 	else
 	{

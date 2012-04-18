@@ -10,7 +10,6 @@ class ViWidget : public QWidget
 {
 	public:
 		ViWidget(QWidget *parent = 0);
-		~ViWidget();
 
 		virtual void setEngine(ViAudioEngine *engine);
 		ViAudioEngine* engine();
@@ -22,7 +21,7 @@ class ViWidget : public QWidget
 	protected:
 		QWidget *mParent;
 		ViAudioEngine *mEngine;
-		QStyle *mStyle;
+		QStyle *mStyle; //Qt deletes this
 };
 
 #endif

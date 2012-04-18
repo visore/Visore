@@ -8,11 +8,6 @@ ViWidget::ViWidget(QWidget *parent)
 	mStyle = style();
 }
 
-ViWidget::~ViWidget()
-{
-	delete mStyle;
-}
-
 void ViWidget::refresh()
 {
 }

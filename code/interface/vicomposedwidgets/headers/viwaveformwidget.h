@@ -18,9 +18,11 @@ class ViWaveFormWidget : public ViWidget
 		void pointerMoved(qint32 position);
 
 	public slots:
+		void zoom(qint16 levels); //Negative values are zoomOut, otherwise zoomIn
 		void zoomIn();
 		void zoomOut();
 		void setPointer(qint32 position);
+		void updateSampleValues(qreal maximum, qreal minimum, qreal maximumAverage, qreal minimumAverage);
 
 	public:
 		ViWaveFormWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent = 0);
@@ -38,21 +40,23 @@ class ViWaveFormWidget : public ViWidget
 		
 		qint16 mZoomLevel;
 
+		//Do not delete the subwidget, QLayout will do that
+
 		ViWidgetToolbar *mControlToolbar;
-		QToolButton mZoomInButton;
-		QToolButton mZoomOutButton;
+		QToolButton *mZoomInButton;
+		QToolButton *mZoomOutButton;
 
 		ViWidgetToolbar *mInfoToolbar;
-		QWidget mInfoWidget;
-		QGridLayout mInfoLayout;
-		QTextEdit mMaxLabel1;
-		QLabel mMinLabel1;
-		QLabel mMaxAvgLabel1;
-		QLabel mMinAvgLabel1;
-		QLabel mMaxLabel2;
-		QLabel mMinLabel2;
-		QLabel mMaxAvgLabel2;
-		QLabel mMinAvgLabel2;
+		QWidget *mInfoWidget;
+		QGridLayout *mInfoLayout;
+		QLabel *mMaxLabel1;
+		QLabel *mMinLabel1;
+		QLabel *mMaxAvgLabel1;
+		QLabel *mMinAvgLabel1;
+		QLabel *mMaxLabel2;
+		QLabel *mMinLabel2;
+		QLabel *mMaxAvgLabel2;
+		QLabel *mMinAvgLabel2;
 		
 };
 

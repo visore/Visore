@@ -271,7 +271,7 @@ void ViAudioEngine::stopOutputFile()
 
 void ViAudioEngine::resetMetaData()
 {
-	mMetaData->setFormat(ViFormatManager::selected("MP3"));
+	//mMetaData->setFormat(ViFormatManager::selected("MP3"));
 	mMetaData->setFrequency(44100);
 	mMetaData->setChannels(2);
 	mMetaData->setBitDepth(16);
