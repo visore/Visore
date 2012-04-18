@@ -57,7 +57,7 @@ ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(QSharedPointer<Vi
 mFileInput = mAudioConnection2->fileInput(mProcessingChain->originalBuffer(), mMetaData);
 mStreamInput = mAudioConnection->streamInput(mProcessingChain->originalBuffer(), mMetaData);
 mFileOutput = mAudioConnection->fileOutput(mProcessingChain->correctedBuffer(), mMetaData);
-mStreamOutput = mAudioConnection->streamOutput(mProcessingChain->correctedBuffer(), mMetaData, &outputDevice);
+mStreamOutput = mAudioConnection2->streamOutput(mProcessingChain->correctedBuffer(), mMetaData, &outputDevice);
 
 //mProcessingChain->attachInput(mFileInput);
 //mProcessingChain->attachInput(mStreamInput);

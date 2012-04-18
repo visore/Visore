@@ -1,52 +1,58 @@
 #include "viaudioposition.h"
 
-ViAudioPosition::ViAudioPosition(qint64 bytes, qint8 bitDepth, qreal secondsInByte)
+ViAudioPosition::ViAudioPosition()
 {
-	mBytes = bytes;
-	mBitDepth = bitDepth;
-	if(mBitDepth <= 0)
-	{
-		mSample = 0;
-	}
-	else
-	{
-		mSample = mBytes / (mBitDepth / 8);
-	}
-	mSeconds = mBytes * secondsInByte;
-	mMilliseconds = mSeconds * 1000;
+	mMicroseconds = 0;
+	mFormat = QAudioFormat();
 }
 
-qint64 ViAudioPosition::seconds()
+ViAudioPosition::ViAudioPosition(qint64 microseconds, QAudioFormat format)
 {
-	return mSeconds;
+	initialize(microseconds, format);
 }
 
-qint64 ViAudioPosition::milliseconds()
+void ViAudioPosition::initialize(qint64 microseconds, QAudioFormat format)
 {
-	return mMilliseconds;
+	mMicroseconds = microseconds;
+	mFormat = format;
+}
+
+qreal ViAudioPosition::seconds()
+{
+	return milliseconds() / 1000.0;
+}
+
+qreal ViAudioPosition::milliseconds()
+{
+	return mMicroseconds / 1000.0;
+}
+
+qint64 ViAudioPosition::microseconds()
+{
+	return mMicroseconds;
 }
 
 qint64 ViAudioPosition::bytes()
 {
-	return mBytes;
-}
-
-qint8 ViAudioPosition::bitDepth()
-{
-	return mBitDepth;
+	return sample() * mFormat.sampleSize();
 }
 
 qint64 ViAudioPosition::sample()
 {
-	return mSample;
+	return mFormat.sampleRate() * seconds() * mFormat.channelCount();
+}
+
+QAudioFormat ViAudioPosition::format()
+{
+	return mFormat;
 }
 
 bool ViAudioPosition::operator ==(const ViAudioPosition &other) const
 {
-	return mBytes == other.mBytes;
+	return mMicroseconds == other.mMicroseconds;
 }
 
 bool ViAudioPosition::operator !=(const ViAudioPosition &other) const
 {
-	return mBytes != other.mBytes;
+	return mMicroseconds != other.mMicroseconds;
 }

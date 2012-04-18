@@ -18,7 +18,7 @@ bool ViFileOutput::setPosition(ViAudioPosition position)
 
 ViAudioPosition ViFileOutput::position()
 {
-	return ViAudioPosition(0, 0, 0);
+	//return ViAudioPosition(0, 0, 0);
 }
 
 void ViFileOutput::bufferChanged(int size)

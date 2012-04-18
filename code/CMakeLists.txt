@@ -35,7 +35,7 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 ENDIF()
 
 #Setup Qt5
-FIND_PACKAGE(Qt5 COMPONENTS Multimedia Core Widgets Gui)
+FIND_PACKAGE(Qt5 COMPONENTS Multimedia Core Widgets Gui Network)
 
 #Setup FFMPEG
 FIND_PACKAGE(Ffmpeg)

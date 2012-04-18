@@ -31,12 +31,20 @@ ViStreamInput* ViQtConnection::streamInput(ViAudioBuffer *buffer, ViAudioMetaDat
 
 ViFileOutput* ViQtConnection::fileOutput(ViAudioBuffer *buffer, ViAudioMetaData* metaData, QString filePath)
 {
-
+	if(mFileOutput == NULL)
+	{
+		mFileOutput = new ViQtFileOutput(buffer, metaData, filePath);
+	}
+	return mFileOutput;
 }
 
 ViStreamOutput* ViQtConnection::streamOutput(ViAudioBuffer *buffer, ViAudioMetaData* metaData, ViAudioDevice *device)
 {
-
+	if(mStreamOutput == NULL)
+	{
+		mStreamOutput = new ViQtStreamOutput(buffer, metaData, device);
+	}
+	return mStreamOutput;
 }
 
 void ViQtConnection::initialize()

@@ -4,7 +4,8 @@
 #define POSITION_CHECK_INTERVAL 100 //Check the position every n milliseconds
 
 #include "vistreamoutput.h"
-#include <QTimer>
+#include <QAudioOutput>
+#include <QBuffer>
 
 class ViQtStreamOutput : public ViStreamOutput
 {
@@ -20,15 +21,21 @@ class ViQtStreamOutput : public ViStreamOutput
 		void stop();
 		void pause();
 		void initialize();
+
 		bool setPosition(ViAudioPosition position);
 		ViAudioPosition position();
-		void bufferChanged(int size);
 		qreal volume();
 		void setVolume(qreal volume);
 		void mute(bool value);
 
 	protected:
 		void free();
+
+	private:
+		ViAudioBufferStream *mStream;
+		QAudioOutput *mAudioOutput;
+		QBuffer *mBufferDevice;
+		ViAudioPosition mOldPosition;
 };
 
 #endif

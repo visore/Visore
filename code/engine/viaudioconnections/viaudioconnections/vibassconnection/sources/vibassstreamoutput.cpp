@@ -33,7 +33,7 @@ ViBassStreamOutput::~ViBassStreamOutput()
 void ViBassStreamOutput::initialize()
 {
 	free();
-	mOldPosition = -1;
+	//mOldPosition = -1;
 	/*if(!BASS_SetDevice(3))
 	{
 		setErrorParameters("ViBassStreamOutput - Device Error", "Cannot stream to the selected output device", ViErrorInfo::Fatal);
@@ -196,14 +196,14 @@ ViAudioPosition ViBassStreamOutput::position()
 	if(position == -1)
 	{
 		setErrorParameters("ViBassStreamOutput - Position Error", "The palyback position could not be retrieved", ViErrorInfo::MediumFatal);
-		return -1;
+		//return -1;
 	}
 	//Ensures that the position is not 0 if no data is available
 	if(mBuffer->size() == 0)
 	{
 		position = -1;
 	}
-	return ViAudioPosition(position, mMetaData->bitDepth(), mSecondsInByte);
+	//return ViAudioPosition(position, mMetaData->bitDepth(), mSecondsInByte);
 }
 
 void ViBassStreamOutput::checkPosition()
