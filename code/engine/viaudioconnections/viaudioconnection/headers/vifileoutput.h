@@ -2,7 +2,6 @@
 #define VIFILEOUTPUT_H
 
 #include "viaudiooutput.h"
-#include "viaudiometadata.h"
 
 class ViFileOutput : public ViAudioOutput
 {
@@ -12,7 +11,7 @@ class ViFileOutput : public ViAudioOutput
 		virtual void bufferChanged(int size);
 
 	public:
-		ViFileOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, QString filePath = "");
+		ViFileOutput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, QString filePath = "");
 		virtual void setFilePath(QString filePath);
 
 		virtual void start() = 0;

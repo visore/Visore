@@ -2,7 +2,6 @@
 #define VIQTCONNECTION_H
 
 #include "viaudioconnection.h"
-#include "viformatmanager.h"
 #include "viqtfileinput.h"
 #include "viqtstreaminput.h"
 #include "viqtfileoutput.h"
@@ -14,10 +13,10 @@ class ViQtConnection : public ViAudioConnection
 	public:
 		ViQtConnection();
 		~ViQtConnection();
-		ViFileInput* fileInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, QString filePath = "");
-		ViStreamInput* streamInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, ViAudioDevice *device = NULL);
-		ViFileOutput* fileOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, QString filePath = "");
-		ViStreamOutput* streamOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, ViAudioDevice *device = NULL);
+		ViFileInput* fileInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, QString filePath = "");
+		ViStreamInput* streamInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, ViAudioDevice *device = NULL);
+		ViFileOutput* fileOutput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, QString filePath = "");
+		ViStreamOutput* streamOutput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, ViAudioDevice *device = NULL);
 		QList<ViAudioDevice> devices(ViAudioDevice::ViAudioDeviceType type = ViAudioDevice::All);
 		ViAudioDevice defaultDevice(ViAudioDevice::ViAudioDeviceType type = ViAudioDevice::Output);
 

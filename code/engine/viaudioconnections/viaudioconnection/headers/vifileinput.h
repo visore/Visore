@@ -2,14 +2,13 @@
 #define VIFILEINPUT_H
 
 #include "viaudioinput.h"
-#include "viaudiometadata.h"
 
 class ViFileInput : public ViAudioInput
 {
     Q_OBJECT
 
 	public:
-		ViFileInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, QString filePath = "");
+		ViFileInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, QString filePath = "");
 		virtual void setFilePath(QString filePath);
 
 		virtual void start() = 0;

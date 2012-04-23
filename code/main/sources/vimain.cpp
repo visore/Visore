@@ -1,5 +1,6 @@
 #include "vimainwindow.h"
 #include "viaudioengine.h"
+#include "vicoder.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -10,6 +11,7 @@ int main(int argc, char *argv[])
 
 	//Register SIGNAL/SLOT parameter types
 	qRegisterMetaType<QSharedPointer<ViWaveFormChunk> >("QSharedPointer<ViWaveFormChunk>");
+	qRegisterMetaType<ViCoder::State>("ViCoder::State");
 
 	ViAudioEngine engine;
 	ViMainWindow window(&engine);

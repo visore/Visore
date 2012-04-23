@@ -11,38 +11,38 @@ ViQtConnection::~ViQtConnection()
 	close();
 }
 
-ViFileInput* ViQtConnection::fileInput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QString filePath)
+ViFileInput* ViQtConnection::fileInput(ViAudioFormat format, ViAudioBuffer *buffer, QString filePath)
 {
 	if(mFileInput == NULL)
 	{
-		mFileInput = new ViQtFileInput(buffer, metaData, filePath);
+		mFileInput = new ViQtFileInput(format, buffer, filePath);
 	}
 	return mFileInput;
 }
 
-ViStreamInput* ViQtConnection::streamInput(ViAudioBuffer *buffer, ViAudioMetaData* metaData, ViAudioDevice *device)
+ViStreamInput* ViQtConnection::streamInput(ViAudioFormat format, ViAudioBuffer *buffer, ViAudioDevice *device)
 {
 	if(mStreamInput == NULL)
 	{
-		mStreamInput = new ViQtStreamInput(buffer, metaData, device);
+		mStreamInput = new ViQtStreamInput(format, buffer, device);
 	}
 	return mStreamInput;
 }
 
-ViFileOutput* ViQtConnection::fileOutput(ViAudioBuffer *buffer, ViAudioMetaData* metaData, QString filePath)
+ViFileOutput* ViQtConnection::fileOutput(ViAudioFormat format, ViAudioBuffer *buffer, QString filePath)
 {
 	if(mFileOutput == NULL)
 	{
-		mFileOutput = new ViQtFileOutput(buffer, metaData, filePath);
+		mFileOutput = new ViQtFileOutput(format, buffer, filePath);
 	}
 	return mFileOutput;
 }
 
-ViStreamOutput* ViQtConnection::streamOutput(ViAudioBuffer *buffer, ViAudioMetaData* metaData, ViAudioDevice *device)
+ViStreamOutput* ViQtConnection::streamOutput(ViAudioFormat format, ViAudioBuffer *buffer, ViAudioDevice *device)
 {
 	if(mStreamOutput == NULL)
 	{
-		mStreamOutput = new ViQtStreamOutput(buffer, metaData, device);
+		mStreamOutput = new ViQtStreamOutput(format, buffer, device);
 	}
 	return mStreamOutput;
 }

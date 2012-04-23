@@ -15,7 +15,7 @@ class ViAudioOutput : public ViAudioTransmission
 		virtual void bufferChanged(int size) = 0;
 
 	public:
-		ViAudioOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL);
+		ViAudioOutput(ViAudioFormat format, ViAudioBuffer *buffer = NULL);
 
 		virtual void start() = 0;
 		virtual void stop() = 0;

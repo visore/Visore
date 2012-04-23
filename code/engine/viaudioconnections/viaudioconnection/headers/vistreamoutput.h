@@ -12,7 +12,7 @@ class ViStreamOutput : public ViAudioOutput
 		virtual void bufferChanged(int size);
 
 	public:
-		ViStreamOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData* metaData = NULL, ViAudioDevice *device = NULL);
+		ViStreamOutput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, ViAudioDevice *device = NULL);
 		~ViStreamOutput();
 		virtual void setDevice(ViAudioDevice *device);
 

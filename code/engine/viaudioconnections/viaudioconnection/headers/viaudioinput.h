@@ -8,7 +8,7 @@ class ViAudioInput : public ViAudioTransmission
     Q_OBJECT
 
 	public:
-		ViAudioInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL);
+		ViAudioInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL);
 
 		virtual void start() = 0;
 		virtual void stop() = 0;

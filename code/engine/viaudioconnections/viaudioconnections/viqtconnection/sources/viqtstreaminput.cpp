@@ -1,7 +1,7 @@
 #include "viqtstreaminput.h"
 
-ViQtStreamInput::ViQtStreamInput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, ViAudioDevice *device)
-	: ViStreamInput(buffer, metaData, device)
+ViQtStreamInput::ViQtStreamInput(ViAudioFormat format, ViAudioBuffer *buffer, ViAudioDevice *device)
+	: ViStreamInput(format, buffer, device)
 {
 	 /*recorder = new QAudioRecorder;
 

@@ -1,5 +1,4 @@
 #include "viaudioengine.h"
-#include "vibassconnection.h"
 #include "viqtconnection.h"
 
 #include <QTimer>
@@ -18,12 +17,11 @@ if(!mAudioConnectionLoader->open(QCoreApplication::applicationDirPath()+"/engine
 mAudioConnection = mAudioConnectionLoader->createObject("createConnection");
 */
 
-mAudioConnection = new ViBassConnection();
+//mAudioConnection = new ViBassConnection();
 ViAudioConnection *mAudioConnection2 = new ViQtConnection();
 
 
 
-mMetaData = new ViAudioMetaData();
 resetMetaData();
 //mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wav");
 
@@ -54,14 +52,14 @@ ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(QSharedPointer<Vi
 
 
 //Make sure the file input is created before the stream input
-mFileInput = mAudioConnection2->fileInput(mProcessingChain->originalBuffer(), mMetaData);
-mStreamInput = mAudioConnection->streamInput(mProcessingChain->originalBuffer(), mMetaData);
-mFileOutput = mAudioConnection->fileOutput(mProcessingChain->correctedBuffer(), mMetaData);
-mStreamOutput = mAudioConnection2->streamOutput(mProcessingChain->correctedBuffer(), mMetaData, &outputDevice);
+mFileInput = mAudioConnection2->fileInput(mFormat, mProcessingChain->originalBuffer());
+//mStreamInput = mAudioConnection->streamInput(mFormat, mProcessingChain->originalBuffer());
+//mFileOutput = mAudioConnection->fileOutput(mProcessingChain->correctedBuffer());
+mStreamOutput = mAudioConnection2->streamOutput(mFormat, mProcessingChain->correctedBuffer(), &outputDevice);
 
 //mProcessingChain->attachInput(mFileInput);
 //mProcessingChain->attachInput(mStreamInput);
-mProcessingChain->attachFileOutput(mFileOutput);
+//mProcessingChain->attachFileOutput(mFileOutput);
 mProcessingChain->attachStreamOutput(mStreamOutput);
 
 //ViWaveFormer *wave = new ViWaveFormer(mMetaData);
@@ -190,7 +188,7 @@ void ViAudioEngine::setInputFilePath(QString filePath)
 	mProcessingChain->attachInput(mFileInput);
 
 	//Required to ensure that the write metadata (aka bit depth is passed to Bass)
-	mFileOutput->initialize();
+	mFileInput->initialize();
 	mStreamOutput->initialize();
 
 	mFileInput->start();
@@ -272,9 +270,9 @@ void ViAudioEngine::stopOutputFile()
 void ViAudioEngine::resetMetaData()
 {
 	//mMetaData->setFormat(ViFormatManager::selected("MP3"));
-	mMetaData->setFrequency(44100);
-	mMetaData->setChannels(2);
-	mMetaData->setBitDepth(16);
+	/*mFormat.setSampleRate(44100);
+	mFormat.setChannelCount(2);
+	mFormat.setSampleSize(16);*/
 }
 
 ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)

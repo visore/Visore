@@ -15,10 +15,10 @@ class ViAudioConnection : public ViError
 		QList<ViAudioFormat*> supportedInputFormats();
 		QList<ViAudioFormat*> supportedOutputFormats();
 
-		virtual ViFileInput* fileInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, QString filePath = "") = 0;
-		virtual ViStreamInput* streamInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, ViAudioDevice *device = NULL) = 0;
-		virtual ViFileOutput* fileOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, QString filePath = "") = 0;
-		virtual ViStreamOutput* streamOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, ViAudioDevice *device = NULL) = 0;
+		virtual ViFileInput* fileInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, QString filePath = "") = 0;
+		virtual ViStreamInput* streamInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, ViAudioDevice *device = NULL) = 0;
+		virtual ViFileOutput* fileOutput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, QString filePath = "") = 0;
+		virtual ViStreamOutput* streamOutput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, ViAudioDevice *device = NULL) = 0;
 		virtual QList<ViAudioDevice> devices(ViAudioDevice::ViAudioDeviceType type = ViAudioDevice::All) = 0;
 		virtual ViAudioDevice defaultDevice(ViAudioDevice::ViAudioDeviceType type = ViAudioDevice::Output) = 0;
 

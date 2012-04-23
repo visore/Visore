@@ -1,7 +1,7 @@
 #include "vistreamoutput.h"
 
-ViStreamOutput::ViStreamOutput(ViAudioBuffer *buffer, ViAudioMetaData* metaData, ViAudioDevice *device)
-	: ViAudioOutput(buffer, metaData)
+ViStreamOutput::ViStreamOutput(ViAudioFormat format, ViAudioBuffer *buffer, ViAudioDevice *device)
+	: ViAudioOutput(format, buffer)
 {
 	mDevice = device;
 	mVolume = 0;

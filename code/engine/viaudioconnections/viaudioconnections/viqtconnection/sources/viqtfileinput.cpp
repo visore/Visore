@@ -1,10 +1,10 @@
 #include "viqtfileinput.h"
 
-#include "vicodecs.h"
+#include "vicoder.h"
 #include <QFile>
 
-ViQtFileInput::ViQtFileInput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QString filePath)
-	: ViFileInput(buffer, metaData, filePath)
+ViQtFileInput::ViQtFileInput(ViAudioFormat format, ViAudioBuffer *buffer, QString filePath)
+	: ViFileInput(format, buffer, filePath)
 {
 
 }
@@ -26,7 +26,9 @@ void ViQtFileInput::free()
 
 void ViQtFileInput::start()
 {
-	ViCodecs::decode(mFilePath, mBuffer);
+	cout << mFormat.sampleRate() << " "<< mFormat.sampleSize()<<endl;
+	mCoder.decode(mFilePath, mBuffer, &mFormat);
+	cout << mFormat.sampleRate() << " "<< mFormat.codec().name().toAscii().data()<<endl;
 }
 
 void ViQtFileInput::stop()

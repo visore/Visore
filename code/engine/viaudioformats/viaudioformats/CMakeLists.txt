@@ -1,8 +1,0 @@
-#Setup directory paths
-SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-SET(VI_MP3FORMAT ${ROOT}/vimp3format)
-SET(VI_WAVEFORMAT ${ROOT}/viwaveformat)
-
-#Initiate sub-directories
-ADD_SUBDIRECTORY(${VI_MP3FORMAT})
-ADD_SUBDIRECTORY(${VI_WAVEFORMAT})

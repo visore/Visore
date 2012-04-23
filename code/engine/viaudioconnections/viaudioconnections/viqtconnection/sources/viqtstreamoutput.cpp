@@ -1,7 +1,17 @@
 #include "viqtstreamoutput.h"
 
-ViQtStreamOutput::ViQtStreamOutput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, ViAudioDevice *device)
-	: ViStreamOutput(buffer, metaData, device)
+ViQtStreamOutput::ViQtStreamOutput(ViAudioFormat format, ViAudioBuffer *buffer, ViAudioDevice *device)
+	: ViStreamOutput(format, buffer, device)
+{
+	initialize();
+}
+
+ViQtStreamOutput::~ViQtStreamOutput()
+{
+	free();
+}
+
+void ViQtStreamOutput::initialize()
 {
 	mStream = mBuffer->createReadStream();
 	mBufferDevice = new QBuffer(mBuffer->data(), this);
@@ -25,24 +35,18 @@ ViQtStreamOutput::ViQtStreamOutput(ViAudioBuffer *buffer, ViAudioMetaData *metaD
          cout << "raw audio format not supported by backend, cannot play audio."<<endl;
      }
 
+	mProcessedMicroseconds = 0;
 	ViObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
-}
 
-ViQtStreamOutput::~ViQtStreamOutput()
-{
-	delete mStream;
-	delete mAudioOutput;
-	delete mBufferDevice;
-}
-
-void ViQtStreamOutput::initialize()
-{
-
+	mMuteVolume = volume();
+	mIsMute = false;
 }
 
 void ViQtStreamOutput::free()
 {
-
+	delete mStream;
+	delete mAudioOutput;
+	delete mBufferDevice;
 }
 
 void ViQtStreamOutput::start()
@@ -60,11 +64,13 @@ void ViQtStreamOutput::start()
 void ViQtStreamOutput::stop()
 {
 	mAudioOutput->stop();
+	mProcessedMicroseconds = 0;
 }
 
 void ViQtStreamOutput::pause()
 {
 	mAudioOutput->suspend();
+	mProcessedMicroseconds = position().microseconds();
 }
 
 bool ViQtStreamOutput::setPosition(ViAudioPosition position)
@@ -80,7 +86,7 @@ ViAudioPosition ViQtStreamOutput::position()
 	format.setChannelCount(2);
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	format.setSampleType(QAudioFormat::SignedInt);
-	return ViAudioPosition(mAudioOutput->elapsedUSecs(), format);
+	return ViAudioPosition(mAudioOutput->processedUSecs() + mProcessedMicroseconds, format);
 }
 
 void ViQtStreamOutput::checkPosition()
@@ -95,15 +101,32 @@ void ViQtStreamOutput::checkPosition()
 
 qreal ViQtStreamOutput::volume()
 {
-
+	return mAudioOutput->volume();
 }
 
-void ViQtStreamOutput::setVolume(qreal volume)
+void ViQtStreamOutput::setVolume(qreal volumeValue)
 {
-
+	if(mIsMute)
+	{
+		mMuteVolume = volume();
+	}
+	else
+	{
+		mAudioOutput->setVolume(volumeValue);
+	}
 }
 
 void ViQtStreamOutput::mute(bool value)
 {
-
+	if(value)
+	{
+		mMuteVolume = volume();
+		setVolume(0);
+		mIsMute = true;
+	}
+	else
+	{
+		mIsMute = false;
+		setVolume(mMuteVolume);
+	}
 }

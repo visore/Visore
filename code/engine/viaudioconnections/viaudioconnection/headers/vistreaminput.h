@@ -9,7 +9,7 @@ class ViStreamInput : public ViAudioInput
     Q_OBJECT
 
 	public:
-		ViStreamInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, ViAudioDevice *device = NULL);
+		ViStreamInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, ViAudioDevice *device = NULL);
 		~ViStreamInput();
 		virtual void setDevice(ViAudioDevice *device);
 

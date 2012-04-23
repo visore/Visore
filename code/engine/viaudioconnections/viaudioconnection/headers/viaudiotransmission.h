@@ -3,7 +3,7 @@
 
 #include "viaudiobuffer.h"
 #include "vierror.h"
-#include "viaudiometadata.h"
+#include "viaudioformat.h"
 
 class ViAudioTransmission : public QObject, public ViError
 {
@@ -18,12 +18,14 @@ class ViAudioTransmission : public QObject, public ViError
 			Paused = 3
 		};
 
-		ViAudioTransmission(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL);
+		ViAudioTransmission(ViAudioFormat format, ViAudioBuffer *buffer = NULL);
 		~ViAudioTransmission();
 		virtual void setBuffer(ViAudioBuffer *buffer);
 		virtual ViAudioBuffer* buffer();
-		virtual ViAudioMetaData* metaData();
-		virtual void setMetaData(ViAudioMetaData *metaData);
+
+		virtual ViAudioFormat format();
+		virtual void setFormat(ViAudioFormat format);
+
 		virtual void setStatus(ViAudioTransmission::ViTransmissionStatus status);
 		virtual ViAudioTransmission::ViTransmissionStatus status();
 
@@ -38,7 +40,7 @@ class ViAudioTransmission : public QObject, public ViError
 	protected:
 		ViAudioBuffer *mBuffer;
 		ViAudioBufferStream *mStream;
-		ViAudioMetaData *mMetaData;
+		ViAudioFormat mFormat;
 		ViAudioTransmission::ViTransmissionStatus mStatus;
 };
 

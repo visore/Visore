@@ -1,7 +1,7 @@
 #include "viqtfileoutput.h"
 
-ViQtFileOutput::ViQtFileOutput(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QString filePath)
-	: ViFileOutput(buffer, metaData, filePath)
+ViQtFileOutput::ViQtFileOutput(ViAudioFormat format, ViAudioBuffer *buffer, QString filePath)
+	: ViFileOutput(format, buffer, filePath)
 {
 }
 

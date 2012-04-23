@@ -1,9 +1,0 @@
-#Setup directory paths
-SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-SET(VI_AUDIOFORMAT ${ROOT}/viaudioformat)
-SET(VI_AUDIOFORMATS ${ROOT}/viaudioformats)
-SET(VI_AUDIOFORMATS_LOCATION engine/formats CACHE INTERNAL "Audio formats install directory")
-
-#Initiate sub-directories
-ADD_SUBDIRECTORY(${VI_AUDIOFORMAT})
-ADD_SUBDIRECTORY(${VI_AUDIOFORMATS})

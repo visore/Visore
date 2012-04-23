@@ -11,7 +11,7 @@ class ViQtFileOutput : public ViFileOutput
 	Q_OBJECT
 
 	public:
-		ViQtFileOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, QString filePath = "");
+		ViQtFileOutput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, QString filePath = "");
 		~ViQtFileOutput();
 		void start();
 		void stop();

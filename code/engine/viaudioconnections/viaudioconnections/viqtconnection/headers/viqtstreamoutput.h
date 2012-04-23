@@ -15,7 +15,7 @@ class ViQtStreamOutput : public ViStreamOutput
 		void checkPosition();
 
 	public:
-		ViQtStreamOutput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, ViAudioDevice *device = NULL);
+		ViQtStreamOutput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, ViAudioDevice *device = NULL);
 		~ViQtStreamOutput();
 		void start();
 		void stop();
@@ -25,7 +25,7 @@ class ViQtStreamOutput : public ViStreamOutput
 		bool setPosition(ViAudioPosition position);
 		ViAudioPosition position();
 		qreal volume();
-		void setVolume(qreal volume);
+		void setVolume(qreal volumeValue);
 		void mute(bool value);
 
 	protected:
@@ -36,6 +36,10 @@ class ViQtStreamOutput : public ViStreamOutput
 		QAudioOutput *mAudioOutput;
 		QBuffer *mBufferDevice;
 		ViAudioPosition mOldPosition;
+		qint64 mProcessedMicroseconds;
+
+		qreal mMuteVolume;
+		bool mIsMute;
 };
 
 #endif

@@ -67,7 +67,7 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/viwindowfunctions/viwindowfunction/headers
 	${ENGINE}/vispectrumanalyzer/headers
 	${ENGINE}/viwaveformer/headers
-	${ENGINE}/vicodecs/headers
+	${ENGINE}/vicoder/headers
 
 	${EXTERNAL}/fftreal/sources
 	${EXTERNAL}/fftreal/headers

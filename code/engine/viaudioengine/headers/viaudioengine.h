@@ -7,6 +7,7 @@
 #include "viwaveformer.h"
 #include "vilibrary.h"
 #include "viwavesummarizer.h"
+#include "viaudioformat.h"
 //#include "vispectrumanalyzer.h"
 //#include "visongdetector.h"
 #include <QList>
@@ -102,7 +103,9 @@ public:
 		ViStreamOutput *mStreamOutput;
 		ViFileOutput *mFileOutput;
 		ViAudioProcessingChain *mProcessingChain;
-		ViAudioMetaData *mMetaData;
+		
+		
+		ViAudioFormat mFormat;
 
 		ViAudioEngine::ViAudioType mInputType;
 

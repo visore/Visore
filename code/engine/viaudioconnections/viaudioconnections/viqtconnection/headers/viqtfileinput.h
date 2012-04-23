@@ -2,6 +2,7 @@
 #define VIQTFILEINPUT_H
 
 #include "vifileinput.h"
+#include "vicoder.h"
 #include <QThread>
 
 class ViQtFileInput : public ViFileInput
@@ -9,7 +10,7 @@ class ViQtFileInput : public ViFileInput
 	Q_OBJECT
 
 	public:
-		ViQtFileInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, QString filePath = "");
+		ViQtFileInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, QString filePath = "");
 		~ViQtFileInput();
 		void start();
 		void stop();
@@ -18,6 +19,9 @@ class ViQtFileInput : public ViFileInput
 
 	protected:
 		void free();
+
+	private:
+		ViCoder mCoder;
 
 };
 

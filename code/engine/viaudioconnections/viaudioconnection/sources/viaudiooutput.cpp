@@ -1,7 +1,7 @@
 #include "viaudiooutput.h"
 
-ViAudioOutput::ViAudioOutput(ViAudioBuffer *buffer, ViAudioMetaData *metaData)
-	: ViAudioTransmission(buffer, metaData)
+ViAudioOutput::ViAudioOutput(ViAudioFormat format, ViAudioBuffer *buffer)
+	: ViAudioTransmission(format, buffer)
 {
 	mStream = mBuffer->createReadStream();
 }

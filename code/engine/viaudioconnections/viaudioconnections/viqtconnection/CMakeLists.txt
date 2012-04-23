@@ -25,7 +25,7 @@ QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_QTCONNECTION_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(viqtconnection SHARED  ${VI_QTCONNECTION_HEADERS} ${VI_WRAPPER_HEADERS} ${VI_QTCONNECTION_SOURCES})
-TARGET_LINK_LIBRARIES(viqtconnection ${Qt5Multimedia_LIBRARIES} viaudioconnection vicodecs)
+TARGET_LINK_LIBRARIES(viqtconnection ${Qt5Multimedia_LIBRARIES} viaudioconnection vicoder)
 
 #Install file
 INSTALL(TARGETS viqtconnection DESTINATION ${VI_AUDIOCONNECTIONS_LOCATION})

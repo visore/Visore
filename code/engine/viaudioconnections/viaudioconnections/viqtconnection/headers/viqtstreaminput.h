@@ -11,7 +11,7 @@ class ViQtStreamInput : public ViStreamInput
 	Q_OBJECT
 
 	public:
-		ViQtStreamInput(ViAudioBuffer *buffer = NULL, ViAudioMetaData *metaData = NULL, ViAudioDevice *device = NULL);
+		ViQtStreamInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, ViAudioDevice *device = NULL);
 		~ViQtStreamInput();
 		void start();
 		void stop();
