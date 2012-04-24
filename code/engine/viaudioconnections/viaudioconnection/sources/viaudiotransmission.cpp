@@ -1,21 +1,14 @@
 #include "viaudiotransmission.h"
 
-ViAudioTransmission::ViAudioTransmission(ViAudioFormat format, ViAudioBuffer *buffer)
-	: QObject()
+ViAudioTransmission::ViAudioTransmission()
 {
-	mFormat = format;
-	mBuffer = buffer;
+	mBuffer = NULL;
 	mStream = NULL;
-	mStatus = ViAudioTransmission::None;
+	mState = QAudio::IdleState;
 }
 
 ViAudioTransmission::~ViAudioTransmission()
 {
-	if(mStream != NULL)
-	{
-		delete mStream;
-		mStream = NULL;
-	}
 }
 
 void ViAudioTransmission::setBuffer(ViAudioBuffer *buffer)
@@ -38,12 +31,12 @@ void ViAudioTransmission::setFormat(ViAudioFormat format)
 	mFormat = format;
 }
 
-void ViAudioTransmission::setStatus(ViAudioTransmission::ViTransmissionStatus status)
+void ViAudioTransmission::setState(QAudio::State state)
 {
-	mStatus = status;
+	mState = state;
 }
 
-ViAudioTransmission::ViTransmissionStatus ViAudioTransmission::status()
+QAudio::State ViAudioTransmission::state()
 {
-	return mStatus;
+	return mState;
 }

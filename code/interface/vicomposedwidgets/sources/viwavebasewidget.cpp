@@ -72,7 +72,7 @@ void ViWaveBaseWidget::paintEvent(QPaintEvent *event)
 
 void ViWaveBaseWidget::positionChanged(ViAudioPosition position)
 {
-	mPosition = position.sample();
+	mPosition = position.position(ViAudioPosition::Samples);
 	repaint();
 }
 

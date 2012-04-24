@@ -1,26 +1,27 @@
 #include "vistreamoutput.h"
 
-ViStreamOutput::ViStreamOutput(ViAudioFormat format, ViAudioBuffer *buffer, ViAudioDevice *device)
-	: ViAudioOutput(format, buffer)
+ViStreamOutput::ViStreamOutput()
+	: ViAudioOutput()
 {
-	mDevice = device;
+	mDevice = QAudioDeviceInfo::defaultOutputDevice();
 	mVolume = 0;
 }
 
-ViStreamOutput::~ViStreamOutput()
-{
-	if(mDevice != NULL)
-	{
-		delete mDevice;
-		mDevice = NULL;
-	}
-}
-
-void ViStreamOutput::setDevice(ViAudioDevice *device)
+void ViStreamOutput::setDevice(QAudioDeviceInfo device)
 {
 	mDevice = device;
 }
 
 void ViStreamOutput::bufferChanged(int size)
 {
+}
+
+void ViStreamOutput::initialize()
+{
+	ViAudioOutput::initialize();
+}
+
+void ViStreamOutput::free()
+{
+	ViAudioOutput::free();
 }

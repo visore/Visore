@@ -7,16 +7,20 @@ class ViAudioInput : public ViAudioTransmission
 {
     Q_OBJECT
 
+	signals:
+
+		void formatChanged(ViAudioFormat format);
+
 	public:
-		ViAudioInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL);
+
+		ViAudioInput();
+		
+		virtual void initialize();
+		virtual void free();
 
 		virtual void start() = 0;
 		virtual void stop() = 0;
 		virtual void pause() = 0;
-		virtual void initialize() = 0;
-
-	protected:
-		virtual void free() = 0;
 };
 
 #endif

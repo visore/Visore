@@ -1,12 +1,22 @@
 #include "vifileinput.h"
 
-ViFileInput::ViFileInput(ViAudioFormat format, ViAudioBuffer *buffer, QString filePath)
-	: ViAudioInput(format, buffer)
+ViFileInput::ViFileInput()
+	: ViAudioInput()
+{
+	mFilePath = "";
+}
+
+void ViFileInput::setFile(QString filePath)
 {
 	mFilePath = filePath;
 }
 
-void ViFileInput::setFilePath(QString filePath)
+void ViFileInput::initialize()
 {
-	mFilePath = filePath;
+	ViAudioInput::initialize();
+}
+
+void ViFileInput::free()
+{
+	ViAudioInput::free();
 }

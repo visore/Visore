@@ -1,21 +1,22 @@
 #include "vistreaminput.h"
 
-ViStreamInput::ViStreamInput(ViAudioFormat format, ViAudioBuffer *buffer, ViAudioDevice *device)
-	: ViAudioInput(format, buffer)
+ViStreamInput::ViStreamInput()
+	: ViAudioInput()
+{
+	mDevice = QAudioDeviceInfo::defaultInputDevice();
+}
+
+void ViStreamInput::setDevice(QAudioDeviceInfo device)
 {
 	mDevice = device;
 }
 
-ViStreamInput::~ViStreamInput()
+void ViStreamInput::initialize()
 {
-	if(mDevice != NULL)
-	{
-		delete mDevice;
-		mDevice = NULL;
-	}
+	ViAudioInput::initialize();
 }
 
-void ViStreamInput::setDevice(ViAudioDevice *device)
+void ViStreamInput::free()
 {
-	mDevice = device;
+	ViAudioInput::free();
 }

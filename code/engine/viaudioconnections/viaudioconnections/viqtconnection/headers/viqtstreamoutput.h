@@ -15,28 +15,28 @@ class ViQtStreamOutput : public ViStreamOutput
 		void checkPosition();
 
 	public:
-		ViQtStreamOutput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, ViAudioDevice *device = NULL);
+
+		ViQtStreamOutput();
 		~ViQtStreamOutput();
+		void initialize();
+		void free();
+
 		void start();
 		void stop();
 		void pause();
-		void initialize();
 
 		bool setPosition(ViAudioPosition position);
 		ViAudioPosition position();
+
 		qreal volume();
 		void setVolume(qreal volumeValue);
-		void mute(bool value);
-
-	protected:
-		void free();
+		void mute(bool value);	
 
 	private:
-		ViAudioBufferStream *mStream;
+
 		QAudioOutput *mAudioOutput;
 		QBuffer *mBufferDevice;
 		ViAudioPosition mOldPosition;
-		qint64 mProcessedMicroseconds;
 
 		qreal mMuteVolume;
 		bool mIsMute;

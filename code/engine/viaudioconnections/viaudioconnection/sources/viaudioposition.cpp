@@ -6,40 +6,63 @@ ViAudioPosition::ViAudioPosition()
 	mFormat = QAudioFormat();
 }
 
-ViAudioPosition::ViAudioPosition(qint64 microseconds, QAudioFormat format)
+ViAudioPosition::ViAudioPosition(qreal microseconds, ViAudioPosition::Unit unit, QAudioFormat format)
 {
-	initialize(microseconds, format);
+	setPosition(microseconds, unit, format);
 }
 
-void ViAudioPosition::initialize(qint64 microseconds, QAudioFormat format)
+void ViAudioPosition::setPosition(qreal position, ViAudioPosition::Unit unit, QAudioFormat format)
 {
-	mMicroseconds = microseconds;
 	mFormat = format;
+	setPosition(position, unit);
 }
 
-qreal ViAudioPosition::seconds()
+void ViAudioPosition::setPosition(qreal position, ViAudioPosition::Unit unit)
 {
-	return milliseconds() / 1000.0;
+	if(unit == ViAudioPosition::Microseconds)
+	{
+		mMicroseconds = position;
+	}
+	else if(unit == ViAudioPosition::Milliseconds)
+	{
+		mMicroseconds = position * 1000.0;
+	}
+	else if(unit == ViAudioPosition::Seconds)
+	{
+		mMicroseconds = position * 1000000.0;
+	}
+	else if(unit == ViAudioPosition::Samples)
+	{
+		mMicroseconds = position / (mFormat.sampleRate() * mFormat.channelCount()) * 1000000.0;
+	}
+	else if(unit == ViAudioPosition::Bytes)
+	{
+		mMicroseconds = position / (mFormat.sampleRate() * mFormat.channelCount() * (mFormat.sampleSize() / 8)) * 1000000.0;
+	}
 }
 
-qreal ViAudioPosition::milliseconds()
+qreal ViAudioPosition::position(ViAudioPosition::Unit unit)
 {
-	return mMicroseconds / 1000.0;
-}
-
-qint64 ViAudioPosition::microseconds()
-{
-	return mMicroseconds;
-}
-
-qint64 ViAudioPosition::bytes()
-{
-	return sample() * mFormat.sampleSize();
-}
-
-qint64 ViAudioPosition::sample()
-{
-	return mFormat.sampleRate() * seconds() * mFormat.channelCount();
+	if(unit == ViAudioPosition::Microseconds)
+	{
+		return mMicroseconds;
+	}
+	else if(unit == ViAudioPosition::Milliseconds)
+	{
+		return mMicroseconds / 1000.0;
+	}
+	else if(unit == ViAudioPosition::Seconds)
+	{
+		return mMicroseconds / 1000000.0;
+	}
+	else if(unit == ViAudioPosition::Samples)
+	{
+		return (mMicroseconds / 1000000.0) * mFormat.sampleRate() * mFormat.channelCount();
+	}
+	else if(unit == ViAudioPosition::Bytes)
+	{
+		return (mMicroseconds / 1000000.0) * mFormat.sampleRate() * mFormat.channelCount() * (mFormat.sampleSize() / 8);
+	}
 }
 
 QAudioFormat ViAudioPosition::format()

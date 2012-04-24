@@ -11,82 +11,31 @@ ViAudioEngine::ViAudioEngine()
 	mStreamOutput = NULL;
 	mFileOutput = NULL;
 	mInputType = ViAudioEngine::None;
-/*
-mAudioConnectionLoader = new ViLibrary<ViAudioConnection>();
-if(!mAudioConnectionLoader->open(QCoreApplication::applicationDirPath()+"/engine/connections/libvibassconnection.so")) ViLogger::debug("Library cannot be loaded! ");
-mAudioConnection = mAudioConnectionLoader->createObject("createConnection");
-*/
 
-//mAudioConnection = new ViBassConnection();
-ViAudioConnection *mAudioConnection2 = new ViQtConnection();
+	mAudioConnection = new ViQtConnection();
+	resetMetaData();
 
+	mProcessingChain = new ViAudioProcessingChain();
+	ViObject::connectDirect(mProcessingChain->originalBuffer(), SIGNAL(changed(int)), this, SIGNAL(originalBufferChanged(int)));
+	ViObject::connectDirect(mProcessingChain->correctedBuffer(), SIGNAL(changed(int)), this, SIGNAL(correctedBufferChanged(int)));
 
+	mFileInput = mAudioConnection->fileInput(mFormat, mProcessingChain->originalBuffer());
+	mFileOutput = mAudioConnection->fileOutput(mFormat, mProcessingChain->originalBuffer());
+	mStreamInput = mAudioConnection->streamInput(mFormat, mProcessingChain->originalBuffer(), QAudioDeviceInfo::defaultInputDevice());
+	mStreamOutput = mAudioConnection->streamOutput(mFormat, mProcessingChain->originalBuffer(), QAudioDeviceInfo::defaultOutputDevice());
 
-resetMetaData();
-//mAudioInput = mAudioConnection->fileInput(mBuffer, metaData, "/home/visore/Desktop/a.wav");
+	mProcessingChain->attachInput(mFileInput);
+	mProcessingChain->attachStreamOutput(mStreamOutput);
 
-ViAudioDevice outputDevice;
-outputDevice.setId(-1);
-
-//mFileOutput = mAudioConnection->fileOutput(mBuffer, metaData, "/home/visore/Desktop/testrec.mp3");
-
-mProcessingChain = new ViAudioProcessingChain();
-
-
-
-/*
-mOriginalWaveFormer = new ViWaveFormer(mMetaData);
-mCorrectedWaveFormer = new ViWaveFormer(mMetaData);
-
-mProcessingChain->attachOriginalProcessor(mOriginalWaveFormer, ViProcessorList::Parallel);
-ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(originalWaveChanged(QSharedPointer<ViWaveFormChunk>)));
-
-mProcessingChain->attachCorrectedProcessor(mCorrectedWaveFormer, ViProcessorList::Parallel);
-ViObject::connectDirect(mCorrectedWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), this, SIGNAL(correctedWaveChanged(QSharedPointer<ViWaveFormChunk>)));
-*/
-
-//mOriginalSpectrumAnalyzer = new ViSpectrumAnalyzer();
-//mOriginalSpectrumAnalyzer->setWindowFunction(ViWindowFunctionManager::selected("Hann Window Function"));
-//ViObject::connectDirect(mOriginalWaveFormer, SIGNAL(completed(QSharedPointer<ViWaveFormChunk>)), mOriginalSpectrumAnalyzer, SLOT(start(QSharedPointer<ViWaveFormChunk>)));
-
-
-
-//Make sure the file input is created before the stream input
-mFileInput = mAudioConnection2->fileInput(mFormat, mProcessingChain->originalBuffer());
-//mStreamInput = mAudioConnection->streamInput(mFormat, mProcessingChain->originalBuffer());
-//mFileOutput = mAudioConnection->fileOutput(mProcessingChain->correctedBuffer());
-mStreamOutput = mAudioConnection2->streamOutput(mFormat, mProcessingChain->correctedBuffer(), &outputDevice);
-
-//mProcessingChain->attachInput(mFileInput);
-//mProcessingChain->attachInput(mStreamInput);
-//mProcessingChain->attachFileOutput(mFileOutput);
-mProcessingChain->attachStreamOutput(mStreamOutput);
-
-//ViWaveFormer *wave = new ViWaveFormer(mMetaData);
-//mProcessingChain->attachOriginalProcessor(wave, ViProcessorList::Parallel);
-
-ViObject::connectDirect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
-ViObject::connectDirect(mProcessingChain->originalBuffer(), SIGNAL(changed(int)), this, SIGNAL(originalBufferChanged(int)));
-ViObject::connectDirect(mProcessingChain->correctedBuffer(), SIGNAL(changed(int)), this, SIGNAL(correctedBufferChanged(int)));
-//ViObject::connectDirect(wave, SIGNAL(completed(ViWaveFormChunk*)), this, SIGNAL(waveFormChanged(ViWaveFormChunk*)));
-
-
-
-
-
-
-/*
-mSongDetector = new ViSongDetector(mStreamOutput);
-mSongDetector->setProxy(QNetworkProxy::HttpProxy, "137.215.6.53", 8080, "p04416376", "Rd28jRX");
-mSongDetector->setKey("G1TZBE4IHJAYUSNCN");*/
-
-
-
-mProcessingChain->attachOriginalProcessor(&mOriginalWaveSummarizer, ViProcessorList::Parallel);
-mProcessingChain->attachCorrectedProcessor(&mCorrectedWaveSummarizer, ViProcessorList::Parallel);
-ViObject::connect(&mOriginalWaveSummarizer, SIGNAL(changed()), this, SIGNAL(originalWaveChanged()));
-ViObject::connect(&mCorrectedWaveSummarizer, SIGNAL(changed()), this, SIGNAL(correctedWaveChanged()));
-
+	ViObject::connectDirect(mFileInput, SIGNAL(formatChanged(ViAudioFormat)), mStreamOutput, SLOT(changeFormat(ViAudioFormat)));
+	ViObject::connectDirect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
+	ViObject::connectDirect(mProcessingChain->originalBuffer(), SIGNAL(changed(int)), this, SIGNAL(originalBufferChanged(int)));
+	ViObject::connectDirect(mProcessingChain->correctedBuffer(), SIGNAL(changed(int)), this, SIGNAL(correctedBufferChanged(int)));
+	
+	mProcessingChain->attachOriginalProcessor(&mOriginalWaveSummarizer, ViProcessorList::Parallel);
+	mProcessingChain->attachCorrectedProcessor(&mCorrectedWaveSummarizer, ViProcessorList::Parallel);
+	ViObject::connect(&mOriginalWaveSummarizer, SIGNAL(changed()), this, SIGNAL(originalWaveChanged()));
+	ViObject::connect(&mCorrectedWaveSummarizer, SIGNAL(changed()), this, SIGNAL(correctedWaveChanged()));
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -184,19 +133,15 @@ void ViAudioEngine::setInput(ViAudioEngine::ViAudioType type)
 void ViAudioEngine::setInputFilePath(QString filePath)
 {
 	resetMetaData();
-	mFileInput->setFilePath(filePath);
+	mFileInput->setFile(filePath);
 	mProcessingChain->attachInput(mFileInput);
-
-	//Required to ensure that the write metadata (aka bit depth is passed to Bass)
-	mFileInput->initialize();
-	mStreamOutput->initialize();
-
 	mFileInput->start();
 }
 
 void ViAudioEngine::setOutputFilePath(QString filePath)
 {
-	mFileOutput->setFilePath(filePath);
+	mFileOutput->setFile(filePath);
+	mFileOutput->start();
 }
 
 void ViAudioEngine::reset()
@@ -226,7 +171,8 @@ void ViAudioEngine::startPlayback()
 
 void ViAudioEngine::stopPlayback()
 {
-	mStreamOutput->stop();
+	//mStreamOutput->stop();
+setOutputFilePath("");
 }
 
 void ViAudioEngine::pausePlayback()
@@ -239,11 +185,6 @@ void ViAudioEngine::startRecording()
 	mProcessingChain->reset();
 	resetMetaData();
 	mProcessingChain->attachInput(mStreamInput);
-
-	//Required to ensure that the write metadata (aka bit depth is passed to Bass)
-	mFileOutput->initialize();
-	mStreamOutput->initialize();
-
 	mStreamInput->start();
 }
 
@@ -270,9 +211,12 @@ void ViAudioEngine::stopOutputFile()
 void ViAudioEngine::resetMetaData()
 {
 	//mMetaData->setFormat(ViFormatManager::selected("MP3"));
-	/*mFormat.setSampleRate(44100);
+	mFormat.setSampleRate(44100);
 	mFormat.setChannelCount(2);
-	mFormat.setSampleSize(16);*/
+	mFormat.setSampleSize(16);
+	mFormat.setCodec(ViCodecManager::selected("PCM"));
+	mFormat.setSampleType(QAudioFormat::SignedInt);
+	mFormat.setByteOrder(QAudioFormat::LittleEndian);
 }
 
 ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)

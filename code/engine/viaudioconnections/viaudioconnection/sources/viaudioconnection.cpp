@@ -31,13 +31,3 @@ ViAudioConnection::~ViAudioConnection()
 		mStreamOutput = NULL;
 	}
 }
-
-QList<ViAudioFormat*> ViAudioConnection::supportedInputFormats()
-{
-	return mInputFormats;
-}
-
-QList<ViAudioFormat*> ViAudioConnection::supportedOutputFormats()
-{
-	return mOutputFormats;
-}

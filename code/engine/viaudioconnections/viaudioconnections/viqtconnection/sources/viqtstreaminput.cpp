@@ -1,54 +1,93 @@
 #include "viqtstreaminput.h"
 
-ViQtStreamInput::ViQtStreamInput(ViAudioFormat format, ViAudioBuffer *buffer, ViAudioDevice *device)
-	: ViStreamInput(format, buffer, device)
+ViQtStreamInput::ViQtStreamInput()
+	: ViStreamInput()
 {
-	 /*recorder = new QAudioRecorder;
-
- QAudioEncoderSettings audioSettings;
- audioSettings.setCodec("audio/amr");
- audioSettings.setQuality(QtMultimedia::HighQuality);
-
- recorder->setEncodingSettings(audioSettings);
-
- recorder->setOutputLocation(QUrl::fromLocalFile("test.amr"));
- recorder->record();*/
-
-QAudioDeviceInfo t(QAudioDeviceInfo::defaultInputDevice());
-QList<int> 	 s = t.supportedSampleRates();
-cout<<"********************************************: "<<	QAudioDeviceInfo::availableDevices(QAudio::AudioInput).size()<<"  *"<<t.deviceName().toAscii().data()<<"*"<<endl;
-for(int i = 0;i < s.size(); i++)
-{
-cout<<"codec: "<<s[i]<<endl;
-}
 }
 
 ViQtStreamInput::~ViQtStreamInput()
 {
-
+	free();
 }
 
 void ViQtStreamInput::initialize()
 {
+	ViStreamInput::initialize();
 
+	mBufferDevice = new QBuffer(mBuffer->data(), this);
+	mBufferDevice->open(QIODevice::WriteOnly);
+
+	mAudioInput = new QAudioInput(mDevice, mFormat, this);
+	mAudioInput->setNotifyInterval(25);
+	ViObject::connect(mAudioInput, SIGNAL(notify()), this, SLOT(a()));
+}
+
+void ViQtStreamInput::a()
+{
+//	cIn<<"AAAAAAAAAA: "<<mBufferDevice->size()<<endl;
 }
 
 void ViQtStreamInput::free()
 {
-
+	ViStreamInput::free();
+	delete mAudioInput;
+	delete mBufferDevice;
 }
 
 void ViQtStreamInput::start()
 {
-
+	if(mAudioInput->state() == QAudio::SuspendedState)
+	{
+		mAudioInput->resume();
+	}
+	else
+	{
+		mAudioInput->start(mBufferDevice);
+	}
+	mState = QAudio::ActiveState;
 }
 
 void ViQtStreamInput::stop()
 {
-
+	mBufferDevice->seek(0);
+	mState = QAudio::StoppedState;
+	mAudioInput->stop();
 }
 
 void ViQtStreamInput::pause()
 {
+	mState = QAudio::SuspendedState;
+	mAudioInput->suspend();
+}
 
+qreal ViQtStreamInput::volume()
+{
+	return mAudioInput->volume();
+}
+
+void ViQtStreamInput::setVolume(qreal volumeValue)
+{
+	if(mIsMute)
+	{
+		mMuteVolume = volume();
+	}
+	else
+	{
+		mAudioInput->setVolume(volumeValue);
+	}
+}
+
+void ViQtStreamInput::mute(bool value)
+{
+	if(value)
+	{
+		mMuteVolume = volume();
+		setVolume(0);
+		mIsMute = true;
+	}
+	else
+	{
+		mIsMute = false;
+		setVolume(mMuteVolume);
+	}
 }

@@ -6,17 +6,26 @@
 
 class ViAudioPosition
 {
+
 	public:
+
+		enum Unit
+		{
+			Microseconds = 0,
+			Milliseconds = 1,
+			Seconds = 2,
+			Samples = 3,
+			Bytes = 4
+		};
+
+	public:
+
 		ViAudioPosition();
-		ViAudioPosition(qint64 microseconds, QAudioFormat format);
+		ViAudioPosition(qreal microseconds, ViAudioPosition::Unit unit, QAudioFormat format);
 
-		void initialize(qint64 microseconds, QAudioFormat format);
-
-		qreal seconds();
-		qreal milliseconds();
-		qint64 microseconds();
-		qint64 bytes();
-		qint64 sample();
+		void setPosition(qreal position, ViAudioPosition::Unit unit, QAudioFormat format);
+		void setPosition(qreal position, ViAudioPosition::Unit unit);
+		qreal position(ViAudioPosition::Unit unit);
 
 		QAudioFormat format();
 		
@@ -24,7 +33,7 @@ class ViAudioPosition
 		bool operator !=(const ViAudioPosition &other) const;
 
 	private:
-		qint64 mMicroseconds;
+		qreal mMicroseconds;
 		QAudioFormat mFormat;
 };
 

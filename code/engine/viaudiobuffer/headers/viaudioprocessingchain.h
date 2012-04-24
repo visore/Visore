@@ -25,6 +25,7 @@ class ViAudioProcessingChain : public QObject, public ViError
 		void attachInput(ViAudioInput *input);
 		void attachStreamOutput(ViAudioOutput *output);
 		void attachFileOutput(ViAudioOutput *output);
+
 		void attachOriginalProcessor(ViProcessor *processor, ViProcessorList::ViProcessorExecution execution);
 		void attachCorrectedProcessor(ViProcessor *processor, ViProcessorList::ViProcessorExecution execution);
 

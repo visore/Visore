@@ -71,7 +71,7 @@ void ViWaveOverlayWidget::mouseMoveEvent(QMouseEvent *event)
 
 void ViWaveOverlayWidget::positionChanged(ViAudioPosition position)
 {
-	mPosition = position.sample();
+	mPosition = position.position(ViAudioPosition::Samples);
 }
 
 void ViWaveOverlayWidget::setZoomLevel(qint16 level)

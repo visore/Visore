@@ -2,27 +2,40 @@
 #define VIQTSTREAMINPUT_H
 
 #include "vistreaminput.h"
-#include <QAudioRecorder>
-#include <QAudioEncoderSettings>
-#include <QAudioDeviceInfo>
+#include <QAudioInput>
+#include <QBuffer>
 
 class ViQtStreamInput : public ViStreamInput
 {
 	Q_OBJECT
 
+private slots:
+void a();
+
 	public:
-		ViQtStreamInput(ViAudioFormat format, ViAudioBuffer *buffer = NULL, ViAudioDevice *device = NULL);
+
+		ViQtStreamInput();
 		~ViQtStreamInput();
+		void initialize();
+		void free();
+
 		void start();
 		void stop();
 		void pause();
-		void initialize();
 
-	protected:
-		void free();
-
+		qreal volume();
+		void setVolume(qreal volumeValue);
+		void mute(bool value);
+		
 	private:
-		//QAudioRecorder *mRecorder;
+
+		QAudioInput *mAudioInput;
+		QBuffer *mBufferDevice;
+		ViAudioPosition mOldPosition;
+
+		qreal mMuteVolume;
+		bool mIsMute;
+
 };
 
 #endif

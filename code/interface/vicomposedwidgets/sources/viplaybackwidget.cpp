@@ -118,7 +118,10 @@ void ViPlaybackWidget::pause(bool checked)
 
 void ViPlaybackWidget::stop(bool checked)
 {
-	mEngine->stopPlayback();
+	if(mIsPlaying || mIsPausing)
+	{
+		mEngine->stopPlayback();
+	}
 	play(false);
 	mIsPlaying = false;
 	mIsPausing = false;
