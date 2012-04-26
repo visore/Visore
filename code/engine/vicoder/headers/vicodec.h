@@ -27,6 +27,8 @@ class ViCodec
 
 		ViCodec();
 		ViCodec(ViCodec::Type type, ViCodec::Compression compression, QString abbreviation, QString name, QList<QString> extensions);
+		ViCodec(const ViCodec &codec);
+
 		ViCodec::Type type();
 		ViCodec::Compression compression();
 		QString abbreviation();

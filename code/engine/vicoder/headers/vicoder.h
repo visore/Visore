@@ -100,7 +100,9 @@ class ViEncodingThread : public ViCoderThread
 
 	public:
 		ViEncodingThread(QObject *parent = 0);
+		~ViEncodingThread();
 		void setDevice(QIODevice *device);
+		void setFormat(ViAudioFormat *format);
 		void run();
 
 	private:

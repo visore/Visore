@@ -17,6 +17,15 @@ ViCodec::ViCodec(ViCodec::Type type, ViCodec::Compression compression, QString a
 	mExtensions = extensions;
 }
 
+ViCodec::ViCodec(const ViCodec &codec)
+{
+	mType = codec.mType;
+	mCompression = codec.mCompression;
+	mAbbreviation = codec.mAbbreviation;
+	mName = codec.mName;
+	mExtensions = QList<QString>(codec.mExtensions);
+}
+
 ViCodec::Type ViCodec::type()
 {
 	return mType;

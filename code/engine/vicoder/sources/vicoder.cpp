@@ -10,6 +10,8 @@ extern "C"
 
 #include <iostream>
 using namespace std;
+#define AUDIO_INBUF_SIZE 320
+#define AUDIO_REFILL_THRESH 4096
 
 
 ViCoder::ViCoder()
@@ -92,14 +94,41 @@ ViEncodingThread::ViEncodingThread(QObject *parent)
 	mDevice = NULL;
 }
 
+ViEncodingThread::~ViEncodingThread()
+{
+	if(mFormat != NULL)
+	{
+		delete mFormat;
+		mFormat = NULL;
+	}
+}
+
 void ViEncodingThread::setDevice(QIODevice *device)
 {
 	mDevice = device;
 }
 
+void ViEncodingThread::setFormat(ViAudioFormat *format)
+{
+	mFormat = new ViAudioFormat(*format);
+}
+
 void ViEncodingThread::run()
 {
 	ViAudioBufferStream *readStream = mBuffer->createReadStream();
+
+     AVCodec *codec;
+     AVCodecContext *codecContext= NULL;
+    int frame_size, i, j, ret, got_packet;
+     FILE *f;
+ FILE *f2;
+     char *samples;
+    AVFrame *frame;
+     float t, tincr;
+   AVPacket packet;
+	int sampleSize, s;
+qint64 tt = 0;
+
 
 	CodecID mCodecId;
 	/*QString codecName = mFormat->codec().abbreviation();
@@ -113,17 +142,9 @@ void ViEncodingThread::run()
 	else if(codecName == "FLAC") mCodecId = CODEC_ID_FLAC;
 	else if(codecName == "ALAC") mCodecId = CODEC_ID_ALAC;*/
 
-mCodecId = CODEC_ID_MP3;
+mCodecId = CODEC_ID_FLAC;
 
-	int bufferSize = 1024, outputSize, sampleSize, read;
-	uint8_t *buffer;
-	uint8_t *samples;
 
-	AVCodecContext *codecContext = NULL;
-	AVCodec *codec = NULL;
-	AVPacket packet;
-	int gotPacket = 0;
-	AVFrame *frame;
 
 	if(!mDevice->isOpen())
 	{
@@ -142,12 +163,33 @@ mCodecId = CODEC_ID_MP3;
 	}
 
 	codecContext = avcodec_alloc_context3(codec);
-	if(mFormat->bitRate() > 0)
+codecContext->sample_fmt = AV_SAMPLE_FMT_S16;
+	codecContext->sample_rate = 44100;
+	codecContext->channels = 2;
+
+	/*if(mFormat->bitRate() > 0)
 	{
-		codecContext->bit_rate = mFormat->bitRate();
+		codecContext->bit_rate = mFormat->bitRate() * 1000;
 	}
 	codecContext->sample_rate = mFormat->sampleRate();
 	codecContext->channels = mFormat->channelCount();
+
+	if(mFormat->sampleSize() == 8)
+	{
+		codecContext->sample_fmt = AV_SAMPLE_FMT_U8;
+	}
+	else if(mFormat->sampleSize() == 32)
+	{
+		codecContext->sample_fmt = AV_SAMPLE_FMT_S32;
+	}
+	else if(mFormat->sampleType() == QAudioFormat::Float)
+	{
+		codecContext->sample_fmt = AV_SAMPLE_FMT_FLT;
+	}
+	else
+	{
+		codecContext->sample_fmt = AV_SAMPLE_FMT_S16;
+	}*/
 
 	if(avcodec_open2(codecContext, codec, NULL) < 0)
 	{
@@ -155,62 +197,69 @@ mCodecId = CODEC_ID_MP3;
 		goto END;
 	}
 
-	buffer = new uint8_t[bufferSize];
-	sampleSize = 1024;
-	samples = new uint8_t[sampleSize];
 
-	packet.data = buffer;
-    packet.size = readStream->read(reinterpret_cast<char*>(samples), sampleSize);
-	packet.size /= 2;
 
-	while(packet.size > 0)
+	frame_size = codecContext->frame_size;
+    frame = avcodec_alloc_frame();
+    if (!frame) {
+        fprintf(stderr, "Could not allocate frame.\n");
+        exit(1);
+    }
+    cout<<"frame: "<<frame_size<<endl;
+if(frame_size == 0)
+{
+	frame_size = 1024;
+}
+f = fopen("/home/visore/test.flac", "wb");
+f2 = fopen("/home/visore/a.wav", "rb");
+
+	sampleSize = frame_size * 2 * codecContext->channels;
+	samples = new char[sampleSize];
+	sampleSize = readStream->read(samples, sampleSize);
+//sampleSize = fread(samples, 1, sampleSize, f2);
+
+cout<<"*-*: "<<samples[0]<<samples[1]<<samples[2]<<samples[3]<<endl;
+
+	tt+=sampleSize;
+	
+
+	while(sampleSize > 0)
 	{
-		if(!frame)
-		{
-			if(!(frame = avcodec_alloc_frame()))
-			{
-                mError = ViCoder::OutOfMemoryError;
-                goto END;
-			}
+//cout<<"Writing: "<<sampleSize<<endl;
+		frame->data[0] = (uint8_t*)samples;
+		frame->nb_samples = sampleSize / (2 * codecContext->channels);
+		av_init_packet(&packet);
+		packet.data = NULL;
+		packet.size = 0;
+		got_packet = 0;
+		ret = avcodec_encode_audio2(codecContext, &packet, frame, &got_packet);
+		if (ret < 0) {
+				cout<<"Audio encoding failed"<<endl;
 		}
-		else
-		{
-			avcodec_get_frame_defaults(frame);
-		}
-
-		frame->nb_samples = sampleSize / (codecContext->channels * av_get_bytes_per_sample(codecContext->sample_fmt));
-
-		if(avcodec_fill_audio_frame(frame, codecContext->channels, codecContext->sample_fmt, samples, sampleSize, 1) < 0)
-		{
-			mError = ViCoder::EncodingError;
-			goto END;
-		}
-
-		if(avcodec_encode_audio2(codecContext, &packet, frame, &gotPacket) < 0)
-		{
-			mError = ViCoder::EncodingError;
-			goto END;
-		}
-
-		if(gotPacket)
-		{
-			int dataSize = av_samples_get_buffer_size(NULL, codecContext->channels, frame->nb_samples, codecContext->sample_fmt, 1);
-			mDevice->write(reinterpret_cast<char*>(packet.data), packet.size);
-			av_free_packet(&packet);
-        }
-
+		    if (got_packet) {
+		       //fwrite(packet.data, 1, packet.size, f);
+				fwrite(samples, 1, sampleSize, f);
+				//mDevice->write(reinterpret_cast<char*>(packet.data), packet.size);
+		        av_destruct_packet(&packet);
+		   }
+		//sampleSize = readStream->read(samples, sampleSize);
+		sampleSize = fread(samples, 1, sampleSize, f2);
+		tt+=sampleSize;
 	}
-
+//42056684
 	mDevice->close();
 
-	delete [] buffer;
-	delete [] samples;
-
+	fclose(f);
+cout<<"pp: "<<tt<<endl;
 	END:
 	
-	//avcodec_close(codecContext);
-	//av_free(codecContext);
-cout<<endl;
+
+	av_free(frame);
+    delete [] samples;
+	avcodec_close(codecContext);
+	av_free(codecContext);
+
+cout<<"err: "<<mError<<endl;
 }
 
 ViDecodingThread::ViDecodingThread(QObject *parent)
@@ -240,7 +289,11 @@ void ViDecodingThread::setFormat(ViAudioFormat *format)
 	}
 	else
 	{
-		streamId = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
+		streamId = avformat_find_stream_info(formatContext, NULL);
+		if(streamId < 0)
+		{
+			streamId = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
+		}
 		if(streamId == AVERROR_STREAM_NOT_FOUND)
 		{
 			mError = ViCoder::NoStreamError;

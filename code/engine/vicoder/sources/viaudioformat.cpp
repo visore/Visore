@@ -6,6 +6,13 @@ ViAudioFormat::ViAudioFormat()
 	mBitRate = -1;
 }
 
+ViAudioFormat::ViAudioFormat(const ViAudioFormat &format)
+	: QAudioFormat(format)
+{
+	mCodec = ViCodec(format.mCodec);
+	mBitRate = format.mBitRate;
+}
+
 void ViAudioFormat::setCodec(ViCodec codec)
 {
 	mCodec = codec;
