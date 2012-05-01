@@ -22,13 +22,14 @@ void ViQtFileOutput::free()
 
 void ViQtFileOutput::start()
 {
-	QFile *file = new QFile("/home/visore/b.mp3");
+	
 	ViAudioFormat format;
 	format.setChannelCount(2);
 	format.setSampleRate(44100);
 	format.setSampleSize(16);
 	format.setBitRate(128);
-	format.setCodec(ViCodecManager::selected("MP3"));
+	format.setCodec(ViCodecManager::selected("AC3"));
+	QFile *file = new QFile("/home/visore/test."+format.codec().extensions()[0]);
 	mCoder.encode(mBuffer, file, &format);
 }
 

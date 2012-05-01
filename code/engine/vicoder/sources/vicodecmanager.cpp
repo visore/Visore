@@ -21,6 +21,18 @@ void ViCodecManager::populate()
 	QList<QString> mp3Extensions;
 	mp3Extensions << "mp3" << "bit";
 	mCodecs.append(ViCodec(ViCodec::InputType, ViCodec::LossyCompression, "MP3", "Moving Picture Experts Group (MPEG) Audio Layer 3", mp3Extensions));
+
+	QList<QString> wavExtensions;
+	wavExtensions << "wav" << "wave";
+	mCodecs.append(ViCodec(ViCodec::InputType, ViCodec::LosslessCompression, "WAV", "Waveform Audio File Format", wavExtensions));
+
+	QList<QString> flacExtensions;
+	flacExtensions << "flac";
+	mCodecs.append(ViCodec(ViCodec::InputType, ViCodec::LosslessCompression, "FLAC", "Free Lossless Audio Codec", flacExtensions));
+
+	QList<QString> ac3Extensions;
+	ac3Extensions << "ac3";
+	mCodecs.append(ViCodec(ViCodec::InputType, ViCodec::LossyCompression, "AC3", "Dolby Digital Audio Codec 3", ac3Extensions));
 }
 
 QList<ViCodec> ViCodecManager::all()

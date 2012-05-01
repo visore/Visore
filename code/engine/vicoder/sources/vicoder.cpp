@@ -36,9 +36,10 @@ ViCoder::~ViCoder()
 	}
 }
 
-void ViCoder::encode(ViAudioBuffer *buffer, QIODevice *device, ViAudioFormat *format)
+void ViCoder::encode(ViAudioBuffer *buffer, QFile *file, ViAudioFormat *format)
 {
-	mEncodingThread->setDevice(device);
+	mEncodingThread->setDevice(file);
+	mEncodingThread->setFile(file->fileName());
 	mEncodingThread->setBuffer(buffer);
 	mEncodingThread->setFormat(format);
 	mEncodingThread->start();
@@ -62,6 +63,7 @@ ViCoderThread::ViCoderThread(QObject *parent)
 {
 	mBuffer = NULL;
 	mFormat = NULL;
+	mFile = "";
 	mState = ViCoder::UninitializedState;
 	mError = ViCoder::NoError;
 	av_register_all();
@@ -76,6 +78,11 @@ void ViCoderThread::setFormat(ViAudioFormat *format)
 void ViCoderThread::setBuffer(ViAudioBuffer *buffer)
 {
 	mBuffer = buffer;
+}
+
+void ViCoderThread::setFile(QString file)
+{
+	mFile = file;
 }
 
 ViCoder::State ViCoderThread::status()
@@ -116,62 +123,121 @@ void ViEncodingThread::setFormat(ViAudioFormat *format)
 void ViEncodingThread::run()
 {
 	ViAudioBufferStream *readStream = mBuffer->createReadStream();
+	mDevice->close();
 
-     AVCodec *codec;
-     AVCodecContext *codecContext= NULL;
-    int frame_size, i, j, ret, got_packet;
-     FILE *f;
- FILE *f2;
-     char *samples;
-    AVFrame *frame;
-     float t, tincr;
-   AVPacket packet;
-	int sampleSize, s;
-qint64 tt = 0;
+	AVCodec *codec = NULL;
+	AVCodecContext *codecContext= NULL;
+	AVFrame *frame = NULL;
+	AVFormatContext *formatContext = NULL;
+	AVStream *stream = NULL;
+	AVPacket packet;
+	int sampleSize, frameSize, gotPacket;
+	char *samples = NULL;
 
-
-	CodecID mCodecId;
-	/*QString codecName = mFormat->codec().abbreviation();
-	if(codecName == "MP2") mCodecId = CODEC_ID_MP2;
-	else if(codecName == "MP3") mCodecId = CODEC_ID_MP3;
-	else if(codecName == "AAC") mCodecId = CODEC_ID_AAC;
-	else if(codecName == "AC3") mCodecId = CODEC_ID_AC3;
-	else if(codecName == "DTS") mCodecId = CODEC_ID_DTS;
-	else if(codecName == "VORBIS") mCodecId = CODEC_ID_VORBIS;
-	else if(codecName == "WMA") mCodecId = CODEC_ID_WMAV2;
-	else if(codecName == "FLAC") mCodecId = CODEC_ID_FLAC;
-	else if(codecName == "ALAC") mCodecId = CODEC_ID_ALAC;*/
-
-mCodecId = CODEC_ID_FLAC;
-
-
-
-	if(!mDevice->isOpen())
+    CodecID codecId;
+	QString codecName = mFormat->codec().abbreviation();
+	if(codecName == "MP2")
 	{
-		if(!mDevice->open(QIODevice::WriteOnly))
+		codecId = CODEC_ID_MP2;
+		codecName = "mp2";
+	}
+	else if(codecName == "MP3")
+	{
+		codecId = CODEC_ID_MP3;
+		codecName = "mp3";
+	}
+	else if(codecName == "AAC")
+	{
+		codecId = CODEC_ID_AAC;
+		codecName = "aac";
+	}
+	else if(codecName == "AC3")
+	{
+		codecId = CODEC_ID_AC3;
+		codecName = "ac3";
+	}
+	else if(codecName == "VORBIS")
+	{
+		codecId = CODEC_ID_VORBIS;
+		codecName = "ogg";
+	}
+	else if(codecName == "FLAC")
+	{
+		codecId = CODEC_ID_FLAC;
+		codecName = "flac";
+	}
+	else if(codecName == "WAV")
+	{
+		if(mFormat->byteOrder() == QAudioFormat::LittleEndian)
 		{
-			mError = ViCoder::DeviceOpenError;
-			goto END;
+			if(mFormat->sampleType() == QAudioFormat::Float)
+			{
+				if(mFormat->sampleSize() == 64) codecId = CODEC_ID_PCM_F64LE;
+				else codecId = CODEC_ID_PCM_F32LE;
+			}
+			else if(mFormat->sampleType() == QAudioFormat::UnSignedInt)
+			{
+				if(mFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_U8;
+				else if(mFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_U24LE;
+				else if(mFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_U32LE;
+				else codecId = CODEC_ID_PCM_U16LE;
+			}
+			else
+			{
+				if(mFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_S8;
+				else if(mFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_S24LE;
+				else if(mFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_S32LE;
+				else codecId = CODEC_ID_PCM_S16LE;
+			}
 		}
+		else
+		{
+			if(mFormat->sampleType() == QAudioFormat::Float)
+			{
+				if(mFormat->sampleSize() == 64) codecId = CODEC_ID_PCM_F64BE;
+				else codecId = CODEC_ID_PCM_F32BE;
+			}
+			else if(mFormat->sampleType() == QAudioFormat::UnSignedInt)
+			{
+				if(mFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_U8;
+				else if(mFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_U24BE;
+				else if(mFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_U32BE;
+				else codecId = CODEC_ID_PCM_U16LE;
+			}
+			else
+			{
+				if(mFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_S8;
+				else if(mFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_S24BE;
+				else if(mFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_S32BE;
+				else codecId = CODEC_ID_PCM_S16BE;
+			}
+		}
+		codecName = "wav";
 	}
 
-	codec = avcodec_find_encoder(mCodecId);
-	if(!codec)
+	if(avformat_alloc_output_context2(&formatContext, NULL, codecName.toAscii().data(), mFile.toAscii().data()) < 0)
 	{
 		mError = ViCoder::NoEncoderError;
 		goto END;
 	}
+	formatContext->oformat->audio_codec = codecId;
+	stream = avformat_new_stream(formatContext, 0);
+	if(stream == NULL)
+	{
+		mError = ViCoder::UnsupportedFormatError;
+		goto END;
+	}
 
-	codecContext = avcodec_alloc_context3(codec);
-codecContext->sample_fmt = AV_SAMPLE_FMT_S16;
-	codecContext->sample_rate = 44100;
-	codecContext->channels = 2;
+	codecContext = stream->codec;
+	codecContext->codec_id = formatContext->oformat->audio_codec;
+	codecContext->codec_type = AVMEDIA_TYPE_AUDIO;
 
-	/*if(mFormat->bitRate() > 0)
+	if(mFormat->bitRate() > 0)
 	{
 		codecContext->bit_rate = mFormat->bitRate() * 1000;
 	}
 	codecContext->sample_rate = mFormat->sampleRate();
+
 	codecContext->channels = mFormat->channelCount();
 
 	if(mFormat->sampleSize() == 8)
@@ -189,88 +255,125 @@ codecContext->sample_fmt = AV_SAMPLE_FMT_S16;
 	else
 	{
 		codecContext->sample_fmt = AV_SAMPLE_FMT_S16;
-	}*/
+	}
 
+	codecContext->time_base.num = 1;
+	codecContext->time_base.den = codecContext->sample_rate;
+
+	codec = avcodec_find_encoder(codecContext->codec_id);
 	if(avcodec_open2(codecContext, codec, NULL) < 0)
 	{
 		mError = ViCoder::UnsupportedCodecError;
 		goto END;
 	}
 
+	if(avio_open(&formatContext->pb, mFile.toAscii().data(), AVIO_FLAG_WRITE) < 0)
+	{cout<<mFile.toAscii().data()<<endl;
+		mError = ViCoder::DeviceError;
+		goto END;
+	}
 
+	if(avformat_write_header(formatContext, NULL) < 0)
+	{
+		mError = ViCoder::DeviceError;
+		goto END;
+	}
 
-	frame_size = codecContext->frame_size;
+	if(!mDevice->open(QIODevice::Append))
+	{
+		mError = ViCoder::DeviceError;
+		goto END;
+	}
+
     frame = avcodec_alloc_frame();
-    if (!frame) {
-        fprintf(stderr, "Could not allocate frame.\n");
-        exit(1);
+	if(!frame)
+	{
+        mError = ViCoder::OutOfMemoryError;
+		goto END;
     }
-    cout<<"frame: "<<frame_size<<endl;
-if(frame_size == 0)
-{
-	frame_size = 1024;
-}
-f = fopen("/home/visore/test.flac", "wb");
-f2 = fopen("/home/visore/a.wav", "rb");
 
-	sampleSize = frame_size * 2 * codecContext->channels;
+	frameSize = codecContext->frame_size;
+	if(frameSize == 0)
+	{
+		frameSize = 1024;
+	}
+	sampleSize = frameSize * 2 * codecContext->channels;
 	samples = new char[sampleSize];
 	sampleSize = readStream->read(samples, sampleSize);
-//sampleSize = fread(samples, 1, sampleSize, f2);
-
-cout<<"*-*: "<<samples[0]<<samples[1]<<samples[2]<<samples[3]<<endl;
-
-	tt+=sampleSize;
-	
 
 	while(sampleSize > 0)
 	{
-//cout<<"Writing: "<<sampleSize<<endl;
-		frame->data[0] = (uint8_t*)samples;
-		frame->nb_samples = sampleSize / (2 * codecContext->channels);
+		frame->data[0] = (uint8_t*) samples;
+		frame->nb_samples = frameSize;
 		av_init_packet(&packet);
 		packet.data = NULL;
 		packet.size = 0;
-		got_packet = 0;
-		ret = avcodec_encode_audio2(codecContext, &packet, frame, &got_packet);
-		if (ret < 0) {
-				cout<<"Audio encoding failed"<<endl;
+		gotPacket = 0;
+		if(avcodec_encode_audio2(codecContext, &packet, frame, &gotPacket) < 0)
+		{
+			mError = ViCoder::EncodingError;
+			goto END;
 		}
-		    if (got_packet) {
-		       //fwrite(packet.data, 1, packet.size, f);
-				fwrite(samples, 1, sampleSize, f);
-				//mDevice->write(reinterpret_cast<char*>(packet.data), packet.size);
-		        av_destruct_packet(&packet);
-		   }
-		//sampleSize = readStream->read(samples, sampleSize);
-		sampleSize = fread(samples, 1, sampleSize, f2);
-		tt+=sampleSize;
+		else if(gotPacket)
+		{
+			//mDevice->write(reinterpret_cast<char*>(packet.data), packet.size);
+			av_interleaved_write_frame(formatContext, &packet);
+			sampleSize = readStream->read(samples, sampleSize);
+		}
 	}
-//42056684
+
 	mDevice->close();
 
-	fclose(f);
-cout<<"pp: "<<tt<<endl;
+	if(av_write_trailer(formatContext) < 0)
+	{
+		mError = ViCoder::DeviceError;
+		goto END;
+	}
+
 	END:
-	
 
-	av_free(frame);
-    delete [] samples;
-	avcodec_close(codecContext);
-	av_free(codecContext);
+	if(codecContext != NULL)
+	{
+		avcodec_close(codecContext);
+	}
 
-cout<<"err: "<<mError<<endl;
+	if(formatContext != NULL)
+	{
+		if(formatContext->streams[0] != NULL)
+		{
+			av_freep(&formatContext->streams[0]->codec);
+			av_freep(&formatContext->streams[0]);
+		}
+		if(formatContext->pb != NULL)
+		{
+			avio_close(formatContext->pb);
+		}
+		av_free(formatContext);
+	}
+
+	if(frame != NULL)
+	{
+		av_free(frame);
+	}
+
+	if(samples != NULL)
+	{
+    	delete [] samples;
+	}
+
+	if(mError != ViCoder::NoError)
+	{
+		QFile file(mFile);
+		if(file.exists())
+		{
+			file.remove();
+		}
+	}
 }
 
 ViDecodingThread::ViDecodingThread(QObject *parent)
 	: ViCoderThread(parent)
 {
-	mFile = "";
-}
-
-void ViDecodingThread::setFile(QString file)
-{
-	mFile = file;
 }
 
 void ViDecodingThread::setFormat(ViAudioFormat *format)
@@ -284,7 +387,7 @@ void ViDecodingThread::setFormat(ViAudioFormat *format)
 	CodecID codecId;
 	if(avformat_open_input(&formatContext, mFile.toAscii().data(), NULL, NULL) < 0)
 	{
-		mError = ViCoder::DeviceOpenError;
+		mError = ViCoder::DeviceError;
 		goto END;
 	}
 	else
@@ -443,7 +546,7 @@ void ViDecodingThread::run()
 
 	if(avformat_open_input(&formatContext, mFile.toAscii().data(), NULL, NULL) < 0)
 	{
-		mError = ViCoder::DeviceOpenError;
+		mError = ViCoder::DeviceError;
 		goto END;
 	}
 	else

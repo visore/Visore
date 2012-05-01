@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QString>
 #include <QByteArray>
+#include <QFile>
 #include "viaudiobuffer.h"
 #include "viobject.h"
 #include "viaudioformat.h"
@@ -29,14 +30,15 @@ class ViCoder : public QObject
 		{
 			NoError = 0,
 			InitializationError = 1,
-			UnsupportedCodecError = 2,
-			DecodingError = 3,
-			EncodingError = 4,
-			DeviceOpenError = 5,
-			NoStreamError = 6,
-			NoDecoderError = 7,
-			NoEncoderError = 8,
-			OutOfMemoryError = 9
+			UnsupportedFormatError = 2,
+			UnsupportedCodecError = 3,
+			DecodingError = 4,
+			EncodingError = 5,
+			DeviceError = 6,
+			NoStreamError = 7,
+			NoDecoderError = 8,
+			NoEncoderError = 9,
+			OutOfMemoryError = 10
 		};
 
 	signals:
@@ -48,7 +50,7 @@ class ViCoder : public QObject
 		ViCoder();
 		~ViCoder();
 
-		void encode(ViAudioBuffer *buffer, QIODevice *device, ViAudioFormat *format);
+		void encode(ViAudioBuffer *buffer, QFile *file, ViAudioFormat *format);
 		void decode(QString file, ViAudioBuffer *buffer, ViAudioFormat *format);
 		void stop();
 	
@@ -69,6 +71,7 @@ class ViCoderThread : public QThread
 		ViCoderThread(QObject *parent = 0);
 		virtual void setFormat(ViAudioFormat *format);
 		virtual void setBuffer(ViAudioBuffer *buffer);
+		virtual void setFile(QString file);
 		ViCoder::State status();
 		ViCoder::Error error();
 
@@ -77,6 +80,7 @@ class ViCoderThread : public QThread
 		ViAudioFormat *mFormat;
 		ViCoder::State mState;
 		ViCoder::Error mError;
+		QString mFile;
 };
 
 class ViDecodingThread : public ViCoderThread
@@ -85,13 +89,8 @@ class ViDecodingThread : public ViCoderThread
 
 	public:
 		ViDecodingThread(QObject *parent = 0);
-		void setFile(QString file);
 		void setFormat(ViAudioFormat *format);
-		void run();
-
-	private:
-		QString mFile;
-		
+		void run();	
 };
 
 class ViEncodingThread : public ViCoderThread
