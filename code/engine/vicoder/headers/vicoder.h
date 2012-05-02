@@ -50,7 +50,7 @@ class ViCoder : public QObject
 		ViCoder();
 		~ViCoder();
 
-		void encode(ViAudioBuffer *buffer, QFile *file, ViAudioFormat *format);
+		void encode(ViAudioBuffer *buffer, QString filePath, ViAudioFormat *format);
 		void decode(QString file, ViAudioBuffer *buffer, ViAudioFormat *format);
 		void stop();
 	
@@ -100,12 +100,8 @@ class ViEncodingThread : public ViCoderThread
 	public:
 		ViEncodingThread(QObject *parent = 0);
 		~ViEncodingThread();
-		void setDevice(QIODevice *device);
 		void setFormat(ViAudioFormat *format);
 		void run();
-
-	private:
-		QIODevice *mDevice;
 };
 
 #endif

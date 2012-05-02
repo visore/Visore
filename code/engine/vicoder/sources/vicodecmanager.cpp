@@ -4,7 +4,8 @@ QSharedPointer<ViCodecManager> ViCodecManager::mInstance;
 
 ViCodecManager::ViCodecManager()
 {
-	populate();
+	populateCodecs();
+	populateFormats();
 }
 
 ViCodecManager* ViCodecManager::instance()
@@ -16,7 +17,7 @@ ViCodecManager* ViCodecManager::instance()
 	return mInstance.data();
 }
 
-void ViCodecManager::populate()
+void ViCodecManager::populateCodecs()
 {
 	QList<QString> mp3Extensions;
 	mp3Extensions << "mp3" << "bit";
@@ -24,7 +25,7 @@ void ViCodecManager::populate()
 
 	QList<QString> wavExtensions;
 	wavExtensions << "wav" << "wave";
-	mCodecs.append(ViCodec(ViCodec::InputType, ViCodec::LosslessCompression, "WAV", "Waveform Audio File Format", wavExtensions));
+	mCodecs.append(ViCodec(ViCodec::InputOutputType, ViCodec::LosslessCompression, "WAV", "Waveform Audio File Format", wavExtensions));
 
 	QList<QString> flacExtensions;
 	flacExtensions << "flac";
@@ -33,6 +34,39 @@ void ViCodecManager::populate()
 	QList<QString> ac3Extensions;
 	ac3Extensions << "ac3";
 	mCodecs.append(ViCodec(ViCodec::InputType, ViCodec::LossyCompression, "AC3", "Dolby Digital Audio Codec 3", ac3Extensions));
+}
+
+void ViCodecManager::populateFormats()
+{
+	mByteOrders.append(QAudioFormat::LittleEndian);
+	mByteOrders.append(QAudioFormat::BigEndian);
+
+	mSampleTypes.append(QAudioFormat::SignedInt);
+	mSampleTypes.append(QAudioFormat::UnSignedInt);
+	mSampleTypes.append(QAudioFormat::Float);
+
+	mSampleRates.append(8000);
+	mSampleRates.append(11025);
+	mSampleRates.append(16000);
+	mSampleRates.append(22050);
+	mSampleRates.append(32000);
+	mSampleRates.append(44056);
+	mSampleRates.append(44100);
+	mSampleRates.append(47250);
+	mSampleRates.append(48000);
+	mSampleRates.append(50000);
+	mSampleRates.append(50400);
+	mSampleRates.append(88200);
+	mSampleRates.append(96000);
+
+	mSampleSizes.append(8);
+	mSampleSizes.append(16);
+	mSampleSizes.append(24);
+	mSampleSizes.append(32);
+	mSampleSizes.append(64);
+
+	mChannels.append(1);
+	mChannels.append(2);
 }
 
 QList<ViCodec> ViCodecManager::all()
@@ -80,3 +114,34 @@ ViCodec ViCodecManager::selected(QString abbreviation)
 	}
 	return ViCodec();
 }
+
+QList<QAudioFormat::Endian> ViCodecManager::byteOrders()
+{
+	ViCodecManager *manager = ViCodecManager::instance();
+	return manager->mByteOrders;
+}
+
+QList<QAudioFormat::SampleType> ViCodecManager::sampleTypes()
+{
+	ViCodecManager *manager = ViCodecManager::instance();
+	return manager->mSampleTypes;
+}
+
+QList<qint32> ViCodecManager::sampleRates()
+{
+	ViCodecManager *manager = ViCodecManager::instance();
+	return manager->mSampleRates;
+}
+
+QList<qint8> ViCodecManager::sampleSizes()
+{
+	ViCodecManager *manager = ViCodecManager::instance();
+	return manager->mSampleSizes;
+}
+
+QList<qint8> ViCodecManager::channels()
+{
+	ViCodecManager *manager = ViCodecManager::instance();
+	return manager->mChannels;
+}
+

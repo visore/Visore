@@ -6,6 +6,7 @@
 #include "viwaveformwidget.h"
 #include "vicontrolcontainer.h"
 #include "viinputcontainer.h"
+#include "vioutputcontainer.h"
 #include "viloadingwidget.h"
 
 namespace Ui
@@ -38,6 +39,7 @@ class ViMainWindow : public QMainWindow
 
 		ViControlContainer *mControlContainer;
 		ViInputContainer *mInputContainer;
+		ViOutputContainer *mOutputContainer;
 };
 
 #endif

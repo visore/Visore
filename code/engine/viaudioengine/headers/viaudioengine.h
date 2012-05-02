@@ -81,7 +81,9 @@ class ViAudioEngine : public QObject, public ViError
 		ViAudioProcessingChain* processingChain();
 		void setInput(ViAudioEngine::ViAudioType type);
 		void setInputFilePath(QString filePath);
-		void setOutputFilePath(QString filePath);
+
+		void createOutputFile(QString filePath, ViAudioFormat format);
+
 		void reset();
 		int volume();
 

@@ -36,10 +36,9 @@ ViCoder::~ViCoder()
 	}
 }
 
-void ViCoder::encode(ViAudioBuffer *buffer, QFile *file, ViAudioFormat *format)
+void ViCoder::encode(ViAudioBuffer *buffer, QString filePath, ViAudioFormat *format)
 {
-	mEncodingThread->setDevice(file);
-	mEncodingThread->setFile(file->fileName());
+	mEncodingThread->setFile(filePath);
 	mEncodingThread->setBuffer(buffer);
 	mEncodingThread->setFormat(format);
 	mEncodingThread->start();
@@ -98,7 +97,6 @@ ViCoder::Error ViCoderThread::error()
 ViEncodingThread::ViEncodingThread(QObject *parent)
 	: ViCoderThread(parent)
 {
-	mDevice = NULL;
 }
 
 ViEncodingThread::~ViEncodingThread()
@@ -110,11 +108,6 @@ ViEncodingThread::~ViEncodingThread()
 	}
 }
 
-void ViEncodingThread::setDevice(QIODevice *device)
-{
-	mDevice = device;
-}
-
 void ViEncodingThread::setFormat(ViAudioFormat *format)
 {
 	mFormat = new ViAudioFormat(*format);
@@ -122,8 +115,8 @@ void ViEncodingThread::setFormat(ViAudioFormat *format)
 
 void ViEncodingThread::run()
 {
+	QFile fileDevice(mFile);
 	ViAudioBufferStream *readStream = mBuffer->createReadStream();
-	mDevice->close();
 
 	AVCodec *codec = NULL;
 	AVCodecContext *codecContext= NULL;
@@ -279,7 +272,7 @@ void ViEncodingThread::run()
 		goto END;
 	}
 
-	if(!mDevice->open(QIODevice::Append))
+	if(!fileDevice.open(QIODevice::Append))
 	{
 		mError = ViCoder::DeviceError;
 		goto END;
@@ -316,13 +309,13 @@ void ViEncodingThread::run()
 		}
 		else if(gotPacket)
 		{
-			//mDevice->write(reinterpret_cast<char*>(packet.data), packet.size);
+			//fileDevice.write(reinterpret_cast<char*>(packet.data), packet.size);
 			av_interleaved_write_frame(formatContext, &packet);
 			sampleSize = readStream->read(samples, sampleSize);
 		}
 	}
 
-	mDevice->close();
+	fileDevice.close();
 
 	if(av_write_trailer(formatContext) < 0)
 	{

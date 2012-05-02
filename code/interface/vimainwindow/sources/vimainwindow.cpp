@@ -16,6 +16,7 @@ ViMainWindow::~ViMainWindow()
 	delete mOriginalWaveWidget;
 	delete mCorrectedWaveWidget;
 	delete mInputContainer;
+	delete mOutputContainer;
 	delete mControlContainer;
 	delete mLoadingWidget;
 }
@@ -57,4 +58,8 @@ void ViMainWindow::initialize()
 	mControlContainer = new ViControlContainer(mUi->tabWidget);
 	mControlContainer->setEngine(mEngine);
 	mUi->tabWidget->addTab("Control", mControlContainer);
+
+	mOutputContainer = new ViOutputContainer(mUi->tabWidget);
+	mOutputContainer->setEngine(mEngine);
+	mUi->tabWidget->addTab("Output", mOutputContainer);
 }

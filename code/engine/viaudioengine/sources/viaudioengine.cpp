@@ -138,9 +138,10 @@ void ViAudioEngine::setInputFilePath(QString filePath)
 	mFileInput->start();
 }
 
-void ViAudioEngine::setOutputFilePath(QString filePath)
+void ViAudioEngine::createOutputFile(QString filePath, ViAudioFormat format)
 {
 	mFileOutput->setFile(filePath);
+	mFileOutput->setFormat(format);
 	mFileOutput->start();
 }
 
@@ -171,8 +172,7 @@ void ViAudioEngine::startPlayback()
 
 void ViAudioEngine::stopPlayback()
 {
-	//mStreamOutput->stop();
-setOutputFilePath("");
+	mStreamOutput->stop();
 }
 
 void ViAudioEngine::pausePlayback()
@@ -210,7 +210,6 @@ void ViAudioEngine::stopOutputFile()
 
 void ViAudioEngine::resetMetaData()
 {
-	//mMetaData->setFormat(ViFormatManager::selected("MP3"));
 	mFormat.setSampleRate(44100);
 	mFormat.setChannelCount(2);
 	mFormat.setSampleSize(16);
