@@ -9,7 +9,7 @@
 #include "viwavesummarizer.h"
 #include "viaudioformat.h"
 //#include "vispectrumanalyzer.h"
-//#include "visongdetector.h"
+#include "visongdetector.h"
 #include <QList>
 #include <QCoreApplication>
 
@@ -114,7 +114,7 @@ public:
 		ViWaveSummarizer mOriginalWaveSummarizer;
 		ViWaveSummarizer mCorrectedWaveSummarizer;
 
-		//ViSongDetector *mSongDetector;
+		ViSongDetector *mSongDetector;
 };
 
 #endif

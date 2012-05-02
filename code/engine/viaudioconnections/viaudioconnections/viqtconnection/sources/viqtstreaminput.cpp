@@ -24,7 +24,7 @@ void ViQtStreamInput::initialize()
 
 void ViQtStreamInput::a()
 {
-//	cIn<<"AAAAAAAAAA: "<<mBufferDevice->size()<<endl;
+	//cout<<"AAAAAAAAAA: "<<mBufferDevice->size()<<<<endl;
 }
 
 void ViQtStreamInput::free()

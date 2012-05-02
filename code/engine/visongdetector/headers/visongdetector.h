@@ -14,7 +14,6 @@
 #include "viobject.h"
 #include "vipcmconverter.h"
 #include "viechonestresponse.h"
-#include "viaudiocodecs.h"
 
 //Interval (milliseconds) use to request info
 #define REQUEST_SAMPLES_1 20000
@@ -29,7 +28,7 @@ class ViSongCodeGeneratorThread : public QThread
 		void finished(QString code, QString version, int codeLength);
 
 	public:
-		ViSongCodeGeneratorThread(ViAudioBuffer *buffer, ViAudioMetaData *metaData, QObject *parent = 0);
+		ViSongCodeGeneratorThread(ViAudioBuffer *buffer, ViAudioFormat format, QObject *parent = 0);
 		void setOffset(int offset);
 
 	protected:
@@ -37,7 +36,7 @@ class ViSongCodeGeneratorThread : public QThread
 
 	private:
 		ViAudioBuffer *mBuffer;
-		ViAudioMetaData *mMetaData;
+		ViAudioFormat mFormat;
 		int mOffset;
 };
 

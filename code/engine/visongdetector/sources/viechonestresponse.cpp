@@ -1,5 +1,5 @@
 #include "viechonestresponse.h"
-#include "parser.h"
+#include <QJsonDocument>
 
 ViEchoNestResponse::ViEchoNestResponse()
 {
@@ -12,10 +12,10 @@ ViEchoNestResponse::ViEchoNestResponse()
 
 void ViEchoNestResponse::analyze(QByteArray json)
 {
-	QJson::Parser parser;
+	QJsonDocument document = QJsonDocument::fromJson(json);
 	bool ok;
-	QVariantMap result = parser.parse(json, &ok).toMap();
-	if(!ok)
+	//QVariantMap result = parser.toJson();
+	/*if(!ok)
 	{
 		mHasError = true;
 	}
@@ -58,7 +58,7 @@ void ViEchoNestResponse::analyze(QByteArray json)
 	if(mSongs.size() > 0)
 	{
 		mCurrentSong = 0;
-	}
+	}*/
 }
 
 QString ViEchoNestResponse::version()

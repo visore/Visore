@@ -68,6 +68,7 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/vispectrumanalyzer/headers
 	${ENGINE}/viwaveformer/headers
 	${ENGINE}/vicoder/headers
+	${ENGINE}/visongdetector/headers
 
 	${EXTERNAL}/fftreal/sources
 	${EXTERNAL}/fftreal/headers
