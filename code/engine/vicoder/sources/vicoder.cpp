@@ -6,6 +6,7 @@ extern "C"
 	#include "avutil.h"
 	#include "avcodec.h"
 	#include "avformat.h"
+	#include "swresample.h"
 }
 
 #include <iostream>
@@ -19,6 +20,7 @@ ViCoder::ViCoder()
 {
 	mEncodingThread = new ViEncodingThread(this);
 	mDecodingThread = new ViDecodingThread(this);
+	ViObject::connect(mEncodingThread, SIGNAL(stateChanged(ViCoder::State)), this, SIGNAL(stateChanged(ViCoder::State)));
 	ViObject::connect(mDecodingThread, SIGNAL(stateChanged(ViCoder::State)), this, SIGNAL(stateChanged(ViCoder::State)));
 }
 
@@ -36,11 +38,21 @@ ViCoder::~ViCoder()
 	}
 }
 
-void ViCoder::encode(ViAudioBuffer *buffer, QString filePath, ViAudioFormat *format)
+void ViCoder::encode(ViAudioBuffer *buffer, QString filePath, ViAudioFormat inputFormat, ViAudioFormat outputFormat)
 {
 	mEncodingThread->setFile(filePath);
 	mEncodingThread->setBuffer(buffer);
-	mEncodingThread->setFormat(format);
+	mEncodingThread->setInputFormat(&inputFormat);
+	mEncodingThread->setOutputFormat(&outputFormat);
+	mEncodingThread->start();
+}
+
+void ViCoder::encode(ViAudioBuffer *buffer, QByteArray *outputBuffer, ViAudioFormat inputFormat, ViAudioFormat outputFormat)
+{
+	mEncodingThread->setBuffer(buffer);
+	mEncodingThread->setOutputBuffer(outputBuffer);
+	mEncodingThread->setInputFormat(&inputFormat);
+	mEncodingThread->setOutputFormat(&outputFormat);
 	mEncodingThread->start();
 }
 
@@ -48,7 +60,7 @@ void ViCoder::decode(QString file, ViAudioBuffer *buffer, ViAudioFormat *format)
 {
 	mDecodingThread->setFile(file);
 	mDecodingThread->setBuffer(buffer);
-	mDecodingThread->setFormat(format);
+	mDecodingThread->setOutputFormat(format);
 	mDecodingThread->start();
 }
 
@@ -57,21 +69,39 @@ void ViCoder::stop()
 	mDecodingThread->quit();
 }
 
+ViCoder::Error ViCoder::error()
+{
+	if(mEncodingThread->state() == ViCoder::IdleState)
+	{
+		mDecodingThread->error();
+	}
+	else
+	{
+		mEncodingThread->error();
+	}
+}
+
 ViCoderThread::ViCoderThread(QObject *parent)
 	: QThread(parent)
 {
 	mBuffer = NULL;
-	mFormat = NULL;
+	mInputFormat = NULL;
+	mOutputFormat = NULL;
 	mFile = "";
-	mState = ViCoder::UninitializedState;
+	mState = ViCoder::IdleState;
 	mError = ViCoder::NoError;
 	av_register_all();
 	avcodec_register_all();
 }
 
-void ViCoderThread::setFormat(ViAudioFormat *format)
+void ViCoderThread::setInputFormat(ViAudioFormat *format)
 {
-	mFormat = format;
+	mInputFormat = format;
+}
+
+void ViCoderThread::setOutputFormat(ViAudioFormat *format)
+{
+	mOutputFormat = format;
 }
 
 void ViCoderThread::setBuffer(ViAudioBuffer *buffer)
@@ -84,7 +114,7 @@ void ViCoderThread::setFile(QString file)
 	mFile = file;
 }
 
-ViCoder::State ViCoderThread::status()
+ViCoder::State ViCoderThread::state()
 {
 	return mState;
 }
@@ -97,38 +127,75 @@ ViCoder::Error ViCoderThread::error()
 ViEncodingThread::ViEncodingThread(QObject *parent)
 	: ViCoderThread(parent)
 {
+	mOutputBuffer = NULL;
 }
 
 ViEncodingThread::~ViEncodingThread()
 {
-	if(mFormat != NULL)
+	if(mInputFormat != NULL)
 	{
-		delete mFormat;
-		mFormat = NULL;
+		delete mInputFormat;
+		mInputFormat = NULL;
+	}
+	if(mOutputFormat != NULL)
+	{
+		delete mOutputFormat;
+		mOutputFormat = NULL;
 	}
 }
 
-void ViEncodingThread::setFormat(ViAudioFormat *format)
+void ViEncodingThread::setInputFormat(ViAudioFormat *format)
 {
-	mFormat = new ViAudioFormat(*format);
+	if(mInputFormat != NULL)
+	{
+		delete mInputFormat;
+	}
+	mInputFormat = new ViAudioFormat(*format);
+}
+
+void ViEncodingThread::setOutputFormat(ViAudioFormat *format)
+{
+	if(mOutputFormat != NULL)
+	{
+		delete mOutputFormat;
+	}
+	mOutputFormat = new ViAudioFormat(*format);
+}
+
+void ViEncodingThread::setOutputBuffer(QByteArray *outputBuffer)
+{
+	mOutputBuffer = outputBuffer;
 }
 
 void ViEncodingThread::run()
 {
-	QFile fileDevice(mFile);
-	ViAudioBufferStream *readStream = mBuffer->createReadStream();
+	mState = ViCoder::ActiveState;
 
+	ViAudioBufferStream *readStream = mBuffer->createReadStream();
+	QFile fileDevice(mFile);
+
+	AVSampleFormat inputFormat;
 	AVCodec *codec = NULL;
-	AVCodecContext *codecContext= NULL;
+	AVCodecContext *codecContext = NULL;
 	AVFrame *frame = NULL;
 	AVFormatContext *formatContext = NULL;
 	AVStream *stream = NULL;
 	AVPacket packet;
-	int sampleSize, frameSize, gotPacket;
+	int sampleBufferSize, resampleBufferSize;
+	int sampleNumberOfSamplesPerChannel, resampleNumberOfSamplesPerChannel;
+	int frameSize, gotPacket;
+	qreal sampleResampleRatio;
+
 	char *samples = NULL;
+	char *resamples = NULL;
+	uint8_t *input[1];
+    uint8_t *output[1];
+	SwrContext *resampleContext = NULL;
+
+qint64 j=0;
 
     CodecID codecId;
-	QString codecName = mFormat->codec().abbreviation();
+	QString codecName = mOutputFormat->codec().abbreviation();
 	if(codecName == "MP2")
 	{
 		codecId = CODEC_ID_MP2;
@@ -161,47 +228,47 @@ void ViEncodingThread::run()
 	}
 	else if(codecName == "WAV")
 	{
-		if(mFormat->byteOrder() == QAudioFormat::LittleEndian)
+		if(mOutputFormat->byteOrder() == QAudioFormat::LittleEndian)
 		{
-			if(mFormat->sampleType() == QAudioFormat::Float)
+			if(mOutputFormat->sampleType() == QAudioFormat::Float)
 			{
-				if(mFormat->sampleSize() == 64) codecId = CODEC_ID_PCM_F64LE;
+				if(mOutputFormat->sampleSize() == 64) codecId = CODEC_ID_PCM_F64LE;
 				else codecId = CODEC_ID_PCM_F32LE;
 			}
-			else if(mFormat->sampleType() == QAudioFormat::UnSignedInt)
+			else if(mOutputFormat->sampleType() == QAudioFormat::UnSignedInt)
 			{
-				if(mFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_U8;
-				else if(mFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_U24LE;
-				else if(mFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_U32LE;
+				if(mOutputFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_U8;
+				else if(mOutputFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_U24LE;
+				else if(mOutputFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_U32LE;
 				else codecId = CODEC_ID_PCM_U16LE;
 			}
 			else
 			{
-				if(mFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_S8;
-				else if(mFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_S24LE;
-				else if(mFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_S32LE;
+				if(mOutputFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_S8;
+				else if(mOutputFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_S24LE;
+				else if(mOutputFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_S32LE;
 				else codecId = CODEC_ID_PCM_S16LE;
 			}
 		}
 		else
 		{
-			if(mFormat->sampleType() == QAudioFormat::Float)
+			if(mOutputFormat->sampleType() == QAudioFormat::Float)
 			{
-				if(mFormat->sampleSize() == 64) codecId = CODEC_ID_PCM_F64BE;
+				if(mOutputFormat->sampleSize() == 64) codecId = CODEC_ID_PCM_F64BE;
 				else codecId = CODEC_ID_PCM_F32BE;
 			}
-			else if(mFormat->sampleType() == QAudioFormat::UnSignedInt)
+			else if(mOutputFormat->sampleType() == QAudioFormat::UnSignedInt)
 			{
-				if(mFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_U8;
-				else if(mFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_U24BE;
-				else if(mFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_U32BE;
+				if(mOutputFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_U8;
+				else if(mOutputFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_U24BE;
+				else if(mOutputFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_U32BE;
 				else codecId = CODEC_ID_PCM_U16LE;
 			}
 			else
 			{
-				if(mFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_S8;
-				else if(mFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_S24BE;
-				else if(mFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_S32BE;
+				if(mOutputFormat->sampleSize() == 8) codecId = CODEC_ID_PCM_S8;
+				else if(mOutputFormat->sampleSize() == 24) codecId = CODEC_ID_PCM_S24BE;
+				else if(mOutputFormat->sampleSize() == 32) codecId = CODEC_ID_PCM_S32BE;
 				else codecId = CODEC_ID_PCM_S16BE;
 			}
 		}
@@ -225,29 +292,46 @@ void ViEncodingThread::run()
 	codecContext->codec_id = formatContext->oformat->audio_codec;
 	codecContext->codec_type = AVMEDIA_TYPE_AUDIO;
 
-	if(mFormat->bitRate() > 0)
+	if(mOutputFormat->bitRate() > 0)
 	{
-		codecContext->bit_rate = mFormat->bitRate() * 1000;
+		codecContext->bit_rate = mOutputFormat->bitRate() * 1000;
 	}
-	codecContext->sample_rate = mFormat->sampleRate();
+	codecContext->sample_rate = mOutputFormat->sampleRate();
 
-	codecContext->channels = mFormat->channelCount();
+	codecContext->channels = mOutputFormat->channelCount();
 
-	if(mFormat->sampleSize() == 8)
+	if(mOutputFormat->sampleSize() == 8)
 	{
 		codecContext->sample_fmt = AV_SAMPLE_FMT_U8;
 	}
-	else if(mFormat->sampleSize() == 32)
+	else if(mOutputFormat->sampleSize() == 32)
 	{
 		codecContext->sample_fmt = AV_SAMPLE_FMT_S32;
 	}
-	else if(mFormat->sampleType() == QAudioFormat::Float)
+	else if(mOutputFormat->sampleType() == QAudioFormat::Float)
 	{
 		codecContext->sample_fmt = AV_SAMPLE_FMT_FLT;
 	}
 	else
 	{
 		codecContext->sample_fmt = AV_SAMPLE_FMT_S16;
+	}
+
+	if(mInputFormat->sampleSize() == 8)
+	{
+		inputFormat = AV_SAMPLE_FMT_U8;
+	}
+	else if(mInputFormat->sampleSize() == 32)
+	{
+		inputFormat = AV_SAMPLE_FMT_S32;
+	}
+	else if(mInputFormat->sampleType() == QAudioFormat::Float)
+	{
+		inputFormat = AV_SAMPLE_FMT_FLT;
+	}
+	else
+	{
+		inputFormat = AV_SAMPLE_FMT_S16;
 	}
 
 	codecContext->time_base.num = 1;
@@ -260,22 +344,23 @@ void ViEncodingThread::run()
 		goto END;
 	}
 
-	if(avio_open(&formatContext->pb, mFile.toAscii().data(), AVIO_FLAG_WRITE) < 0)
-	{cout<<mFile.toAscii().data()<<endl;
-		mError = ViCoder::DeviceError;
-		goto END;
-	}
-
-	if(avformat_write_header(formatContext, NULL) < 0)
+	if(mFile != "")
 	{
-		mError = ViCoder::DeviceError;
-		goto END;
-	}
-
-	if(!fileDevice.open(QIODevice::Append))
-	{
-		mError = ViCoder::DeviceError;
-		goto END;
+		if(avio_open(&formatContext->pb, mFile.toAscii().data(), AVIO_FLAG_WRITE) < 0)
+		{
+			mError = ViCoder::DeviceError;
+			goto END;
+		}
+		if(avformat_write_header(formatContext, NULL) < 0)
+		{
+			mError = ViCoder::DeviceError;
+			goto END;
+		}
+		if(!fileDevice.open(QIODevice::Append))
+		{
+			mError = ViCoder::DeviceError;
+			goto END;
+		}
 	}
 
     frame = avcodec_alloc_frame();
@@ -290,14 +375,44 @@ void ViEncodingThread::run()
 	{
 		frameSize = 1024;
 	}
-	sampleSize = frameSize * 2 * codecContext->channels;
-	samples = new char[sampleSize];
-	sampleSize = readStream->read(samples, sampleSize);
 
-	while(sampleSize > 0)
+	sampleResampleRatio = (mOutputFormat->channelCount() * mOutputFormat->sampleSize() * mOutputFormat->sampleRate()) / qreal(mInputFormat->channelCount() * mInputFormat->sampleSize() * mInputFormat->sampleRate());
+
+	sampleBufferSize = av_samples_get_buffer_size(NULL, mOutputFormat->channelCount(), frameSize, codecContext->sample_fmt, 1);
+	resampleBufferSize = sampleBufferSize * sampleResampleRatio;
+
+	sampleNumberOfSamplesPerChannel = frameSize / (mInputFormat->channelCount() / mOutputFormat->channelCount());
+	resampleNumberOfSamplesPerChannel = frameSize * sampleResampleRatio;
+
+	samples = new char[sampleBufferSize];
+	resamples = new char[resampleBufferSize];
+	input[0] = (uint8_t*) samples;
+	output[0] = (uint8_t*) resamples;
+
+	sampleBufferSize = readStream->read(samples, sampleBufferSize);
+
+	//Resample
+	resampleContext = swr_alloc_set_opts	(NULL,
+											av_get_default_channel_layout(mOutputFormat->channelCount()),
+											codecContext->sample_fmt,
+											mOutputFormat->sampleRate(),
+											av_get_default_channel_layout(mInputFormat->channelCount()),
+											inputFormat,
+											mInputFormat->sampleRate(),
+											0,
+											NULL);
+    swr_init(resampleContext);
+
+	while(sampleBufferSize > 0)
 	{
-		frame->data[0] = (uint8_t*) samples;
-		frame->nb_samples = frameSize;
+		if((swr_convert(resampleContext, output, resampleNumberOfSamplesPerChannel, (const uint8_t**) input, sampleNumberOfSamplesPerChannel)) < 0)
+		{
+			mError = ViCoder::ResampleError;
+			goto END;
+		}
+j+=resampleNumberOfSamplesPerChannel;
+		frame->data[0] = (uint8_t*) resamples;
+		frame->nb_samples = resampleNumberOfSamplesPerChannel;
 		av_init_packet(&packet);
 		packet.data = NULL;
 		packet.size = 0;
@@ -309,21 +424,34 @@ void ViEncodingThread::run()
 		}
 		else if(gotPacket)
 		{
-			//fileDevice.write(reinterpret_cast<char*>(packet.data), packet.size);
-			av_interleaved_write_frame(formatContext, &packet);
-			sampleSize = readStream->read(samples, sampleSize);
+			if(mOutputBuffer == NULL)
+			{
+				fileDevice.write((char*) packet.data, packet.size);
+				//av_interleaved_write_frame(formatContext, &packet);
+			}
+			else
+			{
+				mOutputBuffer->append((char*) packet.data, packet.size);
+			}
+			sampleBufferSize = readStream->read(samples, sampleBufferSize);
 		}
+		av_free_packet(&packet);
 	}
-
-	fileDevice.close();
-
-	if(av_write_trailer(formatContext) < 0)
+cout<<"j: "<<j<<endl;
+	if(mFile != "" && av_write_trailer(formatContext) < 0)
 	{
 		mError = ViCoder::DeviceError;
 		goto END;
 	}
 
 	END:
+
+	fileDevice.close();
+
+	if(resampleContext != NULL)
+	{
+		swr_free(&resampleContext);
+	}
 
 	if(codecContext != NULL)
 	{
@@ -336,6 +464,7 @@ void ViEncodingThread::run()
 		{
 			av_freep(&formatContext->streams[0]->codec);
 			av_freep(&formatContext->streams[0]);
+			av_freep(&formatContext->streams);
 		}
 		if(formatContext->pb != NULL)
 		{
@@ -354,6 +483,11 @@ void ViEncodingThread::run()
     	delete [] samples;
 	}
 
+	if(resamples != NULL)
+	{
+    	delete [] resamples;
+	}
+
 	if(mError != ViCoder::NoError)
 	{
 		QFile file(mFile);
@@ -362,6 +496,19 @@ void ViEncodingThread::run()
 			file.remove();
 		}
 	}
+
+	if(mError != ViCoder::NoError)
+	{
+		mState = ViCoder::FailureState;
+	}
+	else
+	{
+		mState = ViCoder::SuccessState;
+	}
+
+	emit stateChanged(mState);
+
+	mState = ViCoder::IdleState;
 }
 
 ViDecodingThread::ViDecodingThread(QObject *parent)
@@ -369,9 +516,9 @@ ViDecodingThread::ViDecodingThread(QObject *parent)
 {
 }
 
-void ViDecodingThread::setFormat(ViAudioFormat *format)
+void ViDecodingThread::setOutputFormat(ViAudioFormat *format)
 {
-	ViCoderThread::setFormat(format);
+	ViCoderThread::setOutputFormat(format);
 
 	AVCodecContext *codecContext = NULL;
 	AVFormatContext *formatContext = NULL;
@@ -517,6 +664,8 @@ void ViDecodingThread::setFormat(ViAudioFormat *format)
 	}
 
 	emit stateChanged(mState);
+
+	mState = ViCoder::IdleState;
 }
 
 void ViDecodingThread::run()

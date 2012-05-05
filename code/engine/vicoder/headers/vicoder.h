@@ -21,7 +21,7 @@ class ViCoder : public QObject
 
 		enum State
 		{
-			UninitializedState = 0,
+			IdleState = 0,
 			ActiveState = 1,
 			SuccessState = 2,
 			FailureState = 3
@@ -38,7 +38,8 @@ class ViCoder : public QObject
 			NoStreamError = 7,
 			NoDecoderError = 8,
 			NoEncoderError = 9,
-			OutOfMemoryError = 10
+			OutOfMemoryError = 10,
+			ResampleError = 11
 		};
 
 	signals:
@@ -50,9 +51,11 @@ class ViCoder : public QObject
 		ViCoder();
 		~ViCoder();
 
-		void encode(ViAudioBuffer *buffer, QString filePath, ViAudioFormat *format);
+		void encode(ViAudioBuffer *buffer, QString filePath, ViAudioFormat inputFormat, ViAudioFormat outputFormat);
+		void encode(ViAudioBuffer *buffer, QByteArray *outputBuffer, ViAudioFormat inputFormat, ViAudioFormat outputFormat);
 		void decode(QString file, ViAudioBuffer *buffer, ViAudioFormat *format);
 		void stop();
+		ViCoder::Error error();
 	
 	private:
 
@@ -69,15 +72,18 @@ class ViCoderThread : public QThread
 
 	public:
 		ViCoderThread(QObject *parent = 0);
-		virtual void setFormat(ViAudioFormat *format);
+		virtual void setInputFormat(ViAudioFormat *format);
+		virtual void setOutputFormat(ViAudioFormat *format);
 		virtual void setBuffer(ViAudioBuffer *buffer);
 		virtual void setFile(QString file);
-		ViCoder::State status();
+
+		ViCoder::State state();
 		ViCoder::Error error();
 
 	protected:
 		ViAudioBuffer *mBuffer;
-		ViAudioFormat *mFormat;
+		ViAudioFormat *mInputFormat;
+		ViAudioFormat *mOutputFormat;
 		ViCoder::State mState;
 		ViCoder::Error mError;
 		QString mFile;
@@ -89,7 +95,7 @@ class ViDecodingThread : public ViCoderThread
 
 	public:
 		ViDecodingThread(QObject *parent = 0);
-		void setFormat(ViAudioFormat *format);
+		void setOutputFormat(ViAudioFormat *format);
 		void run();	
 };
 
@@ -100,8 +106,13 @@ class ViEncodingThread : public ViCoderThread
 	public:
 		ViEncodingThread(QObject *parent = 0);
 		~ViEncodingThread();
-		void setFormat(ViAudioFormat *format);
+		void setInputFormat(ViAudioFormat *format);
+		void setOutputFormat(ViAudioFormat *format);
+		void setOutputBuffer(QByteArray *outputBuffer);
 		void run();
+
+	private:
+		QByteArray *mOutputBuffer;
 };
 
 #endif

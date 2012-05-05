@@ -38,7 +38,7 @@ ViAudioEngine::ViAudioEngine()
 	ViObject::connect(&mCorrectedWaveSummarizer, SIGNAL(changed()), this, SIGNAL(correctedWaveChanged()));
 
 	mSongDetector = new ViSongDetector(mStreamOutput);
-	mSongDetector->setProxy(QNetworkProxy::HttpProxy, "137.215.6.53", 8080, "p04416376", "Rd28jRX");
+	//mSongDetector->setProxy(QNetworkProxy::HttpProxy, "137.215.6.53", 8080, "p04416376", "Rd28jRX");
 	mSongDetector->setKey("G1TZBE4IHJAYUSNCN");
 }
 

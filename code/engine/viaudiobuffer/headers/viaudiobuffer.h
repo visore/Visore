@@ -2,6 +2,7 @@
 #define VIAUDIOBUFFER_H
 
 #include "viaudiobufferstream.h"
+#include "viaudioformat.h"
 #include "vichunk.h"
 
 typedef ViChunk<char> ViAudioBufferChunk;
@@ -15,6 +16,10 @@ class ViAudioBuffer : public QObject
 	signals:
 		//startIndex = index of the first new byte added (chunk start index), size = chunk size added to buffer
 		void changed(int size);
+		void formatChanged(ViAudioFormat format);
+
+	public slots:
+		void setFormat(ViAudioFormat format);
 
 	public:
 		enum ViAudioBufferType
@@ -38,10 +43,13 @@ class ViAudioBuffer : public QObject
 		void clear(); //Clears all data from the stream
 		void change(int startIndex);
 
+		ViAudioFormat format();
+
 	private:
 		QByteArray *mData;
 		QList<ViAudioBufferStream*> mStreams;
 		int mBufferHeadStart;
+		ViAudioFormat mFormat;
 };
 
 #endif

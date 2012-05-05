@@ -8,6 +8,7 @@ ViAudioProcessingChain::ViAudioProcessingChain::ViAudioProcessingChain()
 	mCorrectedWriteStream = mCorrectedBuffer->createWriteStream();
 	ViObject::connectDirect(mOriginalBuffer, SIGNAL(changed(int)), this, SLOT(originalBufferChanged(int)));
 	ViObject::connectDirect(mCorrectedBuffer, SIGNAL(changed(int)), this, SLOT(correctedBufferChanged(int)));
+	ViObject::connectDirect(mOriginalBuffer, SIGNAL(formatChanged(ViAudioFormat)), mCorrectedBuffer, SLOT(setFormat(ViAudioFormat)));
 }
 
 ViAudioProcessingChain::~ViAudioProcessingChain()

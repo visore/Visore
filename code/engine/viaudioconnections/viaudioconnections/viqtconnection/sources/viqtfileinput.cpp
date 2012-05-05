@@ -25,6 +25,7 @@ void ViQtFileInput::free()
 
 void ViQtFileInput::start()
 {
+	mBuffer->setFormat(mFormat);
 	mCoder.decode(mFilePath, mBuffer, &mFormat);
 	emit formatChanged(mFormat);
 }

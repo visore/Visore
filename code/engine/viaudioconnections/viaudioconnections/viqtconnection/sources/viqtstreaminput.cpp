@@ -17,6 +17,7 @@ void ViQtStreamInput::initialize()
 	mBufferDevice = new QBuffer(mBuffer->data(), this);
 	mBufferDevice->open(QIODevice::WriteOnly);
 
+	mBuffer->setFormat(mFormat);
 	mAudioInput = new QAudioInput(mDevice, mFormat, this);
 	mAudioInput->setNotifyInterval(25);
 	ViObject::connect(mAudioInput, SIGNAL(notify()), this, SLOT(a()));

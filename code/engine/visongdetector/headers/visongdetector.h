@@ -14,11 +14,12 @@
 #include "viobject.h"
 #include "vipcmconverter.h"
 #include "viechonestresponse.h"
+#include "vicoder.h"
 
 //Interval (milliseconds) use to request info
-#define REQUEST_SAMPLES_1 20000
-#define REQUEST_SAMPLES_2 100000
-#define REQUEST_SAMPLES_3 200000
+#define REQUEST_SAMPLES_1 20000000
+#define REQUEST_SAMPLES_2 100000000
+#define REQUEST_SAMPLES_3 200000000
 
 class ViSongCodeGeneratorThread : public QThread
 {
@@ -69,6 +70,7 @@ class ViSongDetector : public QObject
 		void codeFinished(QString code, QString version, int codeLength);
 		void replyFinished(QNetworkReply *reply);
 		void downloadFinished(QNetworkReply *reply);
+		void encodingStateChanged(ViCoder::State state);
 
 	public:
 		ViSongDetector(ViAudioOutput *output);
@@ -80,9 +82,12 @@ class ViSongDetector : public QObject
 		ViSongInfo songInfo();
 
 	private:
+		QByteArray mOutput;
+		ViCoder mCoder;
+
 		ViEchoNestResponse mResponse;
 		ViSongCodeGeneratorThread *mThread;
-		ViAudioOutput *mOutput;
+		ViAudioOutput *mAudioOutput;
 
 		QNetworkAccessManager *mNetworkManager;
 

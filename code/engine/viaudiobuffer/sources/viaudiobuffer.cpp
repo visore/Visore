@@ -98,3 +98,14 @@ void ViAudioBuffer::change(int size)
 {
 	emit changed(size);
 }
+
+void ViAudioBuffer::setFormat(ViAudioFormat format)
+{
+	mFormat = format;
+	emit formatChanged(mFormat);
+}
+
+ViAudioFormat ViAudioBuffer::format()
+{
+	return mFormat;
+}

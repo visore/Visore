@@ -22,7 +22,7 @@ void ViQtFileOutput::free()
 
 void ViQtFileOutput::start()
 {
-	mCoder.encode(mBuffer, mFilePath, &mFormat);
+	mCoder.encode(mBuffer, mFilePath, mBuffer->format(), mFormat);
 }
 
 void ViQtFileOutput::stop()

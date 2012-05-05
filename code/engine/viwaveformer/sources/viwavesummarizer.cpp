@@ -26,7 +26,7 @@ void ViWaveSummarizerThread::run()
 		ViWaveFormChunk wave;
 		mFormer.pcmToReal(&chunk, &wave);
 
-		qreal *data = wave.data();
+		float *data = wave.data();
 		size = wave.size();
 		for(int i = 0; i < size; ++i)
 		{

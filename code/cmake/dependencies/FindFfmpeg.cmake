@@ -68,6 +68,20 @@ else (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIRS)
       ffmpeg
   )
 
+  find_path(FFMPEG_SWRESAMPLE_INCLUDE_DIR
+    NAMES
+      swresample.h
+    PATHS
+      ${_FFMPEGIncDir}
+      /usr/include
+      /usr/include/libswresample
+      /usr/local/include
+      /opt/local/include
+      /sw/include
+    PATH_SUFFIXES
+      ffmpeg
+  )
+
   if (NOT APPLE)
     find_library(FFMPEG_AVUTIL_LIBRARY
       NAMES
@@ -103,16 +117,29 @@ else (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIRS)
       /sw/lib
   )
 
+  find_library(FFMPEG_SWRESAMPLE_LIBRARY
+    NAMES
+      swresample
+    PATHS
+      ${_FFMPEGLinkDir}
+      /usr/lib
+      /usr/local/lib
+      /opt/local/lib
+      /sw/lib
+  )
+
   set(FFMPEG_INCLUDE_DIRS
     ${FFMPEG_AVCODEC_INCLUDE_DIR}
     ${FFMPEG_AVUTIL_INCLUDE_DIR}
     ${FFMPEG_AVFORMAT_INCLUDE_DIR}
+    ${FFMPEG_SWRESAMPLE_INCLUDE_DIR}
   )
  
   set(FFMPEG_LIBRARIES
 	${FFMPEG_AVFORMAT_LIBRARY}
 	${FFMPEG_AVCODEC_LIBRARY}
     ${FFMPEG_AVUTIL_LIBRARY}
+    ${FFMPEG_SWRESAMPLE_LIBRARY}
   )
 
   if (FFMPEG_INCLUDE_DIRS AND FFMPEG_LIBRARIES)
