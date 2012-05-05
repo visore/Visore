@@ -10,19 +10,23 @@ class ViEchoNestResponse
 {
 	public:
 		ViEchoNestResponse();
+		void reset();
 		void analyze(QByteArray json);
 		QString version();
 		QString code();
 		QString message();
 		int numberOfSongs();
 		ViSongInfo songInfo(int index = -1);
-		bool hasError();
+		QList<ViSongInfo> songInfos();
 		QString toString();
 		static QString toUrl(QString string);
 
 	private:
+		void analyzeInfo(QVariantMap map);
+		void analyzeImage(QVariantMap map, int songIndex);
+
+	private:
 		QList<ViSongInfo> mSongs;
-		bool mHasError;
 		QString mVersion;
 		QString mCode;
 		QString mMessage;

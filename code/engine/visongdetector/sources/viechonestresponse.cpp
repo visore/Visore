@@ -1,30 +1,43 @@
 #include "viechonestresponse.h"
 #include <QJsonDocument>
+#include <QJsonObject>
 
 ViEchoNestResponse::ViEchoNestResponse()
+{
+	reset();
+}
+
+void ViEchoNestResponse::reset()
 {
 	mVersion = "";
 	mCode = "";
 	mMessage = "";
 	mCurrentSong = -1;
-	mHasError = false;
+	mSongs.clear();
 }
 
 void ViEchoNestResponse::analyze(QByteArray json)
 {
 	QJsonDocument document = QJsonDocument::fromJson(json);
-	bool ok;
-	//QVariantMap result = parser.toJson();
-	/*if(!ok)
-	{
-		mHasError = true;
-	}
+	QVariantMap result = document.object().toVariantMap();
 	QVariantMap response = result["response"].toMap();
-	QVariantMap status = response["status"].toMap();
+	if(response["images"].toList().size() > 0)
+	{
+		analyzeImage(response, mCurrentSong);
+	}
+	else
+	{
+		analyzeInfo(response);
+	}
+}
+
+void ViEchoNestResponse::analyzeInfo(QVariantMap map)
+{
+	QVariantMap status = map["status"].toMap();
 	mVersion = status["version"].toString();
 	mCode = status["code"].toString();
 	mMessage = status["message"].toString();
-	QVariantList songs = response["songs"].toList();
+	QVariantList songs = map["songs"].toList();
 	for(int i = 0; i < songs.size(); ++i)
 	{
 		QVariantMap song = songs[i].toMap();
@@ -47,10 +60,10 @@ void ViEchoNestResponse::analyze(QByteArray json)
 		info.setSongTempo(summary["tempo"].toDouble());
 		info.setSongDanceability(summary["danceability"].toDouble() * 100);
 		QVariantList tracks = song["tracks"].toList();
-		if(tracks.size() > 0)
+		for(int j = 0; j < tracks.size(); ++j)
 		{
-			QVariantMap track = tracks[0].toMap();
-			info.setImagePath(track["release_image"].toString());
+			QVariantMap track = tracks[j].toMap();
+			info.addImagePath(track["release_image"].toString());
 		}
 
 		mSongs.append(info);
@@ -58,7 +71,17 @@ void ViEchoNestResponse::analyze(QByteArray json)
 	if(mSongs.size() > 0)
 	{
 		mCurrentSong = 0;
-	}*/
+	}
+}
+
+void ViEchoNestResponse::analyzeImage(QVariantMap map, int songIndex)
+{
+	QVariantList images = map["images"].toList();
+	for(int i = 0; i < images.size(); ++i)
+	{
+		QVariantMap image = images[i].toMap();
+		mSongs[songIndex].addImagePath(image["url"].toString());
+	}
 }
 
 QString ViEchoNestResponse::version()
@@ -90,9 +113,9 @@ ViSongInfo ViEchoNestResponse::songInfo(int index)
 	return mSongs[index];
 }
 
-bool ViEchoNestResponse::hasError()
+QList<ViSongInfo> ViEchoNestResponse::songInfos()
 {
-	return mHasError;
+	return mSongs;
 }
 
 QString ViEchoNestResponse::toString()

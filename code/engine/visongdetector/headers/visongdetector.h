@@ -16,11 +16,6 @@
 #include "viechonestresponse.h"
 #include "vicoder.h"
 
-//Interval (milliseconds) use to request info
-#define REQUEST_SAMPLES_1 20000000
-#define REQUEST_SAMPLES_2 100000000
-#define REQUEST_SAMPLES_3 200000000
-
 class ViSongCodeGeneratorThread : public QThread
 {
 	Q_OBJECT
@@ -29,15 +24,14 @@ class ViSongCodeGeneratorThread : public QThread
 		void finished(QString code, QString version, int codeLength);
 
 	public:
-		ViSongCodeGeneratorThread(ViAudioBuffer *buffer, ViAudioFormat format, QObject *parent = 0);
+		ViSongCodeGeneratorThread(QByteArray *data, QObject *parent = 0);
 		void setOffset(int offset);
 
 	protected:
 		void run();
 
 	private:
-		ViAudioBuffer *mBuffer;
-		ViAudioFormat mFormat;
+		QByteArray *mData;
 		int mOffset;
 };
 
@@ -49,24 +43,23 @@ class ViSongDetector : public QObject
 		enum State
 		{
 			Idle = 0,
-			Busy = 1,
-			Finished = 3
+			Encoding = 1,
+			CodeGeneration = 2,
+			SongDetection = 3,
+			ImageRetrieval = 4
 		};
-		enum Result
+		enum Error
 		{
-			None = 0,
-			Timeout = 1,
-			NetworkProblem = 2,
-			NotFound = 3,
-			Found = 4,
-			KeyProblem = 5
+			NoError = 0,
+			NetworkError = 1,
+			KeyError = 2
 		};
 
 	signals:
-		void stateChanged(ViSongDetector::State state);
+		void stateChanged(ViSongDetector::State state, bool found);
 
 	private slots:
-		void bufferChanged(int size);
+		void bufferChanged(int size = -1);
 		void codeFinished(QString code, QString version, int codeLength);
 		void replyFinished(QNetworkReply *reply);
 		void downloadFinished(QNetworkReply *reply);
@@ -75,11 +68,16 @@ class ViSongDetector : public QObject
 	public:
 		ViSongDetector(ViAudioOutput *output);
 		~ViSongDetector();
+		void reset();
 		void setProxy(QNetworkProxy::ProxyType type, QString host, quint16 port, QString username, QString password);
 		void setKey(QString key);
 		ViSongDetector::State state();
-		ViSongDetector::Result result();
-		ViSongInfo songInfo();
+		ViSongDetector::Error error();
+		QNetworkReply::NetworkError networkError();
+		QList<ViSongInfo> songInfo();
+
+	private:
+		void setState(ViSongDetector::State state);
 
 	private:
 		QByteArray mOutput;
@@ -92,10 +90,12 @@ class ViSongDetector : public QObject
 		QNetworkAccessManager *mNetworkManager;
 
 		QString mKey;
-		qint64 mBufferSize;
+
+		bool mFound;
 		ViSongDetector::State mState;
-		ViSongDetector::Result mResult;
-		ViSongInfo mSongInfo;
+		ViSongDetector::Error mError;
+		QNetworkReply::NetworkError mNetworkError;
+
 		qint8 mRequestsSent;
 };
 

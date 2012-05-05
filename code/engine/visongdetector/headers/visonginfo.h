@@ -2,6 +2,7 @@
 #define VISONGINFO_H
 
 #include <QString>
+#include <QList>
 
 class ViSongInfo
 {
@@ -26,7 +27,7 @@ class ViSongInfo
 		qint16 artistHotness();
 		qint16 artistFamiliarity();
 
-		QString imagePath();
+		QString imagePath(int index = 0);
 
 		void setMessage(QString message);
 		void setScore(qint16 score);
@@ -46,7 +47,8 @@ class ViSongInfo
 		void setArtistHotness(qint16 hotness);
 		void setArtistFamiliarity(qint16 familiarity);
 
-		void setImagePath(QString path);
+		void addImagePath(QString path);
+		void changeImagePath(QString fromPath, QString toPath);
 
 		QString toString();
 
@@ -66,7 +68,7 @@ class ViSongInfo
 		qint16 mArtistHotness;
 		qint16 mArtistFamiliarity;
 		QString mDescription;
-		QString mImagePath;
+		QList<QString> mImagePaths;
 		
 };
 

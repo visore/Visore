@@ -192,8 +192,6 @@ void ViEncodingThread::run()
     uint8_t *output[1];
 	SwrContext *resampleContext = NULL;
 
-qint64 j=0;
-
     CodecID codecId;
 	QString codecName = mOutputFormat->codec().abbreviation();
 	if(codecName == "MP2")
@@ -410,7 +408,6 @@ qint64 j=0;
 			mError = ViCoder::ResampleError;
 			goto END;
 		}
-j+=resampleNumberOfSamplesPerChannel;
 		frame->data[0] = (uint8_t*) resamples;
 		frame->nb_samples = resampleNumberOfSamplesPerChannel;
 		av_init_packet(&packet);
@@ -437,7 +434,7 @@ j+=resampleNumberOfSamplesPerChannel;
 		}
 		av_free_packet(&packet);
 	}
-cout<<"j: "<<j<<endl;
+
 	if(mFile != "" && av_write_trailer(formatContext) < 0)
 	{
 		mError = ViCoder::DeviceError;

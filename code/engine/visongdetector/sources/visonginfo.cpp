@@ -19,8 +19,6 @@ ViSongInfo::ViSongInfo()
 	mArtistName = "";
 	mArtistHotness = -1;
 	mArtistFamiliarity = -1;
-	
-	mImagePath = "";
 }
 
 QString ViSongInfo::message()
@@ -98,9 +96,13 @@ qint16 ViSongInfo::artistFamiliarity()
 	return mArtistFamiliarity;
 }
 
-QString ViSongInfo::imagePath()
+QString ViSongInfo::imagePath(int index)
 {
-	return mImagePath;
+	if(index < mImagePaths.size())
+	{
+		return mImagePaths[index];
+	}
+	return "";
 }
 
 void ViSongInfo::setMessage(QString message)
@@ -178,9 +180,26 @@ void ViSongInfo::setArtistFamiliarity(qint16 familiarity)
 	mArtistFamiliarity = familiarity;
 }
 
-void ViSongInfo::setImagePath(QString path)
+void ViSongInfo::addImagePath(QString path)
 {
-	mImagePath = path;
+	mImagePaths.append(path);
+}
+
+void ViSongInfo::changeImagePath(QString fromPath, QString toPath)
+{
+	bool change = false;
+	for(int i = 0; i < mImagePaths.size(); ++i)
+	{
+		if(mImagePaths[i] == fromPath)
+		{
+			change = true;
+			mImagePaths[i] = toPath;
+		}
+	}
+	if(!change)
+	{
+		addImagePath(toPath);
+	}
 }
 
 QString ViSongInfo::toString()
@@ -200,6 +219,9 @@ QString ViSongInfo::toString()
 	result += "\n\tArtist Name: " + mArtistName;
 	result += "\n\tArtist Hotness: " + QString::number(mArtistHotness);
 	result += "\n\tArtist Familiarity: " + QString::number(mArtistFamiliarity);
-	result += "\n\tImage: " + mImagePath;
+	for(int i = 0; i < mImagePaths.size(); ++i)
+	{
+		result += "\n\tImage " + QString::number(i + 1) + ": " + mImagePaths[i];
+	}
 	return result;
 }
