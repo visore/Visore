@@ -123,3 +123,8 @@ qint64 ViAudioBufferStream::position()
 {
 	return device()->pos();
 }
+
+ViAudioBuffer* ViAudioBufferStream::buffer()
+{
+	return mBuffer;
+}

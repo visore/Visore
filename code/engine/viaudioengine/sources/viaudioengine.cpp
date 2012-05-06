@@ -37,10 +37,10 @@ ViAudioEngine::ViAudioEngine()
 	ViObject::connect(&mOriginalWaveSummarizer, SIGNAL(changed()), this, SIGNAL(originalWaveChanged()));
 	ViObject::connect(&mCorrectedWaveSummarizer, SIGNAL(changed()), this, SIGNAL(correctedWaveChanged()));
 
-	mSongDetector = new ViSongDetector(mStreamOutput);
+	/*mSongDetector = new ViSongDetector(mStreamOutput);
 	mSongDetector->setProxy(QNetworkProxy::HttpProxy, "137.215.6.53", 8080, "p04416376", "Rd28jRX");
 	mSongDetector->setKey("G1TZBE4IHJAYUSNCN");
-	ViObject::connect(mSongDetector, SIGNAL(songFound(ViSongInfo)), this, SIGNAL(songInfoChanged(ViSongInfo)));
+	ViObject::connect(mSongDetector, SIGNAL(songFound(ViSongInfo)), this, SIGNAL(songInfoChanged(ViSongInfo)));*/
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -173,6 +173,8 @@ void ViAudioEngine::mute(bool value)
 void ViAudioEngine::startPlayback()
 {
 	mStreamOutput->start();
+ViMatcher *m = new ViMatcher();
+m->match(mProcessingChain->originalBuffer(), mProcessingChain->correctedBuffer());
 }
 
 void ViAudioEngine::stopPlayback()

@@ -34,6 +34,7 @@ class ViAudioBufferStream : public QObject, public QDataStream
 		bool isValidPosition(qint64 position);
 		qint64 setPosition(qint64 position);
 		qint64 position();
+		ViAudioBuffer* buffer();
 
 	private:
 		ViAudioBufferMutex *mMutex;

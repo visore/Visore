@@ -34,7 +34,7 @@ void ViSongCodeGeneratorThread::run()
 		char *chunk = new char[size];
 		size = stream.readRawData(chunk, size);
 		float *result = new float[size / 2];
-		size = ViPcmConverter::pcmToReal16(chunk, result, size);
+		size = ViPcmConverter<float>::pcmToReal16(chunk, result, size);
 		delete [] chunk;
 		Codegen codegen(result, size / 2, mOffset);
 		delete [] result;

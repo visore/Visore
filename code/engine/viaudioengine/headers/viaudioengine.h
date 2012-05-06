@@ -10,6 +10,7 @@
 #include "viaudioformat.h"
 //#include "vispectrumanalyzer.h"
 #include "visongdetector.h"
+#include "vimatcher.h"
 #include <QList>
 #include <QCoreApplication>
 
