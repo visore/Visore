@@ -61,11 +61,11 @@ void ViSampleMatcher::match()
 		pcmToRealSecondPointer = &ViPcmConverter<qreal>::pcmToReal32;
 	}
 
-	do
+	secondSize = mSecondStream->read(secondRawData, secondSize);
+	firstSize = mFirstStream->read(firstRawData, firstSize);
+	while(firstSize > 0 && secondSize > 0);
 	{
-		firstSize = mFirstStream->read(firstRawData, firstSize);
 		firstSampleSize = pcmToRealFirstPointer(firstRawData, firstRealData, firstSize);
-		secondSize = mSecondStream->read(secondRawData, secondSize);
 		secondSampleSize = pcmToRealSecondPointer(secondRawData, secondRealData, secondSize);
 		size = qMin(firstSampleSize, secondSampleSize);
 		for(index = 0; index < size; ++index)
@@ -83,8 +83,10 @@ void ViSampleMatcher::match()
 			}
 		}
 		sampleCounter += size;
+
+		secondSize = mSecondStream->read(secondRawData, secondSize);
+		firstSize = mFirstStream->read(firstRawData, firstSize);
 	}
-	while(firstSize > 0 && secondSize > 0);
 
 	averageDifference /= sampleCounter;
 	mResult->setSampleDifference(ViMatchResultCombination(minimumDifference, maximumDifference, averageDifference));

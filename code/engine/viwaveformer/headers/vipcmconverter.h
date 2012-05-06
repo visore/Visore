@@ -23,6 +23,11 @@ class ViPcmConverter
 		static int pcmToReal16(char* buffer, T* result, int size);
 		static int pcmToReal24(char* buffer, T* result, int size);
 		static int pcmToReal32(char* buffer, T* result, int size);
+
+		static int realToPcm8(T* buffer, char* result, int size);
+		static int realToPcm16(T* buffer, char* result, int size);
+		static int realToPcm24(T* buffer, char* result, int size);
+		static int realToPcm32(T* buffer, char* result, int size);
 };
 
 #include "../sources/vipcmconverter.cpp"

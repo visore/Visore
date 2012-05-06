@@ -107,4 +107,48 @@ int ViPcmConverter<T>::pcmToReal32(char* buffer, T *result, int size)
 	return size;
 }
 
+template <typename T>
+int ViPcmConverter<T>::realToPcm8(T* buffer, char* result, int size)
+{
+	for(int i = 0; i < size; ++i)
+	{
+		result[i] = ViPcmConverter<T>::realToPcm8(buffer[i]);
+	}
+	return size;
+}
+
+template <typename T>
+int ViPcmConverter<T>::realToPcm16(T* buffer, char* result, int size)
+{
+	qint16 *base = reinterpret_cast<qint16*>(result);
+	for(int i = 0; i < size; ++i)
+	{
+		result[i] = ViPcmConverter<T>::realToPcm16(buffer[i]);
+	}
+	return size*2;
+}
+
+template <typename T>
+int ViPcmConverter<T>::realToPcm24(T* buffer, char* result, int size)
+{
+	/*qint16 *base = reinterpret_cast<qint16*>(result);
+	for(int i = 0; i < size; ++i)
+	{
+		result[i] = ViPcmConverter<T>::realToPcm24(buffer[i]);
+	}
+	return size*3;*/
+}
+
+template <typename T>
+int ViPcmConverter<T>::realToPcm32(T* buffer, char* result, int size)
+{
+	qint32 *base = reinterpret_cast<qint32*>(result);
+	for(int i = 0; i < size; ++i)
+	{
+		result[i] = ViPcmConverter<T>::realToPcm32(buffer[i]);
+	}
+	return size*4;
+}
+
+
 #endif
