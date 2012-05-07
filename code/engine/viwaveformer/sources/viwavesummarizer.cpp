@@ -6,6 +6,7 @@ ViWaveSummarizerThread::ViWaveSummarizerThread(ViAudioBuffer *buffer, ViWaveForm
 	: ViProcessorThread(buffer)
 {
 	mForm = form;
+	mFormer.setSampleSize(mBuffer->format().sampleSize());
 }
 
 void ViWaveSummarizerThread::run()

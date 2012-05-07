@@ -7,6 +7,7 @@ template <typename T>
 class ViPcmConverter
 {
 	public:
+
 		static T pcmToReal8(qint8 pcm);
 		static qint8 realToPcm8(T real);
 

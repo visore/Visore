@@ -63,7 +63,7 @@ void ViSampleMatcher::match()
 
 	secondSize = mSecondStream->read(secondRawData, secondSize);
 	firstSize = mFirstStream->read(firstRawData, firstSize);
-	while(firstSize > 0 && secondSize > 0);
+	while(firstSize > 0 && secondSize > 0)
 	{
 		firstSampleSize = pcmToRealFirstPointer(firstRawData, firstRealData, firstSize);
 		secondSampleSize = pcmToRealSecondPointer(secondRawData, secondRealData, secondSize);
@@ -84,8 +84,8 @@ void ViSampleMatcher::match()
 		}
 		sampleCounter += size;
 
-		secondSize = mSecondStream->read(secondRawData, secondSize);
 		firstSize = mFirstStream->read(firstRawData, firstSize);
+		secondSize = mSecondStream->read(secondRawData, secondSize);
 	}
 
 	averageDifference /= sampleCounter;

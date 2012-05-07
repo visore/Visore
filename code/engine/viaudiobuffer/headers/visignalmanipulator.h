@@ -8,8 +8,27 @@ class ViSignalManipulator
 
 	public:
 
+		enum Type
+		{
+			Tooth = 0,
+			Triangle = 1,
+			Mountain = 2
+		};
+
+	public:
+
+		static void createDefaultSignal(ViAudioBuffer *buffer, qint32 cycles, Type type);
+
 		static void createSignal(QList<qreal> samples, ViAudioBuffer *buffer);
-		static void addRandomNoise(ViAudioBuffer *buffer, qreal percentage);
+
+		static void createNoise(ViAudioBuffer *input, ViAudioBuffer *output, qreal percentage);
+
+	private:
+
+		static void createToothSignal(ViAudioBuffer *buffer, qint32 cycles);
+		static void createTriangleSignal(ViAudioBuffer *buffer, qint32 cycles);
+		static void createMountainSignal(ViAudioBuffer *buffer, qint32 cycles);
+
 };
 
 #endif

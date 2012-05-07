@@ -1,9 +1,32 @@
 #include "visignalmanipulator.h"
 #include "vipcmconverter.h"
+#include "vicodecmanager.h"
 #include <time.h>
+#include <QtCore/qmath.h>
 
 #define WINDOW_SIZE 1024
 #define RAND_HALF (RAND_MAX / 2)
+#define PI 3.141592654
+#define HALF_PI 1.570796327
+
+#include <iostream>
+using namespace std;
+
+void ViSignalManipulator::createDefaultSignal(ViAudioBuffer *buffer, qint32 cycles, Type type)
+{
+	if(type == ViSignalManipulator::Tooth)
+	{
+		ViSignalManipulator::createToothSignal(buffer, cycles);
+	}
+	else if(type == ViSignalManipulator::Triangle)
+	{
+		ViSignalManipulator::createTriangleSignal(buffer, cycles);
+	}
+	else if(type == ViSignalManipulator::Mountain)
+	{
+		ViSignalManipulator::createMountainSignal(buffer, cycles);
+	}
+}
 
 void ViSignalManipulator::createSignal(QList<qreal> samples, ViAudioBuffer *buffer)
 {
@@ -18,28 +41,28 @@ void ViSignalManipulator::createSignal(QList<qreal> samples, ViAudioBuffer *buff
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	buffer->setFormat(format);
 
-	int size = samples.size() * format.sampleSize();
+	int size = samples.size() * (format.sampleSize() / 8);
 	char rawData[size];
 	qreal sampleData[samples.size()];
 	for(int i = 0; i < samples.size(); ++i)
 	{
 		sampleData[i] = samples[i];
 	}
-	size = ViPcmConverter::realToPcm16(sampleData, rawData, size);
+	size = ViPcmConverter<qreal>::realToPcm16(sampleData, rawData, samples.size());
 	stream->write(rawData, size);
 }
 
-void ViSignalManipulator::addRandomNoise(ViAudioBuffer *buffer, qreal percentage)
+void ViSignalManipulator::createNoise(ViAudioBuffer *input, ViAudioBuffer *output, qreal percentage)
 {
-	ViAudioBufferStream *readStream = buffer->createWriteStream();
-	ViAudioBufferStream *writeStream = buffer->createWriteStream();
+	ViAudioBufferStream *readStream = input->createReadStream();
+	ViAudioBufferStream *writeStream = output->createWriteStream();
 	
 	srand(time(NULL));
-	int randomMax = RAND_MAX * precentage;
+	qreal randomMax = RAND_MAX / percentage;
 
 	int index;
-	int sampleSize = buffer->format().sampleSize();
-	int size = WINDOW_SIZE * sampleSize;
+	int sampleSize = input->format().sampleSize();
+	int size = WINDOW_SIZE * (sampleSize / 8);
 	qreal random;
 	int sign;
 
@@ -75,12 +98,13 @@ void ViSignalManipulator::addRandomNoise(ViAudioBuffer *buffer, qreal percentage
 		size = pcmToRealPointer(rawData, sampleData, size);
 		for(index = 0; index < size; ++index)
 		{
-			random = sampleData[index] + (rand() / randomMax);
+			random = (sampleData[index] * rand() / randomMax);
 			sign = rand();
 			if(sign > RAND_HALF)
 			{
 				random *= -1;
 			}
+			random += sampleData[index];
 			if(random > 1)
 			{
 				random = 1;
@@ -95,4 +119,76 @@ void ViSignalManipulator::addRandomNoise(ViAudioBuffer *buffer, qreal percentage
 		writeStream->write(rawData, size);
 		size = readStream->read(rawData, size);
 	}
+}
+
+void ViSignalManipulator::createToothSignal(ViAudioBuffer *buffer, qint32 cycles)
+{
+	QList<qreal> list;
+	static const qreal width = 200;
+	static const qreal width2 = width + (width / 2);
+	static const qreal width3 = (width * 3) - (width / 4);
+	static const qreal width4 = (width * 3) + (width / 4);
+	static const qreal offset = qSin((width2) / width * HALF_PI) - qSin((width3) / width * HALF_PI);
+	for(int i = 0; i < cycles; ++i)
+	{
+		for(int j = 0; j < width2; ++j)
+		{
+			list << qSin(j / width * HALF_PI);
+		}
+		for(int j = width3; j < width4; ++j)
+		{
+			list << offset + qSin(j / width * HALF_PI);
+		}
+		for(int j = width2; j >= 0; --j)
+		{
+			list << qSin(j / width * HALF_PI);
+		}
+	}
+	ViSignalManipulator::createSignal(list, buffer);
+}
+
+void ViSignalManipulator::createTriangleSignal(ViAudioBuffer *buffer, qint32 cycles)
+{
+	QList<qreal> list;
+	static const qreal width = 500;
+	for(int i = 0; i < cycles; ++i)
+	{
+		for(int j = 0; j < width; ++j)
+		{
+			list << j / width;
+		}
+		for(int j = width; j > 0; --j)
+		{
+			list << j / width;
+		}
+	}
+	ViSignalManipulator::createSignal(list, buffer);
+}
+
+void ViSignalManipulator::createMountainSignal(ViAudioBuffer *buffer, qint32 cycles)
+{
+	QList<qreal> list;
+	static const qreal width = 500;
+	static const qreal width2 = 150;
+	static const qreal ratio = width2 / width;
+	for(int i = 0; i < cycles; ++i)
+	{
+		for(int j = 0; j < width; ++j)
+		{
+			list << j / width;
+		}
+		for(int j = 0; j < width2; ++j)
+		{
+			list << 1 - (j / width2) * ratio;
+		}
+		for(int j = width2; j >= 0; --j)
+		{
+			list << 1 - (j / width2) * ratio;
+		}
+		for(int j = width; j > 0; --j)
+		{
+			list << j / width;
+		}
+	}
+	ViSignalManipulator::createSignal(list, buffer);
 }
