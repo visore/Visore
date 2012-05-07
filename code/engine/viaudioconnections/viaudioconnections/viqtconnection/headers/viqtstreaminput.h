@@ -5,6 +5,16 @@
 #include <QAudioInput>
 #include <QBuffer>
 
+class ViQtStreamBuffer : public QBuffer
+{
+	public:
+		ViQtStreamBuffer(ViAudioBuffer *buffer);
+		qint64 write(const char *data, qint64 maxSize){cout<<"pol: 1"<<endl;}
+		qint64 write(const char *data){cout<<"pol: 2"<<endl;}
+		qint64 write(const QByteArray &byteArray){cout<<"pol: 3"<<endl;}
+		qint64 writeData ( const char * data, qint64 len ){cout<<"pol: 8"<<endl;}
+};
+
 class ViQtStreamInput : public ViStreamInput
 {
 	Q_OBJECT

@@ -1,5 +1,14 @@
 #include "viqtstreaminput.h"
 
+#include <iostream>
+using namespace std;
+
+ViQtStreamBuffer::ViQtStreamBuffer(ViAudioBuffer *buffer)
+	: QBuffer()
+{
+cout<<"pl"<<endl;
+}
+
 ViQtStreamInput::ViQtStreamInput()
 	: ViStreamInput()
 {
@@ -14,18 +23,20 @@ void ViQtStreamInput::initialize()
 {
 	ViStreamInput::initialize();
 
-	mBufferDevice = new QBuffer(mBuffer->data(), this);
+	//mBufferDevice = new QBuffer(mBuffer->data(), this);
+	mBufferDevice = new ViQtStreamBuffer(mBuffer);
 	mBufferDevice->open(QIODevice::WriteOnly);
 
 	mBuffer->setFormat(mFormat);
 	mAudioInput = new QAudioInput(mDevice, mFormat, this);
 	mAudioInput->setNotifyInterval(25);
 	ViObject::connect(mAudioInput, SIGNAL(notify()), this, SLOT(a()));
+cout<<mAudioInput->error()<<endl;
 }
 
 void ViQtStreamInput::a()
 {
-	//cout<<"AAAAAAAAAA: "<<mBufferDevice->size()<<<<endl;
+	cout<<"AAAAAAAAAA: "<<mBufferDevice->size()<<endl;
 }
 
 void ViQtStreamInput::free()
