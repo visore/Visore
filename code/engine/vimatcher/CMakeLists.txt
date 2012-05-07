@@ -25,7 +25,7 @@ QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_MATCHER_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(vimatcher SHARED ${VI_MATCHER_HEADERS} ${VI_MATCHER_SOURCES} ${VI_WRAPPER_HEADERS})
-TARGET_LINK_LIBRARIES(vimatcher ${QT_QTCORE_LIBRARIES} viaudiobuffer viwaveformer)
+TARGET_LINK_LIBRARIES(vimatcher ${QT_QTCORE_LIBRARIES} viaudiobuffer vifouriertransformer)
 
 #Install file
 INSTALL(TARGETS vimatcher DESTINATION engine)

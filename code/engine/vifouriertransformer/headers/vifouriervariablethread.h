@@ -4,25 +4,23 @@
 #include <QThread>
 #include "FFTReal.h"
 
-template <typename T>
 class ViFourierVariablehread : public QThread
 {
 
 	public:
 
 		ViFourierVariablehread();
-		void setData(T input[], T output[], int numberOfSamples);
+		void setData(float input[], float output[], int numberOfSamples);
 
 	protected:
 
-		T *mInput;
-		T *mOutput;
+		float *mInput;
+		float *mOutput;
 		int mNumberOfSamples;
 
 };
 
-template <typename T>
-class ViFourierVariableForwardThread : public ViFourierVariablehread<T>
+class ViFourierVariableForwardThread : public ViFourierVariablehread
 {
 
 	public:
@@ -32,8 +30,7 @@ class ViFourierVariableForwardThread : public ViFourierVariablehread<T>
 
 };
 
-template <typename T>
-class ViFourierVariableInverseThread : public ViFourierVariablehread<T>
+class ViFourierVariableInverseThread : public ViFourierVariablehread
 {
 
 	public:
@@ -42,7 +39,5 @@ class ViFourierVariableInverseThread : public ViFourierVariablehread<T>
 		void run();
 
 };
-
-#include "../sources/vifouriervariablethread.cpp"
 
 #endif
