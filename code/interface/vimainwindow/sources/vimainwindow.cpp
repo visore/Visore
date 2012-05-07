@@ -19,6 +19,7 @@ ViMainWindow::~ViMainWindow()
 	delete mOutputContainer;
 	delete mControlContainer;
 	delete mLoadingWidget;
+	delete mSongInfoWidget;
 }
 
 void ViMainWindow::resizeEvent(QResizeEvent *event)
@@ -62,4 +63,9 @@ void ViMainWindow::initialize()
 	mOutputContainer = new ViOutputContainer(mUi->tabWidget);
 	mOutputContainer->setEngine(mEngine);
 	mUi->tabWidget->addTab("Output", mOutputContainer);
+
+	//Song info
+	mSongInfoWidget = new ViSongInfoWidget(mUi->songInfoContainer);
+	mUi->songInfoContainer->layout()->addWidget(mSongInfoWidget);
+	mSongInfoWidget->setEngine(mEngine);
 }

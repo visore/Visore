@@ -16,7 +16,7 @@ class ViEchoNestResponse
 		QString code();
 		QString message();
 		int numberOfSongs();
-		ViSongInfo songInfo(int index = -1);
+		ViSongInfo& songInfo(int index = -1);
 		QList<ViSongInfo> songInfos();
 		QString toString();
 		static QString toUrl(QString string);

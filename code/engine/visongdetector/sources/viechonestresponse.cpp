@@ -104,7 +104,7 @@ int ViEchoNestResponse::numberOfSongs()
 	return mSongs.size();
 }
 
-ViSongInfo ViEchoNestResponse::songInfo(int index)
+ViSongInfo& ViEchoNestResponse::songInfo(int index)
 {
 	if(index < 0)
 	{

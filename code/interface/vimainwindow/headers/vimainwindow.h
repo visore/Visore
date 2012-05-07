@@ -8,6 +8,7 @@
 #include "viinputcontainer.h"
 #include "vioutputcontainer.h"
 #include "viloadingwidget.h"
+#include "visonginfowidget.h"
 
 namespace Ui
 {
@@ -40,6 +41,8 @@ class ViMainWindow : public QMainWindow
 		ViControlContainer *mControlContainer;
 		ViInputContainer *mInputContainer;
 		ViOutputContainer *mOutputContainer;
+
+		ViSongInfoWidget *mSongInfoWidget;
 };
 
 #endif

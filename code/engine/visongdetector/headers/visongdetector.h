@@ -24,7 +24,8 @@ class ViSongCodeGeneratorThread : public QThread
 		void finished(QString code, QString version, int codeLength);
 
 	public:
-		ViSongCodeGeneratorThread(QByteArray *data, QObject *parent = 0);
+		ViSongCodeGeneratorThread(QObject *parent = 0);
+		void setData(QByteArray *data);
 		void setOffset(int offset);
 
 	protected:
@@ -56,7 +57,8 @@ class ViSongDetector : public QObject
 		};
 
 	signals:
-		void stateChanged(ViSongDetector::State state, bool found);
+		void stateChanged(ViSongDetector::State state);
+		void songFound(ViSongInfo info);
 
 	private slots:
 		void bufferChanged(int size = -1);
@@ -80,11 +82,11 @@ class ViSongDetector : public QObject
 		void setState(ViSongDetector::State state);
 
 	private:
-		QByteArray mOutput;
+		QByteArray *mOutput;
 		ViCoder mCoder;
 
 		ViEchoNestResponse mResponse;
-		ViSongCodeGeneratorThread *mThread;
+		ViSongCodeGeneratorThread mThread;
 		ViAudioOutput *mAudioOutput;
 
 		QNetworkAccessManager *mNetworkManager;

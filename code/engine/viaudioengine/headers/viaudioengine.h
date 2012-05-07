@@ -75,6 +75,8 @@ class ViAudioEngine : public QObject, public ViError
 		void originalWaveChanged();
 		void correctedWaveChanged();
 
+		void songInfoChanged(ViSongInfo info);
+
 	public:
 		ViAudioEngine();
 		~ViAudioEngine();

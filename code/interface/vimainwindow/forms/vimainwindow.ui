@@ -21,6 +21,33 @@
     <property name="margin">
      <number>9</number>
     </property>
+    <item row="1" column="0">
+     <widget class="QWidget" name="originalWaveContainer" native="true">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4"/>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="ViTabWidget" name="tabWidget" native="true"/>
+    </item>
+    <item row="5" column="0">
+     <widget class="QWidget" name="correctedWaveContainer" native="true">
+      <layout class="QGridLayout" name="gridLayout_5"/>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QWidget" name="songInfoContainer" native="true">
+      <property name="maximumSize">
+       <size>
+        <width>500</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2"/>
+     </widget>
+    </item>
     <item row="5" column="1">
      <spacer name="verticalSpacer_2">
       <property name="orientation">
@@ -46,22 +73,6 @@
        </size>
       </property>
      </spacer>
-    </item>
-    <item row="1" column="0">
-     <widget class="QWidget" name="originalWaveContainer" native="true">
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_4"/>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="ViTabWidget" name="tabWidget" native="true"/>
-    </item>
-    <item row="5" column="0">
-     <widget class="QWidget" name="correctedWaveContainer" native="true">
-      <layout class="QGridLayout" name="gridLayout_5"/>
-     </widget>
     </item>
    </layout>
   </widget>

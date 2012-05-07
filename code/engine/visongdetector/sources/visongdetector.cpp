@@ -2,17 +2,22 @@
 #include "Codegen.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QDir>
 
 //Interval (milliseconds) use to request info
 #define REQUEST_SAMPLES_1 200000
 #define REQUEST_SAMPLES_2 500000
 #define REQUEST_SAMPLES_3 1000000
 
-ViSongCodeGeneratorThread::ViSongCodeGeneratorThread(QByteArray *data, QObject *parent)
+ViSongCodeGeneratorThread::ViSongCodeGeneratorThread(QObject *parent)
 	: QThread(parent)
 {
-	mData = data;
 	mOffset = 0;
+}
+
+void ViSongCodeGeneratorThread::setData(QByteArray *data)
+{
+	mData = data;
 }
 
 void ViSongCodeGeneratorThread::setOffset(int offset)
@@ -31,20 +36,21 @@ void ViSongCodeGeneratorThread::run()
 		float *result = new float[size / 2];
 		size = ViPcmConverter::pcmToReal16(chunk, result, size);
 		delete [] chunk;
-		Codegen *codegen = new Codegen(result, size / 2, mOffset);
+		Codegen codegen(result, size / 2, mOffset);
 		delete [] result;
-		QString code = QString::fromStdString(codegen->getCodeString());
-		QString version = QString::number(codegen->getVersion());
-		finished(code, version, codegen->getNumCodes());
-		delete codegen;
+		QString code = QString::fromStdString(codegen.getCodeString());
+		QString version = QString::number(codegen.getVersion());
+		emit finished(code, version, codegen.getNumCodes());
 	}
+	delete mData;
+	mData = NULL;
 }
 
 ViSongDetector::ViSongDetector(ViAudioOutput *output)
 	: QObject()
 {
 	mAudioOutput = output;
-	mThread = new ViSongCodeGeneratorThread(&mOutput, this);
+	mOutput = NULL;
 	mNetworkManager = new QNetworkAccessManager();
 
 	mState = ViSongDetector::Idle;
@@ -54,16 +60,15 @@ ViSongDetector::ViSongDetector(ViAudioOutput *output)
 
 	mRequestsSent = 0;
 	mKey = "";
-	ViObject::connect(mThread, SIGNAL(finished(QString, QString, int)), this, SLOT(codeFinished(QString, QString, int)));
+	ViObject::connect(&mThread, SIGNAL(finished(QString, QString, int)), this, SLOT(codeFinished(QString, QString, int)));
 	ViObject::connect(mAudioOutput->buffer(), SIGNAL(changed(int)), this, SLOT(bufferChanged(int)));
 	ViObject::connect(&mCoder, SIGNAL(stateChanged(ViCoder::State)), this, SLOT(encodingStateChanged(ViCoder::State)));
 }
 
 ViSongDetector::~ViSongDetector()
 {
-	ViObject::disconnect(mThread, SIGNAL(finished(QString, QString, int)), this, SLOT(codeFinished(QString, QString, int)));
+	ViObject::disconnect(&mThread, SIGNAL(finished(QString, QString, int)), this, SLOT(codeFinished(QString, QString, int)));
 	ViObject::disconnect(mAudioOutput->buffer(), SIGNAL(changed(int)), this, SLOT(bufferChanged(int)));
-	delete mThread;
 	delete mNetworkManager;
 }
 
@@ -85,7 +90,7 @@ void ViSongDetector::bufferChanged(int size)
 	}
 
 	qint64 bufferSize = mAudioOutput->buffer()->size();
-	if(mError != ViSongDetector::NetworkError && !mFound && !mThread->isRunning())
+	if(mError != ViSongDetector::NetworkError && !mFound && !mThread.isRunning())
 	{
 		if((mRequestsSent == 0 && bufferSize >= REQUEST_SAMPLES_1)
 			|| (mRequestsSent == 1 && bufferSize >= REQUEST_SAMPLES_2)
@@ -111,7 +116,8 @@ void ViSongDetector::bufferChanged(int size)
 			format.setByteOrder(ViAudioFormat::LittleEndian);
 			format.setChannelCount(1);
 			format.setCodec(ViCodecManager::selected("WAV"));
-			mCoder.encode(mAudioOutput->buffer(), &mOutput, mAudioOutput->buffer()->format(), format);
+			mOutput = new QByteArray();
+			mCoder.encode(mAudioOutput->buffer(), mOutput, mAudioOutput->buffer()->format(), format);
 		}
 	}
 }
@@ -121,14 +127,19 @@ void ViSongDetector::encodingStateChanged(ViCoder::State state)
 	if(state == ViCoder::SuccessState)
 	{
 		setState(ViSongDetector::CodeGeneration);
-		mThread->start();
+		mThread.setData(mOutput);
+		mThread.start();
+	}
+	else if(state != ViCoder::ActiveState)
+	{
+		delete mOutput;
+		mOutput = NULL;
 	}
 }
 
 void ViSongDetector::codeFinished(QString code, QString version, int codeLength)
 {
 	setState(ViSongDetector::SongDetection);
-	mOutput.clear();
 	ViObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
 	QUrl url("http://developer.echonest.com/api/v4/song/identify?api_key=" + mKey + "&bucket=id:7digital-US&bucket=tracks&bucket=audio_summary&bucket=artist_familiarity&bucket=artist_hotttnesss&bucket=song_hotttnesss");
 	QNetworkRequest request(url);
@@ -163,6 +174,7 @@ void ViSongDetector::replyFinished(QNetworkReply *reply)
 	else
 	{
 		setState(ViSongDetector::ImageRetrieval);
+		emit songFound(mResponse.songInfo());
 		mFound = true;
 		QUrl url;
 		if(mResponse.songInfo().imagePath() != "")
@@ -190,7 +202,7 @@ void ViSongDetector::downloadFinished(QNetworkReply *reply)
 		mError = ViSongDetector::NetworkError;
 	}
 
-	QString newPath = "/tmp/" + mResponse.songInfo().songId();
+	QString newPath = QDir::tempPath() + QDir::separator() + mResponse.songInfo().songId();
 	QFile file(newPath);
 	if(!file.open(QIODevice::WriteOnly))
 	{
@@ -200,6 +212,7 @@ void ViSongDetector::downloadFinished(QNetworkReply *reply)
 	file.close();
 	mResponse.songInfo().changeImagePath(reply->url().toString(), newPath);
 	setState(ViSongDetector::Idle);
+	emit songFound(mResponse.songInfo());
 }
 
 void ViSongDetector::setProxy(QNetworkProxy::ProxyType type, QString host, quint16 port, QString username, QString password)
@@ -236,5 +249,5 @@ QList<ViSongInfo> ViSongDetector::songInfo()
 void ViSongDetector::setState(ViSongDetector::State state)
 {
 	mState = state;
-	emit stateChanged(mState, mFound);
+	emit stateChanged(mState);
 }

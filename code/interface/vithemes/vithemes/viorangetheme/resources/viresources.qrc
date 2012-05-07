@@ -31,5 +31,6 @@
         <file>icons/disabled/play.png</file>
         <file>icons/disabled/record.png</file>
         <file>icons/disabled/stop.png</file>
+        <file>icons/normal/star.png</file>
     </qresource>
 </RCC>
