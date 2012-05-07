@@ -3,10 +3,10 @@
 
 #include <QtGlobal>
 #include <QThread>
+#include <QtCore/qmath.h>
 #include "FFTRealFixLen.h"
-
-// Each pass of the FFT processes 2^X samples, where X is the number below.
-static const int FFT_POWER_OF_TWO = 12;
+#include "vifourierfixedthread.h"
+#include "vifouriervariablethread.h"
 
 class ViFourierObject : public QObject
 {
@@ -15,45 +15,6 @@ class ViFourierObject : public QObject
 	signals:
 
 		void finished();
-};
-
-template <typename T>
-class ViFourierTransformerThread : public QThread
-{
-
-	public:
-
-		ViFourierTransformerThread();
-		void setData(T input[], T output[]);
-
-	protected:
-
-		ffft::FFTRealFixLen<FFT_POWER_OF_TWO> mFourierTransform;
-		T *mInput;
-		T *mOutput;
-
-};
-
-template <typename T>
-class ViFourierTransformerForwardThread : public ViFourierTransformerThread<T>
-{
-
-	public:
-
-		ViFourierTransformerForwardThread();
-		void run();
-
-};
-
-template <typename T>
-class ViFourierTransformerInverseThread : public ViFourierTransformerThread<T>
-{
-
-	public:
-
-		ViFourierTransformerInverseThread();
-		void run();
-
 };
 
 template <typename T>
@@ -72,14 +33,23 @@ class ViFourierTransformer : public ViFourierObject
 
 		ViFourierTransformer();
 		
-		void transform(T input[], T output[], Direction direction = ViFourierTransformer::Forward);
-		void forwardTransform(T input[], T output[]);
-		void inverseTransform(T input[], T output[]);
+		void transform(T input[], T output[], Direction direction = ViFourierTransformer::Forward, qint32 numberOfSamples = FFT_POWER_OF_TWO);
+		void forwardTransform(T input[], T output[], qint32 numberOfSamples = FFT_POWER_OF_TWO);
+		void inverseTransform(T input[], T output[], qint32 numberOfSamples = FFT_POWER_OF_TWO);
 
 	private:
 
-		ViFourierTransformerForwardThread<T>  mForwardThread;
-		ViFourierTransformerInverseThread<T>  mInverseThread;
+		void fixedForwardTransform(T input[], T output[]);
+		void fixedInverseTransform(T input[], T output[]);
+		void variableForwardTransform(T input[], T output[], qint32 numberOfSamples);
+		void variableInverseTransform(T input[], T output[], qint32 numberOfSamples);
+
+	private:
+
+		ViFourierFixedForwardThread<T>  mFixedForwardThread;
+		ViFourierFixedInverseThread<T>  mFixedInverseThread;
+		ViFourierVariableForwardThread<T>  mVariableForwardThread;
+		ViFourierVariableInverseThread<T>  mVariableInverseThread;
 };
 
 #include "../sources/vifouriertransformer.cpp"

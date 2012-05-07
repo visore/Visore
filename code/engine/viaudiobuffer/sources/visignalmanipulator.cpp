@@ -26,9 +26,25 @@ void ViSignalManipulator::createDefaultSignal(ViAudioBuffer *buffer, qint32 cycl
 	{
 		ViSignalManipulator::createMountainSignal(buffer, cycles);
 	}
+	else if(type == ViSignalManipulator::FlatMountain)
+	{
+		ViSignalManipulator::createFlatMountainSignal(buffer, cycles);
+	}
 	else if(type == ViSignalManipulator::Trapezoid)
 	{
 		ViSignalManipulator::createTrapezoidSignal(buffer, cycles);
+	}
+	else if(type == ViSignalManipulator::Sin)
+	{
+		ViSignalManipulator::createSinSignal(buffer, cycles);
+	}
+	else if(type == ViSignalManipulator::Cos)
+	{
+		ViSignalManipulator::createCosSignal(buffer, cycles);
+	}
+	else if(type == ViSignalManipulator::Tan)
+	{
+		ViSignalManipulator::createTanSignal(buffer, cycles);
 	}
 }
 
@@ -161,7 +177,7 @@ void ViSignalManipulator::createTriangleSignal(ViAudioBuffer *buffer, qint32 cyc
 		{
 			list << j / width;
 		}
-		for(int j = width; j > 0; --j)
+		for(int j = width; j >= 0; --j)
 		{
 			list << j / width;
 		}
@@ -189,9 +205,52 @@ void ViSignalManipulator::createMountainSignal(ViAudioBuffer *buffer, qint32 cyc
 		{
 			list << 1 - (j / width2) * ratio;
 		}
-		for(int j = width; j > 0; --j)
+		for(int j = width; j >= 0; --j)
 		{
 			list << j / width;
+		}
+	}
+	ViSignalManipulator::createSignal(list, buffer);
+}
+
+void ViSignalManipulator::createFlatMountainSignal(ViAudioBuffer *buffer, qint32 cycles)
+{
+	QList<qreal> list;
+	static const qreal width = 75;
+	static const qreal width2 = 125;
+	static const qreal width3 = 250;
+	static const qreal width4 = 350;
+	static const qreal width5 = 450;
+	static const qreal width6 = 625;
+	static const qreal flat = width / width2;
+	static const qreal gradient = 0.2;
+	static const qreal gap = width4 - width3;
+	qreal w = width3;
+	for(int i = 0; i < cycles; ++i)
+	{
+		for(int j = 0; j < width; ++j)
+		{
+			list << j / width2;
+		}
+		for(int j = width; j < width3; ++j)
+		{
+			list << flat;
+		}
+		for(int j = gap; j >= 0; --j)
+		{
+			list << (flat - gradient) + (gradient * j / gap);
+		}
+		for(int j = 0; j < gap; ++j)
+		{
+			list << (flat - gradient) + (gradient * j / gap);
+		}
+		for(int j = width5; j < width6; ++j)
+		{
+			list << flat;
+		}
+		for(int j = width; j >= 0; --j)
+		{
+			list << j / width2;
 		}
 	}
 	ViSignalManipulator::createSignal(list, buffer);
@@ -200,22 +259,65 @@ void ViSignalManipulator::createMountainSignal(ViAudioBuffer *buffer, qint32 cyc
 void ViSignalManipulator::createTrapezoidSignal(ViAudioBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
-	static const qreal width = 100;
-	static const qreal width2 = 600;
-	static const qreal ratio = width2 / width;
+	static const qreal width = 75;
+	static const qreal width2 = 125;
+	static const qreal width3 = 625;
+	static const qreal flat = width / width2;
 	for(int i = 0; i < cycles; ++i)
 	{
 		for(int j = 0; j < width; ++j)
 		{
-			list << j / width;
+			list << j / width2;
 		}
-		for(int j = 0; j < width2; ++j)
+		for(int j = width; j < width3; ++j)
 		{
-			list << sin(PI / 4);
+			list << flat;
 		}
-		for(int j = width; j > 0; --j)
+		for(int j = width; j >= 0; --j)
 		{
-			list << j / width;
+			list << j / width2;
+		}
+	}
+	ViSignalManipulator::createSignal(list, buffer);
+}
+
+void ViSignalManipulator::createSinSignal(ViAudioBuffer *buffer, qint32 cycles)
+{
+	QList<qreal> list;
+	static const qreal width = 200;
+	for(int i = 0; i < cycles; ++i)
+	{
+		for(int j = 0; j < width; ++j)
+		{
+			list << qSin(j / width * 2 * PI);
+		}
+	}
+	ViSignalManipulator::createSignal(list, buffer);
+}
+
+void ViSignalManipulator::createCosSignal(ViAudioBuffer *buffer, qint32 cycles)
+{
+	QList<qreal> list;
+	static const qreal width = 200;
+	for(int i = 0; i < cycles; ++i)
+	{
+		for(int j = 0; j < width; ++j)
+		{
+			list << qCos(j / width * 2 * PI);
+		}
+	}
+	ViSignalManipulator::createSignal(list, buffer);
+}
+
+void ViSignalManipulator::createTanSignal(ViAudioBuffer *buffer, qint32 cycles)
+{
+	QList<qreal> list;
+	static const qreal width = 200;
+	for(int i = 0; i < cycles; ++i)
+	{
+		for(int j = 0; j < width; ++j)
+		{
+			list << qTan(j / width * 2 * PI);
 		}
 	}
 	ViSignalManipulator::createSignal(list, buffer);
