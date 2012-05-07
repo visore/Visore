@@ -26,6 +26,10 @@ void ViSignalManipulator::createDefaultSignal(ViAudioBuffer *buffer, qint32 cycl
 	{
 		ViSignalManipulator::createMountainSignal(buffer, cycles);
 	}
+	else if(type == ViSignalManipulator::Trapezoid)
+	{
+		ViSignalManipulator::createTrapezoidSignal(buffer, cycles);
+	}
 }
 
 void ViSignalManipulator::createSignal(QList<qreal> samples, ViAudioBuffer *buffer)
@@ -184,6 +188,30 @@ void ViSignalManipulator::createMountainSignal(ViAudioBuffer *buffer, qint32 cyc
 		for(int j = width2; j >= 0; --j)
 		{
 			list << 1 - (j / width2) * ratio;
+		}
+		for(int j = width; j > 0; --j)
+		{
+			list << j / width;
+		}
+	}
+	ViSignalManipulator::createSignal(list, buffer);
+}
+
+void ViSignalManipulator::createTrapezoidSignal(ViAudioBuffer *buffer, qint32 cycles)
+{
+	QList<qreal> list;
+	static const qreal width = 100;
+	static const qreal width2 = 600;
+	static const qreal ratio = width2 / width;
+	for(int i = 0; i < cycles; ++i)
+	{
+		for(int j = 0; j < width; ++j)
+		{
+			list << j / width;
+		}
+		for(int j = 0; j < width2; ++j)
+		{
+			list << sin(PI / 4);
 		}
 		for(int j = width; j > 0; --j)
 		{

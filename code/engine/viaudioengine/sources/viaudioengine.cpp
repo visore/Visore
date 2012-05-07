@@ -42,6 +42,8 @@ ViAudioEngine::ViAudioEngine()
 	mSongDetector->setKey("G1TZBE4IHJAYUSNCN");
 	ViObject::connect(mSongDetector, SIGNAL(songFound(ViSongInfo)), this, SIGNAL(songInfoChanged(ViSongInfo)));*/
 
+ViSignalManipulator::createDefaultSignal(mProcessingChain->correctedBuffer(), 500, ViSignalManipulator::Trapezoid);
+
 	ViAudioBuffer *b1 = new ViAudioBuffer();
 	ViAudioBuffer *b2 = new ViAudioBuffer();
 	ViSignalManipulator::createDefaultSignal(b1, 500, ViSignalManipulator::Tooth);

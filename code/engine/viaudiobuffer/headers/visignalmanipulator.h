@@ -12,7 +12,8 @@ class ViSignalManipulator
 		{
 			Tooth = 0,
 			Triangle = 1,
-			Mountain = 2
+			Mountain = 2,
+			Trapezoid = 3
 		};
 
 	public:
@@ -28,6 +29,7 @@ class ViSignalManipulator
 		static void createToothSignal(ViAudioBuffer *buffer, qint32 cycles);
 		static void createTriangleSignal(ViAudioBuffer *buffer, qint32 cycles);
 		static void createMountainSignal(ViAudioBuffer *buffer, qint32 cycles);
+		static void createTrapezoidSignal(ViAudioBuffer *buffer, qint32 cycles);
 
 };
 
