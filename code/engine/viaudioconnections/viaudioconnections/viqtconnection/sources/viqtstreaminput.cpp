@@ -6,7 +6,27 @@ using namespace std;
 ViQtStreamBuffer::ViQtStreamBuffer(ViAudioBuffer *buffer)
 	: QBuffer()
 {
-cout<<"pl"<<endl;
+	mStream = buffer->createWriteStream();
+}
+
+qint64 ViQtStreamBuffer::write(const char *data, qint64 maxSize)
+{
+	return mStream->write((char*) data, maxSize);
+}
+
+qint64 ViQtStreamBuffer::write(const char *data)
+{
+	return mStream->write((char*) data, qstrlen(data));
+}
+
+qint64 ViQtStreamBuffer::write(const QByteArray &byteArray)
+{
+	return mStream->write((char*) byteArray.data(), byteArray.size());
+}
+
+qint64 ViQtStreamBuffer::writeData(const char *data, qint64 length)
+{
+	return mStream->write((char*) data, length);
 }
 
 ViQtStreamInput::ViQtStreamInput()
@@ -23,20 +43,11 @@ void ViQtStreamInput::initialize()
 {
 	ViStreamInput::initialize();
 
-	//mBufferDevice = new QBuffer(mBuffer->data(), this);
 	mBufferDevice = new ViQtStreamBuffer(mBuffer);
 	mBufferDevice->open(QIODevice::WriteOnly);
 
 	mBuffer->setFormat(mFormat);
 	mAudioInput = new QAudioInput(mDevice, mFormat, this);
-	mAudioInput->setNotifyInterval(25);
-	ViObject::connect(mAudioInput, SIGNAL(notify()), this, SLOT(a()));
-cout<<mAudioInput->error()<<endl;
-}
-
-void ViQtStreamInput::a()
-{
-	cout<<"AAAAAAAAAA: "<<mBufferDevice->size()<<endl;
 }
 
 void ViQtStreamInput::free()
