@@ -169,13 +169,8 @@ void ViCrossCorrelationMatcher::calculateNext()
 	{
 		mFirstSampleSize = pcmToRealFirstPointer(mFirstRawData, mFirstRealData, mFirstSize);
 		mSecondSampleSize = pcmToRealSecondPointer(mSecondRawData, mSecondRealData, mSecondSize);
-/*
-for(int i = 0; i < mFirstSampleSize; ++i)cout<<mFirstRealData[i]<<" ";
-cout<<endl;*/
-for(int i = 0; i < mFirstSize; ++i)mFirstFourierData[i]=0;
-
-		mTransformer1.forwardTransform(mFirstFourierData, mFirstRealData, mFirstSampleSize);
-		//mTransformer2.forwardTransform(mSecondFourierData, mSecondRealData, mSecondSampleSize);
+		mTransformer1.forwardTransform(mFirstRealData, mFirstFourierData, mFirstSampleSize);
+		//mTransformer2.forwardTransform(mSecondRealData, mSecondFourierData, mSecondSampleSize);
 	}
 	else
 	{
@@ -190,8 +185,6 @@ void ViCrossCorrelationMatcher::summarize()
 	static qreal difference;
 	static qint32 size, index;
 	size = qMin(mFirstSampleSize, mSecondSampleSize);
-size=mFirstSampleSize;
-cout<<"finished"<<endl;
 	for(index = 0; index < size; ++index)
 	{
 

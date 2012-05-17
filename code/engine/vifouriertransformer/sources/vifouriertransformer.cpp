@@ -21,7 +21,7 @@ void ViFourierTransformer::transform(float input[], float output[], Direction di
 	}
 }
 
-void ViFourierTransformer::forwardTransform(float input[], float output[], qint32 numberOfSamples)
+void ViFourierTransformer::forwardTransform(float *input, float *output, qint32 numberOfSamples)
 {
 	if(numberOfSamples == FFT_SAMPLES)
 	{
@@ -45,7 +45,7 @@ void ViFourierTransformer::inverseTransform(float input[], float output[], qint3
 	}
 }
 
-void ViFourierTransformer::fixedForwardTransform(float input[], float output[])
+void ViFourierTransformer::fixedForwardTransform(float *input, float *output)
 {
 	mFixedForwardThread.setData(input, output);
 	mFixedForwardThread.start();
