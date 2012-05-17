@@ -1,6 +1,7 @@
 #include "vimatcherstrategy.h"
 
 ViMatcherStrategy::ViMatcherStrategy()
+	: QObject()
 {
 	mFirstStream = NULL;
 	mSecondStream = NULL;

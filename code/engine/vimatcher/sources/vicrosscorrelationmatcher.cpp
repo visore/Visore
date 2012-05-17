@@ -1,5 +1,8 @@
 #include "vicrosscorrelationmatcher.h"
 
+#include <iostream>
+using namespace std;
+
 ViCrossCorrelationMatcher::ViCrossCorrelationMatcher()
 	: ViMatcherStrategy()
 {
@@ -9,10 +12,17 @@ ViCrossCorrelationMatcher::ViCrossCorrelationMatcher()
 	mSampleCounter = 0;
 	mFirstSize = 0;
 	mSecondSize = 0;
+	mFirstSampleSize = 0;
+	mSecondSampleSize = 0;
 	mFirstRawData = NULL;
 	mSecondRawData = NULL;
 	mFirstRealData = NULL;
 	mSecondRealData = NULL;
+	mFirstFourierData = NULL;
+	mSecondFourierData = NULL;
+
+	QObject::connect(&mTransformer1, SIGNAL(finished()), this, SLOT(summarize()));
+	//QObject::connect(&mTransformer2, SIGNAL(finished()), this, SLOT(summarize()));
 }
 
 ViCrossCorrelationMatcher::~ViCrossCorrelationMatcher()
@@ -33,14 +43,25 @@ ViCrossCorrelationMatcher::~ViCrossCorrelationMatcher()
 	{
 		delete mSecondRealData;
 	}
+	if(mFirstFourierData != NULL)
+	{
+		delete mFirstFourierData;
+	}
+	if(mSecondFourierData != NULL)
+	{
+		delete mSecondFourierData;
+	}
 }
 
 void ViCrossCorrelationMatcher::match()
 {
 	static const qint32 WINDOW_SIZE = 4096;
+	mFirstFourierFinished = false;
 
-	qint32 firstSampleSize = mFirstStream->buffer()->format().sampleSize(), secondSampleSize = mSecondStream->buffer()->format().sampleSize();
-	mFirstSize = WINDOW_SIZE * (firstSampleSize / 8), mSecondSize = WINDOW_SIZE * (secondSampleSize / 8);
+	mFirstSampleSize = mFirstStream->buffer()->format().sampleSize();
+	mSecondSampleSize = mSecondStream->buffer()->format().sampleSize();
+	mFirstSize = WINDOW_SIZE * (mFirstSampleSize / 8);
+	mSecondSize = WINDOW_SIZE * (mSecondSampleSize / 8);
 
 	if(mFirstRawData != NULL)
 	{
@@ -58,42 +79,52 @@ void ViCrossCorrelationMatcher::match()
 	{
 		delete mSecondRealData;
 	}
+	if(mFirstFourierData != NULL)
+	{
+		delete mFirstFourierData;
+	}
+	if(mSecondFourierData != NULL)
+	{
+		delete mSecondFourierData;
+	}
 
 	mFirstRawData = new char[mFirstSize];
 	mSecondRawData = new char[mSecondSize];
 	mFirstRealData = new float[mFirstSize];
 	mSecondRealData = new float[mSecondSize];
+	mFirstFourierData = new float[mFirstSize];
+	mSecondFourierData = new float[mSecondSize];
 
-	if(firstSampleSize == 8)
+	if(mFirstSampleSize == 8)
 	{
 		pcmToRealFirstPointer = &ViPcmConverter<float>::pcmToReal8;
 	}
-	else if(firstSampleSize == 16)
+	else if(mFirstSampleSize == 16)
 	{
 		pcmToRealFirstPointer = &ViPcmConverter<float>::pcmToReal16;
 	}
-	else if(firstSampleSize == 24)
+	else if(mFirstSampleSize == 24)
 	{
 		pcmToRealFirstPointer = &ViPcmConverter<float>::pcmToReal24;
 	}
-	else if(firstSampleSize == 32)
+	else if(mFirstSampleSize == 32)
 	{
 		pcmToRealFirstPointer = &ViPcmConverter<float>::pcmToReal32;
 	}
 
-	if(secondSampleSize == 8)
+	if(mSecondSampleSize == 8)
 	{
 		pcmToRealSecondPointer = &ViPcmConverter<float>::pcmToReal8;
 	}
-	else if(secondSampleSize == 16)
+	else if(mSecondSampleSize == 16)
 	{
 		pcmToRealSecondPointer = &ViPcmConverter<float>::pcmToReal16;
 	}
-	else if(secondSampleSize == 24)
+	else if(mSecondSampleSize == 24)
 	{
 		pcmToRealSecondPointer = &ViPcmConverter<float>::pcmToReal24;
 	}
-	else if(secondSampleSize == 32)
+	else if(mSecondSampleSize == 32)
 	{
 		pcmToRealSecondPointer = &ViPcmConverter<float>::pcmToReal32;
 	}
@@ -102,9 +133,9 @@ void ViCrossCorrelationMatcher::match()
 	firstSize = mFirstStream->read(firstRawData, firstSize);
 	while(firstSize > 0 && secondSize > 0)
 	{
-		firstSampleSize = pcmToRealFirstPointer(firstRawData, firstRealData, firstSize);
-		secondSampleSize = pcmToRealSecondPointer(secondRawData, secondRealData, secondSize);
-		size = qMin(firstSampleSize, secondSampleSize);
+		mFirstSampleSize = pcmToRealFirstPointer(firstRawData, firstRealData, firstSize);
+		mSecondSampleSize = pcmToRealSecondPointer(secondRawData, secondRealData, secondSize);
+		size = qMin(mFirstSampleSize, mSecondSampleSize);
 		for(index = 0; index < size; ++index)
 		{
 			difference = qAbs(firstRealData[index] - secondRealData[index]);
@@ -132,35 +163,52 @@ void ViCrossCorrelationMatcher::match()
 
 void ViCrossCorrelationMatcher::calculateNext()
 {
-	static qreal difference;
-	static qint32 size, index;
-	static qint32 firstSampleSize, secondSampleSize;
-	mSecondSize = mSecondStream->read(mSecondRawData, mSecondSize);
 	mFirstSize = mFirstStream->read(mFirstRawData, mFirstSize);
+	mSecondSize = mSecondStream->read(mSecondRawData, mSecondSize);
 	if(mFirstSize > 0 && mSecondSize > 0)
 	{
-		firstSampleSize = pcmToRealFirstPointer(mFirstRawData, mFirstRealData, mFirstSize);
-		secondSampleSize = pcmToRealSecondPointer(mSecondRawData, mSecondRealData, mSecondSize);
-		size = qMin(firstSampleSize, secondSampleSize);
-		for(index = 0; index < size; ++index)
-		{
-			difference = qAbs(mFirstRealData[index] - mSecondRealData[index]);
+		mFirstSampleSize = pcmToRealFirstPointer(mFirstRawData, mFirstRealData, mFirstSize);
+		mSecondSampleSize = pcmToRealSecondPointer(mSecondRawData, mSecondRealData, mSecondSize);
+/*
+for(int i = 0; i < mFirstSampleSize; ++i)cout<<mFirstRealData[i]<<" ";
+cout<<endl;*/
+for(int i = 0; i < mFirstSize; ++i)mFirstFourierData[i]=0;
 
-			mAverageDifference += difference;
-			if(difference < mMinimumDifference)
-			{
-				mMinimumDifference = difference;
-			}
-			else if(difference > mMaximumDifference)
-			{
-				mMaximumDifference = difference;
-			}
-		}
-		mSampleCounter += size;
+		mTransformer1.forwardTransform(mFirstFourierData, mFirstRealData, mFirstSampleSize);
+		//mTransformer2.forwardTransform(mSecondFourierData, mSecondRealData, mSecondSampleSize);
 	}
 	else
 	{
 		mAverageDifference /= mSampleCounter;
 		mResult->setCrossCorrelation(ViMatchResultCombination(mMinimumDifference, mMaximumDifference, mAverageDifference));
 	}
+}
+
+void ViCrossCorrelationMatcher::summarize()
+{
+	mFirstFourierFinished = !mFirstFourierFinished;
+	static qreal difference;
+	static qint32 size, index;
+	size = qMin(mFirstSampleSize, mSecondSampleSize);
+size=mFirstSampleSize;
+cout<<"finished"<<endl;
+	for(index = 0; index < size; ++index)
+	{
+
+if(mFirstFourierData[index] != 0)
+cout<<mFirstFourierData[index]<<endl;
+
+		difference = qAbs(mFirstRealData[index] - mSecondRealData[index]);
+
+		mAverageDifference += difference;
+		if(difference < mMinimumDifference)
+		{
+			mMinimumDifference = difference;
+		}
+		else if(difference > mMaximumDifference)
+		{
+			mMaximumDifference = difference;
+		}
+	}
+	mSampleCounter += size;
 }

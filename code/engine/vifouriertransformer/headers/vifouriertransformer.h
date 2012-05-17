@@ -37,10 +37,10 @@ class ViFourierTransformer : public QObject
 
 	private:
 
-		ViFourierFixedForwardThread  mFixedForwardThread;
-		ViFourierFixedInverseThread  mFixedInverseThread;
-		ViFourierVariableForwardThread  mVariableForwardThread;
-		ViFourierVariableInverseThread  mVariableInverseThread;
+		ViFourierFixedForwardThread mFixedForwardThread;
+		ViFourierFixedInverseThread mFixedInverseThread;
+		ViFourierVariableForwardThread mVariableForwardThread;
+		ViFourierVariableInverseThread mVariableInverseThread;
 };
 
 #endif

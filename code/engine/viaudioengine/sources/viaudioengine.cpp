@@ -42,12 +42,13 @@ ViAudioEngine::ViAudioEngine()
 	mSongDetector->setKey("G1TZBE4IHJAYUSNCN");
 	ViObject::connect(mSongDetector, SIGNAL(songFound(ViSongInfo)), this, SIGNAL(songInfoChanged(ViSongInfo)));*/
 
-ViSignalManipulator::createDefaultSignal(mProcessingChain->correctedBuffer(), 500, ViSignalManipulator::Tan);
+//ViSignalManipulator::createDefaultSignal(mProcessingChain->originalBuffer(), 2000, ViSignalManipulator::Sin);
+//cout<<"pop: "<<mProcessingChain->originalBuffer()->size()<<" "<<mProcessingChain->correctedBuffer()->size()<<endl;
 
 	ViAudioBuffer *b1 = new ViAudioBuffer();
 	ViAudioBuffer *b2 = new ViAudioBuffer();
-	ViSignalManipulator::createDefaultSignal(b1, 1, ViSignalManipulator::FlatMountain);
-	ViSignalManipulator::createDefaultSignal(b2, 1, ViSignalManipulator::Tooth);
+	ViSignalManipulator::createDefaultSignal(b1, 100, ViSignalManipulator::Tan);
+	ViSignalManipulator::createDefaultSignal(b2, 100, ViSignalManipulator::Tan);
 
 	//ViSignalManipulator::createNoise(b1, b2, 0.01);
 
