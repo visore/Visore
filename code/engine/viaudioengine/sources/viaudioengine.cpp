@@ -47,13 +47,16 @@ ViAudioEngine::ViAudioEngine()
 
 	ViAudioBuffer *b1 = new ViAudioBuffer();
 	ViAudioBuffer *b2 = new ViAudioBuffer();
-	ViSignalManipulator::createDefaultSignal(b1, 100, ViSignalManipulator::Tan);
+	ViSignalManipulator::createDefaultSignal(b1, 100, ViSignalManipulator::Sin);
 	ViSignalManipulator::createDefaultSignal(b2, 100, ViSignalManipulator::Tan);
 
 	//ViSignalManipulator::createNoise(b1, b2, 0.01);
 
-	ViMatcher *m = new ViMatcher();
-m->match(b1, b2);
+	/*ViMatcher *m = new ViMatcher();
+	m->match(b1, b2);*/
+
+	ViSpectrumAnalyzer *s = new ViSpectrumAnalyzer(b1);
+	s->analyze();
 }
 
 ViAudioEngine::~ViAudioEngine()

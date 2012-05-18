@@ -11,6 +11,53 @@ ViAudioPosition::ViAudioPosition(qreal microseconds, ViAudioPosition::Unit unit,
 	setPosition(microseconds, unit, format);
 }
 
+qreal ViAudioPosition::convertPosition(qreal position, ViAudioPosition::Unit fromUnit, ViAudioPosition::Unit toUnit, QAudioFormat format)
+{
+	qreal microseconds = 0;
+
+	if(fromUnit == ViAudioPosition::Microseconds)
+	{
+		microseconds = position;
+	}
+	else if(fromUnit == ViAudioPosition::Milliseconds)
+	{
+		microseconds = position * 1000.0;
+	}
+	else if(fromUnit == ViAudioPosition::Seconds)
+	{
+		microseconds = position * 1000000.0;
+	}
+	else if(fromUnit == ViAudioPosition::Samples)
+	{
+		microseconds = position / (format.sampleRate() * format.channelCount()) * 1000000.0;
+	}
+	else if(fromUnit == ViAudioPosition::Bytes)
+	{
+		microseconds = position / (format.sampleRate() * format.channelCount() * (format.sampleSize() / 8)) * 1000000.0;
+	}
+
+	if(toUnit == ViAudioPosition::Microseconds)
+	{
+		return microseconds;
+	}
+	else if(toUnit == ViAudioPosition::Milliseconds)
+	{
+		return microseconds / 1000.0;
+	}
+	else if(toUnit == ViAudioPosition::Seconds)
+	{
+		return microseconds / 1000000.0;
+	}
+	else if(toUnit == ViAudioPosition::Samples)
+	{
+		return (microseconds / 1000000.0) * format.sampleRate() * format.channelCount();
+	}
+	else if(toUnit == ViAudioPosition::Bytes)
+	{
+		return (microseconds / 1000000.0) * format.sampleRate() * format.channelCount() * (format.sampleSize() / 8);
+	}
+}
+
 void ViAudioPosition::setPosition(qreal position, ViAudioPosition::Unit unit, QAudioFormat format)
 {
 	mFormat = format;
@@ -19,50 +66,12 @@ void ViAudioPosition::setPosition(qreal position, ViAudioPosition::Unit unit, QA
 
 void ViAudioPosition::setPosition(qreal position, ViAudioPosition::Unit unit)
 {
-	if(unit == ViAudioPosition::Microseconds)
-	{
-		mMicroseconds = position;
-	}
-	else if(unit == ViAudioPosition::Milliseconds)
-	{
-		mMicroseconds = position * 1000.0;
-	}
-	else if(unit == ViAudioPosition::Seconds)
-	{
-		mMicroseconds = position * 1000000.0;
-	}
-	else if(unit == ViAudioPosition::Samples)
-	{
-		mMicroseconds = position / (mFormat.sampleRate() * mFormat.channelCount()) * 1000000.0;
-	}
-	else if(unit == ViAudioPosition::Bytes)
-	{
-		mMicroseconds = position / (mFormat.sampleRate() * mFormat.channelCount() * (mFormat.sampleSize() / 8)) * 1000000.0;
-	}
+	mMicroseconds = ViAudioPosition::convertPosition(position, unit, ViAudioPosition::Microseconds, mFormat);
 }
 
 qreal ViAudioPosition::position(ViAudioPosition::Unit unit)
 {
-	if(unit == ViAudioPosition::Microseconds)
-	{
-		return mMicroseconds;
-	}
-	else if(unit == ViAudioPosition::Milliseconds)
-	{
-		return mMicroseconds / 1000.0;
-	}
-	else if(unit == ViAudioPosition::Seconds)
-	{
-		return mMicroseconds / 1000000.0;
-	}
-	else if(unit == ViAudioPosition::Samples)
-	{
-		return (mMicroseconds / 1000000.0) * mFormat.sampleRate() * mFormat.channelCount();
-	}
-	else if(unit == ViAudioPosition::Bytes)
-	{
-		return (mMicroseconds / 1000000.0) * mFormat.sampleRate() * mFormat.channelCount() * (mFormat.sampleSize() / 8);
-	}
+	return ViAudioPosition::convertPosition(mMicroseconds, ViAudioPosition::Microseconds, unit, mFormat);
 }
 
 QAudioFormat ViAudioPosition::format()

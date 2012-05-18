@@ -1,162 +1,106 @@
 #include "vispectrumanalyzer.h"
 
+#include <iostream>
+using namespace std;
+
 ViSpectrumAnalyzerThread::ViSpectrumAnalyzerThread()
+	: QThread()
 {
-	mPreviousStop = 0;
-	mWindow == NULL;
 }
 
-ViSpectrumAnalyzerThread::~ViSpectrumAnalyzerThread()
+void ViSpectrumAnalyzerThread::setData(ViAudioBuffer *buffer, ViFrequencySpectrum *spectrum)
 {
-	for(int i = 0; i < mSamples.size(); ++i)
+	mFormat = buffer->format();
+	qint32 sampleSize = mFormat.sampleSize();
+	if(sampleSize == 8)
 	{
-		delete [] mSamples[i];
+		pcmToRealPointer = &ViPcmConverter<float>::pcmToReal8;
 	}
-	mSamples.clear();
-	mChunks.clear();
-	delete mWindow;
+	else if(sampleSize == 16)
+	{
+		pcmToRealPointer = &ViPcmConverter<float>::pcmToReal16;
+	}
+	else if(sampleSize == 24)
+	{
+		pcmToRealPointer = &ViPcmConverter<float>::pcmToReal24;
+	}
+	else if(sampleSize == 32)
+	{
+		pcmToRealPointer = &ViPcmConverter<float>::pcmToReal32;
+	}
+
+	mStream = buffer->createReadStream();
+	mSpectrum = spectrum;
+}
+
+void ViSpectrumAnalyzerThread::setPositions(qint64 start, qint64 end)
+{
+	mStart = start;
+	qint32 optimal = mTransformer.optimalSize() * (mFormat.sampleSize() / 8);
+	while((end - start) > optimal)
+	{
+		mSizes.append(optimal);
+		end -= optimal;
+	}
+	if(end > 0)
+	{
+		mSizes.append(end);
+	}
 }
 
 void ViSpectrumAnalyzerThread::run()
 {
-	mMutex.lock();
-	while(!mSamples.isEmpty())
+	qint32 index;
+	qint32 halfSize;
+	qint32 optimal = mTransformer.optimalSize();
+	qint32 sampleSize = optimal;
+	qint32 bytesSize = sampleSize * (mFormat.sampleSize() / 8);
+	
+	char bytes[bytesSize];
+	float samples[sampleSize];
+	float fourier[sampleSize];
+	
+	while(!mSizes.isEmpty())
 	{
-		float *input = mSamples.takeFirst();
-		for(int i = 0; i < SPECTRUM_SAMPLES; ++i)
+		bytesSize = mStream->read(bytes, mSizes.takeFirst());
+		sampleSize = pcmToRealPointer(bytes, samples, bytesSize);
+		if(sampleSize != optimal)
 		{
-			input[i] *= mWindow->at(i);
+			for(index = sampleSize; index < optimal; ++index)
+			{
+				samples[index] = 0;
+			}
+			sampleSize = optimal;
 		}
-
-		float output[SPECTRUM_SAMPLES];
-		mFourierWrapper.calculateFft(output, input);
-
-		delete [] input;
-		//addWindow();
-	}
-	mMutex.unlock();
-}
-
-void ViSpectrumAnalyzerThread::setWindowFunction(ViWindowFunction *windowFunction)
-{
-	mWindowFunction = windowFunction;
-	calculateWindow(SPECTRUM_SAMPLES);
-}
-
-void ViSpectrumAnalyzerThread::addChunk(QSharedPointer<ViWaveFormChunk> chunk)
-{
-	mChunks.append(chunk);
-	while(enoughSamplesAvailable())
-	{
-		float *data = new float[SPECTRUM_SAMPLES];
-		qint16 currentSize = 0;
-		while(currentSize != SPECTRUM_SAMPLES)
+cout<<"pop: "<<sampleSize<<endl;
+		mTransformer.forwardTransform(samples, fourier, sampleSize);
+		halfSize = sampleSize / 2;
+		mSpectrum->lock();
+		mSpectrum->append(ViComplexFloat(fourier[0], 0));
+		for(index = 1; index < halfSize; ++index)
 		{
-			QSharedPointer<ViWaveFormChunk> first = mChunks.first();
-			qreal *firstData = first->data();
-			qint64 difference = first->size() - mPreviousStop;
-
-			if(difference == SPECTRUM_SAMPLES)
-			{
-				qint16 counter = currentSize;
-				for(qint64 i = mPreviousStop; i < difference; ++i)
-				{
-					data[counter] = firstData[i];
-					++counter;
-				}
-				mPreviousStop = 0;
-				mChunks.removeFirst();
-				currentSize += difference;
-			}
-			else if(difference > SPECTRUM_SAMPLES)
-			{
-				qint16 counter = currentSize;
-				for(qint64 i = mPreviousStop; i < SPECTRUM_SAMPLES; ++i)
-				{
-					data[counter] = firstData[i];
-					++counter;
-				}
-				mPreviousStop += SPECTRUM_SAMPLES;
-				currentSize += SPECTRUM_SAMPLES;
-			}
-			else if(difference < SPECTRUM_SAMPLES)
-			{
-				qint16 counter = currentSize;
-				for(qint64 i = mPreviousStop; i < difference; ++i)
-				{
-					data[counter] = firstData[i];
-					++counter;
-				}
-				mPreviousStop = 0;
-				mChunks.removeFirst();
-				currentSize += difference;
-			}
+			mSpectrum->append(ViComplexFloat(fourier[index], fourier[index + halfSize]));
 		}
-		mMutex.lock();
-		mSamples.append(data);
-		mMutex.unlock();
-	}
-
-	if(!isRunning())
-	{
-		start();
+		mSpectrum->append(ViComplexFloat(fourier[sampleSize - 1], 0));
+		mSpectrum->unlock();
 	}
 }
 
-void ViSpectrumAnalyzerThread::calculateWindow(qint64 size)
+ViSpectrumAnalyzer::ViSpectrumAnalyzer(ViAudioBuffer *buffer)
+	: QObject()
 {
-	mWindow = new ViSpectrumWindow(size, mWindowFunction);
+	mBuffer = buffer;
+	mThread.setData(buffer, &mSpectrum);
 }
 
-bool ViSpectrumAnalyzerThread::enoughSamplesAvailable()
+void ViSpectrumAnalyzer::analyze()
 {
-	qint64 total = 0;
-	for(int i = 0; i < mChunks.size(); ++i)
-	{
-		total += mChunks[i]->size();
-		if(total >= SPECTRUM_SAMPLES)
-		{
-			return true;
-		}
-	}
-	return false;
+	mThread.setPositions(0, mBuffer->size());
+	mThread.start();
 }
 
-ViSpectrumAnalyzer::ViSpectrumAnalyzer()
+void ViSpectrumAnalyzer::analyze(ViAudioPosition start, ViAudioPosition end)
 {
-	mThread = new ViSpectrumAnalyzerThread();
-}
-
-ViSpectrumAnalyzer::~ViSpectrumAnalyzer()
-{
-	if(mThread != NULL)
-	{
-		mThread->quit();
-		delete mThread;
-		mThread = NULL;
-	}
-}
-
-void ViSpectrumAnalyzer::initialize(ViAudioBuffer *buffer)
-{
-}
-
-void ViSpectrumAnalyzer::setWindowFunction(ViWindowFunction *windowFunction)
-{
-	mThread->setWindowFunction(windowFunction);
-}
-
-void ViSpectrumAnalyzer::start(QSharedPointer<ViWaveFormChunk> chunk)
-{
-	mThread->addChunk(chunk);
-}
-
-void ViSpectrumAnalyzer::stop()
-{
-
-}
-
-bool ViSpectrumAnalyzer::isReady()
-{
-
+	mThread.setPositions(start.position(ViAudioPosition::Bytes), end.position(ViAudioPosition::Bytes));
+	mThread.start();
 }

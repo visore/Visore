@@ -3,12 +3,10 @@
 
 #include <QList>
 #include <QtGlobal>
-#include "viwindowfunctionmanager.h"
 
-class ViSpectrumWindow : public QList<qreal>
+class ViSpectrumWindow
 {
-	public:
-		ViSpectrumWindow(qint64 numberOfSamples, ViWindowFunction *function);
+	
 };
 
 #endif

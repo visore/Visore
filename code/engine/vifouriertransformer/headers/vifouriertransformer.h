@@ -20,9 +20,17 @@ class ViFourierTransformer : public QObject
 			Inverse = 1
 		};
 
+		enum Execution
+		{
+			SameThread = 0,
+			SeperateThread = 1
+		};
+
 	public:
 
-		ViFourierTransformer();
+		ViFourierTransformer(Execution execution = ViFourierTransformer::SameThread);
+
+		qint32 optimalSize();
 		
 		void transform(float input[], float output[], Direction direction = ViFourierTransformer::Forward, qint32 numberOfSamples = FFT_POWER_OF_TWO);
 		void forwardTransform(float *input, float *output, qint32 numberOfSamples = FFT_POWER_OF_TWO);
@@ -37,6 +45,7 @@ class ViFourierTransformer : public QObject
 
 	private:
 
+		Execution mExecution;
 		ViFourierFixedForwardThread mFixedForwardThread;
 		ViFourierFixedInverseThread mFixedInverseThread;
 		ViFourierVariableForwardThread mVariableForwardThread;

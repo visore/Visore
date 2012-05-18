@@ -1,87 +1,57 @@
 #ifndef VISPECTRUMANALYZER_H
 #define VISPECTRUMANALYZER_H
 
-#include "vifourierwrapper.h"
-#include "viprocessor.h"
+#include "vifouriertransformer.h"
+#include "viaudioposition.h"
+#include "vipcmconverter.h"
+#include "viaudiobuffer.h"
+#include "vifrequencyspectrum.h"
 #include "vierror.h"
-#include "vispectrum.h"
-#include "vispectrumwindow.h"
-#include "viwaveformchunk.h"
 #include <QThread>
-#include <QMutex>
-
-// Compile-time calculation of powers of two
-
-template<int N> class PowerOfTwo
-{
-	public:
-		static const int Result = PowerOfTwo<N-1>::Result * 2;
-};
-
-template<> class PowerOfTwo<0>
-{
-	public:
-		static const int Result = 1;
-};
-
-const int SPECTRUM_SAMPLES = PowerOfTwo<FFT_POWER_OF_TWO>::Result;
 
 class ViSpectrumAnalyzerThread : public QThread
 {
 	Q_OBJECT
 
 	public:
+
 		ViSpectrumAnalyzerThread();
-		~ViSpectrumAnalyzerThread();
+		void setData(ViAudioBuffer *buffer, ViFrequencySpectrum *spectrum);
+		void setPositions(qint64 start, qint64 end);
 		void run();
-		void setWindowFunction(ViWindowFunction *windowFunction);
-		void addChunk(QSharedPointer<ViWaveFormChunk> chunk);
 
 	private:
-		void calculateWindow(qint64 size);
-		bool enoughSamplesAvailable();
+		
+		int (*pcmToRealPointer)(char*, float*, int);
 
-	private:
-		ViWindowFunction *mWindowFunction;
-		ViSpectrumWindow *mWindow;
-		ViFourierWrapper mFourierWrapper;
-		QList<QSharedPointer<ViWaveFormChunk> > mChunks;
-		QList<float*> mSamples;
-		qint64 mNumberOfSamples;
-		QMutex mMutex;
-		qint64 mPreviousStop;
+		ViFourierTransformer mTransformer;
+		ViAudioFormat mFormat;
+		ViFrequencySpectrum *mSpectrum;
+		ViAudioBufferStream *mStream;
+		qint64 mStart;
+		QList<qint32> mSizes;
+
 };
 
-class ViSpectrumAnalyzer : public ViProcessor, public ViError
+class ViSpectrumAnalyzer : public QObject
 {
 	Q_OBJECT
 
 	signals:
-		void spectrumChanged(const ViSpectrum &spectrum);
 
-	public slots:
-		void start(QSharedPointer<ViWaveFormChunk> chunk);
+		void finished();
 
 	public:
-		ViSpectrumAnalyzer();
-		~ViSpectrumAnalyzer();
-		void initialize(ViAudioBuffer *buffer);
 
-		void setWindowFunction(ViWindowFunction *windowFunction);
-		void stop();
-		bool isReady();
+		ViSpectrumAnalyzer(ViAudioBuffer *buffer);
+		void analyze();
+		void analyze(ViAudioPosition start, ViAudioPosition end);
 
 	private:
-		enum ViProcessState
-		{
-			Idle,
-			Busy,
-			Cancelled
-		};
 
-	private:
-		ViSpectrumAnalyzerThread *mThread;
-		ViProcessState mState;
+		ViAudioBuffer *mBuffer;
+		ViSpectrumAnalyzerThread mThread;
+		ViFrequencySpectrum mSpectrum;
 };
 
 #endif

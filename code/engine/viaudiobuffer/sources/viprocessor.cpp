@@ -1,11 +1,25 @@
 #include "viprocessor.h"
 
-ViProcessorThread::ViProcessorThread(ViAudioBuffer *buffer)
+ViProcessorThread::ViProcessorThread(ViAudioBuffer *buffer, QIODevice::OpenMode mode)
 	: QThread()
 {
 	mBuffer = buffer;
-	mReadStream = mBuffer->createReadStream();
-	mWriteStream = mBuffer->createWriteStream();
+	if(mode == QIODevice::ReadOnly || mode == QIODevice::ReadWrite)
+	{
+		mReadStream = mBuffer->createReadStream();
+	}
+	else
+	{
+		mReadStream = NULL;
+	}
+	if(mode == QIODevice::WriteOnly || mode == QIODevice::ReadWrite)
+	{
+		mWriteStream = mBuffer->createWriteStream();
+	}
+	else
+	{
+		mWriteStream = NULL;
+	}
 }
 
 void ViProcessorThread::update(int size)
@@ -24,6 +38,7 @@ ViProcessor::ViProcessor()
 {
 	mThread = NULL;
 	mId = ViProcessorManager::nextId();
+	QObject::connect(mThread, SIGNAL(changed()), this, SIGNAL(changed()));
 }
 
 ViProcessor::~ViProcessor()
@@ -39,14 +54,6 @@ ViProcessor::~ViProcessor()
 int ViProcessor::id()
 {
 	return mId;
-}
-
-void ViProcessor::initialize(ViAudioBuffer *buffer)
-{
-	if(mThread != NULL)
-	{
-		ViObject::connect(mThread, SIGNAL(changed()), this, SIGNAL(changed()));
-	}
 }
 
 void ViProcessor::update(int size)

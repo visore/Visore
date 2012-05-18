@@ -23,6 +23,8 @@ class ViAudioPosition
 		ViAudioPosition();
 		ViAudioPosition(qreal microseconds, ViAudioPosition::Unit unit, QAudioFormat format);
 
+		static qreal convertPosition(qreal position, ViAudioPosition::Unit fromUnit, ViAudioPosition::Unit toUnit, QAudioFormat format);
+
 		void setPosition(qreal position, ViAudioPosition::Unit unit, QAudioFormat format);
 		void setPosition(qreal position, ViAudioPosition::Unit unit);
 		qreal position(ViAudioPosition::Unit unit);

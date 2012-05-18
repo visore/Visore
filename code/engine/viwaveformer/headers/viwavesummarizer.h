@@ -13,7 +13,7 @@ class ViWaveSummarizerThread : public ViProcessorThread
 	Q_OBJECT
 
 	public:
-		ViWaveSummarizerThread(ViAudioBuffer *buffer, ViWaveForm *form);
+		ViWaveSummarizerThread(ViAudioBuffer *buffer, ViWaveForm *form, QIODevice::OpenMode mode);
 		void run();
 
 	private:

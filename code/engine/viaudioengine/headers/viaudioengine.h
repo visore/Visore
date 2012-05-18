@@ -8,7 +8,7 @@
 #include "vilibrary.h"
 #include "viwavesummarizer.h"
 #include "viaudioformat.h"
-//#include "vispectrumanalyzer.h"
+#include "vispectrumanalyzer.h"
 #include "visongdetector.h"
 #include "visignalmanipulator.h"
 #include "vimatcher.h"

@@ -187,10 +187,6 @@ void ViCrossCorrelationMatcher::summarize()
 	size = qMin(mFirstSampleSize, mSecondSampleSize);
 	for(index = 0; index < size; ++index)
 	{
-
-if(mFirstFourierData[index] != 0)
-cout<<mFirstFourierData[index]<<endl;
-
 		difference = qAbs(mFirstRealData[index] - mSecondRealData[index]);
 
 		mAverageDifference += difference;

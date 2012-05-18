@@ -2,8 +2,8 @@
 
 #define MAX_SIGNAL_COUNTER 100
 
-ViWaveSummarizerThread::ViWaveSummarizerThread(ViAudioBuffer *buffer, ViWaveForm *form)
-	: ViProcessorThread(buffer)
+ViWaveSummarizerThread::ViWaveSummarizerThread(ViAudioBuffer *buffer, ViWaveForm *form, QIODevice::OpenMode mode)
+	: ViProcessorThread(buffer, mode)
 {
 	mForm = form;
 	mFormer.setSampleSize(mBuffer->format().sampleSize());
@@ -55,7 +55,7 @@ ViWaveSummarizer::ViWaveSummarizer()
 
 void ViWaveSummarizer::initialize(ViAudioBuffer *buffer)
 {
-	mThread = new ViWaveSummarizerThread(buffer, &mForm);
+	mThread = new ViWaveSummarizerThread(buffer, &mForm, QIODevice::ReadOnly);
 	ViProcessor::initialize(buffer);
 }
 

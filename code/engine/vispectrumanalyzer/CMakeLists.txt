@@ -26,7 +26,7 @@ QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_SPECTRUMANALYZER_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(vispectrumanalyzer SHARED ${VI_SPECTRUMANALYZER_SOURCES} ${VI_WRAPPER_HEADERS})
-TARGET_LINK_LIBRARIES(vispectrumanalyzer ${QT_LIBRARIES} viwindowfunction viwaveformer fftreal)
+TARGET_LINK_LIBRARIES(vispectrumanalyzer ${QT_QTCORE_LIBRARIES} viaudiobuffer vifouriertransformer)
 
 #Install file
 INSTALL(TARGETS vispectrumanalyzer DESTINATION engine)
