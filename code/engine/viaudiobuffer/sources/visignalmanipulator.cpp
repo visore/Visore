@@ -14,6 +14,10 @@ using namespace std;
 
 void ViSignalManipulator::createDefaultSignal(ViAudioBuffer *buffer, qint32 cycles, Type type)
 {
+	if(type == ViSignalManipulator::Flat)
+	{
+		ViSignalManipulator::createFlatSignal(buffer, cycles);
+	}
 	if(type == ViSignalManipulator::Tooth)
 	{
 		ViSignalManipulator::createToothSignal(buffer, cycles);
@@ -139,6 +143,22 @@ void ViSignalManipulator::createNoise(ViAudioBuffer *input, ViAudioBuffer *outpu
 		writeStream->write(rawData, size);
 		size = readStream->read(rawData, size);
 	}
+}
+
+void ViSignalManipulator::createFlatSignal(ViAudioBuffer *buffer, qint32 cycles)
+{
+	QList<qreal> list;
+	static const qreal width = 100;
+	
+	for(int i = 0; i < cycles; ++i)
+	{
+		for(int j = 0; j < width; ++j)
+		{
+			list << 0;
+		}
+	}
+list<<1;
+	ViSignalManipulator::createSignal(list, buffer);
 }
 
 void ViSignalManipulator::createToothSignal(ViAudioBuffer *buffer, qint32 cycles)

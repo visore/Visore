@@ -15,11 +15,11 @@ qint32 ViFourierTransformer::optimalSize()
 	return FFT_SAMPLES;
 }
 
-void ViFourierTransformer::transform(float input[], float output[], Direction direction, qint32 numberOfSamples)
+void ViFourierTransformer::transform(float input[], float output[], qint32 numberOfSamples, ViWindower *windower, Direction direction)
 {
 	if(direction == ViFourierTransformer::Forward)
 	{
-		forwardTransform(input, output, numberOfSamples);
+		forwardTransform(input, output, numberOfSamples, windower);
 	}
 	else
 	{
@@ -27,8 +27,12 @@ void ViFourierTransformer::transform(float input[], float output[], Direction di
 	}
 }
 
-void ViFourierTransformer::forwardTransform(float *input, float *output, qint32 numberOfSamples)
+void ViFourierTransformer::forwardTransform(float *input, float *output, qint32 numberOfSamples, ViWindower *windower)
 {
+	if(windower != NULL)
+	{
+		windower->apply(input, numberOfSamples);
+	}
 	if(numberOfSamples == FFT_SAMPLES)
 	{
 		ViFourierTransformer::fixedForwardTransform(input, output);

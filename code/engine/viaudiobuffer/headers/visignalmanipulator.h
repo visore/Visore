@@ -11,13 +11,14 @@ class ViSignalManipulator
 		enum Type
 		{
 			Tooth = 0,
-			Triangle = 1,
-			Mountain = 2,
-			FlatMountain = 3,
-			Trapezoid = 4,
-			Sin = 5,
-			Cos = 6,
-			Tan = 7
+			Flat = 1,
+			Triangle = 2,
+			Mountain = 3,
+			FlatMountain = 4,
+			Trapezoid = 5,
+			Sin = 6,
+			Cos = 7,
+			Tan = 8
 		};
 
 	public:
@@ -30,6 +31,7 @@ class ViSignalManipulator
 
 	private:
 
+		static void createFlatSignal(ViAudioBuffer *buffer, qint32 cycles);
 		static void createToothSignal(ViAudioBuffer *buffer, qint32 cycles);
 		static void createTriangleSignal(ViAudioBuffer *buffer, qint32 cycles);
 		static void createMountainSignal(ViAudioBuffer *buffer, qint32 cycles);

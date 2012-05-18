@@ -3,6 +3,7 @@
 
 #include "vifourierfixedthread.h"
 #include "vifouriervariablethread.h"
+#include "viwindower.h"
 
 class ViFourierTransformer : public QObject
 {
@@ -32,9 +33,9 @@ class ViFourierTransformer : public QObject
 
 		qint32 optimalSize();
 		
-		void transform(float input[], float output[], Direction direction = ViFourierTransformer::Forward, qint32 numberOfSamples = FFT_POWER_OF_TWO);
-		void forwardTransform(float *input, float *output, qint32 numberOfSamples = FFT_POWER_OF_TWO);
-		void inverseTransform(float input[], float output[], qint32 numberOfSamples = FFT_POWER_OF_TWO);
+		void transform(float input[], float output[], qint32 numberOfSamples, ViWindower *windower = NULL, Direction direction = ViFourierTransformer::Forward);
+		void forwardTransform(float *input, float *output, qint32 numberOfSamples, ViWindower *windower = NULL);
+		void inverseTransform(float input[], float output[], qint32 numberOfSamples);
 
 	private:
 

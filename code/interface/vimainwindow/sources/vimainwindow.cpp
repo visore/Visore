@@ -18,6 +18,7 @@ ViMainWindow::~ViMainWindow()
 	delete mInputContainer;
 	delete mOutputContainer;
 	delete mControlContainer;
+	delete mAnalysisContainer;
 	delete mLoadingWidget;
 	delete mSongInfoWidget;
 }
@@ -63,6 +64,10 @@ void ViMainWindow::initialize()
 	mOutputContainer = new ViOutputContainer(mUi->tabWidget);
 	mOutputContainer->setEngine(mEngine);
 	mUi->tabWidget->addTab("Output", mOutputContainer);
+
+	mAnalysisContainer = new ViAnalysisContainer(mUi->tabWidget);
+	mAnalysisContainer->setEngine(mEngine);
+	mUi->tabWidget->addTab("Analysis", mAnalysisContainer);
 
 	//Song info
 	mSongInfoWidget = new ViSongInfoWidget(mUi->songInfoContainer);

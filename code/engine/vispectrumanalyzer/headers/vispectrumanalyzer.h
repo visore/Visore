@@ -46,6 +46,7 @@ class ViSpectrumAnalyzer : public QObject
 		ViSpectrumAnalyzer(ViAudioBuffer *buffer);
 		void analyze();
 		void analyze(ViAudioPosition start, ViAudioPosition end);
+		ViFrequencySpectrum& spectrum();
 
 	private:
 

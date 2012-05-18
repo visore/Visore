@@ -50,6 +50,11 @@ ViComplexFloat& ViFrequencySpectrum::operator[](const qint32 index)
 	return mData[index];
 }
 
+qint32 ViFrequencySpectrum::size()
+{
+	return mData.size();
+}
+
 void ViFrequencySpectrum::lock()
 {
 	mMutex.lock();

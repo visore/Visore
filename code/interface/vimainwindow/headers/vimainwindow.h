@@ -7,6 +7,7 @@
 #include "vicontrolcontainer.h"
 #include "viinputcontainer.h"
 #include "vioutputcontainer.h"
+#include "vianalysiscontainer.h"
 #include "viloadingwidget.h"
 #include "visonginfowidget.h"
 
@@ -41,6 +42,7 @@ class ViMainWindow : public QMainWindow
 		ViControlContainer *mControlContainer;
 		ViInputContainer *mInputContainer;
 		ViOutputContainer *mOutputContainer;
+		ViAnalysisContainer *mAnalysisContainer;
 
 		ViSongInfoWidget *mSongInfoWidget;
 };

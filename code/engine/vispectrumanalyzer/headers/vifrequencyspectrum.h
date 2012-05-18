@@ -22,6 +22,8 @@ class ViFrequencySpectrum
 		void set(const qint32 index, ViComplexFloat complex);
 		ViComplexFloat& operator[](const qint32 index);
 
+		qint32 size();
+
 		void lock();
 		void unlock();
 

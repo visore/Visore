@@ -92,6 +92,7 @@ class ViAudioEngine : public QObject, public ViError
 		int volume();
 
 		ViWaveForm* waveSummary(ViAudioBuffer::ViAudioBufferType type);
+		ViFrequencySpectrum& spectrum();
 
 	private:
 		/*void initializeInputStream(QAudioDeviceInfo deviceInfo, QAudioFormat format);
@@ -119,6 +120,8 @@ public:
 		ViWaveSummarizer mCorrectedWaveSummarizer;
 
 		ViSongDetector *mSongDetector;
+
+		ViSpectrumAnalyzer *mSpectrumAnalyzer;
 };
 
 #endif

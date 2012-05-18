@@ -1,8 +1,5 @@
 #include "vispectrumanalyzer.h"
 
-#include <iostream>
-using namespace std;
-
 ViSpectrumAnalyzerThread::ViSpectrumAnalyzerThread()
 	: QThread()
 {
@@ -72,7 +69,6 @@ void ViSpectrumAnalyzerThread::run()
 			}
 			sampleSize = optimal;
 		}
-cout<<"pop: "<<sampleSize<<endl;
 		mTransformer.forwardTransform(samples, fourier, sampleSize);
 		halfSize = sampleSize / 2;
 		mSpectrum->lock();
@@ -91,6 +87,7 @@ ViSpectrumAnalyzer::ViSpectrumAnalyzer(ViAudioBuffer *buffer)
 {
 	mBuffer = buffer;
 	mThread.setData(buffer, &mSpectrum);
+	QObject::connect(&mThread, SIGNAL(finished()), this, SIGNAL(finished()));
 }
 
 void ViSpectrumAnalyzer::analyze()
@@ -103,4 +100,9 @@ void ViSpectrumAnalyzer::analyze(ViAudioPosition start, ViAudioPosition end)
 {
 	mThread.setPositions(start.position(ViAudioPosition::Bytes), end.position(ViAudioPosition::Bytes));
 	mThread.start();
+}
+
+ViFrequencySpectrum& ViSpectrumAnalyzer::spectrum()
+{
+	return mSpectrum;
 }

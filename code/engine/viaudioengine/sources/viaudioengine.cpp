@@ -47,7 +47,7 @@ ViAudioEngine::ViAudioEngine()
 
 	ViAudioBuffer *b1 = new ViAudioBuffer();
 	ViAudioBuffer *b2 = new ViAudioBuffer();
-	ViSignalManipulator::createDefaultSignal(b1, 100, ViSignalManipulator::Sin);
+	ViSignalManipulator::createDefaultSignal(mProcessingChain->originalBuffer(), 1, ViSignalManipulator::Sin);
 	ViSignalManipulator::createDefaultSignal(b2, 100, ViSignalManipulator::Tan);
 
 	//ViSignalManipulator::createNoise(b1, b2, 0.01);
@@ -55,8 +55,8 @@ ViAudioEngine::ViAudioEngine()
 	/*ViMatcher *m = new ViMatcher();
 	m->match(b1, b2);*/
 
-	ViSpectrumAnalyzer *s = new ViSpectrumAnalyzer(b1);
-	s->analyze();
+	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
+	mSpectrumAnalyzer->analyze();
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -249,4 +249,9 @@ ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)
 	{
 		return mCorrectedWaveSummarizer.waveSummary();
 	}
+}
+
+ViFrequencySpectrum& ViAudioEngine::spectrum()
+{
+	return mSpectrumAnalyzer->spectrum();
 }

@@ -28,7 +28,7 @@ QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_COMPOSEDWIDGETS_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(vicomposedwidgets SHARED ${VI_WRAPPER_HEADERS} ${VI_COMPOSEDWIDGETS_SOURCES} ${VI_WRAPPER_FORMS})
-TARGET_LINK_LIBRARIES(vicomposedwidgets ${QT_LIBRARIES} visimplewidgets vigradientcreator viaudioengine)
+TARGET_LINK_LIBRARIES(vicomposedwidgets ${QT_LIBRARIES} qplotting visimplewidgets vigradientcreator viaudioengine)
 
 #Install file
 INSTALL(TARGETS vicomposedwidgets DESTINATION interface)
