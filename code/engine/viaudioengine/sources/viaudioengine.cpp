@@ -47,7 +47,7 @@ ViAudioEngine::ViAudioEngine()
 
 	ViAudioBuffer *b1 = new ViAudioBuffer();
 	ViAudioBuffer *b2 = new ViAudioBuffer();
-	ViSignalManipulator::createDefaultSignal(mProcessingChain->originalBuffer(), 1, ViSignalManipulator::Sin);
+	ViSignalManipulator::createDefaultSignal(b1, 500, ViSignalManipulator::Sin);
 	ViSignalManipulator::createDefaultSignal(b2, 100, ViSignalManipulator::Tan);
 
 	//ViSignalManipulator::createNoise(b1, b2, 0.01);
@@ -55,8 +55,7 @@ ViAudioEngine::ViAudioEngine()
 	/*ViMatcher *m = new ViMatcher();
 	m->match(b1, b2);*/
 
-	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
-	mSpectrumAnalyzer->analyze();
+
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -188,7 +187,9 @@ void ViAudioEngine::mute(bool value)
 
 void ViAudioEngine::startPlayback()
 {
-	mStreamOutput->start();
+	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
+	mSpectrumAnalyzer->analyze();
+	//mStreamOutput->start();
 }
 
 void ViAudioEngine::stopPlayback()

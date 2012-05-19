@@ -1,4 +1,5 @@
 #include "vispectrumanalyzer.h"
+#include "vihammingwindower.h"
 
 ViSpectrumAnalyzerThread::ViSpectrumAnalyzerThread()
 	: QThread()
@@ -56,6 +57,8 @@ void ViSpectrumAnalyzerThread::run()
 	char bytes[bytesSize];
 	float samples[sampleSize];
 	float fourier[sampleSize];
+
+	ViWindower *windower = NULL;//ViHammingWindower::instance();
 	
 	while(!mSizes.isEmpty())
 	{
@@ -69,13 +72,13 @@ void ViSpectrumAnalyzerThread::run()
 			}
 			sampleSize = optimal;
 		}
-		mTransformer.forwardTransform(samples, fourier, sampleSize);
+		mTransformer.forwardTransform(samples, fourier, sampleSize, windower);
 		halfSize = sampleSize / 2;
 		mSpectrum->lock();
 		mSpectrum->append(ViComplexFloat(fourier[0], 0));
 		for(index = 1; index < halfSize; ++index)
 		{
-			mSpectrum->append(ViComplexFloat(fourier[index], fourier[index + halfSize]));
+			mSpectrum->append(ViComplexFloat(fourier[index], -fourier[index + halfSize]));
 		}
 		mSpectrum->append(ViComplexFloat(fourier[sampleSize - 1], 0));
 		mSpectrum->unlock();
