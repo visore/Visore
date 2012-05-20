@@ -1,32 +1,27 @@
 #ifndef VIFOURIERFIXEDTHREAD_H
 #define VIFOURIERFIXEDTHREAD_H
 
-#include <QThread>
-#include <QtCore/qmath.h>
+#include <QtCore/qmath.h> 
 #include "FFTRealFixLen.h"
+#include "vifourierthread.h"
 
-// Each pass of the FFfloat processes 2^X samples, where X is the number below.
-// 4096-point (2^12) FFfloat object constructed.
-static const int FFT_POWER_OF_TWO = 12;
-static const int FFT_SAMPLES = qPow(2, FFT_POWER_OF_TWO);
-
-class ViFourierFixedThread : public QThread
+template <int T>
+class ViFourierFixedThread : public ViFourierThread
 {
 
 	public:
 		
 		ViFourierFixedThread();
-		void setData(float input[], float output[]);
+		virtual void run() = 0;
 
 	protected:
 
-		ffft::FFTRealFixLen<FFT_POWER_OF_TWO> mFourierTransform;
-		float *mInput;
-		float *mOutput;
+		ffft::FFTRealFixLen<T> mFourierTransform;
 
 };
 
-class ViFourierFixedForwardThread : public ViFourierFixedThread
+template <int T>
+class ViFourierFixedForwardThread : public ViFourierFixedThread<T>
 {
 
 	public:
@@ -36,7 +31,8 @@ class ViFourierFixedForwardThread : public ViFourierFixedThread
 
 };
 
-class ViFourierFixedInverseThread : public ViFourierFixedThread
+template <int T>
+class ViFourierFixedInverseThread : public ViFourierFixedThread<T>
 {
 
 	public:
@@ -45,5 +41,7 @@ class ViFourierFixedInverseThread : public ViFourierFixedThread
 		void run();
 
 };
+
+#include "../sources/vifourierfixedthread.cpp"
 
 #endif

@@ -33,7 +33,7 @@ void ViSpectrumWidget::recalculate()
 	QVector<qreal> yImaginary(size);
 	spectrum.lock();
 int c=0;
-int t=0;
+qreal t=0;
 cout<<size<<endl;
 
 for(int i = 0; i < size; ++i)
@@ -47,10 +47,10 @@ x[i] =(i/qreal(size))*44100;
 	for(int i = 0; i < spectrum.size(); ++i)
 	{
 		//x[c] += i;
-		//yReal[c] += spectrum[i].real();
-		//yImaginary[c] += spectrum[i].imaginary();
-yReal[c] += qSqrt((spectrum[i].real()*spectrum[i].real()) + (spectrum[i].imaginary()*spectrum[i].imaginary()));
-yImaginary[c] += qAtan(spectrum[i].imaginary()/spectrum[i].real());
+		yReal[c] += spectrum[i].real();
+		yImaginary[c] += spectrum[i].imaginary();
+//yReal[c] += qSqrt((spectrum[i].real()*spectrum[i].real()) + (spectrum[i].imaginary()*spectrum[i].imaginary()));
+//yImaginary[c] += qAtan(spectrum[i].imaginary()/spectrum[i].real());
 c++;
 if(c==size) {c=0; t++;}
 		//yReal[i] = qSqrt(spectrum[i].real()*spectrum[i].real() + spectrum[i].imaginary()*spectrum[i].imaginary());
@@ -68,12 +68,12 @@ for(int i = 0; i < size; ++i)
 {
 	//yReal[i] /= t;
 	//yImaginary[i] /=t;
-	//yReal[i] = qSqrt(yReal[i]*yReal[i] + yImaginary[i]*yImaginary[i]);
+	yReal[i] = qSqrt(yReal[i]*yReal[i] + yImaginary[i]*yImaginary[i]);
 	//yImaginary[i] *=yImaginary[i];		
 
 
 	//yImaginary[i] *=yImaginary[i];
-	yReal[i]  = 20 * log10(yReal[i]);
+	yReal[i]  = 20 * log10(yReal[i]/size);
 	if(	yReal[i] > max) max = yReal[i];	
 }
 
@@ -81,17 +81,17 @@ for(int i = 0; i < size; ++i)
 
 for(int i = 0; i < size; ++i)
 {
-	yReal[i] -= max;
+	//yReal[i] -= max;
 }
 
 int j = -1;
-for(int i = 0; i < size-1; ++i)
+for(int i = 0; i < size; ++i)
 {
 	
 	if(	yReal[i] < min){min = yReal[i]; j=i;}
 }
 
-cout<<"****: "<<min<<" "<<j<<endl;
+cout<<"****: "<<min<<" "<<max<<endl;
 
 cout<<endl;
 
@@ -102,7 +102,7 @@ cout<<endl;
 	mUi->realSpectrum->graph(0)->setData(x, yReal);
 	mUi->realSpectrum->xAxis->setLabel("x");
 	mUi->realSpectrum->xAxis->setRange(0, 22050);
-	mUi->realSpectrum->yAxis->setRange(min, 0);
+	mUi->realSpectrum->yAxis->setRange(-96, 0);
 	mUi->realSpectrum->replot();
 
 	mUi->imaginarySpectrum->addGraph();

@@ -1,34 +1,34 @@
-#include "vifourierfixedthread.h"
+#ifdef VIFOURIERFIXEDTHREAD_H
 
-ViFourierFixedThread::ViFourierFixedThread()
-	: QThread()
+template <int T>
+ViFourierFixedThread<T>::ViFourierFixedThread()
+	: ViFourierThread()
 {
-	mInput = NULL;
-	mOutput = NULL;
+	setSize(qPow(2, T));
 }
 
-void ViFourierFixedThread::setData(float input[], float output[])
-{
-	mInput = input;
-	mOutput = output;
-}
-
-ViFourierFixedForwardThread::ViFourierFixedForwardThread()
-	: ViFourierFixedThread()
+template <int T>
+ViFourierFixedForwardThread<T>::ViFourierFixedForwardThread()
+	: ViFourierFixedThread<T>()
 {
 }
 
-void ViFourierFixedForwardThread::run()
+template <int T>
+void ViFourierFixedForwardThread<T>::run()
 {
-	mFourierTransform.do_fft(mOutput, mInput);
+	ViFourierFixedThread<T>::mFourierTransform.do_fft(ViFourierThread::mOutput, ViFourierThread::mInput);
 }
 
-ViFourierFixedInverseThread::ViFourierFixedInverseThread()
-	: ViFourierFixedThread()
+template <int T>
+ViFourierFixedInverseThread<T>::ViFourierFixedInverseThread()
+	: ViFourierFixedThread<T>()
 {
 }
 
-void ViFourierFixedInverseThread::run()
+template <int T>
+void ViFourierFixedInverseThread<T>::run()
 {
-	mFourierTransform.do_ifft(mInput, mOutput);
+	ViFourierFixedThread<T>::mFourierTransform.do_ifft(ViFourierThread::mInput, ViFourierThread::mOutput);
 }
+
+#endif

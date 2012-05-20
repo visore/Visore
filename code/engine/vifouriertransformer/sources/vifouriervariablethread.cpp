@@ -1,38 +1,28 @@
 #include "vifouriervariablethread.h"
 
-ViFourierVariablehread::ViFourierVariablehread()
-	: QThread()
+ViFourierVariableThread::ViFourierVariableThread()
+	: ViFourierThread()
 {
-	mInput = NULL;
-	mOutput = NULL;
-	mNumberOfSamples = 0;
-}
-
-void ViFourierVariablehread::setData(float input[], float output[], int numberOfSamples)
-{
-	mInput = input;
-	mOutput = output;
-	mNumberOfSamples = numberOfSamples;
 }
 
 ViFourierVariableForwardThread::ViFourierVariableForwardThread()
-	: ViFourierVariablehread()
+	: ViFourierVariableThread()
 {
 }
 
 void ViFourierVariableForwardThread::run()
 {
-	ffft::FFTReal<float> fourierTransform(mNumberOfSamples);
+	ffft::FFTReal<float> fourierTransform(mSize);
 	fourierTransform.do_fft(mOutput, mInput);
 }
 
 ViFourierVariableInverseThread::ViFourierVariableInverseThread()
-	: ViFourierVariablehread()
+	: ViFourierVariableThread()
 {
 }
 
 void ViFourierVariableInverseThread::run()
 {
-	ffft::FFTReal<float> fourierTransform(mNumberOfSamples);
+	ffft::FFTReal<float> fourierTransform(mSize);
 	fourierTransform.do_ifft(mInput, mOutput);
 }
