@@ -1,14 +1,14 @@
 #include "vispectrumanalyzer.h"
 #include "vihammingwindower.h"
 
-#define FFT_CHUNK_SIZE 4096
+#define DEFAULT_BLOCK_SIZE 4096
 
 ViSpectrumAnalyzerThread::ViSpectrumAnalyzerThread()
 	: QThread()
 {
 }
 
-void ViSpectrumAnalyzerThread::setData(ViAudioBuffer *buffer, ViFrequencySpectrum *spectrum)
+void ViSpectrumAnalyzerThread::setData(ViAudioBuffer *buffer, ViFloatFrequencySpectrum *spectrum)
 {
 	mFormat = buffer->format();
 	qint32 sampleSize = mFormat.sampleSize();
@@ -36,7 +36,7 @@ void ViSpectrumAnalyzerThread::setData(ViAudioBuffer *buffer, ViFrequencySpectru
 void ViSpectrumAnalyzerThread::setPositions(qint64 start, qint64 end)
 {
 	mStart = start;
-	qint32 optimal = FFT_CHUNK_SIZE * (mFormat.sampleSize() / 8);
+	qint32 optimal = mBlockSize * (mFormat.sampleSize() / 8);
 	while((end - start) > optimal)
 	{
 		mSizes.append(optimal);
@@ -48,11 +48,16 @@ void ViSpectrumAnalyzerThread::setPositions(qint64 start, qint64 end)
 	}
 }
 
+void ViSpectrumAnalyzerThread::setBlockSize(qint32 size)
+{
+	mBlockSize = size;
+}
+
 void ViSpectrumAnalyzerThread::run()
 {
 	qint32 index;
-	qint32 halfSize;
-	qint32 sampleSize = FFT_CHUNK_SIZE;
+	qint32 sampleSize = mBlockSize;
+	qint32 halfSize = sampleSize / 2;
 	qint32 bytesSize = sampleSize * (mFormat.sampleSize() / 8);
 	
 	char bytes[bytesSize];
@@ -60,38 +65,38 @@ void ViSpectrumAnalyzerThread::run()
 	float fourier[sampleSize];
 
 	ViFourierTransformer transformer;
-	transformer.setFixedSize(FFT_CHUNK_SIZE);
+	transformer.setFixedSize(mBlockSize);
 	ViWindower *windower = NULL;//ViHammingWindower::instance();
-	
+
+	mSpectrum->initialize(sampleSize / 2 + 1, mFormat.sampleRate() / 2);
+
 	while(!mSizes.isEmpty())
 	{
 		bytesSize = mStream->read(bytes, mSizes.takeFirst());
 		sampleSize = pcmToRealPointer(bytes, samples, bytesSize);
-		if(sampleSize != FFT_CHUNK_SIZE)
+		if(sampleSize != mBlockSize)
 		{
-			for(index = sampleSize; index < FFT_CHUNK_SIZE; ++index)
+			for(index = sampleSize; index < mBlockSize; ++index)
 			{
 				samples[index] = 0;
 			}
-			sampleSize = FFT_CHUNK_SIZE;
+			sampleSize = mBlockSize;
 		}
-		transformer.forwardTransform(samples, fourier, 4096, windower);
-		halfSize = sampleSize / 2;
-		mSpectrum->lock();
-		mSpectrum->append(ViComplexFloat(fourier[0], 0));
+		transformer.forwardTransform(samples, fourier, windower);
+		mSpectrum->add(0, ViComplexFloat(fourier[0], 0));
 		for(index = 1; index < halfSize; ++index)
 		{
-			mSpectrum->append(ViComplexFloat(fourier[index], -fourier[index + halfSize]));
+			mSpectrum->add(index, ViComplexFloat(fourier[index], -fourier[index + halfSize]));
 		}
-		mSpectrum->append(ViComplexFloat(fourier[sampleSize - 1], 0));
-		mSpectrum->unlock();
+		mSpectrum->add(halfSize, ViComplexFloat(fourier[sampleSize - 1], 0));
 	}
-
+	mSpectrum->finalize();
 }
 
 ViSpectrumAnalyzer::ViSpectrumAnalyzer(ViAudioBuffer *buffer)
 	: QObject()
 {
+	setBlockSize(DEFAULT_BLOCK_SIZE);
 	mBuffer = buffer;
 	mThread.setData(buffer, &mSpectrum);
 	QObject::connect(&mThread, SIGNAL(finished()), this, SIGNAL(finished()));
@@ -109,7 +114,18 @@ void ViSpectrumAnalyzer::analyze(ViAudioPosition start, ViAudioPosition end)
 	mThread.start();
 }
 
-ViFrequencySpectrum& ViSpectrumAnalyzer::spectrum()
+ViFloatFrequencySpectrum& ViSpectrumAnalyzer::spectrum()
 {
 	return mSpectrum;
+}
+
+void ViSpectrumAnalyzer::setBlockSize(qint32 size)
+{
+	mBlockSize = size;
+	mThread.setBlockSize(mBlockSize);
+}
+
+qint32 ViSpectrumAnalyzer::fftSize()
+{
+	return mBlockSize;
 }

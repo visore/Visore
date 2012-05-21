@@ -18,6 +18,14 @@ class ViComplexNumber
 		T real();
 		T imaginary();
 
+		ViComplexNumber<T>& operator+=(const ViComplexNumber<T> &number);
+		ViComplexNumber<T>& operator-=(const ViComplexNumber<T> &number);
+		ViComplexNumber<T>& operator/=(const ViComplexNumber<T> &number);
+		ViComplexNumber<T>& operator*=(const ViComplexNumber<T> &number);
+
+		ViComplexNumber<T>& operator/=(const T &value);
+		ViComplexNumber<T>& operator*=(const T &value);
+
 	private:
 
 		T mReal;

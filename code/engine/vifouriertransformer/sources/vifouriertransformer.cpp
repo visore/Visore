@@ -1,11 +1,5 @@
 #include "vifouriertransformer.h"
 
-#include <iostream>
-#include <QString>
-
-using namespace std;
-
-
 ViFourierTransformer::ViFourierTransformer(Execution execution, int fixedSize)
 	 : QObject()
 {

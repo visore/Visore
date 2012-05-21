@@ -252,7 +252,7 @@ ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)
 	}
 }
 
-ViFrequencySpectrum& ViAudioEngine::spectrum()
+ViFloatFrequencySpectrum& ViAudioEngine::spectrum()
 {
 	return mSpectrumAnalyzer->spectrum();
 }

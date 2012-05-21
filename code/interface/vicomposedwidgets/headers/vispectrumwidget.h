@@ -14,14 +14,20 @@ class ViSpectrumWidget : public ViWidget
 {
 	Q_OBJECT
 
+	public slots:
+
+		void replot();
+
 	public:
+
 		ViSpectrumWidget(QWidget *parent = 0);
 		~ViSpectrumWidget();
 		void setEngine(ViAudioEngine *engine);
-		void recalculate();
 
 	private:
+
 		Ui::ViSpectrumWidget *mUi;
+
 };
 
 #endif

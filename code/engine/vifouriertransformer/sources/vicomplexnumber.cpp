@@ -52,4 +52,52 @@ T ViComplexNumber<T>::imaginary()
 	return mImaginary;
 }
 
+template <typename T>
+ViComplexNumber<T>& ViComplexNumber<T>::operator+=(const ViComplexNumber<T> &number)
+{
+	mReal += number.mReal;
+	mImaginary += number.mImaginary;
+	return *this;
+}
+
+template <typename T>
+ViComplexNumber<T>& ViComplexNumber<T>::operator-=(const ViComplexNumber<T> &number)
+{
+	mReal -= number.mReal;
+	mImaginary -= number.mImaginary;
+	return *this;
+}
+
+template <typename T>
+ViComplexNumber<T>& ViComplexNumber<T>::operator/=(const ViComplexNumber<T> &number)
+{
+	mReal /= number.mReal;
+	mImaginary /= number.mImaginary;
+	return *this;
+}
+
+template <typename T>
+ViComplexNumber<T>& ViComplexNumber<T>::operator*=(const ViComplexNumber<T> &number)
+{
+	mReal *= number.mReal;
+	mImaginary *= number.mImaginary;
+	return *this;
+}
+
+template <typename T>
+ViComplexNumber<T>& ViComplexNumber<T>::operator/=(const T &value)
+{
+	mReal /= value;
+	mImaginary /= value;
+	return *this;
+}
+
+template <typename T>
+ViComplexNumber<T>& ViComplexNumber<T>::operator*=(const T &value)
+{
+	mReal *= value;
+	mImaginary *= value;
+	return *this;
+}
+
 #endif

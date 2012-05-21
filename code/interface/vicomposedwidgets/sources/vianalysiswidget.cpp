@@ -27,6 +27,6 @@ void ViAnalysisWidget::setEngine(ViAudioEngine *engine)
 
 void ViAnalysisWidget::openSpectrum()
 {
-	mSpectrum.recalculate();
+	mSpectrum.replot();
 	mDialog.showMaximized();
 }
