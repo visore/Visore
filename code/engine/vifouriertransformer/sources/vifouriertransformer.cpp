@@ -1,5 +1,11 @@
 #include "vifouriertransformer.h"
 
+#include <iostream>
+#include <QString>
+
+using namespace std;
+
+
 ViFourierTransformer::ViFourierTransformer(Execution execution, int fixedSize)
 	 : QObject()
 {
@@ -7,13 +13,11 @@ ViFourierTransformer::ViFourierTransformer(Execution execution, int fixedSize)
 
 	mForwardThread = NULL;
 	mInverseThread = NULL;
+	mRescaleThread = NULL;
 
 	initialize();
 	setFixedSize(fixedSize);
 	setExecution(execution);
-
-	QObject::connect(mForwardThread, SIGNAL(finished()), this, SIGNAL(finished()));
-	QObject::connect(mInverseThread, SIGNAL(finished()), this, SIGNAL(finished()));
 }
 
 ViFourierTransformer::~ViFourierTransformer()
@@ -24,16 +28,27 @@ ViFourierTransformer::~ViFourierTransformer()
 	qDeleteAll(mFixedInverseThreads.begin(), mFixedInverseThreads.end());
 	mFixedInverseThreads.clear();
 
+	qDeleteAll(mFixedRescaleThreads.begin(), mFixedRescaleThreads.end());
+	mFixedRescaleThreads.clear();
+
 	delete mVariableForwardThread;
 	delete mVariableInverseThread;
+	delete mVariableRescaleThread;
+}
+
+void ViFourierTransformer::emitFinished()
+{
+	emit finished();
 }
 
 bool ViFourierTransformer::setFixedSize(int size)
 {
 	bool wasSetForward = false;
 	bool wasSetInverse = false;
-	int index;
-	for(index = 0; index < mFixedForwardThreads.size(); ++index)
+	bool wasSetRescale = false;
+	int index, last;
+	last = mFixedForwardThreads.size();
+	for(index = 0; index < last; ++index)
 	{
 		if(mFixedForwardThreads[index]->size() == size)
 		{
@@ -41,7 +56,8 @@ bool ViFourierTransformer::setFixedSize(int size)
 			wasSetForward = true;
 		}
 	}
-	for(index = 0; index < mFixedInverseThreads.size(); ++index)
+	last = mFixedInverseThreads.size();
+	for(index = 0; index < last; ++index)
 	{
 		if(mFixedInverseThreads[index]->size() == size)
 		{
@@ -49,16 +65,28 @@ bool ViFourierTransformer::setFixedSize(int size)
 			wasSetInverse = true;
 		}
 	}
-	if(wasSetForward && wasSetInverse)
+	last = mFixedRescaleThreads.size();
+	for(index = 0; index < last; ++index)
+	{
+		if(mFixedRescaleThreads[index]->size() == size)
+		{
+			mRescaleThread = mFixedRescaleThreads[index];
+			wasSetRescale = true;
+		}
+	}
+	if(wasSetForward && wasSetInverse && wasSetRescale)
 	{
 		mSize = size;
 		return true;
 	}
-	
-	mSize = 0;
-	mForwardThread = mVariableForwardThread;
-	mInverseThread = mVariableInverseThread;
-	return false;
+	else
+	{
+		mSize = 0;
+		mForwardThread = mVariableForwardThread;
+		mInverseThread = mVariableInverseThread;
+		mRescaleThread = mVariableRescaleThread;
+		return false;
+	}
 }
 
 void ViFourierTransformer::setExecution(Execution execution)
@@ -67,11 +95,13 @@ void ViFourierTransformer::setExecution(Execution execution)
 	{
 		forwardTransformtion = &ViFourierTransformer::forwardTransformSameThread;
 		inverseTransformtion = &ViFourierTransformer::inverseTransformSameThread;
+		rescaleTransformtion = &ViFourierTransformer::rescaleTransformSameThread;
 	}
 	else
 	{
 		forwardTransformtion = &ViFourierTransformer::forwardTransformSeperateThread;
 		inverseTransformtion = &ViFourierTransformer::inverseTransformSeperateThread;
+		rescaleTransformtion = &ViFourierTransformer::rescaleTransformSeperateThread;
 	}
 }
 
@@ -93,15 +123,20 @@ void ViFourierTransformer::forwardTransform(float *input, float *output, ViWindo
 	{
 		windower->apply(input, mSize);
 	}
-	ViFourierTransformer::fixedForwardTransform(input, output);
+	fixedForwardTransform(input, output);
 }
 
 void ViFourierTransformer::inverseTransform(float input[], float output[])
 {
-	ViFourierTransformer::fixedInverseTransform(input, output);
+	fixedInverseTransform(input, output);
 }
 
-void ViFourierTransformer::transform(float input[], float output[], qint32 numberOfSamples, ViWindower *windower, Direction direction)
+void ViFourierTransformer::rescale(float input[])
+{
+	fixedRescale(input);
+}
+
+void ViFourierTransformer::transform(float input[], float output[], int numberOfSamples, ViWindower *windower, Direction direction)
 {
 	if(direction == ViFourierTransformer::Forward)
 	{
@@ -113,7 +148,7 @@ void ViFourierTransformer::transform(float input[], float output[], qint32 numbe
 	}
 }
 
-void ViFourierTransformer::forwardTransform(float *input, float *output, qint32 numberOfSamples, ViWindower *windower)
+void ViFourierTransformer::forwardTransform(float *input, float *output, int numberOfSamples, ViWindower *windower)
 {
 	if(windower != NULL)
 	{
@@ -122,41 +157,60 @@ void ViFourierTransformer::forwardTransform(float *input, float *output, qint32 
 	variableForwardTransform(input, output, numberOfSamples);
 }
 
-void ViFourierTransformer::inverseTransform(float input[], float output[], qint32 numberOfSamples)
+void ViFourierTransformer::inverseTransform(float input[], float output[], int numberOfSamples)
 {
 	variableInverseTransform(input, output, numberOfSamples);
 }
 
+void ViFourierTransformer::rescale(float input[], int numberOfSamples)
+{
+	variableRescale(input, numberOfSamples);
+}
+
 void ViFourierTransformer::initialize()
 {
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<3>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<4>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<5>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<6>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<7>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<8>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<9>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<10>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<11>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<12>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<13>());
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<14>());
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<3>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<4>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<5>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<6>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<7>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<8>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<9>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<10>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<11>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<12>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<13>(this));
+	mFixedForwardThreads.append(new ViFourierFixedForwardThread<14>(this));
 
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<3>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<4>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<5>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<6>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<7>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<8>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<9>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<10>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<11>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<12>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<13>());
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<14>());
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<3>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<4>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<5>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<6>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<7>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<8>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<9>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<10>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<11>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<12>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<13>(this));
+	mFixedInverseThreads.append(new ViFourierFixedInverseThread<14>(this));
 
-	mVariableForwardThread = new ViFourierVariableForwardThread();
-	mVariableInverseThread = new ViFourierVariableInverseThread();
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<3>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<4>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<5>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<6>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<7>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<8>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<9>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<10>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<11>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<12>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<13>(this));
+	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<14>(this));
+
+	mVariableForwardThread = new ViFourierVariableForwardThread(this);
+	mVariableInverseThread = new ViFourierVariableInverseThread(this);
+	mVariableRescaleThread = new ViFourierVariableRescaleThread(this);
 }
 
 void ViFourierTransformer::fixedForwardTransform(float *input, float *output)
@@ -171,18 +225,31 @@ void ViFourierTransformer::fixedInverseTransform(float input[], float output[])
 	(this->*inverseTransformtion)();
 }
 
-void ViFourierTransformer::variableForwardTransform(float input[], float output[], qint32 numberOfSamples)
+void ViFourierTransformer::fixedRescale(float input[])
+{
+	mRescaleThread->setData(input);
+	(this->*rescaleTransformtion)();
+}
+
+void ViFourierTransformer::variableForwardTransform(float input[], float output[], int numberOfSamples)
 {
 	mForwardThread->setData(input, output);
 	mForwardThread->setSize(numberOfSamples);
 	(this->*forwardTransformtion)();
 }
 
-void ViFourierTransformer::variableInverseTransform(float input[], float output[], qint32 numberOfSamples)
+void ViFourierTransformer::variableInverseTransform(float input[], float output[], int numberOfSamples)
 {
 	mInverseThread->setData(input, output);
 	mInverseThread->setSize(numberOfSamples);
 	(this->*inverseTransformtion)();
+}
+
+void ViFourierTransformer::variableRescale(float input[], int numberOfSamples)
+{
+	mRescaleThread->setData(input);
+	mRescaleThread->setSize(numberOfSamples);
+	(this->*rescaleTransformtion)();
 }
 
 void ViFourierTransformer::forwardTransformSameThread()
@@ -203,4 +270,27 @@ void ViFourierTransformer::inverseTransformSameThread()
 void ViFourierTransformer::inverseTransformSeperateThread()
 {
 	mInverseThread->start();
+}
+
+void ViFourierTransformer::rescaleTransformSameThread()
+{
+	mRescaleThread->run();
+}
+
+void ViFourierTransformer::rescaleTransformSeperateThread()
+{
+	mRescaleThread->start();
+}
+
+ViComplexVector toComplex(float input[], int numberOfSamples)
+{
+	QVector<ViComplexFloat> result;
+	int last = numberOfSamples / 2;
+	result.push_back(ViComplexFloat(input[0], 0));
+	for(int i = 1; i < last; ++i)
+	{
+		result.push_back(ViComplexFloat(input[i], -input[last + i]));
+	}
+	result.push_back(ViComplexFloat(input[last], 0));
+	return result;
 }

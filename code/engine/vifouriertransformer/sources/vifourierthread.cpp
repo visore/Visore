@@ -1,8 +1,10 @@
 #include "vifourierthread.h"
+#include "vifouriertransformer.h"
 
-ViFourierThread::ViFourierThread()
+ViFourierThread::ViFourierThread(ViFourierTransformer *transformer)
 	: QThread()
 {
+	mTransformer = transformer;
 	mInput = NULL;
 	mOutput = NULL;
 	mSize = 0;
@@ -22,4 +24,9 @@ void ViFourierThread::setSize(int size)
 int ViFourierThread::size()
 {
 	return mSize;
+}
+
+void ViFourierThread::notify()
+{
+	mTransformer->emitFinished();
 }

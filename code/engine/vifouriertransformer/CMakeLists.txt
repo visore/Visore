@@ -26,7 +26,7 @@ QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_FOURIERTRANSFORMER_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(vifouriertransformer SHARED ${VI_FOURIERTRANSFORMER_SOURCES} ${VI_WRAPPER_HEADERS})
-TARGET_LINK_LIBRARIES(vifouriertransformer ${QT_QTCORE_LIBRARIES} fftreal viwindower)
+TARGET_LINK_LIBRARIES(vifouriertransformer ${QT_QTCORE_LIBRARIES} fftreal)
 
 #Install file
 INSTALL(TARGETS vifouriertransformer DESTINATION engine)

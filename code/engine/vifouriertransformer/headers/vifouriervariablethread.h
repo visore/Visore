@@ -10,7 +10,7 @@ class ViFourierVariableThread : public ViFourierThread
 
 	public:
 
-		ViFourierVariableThread();
+		ViFourierVariableThread(ViFourierTransformer *transformer);
 
 };
 
@@ -19,7 +19,7 @@ class ViFourierVariableForwardThread : public ViFourierVariableThread
 
 	public:
 
-		ViFourierVariableForwardThread();
+		ViFourierVariableForwardThread(ViFourierTransformer *transformer);
 		void run();
 
 };
@@ -29,7 +29,17 @@ class ViFourierVariableInverseThread : public ViFourierVariableThread
 
 	public:
 
-		ViFourierVariableInverseThread();
+		ViFourierVariableInverseThread(ViFourierTransformer *transformer);
+		void run();
+
+};
+
+class ViFourierVariableRescaleThread : public ViFourierVariableThread
+{
+
+	public:
+
+		ViFourierVariableRescaleThread(ViFourierTransformer *transformer);
 		void run();
 
 };

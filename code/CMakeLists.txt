@@ -64,7 +64,6 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/viaudioconnections/viaudioconnection/headers
 	${ENGINE}/viaudioformats/viaudioformat/headers
 	${ENGINE}/viaudiobuffer/headers
-	${ENGINE}/viwindower/headers
 	${ENGINE}/vispectrumanalyzer/headers
 	${ENGINE}/viwaveformer/headers
 	${ENGINE}/vicoder/headers

@@ -3,13 +3,15 @@
 
 #include <QThread>
 
+class ViFourierTransformer;
+
 class ViFourierThread : public QThread
 {
 
 	public:
 		
-		ViFourierThread();
-		void setData(float input[], float output[]);
+		ViFourierThread(ViFourierTransformer *transformer);
+		void setData(float input[], float output[] = NULL);
 		void setSize(int size);
 		int size();
 
@@ -17,6 +19,11 @@ class ViFourierThread : public QThread
 
 	protected:
 
+		void notify();
+
+	protected:
+
+		ViFourierTransformer *mTransformer; // Tight coupling due to template class problems with signals/slots
 		float *mInput;
 		float *mOutput;
 		int mSize;

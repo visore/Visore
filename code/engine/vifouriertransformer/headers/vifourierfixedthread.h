@@ -1,7 +1,7 @@
 #ifndef VIFOURIERFIXEDTHREAD_H
 #define VIFOURIERFIXEDTHREAD_H
 
-#include <QtCore/qmath.h> 
+#include <qmath.h> 
 #include "FFTRealFixLen.h"
 #include "vifourierthread.h"
 
@@ -11,7 +11,7 @@ class ViFourierFixedThread : public ViFourierThread
 
 	public:
 		
-		ViFourierFixedThread();
+		ViFourierFixedThread(ViFourierTransformer *transformer);
 		virtual void run() = 0;
 
 	protected:
@@ -26,7 +26,7 @@ class ViFourierFixedForwardThread : public ViFourierFixedThread<T>
 
 	public:
 
-		ViFourierFixedForwardThread();
+		ViFourierFixedForwardThread(ViFourierTransformer *transformer);
 		void run();
 
 };
@@ -37,7 +37,18 @@ class ViFourierFixedInverseThread : public ViFourierFixedThread<T>
 
 	public:
 
-		ViFourierFixedInverseThread();
+		ViFourierFixedInverseThread(ViFourierTransformer *transformer);
+		void run();
+
+};
+
+template <int T>
+class ViFourierFixedRescaleThread : public ViFourierFixedThread<T>
+{
+
+	public:
+
+		ViFourierFixedRescaleThread(ViFourierTransformer *transformer);
 		void run();
 
 };

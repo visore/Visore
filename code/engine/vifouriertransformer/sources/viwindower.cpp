@@ -1,9 +1,6 @@
 #include "viwindower.h"
 
-QSharedPointer<ViWindower> ViWindower::mInstance;
-
 ViWindower::ViWindower()
-	: ViSingleton()
 {
 	mWindow = NULL;
 }
@@ -16,12 +13,7 @@ ViWindower::~ViWindower()
 	}
 }
 
-ViWindower* ViWindower::instance()
-{
-	return NULL;
-}
-
-void ViWindower::apply(float *data, qint32 size)
+void ViWindower::apply(float *data, int size)
 {
 	createWindow(size);
 	for(int i = 0; i < size; ++i)
@@ -30,7 +22,7 @@ void ViWindower::apply(float *data, qint32 size)
 	}
 }
 
-void ViWindower::createWindow(qint32 size)
+void ViWindower::createWindow(int size)
 {
 	if(mWindow == NULL)
 	{
@@ -45,7 +37,7 @@ void ViWindower::createWindow(qint32 size)
 	}
 }
 
-void ViWindower::fillWindow(qint32 size)
+void ViWindower::fillWindow(int size)
 {
 	for(int i = 0; i < size; ++i)
 	{
