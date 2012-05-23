@@ -35,7 +35,7 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 ENDIF()
 
 #Setup Qt5
-FIND_PACKAGE(Qt5 COMPONENTS Multimedia Core Widgets Gui Network PrintSupport)
+FIND_PACKAGE(Qt5 COMPONENTS Multimedia Core Widgets Gui Network PrintSupport Concurrent Svg)
 
 #Setup FFMPEG
 FIND_PACKAGE(Ffmpeg)
@@ -75,6 +75,7 @@ INCLUDE_DIRECTORIES(
 	${EXTERNAL}/fftreal/sources
 	${EXTERNAL}/fftreal/headers
 	${EXTERNAL}/qplotting/headers
+	${EXTERNAL}/qwt/headers
 )
 
 IF(WIN32)
