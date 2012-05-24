@@ -18,7 +18,7 @@ ViLoadingWidget::ViLoadingWidget(QWidget *parent, bool animation, bool button, V
 	showAnimation(animation);
 	showButton(button);
 	setTextStyle(style);
-
+	progress(0);
 }
 
 ViLoadingWidget::~ViLoadingWidget()
@@ -29,6 +29,11 @@ ViLoadingWidget::~ViLoadingWidget()
 		mTimer = NULL;
 	}
 	delete mUi;
+}
+
+void ViLoadingWidget::progress(qreal percentage)
+{
+	mUi->progressBar->setValue(percentage);
 }
 
 void ViLoadingWidget::showAnimation(bool show)
@@ -100,6 +105,6 @@ void ViLoadingWidget::displayNextImage()
 	{
 		mCurrentImage = 1;
 	}
-	mUi->animationWidget->setStyleSheet("background: url(/home/visore/Desktop/anim/" + QString::number(mCurrentImage) + ".png) no-repeat;");
+	mUi->animationWidget->setStyleSheet("background: url(" + ViThemeManager::image("loading/" + QString::number(mCurrentImage) + ".png", ViThemeImage::Normal, ViThemeManager::Animation).path() + ") no-repeat;");
 	repaint();
 }

@@ -12,9 +12,3 @@ ViOutputContainer::~ViOutputContainer()
 {
 	delete mUi;
 }
-
-void ViOutputContainer::setEngine(ViAudioEngine *engine)
-{
-	ViWidget::setEngine(engine);
-	mUi->outputWidget->setEngine(mEngine);
-}

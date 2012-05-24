@@ -12,6 +12,7 @@
 #include "visongdetector.h"
 #include "visignalmanipulator.h"
 #include "vimatcher.h"
+#include "visingleton.h"
 #include <QList>
 #include <QCoreApplication>
 
@@ -44,7 +45,7 @@ struct ViAudioInputDevice
 		QString mDescription;
 };
 
-class ViAudioEngine : public QObject, public ViError
+class ViAudioEngine : public ViSingleton, public ViError
 {
     Q_OBJECT
 
@@ -70,6 +71,7 @@ class ViAudioEngine : public QObject, public ViError
 		void calculateSpectrum(qint32 size, QString windowFunction);
 
 	signals:
+
 		void originalBufferChanged(int size);
 		void correctedBufferChanged(int size);
 		void positionChanged(ViAudioPosition position);
@@ -77,13 +79,15 @@ class ViAudioEngine : public QObject, public ViError
 
 		void originalWaveChanged();
 		void correctedWaveChanged();
-		void spectrumChanged();
+
+		void spectrumChanged(qreal percentage);
+		void spectrumFinished();
 
 		void songInfoChanged(ViSongInfo info);
 
 	public:
-		ViAudioEngine();
 		~ViAudioEngine();
+		static ViAudioEngine* instance();
 		ViAudioProcessingChain* processingChain();
 		void setInput(ViAudioEngine::ViAudioType type);
 		void setInputFilePath(QString filePath);
@@ -103,8 +107,14 @@ class ViAudioEngine : public QObject, public ViError
 		void initializeOutputFile();*/
 		void resetMetaData();
 
-	//private:
-public:
+	protected:
+
+		ViAudioEngine();
+
+	private:
+
+		static ViAudioEngine *mEngine;
+
 		ViAudioConnection *mAudioConnection;
 		ViLibrary<ViAudioConnection> *mAudioConnectionLoader;
 		ViStreamInput *mStreamInput;

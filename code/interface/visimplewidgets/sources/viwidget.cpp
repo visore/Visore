@@ -4,17 +4,12 @@ ViWidget::ViWidget(QWidget *parent)
 	: QWidget(parent)
 {
 	mParent = parent;
-	mEngine = NULL;
+	mEngine = ViAudioEngine::instance();
 	mStyle = style();
 }
 
 void ViWidget::refresh()
 {
-}
-
-void ViWidget::setEngine(ViAudioEngine *engine)
-{
-	mEngine = engine;
 }
 
 ViAudioEngine* ViWidget::engine()

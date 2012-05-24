@@ -3,8 +3,10 @@
 
 #include <QTimer>
 
+ViAudioEngine *ViAudioEngine::mEngine = NULL;
+
 ViAudioEngine::ViAudioEngine()
-	: QObject()
+	: ViSingleton()
 {
 	mStreamInput = NULL;
 	mFileInput = NULL;
@@ -55,7 +57,8 @@ ViAudioEngine::ViAudioEngine()
 	/*ViMatcher *m = new ViMatcher();
 	m->match(b1, b2);*/
 	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
-	QObject::connect(mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumChanged()));
+	QObject::connect(mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
+	QObject::connect(mSpectrumAnalyzer, SIGNAL(changed(qreal)), this, SIGNAL(spectrumChanged(qreal)));
 
 	
 }
@@ -86,6 +89,15 @@ ViAudioEngine::~ViAudioEngine()
 		delete mBuffer;
 		mBuffer = NULL;
 	}*/
+}
+
+ViAudioEngine* ViAudioEngine::instance()
+{
+	if(mEngine == NULL)
+	{
+		mEngine = new ViAudioEngine();
+	}
+	return mEngine;
 }
 
 ViAudioProcessingChain* ViAudioEngine::processingChain()

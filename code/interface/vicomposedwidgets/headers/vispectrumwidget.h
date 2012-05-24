@@ -4,7 +4,6 @@
 #include <QFileDialog>
 #include "vithememanager.h"
 #include "viwidget.h"
-#include "viloadingwidget.h"
 
 namespace Ui
 {
@@ -24,13 +23,11 @@ class ViSpectrumWidget : public ViWidget
 
 		ViSpectrumWidget(QWidget *parent = 0);
 		~ViSpectrumWidget();
-		void setEngine(ViAudioEngine *engine);
 		void show();
 
 	private:
 
 		Ui::ViSpectrumWidget *mUi;
-		ViLoadingWidget *mLoadingWidget;
 
 };
 

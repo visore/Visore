@@ -21,7 +21,6 @@ class ViAnalysisWidget : public ViWidget
 	public:
 		ViAnalysisWidget(QWidget *parent = 0);
 		~ViAnalysisWidget();
-		void setEngine(ViAudioEngine *engine);
 
 	private:
 		Ui::ViAnalysisWidget *mUi;

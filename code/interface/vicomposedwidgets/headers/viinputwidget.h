@@ -21,7 +21,6 @@ class ViInputWidget : public ViWidget
 	public:
 		ViInputWidget(QWidget *parent = 0);
 		~ViInputWidget();
-		void setEngine(ViAudioEngine *engine);
 
 	private:
 		Ui::ViInputWidget *mUi;

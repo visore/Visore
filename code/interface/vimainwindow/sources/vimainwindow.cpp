@@ -1,13 +1,12 @@
 #include "vimainwindow.h"
 #include "ui_vimainwindow.h"
+#include <iostream>
+using namespace std;
+ViMainWindow *ViMainWindow::mWindow = NULL;
 
-ViMainWindow::ViMainWindow(ViAudioEngine *engine, QWidget *parent)
-	: QMainWindow(parent)
+ViMainWindow::ViMainWindow()
+	: QMainWindow()
 {
-	mUi = new Ui::ViMainWindow();
-	mUi->setupUi(this);
-	mEngine = engine;
-	initialize();
 }
 
 ViMainWindow::~ViMainWindow()
@@ -15,12 +14,47 @@ ViMainWindow::~ViMainWindow()
 	delete mUi;
 	delete mOriginalWaveWidget;
 	delete mCorrectedWaveWidget;
-	delete mInputContainer;
-	delete mOutputContainer;
-	delete mControlContainer;
-	delete mAnalysisContainer;
 	delete mLoadingWidget;
 	delete mSongInfoWidget;
+}
+
+ViMainWindow* ViMainWindow::instance()
+{
+	if(mWindow == NULL)
+	{
+		mWindow = new ViMainWindow();
+		mWindow->initialize();
+	}
+	return mWindow;
+}
+
+void ViMainWindow::progress(qreal percentage)
+{
+	mLoadingWidget->progress(percentage);
+}
+
+void ViMainWindow::hideLoading()
+{
+	mLoadingWidget->setVisible(false);
+}
+
+void ViMainWindow::showLoading(bool animation, bool button, ViLoadingWidget::TextStyle style, QString text)
+{
+	mLoadingWidget->showAnimation(animation);
+	mLoadingWidget->showButton(button);
+	mLoadingWidget->setTextStyle(style);
+	mLoadingWidget->setText(text);
+	mLoadingWidget->setVisible(true);
+}
+
+void ViMainWindow::showWave()
+{
+	mUi->widgetStack->setCurrentIndex(0);
+}
+
+void ViMainWindow::showSpectrum()
+{
+	mUi->widgetStack->setCurrentIndex(1);
 }
 
 void ViMainWindow::resizeEvent(QResizeEvent *event)
@@ -29,48 +63,28 @@ void ViMainWindow::resizeEvent(QResizeEvent *event)
     event->accept();
 }
 
-void ViMainWindow::setLoading(bool load)
-{
-	mLoadingWidget->setVisible(load);
-}
-
 void ViMainWindow::initialize()
 {
+	mUi = new Ui::ViMainWindow();
+	mUi->setupUi(this);
+	mEngine = ViAudioEngine::instance();
+
 	mLoadingWidget = new ViLoadingWidget(centralWidget());
-	setLoading(false);
 
 	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile.png", ViThemeImage::Normal, ViThemeManager::Background).path() + ") repeat-x;}");
 
 	//Wave forms
-	mOriginalWaveWidget = new ViWaveFormWidget(mEngine, ViAudioBuffer::Original, mUi->originalWaveContainer);
+	mOriginalWaveWidget = new ViWaveFormWidget(ViAudioBuffer::Original, mUi->originalWaveContainer);
 	mUi->originalWaveContainer->layout()->addWidget(mOriginalWaveWidget);
-	mCorrectedWaveWidget = new ViWaveFormWidget(mEngine, ViAudioBuffer::Corrected, mUi->correctedWaveContainer);
+	mCorrectedWaveWidget = new ViWaveFormWidget(ViAudioBuffer::Corrected, mUi->correctedWaveContainer);
 	mUi->correctedWaveContainer->layout()->addWidget(mCorrectedWaveWidget);
 	ViObject::connect(mOriginalWaveWidget, SIGNAL(pointerMoved(qint32)), mCorrectedWaveWidget, SLOT(setPointer(qint32)));
 	ViObject::connect(mCorrectedWaveWidget, SIGNAL(pointerMoved(qint32)), mOriginalWaveWidget, SLOT(setPointer(qint32)));
 
-	mUi->tabWidget->setHeight(120);
-	mUi->tabWidget->setRounding(0, 5);
-	mUi->tabWidget->setTabOffset(5);
-
-	mInputContainer = new ViInputContainer(mUi->tabWidget);
-	mInputContainer->setEngine(mEngine);
-	mUi->tabWidget->addTab("Input", mInputContainer);
-
-	mControlContainer = new ViControlContainer(mUi->tabWidget);
-	mControlContainer->setEngine(mEngine);
-	mUi->tabWidget->addTab("Control", mControlContainer);
-
-	mOutputContainer = new ViOutputContainer(mUi->tabWidget);
-	mOutputContainer->setEngine(mEngine);
-	mUi->tabWidget->addTab("Output", mOutputContainer);
-
-	mAnalysisContainer = new ViAnalysisContainer(mUi->tabWidget);
-	mAnalysisContainer->setEngine(mEngine);
-	mUi->tabWidget->addTab("Analysis", mAnalysisContainer);
-
 	//Song info
 	mSongInfoWidget = new ViSongInfoWidget(mUi->songInfoContainer);
 	mUi->songInfoContainer->layout()->addWidget(mSongInfoWidget);
-	mSongInfoWidget->setEngine(mEngine);
+
+	showWave();
+	hideLoading();
 }

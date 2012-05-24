@@ -1,10 +1,8 @@
 #include "vispectrumwidget.h"
 #include "ui_vispectrumwidget.h"
+#include "vimainwindow.h"
 
 #define EXTRA_SPACE 0.05
-
-#include <iostream>
-using namespace std;
 
 ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -12,26 +10,20 @@ ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 	mUi = new Ui::ViSpectrumWidget();
 	mUi->setupUi(this);
 
-	mLoadingWidget = new ViLoadingWidget(this, true, false, ViLoadingWidget::None);
-
 	QObject::connect(mUi->sizeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
 	QObject::connect(mUi->windowBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
 
 	QObject::connect(mUi->frequencyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
 	QObject::connect(mUi->valueBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
 	QObject::connect(mUi->notationBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
+
+	QObject::connect(mEngine, SIGNAL(spectrumFinished()), this, SLOT(replot()));
+	QObject::connect(mEngine, SIGNAL(spectrumChanged(qreal)), ViMainWindow::instance(), SLOT(progress(qreal)));
 }
 
 ViSpectrumWidget::~ViSpectrumWidget()
 {
 	delete mUi;
-	delete mLoadingWidget;
-}
-
-void ViSpectrumWidget::setEngine(ViAudioEngine *engine)
-{
-	ViWidget::setEngine(engine);
-	QObject::connect(mEngine, SIGNAL(spectrumChanged()), this, SLOT(replot()));
 }
 
 void ViSpectrumWidget::show()
@@ -42,13 +34,13 @@ void ViSpectrumWidget::show()
 
 void ViSpectrumWidget::recalculate()
 {
-	mLoadingWidget->setVisible(true);
+	ViMainWindow::instance()->showLoading(true, false, ViLoadingWidget::Text, "Calculating Spectrum");
 	mEngine->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
 }
 
 void ViSpectrumWidget::replot()
 {
-	mLoadingWidget->setVisible(false);
+	ViMainWindow::instance()->hideLoading();
 	ViSpectrum<float> &plot = mEngine->spectrum();
 	qint32 size = plot.size();
 

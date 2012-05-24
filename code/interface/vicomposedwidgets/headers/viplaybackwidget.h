@@ -23,7 +23,6 @@ class ViPlaybackWidget : public ViWidget
 	public:
 		ViPlaybackWidget(QWidget *parent = 0);
 		~ViPlaybackWidget();
-		void setEngine(ViAudioEngine *engine);
 
 	private:
 		Ui::ViPlaybackWidget *mUi;

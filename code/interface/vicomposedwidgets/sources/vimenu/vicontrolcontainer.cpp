@@ -12,10 +12,3 @@ ViControlContainer::~ViControlContainer()
 {
 	delete mUi;
 }
-
-void ViControlContainer::setEngine(ViAudioEngine *engine)
-{
-	ViWidget::setEngine(engine);
-	mUi->playbackWidget->setEngine(mEngine);
-	mUi->volumeWidget->setEngine(mEngine);
-}

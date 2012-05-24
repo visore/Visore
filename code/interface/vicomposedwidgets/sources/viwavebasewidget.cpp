@@ -1,10 +1,8 @@
 #include "viwavebasewidget.h"
 
-ViWaveBaseWidget::ViWaveBaseWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
+ViWaveBaseWidget::ViWaveBaseWidget(ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
 	: ViWidget(parent)
 {
-	setEngine(engine);
-
 	mForm = mEngine->waveSummary(type);
 	if(type == ViAudioBuffer::Original)
 	{

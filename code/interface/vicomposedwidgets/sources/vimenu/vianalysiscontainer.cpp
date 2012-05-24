@@ -12,9 +12,3 @@ ViAnalysisContainer::~ViAnalysisContainer()
 {
 	delete mUi;
 }
-
-void ViAnalysisContainer::setEngine(ViAudioEngine *engine)
-{
-	ViWidget::setEngine(engine);
-	mUi->analysisWidget->setEngine(mEngine);
-}

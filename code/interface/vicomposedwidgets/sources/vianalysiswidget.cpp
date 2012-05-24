@@ -1,5 +1,6 @@
 #include "vianalysiswidget.h"
 #include "ui_vianalysiswidget.h"
+#include "vimainwindow.h"
 
 ViAnalysisWidget::ViAnalysisWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -15,14 +16,8 @@ ViAnalysisWidget::~ViAnalysisWidget()
 	delete mUi;
 }
 
-void ViAnalysisWidget::setEngine(ViAudioEngine *engine)
-{
-	ViWidget::setEngine(engine);
-	mSpectrum.setEngine(engine);
-}
-
 void ViAnalysisWidget::openSpectrum()
 {
-	mSpectrum.replot();
-	mSpectrum.show();
+	mSpectrum.recalculate();
+	ViMainWindow::instance()->showSpectrum();
 }

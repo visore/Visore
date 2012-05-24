@@ -32,5 +32,41 @@
         <file>icons/disabled/record.png</file>
         <file>icons/disabled/stop.png</file>
         <file>icons/normal/star.png</file>
+        <file>animations/loading/1.png</file>
+        <file>animations/loading/2.png</file>
+        <file>animations/loading/3.png</file>
+        <file>animations/loading/4.png</file>
+        <file>animations/loading/5.png</file>
+        <file>animations/loading/6.png</file>
+        <file>animations/loading/7.png</file>
+        <file>animations/loading/8.png</file>
+        <file>animations/loading/9.png</file>
+        <file>animations/loading/10.png</file>
+        <file>animations/loading/11.png</file>
+        <file>animations/loading/12.png</file>
+        <file>animations/loading/13.png</file>
+        <file>animations/loading/14.png</file>
+        <file>animations/loading/15.png</file>
+        <file>animations/loading/16.png</file>
+        <file>animations/loading/17.png</file>
+        <file>animations/loading/18.png</file>
+        <file>animations/loading/19.png</file>
+        <file>animations/loading/20.png</file>
+        <file>animations/loading/21.png</file>
+        <file>animations/loading/22.png</file>
+        <file>animations/loading/23.png</file>
+        <file>animations/loading/24.png</file>
+        <file>animations/loading/25.png</file>
+        <file>animations/loading/26.png</file>
+        <file>animations/loading/27.png</file>
+        <file>animations/loading/28.png</file>
+        <file>animations/loading/29.png</file>
+        <file>animations/loading/30.png</file>
+        <file>animations/loading/31.png</file>
+        <file>animations/loading/32.png</file>
+        <file>animations/loading/33.png</file>
+        <file>animations/loading/34.png</file>
+        <file>animations/loading/35.png</file>
+        <file>animations/loading/36.png</file>
     </qresource>
 </RCC>

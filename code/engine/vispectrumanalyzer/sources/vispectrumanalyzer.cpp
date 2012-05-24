@@ -73,6 +73,7 @@ void ViSpectrumAnalyzerThread::run()
 	qint32 sampleSize = mBlockSize;
 	qint32 halfSize = sampleSize / 2;
 	qint32 bytesSize = sampleSize * (mFormat.sampleSize() / 8);
+	qint64 totalSize = mSizes.size() * bytesSize;
 	
 	char bytes[bytesSize];
 	float samples[sampleSize];
@@ -88,6 +89,8 @@ void ViSpectrumAnalyzerThread::run()
 	{
 		mWindowFunction->create(sampleSize);
 	}
+
+	emit changed(0);
 
 	while(!mSizes.isEmpty())
 	{
@@ -108,6 +111,7 @@ void ViSpectrumAnalyzerThread::run()
 			mSpectrum->add(index, ViComplexFloat(fourier[index], -fourier[index + halfSize]));
 		}
 		mSpectrum->add(halfSize, ViComplexFloat(fourier[sampleSize - 1], 0));
+		emit changed((totalSize - (mSizes.size() * bytesSize)) / (totalSize / 100.0));
 	}
 	mSpectrum->finalize();
 }
@@ -119,6 +123,7 @@ ViSpectrumAnalyzer::ViSpectrumAnalyzer(ViAudioBuffer *buffer)
 	mBuffer = buffer;
 	mThread.setData(buffer, &mSpectrum);
 	QObject::connect(&mThread, SIGNAL(finished()), this, SIGNAL(finished()));
+	QObject::connect(&mThread, SIGNAL(changed(qreal)), this, SIGNAL(changed(qreal)));
 }
 
 void ViSpectrumAnalyzer::analyze()

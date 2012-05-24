@@ -8,6 +8,9 @@ ViOutputControlWidget::ViOutputControlWidget(QWidget *parent)
 	mUi->setupUi(this);
 	populate();
 	setDefaults();
+
+	ViObject::connect(mUi->fileButton, SIGNAL(clicked()), this, SLOT(selectFileOutput()));
+	ViObject::connect(mUi->saveButton, SIGNAL(clicked()), this, SLOT(save()));
 }
 
 ViOutputControlWidget::~ViOutputControlWidget()
@@ -43,13 +46,6 @@ void ViOutputControlWidget::save()
 	format.setByteOrder(QAudioFormat::Endian (mUi->byteOrderBox->itemData(mUi->byteOrderBox->currentIndex()).toInt()));
 	format.setCodec(ViCodecManager::selected(mUi->formatBox->itemData(mUi->formatBox->currentIndex()).toString()));
 	mEngine->createOutputFile(mUi->fileLineEdit->text(), format);
-}
-
-void ViOutputControlWidget::setEngine(ViAudioEngine *engine)
-{
-	ViWidget::setEngine(engine);
-	ViObject::connect(mUi->fileButton, SIGNAL(clicked()), this, SLOT(selectFileOutput()));
-	ViObject::connect(mUi->saveButton, SIGNAL(clicked()), this, SLOT(save()));
 }
 
 void ViOutputControlWidget::populate()

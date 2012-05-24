@@ -4,12 +4,9 @@
 #include <QMainWindow>
 #include <QResizeEvent>
 #include "viwaveformwidget.h"
-#include "vicontrolcontainer.h"
-#include "viinputcontainer.h"
-#include "vioutputcontainer.h"
-#include "vianalysiscontainer.h"
 #include "viloadingwidget.h"
 #include "visonginfowidget.h"
+#include "vimenu.h"
 
 namespace Ui
 {
@@ -20,29 +17,38 @@ class ViMainWindow : public QMainWindow
 {
 	Q_OBJECT
 
+	public slots:
+
+		void progress(qreal percentage);
+		void hideLoading();
+		void showLoading(bool animation = true, bool button = true, ViLoadingWidget::TextStyle style = ViLoadingWidget::Percentage, QString text = "");
+
+		void showWave();
+		void showSpectrum();
+
 	public:
-		ViMainWindow(ViAudioEngine *engine, QWidget *parent = 0);
+
 		~ViMainWindow();
-		void setLoading(bool load);
+		static ViMainWindow* instance();
 
 	protected:
+
+		ViMainWindow();
 		void resizeEvent(QResizeEvent *event);
 
 	private:
 		void initialize();
 
 	private:
+
+		static ViMainWindow *mWindow;
+
 		Ui::ViMainWindow *mUi;
 		ViAudioEngine *mEngine;
 		ViLoadingWidget *mLoadingWidget;
 
 		ViWaveFormWidget *mOriginalWaveWidget;
 		ViWaveFormWidget *mCorrectedWaveWidget;
-
-		ViControlContainer *mControlContainer;
-		ViInputContainer *mInputContainer;
-		ViOutputContainer *mOutputContainer;
-		ViAnalysisContainer *mAnalysisContainer;
 
 		ViSongInfoWidget *mSongInfoWidget;
 };

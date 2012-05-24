@@ -21,18 +21,14 @@ ViSongInfoWidget::ViSongInfoWidget(QWidget *parent)
 	mTimer = new QTimer(this);
 	ViObject::connect(mTimer, SIGNAL(timeout()), this, SLOT(switchInfo()));
 	mTimer->start(INFO_CHANGE_TIMEOUT);
+
+	ViObject::connect(mEngine, SIGNAL(songInfoChanged(ViSongInfo)), this, SLOT(changeSongInfo(ViSongInfo)));
 }
 
 ViSongInfoWidget::~ViSongInfoWidget()
 {
 	delete mUi;
 	delete mTimer;
-}
-
-void ViSongInfoWidget::setEngine(ViAudioEngine *engine)
-{
-	ViWidget::setEngine(engine);
-	ViObject::connect(mEngine, SIGNAL(songInfoChanged(ViSongInfo)), this, SLOT(changeSongInfo(ViSongInfo)));
 }
 
 void ViSongInfoWidget::changeSongInfo(ViSongInfo info)

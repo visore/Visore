@@ -14,18 +14,14 @@ ViInputWidget::ViInputWidget(QWidget *parent)
 	mUi->fileInputButton->setCheckable(true);
 	mUi->vinylInputButton->setGlow(ViThemeManager::color(14));
 	mUi->fileInputButton->setGlow(ViThemeManager::color(14));
+
+	ViObject::connect(mUi->vinylInputButton, SIGNAL(clicked()), this, SLOT(selectLineInput()));
+	ViObject::connect(mUi->fileInputButton, SIGNAL(clicked()), this, SLOT(selectFileInput()));
 }
 
 ViInputWidget::~ViInputWidget()
 {
 	delete mUi;
-}
-
-void ViInputWidget::setEngine(ViAudioEngine *engine)
-{
-	ViWidget::setEngine(engine);
-	ViObject::connect(mUi->vinylInputButton, SIGNAL(clicked()), this, SLOT(selectLineInput()));
-	ViObject::connect(mUi->fileInputButton, SIGNAL(clicked()), this, SLOT(selectFileInput()));
 }
 
 void ViInputWidget::selectLineInput()

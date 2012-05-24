@@ -2,12 +2,12 @@
 
 #define CONTENT_MARGIN -4
 
-ViWaveFormWidget::ViWaveFormWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
+ViWaveFormWidget::ViWaveFormWidget(ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
 	: ViWidget(parent)
 {
-	mBaseWidget = new ViWaveBaseWidget(engine, type, this);
+	mBaseWidget = new ViWaveBaseWidget(type, this);
 
-	mOverlayWidget = new ViWaveOverlayWidget(engine, type, this);
+	mOverlayWidget = new ViWaveOverlayWidget(type, this);
 	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SIGNAL(pointerMoved(qint32)));
 	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SLOT(setPointer(qint32)));
 	ViObject::connect(mOverlayWidget, SIGNAL(pointerValuesChanged(qreal, qreal, qreal, qreal)), this, SLOT(updateSampleValues(qreal, qreal, qreal, qreal)));
@@ -25,7 +25,6 @@ ViWaveFormWidget::ViWaveFormWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudio
 	parent->setContentsMargins(CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN);
 
 	mControlToolbar = new ViWidgetToolbar(Qt::AlignCenter | Qt::AlignRight, this);
-	mControlToolbar->setEngine(engine);
 
 	mZoomInButton = new QToolButton(mControlToolbar);
 	ViObject::connect(mZoomInButton, SIGNAL(clicked()), this, SLOT(zoomIn()));
@@ -42,7 +41,6 @@ ViWaveFormWidget::ViWaveFormWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudio
 	mControlToolbar->addWidget(mZoomOutButton);
 
 	mInfoToolbar = new ViWidgetToolbar(Qt::AlignLeft | Qt::AlignBottom, this);
-	mInfoToolbar->setEngine(engine);
 	mInfoWidget = new QWidget(mInfoToolbar);
 	mInfoLayout = new QGridLayout(mInfoWidget);
 	mMaxLabel1 = new QLabel(mInfoWidget);

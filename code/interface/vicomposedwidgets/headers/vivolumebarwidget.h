@@ -20,7 +20,6 @@ class ViVolumeBarWidget : public ViWidget
 	public:
 		ViVolumeBarWidget(QWidget *parent = 0);
 		~ViVolumeBarWidget();
-		void setEngine(ViAudioEngine *engine);
 
 	private:
 		Ui::ViVolumeBarWidget *mUi;

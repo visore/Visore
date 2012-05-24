@@ -11,7 +11,6 @@ class ViWidget : public QWidget
 	public:
 		ViWidget(QWidget *parent = 0);
 
-		virtual void setEngine(ViAudioEngine *engine);
 		ViAudioEngine* engine();
 
 		virtual void refresh();
@@ -19,6 +18,7 @@ class ViWidget : public QWidget
 		virtual void paintEvent(QPaintEvent *event);
 
 	protected:
+
 		QWidget *mParent;
 		ViAudioEngine *mEngine;
 		QStyle *mStyle; //Qt deletes this

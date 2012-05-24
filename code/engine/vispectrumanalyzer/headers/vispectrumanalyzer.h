@@ -13,6 +13,10 @@ class ViSpectrumAnalyzerThread : public QThread
 {
 	Q_OBJECT
 
+	signals:
+
+		void changed(qreal percentage);
+
 	public:
 
 		ViSpectrumAnalyzerThread();
@@ -44,6 +48,7 @@ class ViSpectrumAnalyzer : public QObject
 	signals:
 
 		void finished();
+		void changed(qreal percentage);
 
 	public:
 

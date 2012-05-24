@@ -20,7 +20,6 @@ class ViSongInfoWidget : public ViWidget
 	public:
 		ViSongInfoWidget(QWidget *parent = 0);
 		~ViSongInfoWidget();
-		void setEngine(ViAudioEngine *engine);
 
 	private:
 		Ui::ViSongInfoWidget *mUi;

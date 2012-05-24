@@ -31,17 +31,13 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mUi->playButton->disable();
 	mUi->pauseButton->disable();
 	mUi->stopButton->disable();
+
+	ViObject::connect(mEngine, SIGNAL(inputChanged(ViAudioEngine::ViAudioType)), this, SLOT(inputChanged(ViAudioEngine::ViAudioType)));
 }
 
 ViPlaybackWidget::~ViPlaybackWidget()
 {
 	delete mUi;
-}
-
-void ViPlaybackWidget::setEngine(ViAudioEngine *engine)
-{
-	ViWidget::setEngine(engine);
-	ViObject::connect(mEngine, SIGNAL(inputChanged(ViAudioEngine::ViAudioType)), this, SLOT(inputChanged(ViAudioEngine::ViAudioType)));
 }
 
 void ViPlaybackWidget::inputChanged(ViAudioEngine::ViAudioType type)

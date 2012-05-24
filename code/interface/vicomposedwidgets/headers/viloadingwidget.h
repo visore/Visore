@@ -14,6 +14,10 @@ class ViLoadingWidget : public ViWidget
 {
 	Q_OBJECT
 
+	public slots:
+
+		void progress(qreal percentage);
+
 	private slots:
 
 		void displayNextImage();

@@ -2,10 +2,9 @@
 
 #define CONTENT_MARGIN -4
 
-ViWaveOverlayWidget::ViWaveOverlayWidget(ViAudioEngine *engine, ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
+ViWaveOverlayWidget::ViWaveOverlayWidget(ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
 	: ViWidget(parent)
 {
-	setEngine(engine);
 	mForm = mEngine->waveSummary(type);
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 	setMouseTracking(true);

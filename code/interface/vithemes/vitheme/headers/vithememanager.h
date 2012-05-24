@@ -13,7 +13,8 @@ class ViThemeManager
 		enum Type
 		{
 			Icon = 0,
-			Background = 1
+			Background = 1,
+			Animation = 2
 		};
 		static QList<QString> themes(); 
 		static void setTheme(QString name);

@@ -22,7 +22,6 @@ class ViOutputWidget : public ViWidget
 	public:
 		ViOutputWidget(QWidget *parent = 0);
 		~ViOutputWidget();
-		void setEngine(ViAudioEngine *engine);
 
 	private:
 		Ui::ViOutputWidget *mUi;

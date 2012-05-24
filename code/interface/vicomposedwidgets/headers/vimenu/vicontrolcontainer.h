@@ -18,7 +18,6 @@ class ViControlContainer : public ViWidget
 	public:
 		ViControlContainer(QWidget *parent = 0);
 		~ViControlContainer();
-		void setEngine(ViAudioEngine *engine);
 
 	private:
 		Ui::ViControlContainer *mUi;

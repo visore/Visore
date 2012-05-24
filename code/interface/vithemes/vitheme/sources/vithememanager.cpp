@@ -99,6 +99,10 @@ ViThemeImage ViThemeManager::image(QString name, ViThemeImage::State state, ViTh
 	{
 		prefix = ":/backgrounds/";
 	}
+	else if(type == ViThemeManager::Animation)
+	{
+		prefix = ":/animations/";
+	}
 	ViThemeImage image(prefix + statePrefix + name, state);
 	return image;
 }
