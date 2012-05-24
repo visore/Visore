@@ -99,11 +99,11 @@ void ViFourierTransformer::setExecution(Execution execution)
 	}
 }
 
-void ViFourierTransformer::transform(float input[], float output[], ViWindower *windower, Direction direction)
+void ViFourierTransformer::transform(float input[], float output[], ViWindowFunction<float> *windowFunction, Direction direction)
 {
 	if(direction == ViFourierTransformer::Forward)
 	{
-		forwardTransform(input, output, windower);
+		forwardTransform(input, output, windowFunction);
 	}
 	else
 	{
@@ -111,11 +111,11 @@ void ViFourierTransformer::transform(float input[], float output[], ViWindower *
 	}
 }
 
-void ViFourierTransformer::forwardTransform(float *input, float *output, ViWindower *windower)
+void ViFourierTransformer::forwardTransform(float *input, float *output, ViWindowFunction<float> *windowFunction)
 {
-	if(windower != NULL)
+	if(windowFunction != NULL)
 	{
-		windower->apply(input, mSize);
+		windowFunction->apply(input, mSize);
 	}
 	fixedForwardTransform(input, output);
 }
@@ -130,11 +130,11 @@ void ViFourierTransformer::rescale(float input[])
 	fixedRescale(input);
 }
 
-void ViFourierTransformer::transform(float input[], float output[], int numberOfSamples, ViWindower *windower, Direction direction)
+void ViFourierTransformer::transform(float input[], float output[], int numberOfSamples, ViWindowFunction<float> *windowFunction, Direction direction)
 {
 	if(direction == ViFourierTransformer::Forward)
 	{
-		forwardTransform(input, output, numberOfSamples, windower);
+		forwardTransform(input, output, numberOfSamples, windowFunction);
 	}
 	else
 	{
@@ -142,11 +142,11 @@ void ViFourierTransformer::transform(float input[], float output[], int numberOf
 	}
 }
 
-void ViFourierTransformer::forwardTransform(float *input, float *output, int numberOfSamples, ViWindower *windower)
+void ViFourierTransformer::forwardTransform(float *input, float *output, int numberOfSamples, ViWindowFunction<float> *windowFunction)
 {
-	if(windower != NULL)
+	if(windowFunction != NULL)
 	{
-		windower->apply(input, numberOfSamples);
+		windowFunction->apply(input, numberOfSamples);
 	}
 	variableForwardTransform(input, output, numberOfSamples);
 }

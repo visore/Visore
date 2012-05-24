@@ -68,7 +68,7 @@ void ViFrequencySpectrum<T>::finalize()
 		mValues[i].rectangular().setDecibel(ViFrequencyElement<T>::toDecibel(mValues[i].rectangular().amplitude()));
 		mValues[i].polar().setDecibel(ViFrequencyElement<T>::toDecibel(mValues[i].polar().amplitude()));
 	}
-
+	mValues.resize(mValues.size() / 2); // Since we use real FFT, we'll have a mirror image, hence we only need half of the N/2 spectrum
 	findRanges();
 }
 

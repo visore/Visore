@@ -67,7 +67,7 @@ class ViAudioEngine : public QObject, public ViError
 		void stopOutputFile();
 		void setVolume(int volume);
 		void mute(bool value = true);
-		void calculateSpectrum(qint32 size);
+		void calculateSpectrum(qint32 size, QString windowFunction);
 
 	signals:
 		void originalBufferChanged(int size);

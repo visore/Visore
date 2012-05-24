@@ -257,8 +257,9 @@ ViFloatFrequencySpectrum& ViAudioEngine::spectrum()
 	return mSpectrumAnalyzer->spectrum();
 }
 
-void ViAudioEngine::calculateSpectrum(qint32 size)
+void ViAudioEngine::calculateSpectrum(qint32 size, QString windowFunction)
 {
+	mSpectrumAnalyzer->setWindowFunction(windowFunction);
 	mSpectrumAnalyzer->setBlockSize(size);
 	mSpectrumAnalyzer->analyze();
 }

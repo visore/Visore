@@ -3,7 +3,7 @@
 
 #include "vifourierfixedthread.h"
 #include "vifouriervariablethread.h"
-#include "viwindower.h"
+#include "viwindowfunction.h"
 #include "vicomplexnumber.h"
 
 typedef QVector<ViComplexFloat> ViComplexVector;
@@ -39,13 +39,13 @@ class ViFourierTransformer : public QObject
 		bool setFixedSize(int size);
 		void setExecution(Execution execution);
 		
-		void transform(float input[], float output[], ViWindower *windower = NULL, Direction direction = ViFourierTransformer::Forward);
-		void forwardTransform(float *input, float *output, ViWindower *windower = NULL);
+		void transform(float input[], float output[], ViWindowFunction<float> *windowFunction = NULL, Direction direction = ViFourierTransformer::Forward);
+		void forwardTransform(float *input, float *output, ViWindowFunction<float> *windowFunction = NULL);
 		void inverseTransform(float input[], float output[]);
 		void rescale(float input[]);
 
-		void transform(float input[], float output[], int numberOfSamples, ViWindower *windower = NULL, Direction direction = ViFourierTransformer::Forward);
-		void forwardTransform(float *input, float *output, int numberOfSamples, ViWindower *windower = NULL);
+		void transform(float input[], float output[], int numberOfSamples, ViWindowFunction<float> *windowFunction = NULL, Direction direction = ViFourierTransformer::Forward);
+		void forwardTransform(float *input, float *output, int numberOfSamples, ViWindowFunction<float> *windowFunction = NULL);
 		void inverseTransform(float input[], float output[], int numberOfSamples);
 
 		void rescale(float input[], int numberOfSamples);

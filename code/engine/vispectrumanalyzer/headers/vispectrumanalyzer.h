@@ -16,9 +16,11 @@ class ViSpectrumAnalyzerThread : public QThread
 	public:
 
 		ViSpectrumAnalyzerThread();
+		~ViSpectrumAnalyzerThread();
 		void setData(ViAudioBuffer *buffer, ViFloatFrequencySpectrum *spectrum);
 		void setPositions(qint64 start, qint64 end);
 		void setBlockSize(qint32 size);
+		void setWindowFunction(ViWindowFunction<float> *windowFunction);
 		void run();
 
 	private:
@@ -28,6 +30,7 @@ class ViSpectrumAnalyzerThread : public QThread
 		ViAudioFormat mFormat;
 		ViFloatFrequencySpectrum *mSpectrum;
 		ViAudioBufferStream *mStream;
+		ViWindowFunction<float> *mWindowFunction;
 		qint64 mStart;
 		QList<qint32> mSizes;
 		qint32 mBlockSize;
@@ -50,7 +53,9 @@ class ViSpectrumAnalyzer : public QObject
 		ViFloatFrequencySpectrum& spectrum();
 
 		void setBlockSize(qint32 size);
-		qint32 fftSize();
+		qint32 blockSize();
+
+		void setWindowFunction(QString functionName);
 
 	private:
 

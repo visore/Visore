@@ -13,10 +13,11 @@ ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 	mUi->setupUi(this);
 
 	QObject::connect(mUi->sizeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
+	QObject::connect(mUi->windowBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
 
 	QObject::connect(mUi->frequencyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
 	QObject::connect(mUi->valueBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
-	QObject::connect(mUi->representationBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
+	QObject::connect(mUi->notationBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
 }
 
 ViSpectrumWidget::~ViSpectrumWidget()
@@ -38,19 +39,18 @@ void ViSpectrumWidget::show()
 
 void ViSpectrumWidget::recalculate()
 {
-	mEngine->calculateSpectrum(mUi->sizeBox->currentText().toInt());
+	mEngine->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
 }
 
 void ViSpectrumWidget::replot()
 {
-	ViFrequencySpectrum<float> &spectrum = mEngine->spectrum();
-	qint32 size = spectrum.size();
+	ViFrequencySpectrum<float> &plot = mEngine->spectrum();
+	qint32 size = plot.size();
 
 	if(size > 0)
 	{
 		QVector<qreal> x(size);
-		QVector<qreal> yReal(size);
-		QVector<qreal> yImaginary(size);
+		QVector<qreal> y(size);
 
 		QString labelX = "Frequency";
 		QString labelY = "Amplitude";
@@ -60,111 +60,80 @@ void ViSpectrumWidget::replot()
 		bool fill = false;
 		bool drawImaginary = true;
 
-		qreal xMaximum, yRealMinimum, yRealMaximum, yImaginaryMinimum, yImaginaryMaximum;
+		qreal xMaximum, yMinimum, yMaximum;
 		if(mUi->frequencyBox->currentIndex() == 0)
 		{
-			xMaximum = spectrum[size - 1].frequencyRange();
+			xMaximum = plot[size - 1].frequencyRange();
 			for(int i = 0; i < size; ++i)
 			{
-				x[i] = spectrum[i].frequencyRange();
+				x[i] = plot[i].frequencyRange();
 			}
 		}
 		else
 		{
-			xMaximum = spectrum[size - 1].frequencyHertz();
+			xMaximum = plot[size - 1].frequencyHertz();
 			for(int i = 0; i < size; ++i)
 			{
-				x[i] = spectrum[i].frequencyHertz();
+				x[i] = plot[i].frequencyHertz();
 			}
 			unitX = "Hz";
 		}
 
-		if(mUi->representationBox->currentIndex() == 0)
+		if(mUi->notationBox->currentIndex() == 0)
 		{
 			fill = true;
 			if(mUi->valueBox->currentIndex() == 0)
 			{
-				yRealMinimum = spectrum.minimum().polar().amplitude().real() * (1 + EXTRA_SPACE);
-				yRealMaximum = spectrum.maximum().polar().amplitude().real() * (1 + EXTRA_SPACE);
-				yImaginaryMinimum = spectrum.minimum().polar().amplitude().imaginary() * (1 + EXTRA_SPACE);
-				yImaginaryMaximum = spectrum.maximum().polar().amplitude().imaginary() * (1 + EXTRA_SPACE);
+				yMinimum = plot.minimum().polar().amplitude().real() * (1 + EXTRA_SPACE);
+				yMaximum = plot.maximum().polar().amplitude().real() * (1 + EXTRA_SPACE);
 				for(int i = 0; i < size; ++i)
 				{
-					yReal[i] = spectrum[i].polar().amplitude().real();
-					yImaginary[i] = spectrum[i].polar().amplitude().imaginary();
+					y[i] = plot[i].polar().amplitude().real();
 				}
 			}
 			else
 			{
 			
-				yRealMinimum = spectrum.minimum().polar().decibel().real() * (1 + EXTRA_SPACE);
-				yRealMaximum = spectrum.maximum().polar().decibel().real() * (1 + EXTRA_SPACE);
-				yImaginaryMinimum = spectrum.minimum().polar().decibel().imaginary() * (1 + EXTRA_SPACE);
-				yImaginaryMaximum = spectrum.maximum().polar().decibel().imaginary() * (1 + EXTRA_SPACE);
+				yMinimum = plot.minimum().polar().decibel().real() * (1 + EXTRA_SPACE);
+				yMaximum = plot.maximum().polar().decibel().real() * (1 + EXTRA_SPACE);
 				for(int i = 0; i < size; ++i)
 				{
-					yReal[i] = spectrum[i].polar().decibel().real();
-					yImaginary[i] = spectrum[i].polar().decibel().imaginary();
+					y[i] = plot[i].polar().decibel().real();
 				}
 				unitY = "dB";
-				drawImaginary = false;
 			}
 		}
 		else
 		{
 			if(mUi->valueBox->currentIndex() == 0)
 			{
-				yRealMinimum = spectrum.minimum().rectangular().amplitude().real() * (1 + EXTRA_SPACE);
-				yRealMaximum = spectrum.maximum().rectangular().amplitude().real() * (1 + EXTRA_SPACE);
-				yImaginaryMinimum = spectrum.minimum().rectangular().amplitude().imaginary() * (1 + EXTRA_SPACE);
-				yImaginaryMaximum = spectrum.maximum().rectangular().amplitude().imaginary() * (1 + EXTRA_SPACE);
+				yMinimum = plot.minimum().rectangular().amplitude().real() * (1 + EXTRA_SPACE);
+				yMaximum = plot.maximum().rectangular().amplitude().real() * (1 + EXTRA_SPACE);
 				for(int i = 0; i < size; ++i)
 				{
-					yReal[i] = spectrum[i].rectangular().amplitude().real();
-					yImaginary[i] = spectrum[i].rectangular().amplitude().imaginary();
+					y[i] = plot[i].rectangular().amplitude().real();
 				}
 			}
 			else
 			{
-				yRealMinimum = spectrum.minimum().rectangular().decibel().real() * (1 + EXTRA_SPACE);
-				yRealMaximum = spectrum.maximum().rectangular().decibel().real() * (1 + EXTRA_SPACE);
-				yImaginaryMinimum = spectrum.minimum().rectangular().decibel().imaginary() * (1 + EXTRA_SPACE);
-				yImaginaryMaximum = spectrum.maximum().rectangular().decibel().imaginary() * (1 + EXTRA_SPACE);
+				yMinimum = plot.minimum().rectangular().decibel().real() * (1 + EXTRA_SPACE);
+				yMaximum = plot.maximum().rectangular().decibel().real() * (1 + EXTRA_SPACE);
 				for(int i = 0; i < size; ++i)
 				{
-					yReal[i] = spectrum[i].rectangular().decibel().real();
-					yImaginary[i] = spectrum[i].rectangular().decibel().imaginary();
+					y[i] = plot[i].rectangular().decibel().real();
 				}
 				unitY = "dB";
-				drawImaginary = false;
 			}
 		}
 
-		mUi->realSpectrum->setScale(ViFrequencyPlot::X, 0, xMaximum);
-		mUi->realSpectrum->setScale(ViFrequencyPlot::Y, yRealMinimum, yRealMaximum);
-		mUi->realSpectrum->setLabel(ViFrequencyPlot::X, labelX);
-		mUi->realSpectrum->setLabel(ViFrequencyPlot::Y, labelY);
-		mUi->realSpectrum->setUnit(ViFrequencyPlot::X, unitX);
-		mUi->realSpectrum->setUnit(ViFrequencyPlot::Y, unitY);
-		mUi->realSpectrum->fill(fill);
-		mUi->realSpectrum->setData(x, yReal);
-
-		mUi->imaginarySpectrum->setScale(ViFrequencyPlot::X, 0, xMaximum);
-		mUi->imaginarySpectrum->setLabel(ViFrequencyPlot::X, labelX);
-		mUi->imaginarySpectrum->setLabel(ViFrequencyPlot::Y, labelY);
-		mUi->imaginarySpectrum->setUnit(ViFrequencyPlot::X, unitX);
-		mUi->imaginarySpectrum->setUnit(ViFrequencyPlot::Y, unitY);
-		mUi->imaginarySpectrum->fill(fill);
-		if(drawImaginary)
-		{
-			mUi->imaginarySpectrum->setScale(ViFrequencyPlot::Y, yImaginaryMinimum, yImaginaryMaximum);
-			mUi->imaginarySpectrum->setData(x, yImaginary);
-		}
-		else
-		{
-			mUi->imaginarySpectrum->setScale(ViFrequencyPlot::Y, 0, 1);
-			mUi->imaginarySpectrum->setData(QVector<qreal>(0), QVector<qreal>(0));
-		}
+		mUi->plot->setScale(ViFrequencyPlot::X, 0, xMaximum);
+		mUi->plot->setScale(ViFrequencyPlot::Y, yMinimum, yMaximum);
+		mUi->plot->setLabel(ViFrequencyPlot::X, labelX);
+		mUi->plot->setLabel(ViFrequencyPlot::Y, labelY);
+		mUi->plot->setUnit(ViFrequencyPlot::X, unitX);
+		mUi->plot->setUnit(ViFrequencyPlot::Y, unitY);
+		mUi->plot->fill(fill);
+		mUi->plot->setData(x, y);
 	}
 }
 

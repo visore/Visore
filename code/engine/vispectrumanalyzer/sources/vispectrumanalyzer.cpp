@@ -1,11 +1,20 @@
 #include "vispectrumanalyzer.h"
-#include "vihammingwindower.h"
 
 #define DEFAULT_BLOCK_SIZE 4096
 
 ViSpectrumAnalyzerThread::ViSpectrumAnalyzerThread()
 	: QThread()
 {
+	mWindowFunction = NULL;
+}
+
+ViSpectrumAnalyzerThread::~ViSpectrumAnalyzerThread()
+{
+	if(mWindowFunction != NULL)
+	{
+		delete mWindowFunction;
+		mWindowFunction = NULL;
+	}
 }
 
 void ViSpectrumAnalyzerThread::setData(ViAudioBuffer *buffer, ViFloatFrequencySpectrum *spectrum)
@@ -53,6 +62,11 @@ void ViSpectrumAnalyzerThread::setBlockSize(qint32 size)
 	mBlockSize = size;
 }
 
+void ViSpectrumAnalyzerThread::setWindowFunction(ViWindowFunction<float> *windowFunction)
+{
+	mWindowFunction = windowFunction;
+}
+
 void ViSpectrumAnalyzerThread::run()
 {
 	qint32 index;
@@ -66,10 +80,14 @@ void ViSpectrumAnalyzerThread::run()
 
 	ViFourierTransformer transformer;
 	transformer.setFixedSize(mBlockSize);
-	ViWindower *windower = NULL;//ViHammingWindower::instance();
 
-	mSpectrum->initialize(sampleSize / 2 + 1, mFormat.sampleRate() / 2);
+	mSpectrum->initialize(halfSize + 1, mFormat.sampleRate() / 2);
 	mStream->restart();
+
+	if(mWindowFunction != NULL)
+	{
+		mWindowFunction->create(sampleSize);
+	}
 
 	while(!mSizes.isEmpty())
 	{
@@ -83,7 +101,7 @@ void ViSpectrumAnalyzerThread::run()
 			}
 			sampleSize = mBlockSize;
 		}
-		transformer.forwardTransform(samples, fourier, windower);
+		transformer.forwardTransform(samples, fourier, mWindowFunction);
 		mSpectrum->add(0, ViComplexFloat(fourier[0], 0));
 		for(index = 1; index < halfSize; ++index)
 		{
@@ -105,12 +123,16 @@ ViSpectrumAnalyzer::ViSpectrumAnalyzer(ViAudioBuffer *buffer)
 
 void ViSpectrumAnalyzer::analyze()
 {
+	mThread.quit();
+	while(mThread.isRunning());
 	mThread.setPositions(0, mBuffer->size());
 	mThread.start();
 }
 
 void ViSpectrumAnalyzer::analyze(ViAudioPosition start, ViAudioPosition end)
 {
+	mThread.quit();
+	while(mThread.isRunning());
 	mThread.setPositions(start.position(ViAudioPosition::Bytes), end.position(ViAudioPosition::Bytes));
 	mThread.start();
 }
@@ -126,7 +148,12 @@ void ViSpectrumAnalyzer::setBlockSize(qint32 size)
 	mThread.setBlockSize(mBlockSize);
 }
 
-qint32 ViSpectrumAnalyzer::fftSize()
+qint32 ViSpectrumAnalyzer::blockSize()
 {
 	return mBlockSize;
+}
+
+void ViSpectrumAnalyzer::setWindowFunction(QString functionName)
+{
+	mThread.setWindowFunction(ViWindowFunctionManager<float>::createFunction(functionName));
 }
