@@ -12,9 +12,6 @@ ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 	mUi = new Ui::ViSpectrumWidget();
 	mUi->setupUi(this);
 
-	mUi->realSpectrum->addGraph();
-	mUi->imaginarySpectrum->addGraph();
-
 	QObject::connect(mUi->sizeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
 	QObject::connect(mUi->frequencyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
 	QObject::connect(mUi->valueBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
@@ -40,6 +37,13 @@ void ViSpectrumWidget::replot()
 	QVector<qreal> yReal(size);
 	QVector<qreal> yImaginary(size);
 
+	QString labelX = "Frequency";
+	QString labelY = "Ampli";
+	QString unitX = "";
+	QString unitY = "";
+
+	QVector<QPointF> realData(size);
+
 	qreal xMaximum, yRealMinimum, yRealMaximum, yImaginaryMinimum, yImaginaryMaximum;
 	if(mUi->frequencyBox->currentIndex() == 0)
 	{
@@ -56,6 +60,7 @@ void ViSpectrumWidget::replot()
 		{
 			x[i] = spectrum[i].frequencyHertz();
 		}
+		unitX = "Hz";
 	}
 
 	if(mUi->representationBox->currentIndex() == 0)
@@ -68,6 +73,7 @@ void ViSpectrumWidget::replot()
 			yImaginaryMaximum = spectrum.maximum().polar().amplitude().imaginary() * (1 + EXTRA_SPACE);
 			for(int i = 0; i < size; ++i)
 			{
+				realData[i] = QPointF(x[i], spectrum[i].polar().amplitude().real());
 				yReal[i] = spectrum[i].polar().amplitude().real();
 				yImaginary[i] = spectrum[i].polar().amplitude().imaginary();
 			}
@@ -81,9 +87,11 @@ void ViSpectrumWidget::replot()
 			yImaginaryMaximum = spectrum.maximum().polar().decibel().imaginary() * (1 + EXTRA_SPACE);
 			for(int i = 0; i < size; ++i)
 			{
+				realData[i] = QPointF(x[i], spectrum[i].polar().decibel().real());
 				yReal[i] = spectrum[i].polar().decibel().real();
 				yImaginary[i] = spectrum[i].polar().decibel().imaginary();
 			}
+			unitY = "dB";
 		}
 	}
 	else
@@ -96,6 +104,7 @@ void ViSpectrumWidget::replot()
 			yImaginaryMaximum = spectrum.maximum().rectangular().amplitude().imaginary() * (1 + EXTRA_SPACE);
 			for(int i = 0; i < size; ++i)
 			{
+				realData[i] = QPointF(x[i], spectrum[i].rectangular().amplitude().real());
 				yReal[i] = spectrum[i].rectangular().amplitude().real();
 				yImaginary[i] = spectrum[i].rectangular().amplitude().imaginary();
 			}
@@ -108,13 +117,23 @@ void ViSpectrumWidget::replot()
 			yImaginaryMaximum = spectrum.maximum().rectangular().decibel().imaginary() * (1 + EXTRA_SPACE);
 			for(int i = 0; i < size; ++i)
 			{
+				realData[i] = QPointF(x[i], spectrum[i].rectangular().decibel().real());
 				yReal[i] = spectrum[i].rectangular().decibel().real();
 				yImaginary[i] = spectrum[i].rectangular().decibel().imaginary();
 			}
+			unitY = "dB";
 		}
 	}
 
-	mUi->realSpectrum->graph(0)->setData(x, yReal);
+	mUi->realSpectrum->setData(realData);
+	mUi->realSpectrum->setScale(ViFrequencyPlot::X, 0, xMaximum);
+	mUi->realSpectrum->setScale(ViFrequencyPlot::Y, yRealMinimum, yRealMaximum);
+	mUi->realSpectrum->setLabel(ViFrequencyPlot::X, labelX);
+	mUi->realSpectrum->setLabel(ViFrequencyPlot::Y, labelY);
+	mUi->realSpectrum->setUnit(ViFrequencyPlot::X, unitX);
+	mUi->realSpectrum->setUnit(ViFrequencyPlot::Y, unitY);
+
+	/*mUi->realSpectrum->graph(0)->setData(x, yReal);
 	mUi->realSpectrum->xAxis->setLabel("x");
 	mUi->realSpectrum->xAxis->setRange(0, xMaximum);
 	mUi->realSpectrum->yAxis->setRange(yRealMinimum, yRealMaximum);
@@ -124,7 +143,7 @@ void ViSpectrumWidget::replot()
 	mUi->imaginarySpectrum->xAxis->setLabel("x");
 	mUi->imaginarySpectrum->xAxis->setRange(0, xMaximum);
 	mUi->imaginarySpectrum->yAxis->setRange(yImaginaryMinimum, yImaginaryMaximum);
-	mUi->imaginarySpectrum->replot();
+	mUi->imaginarySpectrum->replot();*/
 
 }
 

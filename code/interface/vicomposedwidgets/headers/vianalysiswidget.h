@@ -1,8 +1,6 @@
 #ifndef VIANALYSISWIDGET_H
 #define VIANALYSISWIDGET_H
 
-#include <QDialog>
-#include <QGridLayout>
 #include "vithememanager.h"
 #include "viwidget.h"
 #include "vispectrumwidget.h"
@@ -28,8 +26,7 @@ class ViAnalysisWidget : public ViWidget
 	private:
 		Ui::ViAnalysisWidget *mUi;
 		ViSpectrumWidget mSpectrum;
-		QDialog mDialog;
-		QGridLayout mLayout;
+
 };
 
 #endif

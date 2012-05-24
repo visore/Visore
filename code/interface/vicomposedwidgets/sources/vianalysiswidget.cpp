@@ -6,10 +6,6 @@ ViAnalysisWidget::ViAnalysisWidget(QWidget *parent)
 {
 	mUi = new Ui::ViAnalysisWidget();
 	mUi->setupUi(this);
-	
-	mDialog.setLayout(&mLayout);
-	mLayout.addWidget(&mSpectrum);
-	mDialog.resize(800, 800);
 
 	QObject::connect(mUi->spectrumButton, SIGNAL(clicked()), this, SLOT(openSpectrum()));
 }
@@ -28,5 +24,5 @@ void ViAnalysisWidget::setEngine(ViAudioEngine *engine)
 void ViAnalysisWidget::openSpectrum()
 {
 	mSpectrum.replot();
-	mDialog.showMaximized();
+	mSpectrum.show();
 }
