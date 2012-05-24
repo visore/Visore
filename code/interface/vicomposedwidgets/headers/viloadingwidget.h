@@ -15,9 +15,11 @@ class ViLoadingWidget : public ViWidget
 	Q_OBJECT
 
 	private slots:
+
 		void displayNextImage();
 
 	public:
+
 		enum TextStyle
 		{
 			None = 0,
@@ -35,15 +37,18 @@ class ViLoadingWidget : public ViWidget
 		void setText(QString text = "");
 
 	private:
+
 		void start();
 		void stop();
 
 	private:
+
 		Ui::ViLoadingWidget *mUi;
 		QTimer *mTimer;
 		int mCurrentImage;
 		ViLoadingWidget::TextStyle mTextStyle;
 		bool mHasAnimation;
+
 };
 
 #endif

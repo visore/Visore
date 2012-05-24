@@ -1,15 +1,15 @@
-#ifndef VIFREQUENCYPLOT_H
-#define VIFREQUENCYPLOT_H
+#ifndef VISPECTRUMPLOT_H
+#define VISPECTRUMPLOT_H
 
 #include "vithememanager.h"
 #include "qwt_plot.h"
 #include "qwt_plot_curve.h"
 #include "qwt_plot_grid.h"
 
-class ViFrequencyPlotPicker;
-class ViFrequencyPlotMagnifier;
+class ViSpectrumPlotPicker;
+class ViSpectrumPlotMagnifier;
 
-class ViFrequencyPlot : public QwtPlot
+class ViSpectrumPlot : public QwtPlot
 {
 
 	public:
@@ -20,13 +20,13 @@ class ViFrequencyPlot : public QwtPlot
 			Y = 1
 		};
 
-		ViFrequencyPlot(QWidget *parent = 0);
-		~ViFrequencyPlot();
+		ViSpectrumPlot(QWidget *parent = 0);
+		~ViSpectrumPlot();
 
 		void setData(QVector<qreal> dataX, QVector<qreal> dataY);
-		void setScale(ViFrequencyPlot::Axis axis, qreal minimum, qreal maximum);
-		void setLabel(ViFrequencyPlot::Axis axis, QString label);
-		void setUnit(ViFrequencyPlot::Axis axis, QString unit);
+		void setScale(ViSpectrumPlot::Axis axis, qreal minimum, qreal maximum);
+		void setLabel(ViSpectrumPlot::Axis axis, QString label);
+		void setUnit(ViSpectrumPlot::Axis axis, QString unit);
 		void fill(bool fill);
 
 		QRectF extent();
@@ -48,8 +48,8 @@ class ViFrequencyPlot : public QwtPlot
 		QString mUnitX;
 		QString mUnitY;
 
-		//ViFrequencyPlotMagnifier *mMagnifier;
-		ViFrequencyPlotPicker *mPicker;
+		//ViSpectrumPlotMagnifier *mMagnifier;
+		ViSpectrumPlotPicker *mPicker;
 		QwtPointSeriesData mData;
 		QwtPlotCurve mCurve;
 		QwtPlotGrid mGrid;

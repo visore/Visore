@@ -1,5 +1,5 @@
-#ifndef VIFREQUENCYELEMENT_H
-#define VIFREQUENCYELEMENT_H
+#ifndef VIELEMENT_H
+#define VIELEMENT_H
 
 #include <QMutex>
 #include <QVector>
@@ -7,13 +7,13 @@
 #include "vicomplexnumber.h"
 
 template <typename T>
-class ViFrequencyElementForm
+class ViSpectrumElementForm
 {
 
 	public:
 
-		ViFrequencyElementForm();
-		ViFrequencyElementForm(ViComplexNumber<T> amplitude, ViComplexNumber<T> decibel);
+		ViSpectrumElementForm();
+		ViSpectrumElementForm(ViComplexNumber<T> amplitude, ViComplexNumber<T> decibel);
 
 		void setAmplitude(ViComplexNumber<T> amplitude);
 		void setDecibel(ViComplexNumber<T> decibel);
@@ -28,26 +28,26 @@ class ViFrequencyElementForm
 };
 
 template <typename T>
-class ViFrequencyElement
+class ViSpectrumElement
 {
 
 	public:
 
-		ViFrequencyElement();
-		ViFrequencyElement(ViFrequencyElementForm<T> rectangular, ViFrequencyElementForm<T> polar);
+		ViSpectrumElement();
+		ViSpectrumElement(ViSpectrumElementForm<T> rectangular, ViSpectrumElementForm<T> polar);
 
 		void setFrequencyRange(T frequencyRange);
 		void setFrequencyHertz(T frequencyHertz);
-		void setFrequency(T frequencyRange, T frequencyHertz);
+		void set(T frequencyRange, T frequencyHertz);
 
 		T frequencyRange();
 		T frequencyHertz();
 
-		void setRectangular(ViFrequencyElementForm<T> rectangular);
-		void setPolar(ViFrequencyElementForm<T> polar);
+		void setRectangular(ViSpectrumElementForm<T> rectangular);
+		void setPolar(ViSpectrumElementForm<T> polar);
 		
-		ViFrequencyElementForm<T>& rectangular();
-		ViFrequencyElementForm<T>& polar();
+		ViSpectrumElementForm<T>& rectangular();
+		ViSpectrumElementForm<T>& polar();
 
 		static ViComplexNumber<T> toDecibel(ViComplexNumber<T> complex);
 		static ViComplexNumber<T> toPolar(ViComplexNumber<T> complex);
@@ -57,11 +57,11 @@ class ViFrequencyElement
 		T mFrequencyRange;
 		T mFrequencyHertz;
 		
-		ViFrequencyElementForm<T> mRectangular;
-		ViFrequencyElementForm<T> mPolar;
+		ViSpectrumElementForm<T> mRectangular;
+		ViSpectrumElementForm<T> mPolar;
 
 };
 
-#include "../sources/vifrequencyelement.cpp"
+#include "../sources/vispectrumelement.cpp"
 
 #endif

@@ -1,8 +1,8 @@
-#include "vifrequencyplotpicker.h"
+#include "vispectrumplotpicker.h"
 #include <QMouseEvent>
 #include "qwt_picker_machine.h"
 
-ViFrequencyPlotPicker::ViFrequencyPlotPicker(ViFrequencyPlot *plot)
+ViSpectrumPlotPicker::ViSpectrumPlotPicker(ViSpectrumPlot *plot)
 	: QwtPlotPicker(plot->canvas())
 {
 	mPlot = plot;
@@ -15,14 +15,14 @@ ViFrequencyPlotPicker::ViFrequencyPlotPicker(ViFrequencyPlot *plot)
 	setRubberBandPen(QPen(Qt::green));
 }
 
-ViFrequencyPlotPicker::~ViFrequencyPlotPicker()
+ViSpectrumPlotPicker::~ViSpectrumPlotPicker()
 {
 	delete mZoomer;
 }
 
-void ViFrequencyPlotPicker::setLabel(ViFrequencyPlot::Axis axis, QString label)
+void ViSpectrumPlotPicker::setLabel(ViSpectrumPlot::Axis axis, QString label)
 {
-	if(axis == ViFrequencyPlot::X)
+	if(axis == ViSpectrumPlot::X)
 	{
 		mLabelX = label;
 	}
@@ -32,9 +32,9 @@ void ViFrequencyPlotPicker::setLabel(ViFrequencyPlot::Axis axis, QString label)
 	}
 }
 
-void ViFrequencyPlotPicker::setUnit(ViFrequencyPlot::Axis axis, QString unit)
+void ViSpectrumPlotPicker::setUnit(ViSpectrumPlot::Axis axis, QString unit)
 {
-	if(axis == ViFrequencyPlot::X)
+	if(axis == ViSpectrumPlot::X)
 	{
 		mUnitX = unit;
 	}
@@ -44,13 +44,13 @@ void ViFrequencyPlotPicker::setUnit(ViFrequencyPlot::Axis axis, QString unit)
 	}
 }
 
-void ViFrequencyPlotPicker::zoomToExtent()
+void ViSpectrumPlotPicker::zoomToExtent()
 {
 	mZoomer->setZoomBase(mPlot->extent());	
 	mZoomer->zoom(mPlot->extent());
 }
 
-QwtText ViFrequencyPlotPicker::trackerText(const QPoint &position) const
+QwtText ViSpectrumPlotPicker::trackerText(const QPoint &position) const
 {
 	QColor bg(Qt::white);
 	bg.setAlpha(200);

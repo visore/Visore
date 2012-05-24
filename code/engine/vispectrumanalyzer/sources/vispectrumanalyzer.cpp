@@ -17,7 +17,7 @@ ViSpectrumAnalyzerThread::~ViSpectrumAnalyzerThread()
 	}
 }
 
-void ViSpectrumAnalyzerThread::setData(ViAudioBuffer *buffer, ViFloatFrequencySpectrum *spectrum)
+void ViSpectrumAnalyzerThread::setData(ViAudioBuffer *buffer, ViFloatSpectrum *spectrum)
 {
 	mFormat = buffer->format();
 	qint32 sampleSize = mFormat.sampleSize();
@@ -137,7 +137,7 @@ void ViSpectrumAnalyzer::analyze(ViAudioPosition start, ViAudioPosition end)
 	mThread.start();
 }
 
-ViFloatFrequencySpectrum& ViSpectrumAnalyzer::spectrum()
+ViFloatSpectrum& ViSpectrumAnalyzer::spectrum()
 {
 	return mSpectrum;
 }

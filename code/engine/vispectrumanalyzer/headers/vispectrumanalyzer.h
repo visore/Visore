@@ -5,7 +5,7 @@
 #include "viaudioposition.h"
 #include "vipcmconverter.h"
 #include "viaudiobuffer.h"
-#include "vifrequencyspectrum.h"
+#include "vispectrum.h"
 #include "vierror.h"
 #include <QThread>
 
@@ -17,7 +17,7 @@ class ViSpectrumAnalyzerThread : public QThread
 
 		ViSpectrumAnalyzerThread();
 		~ViSpectrumAnalyzerThread();
-		void setData(ViAudioBuffer *buffer, ViFloatFrequencySpectrum *spectrum);
+		void setData(ViAudioBuffer *buffer, ViFloatSpectrum *spectrum);
 		void setPositions(qint64 start, qint64 end);
 		void setBlockSize(qint32 size);
 		void setWindowFunction(ViWindowFunction<float> *windowFunction);
@@ -28,7 +28,7 @@ class ViSpectrumAnalyzerThread : public QThread
 		int (*pcmToRealPointer)(char*, float*, int);
 
 		ViAudioFormat mFormat;
-		ViFloatFrequencySpectrum *mSpectrum;
+		ViFloatSpectrum *mSpectrum;
 		ViAudioBufferStream *mStream;
 		ViWindowFunction<float> *mWindowFunction;
 		qint64 mStart;
@@ -50,7 +50,7 @@ class ViSpectrumAnalyzer : public QObject
 		ViSpectrumAnalyzer(ViAudioBuffer *buffer);
 		void analyze();
 		void analyze(ViAudioPosition start, ViAudioPosition end);
-		ViFloatFrequencySpectrum& spectrum();
+		ViFloatSpectrum& spectrum();
 
 		void setBlockSize(qint32 size);
 		qint32 blockSize();
@@ -61,7 +61,7 @@ class ViSpectrumAnalyzer : public QObject
 
 		ViAudioBuffer *mBuffer;
 		ViSpectrumAnalyzerThread mThread;
-		ViFloatFrequencySpectrum mSpectrum;
+		ViFloatSpectrum mSpectrum;
 		qint32 mBlockSize;
 
 };

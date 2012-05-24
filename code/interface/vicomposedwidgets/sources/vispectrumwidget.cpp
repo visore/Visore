@@ -12,6 +12,8 @@ ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 	mUi = new Ui::ViSpectrumWidget();
 	mUi->setupUi(this);
 
+	mLoadingWidget = new ViLoadingWidget(this, true, false, ViLoadingWidget::None);
+
 	QObject::connect(mUi->sizeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
 	QObject::connect(mUi->windowBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
 
@@ -23,6 +25,7 @@ ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 ViSpectrumWidget::~ViSpectrumWidget()
 {
 	delete mUi;
+	delete mLoadingWidget;
 }
 
 void ViSpectrumWidget::setEngine(ViAudioEngine *engine)
@@ -39,12 +42,14 @@ void ViSpectrumWidget::show()
 
 void ViSpectrumWidget::recalculate()
 {
+	mLoadingWidget->setVisible(true);
 	mEngine->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
 }
 
 void ViSpectrumWidget::replot()
 {
-	ViFrequencySpectrum<float> &plot = mEngine->spectrum();
+	mLoadingWidget->setVisible(false);
+	ViSpectrum<float> &plot = mEngine->spectrum();
 	qint32 size = plot.size();
 
 	if(size > 0)
@@ -126,12 +131,12 @@ void ViSpectrumWidget::replot()
 			}
 		}
 
-		mUi->plot->setScale(ViFrequencyPlot::X, 0, xMaximum);
-		mUi->plot->setScale(ViFrequencyPlot::Y, yMinimum, yMaximum);
-		mUi->plot->setLabel(ViFrequencyPlot::X, labelX);
-		mUi->plot->setLabel(ViFrequencyPlot::Y, labelY);
-		mUi->plot->setUnit(ViFrequencyPlot::X, unitX);
-		mUi->plot->setUnit(ViFrequencyPlot::Y, unitY);
+		mUi->plot->setScale(ViSpectrumPlot::X, 0, xMaximum);
+		mUi->plot->setScale(ViSpectrumPlot::Y, yMinimum, yMaximum);
+		mUi->plot->setLabel(ViSpectrumPlot::X, labelX);
+		mUi->plot->setLabel(ViSpectrumPlot::Y, labelY);
+		mUi->plot->setUnit(ViSpectrumPlot::X, unitX);
+		mUi->plot->setUnit(ViSpectrumPlot::Y, unitY);
 		mUi->plot->fill(fill);
 		mUi->plot->setData(x, y);
 	}

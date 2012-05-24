@@ -1,7 +1,7 @@
-#include "vifrequencyplotmagnifier.h"
+#include "vispectrumplotmagnifier.h"
 #include <QMouseEvent>
 
-ViFrequencyPlotMagnifier::ViFrequencyPlotMagnifier(ViFrequencyPlot *plot)
+ViSpectrumPlotMagnifier::ViSpectrumPlotMagnifier(ViSpectrumPlot *plot)
 	: QwtPlotMagnifier(plot->canvas())
 {
 	mPlot = plot;
@@ -10,17 +10,17 @@ ViFrequencyPlotMagnifier::ViFrequencyPlotMagnifier(ViFrequencyPlot *plot)
 	setAxisEnabled (1, false);
 }
 
-ViFrequencyPlotMagnifier::~ViFrequencyPlotMagnifier()
+ViSpectrumPlotMagnifier::~ViSpectrumPlotMagnifier()
 {
 	delete mZoomer;
 }
 
-void ViFrequencyPlotMagnifier::zoomToExtent()
+void ViSpectrumPlotMagnifier::zoomToExtent()
 {
 	mZoomer->zoom(mPlot->extent());
 }
 /*
-void ViFrequencyPlotMagnifier::widgetMouseReleaseEvent(QMouseEvent *event)
+void ViSpectrumPlotMagnifier::widgetMouseReleaseEvent(QMouseEvent *event)
 {
 	QwtPlotMagnifier::widgetMouseReleaseEvent(event);
 	if(event->button() == Qt::RightButton)

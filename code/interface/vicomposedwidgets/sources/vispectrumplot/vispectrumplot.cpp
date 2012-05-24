@@ -1,6 +1,6 @@
-#include "vifrequencyplot.h"
-#include "vifrequencyplotmagnifier.h"
-#include "vifrequencyplotpicker.h"
+#include "vispectrumplot.h"
+#include "vispectrumplotmagnifier.h"
+#include "vispectrumplotpicker.h"
 
 #include "qwt_plot_magnifier.h"
 #include "qwt_legend.h"
@@ -9,7 +9,7 @@
 #include <iostream>
 using namespace std;
 
-ViFrequencyPlot::ViFrequencyPlot(QWidget *parent)
+ViSpectrumPlot::ViSpectrumPlot(QWidget *parent)
 	: QwtPlot(parent)
 {
 	mDataX = NULL;
@@ -28,8 +28,8 @@ ViFrequencyPlot::ViFrequencyPlot(QWidget *parent)
 	mGrid.setPen(QPen(Qt::white));
 	mGrid.attach(this);
 
-	mPicker = new ViFrequencyPlotPicker(this);
-	//mMagnifier = new ViFrequencyPlotMagnifier(this);
+	mPicker = new ViSpectrumPlotPicker(this);
+	//mMagnifier = new ViSpectrumPlotMagnifier(this);
 
     canvas()->setFrameStyle(QFrame::Box | QFrame::Plain);
     canvas()->setBorderRadius(1); // Canvas turns black on values < 1
@@ -39,14 +39,14 @@ ViFrequencyPlot::ViFrequencyPlot(QWidget *parent)
     canvas()->setPalette(canvasPalette);
 }
 
-ViFrequencyPlot::~ViFrequencyPlot()
+ViSpectrumPlot::~ViSpectrumPlot()
 {
 	clear();
 	//delete mMagnifier;
 	delete mPicker;
 }
 
-void ViFrequencyPlot::clear()
+void ViSpectrumPlot::clear()
 {
 	if(mDataX != NULL)
 	{
@@ -61,7 +61,7 @@ void ViFrequencyPlot::clear()
 	mDataCount = 0;
 }
 
-void ViFrequencyPlot::setData(QVector<qreal> dataX, QVector<qreal> dataY)
+void ViSpectrumPlot::setData(QVector<qreal> dataX, QVector<qreal> dataY)
 {
 	clear();
 	mDataCount = qMin(dataX.size(), dataY.size());
@@ -77,9 +77,9 @@ void ViFrequencyPlot::setData(QVector<qreal> dataX, QVector<qreal> dataY)
 	mPicker->zoomToExtent();
 }
 
-void ViFrequencyPlot::setScale(ViFrequencyPlot::Axis axis, qreal minimum, qreal maximum)
+void ViSpectrumPlot::setScale(ViSpectrumPlot::Axis axis, qreal minimum, qreal maximum)
 {
-	if(axis == ViFrequencyPlot::X)
+	if(axis == ViSpectrumPlot::X)
 	{
 		setAxisScale(xBottom, minimum, maximum);
 		mLength = maximum - minimum;
@@ -91,9 +91,9 @@ void ViFrequencyPlot::setScale(ViFrequencyPlot::Axis axis, qreal minimum, qreal 
 	}
 }
 
-void ViFrequencyPlot::setLabel(ViFrequencyPlot::Axis axis, QString label)
+void ViSpectrumPlot::setLabel(ViSpectrumPlot::Axis axis, QString label)
 {
-	if(axis == ViFrequencyPlot::X)
+	if(axis == ViSpectrumPlot::X)
 	{
 		setAxisTitle(xBottom, label);
 		mLabelX = label;
@@ -106,9 +106,9 @@ void ViFrequencyPlot::setLabel(ViFrequencyPlot::Axis axis, QString label)
 	mPicker->setLabel(axis, label);
 }
 
-void ViFrequencyPlot::setUnit(ViFrequencyPlot::Axis axis, QString unit)
+void ViSpectrumPlot::setUnit(ViSpectrumPlot::Axis axis, QString unit)
 {
-	if(axis == ViFrequencyPlot::X)
+	if(axis == ViSpectrumPlot::X)
 	{
 		setAxisTitle(xBottom, mLabelX + " (" + unit + ")");
 		mUnitX = unit;
@@ -121,7 +121,7 @@ void ViFrequencyPlot::setUnit(ViFrequencyPlot::Axis axis, QString unit)
 	mPicker->setUnit(axis, unit);
 }
 
-void ViFrequencyPlot::fill(bool fill)
+void ViSpectrumPlot::fill(bool fill)
 {
 	if(fill)
 	{
@@ -135,12 +135,12 @@ void ViFrequencyPlot::fill(bool fill)
 	}
 }
 
-QRectF ViFrequencyPlot::extent()
+QRectF ViSpectrumPlot::extent()
 {
 	return mCurve.boundingRect();
 }
 
-qreal ViFrequencyPlot::valueAt(qreal x)
+qreal ViSpectrumPlot::valueAt(qreal x)
 {
 	if(mLength != 0)
 	{

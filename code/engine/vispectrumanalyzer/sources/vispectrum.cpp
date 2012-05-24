@@ -1,56 +1,56 @@
-#ifdef VIFREQUENCYSPECTRUM_H
+#ifdef VISPECTRUM_H
 
 template <typename T>
-ViFrequencySpectrum<T>::ViFrequencySpectrum(qint32 size)
+ViSpectrum<T>::ViSpectrum(qint32 size)
 {
 }
 
 template <typename T>
-ViFrequencyElement<T> ViFrequencySpectrum<T>::at(const qint32 index)
-{
-	return mValues[index];
-}
-
-template <typename T>
-ViFrequencyElement<T> ViFrequencySpectrum<T>::operator[](const qint32 index) const
+ViSpectrumElement<T> ViSpectrum<T>::at(const qint32 index)
 {
 	return mValues[index];
 }
 
 template <typename T>
-void ViFrequencySpectrum<T>::add(const qint32 index, ViComplexNumber<T> complex)
+ViSpectrumElement<T> ViSpectrum<T>::operator[](const qint32 index) const
+{
+	return mValues[index];
+}
+
+template <typename T>
+void ViSpectrum<T>::add(const qint32 index, ViComplexNumber<T> complex)
 {
 	++mAdditionCounter;
 	mValues[index].rectangular().amplitude() += complex;
-	mValues[index].polar().amplitude() += ViFrequencyElement<T>::toPolar(complex);
+	mValues[index].polar().amplitude() += ViSpectrumElement<T>::toPolar(complex);
 }
 
 template <typename T>
-ViFrequencyElement<T>& ViFrequencySpectrum<T>::operator[](const qint32 index)
+ViSpectrumElement<T>& ViSpectrum<T>::operator[](const qint32 index)
 {
 	return mValues[index];
 }
 
 template <typename T>
-qint32 ViFrequencySpectrum<T>::size()
+qint32 ViSpectrum<T>::size()
 {
 	return mValues.size();
 }
 
 template <typename T>
-ViFrequencyElement<T> ViFrequencySpectrum<T>::maximum()
+ViSpectrumElement<T> ViSpectrum<T>::maximum()
 {
 	return mMaximum;
 }
 
 template <typename T>
-ViFrequencyElement<T> ViFrequencySpectrum<T>::minimum()
+ViSpectrumElement<T> ViSpectrum<T>::minimum()
 {
 	return mMinimum;
 }
 
 template <typename T>
-void ViFrequencySpectrum<T>::initialize(qint32 size, qint32 frequency)
+void ViSpectrum<T>::initialize(qint32 size, qint32 frequency)
 {
 	mAdditionCounter = 0;
 	mValues.clear();
@@ -59,21 +59,21 @@ void ViFrequencySpectrum<T>::initialize(qint32 size, qint32 frequency)
 }
 
 template <typename T>
-void ViFrequencySpectrum<T>::finalize()
+void ViSpectrum<T>::finalize()
 {
 	for(int i = 0; i < mValues.size(); ++i)
 	{
 		mValues[i].rectangular().amplitude() /= T(mAdditionCounter);
 		mValues[i].polar().amplitude() /= T(mAdditionCounter);
-		mValues[i].rectangular().setDecibel(ViFrequencyElement<T>::toDecibel(mValues[i].rectangular().amplitude()));
-		mValues[i].polar().setDecibel(ViFrequencyElement<T>::toDecibel(mValues[i].polar().amplitude()));
+		mValues[i].rectangular().setDecibel(ViSpectrumElement<T>::toDecibel(mValues[i].rectangular().amplitude()));
+		mValues[i].polar().setDecibel(ViSpectrumElement<T>::toDecibel(mValues[i].polar().amplitude()));
 	}
 	mValues.resize(mValues.size() / 2); // Since we use real FFT, we'll have a mirror image, hence we only need half of the N/2 spectrum
 	findRanges();
 }
 
 template <typename T>
-void ViFrequencySpectrum<T>::initializeFrequencies(qint32 frequency)
+void ViSpectrum<T>::initializeFrequencies(qint32 frequency)
 {
 	qint32 size = mValues.size();
 	for(int i = 0; i < size; ++i)
@@ -84,12 +84,12 @@ void ViFrequencySpectrum<T>::initializeFrequencies(qint32 frequency)
 }
 
 template <typename T>
-void ViFrequencySpectrum<T>::findRanges()
+void ViSpectrum<T>::findRanges()
 {
-	mMaximum.setPolar(ViFrequencyElementForm<T>(ViComplexNumber<T>(FLT_MIN, FLT_MIN), ViComplexNumber<T>(FLT_MIN, FLT_MIN)));
-	mMaximum.setRectangular(ViFrequencyElementForm<T>(ViComplexNumber<T>(FLT_MIN, FLT_MIN), ViComplexNumber<T>(FLT_MIN, FLT_MIN)));
-	mMinimum.setPolar(ViFrequencyElementForm<T>(ViComplexNumber<T>(FLT_MAX, FLT_MAX), ViComplexNumber<T>(FLT_MAX, FLT_MAX)));
-	mMinimum.setRectangular(ViFrequencyElementForm<T>(ViComplexNumber<T>(FLT_MAX, FLT_MAX), ViComplexNumber<T>(FLT_MAX, FLT_MAX)));
+	mMaximum.setPolar(ViSpectrumElementForm<T>(ViComplexNumber<T>(FLT_MIN, FLT_MIN), ViComplexNumber<T>(FLT_MIN, FLT_MIN)));
+	mMaximum.setRectangular(ViSpectrumElementForm<T>(ViComplexNumber<T>(FLT_MIN, FLT_MIN), ViComplexNumber<T>(FLT_MIN, FLT_MIN)));
+	mMinimum.setPolar(ViSpectrumElementForm<T>(ViComplexNumber<T>(FLT_MAX, FLT_MAX), ViComplexNumber<T>(FLT_MAX, FLT_MAX)));
+	mMinimum.setRectangular(ViSpectrumElementForm<T>(ViComplexNumber<T>(FLT_MAX, FLT_MAX), ViComplexNumber<T>(FLT_MAX, FLT_MAX)));
 
 	ViComplexNumber<T> valueRectangularAmplitude;
 	ViComplexNumber<T> valuePolarAmplitude;
