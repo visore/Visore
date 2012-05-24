@@ -16,7 +16,7 @@ class ViFrequencyPlotMagnifier : public QwtPlotMagnifier
 
 	protected:
 
-		void widgetMouseReleaseEvent(QMouseEvent *event);
+		//void widgetMouseReleaseEvent(QMouseEvent *event);
 
 	private:
 

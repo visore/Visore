@@ -16,6 +16,7 @@ class ViSpectrumWidget : public ViWidget
 
 	public slots:
 
+		void recalculate();
 		void replot();
 
 	public:
@@ -23,6 +24,7 @@ class ViSpectrumWidget : public ViWidget
 		ViSpectrumWidget(QWidget *parent = 0);
 		~ViSpectrumWidget();
 		void setEngine(ViAudioEngine *engine);
+		void show();
 
 	private:
 

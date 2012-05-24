@@ -22,7 +22,6 @@ ViFrequencyPlot::ViFrequencyPlot(QWidget *parent)
 	mUnitX = "";
 	mUnitY = "";
 
-	mCurve.setBrush(Qt::darkCyan);
 	mCurve.setPen(QPen(Qt::red));
 	mCurve.attach(this);
 
@@ -31,8 +30,6 @@ ViFrequencyPlot::ViFrequencyPlot(QWidget *parent)
 
 	mPicker = new ViFrequencyPlotPicker(this);
 	//mMagnifier = new ViFrequencyPlotMagnifier(this);
-
-	(void) new QwtPlotMagnifier( canvas() );
 
     canvas()->setFrameStyle(QFrame::Box | QFrame::Plain);
     canvas()->setBorderRadius(1); // Canvas turns black on values < 1
@@ -45,7 +42,7 @@ ViFrequencyPlot::ViFrequencyPlot(QWidget *parent)
 ViFrequencyPlot::~ViFrequencyPlot()
 {
 	clear();
-	delete mMagnifier;
+	//delete mMagnifier;
 	delete mPicker;
 }
 
@@ -64,11 +61,10 @@ void ViFrequencyPlot::clear()
 	mDataCount = 0;
 }
 
-void ViFrequencyPlot::setData(QVector<QPointF> data)
+void ViFrequencyPlot::setData(QVector<qreal> dataX, QVector<qreal> dataY)
 {
 	clear();
-	mData.setSamples(data);
-	/*mDataCount = qMin(dataX.size(), dataY.size());
+	mDataCount = qMin(dataX.size(), dataY.size());
 	mDataX = new qreal[mDataCount];
 	mDataY = new qreal[mDataCount];
 	for(int i = 0; i < mDataCount; ++i)
@@ -76,9 +72,7 @@ void ViFrequencyPlot::setData(QVector<QPointF> data)
 		mDataX[i] = dataX[i];
 		mDataY[i] = dataY[i];
 	}
-	mCurve.setRawSamples(mDataX, mDataY, mDataCount);*/
-	mCurve.setData(&mData);
-	mCurve.setBaseline(-120);
+	mCurve.setRawSamples(mDataX, mDataY, mDataCount);
 	replot();
 	mPicker->zoomToExtent();
 }
@@ -93,6 +87,7 @@ void ViFrequencyPlot::setScale(ViFrequencyPlot::Axis axis, qreal minimum, qreal 
 	else
 	{
 		setAxisScale(yLeft, minimum, maximum);
+		mCurve.setBaseline(minimum);
 	}
 }
 
@@ -124,6 +119,20 @@ void ViFrequencyPlot::setUnit(ViFrequencyPlot::Axis axis, QString unit)
 		mUnitY = unit;
 	}
 	mPicker->setUnit(axis, unit);
+}
+
+void ViFrequencyPlot::fill(bool fill)
+{
+	if(fill)
+	{
+		QColor color = mCurve.pen().color();
+		color.setAlpha(150);
+		mCurve.setBrush(color);
+	}
+	else
+	{
+		mCurve.setBrush(Qt::NoBrush);
+	}
 }
 
 QRectF ViFrequencyPlot::extent()

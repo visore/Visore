@@ -54,8 +54,10 @@ ViAudioEngine::ViAudioEngine()
 
 	/*ViMatcher *m = new ViMatcher();
 	m->match(b1, b2);*/
+	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
+	QObject::connect(mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumChanged()));
 
-
+	
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -187,9 +189,7 @@ void ViAudioEngine::mute(bool value)
 
 void ViAudioEngine::startPlayback()
 {
-	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
-	mSpectrumAnalyzer->analyze();
-	//mStreamOutput->start();
+	mStreamOutput->start();
 }
 
 void ViAudioEngine::stopPlayback()
@@ -255,4 +255,10 @@ ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)
 ViFloatFrequencySpectrum& ViAudioEngine::spectrum()
 {
 	return mSpectrumAnalyzer->spectrum();
+}
+
+void ViAudioEngine::calculateSpectrum(qint32 size)
+{
+	mSpectrumAnalyzer->setBlockSize(size);
+	mSpectrumAnalyzer->analyze();
 }

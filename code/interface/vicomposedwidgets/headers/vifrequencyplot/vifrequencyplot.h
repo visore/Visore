@@ -23,10 +23,11 @@ class ViFrequencyPlot : public QwtPlot
 		ViFrequencyPlot(QWidget *parent = 0);
 		~ViFrequencyPlot();
 
-		void setData(QVector<QPointF> data);
+		void setData(QVector<qreal> dataX, QVector<qreal> dataY);
 		void setScale(ViFrequencyPlot::Axis axis, qreal minimum, qreal maximum);
 		void setLabel(ViFrequencyPlot::Axis axis, QString label);
 		void setUnit(ViFrequencyPlot::Axis axis, QString unit);
+		void fill(bool fill);
 
 		QRectF extent();
 		qreal valueAt(qreal x);
@@ -47,7 +48,7 @@ class ViFrequencyPlot : public QwtPlot
 		QString mUnitX;
 		QString mUnitY;
 
-		ViFrequencyPlotMagnifier *mMagnifier;
+		//ViFrequencyPlotMagnifier *mMagnifier;
 		ViFrequencyPlotPicker *mPicker;
 		QwtPointSeriesData mData;
 		QwtPlotCurve mCurve;

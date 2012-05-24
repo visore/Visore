@@ -6,6 +6,8 @@ ViFrequencyPlotMagnifier::ViFrequencyPlotMagnifier(ViFrequencyPlot *plot)
 {
 	mPlot = plot;
 	mZoomer = new QwtPlotZoomer(plot->canvas());
+	setAxisEnabled (0, false);
+	setAxisEnabled (1, false);
 }
 
 ViFrequencyPlotMagnifier::~ViFrequencyPlotMagnifier()
@@ -17,15 +19,12 @@ void ViFrequencyPlotMagnifier::zoomToExtent()
 {
 	mZoomer->zoom(mPlot->extent());
 }
-
+/*
 void ViFrequencyPlotMagnifier::widgetMouseReleaseEvent(QMouseEvent *event)
 {
+	QwtPlotMagnifier::widgetMouseReleaseEvent(event);
 	if(event->button() == Qt::RightButton)
 	{
-		//zoomToExtent();
+		zoomToExtent();
 	}
-	else
-	{
-		//QwtPlotMagnifier::widgetMouseReleaseEvent(event);
-	}
-}
+}*/

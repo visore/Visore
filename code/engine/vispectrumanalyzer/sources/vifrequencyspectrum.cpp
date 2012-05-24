@@ -96,7 +96,6 @@ void ViFrequencySpectrum<T>::findRanges()
 	ViComplexNumber<T> valueRectangularDecibel;
 	ViComplexNumber<T> valuePolarDecibel;
 
-
 	for(int i = 0; i < mValues.size(); ++i)
 	{
 		valueRectangularAmplitude = mValues[i].rectangular().amplitude();

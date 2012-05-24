@@ -69,6 +69,7 @@ void ViSpectrumAnalyzerThread::run()
 	ViWindower *windower = NULL;//ViHammingWindower::instance();
 
 	mSpectrum->initialize(sampleSize / 2 + 1, mFormat.sampleRate() / 2);
+	mStream->restart();
 
 	while(!mSizes.isEmpty())
 	{

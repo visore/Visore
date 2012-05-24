@@ -7,6 +7,7 @@ ViFrequencyPlotPicker::ViFrequencyPlotPicker(ViFrequencyPlot *plot)
 {
 	mPlot = plot;
 	mZoomer = new QwtPlotZoomer(plot->canvas());
+	mZoomer->setTrackerMode(QwtPicker::AlwaysOff);
 
 	setStateMachine(new QwtPickerTrackerMachine);
 	setTrackerMode(QwtPicker::ActiveOnly);
@@ -45,19 +46,8 @@ void ViFrequencyPlotPicker::setUnit(ViFrequencyPlot::Axis axis, QString unit)
 
 void ViFrequencyPlotPicker::zoomToExtent()
 {
+	mZoomer->setZoomBase(mPlot->extent());	
 	mZoomer->zoom(mPlot->extent());
-}
-
-void ViFrequencyPlotPicker::widgetMouseReleaseEvent(QMouseEvent *event)
-{
-	if(event->button() == Qt::RightButton)
-	{
-		zoomToExtent();
-	}
-	else
-	{
-		ViFrequencyPlotPicker::widgetMouseReleaseEvent(event);
-	}
 }
 
 QwtText ViFrequencyPlotPicker::trackerText(const QPoint &position) const

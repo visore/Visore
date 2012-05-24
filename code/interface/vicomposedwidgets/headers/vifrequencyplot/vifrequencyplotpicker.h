@@ -19,11 +19,6 @@ class ViFrequencyPlotPicker : public QwtPlotPicker
 		void zoomToExtent();
 		QwtText trackerText(const QPoint &position) const;
 
-	protected:
-
-		void widgetMouseReleaseEvent(QMouseEvent *event);
-		//void widgetMouseMoveEvent(QMouseEvent *event);
-
 	private:
 
 		QString mLabelX;
