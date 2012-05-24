@@ -5,6 +5,7 @@
 #include "qwt_plot_magnifier.h"
 #include "qwt_legend.h"
 #include "qwt_plot_canvas.h"
+#include "qwt_scale_widget.h"
 
 #include <iostream>
 using namespace std;
@@ -22,21 +23,27 @@ ViSpectrumPlot::ViSpectrumPlot(QWidget *parent)
 	mUnitX = "";
 	mUnitY = "";
 
-	mCurve.setPen(QPen(Qt::red));
+	mCurve.setPen(QPen(ViThemeManager::color(14)));
 	mCurve.attach(this);
 
-	mGrid.setPen(QPen(Qt::white));
+	mGrid.setPen(QPen(ViThemeManager::color(6)));
 	mGrid.attach(this);
 
 	mPicker = new ViSpectrumPlotPicker(this);
-	//mMagnifier = new ViSpectrumPlotMagnifier(this);
 
-    canvas()->setFrameStyle(QFrame::Box | QFrame::Plain);
+    canvas()->setFrameStyle(QFrame::Plain);
     canvas()->setBorderRadius(1); // Canvas turns black on values < 1
 
-    QPalette canvasPalette(Qt::white);
-    canvasPalette.setColor(QPalette::Foreground, QColor( 133, 190, 232 ));
+    QPalette canvasPalette(ViThemeManager::color(1));
+    canvasPalette.setColor(QPalette::Foreground, ViThemeManager::color(14));
     canvas()->setPalette(canvasPalette);
+
+    QPalette scalePalette(ViThemeManager::color(6));
+    scalePalette.setColor(QPalette::Foreground, ViThemeManager::color(6));
+	scalePalette.setColor(QPalette::WindowText, ViThemeManager::color(6));
+	scalePalette.setColor(QPalette::Text, ViThemeManager::color(6));
+	axisWidget(xBottom)->setPalette(scalePalette);
+	axisWidget(yLeft)->setPalette(scalePalette);
 }
 
 ViSpectrumPlot::~ViSpectrumPlot()
@@ -108,17 +115,20 @@ void ViSpectrumPlot::setLabel(ViSpectrumPlot::Axis axis, QString label)
 
 void ViSpectrumPlot::setUnit(ViSpectrumPlot::Axis axis, QString unit)
 {
-	if(axis == ViSpectrumPlot::X)
+	if(unit != "")
 	{
-		setAxisTitle(xBottom, mLabelX + " (" + unit + ")");
-		mUnitX = unit;
+		if(axis == ViSpectrumPlot::X)
+		{
+			setAxisTitle(xBottom, mLabelX + " (" + unit + ")");
+			mUnitX = unit;
+		}
+		else
+		{
+			setAxisTitle(yLeft, mLabelY + " (" + unit + ")");
+			mUnitY = unit;
+		}
+		mPicker->setUnit(axis, unit);
 	}
-	else
-	{
-		setAxisTitle(yLeft, mLabelY + " (" + unit + ")");
-		mUnitY = unit;
-	}
-	mPicker->setUnit(axis, unit);
 }
 
 void ViSpectrumPlot::fill(bool fill)

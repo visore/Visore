@@ -12,7 +12,10 @@ ViSpectrumPlotPicker::ViSpectrumPlotPicker(ViSpectrumPlot *plot)
 	setStateMachine(new QwtPickerTrackerMachine);
 	setTrackerMode(QwtPicker::ActiveOnly);
 	setRubberBand(QwtPicker::VLineRubberBand);
-	setRubberBandPen(QPen(Qt::green));
+
+	QPen pen(ViThemeManager::color(13));
+	setRubberBandPen(pen);
+	mZoomer->setRubberBandPen(pen);
 }
 
 ViSpectrumPlotPicker::~ViSpectrumPlotPicker()
