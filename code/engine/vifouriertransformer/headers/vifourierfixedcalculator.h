@@ -1,7 +1,6 @@
 #ifndef VIFOURIERFIXEDCALCULATOR_H
 #define VIFOURIERFIXEDCALCULATOR_H
 
-#include <qmath.h> 
 #include "FFTRealFixLen.h"
 #include "vifouriercalculator.h"
 
@@ -12,6 +11,7 @@ class ViFourierFixedCalculator : public ViFourierCalculator
 	public:
 		
 		ViFourierFixedCalculator();
+		void setSize(int size);
 		void forward();
 		void inverse();
 		void rescale();

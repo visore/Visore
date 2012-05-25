@@ -4,7 +4,12 @@ template <int T>
 ViFourierFixedCalculator<T>::ViFourierFixedCalculator()
 	: ViFourierCalculator()
 {
-	setSize(qPow(2, T));
+	setSize(mFourierTransform.get_length());
+}
+
+template <int T>
+void ViFourierFixedCalculator<T>::setSize(int size)
+{
 }
 
 template <int T>
