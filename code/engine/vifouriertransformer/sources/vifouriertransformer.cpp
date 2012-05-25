@@ -1,109 +1,83 @@
 #include "vifouriertransformer.h"
 
-ViFourierTransformer::ViFourierTransformer(Execution execution, int fixedSize)
-	 : QObject()
+ViFourierTransformer::ViFourierTransformer(int size, QString functionName)
 {
-	mSize = 0;
-
-	mForwardThread = NULL;
-	mInverseThread = NULL;
-	mRescaleThread = NULL;
-
+	mWindowFunctions = ViWindowFunctionManager<float>::functions();
+	mWindowFunction = 0;
+	mCalculator = 0;
 	initialize();
-	setFixedSize(fixedSize);
-	setExecution(execution);
+	setSize(size);
+	setWindowFunction(functionName);
 }
 
 ViFourierTransformer::~ViFourierTransformer()
 {
-	qDeleteAll(mFixedForwardThreads.begin(), mFixedForwardThreads.end());
-	mFixedForwardThreads.clear();
-
-	qDeleteAll(mFixedInverseThreads.begin(), mFixedInverseThreads.end());
-	mFixedInverseThreads.clear();
-
-	qDeleteAll(mFixedRescaleThreads.begin(), mFixedRescaleThreads.end());
-	mFixedRescaleThreads.clear();
-
-	delete mVariableForwardThread;
-	delete mVariableInverseThread;
-	delete mVariableRescaleThread;
+	qDeleteAll(mFixedCalculators.begin(), mFixedCalculators.end());
+	mFixedCalculators.clear();
+	delete mVariableCalculator;
+	if(mWindowFunction != 0)
+	{
+		delete mWindowFunction;
+	}
 }
 
-void ViFourierTransformer::emitFinished()
+ViFourierTransformer::Initialization ViFourierTransformer::setSize(int size)
 {
-	emit finished();
-}
-
-bool ViFourierTransformer::setFixedSize(int size)
-{
-	bool wasSetForward = false;
-	bool wasSetInverse = false;
-	bool wasSetRescale = false;
-	int index, last;
-	last = mFixedForwardThreads.size();
-	for(index = 0; index < last; ++index)
-	{
-		if(mFixedForwardThreads[index]->size() == size)
-		{
-			mForwardThread = mFixedForwardThreads[index];
-			wasSetForward = true;
-		}
-	}
-	last = mFixedInverseThreads.size();
-	for(index = 0; index < last; ++index)
-	{
-		if(mFixedInverseThreads[index]->size() == size)
-		{
-			mInverseThread = mFixedInverseThreads[index];
-			wasSetInverse = true;
-		}
-	}
-	last = mFixedRescaleThreads.size();
-	for(index = 0; index < last; ++index)
-	{
-		if(mFixedRescaleThreads[index]->size() == size)
-		{
-			mRescaleThread = mFixedRescaleThreads[index];
-			wasSetRescale = true;
-		}
-	}
-	if(wasSetForward && wasSetInverse && wasSetRescale)
+	if(isValidSize(size))
 	{
 		mSize = size;
-		return true;
+		if(mWindowFunction != 0)
+		{
+			mWindowFunction->create(mSize);
+		}
+		int key = sizeToKey(mSize);
+		if(mFixedCalculators.contains(key))
+		{
+			mCalculator = mFixedCalculators[key];
+			return ViFourierTransformer::FixedSize;
+		}
+		else
+		{
+			mCalculator = mVariableCalculator;
+			mCalculator->setSize(mSize);
+			return ViFourierTransformer::VariableSize;
+		}
 	}
-	else
-	{
-		mSize = 0;
-		mForwardThread = mVariableForwardThread;
-		mInverseThread = mVariableInverseThread;
-		mRescaleThread = mVariableRescaleThread;
-		return false;
-	}
+	mSize = 0;
+	return ViFourierTransformer::InvalidSize;
 }
 
-void ViFourierTransformer::setExecution(Execution execution)
+bool ViFourierTransformer::setWindowFunction(QString functionName)
 {
-	if(execution == ViFourierTransformer::SameThread)
+	for(int i = 0; i < mWindowFunctions.size(); ++i)
 	{
-		forwardTransformtion = &ViFourierTransformer::forwardTransformSameThread;
-		inverseTransformtion = &ViFourierTransformer::inverseTransformSameThread;
-		rescaleTransformtion = &ViFourierTransformer::rescaleTransformSameThread;
+		if(functionName.trimmed().toLower().replace("function", "") == mWindowFunctions[i].trimmed().toLower().replace("function", ""))
+		{
+			if(mWindowFunction != 0)
+			{
+				delete mWindowFunction;
+			}
+			mWindowFunction = ViWindowFunctionManager<float>::createFunction(functionName);
+			if(mWindowFunction != 0 && isValidSize(mSize))
+			{
+				mWindowFunction->create(mSize);
+			}
+			return true;
+		}
 	}
-	else
-	{
-		forwardTransformtion = &ViFourierTransformer::forwardTransformSeperateThread;
-		inverseTransformtion = &ViFourierTransformer::inverseTransformSeperateThread;
-		rescaleTransformtion = &ViFourierTransformer::rescaleTransformSeperateThread;
-	}
+	return false;
 }
 
-void ViFourierTransformer::transform(float input[], float output[], ViWindowFunction<float> *windowFunction, Direction direction)
+QStringList ViFourierTransformer::windowFunctions()
+{
+	return mWindowFunctions;
+}
+
+void ViFourierTransformer::transform(float input[], float output[], Direction direction)
 {
 	if(direction == ViFourierTransformer::Forward)
 	{
-		forwardTransform(input, output, windowFunction);
+		forwardTransform(input, output);
 	}
 	else
 	{
@@ -111,180 +85,78 @@ void ViFourierTransformer::transform(float input[], float output[], ViWindowFunc
 	}
 }
 
-void ViFourierTransformer::forwardTransform(float *input, float *output, ViWindowFunction<float> *windowFunction)
+void ViFourierTransformer::forwardTransform(float *input, float *output)
 {
-	if(windowFunction != NULL)
+	if(mWindowFunction != 0)
 	{
-		windowFunction->apply(input, mSize);
+		mWindowFunction->apply(input, mSize);
 	}
-	fixedForwardTransform(input, output);
+	mCalculator->setData(input, output);
+	mCalculator->forward();
 }
 
 void ViFourierTransformer::inverseTransform(float input[], float output[])
 {
-	fixedInverseTransform(input, output);
+	mCalculator->setData(input, output);
+	mCalculator->inverse();
 }
 
 void ViFourierTransformer::rescale(float input[])
 {
-	fixedRescale(input);
-}
-
-void ViFourierTransformer::transform(float input[], float output[], int numberOfSamples, ViWindowFunction<float> *windowFunction, Direction direction)
-{
-	if(direction == ViFourierTransformer::Forward)
-	{
-		forwardTransform(input, output, numberOfSamples, windowFunction);
-	}
-	else
-	{
-		inverseTransform(input, output, numberOfSamples);
-	}
-}
-
-void ViFourierTransformer::forwardTransform(float *input, float *output, int numberOfSamples, ViWindowFunction<float> *windowFunction)
-{
-	if(windowFunction != NULL)
-	{
-		windowFunction->apply(input, numberOfSamples);
-	}
-	variableForwardTransform(input, output, numberOfSamples);
-}
-
-void ViFourierTransformer::inverseTransform(float input[], float output[], int numberOfSamples)
-{
-	variableInverseTransform(input, output, numberOfSamples);
-}
-
-void ViFourierTransformer::rescale(float input[], int numberOfSamples)
-{
-	variableRescale(input, numberOfSamples);
+	mCalculator->setData(input);
+	mCalculator->rescale();
 }
 
 void ViFourierTransformer::initialize()
 {
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<3>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<4>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<5>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<6>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<7>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<8>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<9>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<10>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<11>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<12>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<13>(this));
-	mFixedForwardThreads.append(new ViFourierFixedForwardThread<14>(this));
+	mFixedCalculators.insert(3, new ViFourierFixedCalculator<3>());
+	mFixedCalculators.insert(4, new ViFourierFixedCalculator<4>());
+	mFixedCalculators.insert(5, new ViFourierFixedCalculator<5>());
+	mFixedCalculators.insert(6, new ViFourierFixedCalculator<6>());
+	mFixedCalculators.insert(7, new ViFourierFixedCalculator<7>());
+	mFixedCalculators.insert(8, new ViFourierFixedCalculator<8>());
+	mFixedCalculators.insert(9, new ViFourierFixedCalculator<9>());
+	mFixedCalculators.insert(10, new ViFourierFixedCalculator<10>());
+	mFixedCalculators.insert(11, new ViFourierFixedCalculator<11>());
+	mFixedCalculators.insert(12, new ViFourierFixedCalculator<12>());
+	mFixedCalculators.insert(13, new ViFourierFixedCalculator<13>());
+	mFixedCalculators.insert(14, new ViFourierFixedCalculator<14>());
 
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<3>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<4>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<5>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<6>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<7>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<8>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<9>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<10>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<11>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<12>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<13>(this));
-	mFixedInverseThreads.append(new ViFourierFixedInverseThread<14>(this));
-
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<3>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<4>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<5>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<6>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<7>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<8>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<9>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<10>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<11>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<12>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<13>(this));
-	mFixedRescaleThreads.append(new ViFourierFixedRescaleThread<14>(this));
-
-	mVariableForwardThread = new ViFourierVariableForwardThread(this);
-	mVariableInverseThread = new ViFourierVariableInverseThread(this);
-	mVariableRescaleThread = new ViFourierVariableRescaleThread(this);
+	mVariableCalculator = new ViFourierVariableCalculator();
 }
 
-void ViFourierTransformer::fixedForwardTransform(float *input, float *output)
+int ViFourierTransformer::sizeToKey(int size)
 {
-	mForwardThread->setData(input, output);
-	(this->*forwardTransformtion)();
+	float result = log(size) / float(log(2));
+	if(result == float(int(result)))
+	{
+		return result;
+	}
+	return -1;
 }
 
-void ViFourierTransformer::fixedInverseTransform(float input[], float output[])
+bool ViFourierTransformer::isValidSize(int value)
 {
-	mInverseThread->setData(input, output);
-	(this->*inverseTransformtion)();
+	return ((value > 0) && ((value & (~value + 1)) == value));
 }
 
-void ViFourierTransformer::fixedRescale(float input[])
+void ViFourierTransformer::conjugate(float input[])
 {
-	mRescaleThread->setData(input);
-	(this->*rescaleTransformtion)();
+	for(int i = mSize / 2 + 1; i < mSize; ++i)
+	{
+		input[i] = -input[i];
+	}
 }
 
-void ViFourierTransformer::variableForwardTransform(float input[], float output[], int numberOfSamples)
+ViComplexVector ViFourierTransformer::toComplex(float input[])
 {
-	mForwardThread->setData(input, output);
-	mForwardThread->setSize(numberOfSamples);
-	(this->*forwardTransformtion)();
-}
-
-void ViFourierTransformer::variableInverseTransform(float input[], float output[], int numberOfSamples)
-{
-	mInverseThread->setData(input, output);
-	mInverseThread->setSize(numberOfSamples);
-	(this->*inverseTransformtion)();
-}
-
-void ViFourierTransformer::variableRescale(float input[], int numberOfSamples)
-{
-	mRescaleThread->setData(input);
-	mRescaleThread->setSize(numberOfSamples);
-	(this->*rescaleTransformtion)();
-}
-
-void ViFourierTransformer::forwardTransformSameThread()
-{
-	mForwardThread->run();
-}
-
-void ViFourierTransformer::forwardTransformSeperateThread()
-{
-	mForwardThread->start();
-}
-
-void ViFourierTransformer::inverseTransformSameThread()
-{
-	mInverseThread->run();
-}
-
-void ViFourierTransformer::inverseTransformSeperateThread()
-{
-	mInverseThread->start();
-}
-
-void ViFourierTransformer::rescaleTransformSameThread()
-{
-	mRescaleThread->run();
-}
-
-void ViFourierTransformer::rescaleTransformSeperateThread()
-{
-	mRescaleThread->start();
-}
-
-ViComplexVector toComplex(float input[], int numberOfSamples)
-{
-	QVector<ViComplexFloat> result;
-	int last = numberOfSamples / 2;
-	result.push_back(ViComplexFloat(input[0], 0));
+	int last = mSize / 2;
+	QVector<ViComplexFloat> result(last + 1);
+	result[0] = ViComplexFloat(input[0], 0);
 	for(int i = 1; i < last; ++i)
 	{
-		result.push_back(ViComplexFloat(input[i], -input[last + i]));
+		result[i] = ViComplexFloat(input[i], -input[last + i]);
 	}
-	result.push_back(ViComplexFloat(input[last], 0));
+	result[last] = ViComplexFloat(input[last], 0);
 	return result;
 }

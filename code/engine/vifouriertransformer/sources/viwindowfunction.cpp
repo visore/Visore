@@ -52,6 +52,14 @@ ViWindowFunction<T>* ViWindowFunctionManager<T>::createFunction(QString function
 	return NULL;
 }
 
+template <typename T>
+QStringList ViWindowFunctionManager<T>::functions()
+{
+	QStringList result;
+	result << "Rectangular" << "Hamming" << "Hann";
+	return result;
+}
+
 /**********************************************************
 ViRectangularFunction
 **********************************************************/

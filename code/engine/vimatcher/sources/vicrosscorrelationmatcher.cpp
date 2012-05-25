@@ -21,7 +21,7 @@ ViCrossCorrelationMatcher::ViCrossCorrelationMatcher()
 	mFirstFourierData = NULL;
 	mSecondFourierData = NULL;
 
-	QObject::connect(&mTransformer1, SIGNAL(finished()), this, SLOT(summarize()));
+	//QObject::connect(&mTransformer1, SIGNAL(finished()), this, SLOT(summarize()));
 	//QObject::connect(&mTransformer2, SIGNAL(finished()), this, SLOT(summarize()));
 }
 
@@ -169,7 +169,7 @@ void ViCrossCorrelationMatcher::calculateNext()
 	{
 		mFirstSampleSize = pcmToRealFirstPointer(mFirstRawData, mFirstRealData, mFirstSize);
 		mSecondSampleSize = pcmToRealSecondPointer(mSecondRawData, mSecondRealData, mSecondSize);
-		mTransformer1.forwardTransform(mFirstRealData, mFirstFourierData, mFirstSampleSize);
+		mTransformer1.forwardTransform(mFirstRealData, mFirstFourierData);
 		//mTransformer2.forwardTransform(mSecondRealData, mSecondFourierData, mSecondSampleSize);
 	}
 	else

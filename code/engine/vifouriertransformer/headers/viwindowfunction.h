@@ -2,7 +2,8 @@
 #define VIWINDOWFUNCTION_H
 
 #include <QtGlobal>
-#include <QString>
+#include <QList>
+#include <QStringList>
 #include <QVector>
 #include "math.h"
 #include <qmath.h>
@@ -43,6 +44,7 @@ class ViWindowFunctionManager
 	public:
 
 		static ViWindowFunction<T>* createFunction(QString functionName);
+		static QStringList functions();
 
 };
 

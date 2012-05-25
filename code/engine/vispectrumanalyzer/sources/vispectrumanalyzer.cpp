@@ -5,16 +5,7 @@
 ViSpectrumAnalyzerThread::ViSpectrumAnalyzerThread()
 	: QThread()
 {
-	mWindowFunction = NULL;
-}
-
-ViSpectrumAnalyzerThread::~ViSpectrumAnalyzerThread()
-{
-	if(mWindowFunction != NULL)
-	{
-		delete mWindowFunction;
-		mWindowFunction = NULL;
-	}
+	mWindowFunction = "";
 }
 
 void ViSpectrumAnalyzerThread::setData(ViAudioBuffer *buffer, ViFloatSpectrum *spectrum)
@@ -62,9 +53,9 @@ void ViSpectrumAnalyzerThread::setBlockSize(qint32 size)
 	mBlockSize = size;
 }
 
-void ViSpectrumAnalyzerThread::setWindowFunction(ViWindowFunction<float> *windowFunction)
+void ViSpectrumAnalyzerThread::setWindowFunction(QString functionName)
 {
-	mWindowFunction = windowFunction;
+	mWindowFunction = functionName;
 }
 
 void ViSpectrumAnalyzerThread::run()
@@ -80,15 +71,11 @@ void ViSpectrumAnalyzerThread::run()
 	float fourier[sampleSize];
 
 	ViFourierTransformer transformer;
-	transformer.setFixedSize(mBlockSize);
+
+	transformer.setWindowFunction(mWindowFunction);	transformer.setSize(mBlockSize);
 
 	mSpectrum->initialize(halfSize + 1, mFormat.sampleRate() / 2);
 	mStream->restart();
-
-	if(mWindowFunction != NULL)
-	{
-		mWindowFunction->create(sampleSize);
-	}
 
 	emit changed(0);
 
@@ -104,7 +91,7 @@ void ViSpectrumAnalyzerThread::run()
 			}
 			sampleSize = mBlockSize;
 		}
-		transformer.forwardTransform(samples, fourier, mWindowFunction);
+		transformer.forwardTransform(samples, fourier);
 		mSpectrum->add(0, ViComplexFloat(fourier[0], 0));
 		for(index = 1; index < halfSize; ++index)
 		{
@@ -160,5 +147,5 @@ qint32 ViSpectrumAnalyzer::blockSize()
 
 void ViSpectrumAnalyzer::setWindowFunction(QString functionName)
 {
-	mThread.setWindowFunction(ViWindowFunctionManager<float>::createFunction(functionName));
+	mThread.setWindowFunction(functionName);
 }
