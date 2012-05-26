@@ -7,7 +7,7 @@ ViFourierCalculator::ViFourierCalculator()
 	mSize = 0;
 }
 
-void ViFourierCalculator::setData(float input[], float output[])
+void ViFourierCalculator::setData(double input[], double output[])
 {
 	mInput = input;
 	mOutput = output;

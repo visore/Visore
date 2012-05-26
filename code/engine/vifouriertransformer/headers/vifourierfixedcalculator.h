@@ -22,6 +22,4 @@ class ViFourierFixedCalculator : public ViFourierCalculator
 
 };
 
-#include "../sources/vifourierfixedcalculator.cpp"
-
 #endif

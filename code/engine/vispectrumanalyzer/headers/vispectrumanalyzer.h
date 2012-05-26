@@ -28,7 +28,7 @@ class ViSpectrumAnalyzerThread : public QThread
 
 	private:
 		
-		int (*pcmToRealPointer)(char*, float*, int);
+		int (*pcmToRealPointer)(char*, double*, int);
 
 		ViAudioFormat mFormat;
 		ViFloatSpectrum *mSpectrum;

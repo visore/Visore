@@ -1,4 +1,4 @@
-#ifdef VIWINDOWFUNCTION_H
+#include "viwindowfunction.h"
 
 /**********************************************************
 ViWindowFunction
@@ -33,6 +33,12 @@ void ViWindowFunction<T>::fillWindow(int size)
 	}
 }
 
+template class ViWindowFunction<short>;
+template class ViWindowFunction<int>;
+template class ViWindowFunction<long>;
+template class ViWindowFunction<float>;
+template class ViWindowFunction<double>;
+
 /**********************************************************
 ViWindowFunctionManager
 **********************************************************/
@@ -60,6 +66,12 @@ QStringList ViWindowFunctionManager<T>::functions()
 	return result;
 }
 
+template class ViWindowFunctionManager<short>;
+template class ViWindowFunctionManager<int>;
+template class ViWindowFunctionManager<long>;
+template class ViWindowFunctionManager<float>;
+template class ViWindowFunctionManager<double>;
+
 /**********************************************************
 ViRectangularFunction
 **********************************************************/
@@ -69,6 +81,12 @@ T ViRectangularFunction<T>::calculate(int currentSample, int totalSamples)
 {
 	return 1.0;
 }
+
+template class ViRectangularFunction<short>;
+template class ViRectangularFunction<int>;
+template class ViRectangularFunction<long>;
+template class ViRectangularFunction<float>;
+template class ViRectangularFunction<double>;
 
 /**********************************************************
 ViHammingFunction
@@ -80,6 +98,12 @@ T ViHammingFunction<T>::calculate(int currentSample, int totalSamples)
 	return 0.54 + (0.46 * qCos((2 * M_PI * currentSample) / (totalSamples - 1)));
 }
 
+template class ViHammingFunction<short>;
+template class ViHammingFunction<int>;
+template class ViHammingFunction<long>;
+template class ViHammingFunction<float>;
+template class ViHammingFunction<double>;
+
 /**********************************************************
 ViHannFunction
 **********************************************************/
@@ -90,4 +114,8 @@ T ViHannFunction<T>::calculate(int currentSample, int totalSamples)
 	return 0.5 * (1 - qCos((2 * M_PI * currentSample) / (totalSamples - 1)));
 }
 
-#endif
+template class ViHannFunction<short>;
+template class ViHannFunction<int>;
+template class ViHannFunction<long>;
+template class ViHannFunction<float>;
+template class ViHannFunction<double>;

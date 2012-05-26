@@ -1,4 +1,4 @@
-#ifdef VICOMPLEXNUMBER_H
+#include "vicomplexnumber.h"
 
 template <typename T>
 ViComplexNumber<T>::ViComplexNumber()
@@ -100,4 +100,8 @@ ViComplexNumber<T>& ViComplexNumber<T>::operator*=(const T &value)
 	return *this;
 }
 
-#endif
+template class ViComplexNumber<short>;
+template class ViComplexNumber<int>;
+template class ViComplexNumber<long>;
+template class ViComplexNumber<float>;
+template class ViComplexNumber<double>;

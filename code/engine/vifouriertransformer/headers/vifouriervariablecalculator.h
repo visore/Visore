@@ -18,7 +18,7 @@ class ViFourierVariableCalculator : public ViFourierCalculator
 
 	protected:
 
-		ffft::FFTReal<float> *mFourierTransform;
+		ffft::FFTReal<double> *mFourierTransform;
 
 };
 

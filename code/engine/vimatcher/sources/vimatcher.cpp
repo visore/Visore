@@ -19,7 +19,7 @@ ViMatcher::ViMatcher()
 	: QObject()
 {
 	finishCounter = 0;
-	mStrategies.append(new ViSampleMatcher());
+	//mStrategies.append(new ViSampleMatcher());
 	mStrategies.append(new ViCrossCorrelationMatcher());
 	for(int i = 0; i < mStrategies.size(); ++i)
 	{

@@ -37,6 +37,4 @@ typedef ViComplexNumber<float> ViComplexFloat;
 typedef ViComplexNumber<double> ViComplexDouble;
 typedef ViComplexNumber<int> ViComplexInteger;
 
-#include "../sources/vicomplexnumber.cpp"
-
 #endif

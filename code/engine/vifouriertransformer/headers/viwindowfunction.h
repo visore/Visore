@@ -1,7 +1,6 @@
 #ifndef VIWINDOWFUNCTION_H
 #define VIWINDOWFUNCTION_H
 
-#include <QtGlobal>
 #include <QList>
 #include <QStringList>
 #include <QVector>
@@ -89,7 +88,5 @@ class ViHannFunction : public ViWindowFunction<T>
 		T calculate(int currentSample, int totalSamples);
 
 };
-
-#include "../sources/viwindowfunction.cpp"
 
 #endif

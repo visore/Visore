@@ -44,18 +44,19 @@ ViAudioEngine::ViAudioEngine()
 	mSongDetector->setKey("G1TZBE4IHJAYUSNCN");
 	ViObject::connect(mSongDetector, SIGNAL(songFound(ViSongInfo)), this, SIGNAL(songInfoChanged(ViSongInfo)));*/
 
-//ViSignalManipulator::createDefaultSignal(mProcessingChain->originalBuffer(), 2000, ViSignalManipulator::Sin);
+ViSignalManipulator::createDefaultSignal(mProcessingChain->originalBuffer(), 200, ViSignalManipulator::Tooth);
 //cout<<"pop: "<<mProcessingChain->originalBuffer()->size()<<" "<<mProcessingChain->correctedBuffer()->size()<<endl;
 
 	ViAudioBuffer *b1 = new ViAudioBuffer();
 	ViAudioBuffer *b2 = new ViAudioBuffer();
-	ViSignalManipulator::createDefaultSignal(b1, 500, ViSignalManipulator::Sin);
-	ViSignalManipulator::createDefaultSignal(b2, 100, ViSignalManipulator::Tan);
+	ViSignalManipulator::createDefaultSignal(b1, 1, ViSignalManipulator::Tooth);
+	ViSignalManipulator::createDefaultSignal(b2, 1, ViSignalManipulator::FlatMountain);
 
 	//ViSignalManipulator::createNoise(b1, b2, 0.01);
 
-	/*ViMatcher *m = new ViMatcher();
-	m->match(b1, b2);*/
+	ViMatcher *m = new ViMatcher();
+	m->match(b1, b2);
+
 	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
 	QObject::connect(mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
 	QObject::connect(mSpectrumAnalyzer, SIGNAL(changed(qreal)), this, SIGNAL(spectrumChanged(qreal)));

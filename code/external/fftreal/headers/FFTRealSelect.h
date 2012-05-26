@@ -43,8 +43,8 @@ class FFTRealSelect
 
 public:
 
-	ffft_FORCEINLINE static float *
-						sel_bin (float *e_ptr, float *o_ptr);
+	ffft_FORCEINLINE static double *
+						sel_bin (double *e_ptr, double *o_ptr);
 
 
 

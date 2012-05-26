@@ -14,19 +14,19 @@ void ViSpectrumAnalyzerThread::setData(ViAudioBuffer *buffer, ViFloatSpectrum *s
 	qint32 sampleSize = mFormat.sampleSize();
 	if(sampleSize == 8)
 	{
-		pcmToRealPointer = &ViPcmConverter<float>::pcmToReal8;
+		pcmToRealPointer = &ViPcmConverter<double>::pcmToReal8;
 	}
 	else if(sampleSize == 16)
 	{
-		pcmToRealPointer = &ViPcmConverter<float>::pcmToReal16;
+		pcmToRealPointer = &ViPcmConverter<double>::pcmToReal16;
 	}
 	else if(sampleSize == 24)
 	{
-		pcmToRealPointer = &ViPcmConverter<float>::pcmToReal24;
+		pcmToRealPointer = &ViPcmConverter<double>::pcmToReal24;
 	}
 	else if(sampleSize == 32)
 	{
-		pcmToRealPointer = &ViPcmConverter<float>::pcmToReal32;
+		pcmToRealPointer = &ViPcmConverter<double>::pcmToReal32;
 	}
 
 	mStream = buffer->createReadStream();
@@ -67,8 +67,8 @@ void ViSpectrumAnalyzerThread::run()
 	qint64 totalSize = mSizes.size() * bytesSize;
 	
 	char bytes[bytesSize];
-	float samples[sampleSize];
-	float fourier[sampleSize];
+	double samples[sampleSize];
+	double fourier[sampleSize];
 
 	ViFourierTransformer transformer;
 

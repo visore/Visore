@@ -9,6 +9,10 @@ class ViMatcherStrategy : public QObject
 {
 	Q_OBJECT
 
+	signals:
+
+		void finished();
+
 	public:
 		
 		ViMatcherStrategy();

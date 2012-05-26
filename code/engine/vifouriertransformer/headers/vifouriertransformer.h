@@ -1,8 +1,7 @@
 #ifndef VIFOURIERTRANSFORMER_H
 #define VIFOURIERTRANSFORMER_H
 
-#include "vifourierfixedcalculator.h"
-#include "vifouriervariablecalculator.h"
+#include "vifouriercalculator.h"
 #include "viwindowfunction.h"
 #include "vicomplexnumber.h"
 #include <QMap>
@@ -36,13 +35,15 @@ class ViFourierTransformer
 		bool setWindowFunction(QString functionName);
 		QStringList windowFunctions();
 
-		void transform(float input[], float output[], Direction direction = ViFourierTransformer::Forward);
-		void forwardTransform(float *input, float *output);
-		void inverseTransform(float input[], float output[]);
-		void rescale(float input[]);
+		void transform(double input[], double output[], Direction direction = ViFourierTransformer::Forward);
+		void forwardTransform(double input[], double output[]);
+		void inverseTransform(double input[], double output[]);
+		void rescale(double input[]);
 
-		void conjugate(float input[]);
-		ViComplexVector toComplex(float input[]);
+		void conjugate(double input[]);
+		void pad(double input[], int numberOfSamples, double value = 0);
+		void multiply(double first[], double second[], double output[]);
+		ViComplexVector toComplex(double input[]);
 
 	protected:
 
@@ -57,7 +58,7 @@ class ViFourierTransformer
 		ViFourierCalculator* mVariableCalculator;
 		ViFourierCalculator *mCalculator;
 		QStringList mWindowFunctions;
-		ViWindowFunction<float> *mWindowFunction;
+		ViWindowFunction<double> *mWindowFunction;
 
 };
 

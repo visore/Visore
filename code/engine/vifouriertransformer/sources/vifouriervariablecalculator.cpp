@@ -19,12 +19,12 @@ void ViFourierVariableCalculator::setSize(int size)
 	ViFourierCalculator::setSize(size);
 	if(mFourierTransform == 0)
 	{
-		mFourierTransform = new ffft::FFTReal<float>(mSize);
+		mFourierTransform = new ffft::FFTReal<double>(mSize);
 	}
 	else if(mFourierTransform->get_length() != mSize)
 	{
 		delete mFourierTransform;
-		mFourierTransform = new ffft::FFTReal<float>(mSize);
+		mFourierTransform = new ffft::FFTReal<double>(mSize);
 	}
 }
 
