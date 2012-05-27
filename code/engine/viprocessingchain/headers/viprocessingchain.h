@@ -5,7 +5,7 @@
 #include <QThread>
 #include "viaudiobuffer.h"
 #include "viaudioconnection.h"
-#include "viprocessor.h"
+#include "viprocessorlist.h"
 
 class ViProcessingThread : public QThread
 {
@@ -13,10 +13,9 @@ class ViProcessingThread : public QThread
 	public:
 
 		ViProcessingThread();
-		~ViProcessingThread();
 		void setStream(ViAudioConnection::Direction direction, ViAudioBufferStream *stream);
 		void setSampleSize(ViAudioConnection::Direction direction, int sampleSize);
-		void attach(ViAudioConnection::Direction direction, ViProcessor *processor);
+		bool attach(ViAudioConnection::Direction direction, ViProcessor *processor);
 		void run();
 
 	private:
@@ -28,10 +27,7 @@ class ViProcessingThread : public QThread
 		ViAudioBufferStream *mReadStream;
 		ViAudioBufferStream *mWriteStream;
 
-		QList<ViRawProcessor*> mRawInputProcessors;
-		QList<ViRealProcessor*> mRealInputProcessors;
-		QList<ViRawProcessor*> mRawOutputProcessors;
-		QList<ViRealProcessor*> mRealOutputProcessors;
+		ViProcessorList mProcessors;
 
 };
 
@@ -55,7 +51,7 @@ class ViProcessingChain : public QObject, public ViError
 
 		void start();
 		ViAudioBuffer* buffer(ViAudioConnection::Direction direction, ViAudioConnection::Type type);
-		void attach(ViAudioConnection::Direction direction, ViProcessor *processor);
+		bool attach(ViAudioConnection::Direction direction, ViProcessor *processor);
 
 		void setInput(ViAudioFormat format, QString filePath);
 		void setInput(ViAudioFormat format, QAudioDeviceInfo device);

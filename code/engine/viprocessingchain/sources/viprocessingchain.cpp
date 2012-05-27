@@ -11,19 +11,6 @@ ViProcessingThread::ViProcessingThread()
 	mRawChunk.resize(BLOCK_SIZE);
 }
 
-ViProcessingThread::~ViProcessingThread()
-{
-	qDeleteAll(mRawInputProcessors);
-	mRawInputProcessors.clear();
-	qDeleteAll(mRealInputProcessors);
-	mRealInputProcessors.clear();
-
-	qDeleteAll(mRawOutputProcessors);
-	mRawOutputProcessors.clear();
-	qDeleteAll(mRealOutputProcessors);
-	mRealOutputProcessors.clear();
-}
-
 void ViProcessingThread::setStream(ViAudioConnection::Direction direction, ViAudioBufferStream *stream)
 {
 	if(direction == ViAudioConnection::Input)
@@ -64,33 +51,9 @@ void ViProcessingThread::setSampleSize(ViAudioConnection::Direction direction, i
 	}
 }
 
-void ViProcessingThread::attach(ViAudioConnection::Direction direction, ViProcessor *processor)
+bool ViProcessingThread::attach(ViAudioConnection::Direction direction, ViProcessor *processor)
 {
-	ViRawProcessor *rawProcessor;
-	ViRealProcessor *realProcessor;
-	if((rawProcessor = dynamic_cast<ViRawProcessor*>(processor)) != NULL)
-	{
-		if(direction == ViAudioConnection::Input)
-		{
-			mRawInputProcessors.append(rawProcessor);
-		}
-		else
-		{
-			mRawOutputProcessors.append(rawProcessor);
-		}
-		
-	}
-	else if((realProcessor = dynamic_cast<ViRealProcessor*>(processor)) != NULL)
-	{
-		if(direction == ViAudioConnection::Input)
-		{
-			mRealInputProcessors.append(realProcessor);
-		}
-		else
-		{
-			mRealOutputProcessors.append(realProcessor);
-		}
-	}
+	return mProcessors.add(direction, processor);
 }
 
 void ViProcessingThread::run()
@@ -100,31 +63,17 @@ void ViProcessingThread::run()
 		mRawChunk.setSize(mReadStream->read(&mRawChunk));
 		if(mRawChunk.size() > 0)
 		{
-			for(int i = 0; i < mRawInputProcessors.size(); ++i)
-			{
-				mRawInputProcessors[i]->setData(&mRawChunk);
-				mRawInputProcessors[i]->run();
-			}
+			mProcessors.processRawInputObservers(&mRawChunk);
 			mRealChunk.setSize(pcmToReal(mRawChunk.data(), mRealChunk.data(), mRawChunk.size()));
-			for(int i = 0; i < mRealInputProcessors.size(); ++i)
-			{
-				mRealInputProcessors[i]->setData(&mRealChunk);
-				mRealInputProcessors[i]->run();
-			}
+			mProcessors.processRealInputObservers(&mRealChunk);
 
-
-			for(int i = 0; i < mRawOutputProcessors.size(); ++i)
-			{
-				mRawOutputProcessors[i]->setData(&mRawChunk);
-				mRawOutputProcessors[i]->run();
-			}
+			mProcessors.processRawInputModifiers(&mRawChunk);
 			mRealChunk.setSize(pcmToReal(mRawChunk.data(), mRealChunk.data(), mRawChunk.size()));
-			for(int i = 0; i < mRealOutputProcessors.size(); ++i)
-			{
-				mRealOutputProcessors[i]->setData(&mRealChunk);
-				mRealOutputProcessors[i]->run();
-			}
+			mProcessors.processRealInputModifiers(&mRealChunk);
 
+			mProcessors.processRawOutputObservers(&mRawChunk);
+			mRealChunk.setSize(pcmToReal(mRawChunk.data(), mRealChunk.data(), mRawChunk.size()));
+			mProcessors.processRealOutputObservers(&mRealChunk);
 
 			mWriteStream->write(&mRawChunk);
 		}
@@ -175,9 +124,9 @@ ViAudioBuffer* ViProcessingChain::buffer(ViAudioConnection::Direction direction,
 	}
 }
 
-void ViProcessingChain::attach(ViAudioConnection::Direction direction, ViProcessor *processor)
+bool ViProcessingChain::attach(ViAudioConnection::Direction direction, ViProcessor *processor)
 {
-	mThread.attach(direction, processor);
+	return mThread.attach(direction, processor);
 }
 
 void ViProcessingChain::setInput(ViAudioFormat format, QString filePath)

@@ -12,11 +12,26 @@ class ViProcessor : public QObject, public QRunnable
 	signals:
 
 		void changed();
+		void enabled(bool enabled);
 
 	public:
 
-		ViProcessor();
+		enum Type
+		{
+			Observer = 0,
+			Modifier = 1
+		};
+
+		ViProcessor(ViProcessor::Type type);
+		ViProcessor::Type type();
+		void enable(bool enable = true);
+		bool isEnabled();
 		virtual void run() = 0;
+
+	private:
+
+		ViProcessor::Type mType;
+		bool mIsEnabled;
 
 };
 
@@ -25,9 +40,8 @@ class ViRawProcessor : public ViProcessor
 
 	public:
 
-		ViRawProcessor();
+		ViRawProcessor(ViProcessor::Type type);
 		void setData(ViChunk<char> *data);
-		virtual void run() = 0;
 
 	protected:
 
@@ -40,9 +54,8 @@ class ViRealProcessor : public ViProcessor
 
 	public:
 
-		ViRealProcessor();
+		ViRealProcessor(ViProcessor::Type type);
 		void setData(ViChunk<double> *data);
-		virtual void run() = 0;
 
 	protected:
 
