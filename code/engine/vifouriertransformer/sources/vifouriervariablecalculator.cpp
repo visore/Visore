@@ -14,7 +14,7 @@ ViFourierVariableCalculator::~ViFourierVariableCalculator()
 	}
 }
 
-void ViFourierVariableCalculator::setSize(int size)
+void ViFourierVariableCalculator::setSize(const int size)
 {
 	ViFourierCalculator::setSize(size);
 	if(mFourierTransform == 0)
@@ -40,5 +40,5 @@ void ViFourierVariableCalculator::inverse()
 
 void ViFourierVariableCalculator::rescale()
 {
-	mFourierTransform->rescale(mInput);
+	mFourierTransform->rescale(mOutput);
 }

@@ -3,36 +3,30 @@
 #include "vipcmconverter.h"
 #include "viqtconnection.h"
 
-#define WINDOW_SIZE 2048
+#define DEFAULT_WINDOW_SIZE 2048
 
 ViProcessingThread::ViProcessingThread()
 	: QThread()
 {
-	mRawChunk.resize(WINDOW_SIZE);
+	mWindowSize = DEFAULT_WINDOW_SIZE;
+	mReadStream = NULL;
+	mWriteStream = NULL;
+}
+
+void ViProcessingThread::setWindowSize(int windowSize)
+{
+	mWindowSize = windowSize;
+	updateChunks();
+	updateProcessors();
 }
 
 void ViProcessingThread::setStream(ViAudioConnection::Direction direction, ViAudioBufferStream *stream)
 {
+	int sampleSize;
 	if(direction == ViAudioConnection::Input)
 	{
 		mReadStream = stream;
-		QList<ViProcessor*> processors = mProcessors.processors();
-		for(int i = 0; i < processors.size(); ++i)
-		{
-			processors[i]->setFormat(mReadStream->buffer()->format());
-		}
-	}
-	else
-	{
-		mWriteStream = stream;
-	}
-}
-
-void ViProcessingThread::setSampleSize(ViAudioConnection::Direction direction, int sampleSize)
-{
-	if(direction == ViAudioConnection::Input)
-	{
-		mRealChunk.resize(WINDOW_SIZE / (sampleSize / 8));
+		sampleSize = mReadStream->buffer()->format().sampleSize();
 		if(sampleSize == 8)
 		{
 			pcmToReal = &ViPcmConverter<double>::pcmToReal8;
@@ -52,6 +46,8 @@ void ViProcessingThread::setSampleSize(ViAudioConnection::Direction direction, i
 	}
 	else
 	{
+		mWriteStream = stream;
+		sampleSize = mWriteStream->buffer()->format().sampleSize();
 		if(sampleSize == 8)
 		{
 			realToPcm = &ViPcmConverter<double>::realToPcm8;
@@ -69,34 +65,62 @@ void ViProcessingThread::setSampleSize(ViAudioConnection::Direction direction, i
 			realToPcm = &ViPcmConverter<double>::realToPcm32;
 		}
 	}
+	updateChunks();
+	updateProcessors();
 }
 
 bool ViProcessingThread::attach(ViAudioConnection::Direction direction, ViProcessor *processor)
 {
 	if(mProcessors.add(direction, processor))
 	{
-		processor->setWindowSize(WINDOW_SIZE);
-		processor->setFormat(mReadStream->buffer()->format());
+		updateProcessors();
 	}
 	return false;
+}
+
+void ViProcessingThread::updateProcessors()
+{
+	if(mReadStream != NULL)
+	{
+		ViAudioFormat format = mReadStream->buffer()->format();
+		QList<ViProcessor*> processors = mProcessors.processors();
+		for(int i = 0; i < processors.size(); ++i)
+		{
+			processors[i]->setWindowSize(mWindowSize);
+			processors[i]->setFormat(format);
+		}
+	}
+}
+
+void ViProcessingThread::updateChunks()
+{
+	if(mReadStream != NULL)
+	{
+		mInputChunk.resize(mWindowSize * (mReadStream->buffer()->format().sampleSize() / 8));
+	}
+	mRealChunk.resize(mWindowSize);
+	if(mWriteStream != NULL)
+	{
+		mOutputChunk.resize(mWindowSize * (mWriteStream->buffer()->format().sampleSize() / 8));
+	}
 }
 
 void ViProcessingThread::run()
 {
 	do
 	{
-		mRawChunk.setSize(mReadStream->read(&mRawChunk));
-		if(mRawChunk.size() > 0)
+		mInputChunk.setSize(mReadStream->read(&mInputChunk));
+		if(mInputChunk.size() > 0)
 		{
-			mRealChunk.setSize(pcmToReal(mRawChunk.data(), mRealChunk.data(), mRawChunk.size()));
+			mRealChunk.setSize(pcmToReal(mInputChunk.data(), mRealChunk.data(), mInputChunk.size()));
 			mProcessors.observeInput(&mRealChunk);
 			mProcessors.manipulateInput(&mRealChunk);
 			mProcessors.observeOutput(&mRealChunk);
-			mRawChunk.setSize(realToPcm(mRealChunk.data(), mRawChunk.data(), mRealChunk.size()));
-			mWriteStream->write(&mRawChunk);
+			mOutputChunk.setSize(realToPcm(mRealChunk.data(), mOutputChunk.data(), mRealChunk.size()));
+			mWriteStream->write(&mOutputChunk);
 		}
 	}
-	while(mRawChunk.size() > 0);
+	while(mInputChunk.size() > 0);
 }
 
 ViProcessingChain::ViProcessingChain()
@@ -151,28 +175,24 @@ void ViProcessingChain::setInput(ViAudioFormat format, QString filePath)
 {
 	changeInputBuffer(allocateBuffer(ViAudioConnection::Input));
 	mInput = mConnection->fileInput(format, mInputBuffer, filePath);
-	mThread.setSampleSize(ViAudioConnection::Input, format.sampleSize());
 }
 
 void ViProcessingChain::setInput(ViAudioFormat format, QAudioDeviceInfo device)
 {
 	changeInputBuffer(allocateBuffer(ViAudioConnection::Input));
 	mInput = mConnection->streamInput(format, mInputBuffer, device);
-	mThread.setSampleSize(ViAudioConnection::Input, format.sampleSize());
 }
 
 void ViProcessingChain::addOutput(ViAudioFormat format, QString filePath)
 {
 	changeOutputBuffer(allocateBuffer(ViAudioConnection::Output));
 	mOutputs.append(mConnection->fileOutput(format, mOutputBuffer, filePath));
-	mThread.setSampleSize(ViAudioConnection::Output, format.sampleSize());
 }
 
 void ViProcessingChain::addOutput(ViAudioFormat format, QAudioDeviceInfo device)
 {
 	changeOutputBuffer(allocateBuffer(ViAudioConnection::Output));
 	mOutputs.append(mConnection->streamOutput(format, mOutputBuffer, device));
-	mThread.setSampleSize(ViAudioConnection::Output, format.sampleSize());
 }
 
 void ViProcessingChain::changeInputBuffer(ViAudioBuffer *buffer)
@@ -183,6 +203,7 @@ void ViProcessingChain::changeInputBuffer(ViAudioBuffer *buffer)
 		QObject::disconnect(mInputBuffer, SIGNAL(changed(int)), this, SLOT(inputChanged()));
 	}
 	mInputBuffer = buffer;
+	mInputBuffer->setFormat(ViAudioFormat::defaultFormat()); // TODO: change to format of input
 	if(mInputBuffer != NULL)
 	{
 		QObject::connect(mInputBuffer, SIGNAL(changed(int)), this, SLOT(process()));
@@ -198,6 +219,7 @@ void ViProcessingChain::changeOutputBuffer(ViAudioBuffer *buffer)
 		QObject::disconnect(mOutputBuffer, SIGNAL(changed(int)), this, SIGNAL(outputChanged()));
 	}
 	mOutputBuffer = buffer;
+	mOutputBuffer->setFormat(ViAudioFormat::defaultFormat()); // TODO: change to input format by default
 	if(mOutputBuffer != NULL)
 	{
 		QObject::connect(mOutputBuffer, SIGNAL(changed(int)), this, SIGNAL(outputChanged()));

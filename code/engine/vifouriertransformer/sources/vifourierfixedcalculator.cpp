@@ -8,7 +8,7 @@ ViFourierFixedCalculator<T>::ViFourierFixedCalculator()
 }
 
 template <int T>
-void ViFourierFixedCalculator<T>::setSize(int size)
+void ViFourierFixedCalculator<T>::setSize(const int size)
 {
 }
 
@@ -27,7 +27,7 @@ void ViFourierFixedCalculator<T>::inverse()
 template <int T>
 void ViFourierFixedCalculator<T>::rescale()
 {
-	ViFourierFixedCalculator<T>::mFourierTransform.rescale(ViFourierCalculator::mInput);
+	ViFourierFixedCalculator<T>::mFourierTransform.rescale(ViFourierCalculator::mOutput);
 }
 
 template class ViFourierFixedCalculator<3>;

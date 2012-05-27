@@ -30,7 +30,7 @@ class ViProcessor : public QObject, public QRunnable
 
 		virtual void run() = 0;
 
-	private:
+	protected:
 
 		ViAudioFormat mFormat;
 		bool mIsEnabled;

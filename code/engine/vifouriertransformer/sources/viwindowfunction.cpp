@@ -5,16 +5,16 @@ ViWindowFunction
 **********************************************************/
 
 template <typename T>
-void ViWindowFunction<T>::apply(T *data, int size)
+void ViWindowFunction<T>::apply(const T input[], T output[], const int size)
 {
 	for(int i = 0; i < size; ++i)
 	{
-		data[i] *= mWindow[i];
+		output[i] = input[i] * mWindow[i];
 	}
 }
 
 template <typename T>
-void ViWindowFunction<T>::create(int size)
+void ViWindowFunction<T>::create(const int size)
 {
 	if(size != mWindow.size())
 	{
@@ -25,7 +25,7 @@ void ViWindowFunction<T>::create(int size)
 }
 
 template <typename T>
-void ViWindowFunction<T>::fillWindow(int size)
+void ViWindowFunction<T>::fillWindow(const int size)
 {
 	for(int i = 0; i < size; ++i)
 	{
@@ -77,7 +77,7 @@ ViRectangularFunction
 **********************************************************/
 
 template <typename T>
-T ViRectangularFunction<T>::calculate(int currentSample, int totalSamples)
+T ViRectangularFunction<T>::calculate(const int currentSample, const int totalSamples)
 {
 	return 1.0;
 }
@@ -93,7 +93,7 @@ ViHammingFunction
 **********************************************************/
 
 template <typename T>
-T ViHammingFunction<T>::calculate(int currentSample, int totalSamples)
+T ViHammingFunction<T>::calculate(const int currentSample, const int totalSamples)
 {
 	return 0.54 + (0.46 * qCos((2 * M_PI * currentSample) / (totalSamples - 1)));
 }
@@ -109,7 +109,7 @@ ViHannFunction
 **********************************************************/
 
 template <typename T>
-T ViHannFunction<T>::calculate(int currentSample, int totalSamples)
+T ViHannFunction<T>::calculate(const int currentSample, const int totalSamples)
 {
 	return 0.5 * (1 - qCos((2 * M_PI * currentSample) / (totalSamples - 1)));
 }

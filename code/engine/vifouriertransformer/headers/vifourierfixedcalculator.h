@@ -11,7 +11,7 @@ class ViFourierFixedCalculator : public ViFourierCalculator
 	public:
 		
 		ViFourierFixedCalculator();
-		void setSize(int size);
+		void setSize(const int size);
 		void forward();
 		void inverse();
 		void rescale();

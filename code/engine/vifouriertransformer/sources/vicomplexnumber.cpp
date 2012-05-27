@@ -53,34 +53,30 @@ T ViComplexNumber<T>::imaginary()
 }
 
 template <typename T>
-ViComplexNumber<T>& ViComplexNumber<T>::operator+=(const ViComplexNumber<T> &number)
+bool ViComplexNumber<T>::operator==(const ViComplexNumber<T> &complex) const
 {
-	mReal += number.mReal;
-	mImaginary += number.mImaginary;
+	return (mReal == complex.mReal) && (mImaginary == complex.mImaginary);
+}
+
+template <typename T>
+bool ViComplexNumber<T>::operator!=(const ViComplexNumber<T> &complex) const
+{
+	return !(*this == complex);
+}
+
+template <typename T>
+ViComplexNumber<T>& ViComplexNumber<T>::operator+=(const ViComplexNumber<T> &complex)
+{
+	mReal += complex.mReal;
+	mImaginary += complex.mImaginary;
 	return *this;
 }
 
 template <typename T>
-ViComplexNumber<T>& ViComplexNumber<T>::operator-=(const ViComplexNumber<T> &number)
+ViComplexNumber<T>& ViComplexNumber<T>::operator-=(const ViComplexNumber<T> &complex)
 {
-	mReal -= number.mReal;
-	mImaginary -= number.mImaginary;
-	return *this;
-}
-
-template <typename T>
-ViComplexNumber<T>& ViComplexNumber<T>::operator/=(const ViComplexNumber<T> &number)
-{
-	mReal /= number.mReal;
-	mImaginary /= number.mImaginary;
-	return *this;
-}
-
-template <typename T>
-ViComplexNumber<T>& ViComplexNumber<T>::operator*=(const ViComplexNumber<T> &number)
-{
-	mReal *= number.mReal;
-	mImaginary *= number.mImaginary;
+	mReal -= complex.mReal;
+	mImaginary -= complex.mImaginary;
 	return *this;
 }
 
@@ -100,8 +96,21 @@ ViComplexNumber<T>& ViComplexNumber<T>::operator*=(const T &value)
 	return *this;
 }
 
+template <typename T>
+ViComplexNumber<T> ViComplexNumber<T>::operator/(const T &value) const
+{
+	ViComplexNumber<T> result(mReal / value, mImaginary / value);
+	return result;
+}
+
+template <typename T>
+ViComplexNumber<T> ViComplexNumber<T>::operator*(const T &value) const
+{
+	ViComplexNumber<T> result(mReal * value, mImaginary * value);
+	return result;
+}
+
 template class ViComplexNumber<short>;
 template class ViComplexNumber<int>;
-template class ViComplexNumber<long>;
 template class ViComplexNumber<float>;
 template class ViComplexNumber<double>;

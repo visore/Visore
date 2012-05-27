@@ -6,12 +6,15 @@
 #include "viprocessingchain.h"
 #include "vilibrary.h"
 #include "viaudioformat.h"
-#include "vispectrumanalyzer.h"
+
 #include "visongdetector.h"
 #include "visignalmanipulator.h"
 #include "vicorrelator.h"
 #include "visingleton.h"
+
+#include "vispectrumanalyzer.h"
 #include "viwaveformer.h"
+
 #include <QList>
 #include <QCoreApplication>
 
@@ -104,7 +107,7 @@ class ViAudioEngine : public ViSingleton, public ViError
 
 		//ViWaveForm* waveSummary(ViAudioBuffer::ViAudioBufferType type);
 
-		ViFloatSpectrum& spectrum();
+		ViRealSpectrum spectrum();
 		ViCorrelationResult& correlation();
 
 	private:
@@ -123,6 +126,8 @@ class ViAudioEngine : public ViSingleton, public ViError
 		static ViAudioEngine *mEngine;
 
 		ViProcessingChain *mProcessingChain;
+
+		ViSpectrumAnalyzer *mSpectrumAnalyzer;
 		
 		
 		ViAudioFormat mFormat;
@@ -134,7 +139,6 @@ class ViAudioEngine : public ViSingleton, public ViError
 
 		ViSongDetector *mSongDetector;
 
-		ViSpectrumAnalyzer *mSpectrumAnalyzer;
 		ViCorrelator *mCorrelator;
 };
 

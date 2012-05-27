@@ -13,18 +13,27 @@ class ViProcessingThread : public QThread
 	public:
 
 		ViProcessingThread();
+		void setWindowSize(int windowSize);
 		void setStream(ViAudioConnection::Direction direction, ViAudioBufferStream *stream);
-		void setSampleSize(ViAudioConnection::Direction direction, int sampleSize);
 		bool attach(ViAudioConnection::Direction direction, ViProcessor *processor);
 		void run();
+
+	protected:
+
+		void updateProcessors();
+		void updateChunks();
 
 	private:
 
 		int (*pcmToReal)(char*, double*, int);
 		int (*realToPcm)(double*, char*, int);
 
-		ViAudioBufferChunk mRawChunk;
-		ViChunk<double> mRealChunk;
+		int mWindowSize;
+
+		ViAudioBufferChunk mInputChunk;
+		ViSampleChunk mRealChunk;
+		ViAudioBufferChunk mOutputChunk;
+
 		ViAudioBufferStream *mReadStream;
 		ViAudioBufferStream *mWriteStream;
 

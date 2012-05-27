@@ -11,21 +11,18 @@ class ViSpectrum
 
 	public:
 	
-		ViSpectrum(qint32 size = 0);
+		ViSpectrum();
 
 		ViSpectrumElement<T> at(const qint32 index);
 		ViSpectrumElement<T> operator[](const qint32 index) const;
 
 		void add(const qint32 index, ViComplexNumber<T> complex);
-		ViSpectrumElement<T>& operator[](const qint32 index);
 
 		qint32 size();
 		ViSpectrumElement<T> maximum();
 		ViSpectrumElement<T> minimum();
 
 		void initialize(qint32 size, qint32 frequency);
-		void initializeSize(qint32 size);
-		void initializeFrequencies(qint32 frequency);
 		void finalize();
 
 	private:
@@ -34,8 +31,10 @@ class ViSpectrum
 
 	private:
 
+		QVector<ViSpectrumElement<T> > mRawValues;
 		QVector<ViSpectrumElement<T> > mValues;
 		qint32 mAdditionCounter;
+		qint32 mPreviousAdditionCounter;
 		ViSpectrumElement<T> mMaximum;
 		ViSpectrumElement<T> mMinimum;
 
@@ -43,6 +42,7 @@ class ViSpectrum
 
 typedef ViSpectrum<float> ViFloatSpectrum;
 typedef ViSpectrum<double> ViDoubleSpectrum;
+typedef ViDoubleSpectrum ViRealSpectrum;
 
 #include "../../../sources/viobservationprocessors/vispectrumanalyzer/vispectrum.cpp"
 

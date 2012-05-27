@@ -1,6 +1,5 @@
 #include "viaudioengine.h"
 #include "viqtconnection.h"
-#include "viwaveformer.h"
 
 #include <QTimer>
 
@@ -48,6 +47,9 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(waveFormer2, SIGNAL(changed(ViWaveForm*)), this, SIGNAL(outputWaveChanged(ViWaveForm*)));
 	mProcessingChain->attach(ViAudioConnection::Input, waveFormer1);
 	mProcessingChain->attach(ViAudioConnection::Output, waveFormer2);
+
+	mSpectrumAnalyzer = new ViSpectrumAnalyzer();
+	mProcessingChain->attach(ViAudioConnection::Input, mSpectrumAnalyzer);
 
 	mProcessingChain->start();
 
@@ -294,9 +296,9 @@ ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)
 	}
 }*/
 
-ViFloatSpectrum& ViAudioEngine::spectrum()
+ViRealSpectrum ViAudioEngine::spectrum()
 {
-	//return mSpectrumAnalyzer->spectrum();
+	return mSpectrumAnalyzer->spectrum();
 }
 
 ViCorrelationResult& ViAudioEngine::correlation()

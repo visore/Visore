@@ -18,13 +18,17 @@ class ViComplexNumber
 		T real();
 		T imaginary();
 
-		ViComplexNumber<T>& operator+=(const ViComplexNumber<T> &number);
-		ViComplexNumber<T>& operator-=(const ViComplexNumber<T> &number);
-		ViComplexNumber<T>& operator/=(const ViComplexNumber<T> &number);
-		ViComplexNumber<T>& operator*=(const ViComplexNumber<T> &number);
+		bool operator==(const ViComplexNumber<T> &complex) const;
+		bool operator!=(const ViComplexNumber<T> &complex) const;
+
+		ViComplexNumber<T>& operator+=(const ViComplexNumber<T> &complex);
+		ViComplexNumber<T>& operator-=(const ViComplexNumber<T> &complex);
 
 		ViComplexNumber<T>& operator/=(const T &value);
 		ViComplexNumber<T>& operator*=(const T &value);
+
+		ViComplexNumber<T> operator/(const T &value) const;
+		ViComplexNumber<T> operator*(const T &value) const;
 
 	private:
 
@@ -33,8 +37,10 @@ class ViComplexNumber
 
 };
 
-typedef ViComplexNumber<float> ViComplexFloat;
-typedef ViComplexNumber<double> ViComplexDouble;
-typedef ViComplexNumber<int> ViComplexInteger;
+typedef ViComplexNumber<float> ViFloatComplex;
+typedef ViComplexNumber<double> ViDoubleComplex;
+typedef ViDoubleComplex ViRealComplex;
+typedef ViComplexNumber<int> ViIntegerComplex;
+typedef ViComplexNumber<short> ViShortComplex;
 
 #endif

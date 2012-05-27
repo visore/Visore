@@ -2,11 +2,12 @@
 #include "vifourierfixedcalculator.h"
 #include "vifouriervariablecalculator.h"
 
-ViFourierTransformer::ViFourierTransformer(int size, QString functionName)
+ViFourierTransformer::ViFourierTransformer(const int size, QString const functionName)
 {
 	mWindowFunctions = ViWindowFunctionManager<double>::functions();
 	mWindowFunction = 0;
 	mCalculator = 0;
+	mWindowData = 0;
 	initialize();
 	setSize(size);
 	setWindowFunction(functionName);
@@ -21,13 +22,22 @@ ViFourierTransformer::~ViFourierTransformer()
 	{
 		delete mWindowFunction;
 	}
+	if(mWindowData != 0)
+	{
+		delete mWindowData;
+	}
 }
 
-ViFourierTransformer::Initialization ViFourierTransformer::setSize(int size)
+ViFourierTransformer::Initialization ViFourierTransformer::setSize(const int size)
 {
 	if(isValidSize(size))
 	{
 		mSize = size;
+		if(mWindowData != NULL)
+		{
+			delete mWindowData;
+		}
+		mWindowData = new double[mSize];
 		if(mWindowFunction != 0)
 		{
 			mWindowFunction->create(mSize);
@@ -49,7 +59,7 @@ ViFourierTransformer::Initialization ViFourierTransformer::setSize(int size)
 	return ViFourierTransformer::InvalidSize;
 }
 
-bool ViFourierTransformer::setWindowFunction(QString functionName)
+bool ViFourierTransformer::setWindowFunction(const QString functionName)
 {
 	for(int i = 0; i < mWindowFunctions.size(); ++i)
 	{
@@ -70,12 +80,12 @@ bool ViFourierTransformer::setWindowFunction(QString functionName)
 	return false;
 }
 
-QStringList ViFourierTransformer::windowFunctions()
+QStringList ViFourierTransformer::windowFunctions() const
 {
 	return mWindowFunctions;
 }
 
-void ViFourierTransformer::transform(double input[], double output[], Direction direction)
+void ViFourierTransformer::transform(const double input[], double output[], Direction direction)
 {
 	if(direction == ViFourierTransformer::Forward)
 	{
@@ -87,18 +97,22 @@ void ViFourierTransformer::transform(double input[], double output[], Direction 
 	}
 }
 
-void ViFourierTransformer::forwardTransform(double input[], double output[])
+void ViFourierTransformer::forwardTransform(const double input[], double output[])
 {
 	if(mWindowFunction != 0)
 	{
-		mWindowFunction->apply(input, mSize);
+		mWindowFunction->apply(input, mWindowData, mSize);
+		mCalculator->setData(mWindowData, output);
 	}
-	mCalculator->setData(input, output);
+	else
+	{
+		mCalculator->setData(input, output);
+	}
 	mCalculator->forward();
 	conjugate(output); //FFTReal somehow has a negative imaginary part
 }
 
-void ViFourierTransformer::inverseTransform(double input[], double output[])
+void ViFourierTransformer::inverseTransform(const double input[], double output[])
 {
 	mCalculator->setData(input, output);
 	mCalculator->inverse();
@@ -128,7 +142,7 @@ void ViFourierTransformer::initialize()
 	mVariableCalculator = new ViFourierVariableCalculator();
 }
 
-int ViFourierTransformer::sizeToKey(int size)
+int ViFourierTransformer::sizeToKey(const int size) const
 {
 	double result = log(size) / double(log(2));
 	if(result == double(int(result)))
@@ -138,12 +152,12 @@ int ViFourierTransformer::sizeToKey(int size)
 	return -1;
 }
 
-bool ViFourierTransformer::isValidSize(int value)
+bool ViFourierTransformer::isValidSize(const int value) const
 {
 	return ((value > 0) && ((value & (~value + 1)) == value));
 }
 
-void ViFourierTransformer::conjugate(double input[])
+void ViFourierTransformer::conjugate(double input[]) const
 {
 	for(int i = mSize / 2 + 1; i < mSize; ++i)
 	{
@@ -151,7 +165,7 @@ void ViFourierTransformer::conjugate(double input[])
 	}
 }
 
-void ViFourierTransformer::pad(double input[], int numberOfSamples, double value)
+void ViFourierTransformer::pad(double input[], const int numberOfSamples, const double value) const
 {
 	if(numberOfSamples < mSize)
 	{
@@ -162,7 +176,7 @@ void ViFourierTransformer::pad(double input[], int numberOfSamples, double value
 	}
 }
 
-void ViFourierTransformer::multiply(double first[], double second[], double output[])
+void ViFourierTransformer::multiply(const double first[], const double second[], double output[]) const
 {
 	int last = mSize / 2;
 	output[0] = first[0] * second[0];
@@ -174,15 +188,15 @@ void ViFourierTransformer::multiply(double first[], double second[], double outp
 	output[last] = first[last] * second[last];
 }
 
-ViComplexVector ViFourierTransformer::toComplex(double input[])
+ViComplexVector ViFourierTransformer::toComplex(const double input[]) const
 {
 	int last = mSize / 2;
-	QVector<ViComplexFloat> result(last + 1);
-	result[0] = ViComplexFloat(input[0], 0);
+	QVector<ViDoubleComplex> result(last + 1);
+	result[0] = ViDoubleComplex(input[0], 0);
 	for(int i = 1; i < last; ++i)
 	{
-		result[i] = ViComplexFloat(input[i], input[i + last]);
+		result[i] = ViDoubleComplex(input[i], input[i + last]);
 	}
-	result[last] = ViComplexFloat(input[last], 0);
+	result[last] = ViDoubleComplex(input[last], 0);
 	return result;
 }

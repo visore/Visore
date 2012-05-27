@@ -7,18 +7,23 @@ ViFourierCalculator::ViFourierCalculator()
 	mSize = 0;
 }
 
-void ViFourierCalculator::setData(double input[], double output[])
+void ViFourierCalculator::setData(const double input[], double output[])
 {
 	mInput = input;
 	mOutput = output;
 }
 
-void ViFourierCalculator::setSize(int size)
+void ViFourierCalculator::setData(double input[])
+{
+	mOutput = input;
+}
+
+void ViFourierCalculator::setSize(const int size)
 {
 	mSize = size;
 }
 
-int ViFourierCalculator::size()
+int ViFourierCalculator::size() const
 {
 	return mSize;
 }

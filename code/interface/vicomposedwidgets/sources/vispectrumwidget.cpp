@@ -33,20 +33,21 @@ void ViSpectrumWidget::showEvent(QShowEvent *event)
 	if(!mWasInitialized)
 	{
 		mWasInitialized = true;
-		recalculate();
+		//recalculate();
+		replot();
 	}
 	ViWidget::showEvent(event);
 }
 
 void ViSpectrumWidget::recalculate()
 {
-	ViMainWindow::instance()->showLoading(true, false, ViLoadingWidget::Text, "Calculating Spectrum");
-	mEngine->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
+	//ViMainWindow::instance()->showLoading(true, false, ViLoadingWidget::Text, "Calculating Spectrum");
+	//mEngine->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
 }
 
 void ViSpectrumWidget::replot()
 {
-	ViSpectrum<float> &plot = mEngine->spectrum();
+	ViRealSpectrum plot = mEngine->spectrum();
 	qint32 size = plot.size();
 
 	if(size > 0)
@@ -92,6 +93,7 @@ void ViSpectrumWidget::replot()
 				{
 					y[i] = plot[i].polar().amplitude().real();
 				}
+				unitY = "";
 			}
 			else
 			{
@@ -115,6 +117,7 @@ void ViSpectrumWidget::replot()
 				{
 					y[i] = plot[i].rectangular().amplitude().real();
 				}
+				unitY = "";
 			}
 			else
 			{
@@ -136,8 +139,9 @@ void ViSpectrumWidget::replot()
 		mUi->plot->setUnit(ViSpectrumPlot::Y, unitY);
 		mUi->plot->fill(fill);
 		mUi->plot->setData(x, y);
+
 	}
-	ViMainWindow::instance()->hideLoading();
+	//ViMainWindow::instance()->hideLoading();
 }
 
 

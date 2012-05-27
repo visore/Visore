@@ -43,12 +43,6 @@ int ViChunk<T>::size() const
 }
 
 template<typename T>
-T ViChunk<T>::at(int index) const
-{
-	return mData[index];
-}
-
-template<typename T>
 void ViChunk<T>::setData(T *data, int size)
 {
 	if(mData != NULL)
@@ -77,6 +71,30 @@ void ViChunk<T>::resize(int size)
 		mData = new T[size];
 		mSize = size;
 	}
+}
+
+template<typename T>
+const T& ViChunk<T>::at(int index) const
+{
+	return mData[index];
+}
+
+template<typename T>
+T& ViChunk<T>::at(int index)
+{
+	return mData[index];
+}
+
+template<typename T>
+const T& ViChunk<T>::operator[](const int index) const
+{
+	return mData[index];
+}
+
+template<typename T>
+T& ViChunk<T>::operator[] (const int index)
+{
+	return mData[index];
 }
 
 #endif

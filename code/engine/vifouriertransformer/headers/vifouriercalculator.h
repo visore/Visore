@@ -7,9 +7,10 @@ class ViFourierCalculator
 	public:
 		
 		ViFourierCalculator();
-		virtual void setData(double input[], double output[] = 0);
-		virtual void setSize(int size);
-		virtual int size();
+		virtual void setData(const double input[], double output[]);
+		virtual void setData(double input[]);
+		virtual void setSize(const int size);
+		virtual int size() const;
 
 		virtual void forward() = 0;
 		virtual void inverse() = 0;
@@ -17,7 +18,7 @@ class ViFourierCalculator
 
 	protected:
 
-		double *mInput;
+		const double *mInput;
 		double *mOutput;
 		int mSize;
 

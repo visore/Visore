@@ -6,7 +6,7 @@
 #include "vicomplexnumber.h"
 #include <QMap>
 
-typedef QVector<ViComplexFloat> ViComplexVector;
+typedef QVector<ViDoubleComplex> ViComplexVector;
 
 class ViFourierTransformer
 {
@@ -28,32 +28,33 @@ class ViFourierTransformer
 
 	public:
 
-		ViFourierTransformer(int size = 0, QString functionName = "");
+		ViFourierTransformer(const int size = 0, const QString functionName = "");
 		~ViFourierTransformer();
 
-		Initialization setSize(int size);
-		bool setWindowFunction(QString functionName);
-		QStringList windowFunctions();
+		Initialization setSize(const int size);
+		bool setWindowFunction(const QString functionName);
+		QStringList windowFunctions() const;
 
-		void transform(double input[], double output[], Direction direction = ViFourierTransformer::Forward);
-		void forwardTransform(double input[], double output[]);
-		void inverseTransform(double input[], double output[]);
+		void transform(const double input[], double output[], const Direction direction = ViFourierTransformer::Forward);
+		void forwardTransform(const double input[], double output[]);
+		void inverseTransform(const double input[], double output[]);
 		void rescale(double input[]);
 
-		void conjugate(double input[]);
-		void pad(double input[], int numberOfSamples, double value = 0);
-		void multiply(double first[], double second[], double output[]);
-		ViComplexVector toComplex(double input[]);
+		void conjugate(double input[]) const;
+		void pad(double input[], const int numberOfSamples, const double value = 0) const;
+		void multiply(const double first[], const double second[], double output[]) const;
+		ViComplexVector toComplex(const double input[]) const;
 
 	protected:
 
 		void initialize();
-		int sizeToKey(int size);
-		bool isValidSize(int value);
+		int sizeToKey(const int size) const;
+		bool isValidSize(const int value) const;
 
 	private:
 
 		int mSize;
+		double *mWindowData;
 		QMap<int, ViFourierCalculator*> mFixedCalculators;
 		ViFourierCalculator* mVariableCalculator;
 		ViFourierCalculator *mCalculator;

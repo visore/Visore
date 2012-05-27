@@ -1,6 +1,7 @@
 #ifndef VISPECTRUMANALYZER_H
 #define VISPECTRUMANALYZER_H
 
+#include <QMutex>
 #include "vispectrum.h"
 #include "viprocessor.h"
 #include "vifouriertransformer.h"
@@ -11,7 +12,7 @@ class ViSpectrumAnalyzer : public ViObserver
 	public:
 
 		ViSpectrumAnalyzer();
-		ViFloatSpectrum& spectrum();
+		ViRealSpectrum spectrum();
 		void setWindowFunction(QString functionName);
 
 		void setWindowSize(int windowSize);
@@ -20,8 +21,10 @@ class ViSpectrumAnalyzer : public ViObserver
 
 	private:
 
-		ViFloatSpectrum mSpectrum;
-		QString mWindowFunction;
+		QMutex mMutex;
+		int mHalfWindowSize;
+		ViFourierTransformer mTransformer;
+		ViRealSpectrum mSpectrum;
 
 };
 

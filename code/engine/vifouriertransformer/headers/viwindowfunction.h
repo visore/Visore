@@ -19,13 +19,13 @@ class ViWindowFunction
 
 	public:
 
-		void apply(T *data, int size);
-		void create(int size);
+		void apply(const T input[], T output[], int size);
+		void create(const int size);
 
 	protected:
 
-		void fillWindow(int size);
-		virtual T calculate(int currentSample, int totalSamples) = 0;
+		void fillWindow(const int size);
+		virtual T calculate(const int currentSample, const int totalSamples) = 0;
 
 	protected:
 
@@ -57,7 +57,7 @@ class ViRectangularFunction : public ViWindowFunction<T>
 
 	protected:
 
-		T calculate(int currentSample, int totalSamples);
+		T calculate(const int currentSample, const int totalSamples);
 
 };
 
@@ -71,7 +71,7 @@ class ViHammingFunction : public ViWindowFunction<T>
 
 	protected:
 
-		T calculate(int currentSample, int totalSamples);
+		T calculate(const int currentSample, const int totalSamples);
 
 };
 
@@ -85,7 +85,7 @@ class ViHannFunction : public ViWindowFunction<T>
 
 	protected:
 
-		T calculate(int currentSample, int totalSamples);
+		T calculate(const int currentSample, const int totalSamples);
 
 };
 

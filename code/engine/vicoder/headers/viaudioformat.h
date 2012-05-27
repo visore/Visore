@@ -11,6 +11,8 @@ class ViAudioFormat : public QAudioFormat
 		ViAudioFormat();
 		ViAudioFormat(const ViAudioFormat &format);
 
+		static ViAudioFormat defaultFormat();
+
 		void setCodec(ViCodec codec);
 		ViCodec codec();
 

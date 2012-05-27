@@ -13,11 +13,14 @@ class ViChunk
 		T* data() const;
 		int size() const;
 
-		T at(int index) const;
-
 		void setData(T *data, int size);
 		void setSize(int size);
 		void resize(int size);
+
+		const T& at(int index) const;
+		T& at(int index);
+		const T& operator[](const int index) const;
+		T& operator[] (const int index);
 
 	private:
 		T *mData;

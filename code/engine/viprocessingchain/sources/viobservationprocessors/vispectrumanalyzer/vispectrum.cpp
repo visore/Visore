@@ -1,7 +1,8 @@
 #ifdef VISPECTRUM_H
-
+#include<iostream>
+using namespace std;
 template <typename T>
-ViSpectrum<T>::ViSpectrum(qint32 size)
+ViSpectrum<T>::ViSpectrum()
 {
 }
 
@@ -21,14 +22,8 @@ template <typename T>
 void ViSpectrum<T>::add(const qint32 index, ViComplexNumber<T> complex)
 {
 	++mAdditionCounter;
-	mValues[index].rectangular().amplitude() += complex;
-	mValues[index].polar().amplitude() += ViSpectrumElement<T>::toPolar(complex);
-}
-
-template <typename T>
-ViSpectrumElement<T>& ViSpectrum<T>::operator[](const qint32 index)
-{
-	return mValues[index];
+	mRawValues[index].rectangular().amplitude() += complex;
+	mRawValues[index].polar().amplitude() += ViSpectrumElement<T>::toPolar(complex);
 }
 
 template <typename T>
@@ -52,48 +47,46 @@ ViSpectrumElement<T> ViSpectrum<T>::minimum()
 template <typename T>
 void ViSpectrum<T>::initialize(qint32 size, qint32 frequency)
 {
-	initializeSize(size);
-	initializeFrequencies(frequency);
-}
-
-template <typename T>
-void ViSpectrum<T>::initializeSize(qint32 size)
-{
 	mAdditionCounter = 0;
+	mPreviousAdditionCounter = 0;
+	mRawValues.clear();
+	mRawValues.resize(size);
 	mValues.clear();
-	mValues.resize(size);
-}
-
-template <typename T>
-void ViSpectrum<T>::initializeFrequencies(qint32 frequency)
-{
-	qint32 size = mValues.size();
-	for(int i = 0; i < size; ++i)
+	mValues.resize(size / 2); // Since we use real FFT, we'll have a mirror image, hence we only need half of the N/2 spectrum
+	qint32 valueSize = mValues.size();
+	for(int i = 0; i < valueSize; ++i)
 	{
-		mValues[i].setFrequencyHertz(frequency * ((i + 1) / T(size)));
-		mValues[i].setFrequencyRange(0.5 * ((i + 1) / T(size)));
+		mValues[i].setFrequencyHertz(frequency * ((i + 1) / T(valueSize)));
+		mValues[i].setFrequencyRange(0.5 * ((i + 1) / T(valueSize)));
 	}
 }
 
 template <typename T>
 void ViSpectrum<T>::finalize()
 {
-	for(int i = 0; i < mValues.size(); ++i)
+	if(mPreviousAdditionCounter != mAdditionCounter && mAdditionCounter != 0)
 	{
-		mValues[i].rectangular().amplitude() /= T(mAdditionCounter);
-		mValues[i].polar().amplitude() /= T(mAdditionCounter);
-		mValues[i].rectangular().setDecibel(ViSpectrumElement<T>::toDecibel(mValues[i].rectangular().amplitude()));
-		mValues[i].polar().setDecibel(ViSpectrumElement<T>::toDecibel(mValues[i].polar().amplitude()));
+		ViComplexNumber<T> rectangularAmplitude, rectangularDecibel, polarAmplitude, polarDecibel;
+		for(int i = 0; i < mValues.size(); ++i)
+		{
+			rectangularAmplitude = mRawValues[i].rectangular().amplitude() / T(mAdditionCounter);
+			rectangularDecibel = ViSpectrumElement<T>::toDecibel(rectangularAmplitude);
+			polarAmplitude = mRawValues[i].polar().amplitude() / T(mAdditionCounter);
+			polarDecibel = ViSpectrumElement<T>::toDecibel(polarAmplitude);
+			mValues[i].setRectangular(ViSpectrumElementForm<T>(rectangularAmplitude, rectangularDecibel));
+			mValues[i].setPolar(ViSpectrumElementForm<T>(polarAmplitude, polarDecibel));
+
+		}
+		findRanges();
+		mPreviousAdditionCounter = mAdditionCounter;
 	}
-	mValues.resize(mValues.size() / 2); // Since we use real FFT, we'll have a mirror image, hence we only need half of the N/2 spectrum
-	findRanges();
 }
 
 template <typename T>
 void ViSpectrum<T>::findRanges()
 {
-	mMaximum.setPolar(ViSpectrumElementForm<T>(ViComplexNumber<T>(FLT_MIN, FLT_MIN), ViComplexNumber<T>(FLT_MIN, FLT_MIN)));
-	mMaximum.setRectangular(ViSpectrumElementForm<T>(ViComplexNumber<T>(FLT_MIN, FLT_MIN), ViComplexNumber<T>(FLT_MIN, FLT_MIN)));
+	mMaximum.setPolar(ViSpectrumElementForm<T>(ViComplexNumber<T>(-FLT_MAX, -FLT_MAX), ViComplexNumber<T>(-FLT_MAX, -FLT_MAX)));
+	mMaximum.setRectangular(ViSpectrumElementForm<T>(ViComplexNumber<T>(-FLT_MAX, -FLT_MAX), ViComplexNumber<T>(-FLT_MAX, -FLT_MAX)));
 	mMinimum.setPolar(ViSpectrumElementForm<T>(ViComplexNumber<T>(FLT_MAX, FLT_MAX), ViComplexNumber<T>(FLT_MAX, FLT_MAX)));
 	mMinimum.setRectangular(ViSpectrumElementForm<T>(ViComplexNumber<T>(FLT_MAX, FLT_MAX), ViComplexNumber<T>(FLT_MAX, FLT_MAX)));
 
@@ -106,7 +99,7 @@ void ViSpectrum<T>::findRanges()
 	{
 		valueRectangularAmplitude = mValues[i].rectangular().amplitude();
 		valuePolarAmplitude = mValues[i].polar().amplitude();
-		valueRectangularDecibel =mValues[i].rectangular().decibel();
+		valueRectangularDecibel = mValues[i].rectangular().decibel();
 		valuePolarDecibel = mValues[i].polar().decibel();
 
 		if(valueRectangularAmplitude.real() > mMaximum.rectangular().amplitude().real())
