@@ -31,6 +31,7 @@ class ViWaveFormWidget : public ViWidget
 		void setZoomLevel(qint16 level);
 
 	protected:
+		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
 		void enterEvent(QEvent *event);
 		void leaveEvent(QEvent *event);

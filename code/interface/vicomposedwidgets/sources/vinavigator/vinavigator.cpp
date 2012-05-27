@@ -27,22 +27,16 @@ ViNavigator::~ViNavigator()
 	{
 		delete mAnalysisMenu;
 	}
-	if(mInputContainer != NULL)
-	{
-		delete mInputContainer;
-	}
-	if(mOutputContainer != NULL)
-	{
-		delete mOutputContainer;
-	}
-	if(mControlContainer != NULL)
-	{
-		delete mControlContainer;
-	}
-	if(mAnalysisContainer != NULL)
-	{
-		delete mAnalysisContainer;
-	}
+}
+
+void ViNavigator::setStackIndex(int index)
+{
+	mUi->stack->setCurrentIndex(index);
+}
+
+int ViNavigator::addStackWidget(ViWidget *widget)
+{
+	return mUi->stack->addWidget(widget);
 }
 
 void ViNavigator::initialize()
@@ -53,21 +47,13 @@ void ViNavigator::initialize()
 
 	mInputMenu = new ViInputMenu(this);
 	mUi->menu->addTab("Input", mInputMenu);
-	mInputContainer = new ViInputContainer(this);
-	mUi->stack->addWidget(mInputContainer);
 
 	mControlMenu = new ViControlMenu(this);
 	mUi->menu->addTab("Control", mControlMenu);
-	mControlContainer = new ViControlContainer(this);
-	mUi->stack->addWidget(mControlContainer);
 
 	mOutputMenu = new ViOutputMenu(this);
 	mUi->menu->addTab("Output", mOutputMenu);
-	mOutputContainer = new ViOutputContainer(this);
-	mUi->stack->addWidget(mOutputContainer);
 
 	mAnalysisMenu = new ViAnalysisMenu(this);
 	mUi->menu->addTab("Analysis", mAnalysisMenu);
-	mAnalysisContainer = new ViAnalysisContainer(this);
-	mUi->stack->addWidget(mAnalysisContainer);
 }

@@ -1,20 +1,27 @@
 #include "viwaveformwidget.h"
 
-#define CONTENT_MARGIN -4
-
 ViWaveFormWidget::ViWaveFormWidget(QWidget *parent)
 	: ViWidget(parent)
 {
-	parent->setObjectName("parent");
-	parent->setStyleSheet("\
-		.QWidget#parent{\
-			border-radius: 10px;\
-			border-style: solid;\
-			border-color: rgb(" + QString::number(ViThemeManager::color(14).red()) + ", " + QString::number(ViThemeManager::color(14).green()) + ", " + QString::number(ViThemeManager::color(14).blue()) + ");\
-			border-width: 5px;\
-		}\
-	");
-	parent->setContentsMargins(CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN);
+}
+
+ViWaveFormWidget::~ViWaveFormWidget()
+{
+	delete mControlToolbar;
+	delete mBaseWidget;
+	delete mOverlayWidget;
+}
+
+void ViWaveFormWidget::setBufferType(ViAudioBuffer::ViAudioBufferType type)
+{
+	mBaseWidget = new ViWaveBaseWidget(this);
+	mBaseWidget->setBufferType(type);
+	mOverlayWidget = new ViWaveOverlayWidget(this);
+	mOverlayWidget->setBufferType(type);
+	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SIGNAL(pointerMoved(qint32)));
+	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SLOT(setPointer(qint32)));
+	ViObject::connect(mOverlayWidget, SIGNAL(pointerValuesChanged(qreal, qreal, qreal, qreal)), this, SLOT(updateSampleValues(qreal, qreal, qreal, qreal)));
+	ViObject::connect(mOverlayWidget, SIGNAL(zoomLevelChanged(qint16)), this, SLOT(zoom(qint16)));
 
 	mControlToolbar = new ViWidgetToolbar(Qt::AlignCenter | Qt::AlignRight, this);
 
@@ -70,25 +77,7 @@ ViWaveFormWidget::ViWaveFormWidget(QWidget *parent)
 	mInfoWidget->setLayout(mInfoLayout);
 	mInfoWidget->setStyleSheet("color: " + ViThemeManager::color(4).name() + "; font-size: 11px;");
 	mInfoToolbar->addWidget(mInfoWidget);
-}
 
-ViWaveFormWidget::~ViWaveFormWidget()
-{
-	delete mControlToolbar;
-	delete mBaseWidget;
-	delete mOverlayWidget;
-}
-
-void ViWaveFormWidget::setBufferType(ViAudioBuffer::ViAudioBufferType type)
-{
-	mBaseWidget = new ViWaveBaseWidget(this);
-	mBaseWidget->setBufferType(type);
-	mOverlayWidget = new ViWaveOverlayWidget(this);
-	mOverlayWidget->setBufferType(type);
-	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SIGNAL(pointerMoved(qint32)));
-	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SLOT(setPointer(qint32)));
-	ViObject::connect(mOverlayWidget, SIGNAL(pointerValuesChanged(qreal, qreal, qreal, qreal)), this, SLOT(updateSampleValues(qreal, qreal, qreal, qreal)));
-	ViObject::connect(mOverlayWidget, SIGNAL(zoomLevelChanged(qint16)), this, SLOT(zoom(qint16)));
 	setZoomLevel(6);
 }
 
@@ -120,6 +109,14 @@ void ViWaveFormWidget::zoomIn()
 void ViWaveFormWidget::zoomOut()
 {
 	zoom(1);
+}
+
+void ViWaveFormWidget::paintEvent(QPaintEvent *event)
+{
+	QStyleOption options;
+	options.init(this);
+	QPainter painter(this);
+	style()->drawPrimitive(QStyle::PE_Widget, &options, &painter, this);
 }
 
 void ViWaveFormWidget::resizeEvent(QResizeEvent *event)

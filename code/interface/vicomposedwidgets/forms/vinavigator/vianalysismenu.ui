@@ -24,9 +24,9 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">
-    <widget class="ViAnalysisWidget" name="analysisWidget" native="true"/>
+    <widget class="ViPushButton" name="spectrumButton" native="true"/>
    </item>
-   <item row="1" column="1">
+   <item row="1" column="2">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -39,13 +39,16 @@
      </property>
     </spacer>
    </item>
+   <item row="1" column="1">
+    <widget class="ViPushButton" name="matchButton" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ViAnalysisWidget</class>
+   <class>ViPushButton</class>
    <extends>QWidget</extends>
-   <header>vianalysiswidget.h</header>
+   <header>vipushbutton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

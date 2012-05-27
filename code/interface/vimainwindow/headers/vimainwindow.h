@@ -20,9 +20,6 @@ class ViMainWindow : public QMainWindow
 		void hideLoading();
 		void showLoading(bool animation = true, bool button = true, ViLoadingWidget::TextStyle style = ViLoadingWidget::Percentage, QString text = "");
 
-		void showWave();
-		void showSpectrum();
-
 	public:
 
 		~ViMainWindow();
@@ -43,11 +40,6 @@ class ViMainWindow : public QMainWindow
 		Ui::ViMainWindow *mUi;
 		ViAudioEngine *mEngine;
 		ViLoadingWidget *mLoadingWidget;
-
-		/*ViWaveFormWidget *mOriginalWaveWidget;
-		ViWaveFormWidget *mCorrectedWaveWidget;
-
-		ViSongInfoWidget *mSongInfoWidget;*/
 };
 
 #endif

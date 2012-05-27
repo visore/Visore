@@ -13,6 +13,15 @@ ViWaveOverlayWidget::ViWaveOverlayWidget(QWidget *parent)
 
 	mHeightRatio = 0;
 	mZoomRatio = 0;
+
+	setStyleSheet("\
+		ViWaveOverlayWidget{\
+			border-radius: 10px;\
+			border-style: solid;\
+			border-color: rgb(" + QString::number(ViThemeManager::color(14).red()) + ", " + QString::number(ViThemeManager::color(14).green()) + ", " + QString::number(ViThemeManager::color(14).blue()) + ");\
+			border-width: 5px;\
+		}\
+	");
 }
 
 void ViWaveOverlayWidget::setBufferType(ViAudioBuffer::ViAudioBufferType type)
@@ -50,7 +59,6 @@ void ViWaveOverlayWidget::paintEvent(QPaintEvent *event)
 	{
 		maximum = mForm->maximum(position, mZoomLevel) / mHeightRatio;
 	}
-	+mPointerPositionPixel;
 	painter.drawLine(mPointerPositionPixel, 0, mPointerPositionPixel, maximum - 4);
 	painter.drawEllipse(mPointerPositionPixel - 3, maximum - 3, 8, 8);
 	if(!test || mUnderCutOff || maximum + 1 >= minimum)
@@ -64,6 +72,10 @@ void ViWaveOverlayWidget::paintEvent(QPaintEvent *event)
 		painter.drawEllipse(mPointerPositionPixel - 3, minimum - 3, 8, 8);
 		painter.drawLine(mPointerPositionPixel, minimum + 5, mPointerPositionPixel, height());
 	}
+
+	QStyleOption options;
+	options.init(this);
+	style()->drawPrimitive(QStyle::PE_Widget, &options, &painter, this);
 }
 
 

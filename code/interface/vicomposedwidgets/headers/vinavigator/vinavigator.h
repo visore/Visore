@@ -6,10 +6,6 @@
 #include "viinputmenu.h"
 #include "vioutputmenu.h"
 #include "vianalysismenu.h"
-#include "vicontrolcontainer.h"
-#include "viinputcontainer.h"
-#include "vioutputcontainer.h"
-#include "vianalysiscontainer.h"
 
 namespace Ui
 {
@@ -23,6 +19,8 @@ class ViNavigator : public ViWidget
 
 		ViNavigator(QWidget *parent = 0);
 		~ViNavigator();
+		void setStackIndex(int index);
+		int addStackWidget(ViWidget *widget);
 
 	protected:
 
@@ -36,11 +34,6 @@ class ViNavigator : public ViWidget
 		ViInputMenu *mInputMenu;
 		ViOutputMenu *mOutputMenu;
 		ViAnalysisMenu *mAnalysisMenu;
-
-		ViControlContainer *mControlContainer;
-		ViInputContainer *mInputContainer;
-		ViOutputContainer *mOutputContainer;
-		ViAnalysisContainer *mAnalysisContainer;
 
 };
 
