@@ -24,11 +24,12 @@ class ViSpectrum
 		ViSpectrumElement<T> minimum();
 
 		void initialize(qint32 size, qint32 frequency);
+		void initializeSize(qint32 size);
+		void initializeFrequencies(qint32 frequency);
 		void finalize();
 
 	private:
 
-		void initializeFrequencies(qint32 frequency);
 		void findRanges();
 
 	private:
@@ -43,6 +44,6 @@ class ViSpectrum
 typedef ViSpectrum<float> ViFloatSpectrum;
 typedef ViSpectrum<double> ViDoubleSpectrum;
 
-#include "../sources/vispectrum.cpp"
+#include "../../../sources/viobservationprocessors/vispectrumanalyzer/vispectrum.cpp"
 
 #endif

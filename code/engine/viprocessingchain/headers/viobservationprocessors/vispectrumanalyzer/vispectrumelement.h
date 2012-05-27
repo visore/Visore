@@ -62,6 +62,6 @@ class ViSpectrumElement
 
 };
 
-#include "../sources/vispectrumelement.cpp"
+#include "../../../sources/viobservationprocessors/vispectrumanalyzer/vispectrumelement.cpp"
 
 #endif

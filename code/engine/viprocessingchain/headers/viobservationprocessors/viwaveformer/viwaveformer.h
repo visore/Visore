@@ -4,7 +4,7 @@
 #include "viwaveform.h"
 #include "viprocessor.h"
 
-class ViWaveFormer : public ViRealProcessor
+class ViWaveFormer : public ViObserver
 {
 	Q_OBJECT
 

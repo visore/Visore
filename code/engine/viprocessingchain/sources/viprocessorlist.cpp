@@ -8,139 +8,92 @@ ViProcessorList::ViProcessorList()
 
 ViProcessorList::~ViProcessorList()
 {
-	qDeleteAll(mRawInputObservers);
-	mRawInputObservers.clear();
-	qDeleteAll(mRealInputObservers);
-	mRealInputObservers.clear();
-	qDeleteAll(mRawInputModifiers);
-	mRawInputModifiers.clear();
-	qDeleteAll(mRealInputModifiers);
-	mRealInputModifiers.clear();
-	qDeleteAll(mRawOutputObservers);
-	mRawOutputObservers.clear();
-	qDeleteAll(mRealOutputObservers);
-	mRealOutputObservers.clear();
+	qDeleteAll(mInputObservers);
+	mInputObservers.clear();
+	qDeleteAll(mInputModifiers);
+	mInputModifiers.clear();
+	qDeleteAll(mOutputObservers);
+	mOutputObservers.clear();
 
-	mActiveRawInputObservers.clear();
-	mActiveRealInputObservers.clear();
-	mActiveRawInputModifiers.clear();
-	mActiveRealInputModifiers.clear();
-	mActiveRawOutputObservers.clear();
-	mActiveRealOutputObservers.clear();
+	mActiveInputObservers.clear();
+	mActiveInputModifiers.clear();
+	mActiveOutputObservers.clear();
+}
+
+QList<ViProcessor*> ViProcessorList::processors()
+{
+	QList<ViProcessor*> result;
+	for(int i = 0; i < mInputObservers.size(); ++i)
+	{
+		result.append(mInputObservers[i]);
+	}
+	for(int i = 0; i < mInputModifiers.size(); ++i)
+	{
+		result.append(mInputModifiers[i]);
+	}
+	for(int i = 0; i < mOutputObservers.size(); ++i)
+	{
+		result.append(mOutputObservers[i]);
+	}
+	return result;
 }
 
 void ViProcessorList::updateActiveProcessors()
 {
-	mActiveRawInputObservers.clear();
-	mActiveRealInputObservers.clear();
-	mActiveRawInputModifiers.clear();
-	mActiveRealInputModifiers.clear();
-	mActiveRawOutputObservers.clear();
-	mActiveRealOutputObservers.clear();
+	mActiveInputObservers.clear();
+	mActiveInputModifiers.clear();
+	mActiveOutputObservers.clear();
 
-	for(int i = 0; i < mRawInputObservers.size(); ++i)
+	for(int i = 0; i < mInputObservers.size(); ++i)
 	{
-		if(mRawInputObservers[i]->isEnabled())
+		if(mInputObservers[i]->isEnabled())
 		{
-			mActiveRawInputObservers.append(mRawInputObservers[i]);
+			mActiveInputObservers.append(mInputObservers[i]);
 		}
 	}
 
-	for(int i = 0; i < mRealInputObservers.size(); ++i)
+	for(int i = 0; i < mInputModifiers.size(); ++i)
 	{
-		if(mRealInputObservers[i]->isEnabled())
+		if(mInputModifiers[i]->isEnabled())
 		{
-			mActiveRealInputObservers.append(mRealInputObservers[i]);
+			mActiveInputModifiers.append(mInputModifiers[i]);
 		}
 	}
 
-	for(int i = 0; i < mRawInputModifiers.size(); ++i)
+	for(int i = 0; i < mOutputObservers.size(); ++i)
 	{
-		if(mRawInputModifiers[i]->isEnabled())
+		if(mOutputObservers[i]->isEnabled())
 		{
-			mActiveRawInputModifiers.append(mRawInputModifiers[i]);
-		}
-	}
-
-	for(int i = 0; i < mRealInputModifiers.size(); ++i)
-	{
-		if(mRealInputModifiers[i]->isEnabled())
-		{
-			mActiveRealInputModifiers.append(mRealInputModifiers[i]);
-		}
-	}
-
-	for(int i = 0; i < mRawOutputObservers.size(); ++i)
-	{
-		if(mRawOutputObservers[i]->isEnabled())
-		{
-			mActiveRawOutputObservers.append(mRawOutputObservers[i]);
-		}
-	}
-
-	for(int i = 0; i < mRealOutputObservers.size(); ++i)
-	{
-		if(mRealOutputObservers[i]->isEnabled())
-		{
-			mActiveRealOutputObservers.append(mRealOutputObservers[i]);
+			mActiveOutputObservers.append(mOutputObservers[i]);
 		}
 	}
 }
 
-void ViProcessorList::processRawInputObservers(ViChunk<char> *data)
+void ViProcessorList::observeInput(const ViSampleChunk *data)
 {
-	for(int i = 0; i < mActiveRawInputObservers.size(); ++i)
+	for(int i = 0; i < mActiveInputObservers.size(); ++i)
 	{
-		mActiveRawInputObservers[i]->setData(data);
-		mThreadPool.start(mActiveRawInputObservers[i]);
+		mActiveInputObservers[i]->setData(data);
+		mThreadPool.start(mActiveInputObservers[i]);
 	}
 	mThreadPool.waitForDone();
 }
 
-void ViProcessorList::processRealInputObservers(ViChunk<double> *data)
+void ViProcessorList::manipulateInput(ViSampleChunk *data)
 {
-	for(int i = 0; i < mActiveRealInputObservers.size(); ++i)
+	for(int i = 0; i < mActiveInputModifiers.size(); ++i)
 	{
-		mActiveRealInputObservers[i]->setData(data);
-		mThreadPool.start(mActiveRealInputObservers[i]);
-	}
-	mThreadPool.waitForDone();
-}
-
-void ViProcessorList::processRawInputModifiers(ViChunk<char> *data)
-{
-	for(int i = 0; i < mActiveRawInputModifiers.size(); ++i)
-	{
-		mActiveRawInputModifiers[i]->setData(data);
-		mActiveRawInputModifiers[i]->run();
+		mActiveInputModifiers[i]->setData(data);
+		mActiveInputModifiers[i]->run();
 	}
 }
 
-void ViProcessorList::processRealInputModifiers(ViChunk<double> *data)
+void ViProcessorList::observeOutput(const ViSampleChunk *data)
 {
-	for(int i = 0; i < mActiveRealInputModifiers.size(); ++i)
+	for(int i = 0; i < mActiveOutputObservers.size(); ++i)
 	{
-		mActiveRealInputModifiers[i]->setData(data);
-		mActiveRealInputModifiers[i]->run();
-	}
-}
-
-void ViProcessorList::processRawOutputObservers(ViChunk<char> *data)
-{
-	for(int i = 0; i < mActiveRawOutputObservers.size(); ++i)
-	{
-		mActiveRawOutputObservers[i]->setData(data);
-		mThreadPool.start(mActiveRawOutputObservers[i]);
-	}
-	mThreadPool.waitForDone();
-}
-
-void ViProcessorList::processRealOutputObservers(ViChunk<double> *data)
-{
-	for(int i = 0; i < mActiveRealOutputObservers.size(); ++i)
-	{
-		mActiveRealOutputObservers[i]->setData(data);
-		mThreadPool.start(mActiveRealOutputObservers[i]);
+		mActiveOutputObservers[i]->setData(data);
+		mThreadPool.start(mActiveOutputObservers[i]);
 	}
 	mThreadPool.waitForDone();
 }
@@ -148,15 +101,28 @@ void ViProcessorList::processRealOutputObservers(ViChunk<double> *data)
 bool ViProcessorList::add(ViAudioConnection::Direction direction, ViProcessor *processor)
 {
 	bool result = false;
-	ViRawProcessor *rawProcessor;
-	ViRealProcessor *realProcessor;
-	if((rawProcessor = dynamic_cast<ViRawProcessor*>(processor)) != NULL)
+	ViObserver *observer;
+	ViModifier *modifier;
+	if((observer = dynamic_cast<ViObserver*>(processor)) != NULL)
 	{
-		result = addRaw(direction, rawProcessor);
+		if(direction == ViAudioConnection::Input)
+		{
+			mInputObservers.append(observer);
+			result = true;
+		}
+		else
+		{
+			mOutputObservers.append(observer);
+			result = true;
+		}
 	}
-	else if((realProcessor = dynamic_cast<ViRealProcessor*>(processor)) != NULL)
+	else if((modifier = dynamic_cast<ViModifier*>(processor)) != NULL)
 	{
-		result = addReal(direction, realProcessor);
+		if(direction == ViAudioConnection::Input)
+		{
+			mInputModifiers.append(modifier);
+			result = true;
+		}
 	}
 	if(result)
 	{
@@ -164,56 +130,4 @@ bool ViProcessorList::add(ViAudioConnection::Direction direction, ViProcessor *p
 		QObject::connect(processor, SIGNAL(enabled(bool)), this, SLOT(updateActiveProcessors()));
 	}
 	return result;
-}
-
-bool ViProcessorList::addRaw(ViAudioConnection::Direction direction, ViRawProcessor *processor)
-{
-	if(direction == ViAudioConnection::Input)
-	{
-		if(processor->type() == ViProcessor::Observer)
-		{
-			mRawInputObservers.append(processor);
-			return true;
-		}
-		else if(processor->type() == ViProcessor::Modifier)
-		{
-			mRawInputModifiers.append(processor);
-			return true;
-		}
-	}
-	else
-	{
-		if(processor->type() == ViProcessor::Observer)
-		{
-			mRawOutputObservers.append(processor);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool ViProcessorList::addReal(ViAudioConnection::Direction direction, ViRealProcessor *processor)
-{
-	if(direction == ViAudioConnection::Input)
-	{
-		if(processor->type() == ViProcessor::Observer)
-		{
-			mRealInputObservers.append(processor);
-			return true;
-		}
-		else if(processor->type() == ViProcessor::Modifier)
-		{
-			mRealInputModifiers.append(processor);
-			return true;
-		}
-	}
-	else
-	{
-		if(processor->type() == ViProcessor::Observer)
-		{
-			mRealOutputObservers.append(processor);
-			return true;
-		}
-	}
-	return false;
 }

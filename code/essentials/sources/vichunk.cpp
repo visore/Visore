@@ -31,19 +31,19 @@ ViChunk<T>::~ViChunk()
 }
 
 template<typename T>
-T* ViChunk<T>::data()
+T* ViChunk<T>::data() const
 {
 	return mData;
 }
 
 template<typename T>
-int ViChunk<T>::size()
+int ViChunk<T>::size() const
 {
 	return mSize;
 }
 
 template<typename T>
-T ViChunk<T>::at(int index)
+T ViChunk<T>::at(int index) const
 {
 	return mData[index];
 }

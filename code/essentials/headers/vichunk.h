@@ -10,10 +10,10 @@ class ViChunk
 		ViChunk(int size);
 		~ViChunk();
 
-		T* data();
-		int size();
+		T* data() const;
+		int size() const;
 
-		T at(int index);
+		T at(int index) const;
 
 		void setData(T *data, int size);
 		void setSize(int size);
@@ -23,6 +23,11 @@ class ViChunk
 		T *mData;
 		int mSize;
 };
+
+typedef ViChunk<double> ViDoubleChunk;
+typedef ViDoubleChunk ViRealChunk;
+typedef ViDoubleChunk ViSampleChunk;
+typedef ViChunk<float> ViFloatChunk;
 
 //Template decleration and implementation should actually be in the same file
 #include "../sources/vichunk.cpp"

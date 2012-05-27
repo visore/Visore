@@ -67,8 +67,6 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/viaudioconnections/viaudioconnections/viqtconnection/headers
 	${ENGINE}/viaudioformats/viaudioformat/headers
 	${ENGINE}/viaudiobuffer/headers
-	${ENGINE}/vispectrumanalyzer/headers
-	#${ENGINE}/viwaveformer/headers
 	${ENGINE}/vicoder/headers
 	${ENGINE}/visongdetector/headers
 	${ENGINE}/vifouriertransformer/headers
@@ -77,6 +75,7 @@ INCLUDE_DIRECTORIES(
 
 	${ENGINE}/viprocessingchain/headers
 	${ENGINE}/viprocessingchain/headers/viobservationprocessors/viwaveformer
+	${ENGINE}/viprocessingchain/headers/viobservationprocessors/vispectrumanalyzer
 
 	${EXTERNAL}/fftreal/sources
 	${EXTERNAL}/fftreal/headers

@@ -52,10 +52,27 @@ ViSpectrumElement<T> ViSpectrum<T>::minimum()
 template <typename T>
 void ViSpectrum<T>::initialize(qint32 size, qint32 frequency)
 {
+	initializeSize(size);
+	initializeFrequencies(frequency);
+}
+
+template <typename T>
+void ViSpectrum<T>::initializeSize(qint32 size)
+{
 	mAdditionCounter = 0;
 	mValues.clear();
 	mValues.resize(size);
-	initializeFrequencies(frequency);
+}
+
+template <typename T>
+void ViSpectrum<T>::initializeFrequencies(qint32 frequency)
+{
+	qint32 size = mValues.size();
+	for(int i = 0; i < size; ++i)
+	{
+		mValues[i].setFrequencyHertz(frequency * ((i + 1) / T(size)));
+		mValues[i].setFrequencyRange(0.5 * ((i + 1) / T(size)));
+	}
 }
 
 template <typename T>
@@ -70,17 +87,6 @@ void ViSpectrum<T>::finalize()
 	}
 	mValues.resize(mValues.size() / 2); // Since we use real FFT, we'll have a mirror image, hence we only need half of the N/2 spectrum
 	findRanges();
-}
-
-template <typename T>
-void ViSpectrum<T>::initializeFrequencies(qint32 frequency)
-{
-	qint32 size = mValues.size();
-	for(int i = 0; i < size; ++i)
-	{
-		mValues[i].setFrequencyHertz(frequency * ((i + 1) / T(size)));
-		mValues[i].setFrequencyRange(0.5 * ((i + 1) / T(size)));
-	}
 }
 
 template <typename T>

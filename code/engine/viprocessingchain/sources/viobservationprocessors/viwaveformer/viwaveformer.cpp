@@ -3,7 +3,7 @@
 #define MAX_SIGNAL_COUNTER 100
 
 ViWaveFormer::ViWaveFormer()
-	: ViRealProcessor(ViProcessor::Observer)
+	: ViObserver()
 {
 	mSignalCounter = 0;
 }

@@ -21,6 +21,7 @@ class ViProcessingThread : public QThread
 	private:
 
 		int (*pcmToReal)(char*, double*, int);
+		int (*realToPcm)(double*, char*, int);
 
 		ViAudioBufferChunk mRawChunk;
 		ViChunk<double> mRealChunk;

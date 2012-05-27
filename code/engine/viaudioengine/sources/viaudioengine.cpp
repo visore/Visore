@@ -296,7 +296,7 @@ ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)
 
 ViFloatSpectrum& ViAudioEngine::spectrum()
 {
-	return mSpectrumAnalyzer->spectrum();
+	//return mSpectrumAnalyzer->spectrum();
 }
 
 ViCorrelationResult& ViAudioEngine::correlation()
@@ -306,9 +306,9 @@ ViCorrelationResult& ViAudioEngine::correlation()
 
 void ViAudioEngine::calculateSpectrum(qint32 size, QString windowFunction)
 {
-	mSpectrumAnalyzer->setWindowFunction(windowFunction);
+	/*mSpectrumAnalyzer->setWindowFunction(windowFunction);
 	mSpectrumAnalyzer->setBlockSize(size);
-	mSpectrumAnalyzer->analyze();
+	mSpectrumAnalyzer->analyze();*/
 }
 
 void ViAudioEngine::calculateCorrelation()
