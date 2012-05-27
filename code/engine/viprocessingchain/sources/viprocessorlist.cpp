@@ -9,15 +9,9 @@ ViProcessorList::ViProcessorList()
 ViProcessorList::~ViProcessorList()
 {
 	qDeleteAll(mInputObservers);
-	mInputObservers.clear();
 	qDeleteAll(mInputModifiers);
-	mInputModifiers.clear();
 	qDeleteAll(mOutputObservers);
-	mOutputObservers.clear();
-
-	mActiveInputObservers.clear();
-	mActiveInputModifiers.clear();
-	mActiveOutputObservers.clear();
+	removeAll();
 }
 
 QList<ViProcessor*> ViProcessorList::processors()
@@ -130,4 +124,14 @@ bool ViProcessorList::add(ViAudioConnection::Direction direction, ViProcessor *p
 		QObject::connect(processor, SIGNAL(enabled(bool)), this, SLOT(updateActiveProcessors()));
 	}
 	return result;
+}
+
+void ViProcessorList::removeAll()
+{
+	mInputObservers.clear();
+	mInputModifiers.clear();
+	mOutputObservers.clear();
+	mActiveInputObservers.clear();
+	mActiveInputModifiers.clear();
+	mActiveOutputObservers.clear();
 }

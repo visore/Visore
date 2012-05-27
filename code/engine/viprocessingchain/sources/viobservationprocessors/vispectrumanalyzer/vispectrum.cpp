@@ -1,6 +1,5 @@
 #ifdef VISPECTRUM_H
-#include<iostream>
-using namespace std;
+
 template <typename T>
 ViSpectrum<T>::ViSpectrum()
 {

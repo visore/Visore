@@ -48,12 +48,7 @@ ViAudioEngine::ViAudioEngine()
 	mProcessingChain->attach(ViAudioConnection::Input, waveFormer1);
 	mProcessingChain->attach(ViAudioConnection::Output, waveFormer2);
 
-	mSpectrumAnalyzer = new ViSpectrumAnalyzer();
-	mProcessingChain->attach(ViAudioConnection::Input, mSpectrumAnalyzer);
-
 	mProcessingChain->start();
-
-
 
 
 
@@ -298,7 +293,7 @@ ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)
 
 ViRealSpectrum ViAudioEngine::spectrum()
 {
-	return mSpectrumAnalyzer->spectrum();
+	return mSpectrumAnalyzer.spectrum();
 }
 
 ViCorrelationResult& ViAudioEngine::correlation()
@@ -308,9 +303,12 @@ ViCorrelationResult& ViAudioEngine::correlation()
 
 void ViAudioEngine::calculateSpectrum(qint32 size, QString windowFunction)
 {
-	/*mSpectrumAnalyzer->setWindowFunction(windowFunction);
-	mSpectrumAnalyzer->setBlockSize(size);
-	mSpectrumAnalyzer->analyze();*/
+	mProcessorExecutor.initialize();
+	mProcessorExecutor.setWindowSize(size);
+	mSpectrumAnalyzer.setWindowFunction(windowFunction);
+	QObject::connect(&mProcessorExecutor, SIGNAL(progressed(short)), this, SIGNAL(spectrumChanged(short)));
+	QObject::connect(&mProcessorExecutor, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
+	mProcessorExecutor.execute(&mSpectrumAnalyzer, mProcessingChain->buffer(ViAudioConnection::Input));
 }
 
 void ViAudioEngine::calculateCorrelation()

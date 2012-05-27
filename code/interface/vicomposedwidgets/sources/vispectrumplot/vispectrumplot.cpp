@@ -115,7 +115,11 @@ void ViSpectrumPlot::setLabel(ViSpectrumPlot::Axis axis, QString label)
 
 void ViSpectrumPlot::setUnit(ViSpectrumPlot::Axis axis, QString unit)
 {
-	if(unit != "")
+	if(unit == "")
+	{
+		mPicker->setUnit(axis, "  ");
+	}
+	else
 	{
 		if(axis == ViSpectrumPlot::X)
 		{

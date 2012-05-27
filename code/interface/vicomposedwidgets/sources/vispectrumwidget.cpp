@@ -20,7 +20,7 @@ ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 	QObject::connect(mUi->notationBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
 
 	QObject::connect(mEngine, SIGNAL(spectrumFinished()), this, SLOT(replot()));
-	QObject::connect(mEngine, SIGNAL(spectrumChanged(qreal)), ViMainWindow::instance(), SLOT(progress(qreal)));
+	QObject::connect(mEngine, SIGNAL(spectrumChanged(short)), ViMainWindow::instance(), SLOT(progress(short)));
 }
 
 ViSpectrumWidget::~ViSpectrumWidget()
@@ -33,16 +33,15 @@ void ViSpectrumWidget::showEvent(QShowEvent *event)
 	if(!mWasInitialized)
 	{
 		mWasInitialized = true;
-		//recalculate();
-		replot();
+		recalculate();
 	}
 	ViWidget::showEvent(event);
 }
 
 void ViSpectrumWidget::recalculate()
 {
-	//ViMainWindow::instance()->showLoading(true, false, ViLoadingWidget::Text, "Calculating Spectrum");
-	//mEngine->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
+	ViMainWindow::instance()->showLoading(true, false, ViLoadingWidget::Text, "Calculating Spectrum");
+	mEngine->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
 }
 
 void ViSpectrumWidget::replot()
@@ -71,6 +70,7 @@ void ViSpectrumWidget::replot()
 			{
 				x[i] = plot[i].frequencyRange();
 			}
+			unitX = "";
 		}
 		else
 		{
@@ -141,7 +141,7 @@ void ViSpectrumWidget::replot()
 		mUi->plot->setData(x, y);
 
 	}
-	//ViMainWindow::instance()->hideLoading();
+	ViMainWindow::instance()->hideLoading();
 }
 
 

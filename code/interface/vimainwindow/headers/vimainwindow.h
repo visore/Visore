@@ -16,7 +16,7 @@ class ViMainWindow : public QMainWindow
 
 	public slots:
 
-		void progress(qreal percentage);
+		void progress(short percentage);
 		void hideLoading();
 		void showLoading(bool animation = true, bool button = true, ViLoadingWidget::TextStyle style = ViLoadingWidget::Percentage, QString text = "");
 

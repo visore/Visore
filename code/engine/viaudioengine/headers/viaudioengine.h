@@ -4,6 +4,7 @@
 #include "viobject.h"
 #include "viaudioconnection.h"
 #include "viprocessingchain.h"
+#include "viprocessorexecutor.h"
 #include "vilibrary.h"
 #include "viaudioformat.h"
 
@@ -85,10 +86,10 @@ class ViAudioEngine : public ViSingleton, public ViError
 		void inputWaveChanged(ViWaveForm *waveForm);
 		void outputWaveChanged(ViWaveForm *waveForm);
 
-		void spectrumChanged(qreal percentage);
+		void spectrumChanged(short percentage);
 		void spectrumFinished();
 
-		void correlationChanged(qreal percentage);
+		void correlationChanged(short percentage);
 		void correlationFinished();
 
 		void songInfoChanged(ViSongInfo info);
@@ -126,8 +127,9 @@ class ViAudioEngine : public ViSingleton, public ViError
 		static ViAudioEngine *mEngine;
 
 		ViProcessingChain *mProcessingChain;
+		ViProcessorExecutor mProcessorExecutor;
 
-		ViSpectrumAnalyzer *mSpectrumAnalyzer;
+		ViSpectrumAnalyzer mSpectrumAnalyzer;
 		
 		
 		ViAudioFormat mFormat;

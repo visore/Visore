@@ -16,7 +16,7 @@ class ViLoadingWidget : public ViWidget
 
 	public slots:
 
-		void progress(qreal percentage);
+		void progress(short percentage);
 
 	private slots:
 

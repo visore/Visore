@@ -25,7 +25,7 @@ ViMainWindow* ViMainWindow::instance()
 	return mWindow;
 }
 
-void ViMainWindow::progress(qreal percentage)
+void ViMainWindow::progress(short percentage)
 {
 	mLoadingWidget->progress(percentage);
 }

@@ -24,7 +24,7 @@ ViCorrelationWidget::ViCorrelationWidget(QWidget *parent)
 	mUi->tableWidget->setItem(1, 3, new QTableWidgetItem("-"));
 
 	QObject::connect(mEngine, SIGNAL(correlationFinished()), this, SLOT(update()));
-	QObject::connect(mEngine, SIGNAL(correlationChanged(qreal)), ViMainWindow::instance(), SLOT(progress(qreal)));
+	QObject::connect(mEngine, SIGNAL(correlationChanged(short)), ViMainWindow::instance(), SLOT(progress(short)));
 }
 
 ViCorrelationWidget::~ViCorrelationWidget()

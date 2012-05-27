@@ -11,7 +11,6 @@ ViRealSpectrum ViSpectrumAnalyzer::spectrum()
 	mMutex.lock();
 	mSpectrum.finalize();
 	ViRealSpectrum result = mSpectrum;
-		
 	mMutex.unlock();
 	return result;
 }

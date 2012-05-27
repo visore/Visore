@@ -31,7 +31,7 @@ ViLoadingWidget::~ViLoadingWidget()
 	delete mUi;
 }
 
-void ViLoadingWidget::progress(qreal percentage)
+void ViLoadingWidget::progress(short percentage)
 {
 	mUi->progressBar->setValue(percentage);
 }
