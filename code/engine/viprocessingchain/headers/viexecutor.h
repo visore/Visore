@@ -19,10 +19,6 @@ class ViExecutor : public QThread
 
 		void execute();
 
-	private slots:
-
-		void changeFormat(ViAudioFormat format);
-
 	public:
 
 		ViExecutor();

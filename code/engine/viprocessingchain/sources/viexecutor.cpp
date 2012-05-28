@@ -66,12 +66,8 @@ void ViExecutor::setBuffer(ViAudioConnection::Direction direction, ViAudioBuffer
 			mRealChunk = new ViSampleChunk();
 		}
 		mReadStream = buffer->createReadStream();
-		mInputFormat = buffer->format();
-		mInputConverter.setSize(mInputFormat.sampleSize());
 		QObject::disconnect(this, SLOT(execute()));
-		QObject::disconnect(this, SLOT(changeFormat(ViAudioFormat)));
 		QObject::connect(buffer, SIGNAL(changed(int)), this, SLOT(execute()));
-		QObject::connect(buffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(changeFormat(ViAudioFormat)), Qt::UniqueConnection);
 	}
 	else
 	{
@@ -80,15 +76,8 @@ void ViExecutor::setBuffer(ViAudioConnection::Direction direction, ViAudioBuffer
 			mOutputChunk = new ViRawChunk();
 		}
 		mWriteStream = buffer->createWriteStream();
-		mOutputFormat = buffer->format();
-		mOutputConverter.setSize(mOutputFormat.sampleSize());
+		
 	}
-}
-
-void ViExecutor::changeFormat(ViAudioFormat format)
-{
-	mInputFormat = format;
-	mInputConverter.setSize(mInputFormat.sampleSize());
 }
 
 void ViExecutor::execute()
@@ -101,6 +90,11 @@ void ViExecutor::execute()
 
 void ViExecutor::update()
 {
+	mInputFormat = mReadStream->buffer()->format();
+	mOutputFormat = mWriteStream->buffer()->format();
+	mInputConverter.setSize(mInputFormat.sampleSize());
+	mOutputConverter.setSize(mOutputFormat.sampleSize());
+
 	QList<ViProcessor*> processors = mProcessors.all();
 	for(int i = 0; i < processors.size(); ++i)
 	{
