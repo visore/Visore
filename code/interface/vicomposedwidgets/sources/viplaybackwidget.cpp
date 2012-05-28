@@ -7,7 +7,7 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mUi = new Ui::ViPlaybackWidget();
 	mUi->setupUi(this);
 
-	mIsRecording = false;
+	/*mIsRecording = false;
 	mIsPlaying = false;
 	mIsPausing = false;
 
@@ -32,14 +32,14 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mUi->pauseButton->disable();
 	mUi->stopButton->disable();
 
-	ViObject::connect(mEngine, SIGNAL(inputChanged(ViAudioEngine::ViAudioType)), this, SLOT(inputChanged(ViAudioEngine::ViAudioType)));
+	ViObject::connect(mEngine, SIGNAL(inputChanged(ViAudioEngine::ViAudioType)), this, SLOT(inputChanged(ViAudioEngine::ViAudioType)));*/
 }
 
 ViPlaybackWidget::~ViPlaybackWidget()
 {
 	delete mUi;
 }
-
+/*
 void ViPlaybackWidget::inputChanged(ViAudioEngine::ViAudioType type)
 {
 	stop(true);
@@ -122,4 +122,4 @@ void ViPlaybackWidget::stop(bool checked)
 	mIsPlaying = false;
 	mIsPausing = false;
 	mUi->playButton->setChecked(mIsPlaying);
-}
+}*/

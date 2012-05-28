@@ -133,9 +133,10 @@ void ViProcessorThread::updateChunks()
 	}
 }
 
-void ViProcessorThread::removeAll()
+void ViProcessorThread::reset()
 {
-	mProcessors.removeAll();
+	quit();
+	mProcessors.clear();
 }
 
 void ViProcessorThread::run()

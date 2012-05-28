@@ -19,7 +19,7 @@ class ViProcessorList : public QObject
 		ViProcessorList();
 		~ViProcessorList();
 		bool add(ViAudioConnection::Direction direction, ViProcessor *processor);
-		void removeAll();
+		void clear();
 		QList<ViProcessor*> processors();
 
 		void observeInput(const ViSampleChunk *data);

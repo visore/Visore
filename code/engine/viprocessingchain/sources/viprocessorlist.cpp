@@ -11,7 +11,7 @@ ViProcessorList::~ViProcessorList()
 	qDeleteAll(mInputObservers);
 	qDeleteAll(mInputModifiers);
 	qDeleteAll(mOutputObservers);
-	removeAll();
+	clear();
 }
 
 QList<ViProcessor*> ViProcessorList::processors()
@@ -126,7 +126,7 @@ bool ViProcessorList::add(ViAudioConnection::Direction direction, ViProcessor *p
 	return result;
 }
 
-void ViProcessorList::removeAll()
+void ViProcessorList::clear()
 {
 	mInputObservers.clear();
 	mInputModifiers.clear();

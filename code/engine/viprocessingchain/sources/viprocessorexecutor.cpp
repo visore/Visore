@@ -13,15 +13,6 @@ void ViProcessorExecutor::setWindowSize(int windowSize)
 	mWindowSize = windowSize;
 }
 
-void ViProcessorExecutor::initialize()
-{
-	mThread.quit();
-	while(mThread.isRunning());
-	QObject::disconnect(this, SIGNAL(progressed(short)));
-	QObject::disconnect(this, SIGNAL(finished()));
-	mThread.removeAll();
-}
-
 bool ViProcessorExecutor::execute(ViProcessor *processor, ViAudioBuffer *input, ViAudioBuffer *output)
 {
 	if(dynamic_cast<ViModifier*>(processor) != NULL && output == NULL)
@@ -29,6 +20,14 @@ bool ViProcessorExecutor::execute(ViProcessor *processor, ViAudioBuffer *input, 
 		return false;
 	}
 
+	mThread.quit();
+	while(mThread.isRunning());
+	mThread.reset();
+	QObject::disconnect(this, SIGNAL(progressed(short)));
+	QObject::disconnect(this, SIGNAL(finished()));
+
+	QObject::connect(this, SIGNAL(progressed(short)), processor, SIGNAL(progressed(short)));
+	QObject::connect(this, SIGNAL(finished()), processor, SIGNAL(finished()));
 	mThread.attach(ViAudioConnection::Input, processor);
 
 	mThread.setStream(ViAudioConnection::Input, input->createReadStream());

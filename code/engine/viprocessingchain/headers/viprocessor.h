@@ -14,6 +14,8 @@ class ViProcessor : public QObject, public QRunnable
 
 		void changed();
 		void enabled(bool enabled);
+		void progressed(short progress);
+		void finished();
 
 	public:
 

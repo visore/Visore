@@ -38,14 +38,14 @@ void ViOutputControlWidget::selectFileOutput()
 
 void ViOutputControlWidget::save()
 {
-	ViAudioFormat format;
+	/*ViAudioFormat format;
 	format.setChannelCount(mUi->channelsBox->itemData(mUi->channelsBox->currentIndex()).toInt());
 	format.setSampleRate(mUi->sampleRateBox->itemData(mUi->sampleRateBox->currentIndex()).toInt());
 	format.setSampleSize(mUi->sampleSizeBox->itemData(mUi->sampleSizeBox->currentIndex()).toInt());
 	format.setSampleType(QAudioFormat::SampleType (mUi->sampleTypeBox->itemData(mUi->sampleTypeBox->currentIndex()).toInt()));
 	format.setByteOrder(QAudioFormat::Endian (mUi->byteOrderBox->itemData(mUi->byteOrderBox->currentIndex()).toInt()));
 	format.setCodec(ViCodecManager::selected(mUi->formatBox->itemData(mUi->formatBox->currentIndex()).toString()));
-	mEngine->createOutputFile(mUi->fileLineEdit->text(), format);
+	mEngine->createOutputFile(mUi->fileLineEdit->text(), format);*/
 }
 
 void ViOutputControlWidget::populate()

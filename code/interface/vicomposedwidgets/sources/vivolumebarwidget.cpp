@@ -7,7 +7,7 @@ ViVolumeBarWidget::ViVolumeBarWidget(QWidget *parent)
 	mUi = new Ui::ViVolumeBarWidget();
 	mUi->setupUi(this);
 
-	mUi->muteButton->setCheckable(true);
+	/*mUi->muteButton->setCheckable(true);
 	mUi->muteButton->setIcon(ViThemeManager::image("mute.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 	mUi->muteButton->setIcon(ViThemeManager::image("mute.png", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Hovered);
 	mUi->muteButton->setIcon(ViThemeManager::image("unmute.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Selected);
@@ -20,7 +20,7 @@ ViVolumeBarWidget::ViVolumeBarWidget(QWidget *parent)
 	volumeChanged();
 
 	ViObject::connect(mUi->volumeBar, SIGNAL(valueChanged(int)), mEngine, SLOT(setVolume(int)));
-	ViObject::connect(mUi->muteButton, SIGNAL(clicked(bool)), this, SLOT(mute(bool)));
+	ViObject::connect(mUi->muteButton, SIGNAL(clicked(bool)), this, SLOT(mute(bool)));*/
 }
 
 ViVolumeBarWidget::~ViVolumeBarWidget()
@@ -30,12 +30,12 @@ ViVolumeBarWidget::~ViVolumeBarWidget()
 
 void ViVolumeBarWidget::volumeChanged(int volume)
 {
-	volume = mEngine->volume();
+	//volume = mEngine->volume();
 }
 
 void ViVolumeBarWidget::mute(bool value)
 {
-	mEngine->mute(value);
+	/*mEngine->mute(value);
 	if(value)
 	{
 		mUi->muteButton->setIcon(ViThemeManager::image("unmute.png", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Hovered);
@@ -43,5 +43,5 @@ void ViVolumeBarWidget::mute(bool value)
 	else
 	{
 		mUi->muteButton->setIcon(ViThemeManager::image("mute.png", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Hovered);
-	}
+	}*/
 }

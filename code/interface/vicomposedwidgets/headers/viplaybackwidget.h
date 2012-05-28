@@ -14,11 +14,11 @@ class ViPlaybackWidget : public ViWidget
 	Q_OBJECT
 
 	private slots:
-		void record(bool checked);
+		/*void record(bool checked);
 		void play(bool checked);
 		void pause(bool checked);
 		void stop(bool checked);
-		void inputChanged(ViAudioEngine::ViAudioType type);
+		void inputChanged(ViAudioEngine::ViAudioType type);*/
 
 	public:
 		ViPlaybackWidget(QWidget *parent = 0);

@@ -25,12 +25,14 @@ class ViProcessorThread : public QThread
 		};
 
 		ViProcessorThread(ViProcessorThread::Execution execution = ViProcessorThread::ObservationModification, bool notify = false);
+		
 		void setNotification(bool notify);
 		void setExecution(ViProcessorThread::Execution execution);
 		void setWindowSize(int windowSize);
 		void setStream(ViAudioConnection::Direction direction, ViAudioBufferStream *stream);
 		bool attach(ViAudioConnection::Direction direction, ViProcessor *processor);
-		void removeAll();
+
+		void reset();
 		void run();
 
 	protected:

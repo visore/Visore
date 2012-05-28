@@ -16,7 +16,6 @@ class ViProcessorExecutor : public QObject
 	public:
 
 		ViProcessorExecutor();
-		void initialize();
 		void setWindowSize(int windowSize);
 		bool execute(ViProcessor *processor, ViAudioBuffer *input, ViAudioBuffer *output = NULL);
 
