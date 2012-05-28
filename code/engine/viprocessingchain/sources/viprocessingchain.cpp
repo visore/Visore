@@ -7,6 +7,8 @@ ViProcessingChain::ViProcessingChain()
 	mOutput = NULL;
 	mInputBuffer = NULL;
 	mOutputBuffer = NULL;
+	mMultiExecutor.setNotify(true);
+	QObject::connect(&mMultiExecutor, SIGNAL(progressed(short)), this, SIGNAL(changed()));
 }
 
 ViProcessingChain::~ViProcessingChain()

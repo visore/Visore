@@ -25,15 +25,16 @@ ViWaveOverlayWidget::ViWaveOverlayWidget(QWidget *parent)
 	");
 }
 
-void ViWaveOverlayWidget::updateWave(ViWaveForm *waveForm)
+void ViWaveOverlayWidget::updateWave()
 {
-	mForm = waveForm;
+	mForm = &mEngine->wave(mDirection);
 	mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
 }
 
-void ViWaveOverlayWidget::setBufferType(ViAudioBuffer::ViAudioBufferType type)
+void ViWaveOverlayWidget::setDirection(ViAudioConnection::Direction direction)
 {
-	ViObject::connect(mEngine, SIGNAL(inputWaveChanged(ViWaveForm*)), this, SLOT(updateWave(ViWaveForm*)));
+	mDirection = direction;
+	ViObject::connect(mEngine, SIGNAL(chainChanged(ViWaveForm*)), this, SLOT(updateWave()));
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 }
 

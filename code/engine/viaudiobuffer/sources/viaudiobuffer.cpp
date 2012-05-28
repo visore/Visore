@@ -9,14 +9,8 @@ ViAudioBuffer::ViAudioBuffer(QObject *parent, int bufferHeadStart)
 
 ViAudioBuffer::~ViAudioBuffer()
 {
-	for(int i = 0; i < mStreams.size(); ++i)
-	{	
-		if(mStreams[i] != NULL)
-		{
-			delete mStreams[i];
-			mStreams[i] = NULL;
-		}
-	}
+	qDeleteAll(mStreams);
+	mStreams.clear();
 	if(mData != NULL)
 	{
 		delete mData;

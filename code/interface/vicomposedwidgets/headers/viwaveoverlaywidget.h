@@ -18,14 +18,14 @@ class ViWaveOverlayWidget : public ViWidget
 
 	public slots:
 		void setPointer(qint32 position);
-		void updateWave(ViWaveForm *waveForm);
+		void updateWave();
 
 	private slots:
 		void positionChanged(ViAudioPosition position);
 
 	public:
 		ViWaveOverlayWidget(QWidget *parent = 0);
-		void setBufferType(ViAudioBuffer::ViAudioBufferType type);
+		void setDirection(ViAudioConnection::Direction direction);
 		void setZoomLevel(qint16 level);
 
 	protected:
@@ -36,6 +36,8 @@ class ViWaveOverlayWidget : public ViWidget
 		void calculatePosition();
 
 	private:
+
+		ViAudioConnection::Direction mDirection;
 		ViWaveForm *mForm;
 		qint64 mPosition;
 		qint16 mZoomLevel;

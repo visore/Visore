@@ -17,11 +17,30 @@ class ViAudioEngine : public ViSingleton
 
 	public slots:
 
+		//Playback
+		void startPlayback();
+		void stopPlayback();
+		void pausePlayback();
+
+		//Recording
+		void startRecording();
+		void stopRecording();
+		void pauseRecording();
+
+		//File I/O
+		void openFile(QString filePath);
+		void saveFile(QString filePath);
+		
+		//Spectrum
 		void calculateSpectrum(qint32 size, QString windowFunction);
 
 	signals:
 
-		void spectrumChanged(short percentage);
+		void chainChanged();
+
+		void inputChanged(ViAudioConnection::Type type);		
+
+		void spectrumProgressed(short percentage);
 		void spectrumFinished();
 
 	public:
@@ -30,6 +49,7 @@ class ViAudioEngine : public ViSingleton
 		static ViAudioEngine* instance();
 
 		ViRealSpectrum spectrum();
+		ViWaveForm& wave(ViAudioConnection::Direction direction);
 
 	protected:
 
@@ -49,6 +69,8 @@ class ViAudioEngine : public ViSingleton
 		ViSingleExecutor mExecutor;
 
 		ViSpectrumAnalyzer mSpectrumAnalyzer;
+		ViWaveFormer mInputWaveFormer;
+		ViWaveFormer mOutputWaveFormer;
 
 };
 

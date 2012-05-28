@@ -7,8 +7,8 @@ ViMainWidget::ViMainWidget(QWidget *parent)
 	mUi = new Ui::ViMainWidget();
 	mUi->setupUi(this);
 
-	mUi->originalWaveWidget->setBufferType(ViAudioBuffer::Original);
-	mUi->correctedWaveWidget->setBufferType(ViAudioBuffer::Corrected);
+	mUi->originalWaveWidget->setDirection(ViAudioConnection::Input);
+	mUi->correctedWaveWidget->setDirection(ViAudioConnection::Output);
 }
 
 ViMainWidget::~ViMainWidget()

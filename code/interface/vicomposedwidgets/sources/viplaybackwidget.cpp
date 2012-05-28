@@ -7,7 +7,7 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mUi = new Ui::ViPlaybackWidget();
 	mUi->setupUi(this);
 
-	/*mIsRecording = false;
+	mIsRecording = false;
 	mIsPlaying = false;
 	mIsPausing = false;
 
@@ -32,25 +32,25 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mUi->pauseButton->disable();
 	mUi->stopButton->disable();
 
-	ViObject::connect(mEngine, SIGNAL(inputChanged(ViAudioEngine::ViAudioType)), this, SLOT(inputChanged(ViAudioEngine::ViAudioType)));*/
+	ViObject::connect(mEngine, SIGNAL(inputChanged(ViAudioConnection::Type)), this, SLOT(inputChanged(ViAudioConnection::Type)));
 }
 
 ViPlaybackWidget::~ViPlaybackWidget()
 {
 	delete mUi;
 }
-/*
-void ViPlaybackWidget::inputChanged(ViAudioEngine::ViAudioType type)
+
+void ViPlaybackWidget::inputChanged(ViAudioConnection::Type type)
 {
 	stop(true);
-	if(type == ViAudioEngine::File)
+	if(type == ViAudioConnection::File)
 	{
 		mUi->recordButton->disable();
 		mUi->playButton->enable();
 		mUi->pauseButton->disable();
 		mUi->stopButton->disable();
 	}
-	else if(type == ViAudioEngine::Stream)
+	else if(type == ViAudioConnection::Stream)
 	{
 		mUi->recordButton->enable();
 		mUi->playButton->disable();
@@ -122,4 +122,4 @@ void ViPlaybackWidget::stop(bool checked)
 	mIsPlaying = false;
 	mIsPausing = false;
 	mUi->playButton->setChecked(mIsPlaying);
-}*/
+}

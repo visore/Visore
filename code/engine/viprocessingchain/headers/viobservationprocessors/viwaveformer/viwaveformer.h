@@ -6,22 +6,16 @@
 
 class ViWaveFormer : public ViObserver
 {
-	Q_OBJECT
-
-	signals:
-
-		void changed(ViWaveForm *waveForm);
 
 	public:
 
 		ViWaveFormer();
-		ViWaveForm& waveSummary();
+		ViWaveForm& wave();
 		void run();
 
 	private:
 		
 		ViWaveForm mForm;
-		int mSignalCounter;
 
 };
 

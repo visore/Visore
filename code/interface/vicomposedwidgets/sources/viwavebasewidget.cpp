@@ -1,30 +1,32 @@
 #include "viwavebasewidget.h"
 
+#define REPAINT_INTERVAL 100
+
 ViWaveBaseWidget::ViWaveBaseWidget(QWidget *parent)
 	: ViWidget(parent)
 {	
 	mPosition = 0;
 	mZoomLevel = 0;
+	mIntervalCounter = 0;
 	mForm = NULL;
 }
 
-void ViWaveBaseWidget::updateWave(ViWaveForm *waveForm)
+void ViWaveBaseWidget::updateWave()
 {
-	mForm = waveForm;
+	mForm = &mEngine->wave(mDirection);
 	mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
-	repaint();
+	++mIntervalCounter;
+	if(mIntervalCounter > REPAINT_INTERVAL)
+	{
+		mIntervalCounter = 0;
+		repaint();
+	}
 }
 
-void ViWaveBaseWidget::setBufferType(ViAudioBuffer::ViAudioBufferType type)
+void ViWaveBaseWidget::setDirection(ViAudioConnection::Direction direction)
 {
-	if(type == ViAudioBuffer::Original)
-	{
-		ViObject::connect(mEngine, SIGNAL(inputWaveChanged(ViWaveForm*)), this, SLOT(updateWave(ViWaveForm*)));
-	}
-	else
-	{
-		ViObject::connect(mEngine, SIGNAL(outputWaveChanged(ViWaveForm*)), this, SLOT(updateWave(ViWaveForm*)));
-	}
+	mDirection = direction;
+	ViObject::connect(mEngine, SIGNAL(chainChanged()), this, SLOT(updateWave()));
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 }
 

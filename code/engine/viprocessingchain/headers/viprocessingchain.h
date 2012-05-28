@@ -9,6 +9,10 @@ class ViProcessingChain : public QObject
 {
     Q_OBJECT
 
+	signals:
+
+		void changed();
+
 	private:
 
 		void changeInput(); // Connect song end detector to this slot

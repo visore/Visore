@@ -11,11 +11,11 @@ class ViWaveBaseWidget : public ViWidget
 
 	private slots:
 		void positionChanged(ViAudioPosition position);
-		void updateWave(ViWaveForm *waveForm);
+		void updateWave();
 
 	public:
 		ViWaveBaseWidget(QWidget *parent = 0);
-		void setBufferType(ViAudioBuffer::ViAudioBufferType type);
+		void setDirection(ViAudioConnection::Direction direction);
 		void setZoomLevel(qint16 level);
 
 	protected:
@@ -24,6 +24,7 @@ class ViWaveBaseWidget : public ViWidget
 
 	private:
 
+		ViAudioConnection::Direction mDirection;
 		ViWaveForm *mForm;
 		qint64 mPosition;
 		qint16 mZoomLevel;
@@ -32,6 +33,7 @@ class ViWaveBaseWidget : public ViWidget
 		qint32 mHalfHeight;
 		qreal mRatio;
 		bool mUnderCutOff;
+		int mIntervalCounter;
 };
 
 #endif

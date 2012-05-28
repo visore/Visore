@@ -23,9 +23,8 @@ int ViAudioBufferStream::read(char *data, int length)
 
 int ViAudioBufferStream::read(ViAudioBufferChunk *chunk, int length)
 {
-	char *data = new char[length];
-	int dataRead = read(data, length);
-	chunk->setData(data, length);
+	int dataRead = read(chunk->data(), length);
+	chunk->setSize(dataRead);
 	return dataRead;
 }
 

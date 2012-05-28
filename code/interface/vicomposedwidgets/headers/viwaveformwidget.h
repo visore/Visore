@@ -27,7 +27,7 @@ class ViWaveFormWidget : public ViWidget
 	public:
 		ViWaveFormWidget(QWidget *parent = 0);
 		~ViWaveFormWidget();
-		void setBufferType(ViAudioBuffer::ViAudioBufferType type);
+		void setDirection(ViAudioConnection::Direction direction);
 		void setZoomLevel(qint16 level);
 
 	protected:
@@ -37,6 +37,7 @@ class ViWaveFormWidget : public ViWidget
 		void leaveEvent(QEvent *event);
 
 	private:
+
 		ViWaveBaseWidget *mBaseWidget;
 		ViWaveOverlayWidget *mOverlayWidget;
 		
