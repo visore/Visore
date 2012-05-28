@@ -8,6 +8,11 @@ class ViPcmConverter
 {
 	public:
 
+		ViPcmConverter(int size = 8);
+		bool setSize(int size);
+		int pcmToReal(char* buffer, T* result, int size);
+		int realToPcm(T* buffer, char* result, int size);
+
 		static T pcmToReal8(qint8 pcm);
 		static qint8 realToPcm8(T real);
 
@@ -29,6 +34,12 @@ class ViPcmConverter
 		static int realToPcm16(T* buffer, char* result, int size);
 		static int realToPcm24(T* buffer, char* result, int size);
 		static int realToPcm32(T* buffer, char* result, int size);
+
+	private:
+
+		int (*pcmToRealPointer)(char*, T*, int);
+		int (*realToPcmPointer)(T*, char*, int);
+
 };
 
 #include "../sources/vipcmconverter.cpp"

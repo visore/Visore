@@ -4,19 +4,7 @@ ViProcessor::ViProcessor()
 	: QObject(), QRunnable(), ViId()
 {
 	setAutoDelete(false); //Ensures that QThreadPool doesn't automatically delete object
-	mIsEnabled = true;
 	mWindowSize = 0;
-}
-
-void ViProcessor::enable(bool enable)
-{
-	mIsEnabled = enable;
-	emit enabled(mIsEnabled);
-}
-
-bool ViProcessor::isEnabled()
-{
-	return mIsEnabled;
 }
 
 void ViProcessor::setWindowSize(int windowSize)

@@ -1,11 +1,14 @@
 #include "viaudioengine.h"
 
+#include "vimultiexecutor.h"
+#include "viqtconnection.h"
+
 ViAudioEngine *ViAudioEngine::mEngine = NULL;
 
 ViAudioEngine::ViAudioEngine()
 	: ViSingleton()
 {
-	mProcessingChain.addOutput(ViAudioFormat::defaultFormat(), QAudioDeviceInfo::defaultOutputDevice());
+	/*mProcessingChain.addOutput(ViAudioFormat::defaultFormat(), QAudioDeviceInfo::defaultOutputDevice());
 	mProcessingChain.setInput(ViAudioFormat::defaultFormat(), "/home/visore/a.wav");
 
 	ViWaveFormer *waveFormer1 = new ViWaveFormer();
@@ -18,7 +21,22 @@ ViAudioEngine::ViAudioEngine()
 	mProcessingChain.start();
 
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(progressed(short)), this, SIGNAL(spectrumChanged(short)));
-	QObject::connect(&mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
+	QObject::connect(&mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));*/
+
+	ViMultiExecutor *e = new ViMultiExecutor();
+	ViQtConnection *c = new ViQtConnection();
+	ViAudioBuffer *ib = new ViAudioBuffer();
+	ViAudioBuffer *ob = new ViAudioBuffer();
+
+	ViFileInput *si = c->fileInput(ViAudioFormat::defaultFormat(), ib, "/home/visore/a.wav");
+	ViStreamOutput *so = c->streamOutput(ViAudioFormat::defaultFormat(), ob, QAudioDeviceInfo::defaultOutputDevice());
+
+	e->setBuffer(ViAudioConnection::Input, ib);
+	e->setBuffer(ViAudioConnection::Output, ob);
+
+	si->start();
+	so->start();
+
 }
 
 ViAudioEngine::~ViAudioEngine()

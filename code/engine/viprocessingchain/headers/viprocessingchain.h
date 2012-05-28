@@ -31,7 +31,9 @@ class ViProcessingChain : public QObject
 		void setWindowSize(int windowSize);
 		void start();
 		ViAudioBuffer* buffer(ViAudioConnection::Direction direction);
+
 		bool attach(ViAudioConnection::Direction direction, ViProcessor *processor);
+		//bool detach(ViProcessor *processor);
 
 		void setInput(ViAudioFormat format, QString filePath);
 		void setInput(ViAudioFormat format, QAudioDeviceInfo device);

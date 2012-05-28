@@ -111,7 +111,7 @@ void ViProcessorThread::updateProcessors()
 	if(mReadStream != NULL)
 	{
 		ViAudioFormat format = mReadStream->buffer()->format();
-		QList<ViProcessor*> processors = mProcessors.processors();
+		QList<ViProcessor*> processors = mProcessors.all();
 		for(int i = 0; i < processors.size(); ++i)
 		{
 			processors[i]->setWindowSize(mWindowSize);

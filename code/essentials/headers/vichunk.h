@@ -31,6 +31,7 @@ typedef ViChunk<double> ViDoubleChunk;
 typedef ViDoubleChunk ViRealChunk;
 typedef ViDoubleChunk ViSampleChunk;
 typedef ViChunk<float> ViFloatChunk;
+typedef ViChunk<char> ViRawChunk;
 
 //Template decleration and implementation should actually be in the same file
 #include "../sources/vichunk.cpp"

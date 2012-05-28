@@ -2,64 +2,107 @@
 
 #include "visizeconverter.h"
 
-#define PCMS_8_MAX_VALUE 127u; // (2^8)/2
-#define PCMS_8_MAX_AMPLITUDE 128u;
+#define PCM_8_MAX 127u;
+#define PCM_16_MAX 32767u;
+#define PCM_24_MAX 8388607u;
+#define PCM_32_MAX 2147483647u;
 
-#define PCMS_16_MAX_VALUE 32767u;
-#define PCMS_16_MAX_AMPLITUDE 32768u;
+template <typename T>
+ViPcmConverter<T>::ViPcmConverter(int size)
+{
+	setSize(size);
+}
 
-#define PCMS_24_MAX_VALUE 8388607u;
-#define PCMS_24_MAX_AMPLITUDE 32768u;
+template <typename T>
+bool ViPcmConverter<T>::setSize(int size)
+{
+	bool result = true;
+	if(size == 32)
+	{
+		pcmToRealPointer = &ViPcmConverter<T>::pcmToReal32;
+		realToPcmPointer = &ViPcmConverter<T>::realToPcm32;
+	}
+	else if(size == 24)
+	{
+		pcmToRealPointer = &ViPcmConverter<T>::pcmToReal24;
+		realToPcmPointer = &ViPcmConverter<T>::realToPcm24;
+	}
+	else if(size == 16)
+	{
+		pcmToRealPointer = &ViPcmConverter<T>::pcmToReal16;
+		realToPcmPointer = &ViPcmConverter<T>::realToPcm16;
+	}
+	else
+	{
+		pcmToRealPointer = &ViPcmConverter<T>::pcmToReal8;
+		realToPcmPointer = &ViPcmConverter<T>::realToPcm8;
+		result = false;
+	}
+	if(size == 8)
+	{
+		result = true;
+	}
+	return result;
+}
 
-#define PCMS_32_MAX_VALUE 2147483647u;
-#define PCMS_32_MAX_AMPLITUDE 2147483648u;
+template <typename T>
+int ViPcmConverter<T>::pcmToReal(char* buffer, T* result, int size)
+{
+	return pcmToRealPointer(buffer, result, size);
+}
+
+template <typename T>
+int ViPcmConverter<T>::realToPcm(T* buffer, char* result, int size)
+{
+	return realToPcmPointer(buffer, result, size);
+}
 
 template <typename T>
 T ViPcmConverter<T>::pcmToReal8(qint8 pcm)
 {
-    return T(pcm) / PCMS_8_MAX_AMPLITUDE;
+    return T(pcm) / PCM_8_MAX;
 }
 
 template <typename T>
 qint8 ViPcmConverter<T>::realToPcm8(T real)
 {
-    return real * PCMS_8_MAX_VALUE;
+    return real * PCM_8_MAX;
 }
 
 template <typename T>
 T ViPcmConverter<T>::pcmToReal16(qint16 pcm)
 {
-    return T(pcm) / PCMS_16_MAX_AMPLITUDE;
+    return T(pcm) / PCM_16_MAX;
 }
 
 template <typename T>
 qint16 ViPcmConverter<T>::realToPcm16(T real)
 {
-    return real * PCMS_16_MAX_VALUE;
+    return real * PCM_16_MAX;
 }
 
 template <typename T>
 T ViPcmConverter<T>::pcmToReal24(qint32 pcm)
 {
-    return T(pcm) / PCMS_24_MAX_AMPLITUDE;
+    return T(pcm) / PCM_24_MAX;
 }
 
 template <typename T>
 qint32 ViPcmConverter<T>::realToPcm24(T real)
 {
-    return real * PCMS_24_MAX_VALUE;
+    return real * PCM_24_MAX;
 }
 
 template <typename T>
 T ViPcmConverter<T>::pcmToReal32(qint32 pcm)
 {
-    return T(pcm) / PCMS_32_MAX_AMPLITUDE;
+    return T(pcm) / PCM_32_MAX;
 }
 
 template <typename T>
 qint32 ViPcmConverter<T>::realToPcm32(T real)
 {
-    return real * PCMS_32_MAX_VALUE;
+    return real * PCM_32_MAX;
 }
 
 template <typename T>

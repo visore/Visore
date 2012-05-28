@@ -14,16 +14,12 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 	signals:
 
 		void changed();
-		void enabled(bool enabled);
 		void progressed(short progress);
 		void finished();
 
 	public:
 
 		ViProcessor();
-
-		virtual void enable(bool enable = true);
-		virtual bool isEnabled();
 
 		virtual void setWindowSize(int windowSize);
 		virtual int windowSize();
@@ -36,7 +32,6 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 	protected:
 
 		ViAudioFormat mFormat;
-		bool mIsEnabled;
 		int mWindowSize;
 
 };

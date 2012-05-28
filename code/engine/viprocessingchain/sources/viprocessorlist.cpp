@@ -14,7 +14,7 @@ ViProcessorList::~ViProcessorList()
 	clear();
 }
 
-QList<ViProcessor*> ViProcessorList::processors()
+QList<ViProcessor*> ViProcessorList::all()
 {
 	QList<ViProcessor*> result;
 	for(int i = 0; i < mInputObservers.size(); ++i)
@@ -32,62 +32,31 @@ QList<ViProcessor*> ViProcessorList::processors()
 	return result;
 }
 
-void ViProcessorList::updateActiveProcessors()
-{
-	mActiveInputObservers.clear();
-	mActiveInputModifiers.clear();
-	mActiveOutputObservers.clear();
-
-	for(int i = 0; i < mInputObservers.size(); ++i)
-	{
-		if(mInputObservers[i]->isEnabled())
-		{
-			mActiveInputObservers.append(mInputObservers[i]);
-		}
-	}
-
-	for(int i = 0; i < mInputModifiers.size(); ++i)
-	{
-		if(mInputModifiers[i]->isEnabled())
-		{
-			mActiveInputModifiers.append(mInputModifiers[i]);
-		}
-	}
-
-	for(int i = 0; i < mOutputObservers.size(); ++i)
-	{
-		if(mOutputObservers[i]->isEnabled())
-		{
-			mActiveOutputObservers.append(mOutputObservers[i]);
-		}
-	}
-}
-
 void ViProcessorList::observeInput(const ViSampleChunk *data)
 {
-	for(int i = 0; i < mActiveInputObservers.size(); ++i)
+	for(int i = 0; i < mInputObservers.size(); ++i)
 	{
-		mActiveInputObservers[i]->setData(data);
-		mThreadPool.start(mActiveInputObservers[i]);
+		mInputObservers[i]->setData(data);
+		mThreadPool.start(mInputObservers[i]);
 	}
 	mThreadPool.waitForDone();
 }
 
 void ViProcessorList::manipulateInput(ViSampleChunk *data)
 {
-	for(int i = 0; i < mActiveInputModifiers.size(); ++i)
+	for(int i = 0; i < mInputModifiers.size(); ++i)
 	{
-		mActiveInputModifiers[i]->setData(data);
-		mActiveInputModifiers[i]->run();
+		mInputModifiers[i]->setData(data);
+		mInputModifiers[i]->run();
 	}
 }
 
 void ViProcessorList::observeOutput(const ViSampleChunk *data)
 {
-	for(int i = 0; i < mActiveOutputObservers.size(); ++i)
+	for(int i = 0; i < mOutputObservers.size(); ++i)
 	{
-		mActiveOutputObservers[i]->setData(data);
-		mThreadPool.start(mActiveOutputObservers[i]);
+		mOutputObservers[i]->setData(data);
+		mThreadPool.start(mOutputObservers[i]);
 	}
 	mThreadPool.waitForDone();
 }
@@ -118,12 +87,37 @@ bool ViProcessorList::add(ViAudioConnection::Direction direction, ViProcessor *p
 			result = true;
 		}
 	}
-	if(result)
-	{
-		updateActiveProcessors();
-		QObject::connect(processor, SIGNAL(enabled(bool)), this, SLOT(updateActiveProcessors()));
-	}
 	return result;
+}
+
+bool ViProcessorList::remove(ViProcessor *processor)
+{
+	int index;
+	for(index = 0; index < mInputObservers.size(); ++index)
+	{
+		if(mInputObservers[index] == processor)
+		{
+			mInputObservers.removeAt(index);
+			return true;
+		}
+	}
+	for(index = 0; index < mInputModifiers.size(); ++index)
+	{
+		if(mInputModifiers[index] == processor)
+		{
+			mInputModifiers.removeAt(index);
+			return true;
+		}
+	}
+	for(index = 0; index < mOutputObservers.size(); ++index)
+	{
+		if(mOutputObservers[index] == processor)
+		{
+			mOutputObservers.removeAt(index);
+			return true;
+		}
+	}
+	return false;
 }
 
 void ViProcessorList::clear()
@@ -131,7 +125,4 @@ void ViProcessorList::clear()
 	mInputObservers.clear();
 	mInputModifiers.clear();
 	mOutputObservers.clear();
-	mActiveInputObservers.clear();
-	mActiveInputModifiers.clear();
-	mActiveOutputObservers.clear();
 }

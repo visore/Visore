@@ -10,17 +10,16 @@ class ViProcessorList : public QObject
 {
 	Q_OBJECT
 
-	private slots:
-
-		void updateActiveProcessors();
-
 	public:
 
 		ViProcessorList();
 		~ViProcessorList();
+
 		bool add(ViAudioConnection::Direction direction, ViProcessor *processor);
+		bool remove(ViProcessor *processor);
+
 		void clear();
-		QList<ViProcessor*> processors();
+		QList<ViProcessor*> all();
 
 		void observeInput(const ViSampleChunk *data);
 		void manipulateInput(ViSampleChunk *data);
@@ -29,14 +28,9 @@ class ViProcessorList : public QObject
 	private:
 
 		QThreadPool mThreadPool;
-
 		QList<ViObserver*> mInputObservers;
 		QList<ViModifier*> mInputModifiers;
 		QList<ViObserver*> mOutputObservers;
-
-		QList<ViObserver*> mActiveInputObservers;
-		QList<ViModifier*> mActiveInputModifiers;
-		QList<ViObserver*> mActiveOutputObservers;
 
 };
 

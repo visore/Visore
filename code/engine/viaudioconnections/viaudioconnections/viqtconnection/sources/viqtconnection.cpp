@@ -10,6 +10,7 @@ ViFileInput* ViQtConnection::fileInput(ViAudioFormat format, ViAudioBuffer *buff
 	close(mFileInput);
 	if(mFileInput == NULL)
 	{
+		buffer->setFormat(format);
 		mFileInput = new ViQtFileInput();
 		mFileInput->setBuffer(buffer);
 		mFileInput->setFormat(format);
@@ -24,6 +25,7 @@ ViStreamInput* ViQtConnection::streamInput(ViAudioFormat format, ViAudioBuffer *
 	close(mStreamInput);
 	if(mStreamInput == NULL)
 	{
+		buffer->setFormat(format);
 		mStreamInput = new ViQtStreamInput();
 		mStreamInput->setBuffer(buffer);
 		mStreamInput->setFormat(format);
@@ -38,6 +40,7 @@ ViFileOutput* ViQtConnection::fileOutput(ViAudioFormat format, ViAudioBuffer *bu
 	close(mFileOutput);
 	if(mFileOutput == NULL)
 	{
+		buffer->setFormat(format);
 		mFileOutput = new ViQtFileOutput();
 		mFileOutput->setBuffer(buffer);
 		mFileOutput->setFormat(format);
@@ -52,6 +55,7 @@ ViStreamOutput* ViQtConnection::streamOutput(ViAudioFormat format, ViAudioBuffer
 	close(mStreamOutput);
 	if(mStreamOutput == NULL)
 	{
+		buffer->setFormat(format);
 		mStreamOutput = new ViQtStreamOutput();
 		mStreamOutput->setBuffer(buffer);
 		mStreamOutput->setFormat(format);

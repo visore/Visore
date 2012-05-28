@@ -1,0 +1,167 @@
+#include "viexecutor.h"
+
+#define DEFAULT_WINDOW_SIZE 2048
+
+ViExecutor::ViExecutor()
+	: QThread()
+{
+	mWindowSize = DEFAULT_WINDOW_SIZE;
+	mNotify = false;
+	mInputChunk = NULL;
+	mRealChunk = NULL;
+	mOutputChunk = NULL;
+}
+
+ViExecutor::~ViExecutor()
+{
+	if(mInputChunk != NULL)
+	{
+		delete mInputChunk;
+		mInputChunk = NULL;
+	}
+	if(mRealChunk != NULL)
+	{
+		delete mRealChunk;
+		mRealChunk = NULL;
+	}
+	if(mOutputChunk != NULL)
+	{
+		delete mOutputChunk;
+		mOutputChunk = NULL;
+	}
+}
+
+void ViExecutor::setWindowSize(int windowSize)
+{
+	mWindowSize = windowSize;
+}
+
+void ViExecutor::setNotify(bool notify)
+{
+	mNotify = notify;
+}
+
+bool ViExecutor::attach(ViAudioConnection::Direction direction, ViProcessor *processor)
+{
+	bool result = mProcessors.add(direction, processor);
+	return result;
+}
+
+bool ViExecutor::detach(ViProcessor *processor)
+{
+	disconnect(processor);
+	return mProcessors.remove(processor);
+}
+
+void ViExecutor::setBuffer(ViAudioConnection::Direction direction, ViAudioBuffer *buffer)
+{
+	if(direction == ViAudioConnection::Input)
+	{
+		if(mInputChunk == NULL)
+		{
+			mInputChunk = new ViRawChunk();
+		}
+		if(mRealChunk == NULL)
+		{
+			mRealChunk = new ViSampleChunk();
+		}
+		mReadStream = buffer->createReadStream();
+		mInputFormat = buffer->format();
+		mInputConverter.setSize(mInputFormat.sampleSize());
+		QObject::disconnect(this, SLOT(execute()));
+		QObject::disconnect(this, SLOT(changeFormat(ViAudioFormat)));
+		QObject::connect(buffer, SIGNAL(changed(int)), this, SLOT(execute()));
+		QObject::connect(buffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(changeFormat(ViAudioFormat)), Qt::UniqueConnection);
+	}
+	else
+	{
+		if(mOutputChunk == NULL)
+		{
+			mOutputChunk = new ViRawChunk();
+		}
+		mWriteStream = buffer->createWriteStream();
+		mOutputFormat = buffer->format();
+		mOutputConverter.setSize(mOutputFormat.sampleSize());
+	}
+}
+
+void ViExecutor::changeFormat(ViAudioFormat format)
+{
+	mInputFormat = format;
+	mInputConverter.setSize(mInputFormat.sampleSize());
+}
+
+void ViExecutor::execute()
+{
+	if(!isRunning())
+	{
+		start();
+	}
+}
+
+void ViExecutor::update()
+{
+	QList<ViProcessor*> processors = mProcessors.all();
+	for(int i = 0; i < processors.size(); ++i)
+	{
+		processors[i]->setWindowSize(mWindowSize);
+		processors[i]->setFormat(mInputFormat);
+	}
+
+	if(mNotify)
+	{
+		for(int i = 0; i < processors.size(); ++i)
+		{
+			connect(processors[i]);
+		}
+	}
+	else
+	{
+		for(int i = 0; i < processors.size(); ++i)
+		{
+			disconnect(processors[i]);
+		}
+	}
+
+	if(mInputChunk != NULL)
+	{
+		mInputChunk->resize(mWindowSize * (mInputFormat.sampleSize() / 8));
+	}
+	if(mRealChunk != NULL)
+	{
+		mRealChunk->resize(mWindowSize);
+	}
+	if(mOutputChunk != NULL)
+	{
+		mOutputChunk->resize(mWindowSize * (mOutputFormat.sampleSize() / 8));
+	}
+}
+
+void ViExecutor::connect(ViProcessor *processor)
+{
+	QObject::connect(this, SIGNAL(progressed(short)), processor, SIGNAL(progressed(short)), Qt::UniqueConnection);
+	QObject::connect(this, SIGNAL(finished()), processor, SIGNAL(finished()), Qt::UniqueConnection);
+}
+
+void ViExecutor::disconnect(ViProcessor *processor)
+{
+	QObject::disconnect(this, SIGNAL(progressed(short)), processor, SIGNAL(progressed(short)));
+	QObject::disconnect(this, SIGNAL(finished()), processor, SIGNAL(finished()));
+}
+
+void ViExecutor::start()
+{
+	QThread::start();
+}
+
+void ViExecutor::run()
+{
+	if(mNotify)
+	{
+		runNotify();
+	}
+	else
+	{
+		runNormal();
+	}
+}
