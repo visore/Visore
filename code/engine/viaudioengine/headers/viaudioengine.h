@@ -5,7 +5,7 @@
 #include "visingleton.h"
 
 #include "viprocessingchain.h"
-#include "viprocessorexecutor.h"
+#include "visingleexecutor.h"
 
 #include "vispectrumanalyzer.h"
 #include "viwaveformer.h"
@@ -40,7 +40,9 @@ class ViAudioEngine : public ViSingleton
 		static ViAudioEngine *mEngine;
 
 		ViProcessingChain mProcessingChain;
-		ViProcessorExecutor mProcessorExecutor;
+		ViSingleExecutor mExecutor;
+
+ViAudioBuffer *ib;
 
 		ViSpectrumAnalyzer mSpectrumAnalyzer;
 

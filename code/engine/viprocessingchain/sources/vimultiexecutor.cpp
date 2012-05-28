@@ -24,6 +24,7 @@ void ViMultiExecutor::runNotify()
 	emit progressed(0);
 	qint64 size;
 	qint64 progress = 0;
+	update();
 	do
 	{
 		size = mReadStream->bufferSize();

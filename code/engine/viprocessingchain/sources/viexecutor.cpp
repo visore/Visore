@@ -10,6 +10,8 @@ ViExecutor::ViExecutor()
 	mInputChunk = NULL;
 	mRealChunk = NULL;
 	mOutputChunk = NULL;
+	mReadStream = NULL;
+	mWriteStream = NULL;
 }
 
 ViExecutor::~ViExecutor()
@@ -90,10 +92,16 @@ void ViExecutor::execute()
 
 void ViExecutor::update()
 {
-	mInputFormat = mReadStream->buffer()->format();
-	mOutputFormat = mWriteStream->buffer()->format();
-	mInputConverter.setSize(mInputFormat.sampleSize());
-	mOutputConverter.setSize(mOutputFormat.sampleSize());
+	if(mReadStream != NULL)
+	{
+		mInputFormat = mReadStream->buffer()->format();
+		mInputConverter.setSize(mInputFormat.sampleSize());
+	}
+	if(mWriteStream != NULL)
+	{
+		mOutputFormat = mWriteStream->buffer()->format();
+		mOutputConverter.setSize(mOutputFormat.sampleSize());
+	}
 
 	QList<ViProcessor*> processors = mProcessors.all();
 	for(int i = 0; i < processors.size(); ++i)
