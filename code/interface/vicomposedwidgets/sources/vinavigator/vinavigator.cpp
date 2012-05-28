@@ -15,6 +15,7 @@ ViNavigator::ViNavigator(QWidget *parent)
 
 ViNavigator::~ViNavigator()
 {
+	delete mUi;
 	qDeleteAll(mMenus);
 	mMenus.clear();
 }

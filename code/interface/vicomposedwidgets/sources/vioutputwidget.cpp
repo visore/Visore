@@ -8,8 +8,11 @@ ViOutputWidget::ViOutputWidget(QWidget *parent)
 	mUi->setupUi(this);
 	mUi->fileOutputButton->setIcon(ViThemeManager::image("fileinput.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 	mUi->fileOutputButton->setGlow(ViThemeManager::color(14));
-
 	ViObject::connect(mUi->fileOutputButton, SIGNAL(clicked()), this, SLOT(selectFileOutput()));
+
+	mDialog = new QDialog(mParent);
+	mLayout = new QGridLayout(mDialog);
+	mLayout->addWidget(new ViOutputControlWidget);
 }
 
 ViOutputWidget::~ViOutputWidget()
@@ -21,9 +24,5 @@ ViOutputWidget::~ViOutputWidget()
 
 void ViOutputWidget::selectFileOutput()
 {
-	mDialog = new QDialog(mParent);
-	mLayout = new QGridLayout(mDialog);
-	ViOutputControlWidget *widget = new ViOutputControlWidget();
-	mLayout->addWidget(widget);
 	mDialog->show();
 }
