@@ -1,8 +1,0 @@
-#Setup directory paths
-SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-#SET(VI_BASSCONNECTION ${ROOT}/vibassconnection)
-SET(VI_QTCONNECTION ${ROOT}/viqtconnection)
-
-#Initiate sub-directories
-#ADD_SUBDIRECTORY(${VI_BASSCONNECTION})
-ADD_SUBDIRECTORY(${VI_QTCONNECTION})

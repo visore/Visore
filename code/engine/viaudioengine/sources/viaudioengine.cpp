@@ -1,8 +1,5 @@
 #include "viaudioengine.h"
 
-#include "viqtconnection.h"
-#include "vimultiexecutor.h"
-
 ViAudioEngine *ViAudioEngine::mEngine = NULL;
 
 ViAudioEngine::ViAudioEngine()
@@ -11,11 +8,10 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(progressed(short)), this, SIGNAL(spectrumChanged(short)));
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
 
-	mConnection = new ViQtConnection();
-	mFileInput = mConnection->fileInput();
-	mFileOutput = mConnection->fileOutput();
-	mStreamInput = mConnection->streamInput();
-	mStreamOutput = mConnection->streamOutput();
+	mFileInput = mConnection.fileInput();
+	mFileOutput = mConnection.fileOutput();
+	mStreamInput = mConnection.streamInput();
+	mStreamOutput = mConnection.streamOutput();
 
 	mProcessingChain.setTransmission(mFileInput);
 	mProcessingChain.setTransmission(mStreamOutput);
@@ -31,7 +27,7 @@ ViAudioEngine::ViAudioEngine()
 
 ViAudioEngine::~ViAudioEngine()
 {
-	delete mConnection;
+
 }
 
 ViAudioEngine* ViAudioEngine::instance()

@@ -39,7 +39,7 @@ class ViAudioEngine : public ViSingleton
 
 		static ViAudioEngine *mEngine;
 
-		ViAudioConnection *mConnection;
+		ViAudioConnection mConnection;
 		ViFileInput *mFileInput;
 		ViFileOutput *mFileOutput;
 		ViStreamInput *mStreamInput;

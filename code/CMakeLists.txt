@@ -63,8 +63,7 @@ INCLUDE_DIRECTORIES(
 	${INTERFACE}/vicomposedwidgets/headers/vinavigator
 
 	${ENGINE}/viaudioengine/headers
-	${ENGINE}/viaudioconnections/viaudioconnection/headers
-	${ENGINE}/viaudioconnections/viaudioconnections/viqtconnection/headers
+	${ENGINE}/viaudioconnections/headers
 	${ENGINE}/viaudioformats/viaudioformat/headers
 	${ENGINE}/viaudiobuffer/headers
 	${ENGINE}/vicoder/headers
