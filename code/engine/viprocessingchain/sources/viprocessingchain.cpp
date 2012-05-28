@@ -1,44 +1,78 @@
 #include "viprocessingchain.h"
-#include "viaudiobuffermanager.h"
-#include "vipcmconverter.h"
-#include "viqtconnection.h"
 
 ViProcessingChain::ViProcessingChain()
+	: QObject()
 {
-	mConnection = new ViQtConnection();
+	mInput = NULL;
+	mOutput = NULL;
 	mInputBuffer = NULL;
 	mOutputBuffer = NULL;
-	QObject::connect(&mThread, SIGNAL(progressed(short)), this, SIGNAL(progressed(short)));
-	QObject::connect(&mThread, SIGNAL(finished()), this, SIGNAL(finished()));
 }
 
 ViProcessingChain::~ViProcessingChain()
 {
-	ViAudioBufferManager::deallocateAll();
-	delete mConnection;
+	if(mInputBuffer != NULL)
+	{
+		delete mInputBuffer;
+		mInputBuffer = NULL;
+	}
+	qDeleteAll(mInputBuffers);
+	mInputBuffers.clear();
+	if(mOutputBuffer != NULL)
+	{
+		delete mOutputBuffer;
+		mOutputBuffer = NULL;
+	}
+}
+
+void ViProcessingChain::changeInput()
+{
+	QObject::connect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finish()));
+	allocateBuffer(ViAudioConnection::Input);
+	mInput->setBuffer(mInputBuffer);
+}
+
+void ViProcessingChain::finish()
+{
+	QObject::disconnect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finish()));
+	//Save to file here
+	nextBuffer();
 }
 
 void ViProcessingChain::setWindowSize(int windowSize)
 {
-	mThread.setWindowSize(windowSize);
+	mMultiExecutor.setWindowSize(windowSize);
 }
 
-void ViProcessingChain::process()
+void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 {
-	if(!mThread.isRunning())
+	ViAudioInput *input;
+	ViAudioOutput *output;
+	if((input = dynamic_cast<ViAudioInput*>(transmission)) != NULL)
 	{
-		mThread.start();
+		mInput = input;
+		allocateBuffer(ViAudioConnection::Input);
+		nextBuffer();
+		mInput->setBuffer(mInputBuffer);
+		mMultiExecutor.setBuffer(ViAudioConnection::Input, mInputBuffer);
+	}
+	else if((output = dynamic_cast<ViAudioOutput*>(transmission)) != NULL)
+	{
+		mOutput = output;
+		allocateBuffer(ViAudioConnection::Output);
+		mOutput->setBuffer(mOutputBuffer);
+		mMultiExecutor.setBuffer(ViAudioConnection::Output, mOutputBuffer);
 	}
 }
 
-
-void ViProcessingChain::start()
+bool ViProcessingChain::attach(ViAudioConnection::Direction direction, ViProcessor *processor)
 {
-	for(int i = 0; i < mOutputs.size(); ++i)
-	{
-		mOutputs[i]->start();
-	}
-	mInput->start();
+	mMultiExecutor.attach(direction, processor);
+}
+
+bool ViProcessingChain::detach(ViProcessor *processor)
+{
+	mMultiExecutor.detach(processor);
 }
 
 ViAudioBuffer* ViProcessingChain::buffer(ViAudioConnection::Direction direction)
@@ -47,99 +81,45 @@ ViAudioBuffer* ViProcessingChain::buffer(ViAudioConnection::Direction direction)
 	{
 		return mInputBuffer;
 	}
-	else
+	else if(direction == ViAudioConnection::Output)
 	{
 		return mOutputBuffer;
 	}
 }
 
-bool ViProcessingChain::attach(ViAudioConnection::Direction direction, ViProcessor *processor)
+void ViProcessingChain::allocateBuffer(ViAudioConnection::Direction direction)
 {
-	return mThread.attach(direction, processor);
-}
-
-void ViProcessingChain::setInput(ViAudioFormat format, QString filePath)
-{
-	changeInputBuffer(allocateBuffer(ViAudioConnection::Input));
-	mInput = mConnection->fileInput(format, mInputBuffer, filePath);
-}
-
-void ViProcessingChain::setInput(ViAudioFormat format, QAudioDeviceInfo device)
-{
-	changeInputBuffer(allocateBuffer(ViAudioConnection::Input));
-	mInput = mConnection->streamInput(format, mInputBuffer, device);
-}
-
-void ViProcessingChain::addOutput(ViAudioFormat format, QString filePath)
-{
-	changeOutputBuffer(allocateBuffer(ViAudioConnection::Output));
-	mOutputs.append(mConnection->fileOutput(format, mOutputBuffer, filePath));
-}
-
-void ViProcessingChain::addOutput(ViAudioFormat format, QAudioDeviceInfo device)
-{
-	changeOutputBuffer(allocateBuffer(ViAudioConnection::Output));
-	mOutputs.append(mConnection->streamOutput(format, mOutputBuffer, device));
-}
-
-void ViProcessingChain::changeInputBuffer(ViAudioBuffer *buffer)
-{
-	if(mInputBuffer != NULL)
-	{
-		QObject::disconnect(mInputBuffer, SIGNAL(changed(int)), this, SLOT(process()));
-		QObject::disconnect(mInputBuffer, SIGNAL(changed(int)), this, SLOT(inputChanged()));
-	}
-	mInputBuffer = buffer;
-	mInputBuffer->setFormat(ViAudioFormat::defaultFormat()); // TODO: change to format of input
-	if(mInputBuffer != NULL)
-	{
-		QObject::connect(mInputBuffer, SIGNAL(changed(int)), this, SLOT(process()));
-		QObject::connect(mInputBuffer, SIGNAL(changed(int)), this, SIGNAL(inputChanged()));
-		mThread.setStream(ViAudioConnection::Input, mInputBuffer->createReadStream());
-	}
-}
-
-void ViProcessingChain::changeOutputBuffer(ViAudioBuffer *buffer)
-{
-	if(mOutputBuffer != NULL)
-	{
-		QObject::disconnect(mOutputBuffer, SIGNAL(changed(int)), this, SIGNAL(outputChanged()));
-	}
-	mOutputBuffer = buffer;
-	mOutputBuffer->setFormat(ViAudioFormat::defaultFormat()); // TODO: change to input format by default
-	if(mOutputBuffer != NULL)
-	{
-		QObject::connect(mOutputBuffer, SIGNAL(changed(int)), this, SIGNAL(outputChanged()));
-		mThread.setStream(ViAudioConnection::Output, mOutputBuffer->createWriteStream());
-	}
-}
-
-ViAudioBuffer* ViProcessingChain::allocateBuffer(ViAudioConnection::Direction direction)
-{
-	ViAudioBuffer *buffer = ViAudioBufferManager::allocate();
+	ViAudioBuffer *buffer = new ViAudioBuffer();
 	if(direction == ViAudioConnection::Input)
 	{
 		mInputBuffers.enqueue(buffer);
 	}
 	else if(direction == ViAudioConnection::Output)
 	{
+		if(mOutputBuffer != NULL)
+		{
+			delete mOutputBuffer;
+		}
 		mOutputBuffer = buffer;
 	}
-	return buffer;
 }
 
 void ViProcessingChain::nextBuffer()
 {
-	ViAudioBufferManager::deallocate(mOutputBuffer);
-	ViAudioBufferManager::deallocate(mInputBuffers.dequeue());
+	if(mInputBuffer != NULL)
+	{
+		delete mInputBuffer;
+	}
 	if(mInputBuffers.isEmpty())
 	{
-		changeOutputBuffer(NULL);
-		changeInputBuffer(NULL);
+		mInputBuffer = NULL;
 	}
 	else
 	{
-		changeOutputBuffer(allocateBuffer(ViAudioConnection::Output));
-		changeInputBuffer(mInputBuffers.first());
+		mInputBuffer = mInputBuffers.dequeue();
+	}
+	if(mOutputBuffer != NULL)
+	{
+		mOutputBuffer->clear();
 	}
 }

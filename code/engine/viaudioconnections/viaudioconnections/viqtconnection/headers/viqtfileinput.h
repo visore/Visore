@@ -11,15 +11,13 @@ class ViQtFileInput : public ViFileInput
 	public:
 
 		ViQtFileInput();
-		~ViQtFileInput();
-		void initialize();
-		void free();
 
 		void start();
 		void stop();
 		void pause();
 
 	private:
+
 		ViCoder mCoder;
 
 };

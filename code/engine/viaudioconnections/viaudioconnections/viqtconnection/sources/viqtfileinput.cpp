@@ -8,33 +8,21 @@ ViQtFileInput::ViQtFileInput()
 {
 }
 
-ViQtFileInput::~ViQtFileInput()
-{
-	free();
-}
-
-void ViQtFileInput::initialize()
-{
-	ViFileInput::initialize();
-}
-
-void ViQtFileInput::free()
-{
-	ViFileInput::free();
-}
-
 void ViQtFileInput::start()
 {
-	mBuffer->setFormat(mFormat);
 	mCoder.decode(mFilePath, mBuffer, &mFormat);
+	mBuffer->setFormat(mFormat);
 	emit formatChanged(mFormat);
+	emit started();
 }
 
 void ViQtFileInput::stop()
 {
 	mCoder.stop();
+	emit stopped();
 }
 
 void ViQtFileInput::pause()
 {
+	emit paused();
 }

@@ -11,13 +11,16 @@ class ViAudioTransmission : public QObject, public ViError
 {
     Q_OBJECT
 
+	signals:
+
+		void started();
+		void stopped();
+		void paused();
+
 	public:
 
 		ViAudioTransmission();
 		~ViAudioTransmission();
-
-		virtual void initialize() = 0;
-		virtual void free() = 0;
 
 		virtual void setBuffer(ViAudioBuffer *buffer);
 		virtual ViAudioBuffer* buffer();

@@ -39,10 +39,14 @@ class ViAudioEngine : public ViSingleton
 
 		static ViAudioEngine *mEngine;
 
+		ViAudioConnection *mConnection;
+		ViFileInput *mFileInput;
+		ViFileOutput *mFileOutput;
+		ViStreamInput *mStreamInput;
+		ViStreamOutput *mStreamOutput;
+
 		ViProcessingChain mProcessingChain;
 		ViSingleExecutor mExecutor;
-
-ViAudioBuffer *ib;
 
 		ViSpectrumAnalyzer mSpectrumAnalyzer;
 

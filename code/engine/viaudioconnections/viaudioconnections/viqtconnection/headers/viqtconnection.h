@@ -15,10 +15,10 @@ class ViQtConnection : public ViAudioConnection
 
 		ViQtConnection();
 
-		ViFileInput* fileInput(ViAudioFormat format, ViAudioBuffer *buffer, QString filePath = "");
-		ViStreamInput* streamInput(ViAudioFormat format, ViAudioBuffer *buffer, QAudioDeviceInfo device);
-		ViFileOutput* fileOutput(ViAudioFormat format, ViAudioBuffer *buffer, QString filePath = "");
-		ViStreamOutput* streamOutput(ViAudioFormat format, ViAudioBuffer *buffer, QAudioDeviceInfo device);
+		ViFileInput* fileInput();
+		ViStreamInput* streamInput();
+		ViFileOutput* fileOutput();
+		ViStreamOutput* streamOutput();
 };
 
 #endif

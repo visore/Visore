@@ -10,17 +10,24 @@ ViAudioConnection::ViAudioConnection()
 
 ViAudioConnection::~ViAudioConnection()
 {
-	close(mFileInput);
-	close(mStreamInput);
-	close(mFileOutput);
-	close(mStreamOutput);
-}
-
-void ViAudioConnection::close(ViAudioTransmission *transmission)
-{
-	if(transmission != NULL)
+	if(mFileInput != NULL)
 	{
-		delete transmission;
-		transmission = NULL;
+		delete mFileInput;
+		mFileInput = NULL;
+	}
+	if(mStreamInput != NULL)
+	{
+		delete mStreamInput;
+		mStreamInput = NULL;
+	}
+	if(mFileOutput != NULL)
+	{
+		delete mFileOutput;
+		mFileOutput = NULL;
+	}
+	if(mStreamOutput != NULL)
+	{
+		delete mStreamOutput;
+		mStreamOutput = NULL;
 	}
 }

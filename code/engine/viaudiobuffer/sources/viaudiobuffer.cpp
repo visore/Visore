@@ -1,9 +1,8 @@
 #include "viaudiobuffer.h"
 
 ViAudioBuffer::ViAudioBuffer(QObject *parent, int bufferHeadStart)
-	: QObject(parent)
+	: QObject(parent), ViId()
 {
-	mId = -1;
 	mData = new QByteArray();
 	mBufferHeadStart = bufferHeadStart;
 }
@@ -109,14 +108,4 @@ void ViAudioBuffer::setFormat(ViAudioFormat format)
 ViAudioFormat ViAudioBuffer::format()
 {
 	return mFormat;
-}
-
-void ViAudioBuffer::setId(int id)
-{
-	mId = id;
-}
-
-int ViAudioBuffer::id()
-{
-	return mId;
 }

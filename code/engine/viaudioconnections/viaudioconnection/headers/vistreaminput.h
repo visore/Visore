@@ -11,9 +11,6 @@ class ViStreamInput : public ViAudioInput
 	public:
 
 		ViStreamInput();
-		
-		virtual void initialize();
-		virtual void free();
 
 		virtual void setDevice(QAudioDeviceInfo device);
 

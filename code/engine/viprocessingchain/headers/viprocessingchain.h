@@ -2,26 +2,17 @@
 #define VIPROCESSINGCHAIN_H
 
 #include <QQueue>
-#include <QThread>
-#include "viaudiobuffer.h"
 #include "viaudioconnection.h"
-#include "viprocessorlist.h"
-#include "viprocessorthread.h"
+#include "vimultiexecutor.h"
 
 class ViProcessingChain : public QObject
 {
     Q_OBJECT
 
-	signals:
+	private:
 
-		void progressed(short progress);
-		void finished();
-		void inputChanged();
-		void outputChanged();
-
-	protected slots:
-
-		void process();
+		void changeInput(); // Connect song end detector to this slot
+		void finish();
 
 	public:
 
@@ -29,36 +20,25 @@ class ViProcessingChain : public QObject
 		~ViProcessingChain();
 
 		void setWindowSize(int windowSize);
-		void start();
-		ViAudioBuffer* buffer(ViAudioConnection::Direction direction);
-
+		void setTransmission(ViAudioTransmission *transmission);
 		bool attach(ViAudioConnection::Direction direction, ViProcessor *processor);
-		//bool detach(ViProcessor *processor);
-
-		void setInput(ViAudioFormat format, QString filePath);
-		void setInput(ViAudioFormat format, QAudioDeviceInfo device);
-		void addOutput(ViAudioFormat format, QString filePath);
-		void addOutput(ViAudioFormat format, QAudioDeviceInfo device);
+		bool detach(ViProcessor *processor);
+		ViAudioBuffer* buffer(ViAudioConnection::Direction direction);
 
 	protected:
 
-		void changeInputBuffer(ViAudioBuffer *buffer);
-		void changeOutputBuffer(ViAudioBuffer *buffer);
-
-		ViAudioBuffer* allocateBuffer(ViAudioConnection::Direction direction);
+		void allocateBuffer(ViAudioConnection::Direction direction);
 		void nextBuffer();
 
 	private:
 
-		ViProcessorThread mThread;
+		ViMultiExecutor mMultiExecutor;
+		ViAudioInput *mInput;
+		ViAudioOutput *mOutput;
 
 		QQueue<ViAudioBuffer*> mInputBuffers;
 		ViAudioBuffer *mInputBuffer;
-		ViAudioBuffer *mOutputBuffer;
-
-		ViAudioConnection *mConnection;
-		ViAudioInput *mInput;
-		QList<ViAudioOutput*> mOutputs;
+		ViAudioBuffer *mOutputBuffer;	
 
 };
 

@@ -8,39 +8,30 @@ ViAudioEngine *ViAudioEngine::mEngine = NULL;
 ViAudioEngine::ViAudioEngine()
 	: ViSingleton()
 {
-	/*mProcessingChain.addOutput(ViAudioFormat::defaultFormat(), QAudioDeviceInfo::defaultOutputDevice());
-	mProcessingChain.setInput(ViAudioFormat::defaultFormat(), "/home/visore/a.wav");
-
-	ViWaveFormer *waveFormer1 = new ViWaveFormer();
-	ViWaveFormer *waveFormer2 = new ViWaveFormer();
-	QObject::connect(waveFormer1, SIGNAL(changed(ViWaveForm*)), this, SIGNAL(inputWaveChanged(ViWaveForm*)));
-	QObject::connect(waveFormer2, SIGNAL(changed(ViWaveForm*)), this, SIGNAL(outputWaveChanged(ViWaveForm*)));
-	mProcessingChain.attach(ViAudioConnection::Input, waveFormer1);
-	mProcessingChain.attach(ViAudioConnection::Output, waveFormer2);
-
-	mProcessingChain.start();*/
-
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(progressed(short)), this, SIGNAL(spectrumChanged(short)));
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
 
-	ViMultiExecutor *e = new ViMultiExecutor();
-	ViQtConnection *c = new ViQtConnection();
-	ib = new ViAudioBuffer();
-	ViAudioBuffer *ob = new ViAudioBuffer();
+	mConnection = new ViQtConnection();
+	mFileInput = mConnection->fileInput();
+	mFileOutput = mConnection->fileOutput();
+	mStreamInput = mConnection->streamInput();
+	mStreamOutput = mConnection->streamOutput();
 
-	ViFileInput *si = c->fileInput(ViAudioFormat::defaultFormat(), ib, "/home/visore/a.wav");
-	ViStreamOutput *so = c->streamOutput(ViAudioFormat::defaultFormat(), ob, QAudioDeviceInfo::defaultOutputDevice());
+	mProcessingChain.setTransmission(mFileInput);
+	mProcessingChain.setTransmission(mStreamOutput);
+	
+	mFileInput->setFile("/home/visore/a.wav");
+	mStreamOutput->setDevice(QAudioDeviceInfo::defaultOutputDevice());
+	mStreamOutput->setFormat(ViAudioFormat::defaultFormat());
 
-	e->setBuffer(ViAudioConnection::Input, ib);
-	e->setBuffer(ViAudioConnection::Output, ob);
-
-	si->start();
-	so->start();
+	mFileInput->start();
+	mStreamOutput->start();
 
 }
 
 ViAudioEngine::~ViAudioEngine()
 {
+	delete mConnection;
 }
 
 ViAudioEngine* ViAudioEngine::instance()
@@ -61,5 +52,5 @@ void ViAudioEngine::calculateSpectrum(qint32 size, QString windowFunction)
 {
 	mExecutor.setWindowSize(size);
 	mSpectrumAnalyzer.setWindowFunction(windowFunction);
-	mExecutor.execute(ib, &mSpectrumAnalyzer);
+	mExecutor.execute(mProcessingChain.buffer(ViAudioConnection::Input), &mSpectrumAnalyzer);
 }

@@ -4,43 +4,38 @@
 ViQtStreamOutput::ViQtStreamOutput()
 	: ViStreamOutput()
 {
+	mAudioOutput = NULL;
+	mIsMute = false;
 }
 
 ViQtStreamOutput::~ViQtStreamOutput()
 {
-	free();
+	if(mAudioOutput != NULL)
+	{
+		delete mAudioOutput;
+	}
 }
 
-void ViQtStreamOutput::initialize()
+void ViQtStreamOutput::setBuffer(ViAudioBuffer *buffer)
 {
-	ViStreamOutput::initialize();
+	ViStreamOutput::setBuffer(buffer);
+	mBufferDevice.close();
+	mBufferDevice.setBuffer(mBuffer->data());
+	mBufferDevice.open(QIODevice::ReadOnly);
+}
 
-	mBufferDevice = new QBuffer(mBuffer->data(), this);
-	mBufferDevice->open(QIODevice::ReadOnly);
-
-	mFormat.setCodec(ViCodecManager::selected("PCM"));
-	mFormat.setSampleRate(44100);
-	mFormat.setSampleSize(16);
-	mFormat.setChannelCount(2);
+void ViQtStreamOutput::setFormat(ViAudioFormat format)
+{
+	ViStreamOutput::setFormat(format);
+	mBuffer->setFormat(mFormat);
+	if(mAudioOutput != NULL)
+	{
+		QObject::disconnect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
+		delete mAudioOutput;
+	}
 	mAudioOutput = new QAudioOutput(mDevice, mFormat, this);
 	mAudioOutput->setNotifyInterval(25);
-
-	/*if(!mDevice.isFormatSupported(mFormat))
-	{
-		setErrorParameters("ViQtStreamOutput", "The format is not supported on this device", ViErrorInfo::NonFatal);
-	}*/
-
-	ViObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
-
-	mMuteVolume = volume();
-	mIsMute = false;
-}
-
-void ViQtStreamOutput::free()
-{
-	ViStreamOutput::free();
-	delete mAudioOutput;
-	delete mBufferDevice;
+	QObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
 }
 
 void ViQtStreamOutput::start()
@@ -51,28 +46,31 @@ void ViQtStreamOutput::start()
 	}
 	else
 	{
-		mAudioOutput->start(mBufferDevice);
+		mAudioOutput->start(&mBufferDevice);
 	}
 	mState = QAudio::ActiveState;
+	emit started();
 }
 
 void ViQtStreamOutput::stop()
 {
-	mBufferDevice->seek(0);
+	mBufferDevice.seek(0);
 	mState = QAudio::StoppedState;
 	mAudioOutput->stop();
 	checkPosition();
+	emit stopped();
 }
 
 void ViQtStreamOutput::pause()
 {
 	mState = QAudio::SuspendedState;
 	mAudioOutput->suspend();
+	emit paused();
 }
 
 bool ViQtStreamOutput::setPosition(ViAudioPosition position)
 {
-	mBufferDevice->seek(position.position(ViAudioPosition::Bytes));
+	mBufferDevice.seek(position.position(ViAudioPosition::Bytes));
 	checkPosition();
 }
 
@@ -82,7 +80,7 @@ ViAudioPosition ViQtStreamOutput::position()
 	{
 		return ViAudioPosition(0, ViAudioPosition::Microseconds, mFormat);
 	}
-	return ViAudioPosition(mBufferDevice->pos(), ViAudioPosition::Bytes, mFormat);
+	return ViAudioPosition(mBufferDevice.pos(), ViAudioPosition::Bytes, mFormat);
 }
 
 void ViQtStreamOutput::checkPosition()

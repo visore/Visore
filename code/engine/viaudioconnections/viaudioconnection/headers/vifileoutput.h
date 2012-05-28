@@ -7,16 +7,9 @@ class ViFileOutput : public ViAudioOutput
 {
     Q_OBJECT
 
-	public slots:
-
-		virtual void bufferChanged(int size);
-
 	public:
 
 		ViFileOutput();
-
-		virtual void initialize();
-		virtual void free();
 
 		virtual void setFile(QString filePath);
 

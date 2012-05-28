@@ -13,15 +13,15 @@ class ViQtFileOutput : public ViFileOutput
 
 		ViQtFileOutput();
 		~ViQtFileOutput();
-		void initialize();
-		void free();
 
 		void start();
 		void stop();
 		void pause();
 
 	private:
+
 		ViCoder mCoder;
+
 };
 
 #endif

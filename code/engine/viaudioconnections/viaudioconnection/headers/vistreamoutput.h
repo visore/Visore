@@ -12,16 +12,9 @@ class ViStreamOutput : public ViAudioOutput
 
 		void positionChanged(ViAudioPosition position);
 
-	public slots:
-
-		virtual void bufferChanged(int size);
-
 	public:
 
 		ViStreamOutput();
-
-		virtual void initialize();
-		virtual void free();
 
 		virtual void setDevice(QAudioDeviceInfo device);
 

@@ -12,14 +12,16 @@ class ViQtStreamOutput : public ViStreamOutput
 	Q_OBJECT
 
 	private slots:
+
 		void checkPosition();
 
 	public:
 
 		ViQtStreamOutput();
 		~ViQtStreamOutput();
-		void initialize();
-		void free();
+
+		void setBuffer(ViAudioBuffer *buffer);
+		void setFormat(ViAudioFormat format);
 
 		void start();
 		void stop();
@@ -35,11 +37,12 @@ class ViQtStreamOutput : public ViStreamOutput
 	private:
 
 		QAudioOutput *mAudioOutput;
-		QBuffer *mBufferDevice;
+		QBuffer mBufferDevice;
 		ViAudioPosition mOldPosition;
 
 		qreal mMuteVolume;
 		bool mIsMute;
+
 };
 
 #endif

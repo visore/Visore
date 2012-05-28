@@ -10,9 +10,6 @@ class ViFileInput : public ViAudioInput
 	public:
 
 		ViFileInput();
-		
-		virtual void initialize();
-		virtual void free();
 
 		virtual void setFile(QString filePath);
 

@@ -13,7 +13,6 @@ class ViExecutor : public QThread
 	signals:
 
 		void progressed(short progress);
-		void finished();
 
 	public slots:
 

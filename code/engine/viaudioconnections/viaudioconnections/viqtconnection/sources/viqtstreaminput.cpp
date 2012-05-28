@@ -3,8 +3,12 @@
 #include <iostream>
 using namespace std;
 
-ViQtStreamBuffer::ViQtStreamBuffer(ViAudioBuffer *buffer)
+ViQtStreamBuffer::ViQtStreamBuffer()
 	: QBuffer()
+{
+}
+
+void ViQtStreamBuffer::setBuffer(ViAudioBuffer *buffer)
 {
 	mStream = buffer->createWriteStream();
 }
@@ -32,29 +36,34 @@ qint64 ViQtStreamBuffer::writeData(const char *data, qint64 length)
 ViQtStreamInput::ViQtStreamInput()
 	: ViStreamInput()
 {
+	mAudioInput = NULL;
 }
 
 ViQtStreamInput::~ViQtStreamInput()
 {
-	free();
+	if(mAudioInput != NULL)
+	{
+		delete mAudioInput;
+	}
 }
 
-void ViQtStreamInput::initialize()
+void ViQtStreamInput::setBuffer(ViAudioBuffer *buffer)
 {
-	ViStreamInput::initialize();
+	ViStreamInput::setBuffer(buffer);
+	mBufferDevice.close();
+	mBufferDevice.setBuffer(mBuffer);
+	mBufferDevice.open(QIODevice::WriteOnly);
+}
 
-	mBufferDevice = new ViQtStreamBuffer(mBuffer);
-	mBufferDevice->open(QIODevice::WriteOnly);
-
+void ViQtStreamInput::setFormat(ViAudioFormat format)
+{
+	ViStreamInput::setFormat(format);
 	mBuffer->setFormat(mFormat);
+	if(mAudioInput != NULL)
+	{
+		delete mAudioInput;
+	}
 	mAudioInput = new QAudioInput(mDevice, mFormat, this);
-}
-
-void ViQtStreamInput::free()
-{
-	ViStreamInput::free();
-	delete mAudioInput;
-	delete mBufferDevice;
 }
 
 void ViQtStreamInput::start()
@@ -65,22 +74,25 @@ void ViQtStreamInput::start()
 	}
 	else
 	{
-		mAudioInput->start(mBufferDevice);
+		mAudioInput->start(&mBufferDevice);
 	}
 	mState = QAudio::ActiveState;
+	emit started();
 }
 
 void ViQtStreamInput::stop()
 {
-	mBufferDevice->seek(0);
+	mBufferDevice.seek(0);
 	mState = QAudio::StoppedState;
 	mAudioInput->stop();
+	emit stopped();
 }
 
 void ViQtStreamInput::pause()
 {
 	mState = QAudio::SuspendedState;
 	mAudioInput->suspend();
+	emit paused();
 }
 
 qreal ViQtStreamInput::volume()

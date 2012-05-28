@@ -43,5 +43,4 @@ void ViMultiExecutor::runNotify()
 	}
 	while(mInputChunk->size() > 0);
 	emit progressed(100);
-	emit finished();
 }

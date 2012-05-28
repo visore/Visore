@@ -27,14 +27,10 @@ class ViAudioConnection : public ViError
 		ViAudioConnection();
 		~ViAudioConnection();
 
-		virtual ViFileInput* fileInput(ViAudioFormat format, ViAudioBuffer *buffer, QString filePath = "") = 0;
-		virtual ViStreamInput* streamInput(ViAudioFormat format, ViAudioBuffer *buffer, QAudioDeviceInfo device) = 0;
-		virtual ViFileOutput* fileOutput(ViAudioFormat format, ViAudioBuffer *buffer, QString filePath = "") = 0;
-		virtual ViStreamOutput* streamOutput(ViAudioFormat format, ViAudioBuffer *buffer, QAudioDeviceInfo device) = 0;
-
-	protected:
-
-		void close(ViAudioTransmission *transmission);
+		virtual ViFileInput* fileInput() = 0;
+		virtual ViStreamInput* streamInput() = 0;
+		virtual ViFileOutput* fileOutput() = 0;
+		virtual ViStreamOutput* streamOutput() = 0;
 
 	protected:
 

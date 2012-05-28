@@ -7,15 +7,20 @@
 
 class ViQtStreamBuffer : public QBuffer
 {
+
 	public:
-		ViQtStreamBuffer(ViAudioBuffer *buffer);
+
+		ViQtStreamBuffer();
+		void setBuffer(ViAudioBuffer *buffer);
 		qint64 write(const char *data, qint64 maxSize);
 		qint64 write(const char *data);
 		qint64 write(const QByteArray &byteArray);
 		qint64 writeData(const char *data, qint64 length);
 
 	private:
+
 		ViAudioBufferStream *mStream;
+
 };
 
 class ViQtStreamInput : public ViStreamInput
@@ -26,8 +31,9 @@ class ViQtStreamInput : public ViStreamInput
 
 		ViQtStreamInput();
 		~ViQtStreamInput();
-		void initialize();
-		void free();
+
+		void setBuffer(ViAudioBuffer *buffer);
+		void setFormat(ViAudioFormat format);
 
 		void start();
 		void stop();
@@ -40,7 +46,7 @@ class ViQtStreamInput : public ViStreamInput
 	private:
 
 		QAudioInput *mAudioInput;
-		QBuffer *mBufferDevice;
+		ViQtStreamBuffer mBufferDevice;
 		ViAudioPosition mOldPosition;
 
 		qreal mMuteVolume;

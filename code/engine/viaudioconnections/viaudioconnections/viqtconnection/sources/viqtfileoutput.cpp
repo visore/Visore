@@ -7,30 +7,21 @@ ViQtFileOutput::ViQtFileOutput()
 
 ViQtFileOutput::~ViQtFileOutput()
 {
-	free();
-}
-
-void ViQtFileOutput::initialize()
-{
-	ViFileOutput::initialize();
-}
-
-void ViQtFileOutput::free()
-{
-	ViFileOutput::free();
 }
 
 void ViQtFileOutput::start()
 {
 	mCoder.encode(mBuffer, mFilePath, mBuffer->format(), mFormat);
+	emit started();
 }
 
 void ViQtFileOutput::stop()
 {
 	mCoder.stop();
+	emit stopped();
 }
 
 void ViQtFileOutput::pause()
 {
-
+	emit paused();
 }

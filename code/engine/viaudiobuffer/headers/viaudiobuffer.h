@@ -4,12 +4,13 @@
 #include "viaudiobufferstream.h"
 #include "viaudioformat.h"
 #include "vichunk.h"
+#include "viid.h"
 
 typedef ViChunk<char> ViAudioBufferChunk;
 
 class ViAudioBufferStream;
 
-class ViAudioBuffer : public QObject
+class ViAudioBuffer : public QObject, public ViId
 {
     Q_OBJECT
 
@@ -45,16 +46,12 @@ class ViAudioBuffer : public QObject
 
 		ViAudioFormat format();
 
-		void setId(int id);
-		int id();
-
 	private:
 
 		QByteArray *mData;
 		QList<ViAudioBufferStream*> mStreams;
 		int mBufferHeadStart;
 		ViAudioFormat mFormat;
-		int mId;
 };
 
 #endif

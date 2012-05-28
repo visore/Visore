@@ -5,17 +5,8 @@ ViAudioInput::ViAudioInput()
 {
 }
 
-void ViAudioInput::initialize()
+void ViAudioInput::setBuffer(ViAudioBuffer *buffer)
 {
-	ViAudioInput::free();
+	ViAudioTransmission::setBuffer(buffer);
 	mStream = mBuffer->createWriteStream();
-}
-
-void ViAudioInput::free()
-{
-	if(mStream != NULL)
-	{
-		delete mStream;
-		mStream = NULL;
-	}
 }
