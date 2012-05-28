@@ -14,12 +14,17 @@ ViAudioEngine::ViAudioEngine()
 	mStreamOutput = mConnection.streamOutput();
 
 	QObject::connect(&mProcessingChain, SIGNAL(changed()), this, SIGNAL(chainChanged()));
+
 	mProcessingChain.setTransmission(mStreamOutput);
 	mStreamOutput->setDevice(QAudioDeviceInfo::defaultOutputDevice());
 	mStreamOutput->setFormat(ViAudioFormat::defaultFormat());
+	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
 
-	mProcessingChain.attach(ViAudioConnection::Input, &mInputWaveFormer);
-	mProcessingChain.attach(ViAudioConnection::Output, &mOutputWaveFormer);
+	mStreamInput->setFormat(ViAudioFormat::defaultFormat());
+	mStreamInput->setDevice(QAudioDeviceInfo::defaultInputDevice());
+
+	mProcessingChain.attach(ViAudio::AudioInput, &mInputWaveFormer);
+	mProcessingChain.attach(ViAudio::AudioOutput, &mOutputWaveFormer);
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -41,16 +46,29 @@ ViRealSpectrum ViAudioEngine::spectrum()
 	return mSpectrumAnalyzer.spectrum();
 }
 
-ViWaveForm& ViAudioEngine::wave(ViAudioConnection::Direction direction)
+ViWaveForm& ViAudioEngine::wave(ViAudio::Mode mode)
 {
-	if(direction == ViAudioConnection::Input)
+	if(mode == ViAudio::AudioInput)
 	{
 		return mInputWaveFormer.wave();
 	}
-	else if(direction == ViAudioConnection::Output)
+	else if(mode == ViAudio::AudioOutput)
 	{
 		return mOutputWaveFormer.wave();
 	}
+}
+
+void ViAudioEngine::changeInput(ViAudio::Input input)
+{
+	if(input == ViAudio::File)
+	{
+		mProcessingChain.setTransmission(mFileInput);
+	}
+	else if(input == ViAudio::Line)
+	{
+		mProcessingChain.setTransmission(mStreamInput);
+	}
+	emit inputChanged(input);
 }
 
 void ViAudioEngine::startPlayback()
@@ -70,9 +88,6 @@ void ViAudioEngine::pausePlayback()
 
 void ViAudioEngine::startRecording()
 {
-	mStreamInput->setFormat(ViAudioFormat::defaultFormat());
-	mStreamInput->setDevice(QAudioDeviceInfo::defaultInputDevice());
-	mProcessingChain.setTransmission(mStreamInput);
 	mStreamInput->start();
 }
 
@@ -89,7 +104,6 @@ void ViAudioEngine::pauseRecording()
 void ViAudioEngine::openFile(QString filePath)
 {
 	mFileInput->setFile(filePath);
-	mProcessingChain.setTransmission(mFileInput);
 	mFileInput->start();
 }
 
@@ -102,5 +116,5 @@ void ViAudioEngine::calculateSpectrum(qint32 size, QString windowFunction)
 {
 	mExecutor.setWindowSize(size);
 	mSpectrumAnalyzer.setWindowFunction(windowFunction);
-	mExecutor.execute(mProcessingChain.buffer(ViAudioConnection::Input), &mSpectrumAnalyzer);
+	mExecutor.execute(mProcessingChain.buffer(ViAudio::AudioInput), &mSpectrumAnalyzer);
 }

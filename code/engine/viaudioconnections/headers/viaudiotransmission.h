@@ -3,11 +3,10 @@
 
 #include <qaudio.h>
 #include "viaudiobuffer.h"
-#include "vierror.h"
 #include "viaudioformat.h"
 #include "viaudioposition.h"
 
-class ViAudioTransmission : public QObject, public ViError
+class ViAudioTransmission : public QObject
 {
     Q_OBJECT
 

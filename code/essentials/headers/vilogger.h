@@ -1,15 +1,67 @@
 #ifndef VILOGGER_H
 #define VILOGGER_H
 
+#include <QtGlobal>
 #include <QString>
+#include <QList>
+#include <QSharedPointer>
 #include <iostream>
 
 using namespace std;
 
+class ViLogEntry
+{
+
+	public:
+
+		ViLogEntry(QString className, int lineNumber, QString message, QtMsgType type);
+		QString className();
+		int lineNumber();
+		QString message();
+		QtMsgType type();
+		QString toString();
+		void print();
+
+	private:
+
+		QString mClassName;
+		QString mMessage;
+		int mLineNumber;
+		QtMsgType mType;
+
+};
+
 class ViLogger
 {
+
 	public:
-		static void debug(QString message);
+
+		static ViLogger* instance();
+		void enableTerminal(bool enable);
+		void append(ViLogEntry entry);
+
+	protected:
+
+		ViLogger();
+
+	protected:
+
+		static QSharedPointer<ViLogger> mInstance;
+		QList<ViLogEntry> mEntries;
+		bool mTerminalEnabled;
+	
 };
+
+#define LOG1(message) log(__FILE__, __LINE__, message, QtDebugMsg)
+#define LOG2(message, type) log(__FILE__, __LINE__, message, type)
+
+#define GET_ARGUMENT(arg1, arg2, arg3, ...) arg3
+#define LOG_CHOOSER(...) GET_ARGUMENT(__VA_ARGS__, LOG2, LOG1, )
+
+#define LOG(...) LOG_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
+
+ViLogger * const LOGGER = ViLogger::instance();
+
+void log(const char *file, const int line, const char *message, QtMsgType type);
 
 #endif

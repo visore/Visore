@@ -9,8 +9,8 @@ ViSingleExecutor::ViSingleExecutor()
 void ViSingleExecutor::execute(ViAudioBuffer *buffer, ViProcessor *processor)
 {
 	mProcessors.clear();
-	setBuffer(ViAudioConnection::Input, buffer);
-	attach(ViAudioConnection::Input, processor);
+	setBuffer(ViAudio::AudioInput, buffer);
+	attach(ViAudio::AudioInput, processor);
 	ViSingleExecutor::runIt = &ViSingleExecutor::runObserve;
 	ViExecutor::execute();
 }
@@ -18,9 +18,9 @@ void ViSingleExecutor::execute(ViAudioBuffer *buffer, ViProcessor *processor)
 void ViSingleExecutor::execute(ViAudioBuffer *inputBuffer, ViAudioBuffer *outputBuffer, ViProcessor *processor)
 {
 	mProcessors.clear();
-	setBuffer(ViAudioConnection::Input, inputBuffer);
-	setBuffer(ViAudioConnection::Output, outputBuffer);
-	attach(ViAudioConnection::Input, processor);
+	setBuffer(ViAudio::AudioInput, inputBuffer);
+	setBuffer(ViAudio::AudioOutput, outputBuffer);
+	attach(ViAudio::AudioInput, processor);
 	ViSingleExecutor::runIt = &ViSingleExecutor::runModify;
 	ViExecutor::execute();
 }

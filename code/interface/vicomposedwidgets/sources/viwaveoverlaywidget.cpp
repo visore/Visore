@@ -27,13 +27,13 @@ ViWaveOverlayWidget::ViWaveOverlayWidget(QWidget *parent)
 
 void ViWaveOverlayWidget::updateWave()
 {
-	mForm = &mEngine->wave(mDirection);
+	mForm = &mEngine->wave(mMode);
 	mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
 }
 
-void ViWaveOverlayWidget::setDirection(ViAudioConnection::Direction direction)
+void ViWaveOverlayWidget::setMode(ViAudio::Mode mode)
 {
-	mDirection = direction;
+	mMode = mode;
 	ViObject::connect(mEngine, SIGNAL(chainChanged(ViWaveForm*)), this, SLOT(updateWave()));
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 }

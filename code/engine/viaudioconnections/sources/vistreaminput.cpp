@@ -53,6 +53,7 @@ void ViStreamInput::setDevice(QAudioDeviceInfo device)
 void ViStreamInput::setBuffer(ViAudioBuffer *buffer)
 {
 	ViAudioInput::setBuffer(buffer);
+	mBuffer->setFormat(mFormat);
 	mBufferDevice.close();
 	mBufferDevice.setBuffer(mBuffer);
 	mBufferDevice.open(QIODevice::WriteOnly);
@@ -61,7 +62,10 @@ void ViStreamInput::setBuffer(ViAudioBuffer *buffer)
 void ViStreamInput::setFormat(ViAudioFormat format)
 {
 	ViAudioInput::setFormat(format);
-	mBuffer->setFormat(mFormat);
+	if(mBuffer != NULL)
+	{
+		mBuffer->setFormat(mFormat);
+	}
 	if(mAudioInput != NULL)
 	{
 		delete mAudioInput;

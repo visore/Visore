@@ -61,14 +61,14 @@ void ViProcessorList::observeOutput(const ViSampleChunk *data)
 	mThreadPool.waitForDone();
 }
 
-bool ViProcessorList::add(ViAudioConnection::Direction direction, ViProcessor *processor)
+bool ViProcessorList::add(ViAudio::Mode mode, ViProcessor *processor)
 {
 	bool result = false;
 	ViObserver *observer;
 	ViModifier *modifier;
 	if((observer = dynamic_cast<ViObserver*>(processor)) != NULL)
 	{
-		if(direction == ViAudioConnection::Input)
+		if(mode == ViAudio::AudioInput)
 		{
 			mInputObservers.append(observer);
 			result = true;
@@ -81,7 +81,7 @@ bool ViProcessorList::add(ViAudioConnection::Direction direction, ViProcessor *p
 	}
 	else if((modifier = dynamic_cast<ViModifier*>(processor)) != NULL)
 	{
-		if(direction == ViAudioConnection::Input)
+		if(mode == ViAudio::AudioInput)
 		{
 			mInputModifiers.append(modifier);
 			result = true;

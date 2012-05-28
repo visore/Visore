@@ -5,6 +5,7 @@
 #include <QThreadPool>
 #include "viprocessor.h"
 #include "viaudioconnection.h"
+#include "viaudio.h"
 
 class ViProcessorList : public QObject
 {
@@ -15,7 +16,7 @@ class ViProcessorList : public QObject
 		ViProcessorList();
 		~ViProcessorList();
 
-		bool add(ViAudioConnection::Direction direction, ViProcessor *processor);
+		bool add(ViAudio::Mode mode, ViProcessor *processor);
 		bool remove(ViProcessor *processor);
 
 		void clear();

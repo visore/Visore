@@ -13,7 +13,7 @@ ViWaveBaseWidget::ViWaveBaseWidget(QWidget *parent)
 
 void ViWaveBaseWidget::updateWave()
 {
-	mForm = &mEngine->wave(mDirection);
+	mForm = &mEngine->wave(mMode);
 	mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
 	++mIntervalCounter;
 	if(mIntervalCounter > REPAINT_INTERVAL)
@@ -23,9 +23,9 @@ void ViWaveBaseWidget::updateWave()
 	}
 }
 
-void ViWaveBaseWidget::setDirection(ViAudioConnection::Direction direction)
+void ViWaveBaseWidget::setMode(ViAudio::Mode mode)
 {
-	mDirection = direction;
+	mMode = mode;
 	ViObject::connect(mEngine, SIGNAL(chainChanged()), this, SLOT(updateWave()));
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 }

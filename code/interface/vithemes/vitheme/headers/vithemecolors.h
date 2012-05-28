@@ -4,9 +4,8 @@
 #define MAXIMUM_COLORS 25
 
 #include <QColor>
-#include "vierror.h"
 
-class ViThemeColors : public ViError
+class ViThemeColors
 {
 	public:
 		ViThemeColors();

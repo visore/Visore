@@ -1,28 +1,15 @@
 #ifndef VIAUDIOCONNECTION_H
 #define VIAUDIOCONNECTION_H
 
-#include "vierror.h"
 #include "vifileinput.h"
 #include "vistreaminput.h"
 #include "vifileoutput.h"
 #include "vistreamoutput.h"
 
-class ViAudioConnection : public ViError
+class ViAudioConnection
 {
 
 	public:
-
-		enum Direction
-		{
-			Input = 0,
-			Output = 1
-		};
-
-		enum Type
-		{
-			Stream = 0,
-			File = 1
-		};
 
 		ViAudioConnection();
 		~ViAudioConnection();

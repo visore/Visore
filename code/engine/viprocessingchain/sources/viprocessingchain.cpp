@@ -30,7 +30,7 @@ ViProcessingChain::~ViProcessingChain()
 void ViProcessingChain::changeInput()
 {
 	QObject::connect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finish()));
-	allocateBuffer(ViAudioConnection::Input);
+	allocateBuffer(ViAudio::AudioInput);
 	mInput->setBuffer(mInputBuffer);
 }
 
@@ -53,23 +53,23 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 	if((input = dynamic_cast<ViAudioInput*>(transmission)) != NULL)
 	{
 		mInput = input;
-		allocateBuffer(ViAudioConnection::Input);
+		allocateBuffer(ViAudio::AudioInput);
 		nextBuffer();
 		mInput->setBuffer(mInputBuffer);
-		mMultiExecutor.setBuffer(ViAudioConnection::Input, mInputBuffer);
+		mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
 	}
 	else if((output = dynamic_cast<ViAudioOutput*>(transmission)) != NULL)
 	{
 		mOutput = output;
-		allocateBuffer(ViAudioConnection::Output);
+		allocateBuffer(ViAudio::AudioOutput);
 		mOutput->setBuffer(mOutputBuffer);
-		mMultiExecutor.setBuffer(ViAudioConnection::Output, mOutputBuffer);
+		mMultiExecutor.setBuffer(ViAudio::AudioOutput, mOutputBuffer);
 	}
 }
 
-bool ViProcessingChain::attach(ViAudioConnection::Direction direction, ViProcessor *processor)
+bool ViProcessingChain::attach(ViAudio::Mode mode, ViProcessor *processor)
 {
-	mMultiExecutor.attach(direction, processor);
+	mMultiExecutor.attach(mode, processor);
 }
 
 bool ViProcessingChain::detach(ViProcessor *processor)
@@ -77,26 +77,26 @@ bool ViProcessingChain::detach(ViProcessor *processor)
 	mMultiExecutor.detach(processor);
 }
 
-ViAudioBuffer* ViProcessingChain::buffer(ViAudioConnection::Direction direction)
+ViAudioBuffer* ViProcessingChain::buffer(ViAudio::Mode mode)
 {
-	if(direction == ViAudioConnection::Input)
+	if(mode == ViAudio::AudioInput)
 	{
 		return mInputBuffer;
 	}
-	else if(direction == ViAudioConnection::Output)
+	else if(mode == ViAudio::AudioOutput)
 	{
 		return mOutputBuffer;
 	}
 }
 
-void ViProcessingChain::allocateBuffer(ViAudioConnection::Direction direction)
+void ViProcessingChain::allocateBuffer(ViAudio::Mode mode)
 {
 	ViAudioBuffer *buffer = new ViAudioBuffer();
-	if(direction == ViAudioConnection::Input)
+	if(mode == ViAudio::AudioInput)
 	{
 		mInputBuffers.enqueue(buffer);
 	}
-	else if(direction == ViAudioConnection::Output)
+	else if(mode == ViAudio::AudioOutput)
 	{
 		if(mOutputBuffer != NULL)
 		{

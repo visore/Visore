@@ -18,7 +18,7 @@ bool ViLibrary<T, P1>::open(QString path)
 	mHandle = dlopen(path.toUtf8().data(), RTLD_NOW);
 	if(mHandle == NULL)
 	{
-		setErrorParameters("ViLibrary - Library Error", "Can't open the specified library(" + path + "): " + QString(dlerror()), ViErrorInfo::Fatal);
+		//setErrorParameters("ViLibrary - Library Error", "Can't open the specified library(" + path + "): " + QString(dlerror()), ViErrorInfo::Fatal);
 		return false;
 	}
 	return true;
@@ -39,7 +39,7 @@ T* ViLibrary<T, P1>::createObject(QString functionName, P1 *object)
 {
 	if(mHandle == NULL)
 	{
-		setErrorParameters("ViLibrary - Library Error", "Please open the library first", ViErrorInfo::Fatal);
+		//setErrorParameters("ViLibrary - Library Error", "Please open the library first", ViErrorInfo::Fatal);
 		return NULL;
 	}
 	if(object != NULL)
@@ -58,7 +58,7 @@ void ViLibrary<T, P1>::deleteObject(QString functionName, T *object)
 {
 	if(mHandle == NULL)
 	{
-		setErrorParameters("ViLibrary - Library Error", "Please open the library first", ViErrorInfo::Fatal);
+		//setErrorParameters("ViLibrary - Library Error", "Please open the library first", ViErrorInfo::Fatal);
 	}
 	typedef void (*deleteObject)(void*);
 	deleteObject deleter = (deleteObject) dlsym(mHandle, functionName.toUtf8().data());

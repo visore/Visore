@@ -43,9 +43,9 @@ void ViExecutor::setNotify(bool notify)
 	mNotify = notify;
 }
 
-bool ViExecutor::attach(ViAudioConnection::Direction direction, ViProcessor *processor)
+bool ViExecutor::attach(ViAudio::Mode mode, ViProcessor *processor)
 {
-	bool result = mProcessors.add(direction, processor);
+	bool result = mProcessors.add(mode, processor);
 	return result;
 }
 
@@ -55,9 +55,9 @@ bool ViExecutor::detach(ViProcessor *processor)
 	return mProcessors.remove(processor);
 }
 
-void ViExecutor::setBuffer(ViAudioConnection::Direction direction, ViAudioBuffer *buffer)
+void ViExecutor::setBuffer(ViAudio::Mode mode, ViAudioBuffer *buffer)
 {
-	if(direction == ViAudioConnection::Input)
+	if(mode == ViAudio::AudioInput)
 	{
 		if(mInputChunk == NULL)
 		{

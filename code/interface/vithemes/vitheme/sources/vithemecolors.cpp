@@ -12,7 +12,7 @@ QColor ViThemeColors::color(int index)
 {
 	if(index >= mColors.size())
 	{
-		setErrorParameters("ViThemeColor - Selected Color", "The color you requested is not available", ViErrorInfo::NonFatal);
+		//setErrorParameters("ViThemeColor - Selected Color", "The color you requested is not available", ViErrorInfo::NonFatal);
 	}
 	return mColors[index];
 }

@@ -18,7 +18,7 @@ class ViPlaybackWidget : public ViWidget
 		void play(bool checked);
 		void pause(bool checked);
 		void stop(bool checked);
-		void inputChanged(ViAudioConnection::Type type);
+		void inputChanged(ViAudio::Input input);
 
 	public:
 		ViPlaybackWidget(QWidget *parent = 0);

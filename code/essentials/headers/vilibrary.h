@@ -1,12 +1,12 @@
 #ifndef VILIBRARY_H
 #define VILIBRARY_H
 
-#include "vierror.h"
+#include "viobject.h"
 #include <dlfcn.h>
 #include <stdlib.h>
 
 template <class T, class P1 = ViObject>
-class ViLibrary : public ViError
+class ViLibrary
 {
 	public:
 		ViLibrary();

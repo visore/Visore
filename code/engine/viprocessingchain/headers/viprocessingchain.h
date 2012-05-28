@@ -25,13 +25,13 @@ class ViProcessingChain : public QObject
 
 		void setWindowSize(int windowSize);
 		void setTransmission(ViAudioTransmission *transmission);
-		bool attach(ViAudioConnection::Direction direction, ViProcessor *processor);
+		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
-		ViAudioBuffer* buffer(ViAudioConnection::Direction direction);
+		ViAudioBuffer* buffer(ViAudio::Mode mode);
 
 	protected:
 
-		void allocateBuffer(ViAudioConnection::Direction direction);
+		void allocateBuffer(ViAudio::Mode mode);
 		void nextBuffer();
 
 	private:

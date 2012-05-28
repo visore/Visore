@@ -32,7 +32,7 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mUi->pauseButton->disable();
 	mUi->stopButton->disable();
 
-	ViObject::connect(mEngine, SIGNAL(inputChanged(ViAudioConnection::Type)), this, SLOT(inputChanged(ViAudioConnection::Type)));
+	ViObject::connect(mEngine, SIGNAL(inputChanged(ViAudio::Input)), this, SLOT(inputChanged(ViAudio::Input)));
 }
 
 ViPlaybackWidget::~ViPlaybackWidget()
@@ -40,17 +40,17 @@ ViPlaybackWidget::~ViPlaybackWidget()
 	delete mUi;
 }
 
-void ViPlaybackWidget::inputChanged(ViAudioConnection::Type type)
+void ViPlaybackWidget::inputChanged(ViAudio::Input input)
 {
 	stop(true);
-	if(type == ViAudioConnection::File)
+	if(input == ViAudio::File)
 	{
 		mUi->recordButton->disable();
 		mUi->playButton->enable();
 		mUi->pauseButton->disable();
 		mUi->stopButton->disable();
 	}
-	else if(type == ViAudioConnection::Stream)
+	else if(input == ViAudio::Line)
 	{
 		mUi->recordButton->enable();
 		mUi->playButton->disable();

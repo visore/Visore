@@ -26,14 +26,15 @@ ViInputWidget::~ViInputWidget()
 
 void ViInputWidget::selectLineInput()
 {
+	mEngine->changeInput(ViAudio::Line);
 	mUi->fileInputButton->setChecked(false);
 }
 
 void ViInputWidget::selectFileInput()
 {
+	mEngine->changeInput(ViAudio::File);
 	//QString file = QFileDialog::getOpenFileName(this, "Open Audio File", QDir::homePath());
 	QString file = "/home/visore/a.wav";
-	//QString file = "/home/visore/a.flac";
 	if(file != "")
 	{
 		mUi->vinylInputButton->setChecked(false);

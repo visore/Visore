@@ -27,7 +27,7 @@ class ViWaveFormWidget : public ViWidget
 	public:
 		ViWaveFormWidget(QWidget *parent = 0);
 		~ViWaveFormWidget();
-		void setDirection(ViAudioConnection::Direction direction);
+		void setMode(ViAudio::Mode mode);
 		void setZoomLevel(qint16 level);
 
 	protected:

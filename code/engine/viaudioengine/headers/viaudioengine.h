@@ -17,6 +17,9 @@ class ViAudioEngine : public ViSingleton
 
 	public slots:
 
+		//Input
+		void changeInput(ViAudio::Input input);
+
 		//Playback
 		void startPlayback();
 		void stopPlayback();
@@ -36,10 +39,16 @@ class ViAudioEngine : public ViSingleton
 
 	signals:
 
+		//Chain
 		void chainChanged();
 
-		void inputChanged(ViAudioConnection::Type type);		
+		//Playback
+		void positionChanged(ViAudioPosition position);
 
+		//Input
+		void inputChanged(ViAudio::Input input);		
+
+		//Spectrum
 		void spectrumProgressed(short percentage);
 		void spectrumFinished();
 
@@ -49,7 +58,7 @@ class ViAudioEngine : public ViSingleton
 		static ViAudioEngine* instance();
 
 		ViRealSpectrum spectrum();
-		ViWaveForm& wave(ViAudioConnection::Direction direction);
+		ViWaveForm& wave(ViAudio::Mode mode);
 
 	protected:
 

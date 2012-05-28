@@ -25,7 +25,7 @@ class ViWaveOverlayWidget : public ViWidget
 
 	public:
 		ViWaveOverlayWidget(QWidget *parent = 0);
-		void setDirection(ViAudioConnection::Direction direction);
+		void setMode(ViAudio::Mode mode);
 		void setZoomLevel(qint16 level);
 
 	protected:
@@ -37,7 +37,7 @@ class ViWaveOverlayWidget : public ViWidget
 
 	private:
 
-		ViAudioConnection::Direction mDirection;
+		ViAudio::Mode mMode;
 		ViWaveForm *mForm;
 		qint64 mPosition;
 		qint16 mZoomLevel;

@@ -12,12 +12,12 @@ ViWaveFormWidget::~ViWaveFormWidget()
 	delete mOverlayWidget;
 }
 
-void ViWaveFormWidget::setDirection(ViAudioConnection::Direction direction)
+void ViWaveFormWidget::setMode(ViAudio::Mode mode)
 {
 	mBaseWidget = new ViWaveBaseWidget(this);
-	mBaseWidget->setDirection(direction);
+	mBaseWidget->setMode(mode);
 	mOverlayWidget = new ViWaveOverlayWidget(this);
-	mOverlayWidget->setDirection(direction);
+	mOverlayWidget->setMode(mode);
 	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SIGNAL(pointerMoved(qint32)));
 	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SLOT(setPointer(qint32)));
 	ViObject::connect(mOverlayWidget, SIGNAL(pointerValuesChanged(qreal, qreal, qreal, qreal)), this, SLOT(updateSampleValues(qreal, qreal, qreal, qreal)));
