@@ -1,7 +1,7 @@
 #include "viprocessor.h"
 
 ViProcessor::ViProcessor()
-	: QObject(), QRunnable()
+	: QObject(), QRunnable(), ViId()
 {
 	setAutoDelete(false); //Ensures that QThreadPool doesn't automatically delete object
 	mIsEnabled = true;

@@ -3,10 +3,11 @@
 
 #include <QObject>
 #include <QRunnable>
+#include "viid.h"
 #include "vichunk.h"
 #include "viaudioformat.h"
 
-class ViProcessor : public QObject, public QRunnable
+class ViProcessor : public QObject, public QRunnable, public ViId
 {
 	Q_OBJECT
 
