@@ -32,11 +32,40 @@ QList<ViProcessor*> ViProcessorList::all()
 	return result;
 }
 
+void ViProcessorList::observeInput(const ViSampleChunk *input, const ViSampleChunk *output)
+{
+	for(int i = 0; i < mInputObservers.size(); ++i)
+	{
+		mInputObservers[i]->setData(input, output);
+		mThreadPool.start(mInputObservers[i]);
+	}
+	mThreadPool.waitForDone();
+}
+
+void ViProcessorList::manipulateInput(ViSampleChunk *input, ViSampleChunk *output)
+{
+	for(int i = 0; i < mInputModifiers.size(); ++i)
+	{
+		mInputModifiers[i]->setData(input, output);
+		mInputModifiers[i]->run();
+	}
+}
+
+void ViProcessorList::observeOutput(const ViSampleChunk *input, const ViSampleChunk *output)
+{
+	for(int i = 0; i < mOutputObservers.size(); ++i)
+	{
+		mOutputObservers[i]->setData(input, output);
+		mThreadPool.start(mOutputObservers[i]);
+	}
+	mThreadPool.waitForDone();
+}
+
 void ViProcessorList::observeInput(const ViSampleChunk *data)
 {
 	for(int i = 0; i < mInputObservers.size(); ++i)
 	{
-		mInputObservers[i]->setData(data);
+		mInputObservers[i]->setInputData(data);
 		mThreadPool.start(mInputObservers[i]);
 	}
 	mThreadPool.waitForDone();
@@ -46,7 +75,7 @@ void ViProcessorList::manipulateInput(ViSampleChunk *data)
 {
 	for(int i = 0; i < mInputModifiers.size(); ++i)
 	{
-		mInputModifiers[i]->setData(data);
+		mInputModifiers[i]->setInputData(data);
 		mInputModifiers[i]->run();
 	}
 }
@@ -55,7 +84,7 @@ void ViProcessorList::observeOutput(const ViSampleChunk *data)
 {
 	for(int i = 0; i < mOutputObservers.size(); ++i)
 	{
-		mOutputObservers[i]->setData(data);
+		mOutputObservers[i]->setInputData(data);
 		mThreadPool.start(mOutputObservers[i]);
 	}
 	mThreadPool.waitForDone();

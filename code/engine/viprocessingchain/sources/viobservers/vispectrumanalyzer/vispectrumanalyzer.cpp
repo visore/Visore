@@ -39,11 +39,11 @@ void ViSpectrumAnalyzer::run()
 	int index;
 	bool tooSmall = false;
 	double *samples;
-	if(mData->size() != mWindowSize)
+	if(mInputData->size() != mWindowSize)
 	{
 		double *paddedSamples = new double[mWindowSize];
-		memcpy(paddedSamples, mData->data(), sizeof(double) * mData->size());
-		for(index = mData->size(); index < mWindowSize; ++index)
+		memcpy(paddedSamples, mInputData->data(), sizeof(double) * mInputData->size());
+		for(index = mInputData->size(); index < mWindowSize; ++index)
 		{
 			paddedSamples[index] = 0;
 		}
@@ -52,7 +52,7 @@ void ViSpectrumAnalyzer::run()
 	}
 	else
 	{
-		samples = mData->data();
+		samples = mInputData->data();
 	}
 
 	double fourier[mWindowSize];
