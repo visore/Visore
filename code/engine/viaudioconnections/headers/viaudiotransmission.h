@@ -5,6 +5,7 @@
 #include "viaudiobuffer.h"
 #include "viaudioformat.h"
 #include "viaudioposition.h"
+#include "vilogger.h"
 
 class ViAudioTransmission : public QObject
 {

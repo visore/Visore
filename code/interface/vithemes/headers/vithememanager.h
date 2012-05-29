@@ -3,8 +3,6 @@
 
 #include "vitheme.h"
 #include "vithemeimage.h"
-#include "vilibrary.h"
-#include "vilibrarydetector.h"
 #include <QIcon>
 
 class ViThemeManager
@@ -16,8 +14,6 @@ class ViThemeManager
 			Background = 1,
 			Animation = 2
 		};
-		static QList<QString> themes(); 
-		static void setTheme(QString name);
 		~ViThemeManager(); //Must be public for QSharedPointer
 
 		static QColor color(int index);
@@ -29,9 +25,7 @@ class ViThemeManager
 		static QString stateString(ViThemeImage::State state);
 
 	protected:
-		QList<ViTheme*> mThemes;
 		ViTheme* mCurrentTheme;
-		QList<ViLibrary<ViTheme>*> mLibraries;
 		static QSharedPointer<ViThemeManager> mInstance;
 };
 

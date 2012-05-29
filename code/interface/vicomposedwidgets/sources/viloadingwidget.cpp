@@ -42,12 +42,12 @@ void ViLoadingWidget::showAnimation(bool show)
 	mUi->animationWidget->setVisible(mHasAnimation);
 	if(mHasAnimation)
 	{
-		ViObject::connect(mTimer, SIGNAL(timeout()), this, SLOT(displayNextImage()));
+		QObject::connect(mTimer, SIGNAL(timeout()), this, SLOT(displayNextImage()));
 	}
 	else
 	{
 		stop();
-		ViObject::disconnect(mTimer, SIGNAL(timeout()), this, SLOT(displayNextImage()));
+		QObject::disconnect(mTimer, SIGNAL(timeout()), this, SLOT(displayNextImage()));
 	}
 }
 

@@ -6,7 +6,6 @@
 #include <QByteArray>
 #include <QFile>
 #include "viaudiobuffer.h"
-#include "viobject.h"
 #include "viaudioformat.h"
 #include "vicodecmanager.h"
 

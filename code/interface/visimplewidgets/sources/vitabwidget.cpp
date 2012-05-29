@@ -71,7 +71,7 @@ void ViTabWidget::addTab(QString title, QWidget *widget)
 {
 	ViTabButton *button = new ViTabButton(title, mCurrentId, this);
 	button->setRounding(mButtonAngle);
-	ViObject::connect(button, SIGNAL(selected(qint8)), this, SLOT(selectTab(qint8)));
+	QObject::connect(button, SIGNAL(selected(qint8)), this, SLOT(selectTab(qint8)));
 	mButtons.append(button);
 	mUi->buttonWidget->layout()->addWidget(button);
 	mUi->stackedWidget->layout()->addWidget(widget);

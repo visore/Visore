@@ -15,8 +15,8 @@ ViInputWidget::ViInputWidget(QWidget *parent)
 	mUi->vinylInputButton->setGlow(ViThemeManager::color(14));
 	mUi->fileInputButton->setGlow(ViThemeManager::color(14));
 
-	ViObject::connect(mUi->vinylInputButton, SIGNAL(clicked()), this, SLOT(selectLineInput()));
-	ViObject::connect(mUi->fileInputButton, SIGNAL(clicked()), this, SLOT(selectFileInput()));
+	QObject::connect(mUi->vinylInputButton, SIGNAL(clicked()), this, SLOT(selectLineInput()));
+	QObject::connect(mUi->fileInputButton, SIGNAL(clicked()), this, SLOT(selectFileInput()));
 }
 
 ViInputWidget::~ViInputWidget()

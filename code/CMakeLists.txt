@@ -18,6 +18,7 @@ SET(COMMON ${ROOT}/common CACHE INTERNAL "Common directory")
 SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
 INCLUDE(Version)
 INCLUDE(Dependencies)
+INCLUDE(Macros)
 
 #Set System
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -48,39 +49,8 @@ IF(WIN32)
 ENDIF()
 
 #Include common headers
-INCLUDE_DIRECTORIES(
-	
-	${CMAKE_BINARY_DIR}
-	${ESSENTIALS}/headers
-
-	${INTERFACE}/vimainwindow/headers
-	${INTERFACE}/vigradientcreator/headers
-	${INTERFACE}/viwidgets/viwidget/headers
-	${INTERFACE}/vithemes/vitheme/headers
-	${INTERFACE}/visimplewidgets/headers
-	${INTERFACE}/vicomposedwidgets/headers
-	${INTERFACE}/vicomposedwidgets/headers/vispectrumplot
-	${INTERFACE}/vicomposedwidgets/headers/vinavigator
-
-	${ENGINE}/viaudioengine/headers
-	${ENGINE}/viaudioconnections/headers
-	${ENGINE}/viaudioformats/viaudioformat/headers
-	${ENGINE}/viaudiobuffer/headers
-	${ENGINE}/vicoder/headers
-	${ENGINE}/visongdetector/headers
-	${ENGINE}/vifouriertransformer/headers
-	${ENGINE}/vicorrelator/headers
-	${ENGINE}/vispectrumanalyzer/headers
-
-	${ENGINE}/viprocessingchain/headers
-	${ENGINE}/viprocessingchain/headers/viobservationprocessors/viwaveformer
-	${ENGINE}/viprocessingchain/headers/viobservationprocessors/vispectrumanalyzer
-
-	${EXTERNAL}/fftreal/sources
-	${EXTERNAL}/fftreal/headers
-	${EXTERNAL}/qplotting/headers
-	${EXTERNAL}/qwt/headers
-)
+HEADER_DIRECTORIES(headers)
+INCLUDE_DIRECTORIES(${headers})
 
 IF(WIN32)
 	INCLUDE_DIRECTORIES(${EXTERNAL}/dlfcn/headers)

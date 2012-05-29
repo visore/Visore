@@ -26,8 +26,8 @@ void ViWaveBaseWidget::updateWave()
 void ViWaveBaseWidget::setMode(ViAudio::Mode mode)
 {
 	mMode = mode;
-	ViObject::connect(mEngine, SIGNAL(chainChanged()), this, SLOT(updateWave()));
-	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
+	QObject::connect(mEngine, SIGNAL(chainChanged()), this, SLOT(updateWave()));
+	QObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 }
 
 void ViWaveBaseWidget::paintEvent(QPaintEvent *event)

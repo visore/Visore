@@ -14,6 +14,7 @@ void ViFileInput::setFile(QString filePath)
 
 void ViFileInput::start()
 {
+	LOG("Reading file started.");
 	mCoder.decode(mFilePath, mBuffer, &mFormat);
 	mBuffer->setFormat(mFormat);
 	emit formatChanged(mFormat);
@@ -22,11 +23,13 @@ void ViFileInput::start()
 
 void ViFileInput::stop()
 {
+	LOG("Reading file stopped.");
 	mCoder.stop();
 	emit stopped();
 }
 
 void ViFileInput::pause()
 {
+	LOG("Reading file paused.");
 	emit paused();
 }

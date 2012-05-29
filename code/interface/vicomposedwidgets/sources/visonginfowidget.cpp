@@ -17,12 +17,12 @@ ViSongInfoWidget::ViSongInfoWidget(QWidget *parent)
 	mUi->button->setCheckable(false);
 	mUi->button->setGlow(ViThemeManager::color(14));
 	mUi->button->setSize(20, 20);
-	ViObject::connect(mUi->button, SIGNAL(clicked()), this, SLOT(switchInfo()));
+	QObject::connect(mUi->button, SIGNAL(clicked()), this, SLOT(switchInfo()));
 	mTimer = new QTimer(this);
-	ViObject::connect(mTimer, SIGNAL(timeout()), this, SLOT(switchInfo()));
+	QObject::connect(mTimer, SIGNAL(timeout()), this, SLOT(switchInfo()));
 	mTimer->start(INFO_CHANGE_TIMEOUT);
 
-	ViObject::connect(mEngine, SIGNAL(songInfoChanged(ViSongInfo)), this, SLOT(changeSongInfo(ViSongInfo)));
+	QObject::connect(mEngine, SIGNAL(songInfoChanged(ViSongInfo)), this, SLOT(changeSongInfo(ViSongInfo)));
 }
 
 ViSongInfoWidget::~ViSongInfoWidget()

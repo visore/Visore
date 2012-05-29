@@ -11,7 +11,6 @@
 #include "viaudiooutput.h"
 #include "viaudioposition.h"
 #include "visonginfo.h"
-#include "viobject.h"
 #include "vipcmconverter.h"
 #include "viechonestresponse.h"
 #include "vicoder.h"

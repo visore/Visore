@@ -22,7 +22,7 @@ QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_PROCESSINGCHAIN_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(viprocessingchain SHARED ${VI_PROCESSINGCHAIN_HEADERS} ${VI_PROCESSINGCHAIN_SOURCES} ${VI_WRAPPER_HEADERS})
-TARGET_LINK_LIBRARIES(viprocessingchain ${QT_QTCORE_LIBRARIES} viessentials viaudioconnection)
+TARGET_LINK_LIBRARIES(viprocessingchain ${QT_QTCORE_LIBRARIES} viessentials viaudioconnection vifouriertransformer)
 
 #Install file
 INSTALL(TARGETS viprocessingchain DESTINATION engine)

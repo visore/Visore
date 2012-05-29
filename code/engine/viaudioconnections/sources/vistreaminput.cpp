@@ -77,10 +77,12 @@ void ViStreamInput::start()
 {
 	if(mAudioInput->state() == QAudio::SuspendedState)
 	{
+		LOG("Recordingresumed.");
 		mAudioInput->resume();
 	}
 	else
 	{
+		LOG("Recording started.");
 		mAudioInput->start(&mBufferDevice);
 	}
 	mState = QAudio::ActiveState;
@@ -89,6 +91,7 @@ void ViStreamInput::start()
 
 void ViStreamInput::stop()
 {
+	LOG("Recording stopped.");
 	mBufferDevice.seek(0);
 	mState = QAudio::StoppedState;
 	mAudioInput->stop();
@@ -97,6 +100,7 @@ void ViStreamInput::stop()
 
 void ViStreamInput::pause()
 {
+	LOG("Recording paused.");
 	mState = QAudio::SuspendedState;
 	mAudioInput->suspend();
 	emit paused();

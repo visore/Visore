@@ -44,6 +44,6 @@ typedef ViSpectrum<float> ViFloatSpectrum;
 typedef ViSpectrum<double> ViDoubleSpectrum;
 typedef ViDoubleSpectrum ViRealSpectrum;
 
-#include "../../../sources/viobservationprocessors/vispectrumanalyzer/vispectrum.cpp"
+#include "vispectrum.cpp"
 
 #endif

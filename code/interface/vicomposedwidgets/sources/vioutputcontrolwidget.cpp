@@ -9,8 +9,8 @@ ViOutputControlWidget::ViOutputControlWidget(QWidget *parent)
 	populate();
 	setDefaults();
 
-	ViObject::connect(mUi->fileButton, SIGNAL(clicked()), this, SLOT(selectFileOutput()));
-	ViObject::connect(mUi->saveButton, SIGNAL(clicked()), this, SLOT(save()));
+	QObject::connect(mUi->fileButton, SIGNAL(clicked()), this, SLOT(selectFileOutput()));
+	QObject::connect(mUi->saveButton, SIGNAL(clicked()), this, SLOT(save()));
 }
 
 ViOutputControlWidget::~ViOutputControlWidget()

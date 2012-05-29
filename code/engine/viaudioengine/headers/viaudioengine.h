@@ -8,6 +8,7 @@
 #include "visingleexecutor.h"
 
 #include "vispectrumanalyzer.h"
+#include "vicorrelator.h"
 #include "viwaveformer.h"
 #include "visongdetector.h"
 
@@ -51,6 +52,10 @@ class ViAudioEngine : public ViSingleton
 		//Spectrum
 		void spectrumProgressed(short percentage);
 		void spectrumFinished();
+
+		//Correlation
+		void correlationProgressed(short percentage);
+		void correlationFinished();
 
 	public:
 

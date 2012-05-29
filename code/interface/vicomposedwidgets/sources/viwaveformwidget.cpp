@@ -18,22 +18,22 @@ void ViWaveFormWidget::setMode(ViAudio::Mode mode)
 	mBaseWidget->setMode(mode);
 	mOverlayWidget = new ViWaveOverlayWidget(this);
 	mOverlayWidget->setMode(mode);
-	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SIGNAL(pointerMoved(qint32)));
-	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SLOT(setPointer(qint32)));
-	ViObject::connect(mOverlayWidget, SIGNAL(pointerValuesChanged(qreal, qreal, qreal, qreal)), this, SLOT(updateSampleValues(qreal, qreal, qreal, qreal)));
-	ViObject::connect(mOverlayWidget, SIGNAL(zoomLevelChanged(qint16)), this, SLOT(zoom(qint16)));
+	QObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SIGNAL(pointerMoved(qint32)));
+	QObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SLOT(setPointer(qint32)));
+	QObject::connect(mOverlayWidget, SIGNAL(pointerValuesChanged(qreal, qreal, qreal, qreal)), this, SLOT(updateSampleValues(qreal, qreal, qreal, qreal)));
+	QObject::connect(mOverlayWidget, SIGNAL(zoomLevelChanged(qint16)), this, SLOT(zoom(qint16)));
 
 	mControlToolbar = new ViWidgetToolbar(Qt::AlignCenter | Qt::AlignRight, this);
 
 	mZoomInButton = new QToolButton(mControlToolbar);
-	ViObject::connect(mZoomInButton, SIGNAL(clicked()), this, SLOT(zoomIn()));
+	QObject::connect(mZoomInButton, SIGNAL(clicked()), this, SLOT(zoomIn()));
 	mZoomInButton->setIcon(ViThemeManager::image("zoomin.png", ViThemeImage::Normal, ViThemeManager::Icon).icon());
 	mZoomInButton->setText("Zoom In");
 	mZoomInButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
 	mControlToolbar->addWidget(mZoomInButton);
 
 	mZoomOutButton = new QToolButton(mControlToolbar);
-	ViObject::connect(mZoomOutButton, SIGNAL(clicked()), this, SLOT(zoomOut()));
+	QObject::connect(mZoomOutButton, SIGNAL(clicked()), this, SLOT(zoomOut()));
 	mZoomOutButton->setIcon(ViThemeManager::image("zoomout.png", ViThemeImage::Normal, ViThemeManager::Icon).icon());
 	mZoomOutButton->setText("Zoom Out");
 	mZoomOutButton->setToolButtonStyle(Qt::ToolButtonIconOnly);

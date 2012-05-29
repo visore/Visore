@@ -60,15 +60,15 @@ ViSongDetector::ViSongDetector(ViAudioOutput *output)
 
 	mRequestsSent = 0;
 	mKey = "";
-	ViObject::connect(&mThread, SIGNAL(finished(QString, QString, int)), this, SLOT(codeFinished(QString, QString, int)));
-	ViObject::connect(mAudioOutput->buffer(), SIGNAL(changed(int)), this, SLOT(bufferChanged(int)));
-	ViObject::connect(&mCoder, SIGNAL(stateChanged(ViCoder::State)), this, SLOT(encodingStateChanged(ViCoder::State)));
+	QObject::connect(&mThread, SIGNAL(finished(QString, QString, int)), this, SLOT(codeFinished(QString, QString, int)));
+	QObject::connect(mAudioOutput->buffer(), SIGNAL(changed(int)), this, SLOT(bufferChanged(int)));
+	QObject::connect(&mCoder, SIGNAL(stateChanged(ViCoder::State)), this, SLOT(encodingStateChanged(ViCoder::State)));
 }
 
 ViSongDetector::~ViSongDetector()
 {
-	ViObject::disconnect(&mThread, SIGNAL(finished(QString, QString, int)), this, SLOT(codeFinished(QString, QString, int)));
-	ViObject::disconnect(mAudioOutput->buffer(), SIGNAL(changed(int)), this, SLOT(bufferChanged(int)));
+	QObject::disconnect(&mThread, SIGNAL(finished(QString, QString, int)), this, SLOT(codeFinished(QString, QString, int)));
+	QObject::disconnect(mAudioOutput->buffer(), SIGNAL(changed(int)), this, SLOT(bufferChanged(int)));
 	delete mNetworkManager;
 }
 
@@ -109,7 +109,7 @@ void ViSongDetector::bufferChanged(int size)
 				mRequestsSent = 1;
 			}
 			setState(ViSongDetector::Encoding);
-			ViObject::disconnect(mAudioOutput->buffer(), SIGNAL(changed(int)), this, SLOT(bufferChanged(int)));
+			QObject::disconnect(mAudioOutput->buffer(), SIGNAL(changed(int)), this, SLOT(bufferChanged(int)));
 			ViAudioFormat format;
 			format.setSampleRate(22050);
 			format.setSampleSize(16);
@@ -140,7 +140,7 @@ void ViSongDetector::encodingStateChanged(ViCoder::State state)
 void ViSongDetector::codeFinished(QString code, QString version, int codeLength)
 {
 	setState(ViSongDetector::SongDetection);
-	ViObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+	QObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
 	QUrl url("http://developer.echonest.com/api/v4/song/identify?api_key=" + mKey + "&bucket=id:7digital-US&bucket=tracks&bucket=audio_summary&bucket=artist_familiarity&bucket=artist_hotttnesss&bucket=song_hotttnesss");
 	QNetworkRequest request(url);
 	request.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/octet-stream"));
@@ -151,7 +151,7 @@ void ViSongDetector::codeFinished(QString code, QString version, int codeLength)
 
 void ViSongDetector::replyFinished(QNetworkReply *reply)
 {
-	ViObject::disconnect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+	QObject::disconnect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
 	mNetworkError = reply->error();
 	if(mNetworkError != QNetworkReply::NoError)
 	{
@@ -180,13 +180,13 @@ void ViSongDetector::replyFinished(QNetworkReply *reply)
 		if(mResponse.songInfo().imagePath() != "")
 		{
 			
-			ViObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadFinished(QNetworkReply*)));
+			QObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadFinished(QNetworkReply*)));
 			url = QUrl(mResponse.songInfo().imagePath());
 		}
 		else
 		{
 			url = QUrl("http://developer.echonest.com/api/v4/artist/images?api_key=" + mKey + "&id=" + mResponse.songInfo().artistId() + "&format=json&results=1&start=0&license=unknown");
-			ViObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));	
+			QObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));	
 		}
 		QNetworkRequest request(url);
 		mNetworkManager->get(request);
@@ -195,7 +195,7 @@ void ViSongDetector::replyFinished(QNetworkReply *reply)
 
 void ViSongDetector::downloadFinished(QNetworkReply *reply)
 {
-	ViObject::disconnect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadFinished(QNetworkReply*)));
+	QObject::disconnect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadFinished(QNetworkReply*)));
 	mNetworkError = reply->error();
 	if(mNetworkError != QNetworkReply::NoError)
 	{

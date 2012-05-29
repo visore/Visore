@@ -48,10 +48,12 @@ void ViStreamOutput::start()
 {
 	if(mAudioOutput->state() == QAudio::SuspendedState)
 	{
+		LOG("Playback resumed.");
 		mAudioOutput->resume();
 	}
 	else
 	{
+		LOG("Playback started.");
 		mAudioOutput->start(&mBufferDevice);
 	}
 	mState = QAudio::ActiveState;
@@ -60,6 +62,7 @@ void ViStreamOutput::start()
 
 void ViStreamOutput::stop()
 {
+	LOG("Playback stopped.");
 	mBufferDevice.seek(0);
 	mState = QAudio::StoppedState;
 	mAudioOutput->stop();
@@ -69,6 +72,7 @@ void ViStreamOutput::stop()
 
 void ViStreamOutput::pause()
 {
+	LOG("Playback paused.");
 	mState = QAudio::SuspendedState;
 	mAudioOutput->suspend();
 	emit paused();

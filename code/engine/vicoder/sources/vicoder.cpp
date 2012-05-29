@@ -20,8 +20,8 @@ ViCoder::ViCoder()
 {
 	mEncodingThread = new ViEncodingThread(this);
 	mDecodingThread = new ViDecodingThread(this);
-	ViObject::connect(mEncodingThread, SIGNAL(stateChanged(ViCoder::State)), this, SIGNAL(stateChanged(ViCoder::State)));
-	ViObject::connect(mDecodingThread, SIGNAL(stateChanged(ViCoder::State)), this, SIGNAL(stateChanged(ViCoder::State)));
+	QObject::connect(mEncodingThread, SIGNAL(stateChanged(ViCoder::State)), this, SIGNAL(stateChanged(ViCoder::State)));
+	QObject::connect(mDecodingThread, SIGNAL(stateChanged(ViCoder::State)), this, SIGNAL(stateChanged(ViCoder::State)));
 }
 
 ViCoder::~ViCoder()
