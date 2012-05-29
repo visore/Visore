@@ -29,6 +29,8 @@ class ViExecutor : public QThread
 		bool detach(ViProcessor *processor);
 		void setBuffer(ViAudio::Mode mode, ViAudioBuffer *buffer);
 
+		static int defaultWindowSize();
+
 	protected:
 
 		void update();
@@ -53,7 +55,8 @@ class ViExecutor : public QThread
 		ViAudioFormat mOutputFormat;
 
 		ViRawChunk *mInputChunk;
-		ViSampleChunk *mRealChunk;
+		ViSampleChunk *mInputSamples;
+		ViSampleChunk *mOutputSamples;
 		ViRawChunk *mOutputChunk;
 
 };

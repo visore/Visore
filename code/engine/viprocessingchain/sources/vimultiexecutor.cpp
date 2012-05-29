@@ -8,11 +8,13 @@ void ViMultiExecutor::runNormal()
 		mInputChunk->setSize(mReadStream->read(mInputChunk));
 		if(mInputChunk->size() > 0)
 		{
-			mRealChunk->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mRealChunk->data(), mInputChunk->size()));
-			mProcessors.observeInput(mRealChunk);
-			mProcessors.manipulateInput(mRealChunk);
-			mProcessors.observeOutput(mRealChunk);
-			mOutputChunk->setSize(mOutputConverter.realToPcm(mRealChunk->data(), mOutputChunk->data(), mRealChunk->size()));
+			mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), mInputChunk->size()));
+			ViSampleChunk::copy(mInputSamples, mOutputSamples);
+			mProcessors.observeInput(mOutputSamples);
+			mProcessors.manipulateInput(mOutputSamples);
+			mProcessors.observeOutput(mOutputSamples);
+			mProcessors.observeDual(mInputSamples, mOutputSamples);
+			mOutputChunk->setSize(mOutputConverter.realToPcm(mOutputSamples->data(), mOutputChunk->data(), mOutputSamples->size()));
 			mWriteStream->write(mOutputChunk);
 		}
 	}
@@ -31,11 +33,13 @@ void ViMultiExecutor::runNotify()
 		mInputChunk->setSize(mReadStream->read(mInputChunk));
 		if(mInputChunk->size() > 0)
 		{
-			mRealChunk->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mRealChunk->data(), mInputChunk->size()));
-			mProcessors.observeInput(mRealChunk);
-			mProcessors.manipulateInput(mRealChunk);
-			mProcessors.observeOutput(mRealChunk);
-			mOutputChunk->setSize(mOutputConverter.realToPcm(mRealChunk->data(), mOutputChunk->data(), mRealChunk->size()));
+			mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), mInputChunk->size()));
+			ViSampleChunk::copy(mInputSamples, mOutputSamples);
+			mProcessors.observeInput(mOutputSamples);
+			mProcessors.manipulateInput(mOutputSamples);
+			mProcessors.observeOutput(mOutputSamples);
+			mProcessors.observeDual(mInputSamples, mOutputSamples);
+			mOutputChunk->setSize(mOutputConverter.realToPcm(mOutputSamples->data(), mOutputChunk->data(), mOutputSamples->size()));
 			mWriteStream->write(mOutputChunk);
 			progress += mInputChunk->size();
 			emit progressed((progress * 100) / size);

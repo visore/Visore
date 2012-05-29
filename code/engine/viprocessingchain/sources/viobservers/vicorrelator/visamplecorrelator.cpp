@@ -22,6 +22,10 @@ void ViSampleCorrelator::run()
 	for(int i = 0; i < size; ++i)
 	{
 		difference = qAbs(mFirstData[i] - mSecondData[i]);
+if(difference != NULL)
+{
+	cout<<difference<<" "<<mFirstData[i]<<" "<<mSecondData[i]<<endl;
+}
 
 		mAverageDifference += difference;
 		if(difference < mMinimumDifference)

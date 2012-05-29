@@ -3,7 +3,12 @@
 
 namespace ViAudio
 {
-	using namespace QAudio;
+	enum Mode
+	{
+		AudioInput = 0,
+		AudioOutput = 1,
+		AudioInputOutput = 2
+	};
 
 	enum Input
 	{
@@ -11,6 +16,8 @@ namespace ViAudio
 		File = 1,
 		Project = 2
 	};
+
+	using namespace QAudio;
 }
 
 #endif

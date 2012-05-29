@@ -9,8 +9,8 @@ class ViSingleExecutor : public ViExecutor
 	public:
 
 		ViSingleExecutor();
-		void execute(ViAudioBuffer *buffer, ViProcessor *processor);
-		void execute(ViAudioBuffer *inputBuffer, ViAudioBuffer *outputBuffer, ViProcessor *processor);
+		bool execute(ViAudioBuffer *buffer, ViProcessor *processor);
+		bool execute(ViAudioBuffer *inputBuffer, ViAudioBuffer *outputBuffer, ViProcessor *processor);
 
 	protected:
 
@@ -18,10 +18,12 @@ class ViSingleExecutor : public ViExecutor
 		void runNotify();
 		void runObserve();
 		void runModify();
+		void runDualObserve();
 
 	private:
 
 		void (ViSingleExecutor::*runIt)();
+		ViAudioBufferStream *mReadStream2;
 
 };
 

@@ -38,6 +38,9 @@ class ViAudioEngine : public ViSingleton
 		//Spectrum
 		void calculateSpectrum(qint32 size, QString windowFunction);
 
+		//Correlation
+		void calculateCorrelation();
+
 	signals:
 
 		//Chain
@@ -64,6 +67,7 @@ class ViAudioEngine : public ViSingleton
 
 		ViRealSpectrum spectrum();
 		ViWaveForm& wave(ViAudio::Mode mode);
+		ViCorrelationResult& correlation();
 
 	protected:
 
@@ -83,6 +87,7 @@ class ViAudioEngine : public ViSingleton
 		ViSingleExecutor mExecutor;
 
 		ViSpectrumAnalyzer mSpectrumAnalyzer;
+		ViCorrelator mCorrelator;
 		ViWaveFormer mInputWaveFormer;
 		ViWaveFormer mOutputWaveFormer;
 

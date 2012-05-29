@@ -4,7 +4,9 @@
 template<typename T>
 class ViChunk
 {
+
 	public:
+
 		ViChunk();
 		ViChunk(T *data, int size);
 		ViChunk(int size);
@@ -22,9 +24,12 @@ class ViChunk
 		const T& operator[](const int index) const;
 		T& operator[] (const int index);
 
+		static void copy(const ViChunk<T> *source, ViChunk<T> *destination);
+
 	private:
 		T *mData;
 		int mSize;
+
 };
 
 typedef ViChunk<double> ViDoubleChunk;

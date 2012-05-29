@@ -30,45 +30,34 @@ ViAudioFormat ViProcessor::format()
 ViObserver::ViObserver()
 	: ViProcessor()
 {
-	mInputData = NULL;
-	mOutputData = NULL;
+	mData = NULL;
 }
 
-void ViObserver::setData(const ViSampleChunk *inputData, const ViSampleChunk *outputData)
+void ViObserver::setData(const ViSampleChunk *data)
 {
-	mInputData = inputData;
-	mOutputData = outputData;
-}
-
-void ViObserver::setInputData(const ViSampleChunk *data)
-{
-	mInputData = data;
-}
-
-void ViObserver::setOutputData(const ViSampleChunk *data)
-{
-	mOutputData = data;
+	mData = data;
 }
 
 ViModifier::ViModifier()
 	: ViProcessor()
 {
-	mInputData = NULL;
-	mOutputData = NULL;
+	mData = NULL;
 }
 
-void ViModifier::setData(ViSampleChunk *inputData, ViSampleChunk *outputData)
+void ViModifier::setData(ViSampleChunk *data)
 {
-	mInputData = inputData;
-	mOutputData = outputData;
+	mData = data;
 }
 
-void ViModifier::setInputData(ViSampleChunk *data)
+ViDualObserver::ViDualObserver()
+	: ViObserver()
 {
-	mInputData = data;
+	mData2 = NULL;
 }
 
-void ViModifier::setOutputData(ViSampleChunk *data)
+void ViDualObserver::setData(const ViSampleChunk *data, const ViSampleChunk *data2)
 {
-	mOutputData = data;
+	mData = data;
+	mData2 = data2;
 }
+

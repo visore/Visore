@@ -12,8 +12,8 @@ ViWaveForm& ViWaveFormer::wave()
 
 void ViWaveFormer::run()
 {
-	for(int i = 0; i < mInputData->size(); ++i)
+	for(int i = 0; i < mData->size(); ++i)
 	{
-		mForm.append(mInputData->at(i));
+		mForm.append(mData->at(i));
 	}
 }

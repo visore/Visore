@@ -4,6 +4,11 @@
 ViCrossCorrelator::ViCrossCorrelator()
 	: ViCorrelatorStrategy()
 {
+	mRealData = NULL;
+	mFirstFourierData = NULL;
+	mSecondFourierData = NULL;
+	mMultiplyData = NULL;
+	mAutocorrelationData = NULL;
 }
 
 void ViCrossCorrelator::initialize(qint32 windowSize)
@@ -89,11 +94,31 @@ void ViCrossCorrelator::allocateData()
 
 void ViCrossCorrelator::deallocateData()
 {
-	delete [] mRealData;
-	delete [] mFirstFourierData;
-	delete [] mSecondFourierData;
-	delete [] mMultiplyData;
-	delete [] mAutocorrelationData;
+	if(mRealData != NULL)
+	{
+		delete [] mRealData;
+		mRealData = NULL;
+	}
+	if(mFirstFourierData != NULL)
+	{
+		delete [] mFirstFourierData;
+		mFirstFourierData = NULL;
+	}
+	if(mSecondFourierData != NULL)
+	{
+		delete [] mSecondFourierData;
+		mSecondFourierData = NULL;
+	}
+	if(mMultiplyData != NULL)
+	{
+		delete [] mMultiplyData;
+		mMultiplyData = NULL;
+	}
+	if(mAutocorrelationData != NULL)
+	{
+		delete [] mAutocorrelationData;
+		mAutocorrelationData = NULL;
+	}
 }
 
 qreal ViCrossCorrelator::norm(qreal array[], qint32 size)

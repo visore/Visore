@@ -3,7 +3,7 @@
 #include "vicrosscorrelator.h"
 
 ViCorrelator::ViCorrelator()
-	: ViObserver()
+	: ViDualObserver()
 {
 	mCorrelators.append(new ViCrossCorrelator());
 	mCorrelators.append(new ViSampleCorrelator());
@@ -31,6 +31,7 @@ ViCorrelationResult& ViCorrelator::result()
 
 void ViCorrelator::setWindowSize(int windowSize)
 {
+	ViDualObserver::setWindowSize(windowSize);
 	for(int i = 0; i < mCorrelators.size(); ++i)
 	{
 		mCorrelators[i]->initialize(mWindowSize);
@@ -41,7 +42,7 @@ void ViCorrelator::run()
 {
 	for(int i = 0; i < mCorrelators.size(); ++i)
 	{
-		mCorrelators[i]->setData(mInputData->data(), mInputData->size(), mOutputData->data(), mOutputData->size());
+		mCorrelators[i]->setData(mData->data(), mData->size(), mData2->data(), mData2->size());
 		mThreadPool.start(mCorrelators[i]);
 	}
 	mThreadPool.waitForDone();

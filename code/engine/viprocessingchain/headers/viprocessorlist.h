@@ -22,13 +22,10 @@ class ViProcessorList : public QObject
 		void clear();
 		QList<ViProcessor*> all();
 
-		void observeInput(const ViSampleChunk *input, const ViSampleChunk *output);
-		void manipulateInput(ViSampleChunk *input, ViSampleChunk *output);
-		void observeOutput(const ViSampleChunk *input, const ViSampleChunk *output);
-
 		void observeInput(const ViSampleChunk *data);
 		void manipulateInput(ViSampleChunk *data);
 		void observeOutput(const ViSampleChunk *data);
+		void observeDual(const ViSampleChunk *data, const ViSampleChunk *data2);
 
 	private:
 
@@ -36,6 +33,7 @@ class ViProcessorList : public QObject
 		QList<ViObserver*> mInputObservers;
 		QList<ViModifier*> mInputModifiers;
 		QList<ViObserver*> mOutputObservers;
+		QList<ViDualObserver*> mDualObservers;
 
 };
 

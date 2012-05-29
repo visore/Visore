@@ -8,7 +8,8 @@ ViExecutor::ViExecutor()
 	mWindowSize = DEFAULT_WINDOW_SIZE;
 	mNotify = false;
 	mInputChunk = NULL;
-	mRealChunk = NULL;
+	mInputSamples = NULL;
+	mOutputSamples = NULL;
 	mOutputChunk = NULL;
 	mReadStream = NULL;
 	mWriteStream = NULL;
@@ -21,10 +22,15 @@ ViExecutor::~ViExecutor()
 		delete mInputChunk;
 		mInputChunk = NULL;
 	}
-	if(mRealChunk != NULL)
+	if(mInputSamples != NULL)
 	{
-		delete mRealChunk;
-		mRealChunk = NULL;
+		delete mInputSamples;
+		mInputSamples = NULL;
+	}
+	if(mOutputSamples != NULL)
+	{
+		delete mOutputSamples;
+		mOutputSamples = NULL;
 	}
 	if(mOutputChunk != NULL)
 	{
@@ -63,9 +69,9 @@ void ViExecutor::setBuffer(ViAudio::Mode mode, ViAudioBuffer *buffer)
 		{
 			mInputChunk = new ViRawChunk();
 		}
-		if(mRealChunk == NULL)
+		if(mInputSamples == NULL)
 		{
-			mRealChunk = new ViSampleChunk();
+			mInputSamples = new ViSampleChunk();
 		}
 		mReadStream = buffer->createReadStream();
 		QObject::disconnect(this, SLOT(execute()));
@@ -77,9 +83,18 @@ void ViExecutor::setBuffer(ViAudio::Mode mode, ViAudioBuffer *buffer)
 		{
 			mOutputChunk = new ViRawChunk();
 		}
+		if(mOutputSamples == NULL)
+		{
+			mOutputSamples = new ViSampleChunk();
+		}
 		mWriteStream = buffer->createWriteStream();
 		
 	}
+}
+
+int ViExecutor::defaultWindowSize()
+{
+	return DEFAULT_WINDOW_SIZE;
 }
 
 void ViExecutor::execute()
@@ -129,9 +144,13 @@ void ViExecutor::update()
 	{
 		mInputChunk->resize(mWindowSize * (mInputFormat.sampleSize() / 8));
 	}
-	if(mRealChunk != NULL)
+	if(mInputSamples != NULL)
 	{
-		mRealChunk->resize(mWindowSize);
+		mInputSamples->resize(mWindowSize);
+	}
+	if(mOutputSamples != NULL)
+	{
+		mOutputSamples->resize(mWindowSize);
 	}
 	if(mOutputChunk != NULL)
 	{

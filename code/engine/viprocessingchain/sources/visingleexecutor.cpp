@@ -6,23 +6,68 @@ ViSingleExecutor::ViSingleExecutor()
 	mNotify = true;
 }
 
-void ViSingleExecutor::execute(ViAudioBuffer *buffer, ViProcessor *processor)
+bool ViSingleExecutor::execute(ViAudioBuffer *buffer, ViProcessor *processor)
 {
 	mProcessors.clear();
+	if(buffer == NULL)
+	{
+		return false;
+	}
+	if(dynamic_cast<ViDualObserver*>(processor) != NULL)
+	{
+		return false;
+	}
+	else if(dynamic_cast<ViObserver*>(processor) != NULL)
+	{
+		attach(ViAudio::AudioInput, processor);
+		ViSingleExecutor::runIt = &ViSingleExecutor::runObserve;
+	}
+	else if(dynamic_cast<ViDualObserver*>(processor) != NULL)
+	{
+		attach(ViAudio::AudioOutput, processor);
+		setBuffer(ViAudio::AudioOutput, buffer);
+		ViSingleExecutor::runIt = &ViSingleExecutor::runModify;
+	}
 	setBuffer(ViAudio::AudioInput, buffer);
-	attach(ViAudio::AudioInput, processor);
-	ViSingleExecutor::runIt = &ViSingleExecutor::runObserve;
 	ViExecutor::execute();
+	return true;
 }
 
-void ViSingleExecutor::execute(ViAudioBuffer *inputBuffer, ViAudioBuffer *outputBuffer, ViProcessor *processor)
+bool ViSingleExecutor::execute(ViAudioBuffer *inputBuffer, ViAudioBuffer *outputBuffer, ViProcessor *processor)
 {
 	mProcessors.clear();
+	if(dynamic_cast<ViDualObserver*>(processor) != NULL)
+	{
+		if(inputBuffer == NULL || outputBuffer == NULL)
+		{
+			return false;
+		}
+		mReadStream2 = outputBuffer->createReadStream();
+		attach(ViAudio::AudioInputOutput, processor);
+		ViSingleExecutor::runIt = &ViSingleExecutor::runDualObserve;
+	}
+	else if(dynamic_cast<ViObserver*>(processor) != NULL)
+	{
+		if(inputBuffer == NULL)
+		{
+			return false;
+		}
+		attach(ViAudio::AudioInput, processor);
+		ViSingleExecutor::runIt = &ViSingleExecutor::runObserve;
+	}
+	else if(dynamic_cast<ViModifier*>(processor) != NULL)
+	{
+		if(inputBuffer == NULL || outputBuffer == NULL)
+		{
+			return false;
+		}
+		attach(ViAudio::AudioOutput, processor);
+		ViSingleExecutor::runIt = &ViSingleExecutor::runModify;
+	}
 	setBuffer(ViAudio::AudioInput, inputBuffer);
 	setBuffer(ViAudio::AudioOutput, outputBuffer);
-	attach(ViAudio::AudioInput, processor);
-	ViSingleExecutor::runIt = &ViSingleExecutor::runModify;
 	ViExecutor::execute();
+	return true;
 }
 
 void ViSingleExecutor::runNormal()
@@ -62,14 +107,22 @@ void ViSingleExecutor::runNotify()
 
 void ViSingleExecutor::runObserve()
 {
-	mRealChunk->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mRealChunk->data(), mInputChunk->size()));
-	mProcessors.observeInput(mRealChunk);
+	mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), mInputChunk->size()));
+	mProcessors.observeInput(mInputSamples);
 }
 
 void ViSingleExecutor::runModify()
 {
-	mRealChunk->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mRealChunk->data(), mInputChunk->size()));
-	mProcessors.manipulateInput(mRealChunk);
-	mOutputChunk->setSize(mOutputConverter.realToPcm(mRealChunk->data(), mOutputChunk->data(), mRealChunk->size()));
+	mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), mInputChunk->size()));
+	mProcessors.manipulateInput(mInputSamples);
+	mOutputChunk->setSize(mOutputConverter.realToPcm(mInputSamples->data(), mOutputChunk->data(), mInputSamples->size()));
 	mWriteStream->write(mOutputChunk);
+}
+
+void ViSingleExecutor::runDualObserve()
+{
+	mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), mInputChunk->size()));
+	mOutputChunk->setSize(mReadStream2->read(mOutputChunk));
+	mOutputSamples->setSize(mInputConverter.pcmToReal(mOutputChunk->data(), mOutputSamples->data(), mOutputChunk->size()));
+	mProcessors.observeDual(mInputSamples, mOutputSamples);
 }

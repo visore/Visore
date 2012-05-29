@@ -42,14 +42,11 @@ class ViObserver : public ViProcessor
 	public:
 
 		ViObserver();
-		virtual void setData(const ViSampleChunk *inputData, const ViSampleChunk *outputData = NULL);
-		virtual void setInputData(const ViSampleChunk *data);
-		virtual void setOutputData(const ViSampleChunk *data);
+		virtual void setData(const ViSampleChunk *data);
 
 	protected:
 
-		const ViSampleChunk *mInputData;
-		const ViSampleChunk *mOutputData;
+		const ViSampleChunk *mData;
 
 };
 
@@ -59,14 +56,25 @@ class ViModifier : public ViProcessor
 	public:
 
 		ViModifier();
-		virtual void setData(ViSampleChunk *inputData, ViSampleChunk *outputData = NULL);
-		virtual void setInputData(ViSampleChunk *data);
-		virtual void setOutputData(ViSampleChunk *data);
+		virtual void setData(ViSampleChunk *data);
 
 	protected:
 
-		ViSampleChunk *mInputData;
-		ViSampleChunk *mOutputData;
+		ViSampleChunk *mData;
+
+};
+
+class ViDualObserver : public ViObserver
+{
+
+	public:
+
+		ViDualObserver();
+		virtual void setData(const ViSampleChunk *data, const ViSampleChunk *data2);
+
+	protected:
+
+		const ViSampleChunk *mData2;
 
 };
 

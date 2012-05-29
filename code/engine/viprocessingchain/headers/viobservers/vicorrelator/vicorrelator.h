@@ -6,7 +6,7 @@
 #include "vicorrelatorstrategy.h"
 #include "viprocessor.h"
 
-class ViCorrelator : public ViObserver
+class ViCorrelator : public ViDualObserver
 {
 
 	public:

@@ -8,9 +8,6 @@ ViProcessorList::ViProcessorList()
 
 ViProcessorList::~ViProcessorList()
 {
-	qDeleteAll(mInputObservers);
-	qDeleteAll(mInputModifiers);
-	qDeleteAll(mOutputObservers);
 	clear();
 }
 
@@ -29,43 +26,18 @@ QList<ViProcessor*> ViProcessorList::all()
 	{
 		result.append(mOutputObservers[i]);
 	}
+	for(int i = 0; i < mDualObservers.size(); ++i)
+	{
+		result.append(mDualObservers[i]);
+	}
 	return result;
-}
-
-void ViProcessorList::observeInput(const ViSampleChunk *input, const ViSampleChunk *output)
-{
-	for(int i = 0; i < mInputObservers.size(); ++i)
-	{
-		mInputObservers[i]->setData(input, output);
-		mThreadPool.start(mInputObservers[i]);
-	}
-	mThreadPool.waitForDone();
-}
-
-void ViProcessorList::manipulateInput(ViSampleChunk *input, ViSampleChunk *output)
-{
-	for(int i = 0; i < mInputModifiers.size(); ++i)
-	{
-		mInputModifiers[i]->setData(input, output);
-		mInputModifiers[i]->run();
-	}
-}
-
-void ViProcessorList::observeOutput(const ViSampleChunk *input, const ViSampleChunk *output)
-{
-	for(int i = 0; i < mOutputObservers.size(); ++i)
-	{
-		mOutputObservers[i]->setData(input, output);
-		mThreadPool.start(mOutputObservers[i]);
-	}
-	mThreadPool.waitForDone();
 }
 
 void ViProcessorList::observeInput(const ViSampleChunk *data)
 {
 	for(int i = 0; i < mInputObservers.size(); ++i)
 	{
-		mInputObservers[i]->setInputData(data);
+		mInputObservers[i]->setData(data);
 		mThreadPool.start(mInputObservers[i]);
 	}
 	mThreadPool.waitForDone();
@@ -75,7 +47,7 @@ void ViProcessorList::manipulateInput(ViSampleChunk *data)
 {
 	for(int i = 0; i < mInputModifiers.size(); ++i)
 	{
-		mInputModifiers[i]->setInputData(data);
+		mInputModifiers[i]->setData(data);
 		mInputModifiers[i]->run();
 	}
 }
@@ -84,8 +56,18 @@ void ViProcessorList::observeOutput(const ViSampleChunk *data)
 {
 	for(int i = 0; i < mOutputObservers.size(); ++i)
 	{
-		mOutputObservers[i]->setInputData(data);
+		mOutputObservers[i]->setData(data);
 		mThreadPool.start(mOutputObservers[i]);
+	}
+	mThreadPool.waitForDone();
+}
+
+void ViProcessorList::observeDual(const ViSampleChunk *data, const ViSampleChunk *data2)
+{
+	for(int i = 0; i < mDualObservers.size(); ++i)
+	{
+		mDualObservers[i]->setData(data, data2);
+		mThreadPool.start(mDualObservers[i]);
 	}
 	mThreadPool.waitForDone();
 }
@@ -93,9 +75,15 @@ void ViProcessorList::observeOutput(const ViSampleChunk *data)
 bool ViProcessorList::add(ViAudio::Mode mode, ViProcessor *processor)
 {
 	bool result = false;
+	ViDualObserver *dualObserver;
 	ViObserver *observer;
 	ViModifier *modifier;
-	if((observer = dynamic_cast<ViObserver*>(processor)) != NULL)
+	if((dualObserver = dynamic_cast<ViDualObserver*>(processor)) != NULL)
+	{
+		mDualObservers.append(dualObserver);
+		result = true;
+	}
+	else if((observer = dynamic_cast<ViObserver*>(processor)) != NULL)
 	{
 		if(mode == ViAudio::AudioInput)
 		{
@@ -122,6 +110,14 @@ bool ViProcessorList::add(ViAudio::Mode mode, ViProcessor *processor)
 bool ViProcessorList::remove(ViProcessor *processor)
 {
 	int index;
+	for(index = 0; index < mDualObservers.size(); ++index)
+	{
+		if(mDualObservers[index] == processor)
+		{
+			mDualObservers.removeAt(index);
+			return true;
+		}
+	}
 	for(index = 0; index < mInputObservers.size(); ++index)
 	{
 		if(mInputObservers[index] == processor)
@@ -154,4 +150,5 @@ void ViProcessorList::clear()
 	mInputObservers.clear();
 	mInputModifiers.clear();
 	mOutputObservers.clear();
+	mDualObservers.clear();
 }

@@ -97,4 +97,11 @@ T& ViChunk<T>::operator[] (const int index)
 	return mData[index];
 }
 
+template<typename T>
+void ViChunk<T>::copy(const ViChunk<T> *source, ViChunk<T> *destination)
+{
+	memcpy(destination->mData, source->mData, sizeof(T) * source->mSize);
+	destination->mSize = source->mSize;
+}
+
 #endif
