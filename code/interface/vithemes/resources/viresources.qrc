@@ -68,5 +68,7 @@
         <file>animations/loading/34.png</file>
         <file>animations/loading/35.png</file>
         <file>animations/loading/36.png</file>
+        <file>icons/normal/correlation.png</file>
+        <file>icons/normal/spectrum.png</file>
     </qresource>
 </RCC>

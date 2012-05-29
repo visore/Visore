@@ -7,11 +7,15 @@ ViAnalysisMenu::ViAnalysisMenu(ViNavigator *navigator)
 	mUi = new Ui::ViAnalysisMenu();
 	mUi->setupUi(this);
 
-	//Spectrum analysis widget
+	//Spectrum
+	mUi->spectrumButton->setIcon(ViThemeManager::image("spectrum.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	mUi->spectrumButton->setCheckable(true);
 	mSpectrumIndex = addStackWidget(&mSpectrumWidget);
 	QObject::connect(mUi->spectrumButton, SIGNAL(clicked()), this, SLOT(showSpectrum()));
 
-	//Signal matching widget
+	//Correlation
+	mUi->matchButton->setIcon(ViThemeManager::image("correlation.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	mUi->matchButton->setCheckable(true);
 	mCorrelationIndex = addStackWidget(&mCorrelationWidget);
 	QObject::connect(mUi->matchButton, SIGNAL(clicked()), this, SLOT(showCorrelation()));
 }
@@ -23,12 +27,14 @@ ViAnalysisMenu::~ViAnalysisMenu()
 
 void ViAnalysisMenu::showSpectrum()
 {
+	mUi->matchButton->setChecked(false);
 	setCurrentStackIndex(mSpectrumIndex);
 	setStackIndex(mSpectrumIndex);
 }
 
 void ViAnalysisMenu::showCorrelation()
 {
+	mUi->spectrumButton->setChecked(false);
 	setCurrentStackIndex(mCorrelationIndex);
 	setStackIndex(mCorrelationIndex);
 }

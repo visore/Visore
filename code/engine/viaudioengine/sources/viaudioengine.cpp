@@ -124,11 +124,17 @@ void ViAudioEngine::calculateSpectrum(qint32 size, QString windowFunction)
 {
 	mExecutor.setWindowSize(size);
 	mSpectrumAnalyzer.setWindowFunction(windowFunction);
-	mExecutor.execute(mProcessingChain.buffer(ViAudio::AudioInput), &mSpectrumAnalyzer);
+	if(!mExecutor.execute(mProcessingChain.buffer(ViAudio::AudioInput), &mSpectrumAnalyzer))
+	{
+		emit spectrumFinished();
+	}
 }
 
 void ViAudioEngine::calculateCorrelation()
 {
 	mExecutor.setWindowSize(ViExecutor::defaultWindowSize());
-	mExecutor.execute(mProcessingChain.buffer(ViAudio::AudioInput), mProcessingChain.buffer(ViAudio::AudioOutput), &mCorrelator);
+	if(!mExecutor.execute(mProcessingChain.buffer(ViAudio::AudioInput), mProcessingChain.buffer(ViAudio::AudioOutput), &mCorrelator))
+	{
+		emit correlationFinished();
+	}
 }
