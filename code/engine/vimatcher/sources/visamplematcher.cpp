@@ -70,7 +70,7 @@ void ViSampleMatcher::match()
 		size = qMin(firstSampleSize, secondSampleSize);
 		for(index = 0; index < size; ++index)
 		{
-			difference = qAbs(firstRealData[index] - secondRealData[index]);
+			difference = 1 - qAbs(firstRealData[index] - secondRealData[index]);
 
 			averageDifference += difference;
 			if(difference < minimumDifference)

@@ -208,26 +208,28 @@ void ViSignalManipulator::createTriangleSignal(ViAudioBuffer *buffer, qint32 cyc
 void ViSignalManipulator::createMountainSignal(ViAudioBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
-	static const qreal width = 500;
+	static const qreal width = 200;
 	static const qreal width2 = 150;
+	static const qreal width3 = width + width2;
 	static const qreal ratio = width2 / width;
+	static const qreal ratio2 = width / width3;
 	for(int i = 0; i < cycles; ++i)
 	{
 		for(int j = 0; j < width; ++j)
 		{
-			list << j / width;
+			list << j / (width3);
 		}
 		for(int j = 0; j < width2; ++j)
 		{
-			list << 1 - (j / width2) * ratio;
+			list << ratio2 - (j / width3) * ratio;
 		}
 		for(int j = width2; j >= 0; --j)
 		{
-			list << 1 - (j / width2) * ratio;
+			list << ratio2 - (j / width3) * ratio;
 		}
 		for(int j = width; j >= 0; --j)
 		{
-			list << j / width;
+			list << j / width3;
 		}
 	}
 	ViSignalManipulator::createSignal(list, buffer);

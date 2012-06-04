@@ -44,18 +44,21 @@ ViAudioEngine::ViAudioEngine()
 	mSongDetector->setKey("G1TZBE4IHJAYUSNCN");
 	ViObject::connect(mSongDetector, SIGNAL(songFound(ViSongInfo)), this, SIGNAL(songInfoChanged(ViSongInfo)));*/
 
-ViSignalManipulator::createDefaultSignal(mProcessingChain->originalBuffer(), 200, ViSignalManipulator::Tooth);
+//ViSignalManipulator::createDefaultSignal(mProcessingChain->originalBuffer(), 200, ViSignalManipulator::Tooth);
+//mProcessingChain->correctedBuffer()->clear();
+//ViSignalManipulator::createDefaultSignal(mProcessingChain->correctedBuffer(), 200, ViSignalManipulator::Mountain);
 //cout<<"pop: "<<mProcessingChain->originalBuffer()->size()<<" "<<mProcessingChain->correctedBuffer()->size()<<endl;
 
 	ViAudioBuffer *b1 = new ViAudioBuffer();
 	ViAudioBuffer *b2 = new ViAudioBuffer();
-	ViSignalManipulator::createDefaultSignal(b1, 1, ViSignalManipulator::Tooth);
-	ViSignalManipulator::createDefaultSignal(b2, 1, ViSignalManipulator::FlatMountain);
+	ViSignalManipulator::createDefaultSignal(mProcessingChain->originalBuffer(), 1, ViSignalManipulator::Tooth);
+	ViSignalManipulator::createDefaultSignal(mProcessingChain->correctedBuffer(), 1, ViSignalManipulator::Mountain);
+	//ViSignalManipulator::createDefaultSignal(b2, 1, ViSignalManipulator::Tooth);
 
-	//ViSignalManipulator::createNoise(b1, b2, 0.01);
+	//ViSignalManipulator::createNoise(mProcessingChain->originalBuffer(), mProcessingChain->correctedBuffer(), 1000000);
 
 	ViMatcher *m = new ViMatcher();
-	m->match(b1, b2);
+	m->match(mProcessingChain->originalBuffer(),mProcessingChain->correctedBuffer());
 
 	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
 	QObject::connect(mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
@@ -203,6 +206,8 @@ void ViAudioEngine::mute(bool value)
 void ViAudioEngine::startPlayback()
 {
 	mStreamOutput->start();
+	//ViMatcher *m = new ViMatcher();
+	//m->match(mProcessingChain->originalBuffer(),mProcessingChain->correctedBuffer());
 }
 
 void ViAudioEngine::stopPlayback()

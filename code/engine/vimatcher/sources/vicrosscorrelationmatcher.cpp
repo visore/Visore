@@ -4,35 +4,22 @@
 #include <iostream>
 using namespace std;
 
-ViCrossCorrelationMatcherThread::ViCrossCorrelationMatcherThread()
+ViCrossCorrelationMatcher::ViCrossCorrelationMatcher()
+	: ViMatcherStrategy()
 {
-	mFirstStream = NULL;
-	mSecondStream = NULL;
-	mResult = NULL;
 }
 
-void ViCrossCorrelationMatcherThread::setStreams(ViAudioBufferStream *first, ViAudioBufferStream *second)
-{
-	mFirstStream = first;
-	mSecondStream = second;
-}
-
-void ViCrossCorrelationMatcherThread::setResult(ViMatchResult *result)
-{
-	mResult = result;
-}
-
-void ViCrossCorrelationMatcherThread::run()
+void ViCrossCorrelationMatcher::match()
 {
 	static const qint32 WINDOW_SIZE = 4096;
 	int (*pcmToRealFirstPointer)(char*, double*, int);
 	int (*pcmToRealSecondPointer)(char*, double*, int);
 
-	qreal maximumDifference = -DBL_MIN;
-	qreal minimumDifference = DBL_MIN;
+	qreal maximumDifference = -DBL_MAX;
+	qreal minimumDifference = DBL_MAX;
 	qreal averageDifference = 0, subAverageDifference;
 	qreal sampleCounter = 0, subSampleCounter;
-	qreal difference;
+	qreal difference, firstNorm, secondNorm, multipliedNorm;
 
 	mFirstStream->restart();
 	mSecondStream->restart();
@@ -96,6 +83,8 @@ void ViCrossCorrelationMatcherThread::run()
 		if(firstSize > 0 && secondSize > 0)
 		{
 			firstSampleSize = pcmToRealFirstPointer(firstRawData, realData, firstSize);
+			firstNorm = norm(realData, firstSampleSize);
+			multipliedNorm = firstNorm * firstNorm;
 			transformer.pad(realData, firstSampleSize);
 			transformer.forwardTransform(realData, firstFourierData);
 
@@ -105,20 +94,24 @@ void ViCrossCorrelationMatcherThread::run()
 			transformer.multiply(firstFourierData, realData, multiply);	
 			transformer.inverseTransform(multiply, autocorrelation);
 			transformer.rescale(autocorrelation);
+			applyNorm(autocorrelation, WINDOW_SIZE, multipliedNorm);
 
 			//Cross-correlation
 			secondSampleSize = pcmToRealSecondPointer(secondRawData, realData, secondSize);
+			secondNorm = norm(realData, secondSampleSize);
+			multipliedNorm = firstNorm * secondNorm;
 			transformer.pad(realData, secondSampleSize);
 			transformer.forwardTransform(realData, secondFourierData);
 			transformer.multiply(firstFourierData, secondFourierData, multiply);
 			transformer.inverseTransform(multiply, realData);
 			transformer.rescale(realData);
+			applyNorm(realData, WINDOW_SIZE, multipliedNorm);
 
 			subAverageDifference = 0;
 			subSampleCounter = 0;
 			for(int i = 0; i < WINDOW_SIZE; ++i)
 			{
-				difference = qAbs(realData[i] - autocorrelation[i]);
+				difference = 1 - qAbs(realData[i] - autocorrelation[i]);
 				if(difference > maximumDifference)
 				{
 					maximumDifference = difference;
@@ -141,39 +134,23 @@ void ViCrossCorrelationMatcherThread::run()
 	}
 }
 
-ViCrossCorrelationMatcher::ViCrossCorrelationMatcher()
-	: ViMatcherStrategy()
+qreal ViCrossCorrelationMatcher::norm(qreal array[], qint32 size)
 {
-	QObject::connect(&mThread, SIGNAL(finished()), this, SIGNAL(finished()));
-}
-
-void ViCrossCorrelationMatcher::match()
-{
-	mThread.setStreams(mFirstStream, mSecondStream);
-	mThread.setResult(mResult);
-	mThread.start();
-}
-
-/*
-void ViCrossCorrelationMatcher::summarize()
-{
-	mFirstFourierFinished = !mFirstFourierFinished;
-	static qreal difference;
-	static qint32 size, index;
-	size = qMin(mFirstSampleSize, mSecondSampleSize);
-	for(index = 0; index < size; ++index)
+	qreal norm = 0;
+	for(int i = 0; i < size; ++i)
 	{
-		difference = qAbs(mFirstRealData[index] - mSecondRealData[index]);
+		norm += (array[i] * array[i]);
+	}
+	return qSqrt(norm);
+}
 
-		mAverageDifference += difference;
-		if(difference < mMinimumDifference)
+void ViCrossCorrelationMatcher::applyNorm(qreal array[], qint32 size, qreal norm)
+{
+	if(norm != 0)
+	{
+		for(int i = 0; i < size; ++i)
 		{
-			mMinimumDifference = difference;
-		}
-		else if(difference > mMaximumDifference)
-		{
-			mMaximumDifference = difference;
+			array[i] /= norm;
 		}
 	}
-	mSampleCounter += size;
-}*/
+}

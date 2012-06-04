@@ -5,25 +5,6 @@
 #include "vifouriertransformer.h"
 #include <QThread>
 
-class ViCrossCorrelationMatcherThread : public QThread
-{
-
-	public:
-
-		ViCrossCorrelationMatcherThread();
-		void setStreams(ViAudioBufferStream *first, ViAudioBufferStream *second);
-		void setResult(ViMatchResult *result);
-		void run();
-
-	private:
-
-		ViAudioBufferStream *mFirstStream;
-		ViAudioBufferStream *mSecondStream;
-		ViMatchResult *mResult;
-
-};
-
-
 class ViCrossCorrelationMatcher : public ViMatcherStrategy
 {
 
@@ -32,9 +13,10 @@ class ViCrossCorrelationMatcher : public ViMatcherStrategy
 		ViCrossCorrelationMatcher();
 		void match();
 
-	private:
+	protected:
 
-		ViCrossCorrelationMatcherThread mThread;
+		qreal norm(qreal array[], qint32 size);
+		void applyNorm(qreal array[], qint32 size, qreal norm);
 
 };
 

@@ -5,13 +5,8 @@
 #include "viaudiobuffer.h"
 #include "vipcmconverter.h"
 
-class ViMatcherStrategy : public QObject
+class ViMatcherStrategy
 {
-	Q_OBJECT
-
-	signals:
-
-		void finished();
 
 	public:
 		
