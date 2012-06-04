@@ -23,7 +23,8 @@ class ViWaveOverlayWidget : public ViWidget
 		void positionChanged(ViAudioPosition position);
 
 	public:
-		ViWaveOverlayWidget(ViAudioBuffer::ViAudioBufferType type, QWidget *parent = 0);
+		ViWaveOverlayWidget(QWidget *parent = 0);
+		void setBufferType(ViAudioBuffer::ViAudioBufferType type);
 		void setZoomLevel(qint16 level);
 
 	protected:

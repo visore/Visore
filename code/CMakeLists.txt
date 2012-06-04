@@ -60,7 +60,7 @@ INCLUDE_DIRECTORIES(
 	${INTERFACE}/visimplewidgets/headers
 	${INTERFACE}/vicomposedwidgets/headers
 	${INTERFACE}/vicomposedwidgets/headers/vispectrumplot
-	${INTERFACE}/vicomposedwidgets/headers/vimenu
+	${INTERFACE}/vicomposedwidgets/headers/vinavigator
 
 	${ENGINE}/viaudioengine/headers
 	${ENGINE}/viaudioconnections/viaudioconnection/headers

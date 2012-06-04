@@ -12,10 +12,10 @@ ViMainWindow::ViMainWindow()
 ViMainWindow::~ViMainWindow()
 {
 	delete mUi;
-	delete mOriginalWaveWidget;
-	delete mCorrectedWaveWidget;
+	//delete mOriginalWaveWidget;
+	//delete mCorrectedWaveWidget;
 	delete mLoadingWidget;
-	delete mSongInfoWidget;
+	//delete mSongInfoWidget;
 }
 
 ViMainWindow* ViMainWindow::instance()
@@ -49,12 +49,12 @@ void ViMainWindow::showLoading(bool animation, bool button, ViLoadingWidget::Tex
 
 void ViMainWindow::showWave()
 {
-	mUi->widgetStack->setCurrentIndex(0);
+	//mUi->widgetStack->setCurrentIndex(0);
 }
 
 void ViMainWindow::showSpectrum()
 {
-	mUi->widgetStack->setCurrentIndex(1);
+	//mUi->widgetStack->setCurrentIndex(1);
 }
 
 void ViMainWindow::resizeEvent(QResizeEvent *event)
@@ -73,6 +73,7 @@ void ViMainWindow::initialize()
 
 	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile.png", ViThemeImage::Normal, ViThemeManager::Background).path() + ") repeat-x;}");
 
+/*
 	//Wave forms
 	mOriginalWaveWidget = new ViWaveFormWidget(ViAudioBuffer::Original, mUi->originalWaveContainer);
 	mUi->originalWaveContainer->layout()->addWidget(mOriginalWaveWidget);
@@ -85,6 +86,7 @@ void ViMainWindow::initialize()
 	mSongInfoWidget = new ViSongInfoWidget(mUi->songInfoContainer);
 	mUi->songInfoContainer->layout()->addWidget(mSongInfoWidget);
 
-	showWave();
+	showWave();*/
+
 	hideLoading();
 }

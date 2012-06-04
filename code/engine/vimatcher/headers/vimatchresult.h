@@ -9,19 +9,19 @@ class ViMatchResultCombination
 
 	public:
 
-		ViMatchResultCombination(qreal minimum = 0, qreal maximum = 0, qreal average = 0);
-		void setMinimum(qreal minimum);
-		void setMaximum(qreal maximum);
+		ViMatchResultCombination(qreal worst = 0, qreal best = 0, qreal average = 0);
+		void setWorst(qreal worst);
+		void setBest(qreal best);
 		void setAverage(qreal average);
-		qreal minimum();
-		qreal maximum();
+		qreal worst();
+		qreal best();
 		qreal average();
 		QString toString();
 
 	private:
 
-		qreal mMinimum;
-		qreal mMaximum;
+		qreal mWorst;
+		qreal mBest;
 		qreal mAverage;
 
 };
@@ -33,8 +33,8 @@ class ViMatchResult
 
 		enum ResultType
 		{
-			Maximum = 0,
-			Minimum = 1,
+			Best = 0,
+			Worst = 1,
 			Average = 2
 		};
 

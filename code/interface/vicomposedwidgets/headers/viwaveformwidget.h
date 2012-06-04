@@ -25,8 +25,9 @@ class ViWaveFormWidget : public ViWidget
 		void updateSampleValues(qreal maximum, qreal minimum, qreal maximumAverage, qreal minimumAverage);
 
 	public:
-		ViWaveFormWidget(ViAudioBuffer::ViAudioBufferType type, QWidget *parent = 0);
+		ViWaveFormWidget(QWidget *parent = 0);
 		~ViWaveFormWidget();
+		void setBufferType(ViAudioBuffer::ViAudioBufferType type);
 		void setZoomLevel(qint16 level);
 
 	protected:

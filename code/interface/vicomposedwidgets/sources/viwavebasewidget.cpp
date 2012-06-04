@@ -1,7 +1,13 @@
 #include "viwavebasewidget.h"
 
-ViWaveBaseWidget::ViWaveBaseWidget(ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
+ViWaveBaseWidget::ViWaveBaseWidget(QWidget *parent)
 	: ViWidget(parent)
+{	
+	mPosition = 0;
+	mZoomLevel = 0;
+}
+
+void ViWaveBaseWidget::setBufferType(ViAudioBuffer::ViAudioBufferType type)
 {
 	mForm = mEngine->waveSummary(type);
 	if(type == ViAudioBuffer::Original)
@@ -13,9 +19,6 @@ ViWaveBaseWidget::ViWaveBaseWidget(ViAudioBuffer::ViAudioBufferType type, QWidge
 		ViObject::connect(mEngine, SIGNAL(correctedWaveChanged()), this, SLOT(repaint()));
 	}
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
-	
-	mPosition = 0;
-	mZoomLevel = 0;
 }
 
 void ViWaveBaseWidget::paintEvent(QPaintEvent *event)

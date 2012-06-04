@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ViInputContainer</class>
+ <widget class="QWidget" name="ViInputContainer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>692</width>
+    <height>546</height>
+   </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string/>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="horizontalSpacing">
+    <number>10</number>
+   </property>
+   <property name="margin">
+    <number>10</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="ViWaveFormWidget" name="originalWaveWidget" native="true"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="ViWaveFormWidget" name="correctedWaveWidget" native="true"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="ViSongInfoWidget" name="songInfoWidget" native="true"/>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ViSongInfoWidget</class>
+   <extends>QWidget</extends>
+   <header>visonginfowidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ViWaveFormWidget</class>
+   <extends>QWidget</extends>
+   <header>viwaveformwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

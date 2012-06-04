@@ -3,10 +3,7 @@
 
 #include <QMainWindow>
 #include <QResizeEvent>
-#include "viwaveformwidget.h"
 #include "viloadingwidget.h"
-#include "visonginfowidget.h"
-#include "vimenu.h"
 
 namespace Ui
 {
@@ -47,10 +44,10 @@ class ViMainWindow : public QMainWindow
 		ViAudioEngine *mEngine;
 		ViLoadingWidget *mLoadingWidget;
 
-		ViWaveFormWidget *mOriginalWaveWidget;
+		/*ViWaveFormWidget *mOriginalWaveWidget;
 		ViWaveFormWidget *mCorrectedWaveWidget;
 
-		ViSongInfoWidget *mSongInfoWidget;
+		ViSongInfoWidget *mSongInfoWidget;*/
 };
 
 #endif

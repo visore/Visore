@@ -1,20 +1,20 @@
 #include "vimatchresult.h"
 
-ViMatchResultCombination::ViMatchResultCombination(qreal minimum, qreal maximum, qreal average)
+ViMatchResultCombination::ViMatchResultCombination(qreal worst, qreal best, qreal average)
 {
-	mMinimum = minimum;
-	mMaximum = maximum;
+	mWorst = worst;
+	mBest = best;
 	mAverage = average;
 }
 
-void ViMatchResultCombination::setMinimum(qreal minimum)
+void ViMatchResultCombination::setWorst(qreal worst)
 {
-	mMinimum = minimum;
+	mWorst = worst;
 }
 
-void ViMatchResultCombination::setMaximum(qreal maximum)
+void ViMatchResultCombination::setBest(qreal best)
 {
-	mMaximum = maximum;
+	mBest = best;
 }
 
 void ViMatchResultCombination::setAverage(qreal average)
@@ -22,14 +22,14 @@ void ViMatchResultCombination::setAverage(qreal average)
 	mAverage = average;
 }
 
-qreal ViMatchResultCombination::minimum()
+qreal ViMatchResultCombination::worst()
 {
-	return mMinimum;
+	return mWorst;
 }
 
-qreal ViMatchResultCombination::maximum()
+qreal ViMatchResultCombination::best()
 {
-	return mMaximum;
+	return mBest;
 }
 
 qreal ViMatchResultCombination::average()
@@ -39,7 +39,7 @@ qreal ViMatchResultCombination::average()
 
 QString ViMatchResultCombination::toString()
 {
-	return "(min: " + QString::number(mMinimum, 'f', 8) + ", max: " + QString::number(mMaximum, 'f', 8) + ", avg: " + QString::number(mAverage, 'f', 8) + ")";
+	return "(worst: " + QString::number(mWorst, 'f', 8) + ", best: " + QString::number(mBest, 'f', 8) + ", avg: " + QString::number(mAverage, 'f', 8) + ")";
 }
 
 ViMatchResult::ViMatchResult()
@@ -56,8 +56,8 @@ void ViMatchResult::reset()
 QString ViMatchResult::toString()
 {
 	QString string = "";
-	string += "Sample difference: " + mSampleDifference.toString() + "\n";
-	string += "Cross correlation: " + mCrossCorrelation.toString();
+	string += "Sample-correlation: " + mSampleDifference.toString() + "\n";
+	string += "Cross-correlation: " + mCrossCorrelation.toString();
 	return string;
 }
 
@@ -73,13 +73,13 @@ void ViMatchResult::setSampleDifference(ViMatchResultCombination combination)
 
 qreal ViMatchResult::crossCorrelation(ResultType type)
 {
-	if(type == ViMatchResult::Maximum)
+	if(type == ViMatchResult::Best)
 	{
-		return mCrossCorrelation.maximum();
+		return mCrossCorrelation.best();
 	}
-	if(type == ViMatchResult::Minimum)
+	if(type == ViMatchResult::Worst)
 	{
-		return mCrossCorrelation.minimum();
+		return mCrossCorrelation.worst();
 	}
 	if(type == ViMatchResult::Average)
 	{
@@ -89,13 +89,13 @@ qreal ViMatchResult::crossCorrelation(ResultType type)
 
 qreal ViMatchResult::sampleDifference(ResultType type)
 {
-	if(type == ViMatchResult::Maximum)
+	if(type == ViMatchResult::Best)
 	{
-		return mSampleDifference.maximum();
+		return mSampleDifference.best();
 	}
-	if(type == ViMatchResult::Minimum)
+	if(type == ViMatchResult::Worst)
 	{
-		return mSampleDifference.minimum();
+		return mSampleDifference.worst();
 	}
 	if(type == ViMatchResult::Average)
 	{

@@ -1,93 +1,47 @@
 #include "visamplematcher.h"
-
-#define WINDOW_SIZE 4096
+#include <float.h>
 
 ViSampleMatcher::ViSampleMatcher()
 	: ViMatcherStrategy()
 {
 }
 
-void ViSampleMatcher::match()
+void ViSampleMatcher::initialize(qint32 windowSize)
 {
-	qreal maximumDifference = 0;
-	qreal minimumDifference = 1;
-	qreal averageDifference = 0;
+	ViMatcherStrategy::initialize(windowSize);
+	mMaximumDifference = -DBL_MAX;
+	mMinimumDifference = DBL_MAX;
+	mAverageDifference = 0;
+	mCounter = 0;
+}
 
+void ViSampleMatcher::run()
+{
 	qreal difference;
-	qint64 sampleCounter = 0;
-	qint32 size, index;
-	qint32 firstSize = WINDOW_SIZE, secondSize = WINDOW_SIZE;
-	qint32 firstSampleSize = mFirstStream->buffer()->format().sampleSize(), secondSampleSize = mSecondStream->buffer()->format().sampleSize();
+	qint32 size = qMin(mFirstSize, mSecondSize);
+	for(int i = 0; i < size; ++i)
+	{
+		difference = qAbs(mFirstData[i] - mSecondData[i]);
 
-	char firstRawData[firstSize];
-	char secondRawData[secondSize];
-	qreal firstRealData[firstSize];
-	qreal secondRealData[secondSize];
-
-	int (*pcmToRealFirstPointer)(char*, qreal*, int);
-	int (*pcmToRealSecondPointer)(char*, qreal*, int);
-
-	if(firstSampleSize == 8)
-	{
-		pcmToRealFirstPointer = &ViPcmConverter<qreal>::pcmToReal8;
-	}
-	else if(firstSampleSize == 16)
-	{
-		pcmToRealFirstPointer = &ViPcmConverter<qreal>::pcmToReal16;
-	}
-	else if(firstSampleSize == 24)
-	{
-		pcmToRealFirstPointer = &ViPcmConverter<qreal>::pcmToReal24;
-	}
-	else if(firstSampleSize == 32)
-	{
-		pcmToRealFirstPointer = &ViPcmConverter<qreal>::pcmToReal32;
-	}
-
-	if(secondSampleSize == 8)
-	{
-		pcmToRealSecondPointer = &ViPcmConverter<qreal>::pcmToReal8;
-	}
-	else if(secondSampleSize == 16)
-	{
-		pcmToRealSecondPointer = &ViPcmConverter<qreal>::pcmToReal16;
-	}
-	else if(secondSampleSize == 24)
-	{
-		pcmToRealSecondPointer = &ViPcmConverter<qreal>::pcmToReal24;
-	}
-	else if(secondSampleSize == 32)
-	{
-		pcmToRealSecondPointer = &ViPcmConverter<qreal>::pcmToReal32;
-	}
-
-	secondSize = mSecondStream->read(secondRawData, secondSize);
-	firstSize = mFirstStream->read(firstRawData, firstSize);
-	while(firstSize > 0 && secondSize > 0)
-	{
-		firstSampleSize = pcmToRealFirstPointer(firstRawData, firstRealData, firstSize);
-		secondSampleSize = pcmToRealSecondPointer(secondRawData, secondRealData, secondSize);
-		size = qMin(firstSampleSize, secondSampleSize);
-		for(index = 0; index < size; ++index)
+		mAverageDifference += difference;
+		if(difference < mMinimumDifference)
 		{
-			difference = 1 - qAbs(firstRealData[index] - secondRealData[index]);
-
-			averageDifference += difference;
-			if(difference < minimumDifference)
-			{
-				minimumDifference = difference;
-			}
-			else if(difference > maximumDifference)
-			{
-				maximumDifference = difference;
-			}
+			mMinimumDifference = difference;
 		}
-		sampleCounter += size;
-
-		firstSize = mFirstStream->read(firstRawData, firstSize);
-		secondSize = mSecondStream->read(secondRawData, secondSize);
+		else if(difference > mMaximumDifference)
+		{
+			mMaximumDifference = difference;
+		}
 	}
+	mCounter += size;
+}
 
-	averageDifference /= sampleCounter;
-	mResult->setSampleDifference(ViMatchResultCombination(minimumDifference, maximumDifference, averageDifference));
+void ViSampleMatcher::finalize()
+{
+	mAverageDifference /= mCounter;
+	mResult->setSampleDifference(ViMatchResultCombination(
+		(2 - qAbs(mMaximumDifference)) / 2,
+		(2 - qAbs(mMinimumDifference)) / 2,
+		(2 - qAbs(mAverageDifference)) / 2
+	));
 }

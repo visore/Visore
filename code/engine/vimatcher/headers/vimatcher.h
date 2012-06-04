@@ -3,19 +3,40 @@
 
 #include <QList>
 #include <QThread>
+#include <QThreadPool>
 #include "vimatcherstrategy.h"
 
 class ViMatcherThread : public QThread
 {
+	Q_OBJECT
+
+	signals:
+
+		void changed(qreal percentage);
 
 	public:
 
-		ViMatcherThread(ViMatcherStrategy *strategy);
+		ViMatcherThread();
+		~ViMatcherThread();
+		void setBuffers(ViAudioBuffer *first, ViAudioBuffer *second);
+		void setResult(ViMatchResult *result);
+		void setWindowSize(qint32 windowSize);
 		void run();
+
+	protected:
+
+		void initialize();
+		void match(qreal firstData[], qint32 firstSize, qreal secondData[], qint32 secondSize);
+		void finalize();
 
 	private:
 
-		ViMatcherStrategy *mStrategy;
+		QThreadPool *mGlobalPool;
+		ViAudioBufferStream *mFirstStream;
+		ViAudioBufferStream *mSecondStream;
+		ViMatchResult *mResult;
+		QList<ViMatcherStrategy*> mMatchers;
+		qint32 mWindowSize;
 
 };
 
@@ -26,25 +47,18 @@ class ViMatcher : public QObject
 	signals:
 
 		void finished();
-
-	private slots:
-
-		void checkFinished();
+		void changed(qreal percentage);
 
 	public:
 
 		ViMatcher();
-		~ViMatcher();
-
-		void match(ViAudioBuffer *first, ViAudioBuffer *second);
+		void match(ViAudioBuffer *first, ViAudioBuffer *second, qint32 windowSize = 4096);
 		ViMatchResult result();
 		
 	private:
 		
 		ViMatchResult mResult;
-		QList<ViMatcherStrategy*> mStrategies;
-		QList<ViMatcherThread*> mThreads;
-		qint32 finishCounter;
+		ViMatcherThread mThread;
 		
 };
 

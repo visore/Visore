@@ -83,6 +83,9 @@ class ViAudioEngine : public ViSingleton, public ViError
 		void spectrumChanged(qreal percentage);
 		void spectrumFinished();
 
+		void matchingChanged(qreal percentage);
+		void matchingFinished();
+
 		void songInfoChanged(ViSongInfo info);
 
 	public:
@@ -134,6 +137,7 @@ class ViAudioEngine : public ViSingleton, public ViError
 		ViSongDetector *mSongDetector;
 
 		ViSpectrumAnalyzer *mSpectrumAnalyzer;
+		ViMatcher *mMatcher;
 };
 
 #endif

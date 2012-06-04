@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ViInputContainer</class>
- <widget class="QWidget" name="ViInputContainer">
+ <class>ViAnalysisMenu</class>
+ <widget class="QWidget" name="ViAnalysisMenu">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -24,7 +24,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">
-    <widget class="ViInputWidget" name="inputWidget" native="true"/>
+    <widget class="ViAnalysisWidget" name="analysisWidget" native="true"/>
    </item>
    <item row="1" column="1">
     <spacer name="horizontalSpacer">
@@ -43,9 +43,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ViInputWidget</class>
+   <class>ViAnalysisWidget</class>
    <extends>QWidget</extends>
-   <header>viinputwidget.h</header>
+   <header>vianalysiswidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

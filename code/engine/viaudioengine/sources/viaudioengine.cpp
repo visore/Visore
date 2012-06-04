@@ -49,16 +49,21 @@ ViAudioEngine::ViAudioEngine()
 //ViSignalManipulator::createDefaultSignal(mProcessingChain->correctedBuffer(), 200, ViSignalManipulator::Mountain);
 //cout<<"pop: "<<mProcessingChain->originalBuffer()->size()<<" "<<mProcessingChain->correctedBuffer()->size()<<endl;
 
-	ViAudioBuffer *b1 = new ViAudioBuffer();
+	/*ViAudioBuffer *b1 = new ViAudioBuffer();
 	ViAudioBuffer *b2 = new ViAudioBuffer();
 	ViSignalManipulator::createDefaultSignal(mProcessingChain->originalBuffer(), 1, ViSignalManipulator::Tooth);
-	ViSignalManipulator::createDefaultSignal(mProcessingChain->correctedBuffer(), 1, ViSignalManipulator::Mountain);
+	//ViSignalManipulator::createDefaultSignal(mProcessingChain->correctedBuffer(), 1, ViSignalManipulator::Tooth);
 	//ViSignalManipulator::createDefaultSignal(b2, 1, ViSignalManipulator::Tooth);
 
-	//ViSignalManipulator::createNoise(mProcessingChain->originalBuffer(), mProcessingChain->correctedBuffer(), 1000000);
+	ViSignalManipulator::createNoise(mProcessingChain->originalBuffer(), mProcessingChain->correctedBuffer(), 10);
 
 	ViMatcher *m = new ViMatcher();
 	m->match(mProcessingChain->originalBuffer(),mProcessingChain->correctedBuffer());
+*/
+
+	mMatcher = new ViMatcher();
+	QObject::connect(mMatcher, SIGNAL(finished()), this, SIGNAL(matchingFinished()));
+	QObject::connect(mMatcher, SIGNAL(changed(qreal)), this, SIGNAL(matchingChanged(qreal)));
 
 	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
 	QObject::connect(mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
@@ -206,8 +211,6 @@ void ViAudioEngine::mute(bool value)
 void ViAudioEngine::startPlayback()
 {
 	mStreamOutput->start();
-	//ViMatcher *m = new ViMatcher();
-	//m->match(mProcessingChain->originalBuffer(),mProcessingChain->correctedBuffer());
 }
 
 void ViAudioEngine::stopPlayback()

@@ -6,6 +6,9 @@ ViInputContainer::ViInputContainer(QWidget *parent)
 {
 	mUi = new Ui::ViInputContainer();
 	mUi->setupUi(this);
+
+	mUi->originalWaveWidget->setBufferType(ViAudioBuffer::Original);
+	mUi->correctedWaveWidget->setBufferType(ViAudioBuffer::Corrected);
 }
 
 ViInputContainer::~ViInputContainer()

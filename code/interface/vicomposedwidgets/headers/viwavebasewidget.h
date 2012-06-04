@@ -13,7 +13,8 @@ class ViWaveBaseWidget : public ViWidget
 		void positionChanged(ViAudioPosition position);
 
 	public:
-		ViWaveBaseWidget(ViAudioBuffer::ViAudioBufferType type, QWidget *parent = 0);
+		ViWaveBaseWidget(QWidget *parent = 0);
+		void setBufferType(ViAudioBuffer::ViAudioBufferType type);
 		void setZoomLevel(qint16 level);
 
 	protected:
@@ -21,6 +22,7 @@ class ViWaveBaseWidget : public ViWidget
 		void resizeEvent(QResizeEvent *event);
 
 	private:
+
 		ViWaveForm *mForm;
 		qint64 mPosition;
 		qint16 mZoomLevel;

@@ -1,19 +1,36 @@
 #include "vimatcherstrategy.h"
 
 ViMatcherStrategy::ViMatcherStrategy()
+	: QRunnable()
 {
-	mFirstStream = NULL;
-	mSecondStream = NULL;
+	setAutoDelete(false); // Object is not automatically deleted by thread pool
+
 	mResult = NULL;
+	mFirstData = NULL;
+	mSecondData = NULL;
+	mFirstSize = 0;
+	mSecondSize = 0;
+	mWindowSize = 0;
 }
 
-void ViMatcherStrategy::setBuffers(ViAudioBuffer *first, ViAudioBuffer *second)
+void ViMatcherStrategy::setData(qreal firstData[], qint32 firstSize, qreal secondData[], qint32 secondSize)
 {
-	mFirstStream = first->createReadStream();
-	mSecondStream = second->createReadStream();
+	mFirstData =  firstData;
+	mSecondData = secondData;
+	mFirstSize = firstSize;
+	mSecondSize = secondSize;
 }
 
 void ViMatcherStrategy::setResult(ViMatchResult *result)
 {
 	mResult = result;
+}
+
+void ViMatcherStrategy::initialize(qint32 windowSize)
+{
+	mWindowSize = windowSize;
+}
+
+void ViMatcherStrategy::finalize()
+{
 }

@@ -2,11 +2,9 @@
 
 #define CONTENT_MARGIN -4
 
-ViWaveOverlayWidget::ViWaveOverlayWidget(ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
+ViWaveOverlayWidget::ViWaveOverlayWidget(QWidget *parent)
 	: ViWidget(parent)
 {
-	mForm = mEngine->waveSummary(type);
-	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 	setMouseTracking(true);
 	mPosition = 0;
 	mZoomLevel = 0;
@@ -15,6 +13,12 @@ ViWaveOverlayWidget::ViWaveOverlayWidget(ViAudioBuffer::ViAudioBufferType type, 
 
 	mHeightRatio = 0;
 	mZoomRatio = 0;
+}
+
+void ViWaveOverlayWidget::setBufferType(ViAudioBuffer::ViAudioBufferType type)
+{
+	mForm = mEngine->waveSummary(type);
+	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 }
 
 void ViWaveOverlayWidget::paintEvent(QPaintEvent *event)

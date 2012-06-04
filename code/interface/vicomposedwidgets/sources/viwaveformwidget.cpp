@@ -2,17 +2,9 @@
 
 #define CONTENT_MARGIN -4
 
-ViWaveFormWidget::ViWaveFormWidget(ViAudioBuffer::ViAudioBufferType type, QWidget *parent)
+ViWaveFormWidget::ViWaveFormWidget(QWidget *parent)
 	: ViWidget(parent)
 {
-	mBaseWidget = new ViWaveBaseWidget(type, this);
-
-	mOverlayWidget = new ViWaveOverlayWidget(type, this);
-	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SIGNAL(pointerMoved(qint32)));
-	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SLOT(setPointer(qint32)));
-	ViObject::connect(mOverlayWidget, SIGNAL(pointerValuesChanged(qreal, qreal, qreal, qreal)), this, SLOT(updateSampleValues(qreal, qreal, qreal, qreal)));
-	ViObject::connect(mOverlayWidget, SIGNAL(zoomLevelChanged(qint16)), this, SLOT(zoom(qint16)));
-
 	parent->setObjectName("parent");
 	parent->setStyleSheet("\
 		.QWidget#parent{\
@@ -78,9 +70,6 @@ ViWaveFormWidget::ViWaveFormWidget(ViAudioBuffer::ViAudioBufferType type, QWidge
 	mInfoWidget->setLayout(mInfoLayout);
 	mInfoWidget->setStyleSheet("color: " + ViThemeManager::color(4).name() + "; font-size: 11px;");
 	mInfoToolbar->addWidget(mInfoWidget);
-
-	setZoomLevel(6);
-
 }
 
 ViWaveFormWidget::~ViWaveFormWidget()
@@ -88,6 +77,19 @@ ViWaveFormWidget::~ViWaveFormWidget()
 	delete mControlToolbar;
 	delete mBaseWidget;
 	delete mOverlayWidget;
+}
+
+void ViWaveFormWidget::setBufferType(ViAudioBuffer::ViAudioBufferType type)
+{
+	mBaseWidget = new ViWaveBaseWidget(this);
+	mBaseWidget->setBufferType(type);
+	mOverlayWidget = new ViWaveOverlayWidget(this);
+	mOverlayWidget->setBufferType(type);
+	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SIGNAL(pointerMoved(qint32)));
+	ViObject::connect(mOverlayWidget, SIGNAL(pointerMoved(qint32)), this, SLOT(setPointer(qint32)));
+	ViObject::connect(mOverlayWidget, SIGNAL(pointerValuesChanged(qreal, qreal, qreal, qreal)), this, SLOT(updateSampleValues(qreal, qreal, qreal, qreal)));
+	ViObject::connect(mOverlayWidget, SIGNAL(zoomLevelChanged(qint16)), this, SLOT(zoom(qint16)));
+	setZoomLevel(6);
 }
 
 void ViWaveFormWidget::setZoomLevel(qint16 level)
