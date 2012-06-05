@@ -73,9 +73,7 @@ void ViWaveOverlayWidget::paintEvent(QPaintEvent *event)
 		painter.drawLine(mPointerPositionPixel, minimum + 5, mPointerPositionPixel, height());
 	}
 
-	QStyleOption options;
-	options.init(this);
-	style()->drawPrimitive(QStyle::PE_Widget, &options, &painter, this);
+	ViWidget::paintEvent(event);
 }
 
 

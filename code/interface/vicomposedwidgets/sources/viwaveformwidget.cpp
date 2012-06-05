@@ -111,14 +111,6 @@ void ViWaveFormWidget::zoomOut()
 	zoom(1);
 }
 
-void ViWaveFormWidget::paintEvent(QPaintEvent *event)
-{
-	QStyleOption options;
-	options.init(this);
-	QPainter painter(this);
-	style()->drawPrimitive(QStyle::PE_Widget, &options, &painter, this);
-}
-
 void ViWaveFormWidget::resizeEvent(QResizeEvent *event)
 {
 	mBaseWidget->resize(event->size());

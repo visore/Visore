@@ -61,9 +61,9 @@ ViAudioEngine::ViAudioEngine()
 	m->match(mProcessingChain->originalBuffer(),mProcessingChain->correctedBuffer());
 */
 
-	mMatcher = new ViMatcher();
-	QObject::connect(mMatcher, SIGNAL(finished()), this, SIGNAL(matchingFinished()));
-	QObject::connect(mMatcher, SIGNAL(changed(qreal)), this, SIGNAL(matchingChanged(qreal)));
+	mCorrelator = new ViCorrelator();
+	QObject::connect(mCorrelator, SIGNAL(finished()), this, SIGNAL(correlationFinished()));
+	QObject::connect(mCorrelator, SIGNAL(changed(qreal)), this, SIGNAL(correlationChanged(qreal)));
 
 	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
 	QObject::connect(mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
@@ -278,9 +278,19 @@ ViFloatSpectrum& ViAudioEngine::spectrum()
 	return mSpectrumAnalyzer->spectrum();
 }
 
+ViCorrelationResult& ViAudioEngine::correlation()
+{
+	return mCorrelator->result();
+}
+
 void ViAudioEngine::calculateSpectrum(qint32 size, QString windowFunction)
 {
 	mSpectrumAnalyzer->setWindowFunction(windowFunction);
 	mSpectrumAnalyzer->setBlockSize(size);
 	mSpectrumAnalyzer->analyze();
+}
+
+void ViAudioEngine::calculateCorrelation()
+{
+	mCorrelator->correlate(mProcessingChain->originalBuffer(), mProcessingChain->correctedBuffer());
 }

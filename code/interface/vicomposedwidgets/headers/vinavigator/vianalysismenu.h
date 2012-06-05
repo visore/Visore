@@ -4,7 +4,7 @@
 #include "vimenu.h"
 #include "vithememanager.h"
 #include "vispectrumwidget.h"
-#include "vimatchwidget.h"
+#include "vicorrelationwidget.h"
 
 namespace Ui
 {
@@ -18,7 +18,7 @@ class ViAnalysisMenu : public ViMenu
 	private slots:
 
 		void showSpectrum();
-		void showMatch();
+		void showCorrelation();
 
 	public:
 		ViAnalysisMenu(ViNavigator *navigator = 0);
@@ -28,10 +28,10 @@ class ViAnalysisMenu : public ViMenu
 		Ui::ViAnalysisMenu *mUi;
 
 		ViSpectrumWidget mSpectrumWidget;
-		ViMatchWidget mMatchWidget;
+		ViCorrelationWidget mCorrelationWidget;
 
 		qint16 mSpectrumIndex;
-		qint16 mMatchIndex;
+		qint16 mCorrelationIndex;
 };
 
 #endif

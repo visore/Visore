@@ -1,21 +1,21 @@
-#include "visamplematcher.h"
+#include "visamplecorrelator.h"
 #include <float.h>
 
-ViSampleMatcher::ViSampleMatcher()
-	: ViMatcherStrategy()
+ViSampleCorrelator::ViSampleCorrelator()
+	: ViCorrelatorStrategy()
 {
 }
 
-void ViSampleMatcher::initialize(qint32 windowSize)
+void ViSampleCorrelator::initialize(qint32 windowSize)
 {
-	ViMatcherStrategy::initialize(windowSize);
+	ViCorrelatorStrategy::initialize(windowSize);
 	mMaximumDifference = -DBL_MAX;
 	mMinimumDifference = DBL_MAX;
 	mAverageDifference = 0;
 	mCounter = 0;
 }
 
-void ViSampleMatcher::run()
+void ViSampleCorrelator::run()
 {
 	qreal difference;
 	qint32 size = qMin(mFirstSize, mSecondSize);
@@ -36,10 +36,10 @@ void ViSampleMatcher::run()
 	mCounter += size;
 }
 
-void ViSampleMatcher::finalize()
+void ViSampleCorrelator::finalize()
 {
 	mAverageDifference /= mCounter;
-	mResult->setSampleDifference(ViMatchResultCombination(
+	mResult->setSampleCorrelation(ViCorrelationResultCombination(
 		(2 - qAbs(mMaximumDifference)) / 2,
 		(2 - qAbs(mMinimumDifference)) / 2,
 		(2 - qAbs(mAverageDifference)) / 2

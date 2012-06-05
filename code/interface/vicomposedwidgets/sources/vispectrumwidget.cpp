@@ -46,7 +46,6 @@ void ViSpectrumWidget::recalculate()
 
 void ViSpectrumWidget::replot()
 {
-	ViMainWindow::instance()->hideLoading();
 	ViSpectrum<float> &plot = mEngine->spectrum();
 	qint32 size = plot.size();
 
@@ -138,6 +137,7 @@ void ViSpectrumWidget::replot()
 		mUi->plot->fill(fill);
 		mUi->plot->setData(x, y);
 	}
+	ViMainWindow::instance()->hideLoading();
 }
 
 

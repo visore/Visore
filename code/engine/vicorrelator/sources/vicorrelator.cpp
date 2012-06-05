@@ -1,11 +1,8 @@
-#include "vimatcher.h"
-#include "visamplematcher.h"
-#include "vicrosscorrelationmatcher.h"
+#include "vicorrelator.h"
+#include "visamplecorrelator.h"
+#include "vicrosscorrelator.h"
 
-#include <iostream>
-using namespace std;
-
-ViMatcherThread::ViMatcherThread()
+ViCorrelatorThread::ViCorrelatorThread()
 {
 	mFirstStream = NULL;
 	mSecondStream = NULL;
@@ -13,33 +10,33 @@ ViMatcherThread::ViMatcherThread()
 	mWindowSize = 0;
 	mGlobalPool = QThreadPool::globalInstance();
 
-	mMatchers.append(new ViCrossCorrelationMatcher());
-	mMatchers.append(new ViSampleMatcher());
+	mCorrelators.append(new ViCrossCorrelator());
+	mCorrelators.append(new ViSampleCorrelator());
 }
 
-ViMatcherThread::~ViMatcherThread()
+ViCorrelatorThread::~ViCorrelatorThread()
 {
-	qDeleteAll(mMatchers);
-	mMatchers.clear();
+	qDeleteAll(mCorrelators);
+	mCorrelators.clear();
 }
 
-void ViMatcherThread::setBuffers(ViAudioBuffer *first, ViAudioBuffer *second)
+void ViCorrelatorThread::setBuffers(ViAudioBuffer *first, ViAudioBuffer *second)
 {
 	mFirstStream = first->createReadStream();
 	mSecondStream = second->createReadStream();
 }
 
-void ViMatcherThread::setResult(ViMatchResult *result)
+void ViCorrelatorThread::setResult(ViCorrelationResult *result)
 {
 	mResult = result;
 }
 
-void ViMatcherThread::setWindowSize(qint32 windowSize)
+void ViCorrelatorThread::setWindowSize(qint32 windowSize)
 {
 	mWindowSize = windowSize;
 }
 
-void ViMatcherThread::run()
+void ViCorrelatorThread::run()
 {
 	emit changed(0);
 	qint32 firstSampleSize = mFirstStream->buffer()->format().sampleSize();
@@ -100,7 +97,7 @@ void ViMatcherThread::run()
 		{
 			firstSampleSize = pcmToRealFirstPointer(firstRawData, firstRealData, firstSize);
 			secondSampleSize = pcmToRealSecondPointer(secondRawData, secondRealData, secondSize);
-			match(firstRealData, firstSampleSize, secondRealData, secondSampleSize);
+			correlate(firstRealData, firstSampleSize, secondRealData, secondSampleSize);
 			++counter;
 			emit changed((counter * mWindowSize) / (totalSize / 100.0));
 		}
@@ -109,41 +106,41 @@ void ViMatcherThread::run()
 	emit changed(100);
 }
 
-void ViMatcherThread::initialize()
+void ViCorrelatorThread::initialize()
 {
-	for(int i = 0; i < mMatchers.size(); ++i)
+	for(int i = 0; i < mCorrelators.size(); ++i)
 	{
-		mMatchers[i]->setResult(mResult);
-		mMatchers[i]->initialize(mWindowSize);
+		mCorrelators[i]->setResult(mResult);
+		mCorrelators[i]->initialize(mWindowSize);
 	}
 }
 
-void ViMatcherThread::match(qreal firstData[], qint32 firstSize, qreal secondData[], qint32 secondSize)
+void ViCorrelatorThread::correlate(qreal firstData[], qint32 firstSize, qreal secondData[], qint32 secondSize)
 {
-	for(int i = 0; i < mMatchers.size(); ++i)
+	for(int i = 0; i < mCorrelators.size(); ++i)
 	{
-		mMatchers[i]->setData(firstData, firstSize, secondData, secondSize);
-		mGlobalPool->start(mMatchers[i]);
+		mCorrelators[i]->setData(firstData, firstSize, secondData, secondSize);
+		mGlobalPool->start(mCorrelators[i]);
 	}
 	mGlobalPool->waitForDone();
 }
 
-void ViMatcherThread::finalize()
+void ViCorrelatorThread::finalize()
 {
-	for(int i = 0; i < mMatchers.size(); ++i)
+	for(int i = 0; i < mCorrelators.size(); ++i)
 	{
-		mMatchers[i]->finalize();
+		mCorrelators[i]->finalize();
 	}
 }
 
-ViMatcher::ViMatcher()
+ViCorrelator::ViCorrelator()
 	: QObject()
 {
 	QObject::connect(&mThread, SIGNAL(finished()), this, SIGNAL(finished()));
 	QObject::connect(&mThread, SIGNAL(changed(qreal)), this, SIGNAL(changed(qreal)));
 }
 
-void ViMatcher::match(ViAudioBuffer *first, ViAudioBuffer *second, qint32 windowSize)
+void ViCorrelator::correlate(ViAudioBuffer *first, ViAudioBuffer *second, qint32 windowSize)
 {
 	mThread.setBuffers(first, second);
 	mThread.setResult(&mResult);
@@ -151,7 +148,7 @@ void ViMatcher::match(ViAudioBuffer *first, ViAudioBuffer *second, qint32 window
 	mThread.start();
 }
 
-ViMatchResult ViMatcher::result()
+ViCorrelationResult& ViCorrelator::result()
 {
 	return mResult;
 }

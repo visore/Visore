@@ -1,14 +1,14 @@
-#ifndef VISAMPLEMATCHER_H
-#define VISAMPLEMATCHER_H
+#ifndef VISAMPLECORRELATOR_H
+#define VISAMPLECORRELATOR_H
 
-#include "vimatcherstrategy.h"
+#include "vicorrelatorstrategy.h"
 
-class ViSampleMatcher : public ViMatcherStrategy
+class ViSampleCorrelator : public ViCorrelatorStrategy
 {
 
 	public:
 		
-		ViSampleMatcher();
+		ViSampleCorrelator();
 		void initialize(qint32 windowSize = 0);
 		void run();
 		void finalize();

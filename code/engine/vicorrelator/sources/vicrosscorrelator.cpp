@@ -1,14 +1,14 @@
-#include "vicrosscorrelationmatcher.h"
+#include "vicrosscorrelator.h"
 #include <float.h>
 
-ViCrossCorrelationMatcher::ViCrossCorrelationMatcher()
-	: ViMatcherStrategy()
+ViCrossCorrelator::ViCrossCorrelator()
+	: ViCorrelatorStrategy()
 {
 }
 
-void ViCrossCorrelationMatcher::initialize(qint32 windowSize)
+void ViCrossCorrelator::initialize(qint32 windowSize)
 {
-	ViMatcherStrategy::initialize(windowSize);
+	ViCorrelatorStrategy::initialize(windowSize);
 	mTransformer.setSize(mWindowSize);
 	allocateData();
 
@@ -18,7 +18,7 @@ void ViCrossCorrelationMatcher::initialize(qint32 windowSize)
 	mCounter = 0;
 }
 
-void ViCrossCorrelationMatcher::run()
+void ViCrossCorrelator::run()
 {
 	qreal subAverageDifference, subSampleCounter, difference, firstNorm, secondNorm, multipliedNorm;
 
@@ -67,18 +67,18 @@ void ViCrossCorrelationMatcher::run()
 	++mCounter;
 }
 
-void ViCrossCorrelationMatcher::finalize()
+void ViCrossCorrelator::finalize()
 {
 	deallocateData();
 	mAverageDifference /= mCounter;
-	mResult->setCrossCorrelation(ViMatchResultCombination(
+	mResult->setCrossCorrelation(ViCorrelationResultCombination(
 		(2 - qAbs(mMaximumDifference)) / 2,
 		(2 - qAbs(mMinimumDifference)) / 2,
 		(2 - qAbs(mAverageDifference)) / 2
 	));
 }
 
-void ViCrossCorrelationMatcher::allocateData()
+void ViCrossCorrelator::allocateData()
 {
 	mRealData = new qreal[mWindowSize];
 	mFirstFourierData = new qreal[mWindowSize];
@@ -87,7 +87,7 @@ void ViCrossCorrelationMatcher::allocateData()
 	mAutocorrelationData = new qreal[mWindowSize];
 }
 
-void ViCrossCorrelationMatcher::deallocateData()
+void ViCrossCorrelator::deallocateData()
 {
 	delete [] mRealData;
 	delete [] mFirstFourierData;
@@ -96,7 +96,7 @@ void ViCrossCorrelationMatcher::deallocateData()
 	delete [] mAutocorrelationData;
 }
 
-qreal ViCrossCorrelationMatcher::norm(qreal array[], qint32 size)
+qreal ViCrossCorrelator::norm(qreal array[], qint32 size)
 {
 	qreal norm = 0;
 	for(int i = 0; i < size; ++i)
@@ -106,7 +106,7 @@ qreal ViCrossCorrelationMatcher::norm(qreal array[], qint32 size)
 	return qSqrt(norm);
 }
 
-void ViCrossCorrelationMatcher::applyNorm(qreal array[], qint32 size, qreal norm)
+void ViCrossCorrelator::applyNorm(qreal array[], qint32 size, qreal norm)
 {
 	if(norm != 0)
 	{

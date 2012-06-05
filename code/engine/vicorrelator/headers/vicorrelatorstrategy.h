@@ -1,26 +1,26 @@
-#ifndef VIMATCHERSTRATEGY_H
-#define VIMATCHERSTRATEGY_H
+#ifndef VICORRELATORSTRATEGY_H
+#define VICORRELATORSTRATEGY_H
 
 #include <QRunnable>
-#include "vimatchresult.h"
+#include "vicorrelationresult.h"
 #include "viaudiobuffer.h"
 #include "vipcmconverter.h"
 
-class ViMatcherStrategy : public QRunnable
+class ViCorrelatorStrategy : public QRunnable
 {
 
 	public:
 		
-		ViMatcherStrategy();
+		ViCorrelatorStrategy();
 		virtual void setData(qreal firstData[], qint32 firstSize, qreal secondData[], qint32 secondSize);
-		virtual void setResult(ViMatchResult *result);
+		virtual void setResult(ViCorrelationResult *result);
 		virtual void initialize(qint32 windowSize = 0);
 		virtual void run() = 0;
 		virtual void finalize();
 		
 	protected:
 
-		ViMatchResult *mResult;
+		ViCorrelationResult *mResult;
 
 		qreal *mFirstData;
 		qreal *mSecondData;

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ViMatchWidget</class>
- <widget class="QWidget" name="ViMatchWidget">
+ <class>ViCorrelationWidget</class>
+ <widget class="QWidget" name="ViCorrelationWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>569</width>
-    <height>186</height>
+    <width>572</width>
+    <height>309</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -29,8 +29,26 @@
    <property name="spacing">
     <number>5</number>
    </property>
-   <item row="0" column="0">
-    <widget class="QTableWidget" name="tableWidget">
+   <item row="1" column="0">
+    <widget class="ViTableWidget" name="tableWidget">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="showDropIndicator" stdset="0">
+      <bool>false</bool>
+     </property>
+     <property name="dragDropOverwriteMode">
+      <bool>false</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
      <attribute name="horizontalHeaderVisible">
       <bool>true</bool>
      </attribute>
@@ -57,27 +75,27 @@
      </attribute>
      <column>
       <property name="text">
-       <string>Matcher</string>
+       <string>Correlator</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Worst match</string>
+       <string>Worst correlation</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Best match</string>
+       <string>Best correlation</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Average match</string>
+       <string>Average correlation</string>
       </property>
      </column>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -92,6 +110,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ViTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>vitablewidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

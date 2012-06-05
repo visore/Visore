@@ -11,7 +11,7 @@
 #include "vispectrumanalyzer.h"
 #include "visongdetector.h"
 #include "visignalmanipulator.h"
-#include "vimatcher.h"
+#include "vicorrelator.h"
 #include "visingleton.h"
 #include <QList>
 #include <QCoreApplication>
@@ -68,7 +68,9 @@ class ViAudioEngine : public ViSingleton, public ViError
 		void stopOutputFile();
 		void setVolume(int volume);
 		void mute(bool value = true);
+
 		void calculateSpectrum(qint32 size, QString windowFunction);
+		void calculateCorrelation();
 
 	signals:
 
@@ -83,8 +85,8 @@ class ViAudioEngine : public ViSingleton, public ViError
 		void spectrumChanged(qreal percentage);
 		void spectrumFinished();
 
-		void matchingChanged(qreal percentage);
-		void matchingFinished();
+		void correlationChanged(qreal percentage);
+		void correlationFinished();
 
 		void songInfoChanged(ViSongInfo info);
 
@@ -101,7 +103,9 @@ class ViAudioEngine : public ViSingleton, public ViError
 		int volume();
 
 		ViWaveForm* waveSummary(ViAudioBuffer::ViAudioBufferType type);
+
 		ViFloatSpectrum& spectrum();
+		ViCorrelationResult& correlation();
 
 	private:
 		/*void initializeInputStream(QAudioDeviceInfo deviceInfo, QAudioFormat format);
@@ -137,7 +141,7 @@ class ViAudioEngine : public ViSingleton, public ViError
 		ViSongDetector *mSongDetector;
 
 		ViSpectrumAnalyzer *mSpectrumAnalyzer;
-		ViMatcher *mMatcher;
+		ViCorrelator *mCorrelator;
 };
 
 #endif

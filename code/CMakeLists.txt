@@ -71,7 +71,7 @@ INCLUDE_DIRECTORIES(
 	${ENGINE}/vicoder/headers
 	${ENGINE}/visongdetector/headers
 	${ENGINE}/vifouriertransformer/headers
-	${ENGINE}/vimatcher/headers
+	${ENGINE}/vicorrelator/headers
 	${ENGINE}/vispectrumanalyzer/headers
 
 	${EXTERNAL}/fftreal/sources

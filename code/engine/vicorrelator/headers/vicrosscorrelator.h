@@ -1,16 +1,16 @@
-#ifndef VICROSSCORRELATIONMATCHER_H
-#define VICROSSCORRELATIONMATCHER_H
+#ifndef VICROSSCORRELATIONCORRELATOR_H
+#define VICROSSCORRELATIONCORRELATOR_H
 
-#include "vimatcherstrategy.h"
+#include "vicorrelatorstrategy.h"
 #include "vifouriertransformer.h"
 #include <QThread>
 
-class ViCrossCorrelationMatcher : public ViMatcherStrategy
+class ViCrossCorrelator : public ViCorrelatorStrategy
 {
 
 	public:
 		
-		ViCrossCorrelationMatcher();
+		ViCrossCorrelator();
 		void initialize(qint32 windowSize = 0);
 		void run();
 		void finalize();

@@ -1,6 +1,6 @@
-#include "vimatcherstrategy.h"
+#include "vicorrelatorstrategy.h"
 
-ViMatcherStrategy::ViMatcherStrategy()
+ViCorrelatorStrategy::ViCorrelatorStrategy()
 	: QRunnable()
 {
 	setAutoDelete(false); // Object is not automatically deleted by thread pool
@@ -13,7 +13,7 @@ ViMatcherStrategy::ViMatcherStrategy()
 	mWindowSize = 0;
 }
 
-void ViMatcherStrategy::setData(qreal firstData[], qint32 firstSize, qreal secondData[], qint32 secondSize)
+void ViCorrelatorStrategy::setData(qreal firstData[], qint32 firstSize, qreal secondData[], qint32 secondSize)
 {
 	mFirstData =  firstData;
 	mSecondData = secondData;
@@ -21,16 +21,16 @@ void ViMatcherStrategy::setData(qreal firstData[], qint32 firstSize, qreal secon
 	mSecondSize = secondSize;
 }
 
-void ViMatcherStrategy::setResult(ViMatchResult *result)
+void ViCorrelatorStrategy::setResult(ViCorrelationResult *result)
 {
 	mResult = result;
 }
 
-void ViMatcherStrategy::initialize(qint32 windowSize)
+void ViCorrelatorStrategy::initialize(qint32 windowSize)
 {
 	mWindowSize = windowSize;
 }
 
-void ViMatcherStrategy::finalize()
+void ViCorrelatorStrategy::finalize()
 {
 }

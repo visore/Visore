@@ -12,8 +12,8 @@ ViAnalysisMenu::ViAnalysisMenu(ViNavigator *navigator)
 	QObject::connect(mUi->spectrumButton, SIGNAL(clicked()), this, SLOT(showSpectrum()));
 
 	//Signal matching widget
-	mMatchIndex = addStackWidget(&mMatchWidget);
-	QObject::connect(mUi->matchButton, SIGNAL(clicked()), this, SLOT(showMatch()));
+	mCorrelationIndex = addStackWidget(&mCorrelationWidget);
+	QObject::connect(mUi->matchButton, SIGNAL(clicked()), this, SLOT(showCorrelation()));
 }
 
 ViAnalysisMenu::~ViAnalysisMenu()
@@ -27,8 +27,8 @@ void ViAnalysisMenu::showSpectrum()
 	setStackIndex(mSpectrumIndex);
 }
 
-void ViAnalysisMenu::showMatch()
+void ViAnalysisMenu::showCorrelation()
 {
-	setCurrentStackIndex(mMatchIndex);
-	setStackIndex(mMatchIndex);
+	setCurrentStackIndex(mCorrelationIndex);
+	setStackIndex(mCorrelationIndex);
 }
