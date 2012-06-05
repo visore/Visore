@@ -16,8 +16,13 @@ class ViTabWidget : public QWidget
 {
 	Q_OBJECT
 
+	signals:
+
+		void tabChanged(int index);
+
 	private slots:
-		void tabSelected(qint8 id);
+
+		void selectTab(qint8 index);
 
 	public:
 		ViTabWidget(QWidget *parent = 0);
@@ -28,7 +33,6 @@ class ViTabWidget : public QWidget
 		void setHeight(int height);
 		void setRounding(qint8 mainAngle, qint8 buttonAngle);
 		void setTabOffset(int offset);
-		void selectTab(qint8 index);
 
 	protected:
 		void paintEvent(QPaintEvent *event);

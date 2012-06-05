@@ -1,17 +1,17 @@
-#include "viinputcontainer.h"
-#include "ui_viinputcontainer.h"
+#include "vimainwidget.h"
+#include "ui_vimainwidget.h"
 
-ViInputContainer::ViInputContainer(QWidget *parent)
+ViMainWidget::ViMainWidget(QWidget *parent)
 	: ViWidget(parent)
 {
-	mUi = new Ui::ViInputContainer();
+	mUi = new Ui::ViMainWidget();
 	mUi->setupUi(this);
 
 	mUi->originalWaveWidget->setBufferType(ViAudioBuffer::Original);
 	mUi->correctedWaveWidget->setBufferType(ViAudioBuffer::Corrected);
 }
 
-ViInputContainer::~ViInputContainer()
+ViMainWidget::~ViMainWidget()
 {
 	delete mUi;
 }

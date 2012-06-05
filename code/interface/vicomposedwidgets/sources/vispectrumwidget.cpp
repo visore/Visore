@@ -10,6 +10,8 @@ ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 	mUi = new Ui::ViSpectrumWidget();
 	mUi->setupUi(this);
 
+	mWasInitialized = false;
+
 	QObject::connect(mUi->sizeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
 	QObject::connect(mUi->windowBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
 
@@ -26,10 +28,14 @@ ViSpectrumWidget::~ViSpectrumWidget()
 	delete mUi;
 }
 
-void ViSpectrumWidget::show()
+void ViSpectrumWidget::showEvent(QShowEvent *event)
 {
-	recalculate();
-	ViWidget::show();
+	if(!mWasInitialized)
+	{
+		mWasInitialized = true;
+		recalculate();
+	}
+	ViWidget::showEvent(event);
 }
 
 void ViSpectrumWidget::recalculate()

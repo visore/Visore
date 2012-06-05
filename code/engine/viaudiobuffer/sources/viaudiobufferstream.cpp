@@ -95,10 +95,10 @@ void ViAudioBufferStream::change()
 
 void ViAudioBufferStream::restart()
 {
-	mOldSize = 0;
-	mHasHeadStart = false;
+	//mOldSize = 0;
+	//mHasHeadStart = false;
 	device()->reset();
-	change();
+	//change();
 }
 
 bool ViAudioBufferStream::isValidPosition(qint64 position)

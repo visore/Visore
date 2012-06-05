@@ -23,11 +23,15 @@ class ViSpectrumWidget : public ViWidget
 
 		ViSpectrumWidget(QWidget *parent = 0);
 		~ViSpectrumWidget();
-		void show();
+
+	protected:
+
+		void showEvent(QShowEvent *event);
 
 	private:
 
 		Ui::ViSpectrumWidget *mUi;
+		bool mWasInitialized;
 
 };
 

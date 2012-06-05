@@ -1,18 +1,17 @@
 #ifndef VIANALYSISMENU_H
 #define VIANALYSISMENU_H
 
+#include "vimenu.h"
 #include "vithememanager.h"
 #include "vispectrumwidget.h"
 #include "vimatchwidget.h"
-
-class ViNavigator;
 
 namespace Ui
 {
     class ViAnalysisMenu;
 }
 
-class ViAnalysisMenu : public ViWidget
+class ViAnalysisMenu : public ViMenu
 {
 	Q_OBJECT
 
@@ -27,7 +26,6 @@ class ViAnalysisMenu : public ViWidget
 
 	private:
 		Ui::ViAnalysisMenu *mUi;
-		ViNavigator *mNavigator;
 
 		ViSpectrumWidget mSpectrumWidget;
 		ViMatchWidget mMatchWidget;

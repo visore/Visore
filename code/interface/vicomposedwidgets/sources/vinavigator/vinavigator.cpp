@@ -1,5 +1,9 @@
 #include "vinavigator.h"
 #include "ui_vinavigator.h"
+#include "vicontrolmenu.h"
+#include "viinputmenu.h"
+#include "vioutputmenu.h"
+#include "vianalysismenu.h"
 
 ViNavigator::ViNavigator(QWidget *parent)
 	: ViWidget(parent)
@@ -11,22 +15,13 @@ ViNavigator::ViNavigator(QWidget *parent)
 
 ViNavigator::~ViNavigator()
 {
-	if(mInputMenu != NULL)
-	{
-		delete mInputMenu;
-	}
-	if(mOutputMenu != NULL)
-	{
-		delete mOutputMenu;
-	}
-	if(mControlMenu != NULL)
-	{
-		delete mControlMenu;
-	}
-	if(mAnalysisMenu != NULL)
-	{
-		delete mAnalysisMenu;
-	}
+	qDeleteAll(mMenus);
+	mMenus.clear();
+}
+
+void ViNavigator::changeStackIndex(int tabIndex)
+{
+	setStackIndex(mMenus[tabIndex]->currentStackIndex());
 }
 
 void ViNavigator::setStackIndex(int index)
@@ -41,19 +36,23 @@ int ViNavigator::addStackWidget(ViWidget *widget)
 
 void ViNavigator::initialize()
 {
+	ViNavigator::connect(mUi->menu, SIGNAL(tabChanged(int)), this, SLOT(changeStackIndex(int)));
+
 	mUi->menu->setHeight(120);
 	mUi->menu->setRounding(0, 5);
 	mUi->menu->setTabOffset(5);
 
-	mInputMenu = new ViInputMenu(this);
-	mUi->menu->addTab("Input", mInputMenu);
+	addMenu("Input", new ViInputMenu(this));
+	addMenu("Control", new ViControlMenu(this));
+	addMenu("Output", new ViOutputMenu(this));
+	addMenu("Analysis", new ViAnalysisMenu(this));
 
-	mControlMenu = new ViControlMenu(this);
-	mUi->menu->addTab("Control", mControlMenu);
+	mMenus[0]->setCurrentStackIndex(mMenus[1]->currentStackIndex());
+	mMenus[2]->setCurrentStackIndex(mMenus[1]->currentStackIndex());
+}
 
-	mOutputMenu = new ViOutputMenu(this);
-	mUi->menu->addTab("Output", mOutputMenu);
-
-	mAnalysisMenu = new ViAnalysisMenu(this);
-	mUi->menu->addTab("Analysis", mAnalysisMenu);
+void ViNavigator::addMenu(QString name, ViMenu *menu)
+{
+	mUi->menu->addTab(name, menu);
+	mMenus.append(menu);
 }

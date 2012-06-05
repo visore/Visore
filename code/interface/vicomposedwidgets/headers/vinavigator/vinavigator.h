@@ -2,10 +2,7 @@
 #define VINAVIGATOR_H
 
 #include "vitabwidget.h"
-#include "vicontrolmenu.h"
-#include "viinputmenu.h"
-#include "vioutputmenu.h"
-#include "vianalysismenu.h"
+#include "vimenu.h"
 
 namespace Ui
 {
@@ -14,6 +11,11 @@ namespace Ui
 
 class ViNavigator : public ViWidget
 {
+	Q_OBJECT
+
+	public slots:
+
+		void changeStackIndex(int tabIndex);
 
 	public:
 
@@ -25,15 +27,12 @@ class ViNavigator : public ViWidget
 	protected:
 
 		void initialize();
+		void addMenu(QString name, ViMenu *menu);
 
 	private:
 
 		Ui::ViNavigator *mUi;
-
-		ViControlMenu *mControlMenu;
-		ViInputMenu *mInputMenu;
-		ViOutputMenu *mOutputMenu;
-		ViAnalysisMenu *mAnalysisMenu;
+		QList<ViMenu*> mMenus;
 
 };
 

@@ -98,6 +98,7 @@ void ViSpectrumAnalyzerThread::run()
 			mSpectrum->add(index, ViComplexFloat(fourier[index], -fourier[index + halfSize]));
 		}
 		mSpectrum->add(halfSize, ViComplexFloat(fourier[sampleSize - 1], 0));
+cout<<(totalSize - (mSizes.size() * bytesSize)) / (totalSize / 100.0)<<endl;
 		emit changed((totalSize - (mSizes.size() * bytesSize)) / (totalSize / 100.0));
 	}
 	mSpectrum->finalize();

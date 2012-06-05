@@ -1,26 +1,31 @@
 #ifndef VICONTROLMENU_H
 #define VICONTROLMENU_H
 
-#include "vivolumebarwidget.h"
-#include "viplaybackwidget.h"
-#include "vithememanager.h"
-#include "viwidget.h"
+#include "vimenu.h"
+#include "vimainwidget.h"
 
 namespace Ui
 {
     class ViControlMenu;
 }
 
-class ViControlMenu : public ViWidget
+class ViControlMenu : public ViMenu
 {
 	Q_OBJECT
 
 	public:
-		ViControlMenu(QWidget *parent = 0);
+
+		ViControlMenu(ViNavigator *navigator = 0);
 		~ViControlMenu();
 
 	private:
+
 		Ui::ViControlMenu *mUi;
+
+		ViMainWidget mMainWidget;
+
+		qint16 mMainIndex;
+
 };
 
 #endif

@@ -1,22 +1,19 @@
 #ifndef VIOUTPUTMENU_H
 #define VIOUTPUTMENU_H
 
-#include "vivolumebarwidget.h"
-#include "viplaybackwidget.h"
-#include "vithememanager.h"
-#include "viwidget.h"
+#include "vimenu.h"
 
 namespace Ui
 {
     class ViOutputMenu;
 }
 
-class ViOutputMenu : public ViWidget
+class ViOutputMenu : public ViMenu
 {
 	Q_OBJECT
 
 	public:
-		ViOutputMenu(QWidget *parent = 0);
+		ViOutputMenu(ViNavigator *navigator = 0);
 		~ViOutputMenu();
 
 	private:

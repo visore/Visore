@@ -23,7 +23,15 @@ ViTabWidget::~ViTabWidget()
 
 void ViTabWidget::selectTab(qint8 index)
 {
+	for(int i = 0; i < mButtons.size(); ++i)
+	{
+		if(mButtons[i]->id() != index)
+		{
+			mButtons[i]->select(false);
+		}
+	}
 	mUi->stackedWidget->setCurrentIndex(index);
+	emit tabChanged(index);
 }
 
 void ViTabWidget::setSize(int width, int height)
@@ -59,23 +67,11 @@ void ViTabWidget::setTabOffset(int offset)
 	mUi->buttonOffset->changeSize(offset, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
-void ViTabWidget::tabSelected(qint8 id)
-{
-	for(int i = 0; i < mButtons.size(); ++i)
-	{
-		if(mButtons[i]->id() != id)
-		{
-			mButtons[i]->select(false);
-		}
-	}
-	mUi->stackedWidget->setCurrentIndex(id);
-}
-
 void ViTabWidget::addTab(QString title, QWidget *widget)
 {
 	ViTabButton *button = new ViTabButton(title, mCurrentId, this);
 	button->setRounding(mButtonAngle);
-	ViObject::connect(button, SIGNAL(selected(qint8)), this, SLOT(tabSelected(qint8)));
+	ViObject::connect(button, SIGNAL(selected(qint8)), this, SLOT(selectTab(qint8)));
 	mButtons.append(button);
 	mUi->buttonWidget->layout()->addWidget(button);
 	mUi->stackedWidget->layout()->addWidget(widget);

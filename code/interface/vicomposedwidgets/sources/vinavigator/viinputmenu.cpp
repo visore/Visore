@@ -1,8 +1,8 @@
 #include "viinputmenu.h"
 #include "ui_viinputmenu.h"
 
-ViInputMenu::ViInputMenu(QWidget *parent)
-	: ViWidget(parent)
+ViInputMenu::ViInputMenu(ViNavigator *navigator)
+	: ViMenu(navigator)
 {
 	mUi = new Ui::ViInputMenu();
 	mUi->setupUi(this);

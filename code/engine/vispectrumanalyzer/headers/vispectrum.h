@@ -40,7 +40,7 @@ class ViSpectrum
 
 };
 
-typedef ViSpectrum<float>ViFloatSpectrum;
+typedef ViSpectrum<float> ViFloatSpectrum;
 typedef ViSpectrum<double> ViDoubleSpectrum;
 
 #include "../sources/vispectrum.cpp"
