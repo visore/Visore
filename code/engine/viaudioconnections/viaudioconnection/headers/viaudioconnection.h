@@ -9,7 +9,21 @@
 
 class ViAudioConnection : public ViError
 {
+
 	public:
+
+		enum Direction
+		{
+			Input = 0,
+			Output = 1
+		};
+
+		enum Type
+		{
+			Stream = 0,
+			File = 1
+		};
+
 		ViAudioConnection();
 		~ViAudioConnection();
 
@@ -19,10 +33,16 @@ class ViAudioConnection : public ViError
 		virtual ViStreamOutput* streamOutput(ViAudioFormat format, ViAudioBuffer *buffer, QAudioDeviceInfo device) = 0;
 
 	protected:
+
+		void close(ViAudioTransmission *transmission);
+
+	protected:
+
 		ViFileInput *mFileInput;
 		ViStreamInput *mStreamInput;
 		ViFileOutput *mFileOutput;
 		ViStreamOutput *mStreamOutput;
+
 };
 
 #endif

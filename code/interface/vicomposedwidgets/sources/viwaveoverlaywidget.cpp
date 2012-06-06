@@ -6,6 +6,7 @@ ViWaveOverlayWidget::ViWaveOverlayWidget(QWidget *parent)
 	: ViWidget(parent)
 {
 	setMouseTracking(true);
+	mForm = NULL;
 	mPosition = 0;
 	mZoomLevel = 0;
 	mPointerPositionPixel = 0;
@@ -24,9 +25,15 @@ ViWaveOverlayWidget::ViWaveOverlayWidget(QWidget *parent)
 	");
 }
 
+void ViWaveOverlayWidget::updateWave(ViWaveForm *waveForm)
+{
+	mForm = waveForm;
+	mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
+}
+
 void ViWaveOverlayWidget::setBufferType(ViAudioBuffer::ViAudioBufferType type)
 {
-	mForm = mEngine->waveSummary(type);
+	ViObject::connect(mEngine, SIGNAL(inputWaveChanged(ViWaveForm*)), this, SLOT(updateWave(ViWaveForm*)));
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 }
 
@@ -48,31 +55,33 @@ void ViWaveOverlayWidget::paintEvent(QPaintEvent *event)
 
 	painter.drawLine(mHalfWidth, 0, mHalfWidth, height());
 
-	painter.setPen(penPointer);
-
-	int position = mPointerPositionSample / mZoomRatio;
-	int maximum = mHalfHeight;
-	int minimum = mHalfHeight;
-
-	bool test = position >= 0 && position < mForm->size(mZoomLevel);
-	if(test)
+	if(mForm != NULL)
 	{
-		maximum = mForm->maximum(position, mZoomLevel) / mHeightRatio;
-	}
-	painter.drawLine(mPointerPositionPixel, 0, mPointerPositionPixel, maximum - 4);
-	painter.drawEllipse(mPointerPositionPixel - 3, maximum - 3, 8, 8);
-	if(!test || mUnderCutOff || maximum + 1 >= minimum)
-	{
-		painter.drawLine(mPointerPositionPixel, maximum + 6, mPointerPositionPixel, height());
-	}
-	else
-	{
-		minimum = mForm->minimum(position, mZoomLevel) / mHeightRatio;
-		painter.drawLine(mPointerPositionPixel, maximum + 5, mPointerPositionPixel, minimum - 4);
-		painter.drawEllipse(mPointerPositionPixel - 3, minimum - 3, 8, 8);
-		painter.drawLine(mPointerPositionPixel, minimum + 5, mPointerPositionPixel, height());
-	}
+		painter.setPen(penPointer);
 
+		int position = mPointerPositionSample / mZoomRatio;
+		int maximum = mHalfHeight;
+		int minimum = mHalfHeight;
+
+		bool test = position >= 0 && position < mForm->size(mZoomLevel);
+		if(test)
+		{
+			maximum = mForm->maximum(position, mZoomLevel) / mHeightRatio;
+		}
+		painter.drawLine(mPointerPositionPixel, 0, mPointerPositionPixel, maximum - 4);
+		painter.drawEllipse(mPointerPositionPixel - 3, maximum - 3, 8, 8);
+		if(!test || mUnderCutOff || maximum + 1 >= minimum)
+		{
+			painter.drawLine(mPointerPositionPixel, maximum + 6, mPointerPositionPixel, height());
+		}
+		else
+		{
+			minimum = mForm->minimum(position, mZoomLevel) / mHeightRatio;
+			painter.drawLine(mPointerPositionPixel, maximum + 5, mPointerPositionPixel, minimum - 4);
+			painter.drawEllipse(mPointerPositionPixel - 3, minimum - 3, 8, 8);
+			painter.drawLine(mPointerPositionPixel, minimum + 5, mPointerPositionPixel, height());
+		}
+	}
 	ViWidget::paintEvent(event);
 }
 
@@ -91,7 +100,10 @@ void ViWaveOverlayWidget::setZoomLevel(qint16 level)
 {
 	mZoomLevel = level;
 	mZoomRatio = FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel);
-	mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
+	if(mForm != NULL)
+	{
+		mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
+	}
 	repaint();
 }
 
@@ -105,7 +117,7 @@ void ViWaveOverlayWidget::setPointer(qint32 position)
 	qreal maxAvg = 0.0;
 	qreal minAvg = 0.0;
 	position /= mZoomRatio;
-	if(position >= 0 && position < mForm->size(mZoomLevel))
+	if(mForm != NULL && position >= 0 && position < mForm->size(mZoomLevel))
 	{
 		max = (UNSIGNED_CHAR_HALF_VALUE - int(mForm->maximum(position, mZoomLevel))) / 255.0;
 		if(!mUnderCutOff)

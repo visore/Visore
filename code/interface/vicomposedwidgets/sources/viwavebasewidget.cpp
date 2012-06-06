@@ -5,68 +5,78 @@ ViWaveBaseWidget::ViWaveBaseWidget(QWidget *parent)
 {	
 	mPosition = 0;
 	mZoomLevel = 0;
+	mForm = NULL;
+}
+
+void ViWaveBaseWidget::updateWave(ViWaveForm *waveForm)
+{
+	mForm = waveForm;
+	mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
+	repaint();
 }
 
 void ViWaveBaseWidget::setBufferType(ViAudioBuffer::ViAudioBufferType type)
 {
-	mForm = mEngine->waveSummary(type);
 	if(type == ViAudioBuffer::Original)
 	{
-		ViObject::connect(mEngine, SIGNAL(originalWaveChanged()), this, SLOT(repaint()));
+		ViObject::connect(mEngine, SIGNAL(inputWaveChanged(ViWaveForm*)), this, SLOT(updateWave(ViWaveForm*)));
 	}
 	else
 	{
-		ViObject::connect(mEngine, SIGNAL(correctedWaveChanged()), this, SLOT(repaint()));
+		ViObject::connect(mEngine, SIGNAL(outputWaveChanged(ViWaveForm*)), this, SLOT(updateWave(ViWaveForm*)));
 	}
 	ViObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 }
 
 void ViWaveBaseWidget::paintEvent(QPaintEvent *event)
 {
-	QPainter painter(this);
-
-	static QPen penNormal(ViThemeManager::color(15));
-	static QPen penAverage(ViThemeManager::color(14));
-
-	int position = mPosition / (FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel));
-	int start = position - mHalfWidth;
-	int end = position + mHalfWidth;
-	int zoomSize = mForm->size(mZoomLevel);
-
-	if(start < 0)
+	if(mForm != NULL)
 	{
-		start = 0;
-	}
-	if(end > zoomSize)
-	{
-		end = zoomSize;
-	}
-	int drawStart = mHalfWidth + (start - position);
+		QPainter painter(this);
 
-	if(mUnderCutOff)
-	{
-		int previous = mHalfHeight;
-		for(int i = start; i < end; ++i)
+		static QPen penNormal(ViThemeManager::color(15));
+		static QPen penAverage(ViThemeManager::color(14));
+
+		int position = mPosition / (FIRST_ZOOM_LEVEL * qPow(ZOOM_LEVEL_INCREASE, mZoomLevel));
+		int start = position - mHalfWidth;
+		int end = position + mHalfWidth;
+		int zoomSize = mForm->size(mZoomLevel);
+
+		if(start < 0)
 		{
-			painter.setPen(penNormal);
-			int now = mForm->maximum(i, mZoomLevel) / mRatio;
-			painter.drawLine(drawStart, previous, drawStart + 1, now);
-			previous = now;
-			drawStart++;
+			start = 0;
 		}
-	}
-	else
-	{
-		for(int i = start; i < end; ++i)
+		if(end > zoomSize)
 		{
-			painter.setPen(penNormal);
-			painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->maximum(i, mZoomLevel) / mRatio);
-			painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->minimum(i, mZoomLevel) / mRatio);
+			end = zoomSize;
+		}
+		int drawStart = mHalfWidth + (start - position);
 
-			painter.setPen(penAverage);
-			painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->maximumAverage(i, mZoomLevel) / mRatio);
-			painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->minimumAverage(i, mZoomLevel) / mRatio);
-			drawStart++;
+		if(mUnderCutOff)
+		{
+			int previous = mHalfHeight;
+			for(int i = start; i < end; ++i)
+			{
+				painter.setPen(penNormal);
+				int now = mForm->maximum(i, mZoomLevel) / mRatio;
+				painter.drawLine(drawStart, previous, drawStart + 1, now);
+				previous = now;
+				drawStart++;
+			}
+		}
+		else
+		{
+			for(int i = start; i < end; ++i)
+			{
+				painter.setPen(penNormal);
+				painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->maximum(i, mZoomLevel) / mRatio);
+				painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->minimum(i, mZoomLevel) / mRatio);
+
+				painter.setPen(penAverage);
+				painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->maximumAverage(i, mZoomLevel) / mRatio);
+				painter.drawLine(drawStart, mHalfHeight, drawStart, mForm->minimumAverage(i, mZoomLevel) / mRatio);
+				drawStart++;
+			}
 		}
 	}
 }
@@ -80,7 +90,10 @@ void ViWaveBaseWidget::positionChanged(ViAudioPosition position)
 void ViWaveBaseWidget::setZoomLevel(qint16 level)
 {
 	mZoomLevel = level;
-	mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
+	if(mForm != NULL)
+	{
+		mUnderCutOff = mForm->isUnderCutoff(mZoomLevel);
+	}
 	repaint();
 }
 

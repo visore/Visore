@@ -45,11 +45,16 @@ class ViAudioBuffer : public QObject
 
 		ViAudioFormat format();
 
+		void setId(int id);
+		int id();
+
 	private:
+
 		QByteArray *mData;
 		QList<ViAudioBufferStream*> mStreams;
 		int mBufferHeadStart;
 		ViAudioFormat mFormat;
+		int mId;
 };
 
 #endif

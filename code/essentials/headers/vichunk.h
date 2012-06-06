@@ -13,7 +13,10 @@ class ViChunk
 		T* data();
 		int size();
 
+		T at(int index);
+
 		void setData(T *data, int size);
+		void setSize(int size);
 		void resize(int size);
 
 	private:

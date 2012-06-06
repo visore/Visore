@@ -43,6 +43,12 @@ int ViChunk<T>::size()
 }
 
 template<typename T>
+T ViChunk<T>::at(int index)
+{
+	return mData[index];
+}
+
+template<typename T>
 void ViChunk<T>::setData(T *data, int size)
 {
 	if(mData != NULL)
@@ -50,6 +56,12 @@ void ViChunk<T>::setData(T *data, int size)
 		delete [] mData;
 	}
 	mData = data;
+	mSize = size;
+}
+
+template<typename T>
+void ViChunk<T>::setSize(int size)
+{
 	mSize = size;
 }
 

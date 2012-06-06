@@ -11,6 +11,7 @@ class ViWaveBaseWidget : public ViWidget
 
 	private slots:
 		void positionChanged(ViAudioPosition position);
+		void updateWave(ViWaveForm *waveForm);
 
 	public:
 		ViWaveBaseWidget(QWidget *parent = 0);

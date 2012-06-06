@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	application.setWindowIcon(logo);
 
 	//Register SIGNAL/SLOT parameter types
-	qRegisterMetaType<QSharedPointer<ViWaveFormChunk> >("QSharedPointer<ViWaveFormChunk>");
+	//qRegisterMetaType<QSharedPointer<ViWaveFormChunk> >("QSharedPointer<ViWaveFormChunk>");
 	qRegisterMetaType<ViCoder::State>("ViCoder::State");
 
 	ViAudioEngine *engine = ViAudioEngine::instance();

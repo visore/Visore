@@ -2,13 +2,14 @@
 #define VIWAVESUMMARIZER_H
 
 #include <QMutex>
+#include <QThread>
 #include "viwaveform.h"
 #include "viwaveformer.h"
 #include "viprocessor.h"
 
 class ViWaveSummarizer;
 
-class ViWaveSummarizerThread : public ViProcessorThread
+class ViWaveSummarizerThread : public QThread
 {
 	Q_OBJECT
 

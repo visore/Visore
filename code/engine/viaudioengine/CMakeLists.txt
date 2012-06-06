@@ -26,7 +26,7 @@ QT5_WRAP_CPP(VI_WRAPPER_HEADERS ${VI_AUDIOENGINE_MOC_HEADERS})
 
 #Create library
 ADD_LIBRARY(viaudioengine SHARED ${VI_AUDIOENGINE_HEADERS} ${VI_AUDIOENGINE_SOURCES} ${VI_WRAPPER_HEADERS})
-TARGET_LINK_LIBRARIES(viaudioengine ${QT_LIBRARIES} viessentials viaudioconnection viqtconnection viwaveformer visongdetector vimatcher vispectrumanalyzer)
+TARGET_LINK_LIBRARIES(viaudioengine ${QT_LIBRARIES} viessentials viaudioconnection viqtconnection visongdetector vimatcher vispectrumanalyzer viprocessingchain)
 
 #Install file
 INSTALL(TARGETS viaudioengine DESTINATION engine)

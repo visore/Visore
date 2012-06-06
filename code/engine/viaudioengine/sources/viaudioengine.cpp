@@ -1,5 +1,6 @@
 #include "viaudioengine.h"
 #include "viqtconnection.h"
+#include "viwaveformer.h"
 
 #include <QTimer>
 
@@ -8,16 +9,11 @@ ViAudioEngine *ViAudioEngine::mEngine = NULL;
 ViAudioEngine::ViAudioEngine()
 	: ViSingleton()
 {
-	mStreamInput = NULL;
-	mFileInput = NULL;
-	mStreamOutput = NULL;
-	mFileOutput = NULL;
 	mInputType = ViAudioEngine::None;
 
-	mAudioConnection = new ViQtConnection();
 	resetMetaData();
 
-	mProcessingChain = new ViAudioProcessingChain();
+	/*mProcessingChain = new ViProcessingChain();
 	ViObject::connectDirect(mProcessingChain->originalBuffer(), SIGNAL(changed(int)), this, SIGNAL(originalBufferChanged(int)));
 	ViObject::connectDirect(mProcessingChain->correctedBuffer(), SIGNAL(changed(int)), this, SIGNAL(correctedBufferChanged(int)));
 
@@ -37,7 +33,32 @@ ViAudioEngine::ViAudioEngine()
 	mProcessingChain->attachOriginalProcessor(&mOriginalWaveSummarizer, ViProcessorList::Parallel);
 	mProcessingChain->attachCorrectedProcessor(&mCorrectedWaveSummarizer, ViProcessorList::Parallel);
 	ViObject::connect(&mOriginalWaveSummarizer, SIGNAL(changed()), this, SIGNAL(originalWaveChanged()));
-	ViObject::connect(&mCorrectedWaveSummarizer, SIGNAL(changed()), this, SIGNAL(correctedWaveChanged()));
+	ViObject::connect(&mCorrectedWaveSummarizer, SIGNAL(changed()), this, SIGNAL(correctedWaveChanged()));*/
+
+
+
+
+	mProcessingChain = new ViProcessingChain();
+	mProcessingChain->addOutput(mFormat, QAudioDeviceInfo::defaultOutputDevice());
+	mProcessingChain->setInput(mFormat, "/home/visore/a.wav");
+
+	ViWaveFormer *waveFormer1 = new ViWaveFormer();
+	ViWaveFormer *waveFormer2 = new ViWaveFormer();
+	QObject::connect(waveFormer1, SIGNAL(changed(ViWaveForm*)), this, SIGNAL(inputWaveChanged(ViWaveForm*)));
+	QObject::connect(waveFormer2, SIGNAL(changed(ViWaveForm*)), this, SIGNAL(outputWaveChanged(ViWaveForm*)));
+	mProcessingChain->attach(ViAudioConnection::Input, waveFormer1);
+	mProcessingChain->attach(ViAudioConnection::Output, waveFormer2);
+
+	mProcessingChain->start();
+
+
+
+
+
+
+
+
+
 
 	/*mSongDetector = new ViSongDetector(mStreamOutput);
 	mSongDetector->setProxy(QNetworkProxy::HttpProxy, "137.215.6.53", 8080, "p04416376", "Rd28jRX");
@@ -61,13 +82,13 @@ ViAudioEngine::ViAudioEngine()
 	m->match(mProcessingChain->originalBuffer(),mProcessingChain->correctedBuffer());
 */
 
-	mCorrelator = new ViCorrelator();
+	/*mCorrelator = new ViCorrelator();
 	QObject::connect(mCorrelator, SIGNAL(finished()), this, SIGNAL(correlationFinished()));
-	QObject::connect(mCorrelator, SIGNAL(changed(qreal)), this, SIGNAL(correlationChanged(qreal)));
+	QObject::connect(mCorrelator, SIGNAL(changed(qreal)), this, SIGNAL(correlationChanged(qreal)));*/
 
-	mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
+	/*mSpectrumAnalyzer = new ViSpectrumAnalyzer(mProcessingChain->originalBuffer());
 	QObject::connect(mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
-	QObject::connect(mSpectrumAnalyzer, SIGNAL(changed(qreal)), this, SIGNAL(spectrumChanged(qreal)));
+	QObject::connect(mSpectrumAnalyzer, SIGNAL(changed(qreal)), this, SIGNAL(spectrumChanged(qreal)));*/
 
 	
 }
@@ -109,7 +130,7 @@ ViAudioEngine* ViAudioEngine::instance()
 	return mEngine;
 }
 
-ViAudioProcessingChain* ViAudioEngine::processingChain()
+ViProcessingChain* ViAudioEngine::processingChain()
 {
 	return mProcessingChain;
 }
@@ -169,86 +190,86 @@ void ViAudioEngine::initializeOutputFile()
 
 void ViAudioEngine::setInput(ViAudioEngine::ViAudioType type)
 {
-	mInputType = type;
-	emit inputChanged(mInputType);
+	/*mInputType = type;
+	emit inputChanged(mInputType);*/
 }
 
 void ViAudioEngine::setInputFilePath(QString filePath)
 {
-	resetMetaData();
+	/*resetMetaData();
 	mFileInput->setFile(filePath);
 	mProcessingChain->attachInput(mFileInput);
-	mFileInput->start();
+	mFileInput->start();*/
 }
 
 void ViAudioEngine::createOutputFile(QString filePath, ViAudioFormat format)
 {
-	mFileOutput->setFile(filePath);
+	/*mFileOutput->setFile(filePath);
 	mFileOutput->setFormat(format);
-	mFileOutput->start();
+	mFileOutput->start();*/
 }
 
 void ViAudioEngine::reset()
 {
-	mProcessingChain->reset();
+	//mProcessingChain->reset();
 }
 
 int ViAudioEngine::volume()
 {
-	return mStreamOutput->volume() * 100;
+	//return mStreamOutput->volume() * 100;
 }
 
 void ViAudioEngine::setVolume(int volume)
 {
-	mStreamOutput->setVolume(volume / 100.0);
+	//mStreamOutput->setVolume(volume / 100.0);
 }
 
 void ViAudioEngine::mute(bool value)
 {
-	mStreamOutput->mute(value);
+	//mStreamOutput->mute(value);
 }
 
 void ViAudioEngine::startPlayback()
 {
-	mStreamOutput->start();
+	//mStreamOutput->start();
 }
 
 void ViAudioEngine::stopPlayback()
 {
-	mStreamOutput->stop();
+	//mStreamOutput->stop();
 }
 
 void ViAudioEngine::pausePlayback()
 {
-	mStreamOutput->pause();
+	//mStreamOutput->pause();
 }
 
 void ViAudioEngine::startRecording()
 {
-	mProcessingChain->reset();
+	/*mProcessingChain->reset();
 	resetMetaData();
 	mProcessingChain->attachInput(mStreamInput);
-	mStreamInput->start();
+	mStreamInput->start();*/
 }
 
 void ViAudioEngine::stopRecording()
 {
-	mStreamInput->stop();
+	//mStreamInput->stop();
 }
 
 void ViAudioEngine::setStreamPosition(ViAudioPosition position)
 {
-	mStreamOutput->setPosition(position);
+	//mStreamOutput->setPosition(position);
 }
 
 void ViAudioEngine::startOutputFile()
 {
-	mFileOutput->start();
+	//mFileOutput->start();
 }
 
 void ViAudioEngine::stopOutputFile()
 {
-	mFileOutput->stop();
+	//mFileOutput->stop();
 }
 
 void ViAudioEngine::resetMetaData()
@@ -260,7 +281,7 @@ void ViAudioEngine::resetMetaData()
 	mFormat.setSampleType(QAudioFormat::SignedInt);
 	mFormat.setByteOrder(QAudioFormat::LittleEndian);
 }
-
+/*
 ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)
 {
 	if(type == ViAudioBuffer::Original)
@@ -271,7 +292,7 @@ ViWaveForm* ViAudioEngine::waveSummary(ViAudioBuffer::ViAudioBufferType type)
 	{
 		return mCorrectedWaveSummarizer.waveSummary();
 	}
-}
+}*/
 
 ViFloatSpectrum& ViAudioEngine::spectrum()
 {
@@ -292,5 +313,5 @@ void ViAudioEngine::calculateSpectrum(qint32 size, QString windowFunction)
 
 void ViAudioEngine::calculateCorrelation()
 {
-	mCorrelator->correlate(mProcessingChain->originalBuffer(), mProcessingChain->correctedBuffer());
+	//mCorrelator->correlate(mProcessingChain->originalBuffer(), mProcessingChain->correctedBuffer());
 }

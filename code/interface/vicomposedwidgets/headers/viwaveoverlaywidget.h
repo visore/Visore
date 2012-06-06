@@ -18,6 +18,7 @@ class ViWaveOverlayWidget : public ViWidget
 
 	public slots:
 		void setPointer(qint32 position);
+		void updateWave(ViWaveForm *waveForm);
 
 	private slots:
 		void positionChanged(ViAudioPosition position);

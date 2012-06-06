@@ -3,16 +3,15 @@
 
 #include "viobject.h"
 #include "viaudioconnection.h"
-#include "viaudioprocessingchain.h"
-#include "viwaveformer.h"
+#include "viprocessingchain.h"
 #include "vilibrary.h"
-#include "viwavesummarizer.h"
 #include "viaudioformat.h"
 #include "vispectrumanalyzer.h"
 #include "visongdetector.h"
 #include "visignalmanipulator.h"
 #include "vicorrelator.h"
 #include "visingleton.h"
+#include "viwaveformer.h"
 #include <QList>
 #include <QCoreApplication>
 
@@ -74,13 +73,14 @@ class ViAudioEngine : public ViSingleton, public ViError
 
 	signals:
 
-		void originalBufferChanged(int size);
-		void correctedBufferChanged(int size);
+		void inputChanged();
+		void outputChanged();
+
 		void positionChanged(ViAudioPosition position);
 		void inputChanged(ViAudioEngine::ViAudioType type);
 
-		void originalWaveChanged();
-		void correctedWaveChanged();
+		void inputWaveChanged(ViWaveForm *waveForm);
+		void outputWaveChanged(ViWaveForm *waveForm);
 
 		void spectrumChanged(qreal percentage);
 		void spectrumFinished();
@@ -93,7 +93,7 @@ class ViAudioEngine : public ViSingleton, public ViError
 	public:
 		~ViAudioEngine();
 		static ViAudioEngine* instance();
-		ViAudioProcessingChain* processingChain();
+		ViProcessingChain* processingChain();
 		void setInput(ViAudioEngine::ViAudioType type);
 		void setInputFilePath(QString filePath);
 
@@ -102,7 +102,7 @@ class ViAudioEngine : public ViSingleton, public ViError
 		void reset();
 		int volume();
 
-		ViWaveForm* waveSummary(ViAudioBuffer::ViAudioBufferType type);
+		//ViWaveForm* waveSummary(ViAudioBuffer::ViAudioBufferType type);
 
 		ViFloatSpectrum& spectrum();
 		ViCorrelationResult& correlation();
@@ -122,21 +122,15 @@ class ViAudioEngine : public ViSingleton, public ViError
 
 		static ViAudioEngine *mEngine;
 
-		ViAudioConnection *mAudioConnection;
-		ViLibrary<ViAudioConnection> *mAudioConnectionLoader;
-		ViStreamInput *mStreamInput;
-		ViFileInput *mFileInput;
-		ViStreamOutput *mStreamOutput;
-		ViFileOutput *mFileOutput;
-		ViAudioProcessingChain *mProcessingChain;
+		ViProcessingChain *mProcessingChain;
 		
 		
 		ViAudioFormat mFormat;
 
 		ViAudioEngine::ViAudioType mInputType;
 
-		ViWaveSummarizer mOriginalWaveSummarizer;
-		ViWaveSummarizer mCorrectedWaveSummarizer;
+	//	ViWaveSummarizer mOriginalWaveSummarizer;
+	//	ViWaveSummarizer mCorrectedWaveSummarizer;
 
 		ViSongDetector *mSongDetector;
 

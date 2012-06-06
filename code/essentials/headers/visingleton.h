@@ -6,15 +6,20 @@
 
 class ViSingleton : public QObject
 {
+
 	public:
+
 		static ViSingleton* instance();
 		virtual QString name();
 
 	protected:
+
 		ViSingleton();
 
 	protected:
+
 		QString mName;
+
 };
 
 #endif
