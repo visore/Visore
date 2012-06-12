@@ -1,25 +1,22 @@
 #ifndef VISINGELTON_H
 #define VISINGELTON_H
 
-#include <QString>
 #include <QSharedPointer>
 
+template<typename T>
 class ViSingleton : public QObject
 {
 
 	public:
 
-		static ViSingleton* instance();
-		virtual QString name();
+		static T* instance();
 
 	protected:
 
-		ViSingleton();
-
-	protected:
-
-		QString mName;
+		static QSharedPointer<T> mInstance;
 
 };
+
+#include "visingleton.cpp"
 
 #endif

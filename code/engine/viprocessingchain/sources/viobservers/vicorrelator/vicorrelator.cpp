@@ -22,11 +22,16 @@ ViCorrelator::~ViCorrelator()
 
 ViCorrelationResult& ViCorrelator::result()
 {
+	return mResult;
+}
+
+void ViCorrelator::setData(const ViSampleChunk *data, const ViSampleChunk *data2)
+{
+	ViDualObserver::setData(data, data2);
 	for(int i = 0; i < mCorrelators.size(); ++i)
 	{
-		mCorrelators[i]->finalize();
+		mCorrelators[i]->setData(mData, mData2);
 	}
-	return mResult;
 }
 
 void ViCorrelator::setWindowSize(int windowSize)
@@ -34,7 +39,23 @@ void ViCorrelator::setWindowSize(int windowSize)
 	ViDualObserver::setWindowSize(windowSize);
 	for(int i = 0; i < mCorrelators.size(); ++i)
 	{
-		mCorrelators[i]->initialize(mWindowSize);
+		mCorrelators[i]->setWindowSize(mWindowSize);
+	}
+}
+
+void ViCorrelator::initialize()
+{
+	for(int i = 0; i < mCorrelators.size(); ++i)
+	{
+		mCorrelators[i]->initialize();
+	}
+}
+
+void ViCorrelator::finalize()
+{
+	for(int i = 0; i < mCorrelators.size(); ++i)
+	{
+		mCorrelators[i]->finalize();
 	}
 }
 
@@ -42,7 +63,6 @@ void ViCorrelator::run()
 {
 	for(int i = 0; i < mCorrelators.size(); ++i)
 	{
-		mCorrelators[i]->setData(mData->data(), mData->size(), mData2->data(), mData2->size());
 		mThreadPool.start(mCorrelators[i]);
 	}
 	mThreadPool.waitForDone();

@@ -1,16 +1,16 @@
-#include "visingleton.h"
+#ifdef VISINGELTON_H
 
-ViSingleton::ViSingleton()
+template<typename T>
+QSharedPointer<T> ViSingleton<T>::mInstance;
+
+template<typename T>
+T* ViSingleton<T>::instance()
 {
-	mName = "";
+	if(mInstance.isNull())
+	{
+		mInstance = QSharedPointer<T>(new T());
+	}
+	return mInstance.data();
 }
 
-ViSingleton* ViSingleton::instance()
-{
-	return NULL;
-}
-
-QString ViSingleton::name()
-{
-	return mName;
-}
+#endif

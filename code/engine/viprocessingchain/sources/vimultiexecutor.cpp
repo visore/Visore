@@ -2,7 +2,7 @@
 
 void ViMultiExecutor::runNormal()
 {
-	update();
+	initialize();
 	do
 	{
 		mInputChunk->setSize(mReadStream->read(mInputChunk));
@@ -19,6 +19,7 @@ void ViMultiExecutor::runNormal()
 		}
 	}
 	while(mInputChunk->size() > 0);
+	finalize();
 }
 
 void ViMultiExecutor::runNotify()
@@ -26,7 +27,7 @@ void ViMultiExecutor::runNotify()
 	emit progressed(0);
 	qint64 size;
 	qint64 progress = 0;
-	update();
+	initialize();
 	do
 	{
 		size = mReadStream->bufferSize();
@@ -46,5 +47,6 @@ void ViMultiExecutor::runNotify()
 		}
 	}
 	while(mInputChunk->size() > 0);
+	finalize();
 	emit progressed(100);
 }

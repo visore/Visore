@@ -9,9 +9,9 @@ class ViSampleCorrelator : public ViCorrelatorStrategy
 	public:
 		
 		ViSampleCorrelator();
-		void initialize(qint32 windowSize = 0);
-		void run();
+		void initialize();
 		void finalize();
+		void run();
 
 	private:
 

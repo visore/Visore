@@ -72,7 +72,7 @@ bool ViSingleExecutor::execute(ViAudioBuffer *inputBuffer, ViAudioBuffer *output
 
 void ViSingleExecutor::runNormal()
 {
-	update();
+	initialize();
 	do
 	{
 		mInputChunk->setSize(mReadStream->read(mInputChunk));
@@ -82,6 +82,7 @@ void ViSingleExecutor::runNormal()
 		}
 	}
 	while(mInputChunk->size() > 0);
+	finalize();
 }
 
 void ViSingleExecutor::runNotify()
@@ -89,7 +90,7 @@ void ViSingleExecutor::runNotify()
 	emit progressed(0);
 	qint64 size;
 	qint64 progress = 0;
-	update();
+	initialize();
 	do
 	{
 		size = mReadStream->bufferSize();
@@ -102,6 +103,7 @@ void ViSingleExecutor::runNotify()
 		}
 	}
 	while(mInputChunk->size() > 0);
+	finalize();
 	emit progressed(100);
 }
 

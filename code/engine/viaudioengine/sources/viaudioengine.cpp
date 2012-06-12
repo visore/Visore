@@ -1,9 +1,6 @@
 #include "viaudioengine.h"
 
-ViAudioEngine *ViAudioEngine::mEngine = NULL;
-
 ViAudioEngine::ViAudioEngine()
-	: ViSingleton()
 {
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(progressed(short)), this, SIGNAL(spectrumProgressed(short)));
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
@@ -33,15 +30,6 @@ ViAudioEngine::ViAudioEngine()
 ViAudioEngine::~ViAudioEngine()
 {
 
-}
-
-ViAudioEngine* ViAudioEngine::instance()
-{
-	if(mEngine == NULL)
-	{
-		mEngine = new ViAudioEngine();
-	}
-	return mEngine;
 }
 
 ViRealSpectrum ViAudioEngine::spectrum()

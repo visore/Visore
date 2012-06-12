@@ -11,9 +11,11 @@ class ViCrossCorrelator : public ViCorrelatorStrategy
 	public:
 		
 		ViCrossCorrelator();
-		void initialize(qint32 windowSize = 0);
-		void run();
+		~ViCrossCorrelator();
+		void setWindowSize(int windowSize);
+		void initialize();
 		void finalize();
+		void run();
 
 	protected:
 
@@ -28,7 +30,7 @@ class ViCrossCorrelator : public ViCorrelatorStrategy
 		qreal mMaximumDifference;
 		qreal mMinimumDifference;
 		qreal mAverageDifference;
-		qint32 mCounter;
+		qreal mCounter;
 
 		qreal *mRealData;
 		qreal *mFirstFourierData;

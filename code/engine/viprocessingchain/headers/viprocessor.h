@@ -27,6 +27,9 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 		virtual void setFormat(ViAudioFormat format);
 		virtual ViAudioFormat format();
 
+		virtual void initialize();
+		virtual void finalize();
+
 		virtual void run() = 0;
 
 	protected:

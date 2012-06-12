@@ -6,27 +6,33 @@ ViSampleCorrelator::ViSampleCorrelator()
 {
 }
 
-void ViSampleCorrelator::initialize(qint32 windowSize)
+void ViSampleCorrelator::initialize()
 {
-	ViCorrelatorStrategy::initialize(windowSize);
 	mMaximumDifference = -DBL_MAX;
 	mMinimumDifference = DBL_MAX;
 	mAverageDifference = 0;
 	mCounter = 0;
 }
 
+void ViSampleCorrelator::finalize()
+{
+	mAverageDifference /= mCounter;
+	mResult->setSampleCorrelation(ViCorrelationResultCombination(
+		(2 - qAbs(mMaximumDifference)) / 2,
+		(2 - qAbs(mMinimumDifference)) / 2,
+		(2 - qAbs(mAverageDifference)) / 2
+	));
+}
+
 void ViSampleCorrelator::run()
 {
 	qreal difference;
-	qint32 size = qMin(mFirstSize, mSecondSize);
+	qreal *data = mData->data();
+	qreal *data2 = mData2->data();
+	qint32 size = qMin(mData->size(), mData2->size());
 	for(int i = 0; i < size; ++i)
 	{
-		difference = qAbs(mFirstData[i] - mSecondData[i]);
-if(difference != NULL)
-{
-	cout<<difference<<" "<<mFirstData[i]<<" "<<mSecondData[i]<<endl;
-}
-
+		difference = qAbs(data[i] - data2[i]);
 		mAverageDifference += difference;
 		if(difference < mMinimumDifference)
 		{
@@ -38,14 +44,4 @@ if(difference != NULL)
 		}
 	}
 	mCounter += size;
-}
-
-void ViSampleCorrelator::finalize()
-{
-	mAverageDifference /= mCounter;
-	mResult->setSampleCorrelation(ViCorrelationResultCombination(
-		(2 - qAbs(mMaximumDifference)) / 2,
-		(2 - qAbs(mMinimumDifference)) / 2,
-		(2 - qAbs(mAverageDifference)) / 2
-	));
 }

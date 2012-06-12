@@ -105,7 +105,7 @@ void ViExecutor::execute()
 	}
 }
 
-void ViExecutor::update()
+void ViExecutor::initialize()
 {
 	if(mReadStream != NULL)
 	{
@@ -123,6 +123,7 @@ void ViExecutor::update()
 	{
 		processors[i]->setWindowSize(mWindowSize);
 		processors[i]->setFormat(mInputFormat);
+		processors[i]->initialize();
 	}
 
 	if(mNotify)
@@ -155,6 +156,15 @@ void ViExecutor::update()
 	if(mOutputChunk != NULL)
 	{
 		mOutputChunk->resize(mWindowSize * (mOutputFormat.sampleSize() / 8));
+	}
+}
+
+void ViExecutor::finalize()
+{
+	QList<ViProcessor*> processors = mProcessors.all();
+	for(int i = 0; i < processors.size(); ++i)
+	{
+		processors[i]->finalize();
 	}
 }
 

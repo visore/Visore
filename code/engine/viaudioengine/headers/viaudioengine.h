@@ -3,6 +3,7 @@
 
 #include "viaudioconnection.h"
 #include "visingleton.h"
+#include "vimanager.h"
 
 #include "viprocessingchain.h"
 #include "visingleexecutor.h"
@@ -12,7 +13,7 @@
 #include "viwaveformer.h"
 #include "visongdetector.h"
 
-class ViAudioEngine : public ViSingleton
+class ViAudioEngine : public ViSingleton<ViAudioEngine>
 {
     Q_OBJECT
 
@@ -63,7 +64,6 @@ class ViAudioEngine : public ViSingleton
 	public:
 
 		~ViAudioEngine();
-		static ViAudioEngine* instance();
 
 		ViRealSpectrum spectrum();
 		ViWaveForm& wave(ViAudio::Mode mode);
@@ -71,11 +71,10 @@ class ViAudioEngine : public ViSingleton
 
 	protected:
 
+		friend class ViSingleton<ViAudioEngine>;
 		ViAudioEngine();
 
 	private:
-
-		static ViAudioEngine *mEngine;
 
 		ViAudioConnection mConnection;
 		ViFileInput *mFileInput;

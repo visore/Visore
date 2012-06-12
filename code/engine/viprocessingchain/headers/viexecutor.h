@@ -33,7 +33,9 @@ class ViExecutor : public QThread
 
 	protected:
 
-		void update();
+		void initialize();
+		void finalize();
+
 		void connect(ViProcessor *processor);
 		void disconnect(ViProcessor *processor);
 		void start();

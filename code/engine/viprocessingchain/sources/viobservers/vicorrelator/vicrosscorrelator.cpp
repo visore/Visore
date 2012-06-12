@@ -11,10 +11,20 @@ ViCrossCorrelator::ViCrossCorrelator()
 	mAutocorrelationData = NULL;
 }
 
-void ViCrossCorrelator::initialize(qint32 windowSize)
+ViCrossCorrelator::~ViCrossCorrelator()
 {
-	ViCorrelatorStrategy::initialize(windowSize);
+	deallocateData();
+}
+
+void ViCrossCorrelator::setWindowSize(int windowSize)
+{
+	ViCorrelatorStrategy::setWindowSize(windowSize);
 	mTransformer.setSize(mWindowSize);
+}
+
+void ViCrossCorrelator::initialize()
+{
+	deallocateData();
 	allocateData();
 
 	mMaximumDifference = -DBL_MAX;
@@ -23,14 +33,25 @@ void ViCrossCorrelator::initialize(qint32 windowSize)
 	mCounter = 0;
 }
 
+void ViCrossCorrelator::finalize()
+{
+	deallocateData();
+	mAverageDifference /= mCounter;
+	mResult->setCrossCorrelation(ViCorrelationResultCombination(
+		(2 - qAbs(mMaximumDifference)) / 2,
+		(2 - qAbs(mMinimumDifference)) / 2,
+		(2 - qAbs(mAverageDifference)) / 2
+	));
+}
+
 void ViCrossCorrelator::run()
 {
 	qreal subAverageDifference, subSampleCounter, difference, firstNorm, secondNorm, multipliedNorm;
 
-	memcpy(mRealData, mFirstData, mFirstSize * sizeof(qreal));
-	firstNorm = norm(mRealData, mFirstSize);
+	memcpy(mRealData, mData->data(), mData->size() * sizeof(qreal));
+	firstNorm = norm(mRealData, mData->size());
 	multipliedNorm = firstNorm * firstNorm;
-	mTransformer.pad(mRealData, mFirstSize);
+	mTransformer.pad(mRealData, mData->size());
 	mTransformer.forwardTransform(mRealData, mFirstFourierData);
 
 	//Auto-correlation
@@ -42,10 +63,10 @@ void ViCrossCorrelator::run()
 	applyNorm(mAutocorrelationData, mWindowSize, multipliedNorm);
 
 	//Cross-correlation
-	memcpy(mRealData, mSecondData, mSecondSize * sizeof(qreal));
-	secondNorm = norm(mRealData, mSecondSize);
+	memcpy(mRealData, mData2->data(), mData2->size() * sizeof(qreal));
+	secondNorm = norm(mRealData, mData->size());
 	multipliedNorm = firstNorm * secondNorm;
-	mTransformer.pad(mRealData, mSecondSize);
+	mTransformer.pad(mRealData, mData2->size());
 	mTransformer.forwardTransform(mRealData, mSecondFourierData);
 	mTransformer.multiply(mFirstFourierData, mSecondFourierData, mMultiplyData);
 	mTransformer.inverseTransform(mMultiplyData, mRealData);
@@ -68,20 +89,8 @@ void ViCrossCorrelator::run()
 		subAverageDifference += difference;
 		++subSampleCounter;
 	}
-	//mAverageDifference += (subAverageDifference / subSampleCounter);
+	mAverageDifference += (subAverageDifference / subSampleCounter);
 	++mCounter;
-	mAverageDifference = ((mAverageDifference / mCounter) * (mCounter - 1)) + ((subAverageDifference / subSampleCounter) / mCounter);
-}
-
-void ViCrossCorrelator::finalize()
-{
-	deallocateData();
-	/*mAverageDifference /= mCounter;
-	mResult->setCrossCorrelation(ViCorrelationResultCombination(
-		(2 - qAbs(mMaximumDifference)) / 2,
-		(2 - qAbs(mMinimumDifference)) / 2,
-		(2 - qAbs(mAverageDifference)) / 2
-	));*/
 }
 
 void ViCrossCorrelator::allocateData()

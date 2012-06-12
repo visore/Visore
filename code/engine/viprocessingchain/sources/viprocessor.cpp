@@ -27,6 +27,14 @@ ViAudioFormat ViProcessor::format()
 	return mFormat;
 }
 
+void ViProcessor::initialize()
+{
+}
+
+void ViProcessor::finalize()
+{
+}
+
 ViObserver::ViObserver()
 	: ViProcessor()
 {
