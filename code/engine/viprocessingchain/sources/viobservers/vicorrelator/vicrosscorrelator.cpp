@@ -68,19 +68,20 @@ void ViCrossCorrelator::run()
 		subAverageDifference += difference;
 		++subSampleCounter;
 	}
-	mAverageDifference += (subAverageDifference / subSampleCounter);
+	//mAverageDifference += (subAverageDifference / subSampleCounter);
 	++mCounter;
+	mAverageDifference = ((mAverageDifference / mCounter) * (mCounter - 1)) + ((subAverageDifference / subSampleCounter) / mCounter);
 }
 
 void ViCrossCorrelator::finalize()
 {
 	deallocateData();
-	mAverageDifference /= mCounter;
+	/*mAverageDifference /= mCounter;
 	mResult->setCrossCorrelation(ViCorrelationResultCombination(
 		(2 - qAbs(mMaximumDifference)) / 2,
 		(2 - qAbs(mMinimumDifference)) / 2,
 		(2 - qAbs(mAverageDifference)) / 2
-	));
+	));*/
 }
 
 void ViCrossCorrelator::allocateData()
