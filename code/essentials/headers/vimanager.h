@@ -1,6 +1,8 @@
 #ifndef VIMANAGER_H
 #define VIMANAGER_H
 
+#include <QSettings>
+#include <QSize>
 #include <QDir>
 #include <QUrl>
 #include <QtGlobal>
@@ -30,17 +32,34 @@ class ViManager : public ViSingleton<ViManager>
 
 	public:
 
+		~ViManager();
+
+		//Universal
 		static ViVersion version();
 		static QString name();
 		static QUrl url();
+
+		//Main window
+		static QSize windowSize();
+		static bool isWindowFullScreen();
+		static bool isWindowMaximized();
+		static QPoint windowPosition();
+
+		static void setWindowSize(QSize size);
+		static void setWindowFullScreen(bool fullScreen);
+		static void setWindowMaximized(bool maximized);
+		static void setWindowPosition(QPoint position);
 
 	protected:
 
 		friend class ViSingleton<ViManager>;
 		ViManager();
+		static void setValue(QString key, QVariant value);
+		static QVariant value(QString key);
 
 	private:
 
+		QSettings *mSettings;
 		ViVersion mVersion;
 		QString mName;
 		QUrl mUrl;

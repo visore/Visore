@@ -7,7 +7,6 @@
 #include "qwt_plot_grid.h"
 
 class ViSpectrumPlotPicker;
-class ViSpectrumPlotMagnifier;
 
 class ViSpectrumPlot : public QwtPlot
 {
@@ -38,7 +37,7 @@ class ViSpectrumPlot : public QwtPlot
 
 	private:
 
-		qreal *mDataX;
+		/*qreal *mDataX;
 		qreal *mDataY;
 		qint32 mDataCount;
 		qreal mLength;
@@ -46,13 +45,12 @@ class ViSpectrumPlot : public QwtPlot
 		QString mLabelX;
 		QString mLabelY;
 		QString mUnitX;
-		QString mUnitY;
+		QString mUnitY;*/
 
-		//ViSpectrumPlotMagnifier *mMagnifier;
-		ViSpectrumPlotPicker *mPicker;
-		QwtPointSeriesData mData;
-		QwtPlotCurve mCurve;
-		QwtPlotGrid mGrid;
+		//ViSpectrumPlotPicker *mPicker;
+		//QwtPointSeriesData mData;
+		//QwtPlotCurve mCurve;
+		//QwtPlotGrid mGrid;
 		
 
 };

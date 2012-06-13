@@ -25,6 +25,9 @@ ViAudioEngine::ViAudioEngine()
 
 	mProcessingChain.attach(ViAudio::AudioInput, &mInputWaveFormer);
 	mProcessingChain.attach(ViAudio::AudioOutput, &mOutputWaveFormer);
+
+	QObject::connect(&mEndDetector, SIGNAL(endDetected()), &mProcessingChain, SLOT(changeInput()));
+	mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
 }
 
 ViAudioEngine::~ViAudioEngine()

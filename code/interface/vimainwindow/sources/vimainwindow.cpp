@@ -25,6 +25,24 @@ ViMainWindow* ViMainWindow::instance()
 	return mWindow;
 }
 
+void ViMainWindow::show()
+{
+	if(ViManager::isWindowFullScreen())
+	{
+		showFullScreen();
+	}
+	else if(ViManager::isWindowMaximized())
+	{
+		showMaximized();
+	}
+	else
+	{
+		resize(ViManager::windowSize());
+		move(ViManager::windowPosition());
+		QMainWindow::show();
+	}
+}
+
 void ViMainWindow::progress(short percentage)
 {
 	mLoadingWidget->progress(percentage);
@@ -48,6 +66,21 @@ void ViMainWindow::resizeEvent(QResizeEvent *event)
 {
 	mLoadingWidget->resize(event->size());
     event->accept();
+	ViManager::setWindowSize(event->size());
+}
+
+void ViMainWindow::moveEvent(QMoveEvent *event)
+{
+	ViManager::setWindowPosition(event->pos());
+}
+
+void ViMainWindow::changeEvent(QEvent *event)
+{
+	if(event->type() == QEvent::WindowStateChange)
+	{
+		ViManager::setWindowFullScreen(isFullScreen());
+		ViManager::setWindowMaximized(isMaximized());
+	}
 }
 
 void ViMainWindow::initialize()

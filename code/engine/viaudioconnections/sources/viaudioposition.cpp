@@ -11,7 +11,7 @@ ViAudioPosition::ViAudioPosition(qreal microseconds, ViAudioPosition::Unit unit,
 	setPosition(microseconds, unit, format);
 }
 
-qreal ViAudioPosition::convertPosition(qreal position, ViAudioPosition::Unit fromUnit, ViAudioPosition::Unit toUnit, QAudioFormat format)
+qreal ViAudioPosition::convertPosition(const qreal position, const ViAudioPosition::Unit fromUnit, const ViAudioPosition::Unit toUnit, const QAudioFormat &format)
 {
 	qreal microseconds = 0;
 

@@ -11,6 +11,7 @@
 #include "vispectrumanalyzer.h"
 #include "vicorrelator.h"
 #include "viwaveformer.h"
+#include "vienddetector.h"
 #include "visongdetector.h"
 
 class ViAudioEngine : public ViSingleton<ViAudioEngine>
@@ -87,6 +88,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 
 		ViSpectrumAnalyzer mSpectrumAnalyzer;
 		ViCorrelator mCorrelator;
+		ViEndDetector mEndDetector;
 		ViWaveFormer mInputWaveFormer;
 		ViWaveFormer mOutputWaveFormer;
 

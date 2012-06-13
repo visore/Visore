@@ -14,7 +14,6 @@ int main(int argc, char *argv[])
 	application.setApplicationVersion(ViManager::version().toString());
 
 	//Register SIGNAL/SLOT parameter types
-	//qRegisterMetaType<QSharedPointer<ViWaveFormChunk> >("QSharedPointer<ViWaveFormChunk>");
 	qRegisterMetaType<ViCoder::State>("ViCoder::State");
 
 	ViMainWindow *window = ViMainWindow::instance();

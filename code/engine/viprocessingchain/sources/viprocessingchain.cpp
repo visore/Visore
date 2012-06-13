@@ -3,6 +3,7 @@
 ViProcessingChain::ViProcessingChain()
 	: QObject()
 {
+	mEndDetected = false;
 	mInput = NULL;
 	mOutput = NULL;
 	mInputBuffer = NULL;
@@ -29,9 +30,14 @@ ViProcessingChain::~ViProcessingChain()
 
 void ViProcessingChain::changeInput()
 {
-	QObject::connect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finish()));
-	allocateBuffer(ViAudio::AudioInput);
-	mInput->setBuffer(mInputBuffer);
+	if(!mEndDetected)
+	{
+		mEndDetected = true;
+		cout<<"+++++++++++++++++ END +++++++++++++++++++++++"<<endl;
+		QObject::connect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finish()));
+		allocateBuffer(ViAudio::AudioInput);
+		mInput->setBuffer(mInputBuffer);
+	}
 }
 
 void ViProcessingChain::finish()
@@ -39,6 +45,7 @@ void ViProcessingChain::finish()
 	QObject::disconnect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finish()));
 	//Save to file here
 	nextBuffer();
+	mEndDetected = false;
 }
 
 void ViProcessingChain::setWindowSize(int windowSize)

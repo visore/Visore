@@ -34,7 +34,7 @@ void ViWaveOverlayWidget::updateWave()
 void ViWaveOverlayWidget::setMode(ViAudio::Mode mode)
 {
 	mMode = mode;
-	QObject::connect(mEngine, SIGNAL(chainChanged(ViWaveForm*)), this, SLOT(updateWave()));
+	QObject::connect(mEngine, SIGNAL(chainChanged()), this, SLOT(updateWave()));
 	QObject::connect(mEngine, SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(positionChanged(ViAudioPosition)));
 }
 

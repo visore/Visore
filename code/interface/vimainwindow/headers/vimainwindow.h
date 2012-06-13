@@ -24,11 +24,14 @@ class ViMainWindow : public QMainWindow
 
 		~ViMainWindow();
 		static ViMainWindow* instance();
+		void show();
 
 	protected:
 
 		ViMainWindow();
 		void resizeEvent(QResizeEvent *event);
+		void moveEvent(QMoveEvent *event);
+		void changeEvent(QEvent *event);
 
 	private:
 		void initialize();

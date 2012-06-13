@@ -27,7 +27,7 @@ class ViAnalysisMenu : public ViMenu
 	private:
 		Ui::ViAnalysisMenu *mUi;
 
-		ViSpectrumWidget mSpectrumWidget;
+		//ViSpectrumWidget mSpectrumWidget;
 		ViCorrelationWidget mCorrelationWidget;
 
 		qint16 mSpectrumIndex;

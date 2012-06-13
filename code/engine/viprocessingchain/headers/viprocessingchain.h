@@ -13,7 +13,7 @@ class ViProcessingChain : public QObject
 
 		void changed();
 
-	private:
+	private slots:
 
 		void changeInput(); // Connect song end detector to this slot
 		void finish();
@@ -36,6 +36,7 @@ class ViProcessingChain : public QObject
 
 	private:
 
+		bool mEndDetected;
 		ViMultiExecutor mMultiExecutor;
 		ViAudioInput *mInput;
 		ViAudioOutput *mOutput;
