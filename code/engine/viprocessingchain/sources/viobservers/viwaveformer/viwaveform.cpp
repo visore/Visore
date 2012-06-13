@@ -1,5 +1,6 @@
 #include "viwaveform.h"
-
+#include<iostream>
+using namespace std;
 ViWaveForm::ViWaveForm(qint16 level)
 {
 	mLevel = level;
@@ -196,15 +197,18 @@ unsigned char ViWaveForm::minimumAverage(qint32 position, qint16 level)
 	return result;
 }
 
-void ViWaveForm::reset()
+void ViWaveForm::clear()
 {
-	mMaximum = 0;
-	mMinimum = 0;
-	mAverageMaximum = 0;
-	mAverageMinimum = 0;
-	mMaximumCounter = 0;
-	mMinimumCounter = 0;
-	mTotalCounter = 0;
+	reset();
+	mMaximums.clear();
+	mMinimums.clear();
+	mAverageMaximums.clear();
+	mAverageMinimums.clear();
+	if(mNextLevel != NULL)
+	{
+		mNextLevel->clear();
+		mNextLevel->reset();
+	}
 }
 
 bool ViWaveForm::isUnderCutoff(qint16 level)
@@ -218,3 +222,15 @@ bool ViWaveForm::isUnderCutoff(qint16 level)
 	mMutex.unlock();
 	return result;
 }
+
+void ViWaveForm::reset()
+{
+	mMaximum = 0;
+	mMinimum = 0;
+	mAverageMaximum = 0;
+	mAverageMinimum = 0;
+	mMaximumCounter = 0;
+	mMinimumCounter = 0;
+	mTotalCounter = 0;
+}
+

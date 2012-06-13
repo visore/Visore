@@ -21,15 +21,15 @@ class ViAudioPosition
 	public:
 
 		ViAudioPosition();
-		ViAudioPosition(qreal microseconds, ViAudioPosition::Unit unit, QAudioFormat format);
+		ViAudioPosition(const qreal microseconds, const ViAudioPosition::Unit unit, const QAudioFormat format);
 
 		static qreal convertPosition(const qreal position, const ViAudioPosition::Unit fromUnit, const ViAudioPosition::Unit toUnit, const QAudioFormat &format);
 
-		void setPosition(qreal position, ViAudioPosition::Unit unit, QAudioFormat format);
-		void setPosition(qreal position, ViAudioPosition::Unit unit);
-		qreal position(ViAudioPosition::Unit unit);
+		void setPosition(const qreal position, const ViAudioPosition::Unit unit, const QAudioFormat format);
+		void setPosition(const qreal position, const ViAudioPosition::Unit unit);
+		qreal position(const ViAudioPosition::Unit unit) const;
 
-		QAudioFormat format();
+		QAudioFormat format() const;
 		
 		bool operator ==(const ViAudioPosition &other) const;
 		bool operator !=(const ViAudioPosition &other) const;

@@ -7,6 +7,7 @@ ViExecutor::ViExecutor()
 {
 	mWindowSize = DEFAULT_WINDOW_SIZE;
 	mNotify = false;
+	mWasInitialized = false;
 	mInputChunk = NULL;
 	mInputSamples = NULL;
 	mOutputSamples = NULL;
@@ -88,7 +89,6 @@ void ViExecutor::setBuffer(ViAudio::Mode mode, ViAudioBuffer *buffer)
 			mOutputSamples = new ViSampleChunk();
 		}
 		mWriteStream = buffer->createWriteStream();
-		
 	}
 }
 
@@ -99,6 +99,10 @@ int ViExecutor::defaultWindowSize()
 
 void ViExecutor::execute()
 {
+	if(!mWasInitialized)
+	{
+		initialize();
+	}
 	if(!isRunning())
 	{
 		start();
@@ -107,6 +111,7 @@ void ViExecutor::execute()
 
 void ViExecutor::initialize()
 {
+	mWasInitialized = true;
 	if(mReadStream != NULL)
 	{
 		mInputFormat = mReadStream->buffer()->format();
@@ -161,10 +166,14 @@ void ViExecutor::initialize()
 
 void ViExecutor::finalize()
 {
-	QList<ViProcessor*> processors = mProcessors.all();
-	for(int i = 0; i < processors.size(); ++i)
+	if(mWasInitialized)
 	{
-		processors[i]->finalize();
+		QList<ViProcessor*> processors = mProcessors.all();
+		for(int i = 0; i < processors.size(); ++i)
+		{
+			processors[i]->finalize();
+		}
+		mWasInitialized = false;
 	}
 }
 

@@ -2,13 +2,13 @@
 
 void ViMultiExecutor::runNormal()
 {
-	initialize();
+	int size;
 	do
 	{
-		mInputChunk->setSize(mReadStream->read(mInputChunk));
-		if(mInputChunk->size() > 0)
+		size = mReadStream->read(mInputChunk->data(), mInputChunk->size());
+		if(size > 0)
 		{
-			mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), mInputChunk->size()));
+			mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), size));
 			ViSampleChunk::copy(mInputSamples, mOutputSamples);
 			mProcessors.observeInput(mOutputSamples);
 			mProcessors.manipulateInput(mOutputSamples);
@@ -18,23 +18,22 @@ void ViMultiExecutor::runNormal()
 			mWriteStream->write(mOutputChunk);
 		}
 	}
-	while(mInputChunk->size() > 0);
-	finalize();
+	while(size > 0);
 }
 
 void ViMultiExecutor::runNotify()
 {
 	emit progressed(0);
-	qint64 size;
+	qint64 bufferSize;
 	qint64 progress = 0;
-	initialize();
+	int size;
 	do
 	{
-		size = mReadStream->bufferSize();
-		mInputChunk->setSize(mReadStream->read(mInputChunk));
+		bufferSize = mReadStream->bufferSize();
+		size = mReadStream->read(mInputChunk->data(), mInputChunk->size());
 		if(mInputChunk->size() > 0)
 		{
-			mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), mInputChunk->size()));
+			mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), size));
 			ViSampleChunk::copy(mInputSamples, mOutputSamples);
 			mProcessors.observeInput(mOutputSamples);
 			mProcessors.manipulateInput(mOutputSamples);
@@ -43,10 +42,9 @@ void ViMultiExecutor::runNotify()
 			mOutputChunk->setSize(mOutputConverter.realToPcm(mOutputSamples->data(), mOutputChunk->data(), mOutputSamples->size()));
 			mWriteStream->write(mOutputChunk);
 			progress += mInputChunk->size();
-			emit progressed((progress * 100) / size);
+			emit progressed((progress * 100) / bufferSize);
 		}
 	}
-	while(mInputChunk->size() > 0);
-	finalize();
+	while(size > 0);
 	emit progressed(100);
 }

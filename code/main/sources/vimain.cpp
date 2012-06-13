@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
 
 	//Register SIGNAL/SLOT parameter types
 	qRegisterMetaType<ViCoder::State>("ViCoder::State");
+	qRegisterMetaType<ViAudioPosition>("ViAudioPosition");
 
 	ViMainWindow *window = ViMainWindow::instance();
 	window->setWindowIcon(logo);

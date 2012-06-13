@@ -13,7 +13,9 @@
 
 class ViWaveForm
 {
+
 	public:
+
 		ViWaveForm(qint16 level = 0);
 		~ViWaveForm();
 		void append(qreal value);
@@ -22,15 +24,18 @@ class ViWaveForm
 		unsigned char minimum(qint32 position, qint16 level);
 		unsigned char maximumAverage(qint32 position, qint16 level);
 		unsigned char minimumAverage(qint32 position, qint16 level);
-		void reset();
+		void clear();
 		bool isUnderCutoff(qint16 level);
 
 	private:
+
+		void reset();
 		void scaleValues(qreal *maximum, qreal *minimum, qreal *averageMaximum, qreal *averageMinimum);
 		void appendValues(qreal maximum, qreal minimum, qreal averageMaximum, qreal averageMinimum);
 		void appendResults();
 
 	private:
+
 		qreal mMaximum;
 		qreal mMinimum;
 		qreal mAverageMaximum;
@@ -48,6 +53,7 @@ class ViWaveForm
 		QVector<unsigned char> mMinimums;
 		QVector<unsigned char> mAverageMaximums;
 		QVector<unsigned char> mAverageMinimums;
+
 };
 
 #endif

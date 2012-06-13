@@ -28,24 +28,24 @@ ViProcessingChain::~ViProcessingChain()
 	}
 }
 
-void ViProcessingChain::changeInput()
+void ViProcessingChain::changeInput(ViAudioPosition position)
 {
 	if(!mEndDetected)
 	{
 		mEndDetected = true;
-		cout<<"+++++++++++++++++ END +++++++++++++++++++++++"<<endl;
 		QObject::connect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finish()));
-		allocateBuffer(ViAudio::AudioInput);
-		mInput->setBuffer(mInputBuffer);
+		mInput->setBuffer(allocateBuffer(ViAudio::AudioInput));
 	}
 }
 
 void ViProcessingChain::finish()
 {
+	mMultiExecutor.finalize();
 	QObject::disconnect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finish()));
 	//Save to file here
 	nextBuffer();
 	mEndDetected = false;
+	mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
 }
 
 void ViProcessingChain::setWindowSize(int windowSize)
@@ -96,7 +96,7 @@ ViAudioBuffer* ViProcessingChain::buffer(ViAudio::Mode mode)
 	}
 }
 
-void ViProcessingChain::allocateBuffer(ViAudio::Mode mode)
+ViAudioBuffer* ViProcessingChain::allocateBuffer(ViAudio::Mode mode)
 {
 	ViAudioBuffer *buffer = new ViAudioBuffer();
 	if(mode == ViAudio::AudioInput)
@@ -111,6 +111,7 @@ void ViProcessingChain::allocateBuffer(ViAudio::Mode mode)
 		}
 		mOutputBuffer = buffer;
 	}
+	return buffer;
 }
 
 void ViProcessingChain::nextBuffer()

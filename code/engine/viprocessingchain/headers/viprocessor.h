@@ -6,6 +6,7 @@
 #include "viid.h"
 #include "vichunk.h"
 #include "viaudioformat.h"
+#include "vilogger.h"
 
 class ViProcessor : public QObject, public QRunnable, public ViId
 {

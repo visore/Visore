@@ -15,7 +15,7 @@ class ViProcessingChain : public QObject
 
 	private slots:
 
-		void changeInput(); // Connect song end detector to this slot
+		void changeInput(ViAudioPosition position); // Connect song end detector to this slot
 		void finish();
 
 	public:
@@ -31,7 +31,7 @@ class ViProcessingChain : public QObject
 
 	protected:
 
-		void allocateBuffer(ViAudio::Mode mode);
+		ViAudioBuffer* allocateBuffer(ViAudio::Mode mode);
 		void nextBuffer();
 
 	private:

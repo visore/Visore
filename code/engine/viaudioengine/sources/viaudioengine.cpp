@@ -26,7 +26,7 @@ ViAudioEngine::ViAudioEngine()
 	mProcessingChain.attach(ViAudio::AudioInput, &mInputWaveFormer);
 	mProcessingChain.attach(ViAudio::AudioOutput, &mOutputWaveFormer);
 
-	QObject::connect(&mEndDetector, SIGNAL(endDetected()), &mProcessingChain, SLOT(changeInput()));
+	QObject::connect(&mEndDetector, SIGNAL(endDetected(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
 	mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
 }
 

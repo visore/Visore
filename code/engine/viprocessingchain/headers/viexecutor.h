@@ -18,6 +18,8 @@ class ViExecutor : public QThread
 	public slots:
 
 		void execute();
+		void initialize();
+		void finalize();
 
 	public:
 
@@ -33,9 +35,6 @@ class ViExecutor : public QThread
 
 	protected:
 
-		void initialize();
-		void finalize();
-
 		void connect(ViProcessor *processor);
 		void disconnect(ViProcessor *processor);
 		void start();
@@ -47,6 +46,7 @@ class ViExecutor : public QThread
 
 		int mWindowSize;
 		bool mNotify;
+		bool mWasInitialized;
 		ViProcessorList mProcessors;
 
 		ViPcmConverter<qreal> mInputConverter;

@@ -64,6 +64,6 @@ class ViLogger
 
 ViLogger * const LOGGER = ViLogger::instance();
 
-void log(const char *file, const char *function, const int line, const char *message, QtMsgType type);
+void log(const char *file, const char *function, const int line, const QString message, QtMsgType type);
 
 #endif

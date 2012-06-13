@@ -1,10 +1,9 @@
 #include "vienddetector.h"
-#include "viaudioposition.h"
 
 ViEndDetector::ViEndDetector()
 	: ViObserver()
 {
-	setThreshold(2000, 0.01);
+	setThreshold(3000, 0.02);
 }
 
 void ViEndDetector::setThreshold(int milliseconds, qreal value)
@@ -17,33 +16,36 @@ void ViEndDetector::initialize()
 {
 	mSamplesThreshold = ViAudioPosition::convertPosition(mMillisecondThreshold, ViAudioPosition::Milliseconds, ViAudioPosition::Samples, mFormat);
 	clear();
+	for(int i = 0; i < mSamplesThreshold; ++i)
+	{
+		mCache.enqueue(1);
+	}
+	mDetected = false;
 }
 
 void ViEndDetector::run()
 {
-	int value;
+	qreal value;
 	for(int i = 0; i < mData->size(); ++i)
 	{
-		mTotalValue -= mCache.dequeue();
-		value = mData->at(i);
-		mTotalValue += value;
+		value = qAbs(mData->at(i));
+		mTotalValue += value - mCache.dequeue();
 		mCache.enqueue(value);
-		if(mTotalValue / mSamplesThreshold <= mValueThreshold)
+		if((mTotalValue / mSamplesThreshold) <= mValueThreshold && !mDetected)
 		{
-			emit endDetected();
-			clear();
-			break;
+			mDetected = true;
+			mSampleCounter += i + 1;
+			LOG(QString("Detected end of song at second " + QString::number(ViAudioPosition::convertPosition(mSampleCounter, ViAudioPosition::Samples, ViAudioPosition::Seconds, mFormat), 'f', 2) + "."));
+			emit endDetected(ViAudioPosition(mSampleCounter, ViAudioPosition::Samples, mFormat));
+			return;
 		}
 	}
+	mSampleCounter += mData->size();
 }
 
 void ViEndDetector::clear()
 {
 	mCache.clear();
-	for(int i = 0; i < mSamplesThreshold; ++i)
-	{
-		mCache.enqueue(1);
-	}
-	mConfidence = 0;
 	mTotalValue = mSamplesThreshold;
+	mSampleCounter = 0;
 }

@@ -105,9 +105,9 @@ void ViLogger::append(ViLogEntry entry)
 	}
 }
 
-void log(const char *file, const char *function, const int line, const char *message, QtMsgType type)
+void log(const char *file, const char *function, const int line, const QString message, QtMsgType type)
 {
 	QString fileName(file);
 	fileName = fileName.mid(fileName.lastIndexOf(QDir::separator()) + 1);
-	LOGGER->append(ViLogEntry(fileName, QString(function), line, QString(message), type));
+	LOGGER->append(ViLogEntry(fileName, QString(function), line, message, type));
 }

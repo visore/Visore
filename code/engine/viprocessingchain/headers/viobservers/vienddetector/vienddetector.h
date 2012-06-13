@@ -1,6 +1,7 @@
 #ifndef VIENDDETECTOR_H
 
 #include "viprocessor.h"
+#include "viaudioposition.h"
 #include <QQueue>
 
 class ViEndDetector : public ViObserver
@@ -9,7 +10,7 @@ class ViEndDetector : public ViObserver
 
 	signals:
 
-		void endDetected();
+		void endDetected(ViAudioPosition position);
 
 	public:
 
@@ -24,11 +25,12 @@ class ViEndDetector : public ViObserver
 
 	private:
 		
-		qreal mConfidence;
+		bool mDetected;
+		qint64 mSampleCounter;
 		qreal mTotalValue;
+		qreal mValueThreshold;
 		int mMillisecondThreshold;
 		int mSamplesThreshold;
-		int mValueThreshold;
 		QQueue<qreal> mCache;
 
 };

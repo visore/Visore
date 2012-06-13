@@ -10,6 +10,11 @@ ViWaveForm& ViWaveFormer::wave()
 	return mForm;
 }
 
+void ViWaveFormer::initialize()
+{
+	mForm.clear();
+}
+
 void ViWaveFormer::run()
 {
 	for(int i = 0; i < mData->size(); ++i)
