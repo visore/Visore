@@ -19,6 +19,7 @@ class ViMainWindow : public QMainWindow
 		void progress(short percentage);
 		void hideLoading();
 		void showLoading(bool animation = true, bool button = true, ViLoadingWidget::TextStyle style = ViLoadingWidget::Percentage, QString text = "");
+		void buffering(short bufferingProgress);
 
 	public:
 
@@ -43,6 +44,7 @@ class ViMainWindow : public QMainWindow
 		Ui::ViMainWindow *mUi;
 		ViAudioEngine *mEngine;
 		ViLoadingWidget *mLoadingWidget;
+		bool mBufferingStarted;
 };
 
 #endif

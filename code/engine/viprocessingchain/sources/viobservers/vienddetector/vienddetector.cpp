@@ -37,7 +37,7 @@ void ViEndDetector::run()
 	qreal old = mTotalValue;
 	for(int i = 0; i < mData->size(); ++i)
 	{
-for(int h = 0; h < 10000; h++) int t = 100*3.25/789+94145-85.20*9654/85;
+for(int h = 0; h < 5000; h++) int t = 100*3.25/789+94145-85.20*9654/85;
 		value = qAbs(mData->at(i));
 		mTotalValue += value - mCache.dequeue();
 		mCache.enqueue(value);

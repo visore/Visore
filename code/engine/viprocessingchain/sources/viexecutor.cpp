@@ -169,7 +169,7 @@ void ViExecutor::initialize()
 		mOutputChunk->resize(mWindowSize * (mOutputFormat.sampleSize() / 8));
 	}
 
-	mProcessedBytes = 0;
+	mProcessedSamples = 0;
 	mProcessingRate = 0;
 	mRateCounter = 0;
 	mTimer.start(1000);
@@ -192,8 +192,8 @@ void ViExecutor::finalize()
 void ViExecutor::updateProcessingRate()
 {
 	++mRateCounter;
-	mProcessingRate = ((mProcessingRate / mRateCounter) * (mRateCounter - 1)) + (ViAudioPosition::convertPosition(mProcessedBytes, ViAudioPosition::Bytes, ViAudioPosition::Samples, mInputFormat) / mRateCounter);
-	mProcessedBytes = 0;
+	mProcessingRate = ((mProcessingRate / mRateCounter) * (mRateCounter - 1)) + ((mProcessedSamples / mInputFormat.channelCount()) / mRateCounter);
+	mProcessedSamples = 0;
 	emit processingRateChanged(mProcessingRate);
 }
 

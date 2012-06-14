@@ -53,7 +53,7 @@ class ViExecutor : public QThread
 
 		QTimer mTimer;
 		qreal mProcessingRate;
-		qint64 mProcessedBytes;
+		qint64 mProcessedSamples;
 		qint64 mRateCounter;
 
 		int mWindowSize;

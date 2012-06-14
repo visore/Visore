@@ -1,6 +1,6 @@
 #include "viprocessingchain.h"
 
-#define DEFAULT_SONG_LENGTH 210000
+#define DEFAULT_SONG_LENGTH 240000
 
 ViProcessingChain::ViProcessingChain()
 	: QObject()
@@ -61,11 +61,19 @@ void ViProcessingChain::updateBuffering(qreal processingRate)
 {
 	if(mSecondsNeeded == 0)
 	{
-		qint64 bytes = ViAudioPosition::convertPosition(DEFAULT_SONG_LENGTH, ViAudioPosition::Milliseconds, ViAudioPosition::Bytes, mOutputBuffer->format()) - mOutput->position().position(ViAudioPosition::Bytes);
-		qint64 bytesNeeded = bytes * (1 - (processingRate / mOutputBuffer->format().sampleRate()));
+		qreal ratio = 1 - (processingRate / mOutputBuffer->format().sampleRate());
+		ratio *= 1 + ratio;
+		qint64 bytesNeeded = ViAudioPosition::convertPosition(DEFAULT_SONG_LENGTH, ViAudioPosition::Milliseconds, ViAudioPosition::Bytes, mOutputBuffer->format());
+		bytesNeeded -= mOutput->position().position(ViAudioPosition::Bytes);
+		bytesNeeded *= ratio;
 		mSecondsNeeded = ViAudioPosition::convertPosition(bytesNeeded, ViAudioPosition::Bytes, ViAudioPosition::Seconds, mOutputBuffer->format());
-		LOG("Buffering started (processing rate: " + QString::number(mMultiExecutor.processingRate(), 'f', 1) + "Hz)");
+		LOG("Buffering started (processing rate: " + QString::number(mMultiExecutor.processingRate(), 'f', 1) + "Hz, buffer needed: " + QString::number(mSecondsNeeded) + "s)");
 	}
+	if(mSecondsNeeded < 0)
+	{
+		return;
+	}
+
 	short progress = mSecondsPassed / (mSecondsNeeded / 100.0);
 	++mSecondsPassed;
 	if(progress >= 100)

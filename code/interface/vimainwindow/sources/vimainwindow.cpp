@@ -62,6 +62,21 @@ void ViMainWindow::showLoading(bool animation, bool button, ViLoadingWidget::Tex
 	mLoadingWidget->setVisible(true);
 }
 
+void ViMainWindow::buffering(short bufferingProgress)
+{
+	if(!mBufferingStarted)
+	{
+		mBufferingStarted = true;
+		showLoading(true, false, ViLoadingWidget::Text, "Buffering");
+	}
+	progress(bufferingProgress);
+	if(bufferingProgress >= 100)
+	{
+		mBufferingStarted = false;
+		hideLoading();
+	}
+}
+
 void ViMainWindow::resizeEvent(QResizeEvent *event)
 {
 	mLoadingWidget->resize(event->size());
@@ -92,4 +107,7 @@ void ViMainWindow::initialize()
 	mLoadingWidget = new ViLoadingWidget(centralWidget());
 	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile.png", ViThemeImage::Normal, ViThemeManager::Background).path() + ") repeat-x;}");
 	hideLoading();
+
+	mBufferingStarted = false;
+	QObject::connect(mEngine, SIGNAL(buffering(short)), this, SLOT(buffering(short)));
 }

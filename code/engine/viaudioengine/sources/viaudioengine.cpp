@@ -14,6 +14,7 @@ ViAudioEngine::ViAudioEngine()
 	mStreamOutput = mConnection.streamOutput();
 
 	QObject::connect(&mProcessingChain, SIGNAL(changed()), this, SIGNAL(chainChanged()));
+	QObject::connect(&mProcessingChain, SIGNAL(buffering(short)), this, SIGNAL(buffering(short)));
 
 	mProcessingChain.setTransmission(mStreamOutput);
 	mStreamOutput->setDevice(QAudioDeviceInfo::defaultOutputDevice());
