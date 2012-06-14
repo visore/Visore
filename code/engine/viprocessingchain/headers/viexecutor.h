@@ -6,6 +6,7 @@
 #include "viprocessorlist.h"
 #include "vipcmconverter.h"
 #include "viaudio.h"
+#include <QTimer>
 
 class ViExecutor : public QThread
 {
@@ -14,6 +15,7 @@ class ViExecutor : public QThread
 	signals:
 
 		void progressed(short progress);
+		void processingRateChanged(qreal rate);
 
 	public slots:
 
@@ -21,10 +23,15 @@ class ViExecutor : public QThread
 		void initialize();
 		void finalize();
 
+	protected slots:
+
+		void updateProcessingRate();
+
 	public:
 
 		ViExecutor();
 		~ViExecutor();
+		int processingRate();
 		void setWindowSize(int windowSize);
 		void setNotify(bool notify);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
@@ -43,6 +50,11 @@ class ViExecutor : public QThread
 		virtual void runNotify() = 0;
 
 	protected:
+
+		QTimer mTimer;
+		qreal mProcessingRate;
+		qint64 mProcessedBytes;
+		qint64 mRateCounter;
 
 		int mWindowSize;
 		bool mNotify;

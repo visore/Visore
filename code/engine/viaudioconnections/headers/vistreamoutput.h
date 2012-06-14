@@ -13,10 +13,12 @@ class ViStreamOutput : public ViAudioOutput
 	signals:
 
 		void positionChanged(ViAudioPosition position);
+		void underrun();
 
 	private slots:
 
 		void checkPosition();
+		void checkUnderrun();
 
 	public:
 

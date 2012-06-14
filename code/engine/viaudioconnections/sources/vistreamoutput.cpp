@@ -37,16 +37,18 @@ void ViStreamOutput::setFormat(ViAudioFormat format)
 	if(mAudioOutput != NULL)
 	{
 		QObject::disconnect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
+		QObject::disconnect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
 		delete mAudioOutput;
 	}
 	mAudioOutput = new QAudioOutput(mDevice, mFormat, this);
 	mAudioOutput->setNotifyInterval(25);
 	QObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
+	QObject::connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
 }
 
 void ViStreamOutput::start()
 {
-	if(mAudioOutput->state() == QAudio::SuspendedState)
+	if(mAudioOutput->state() == QAudio::SuspendedState )
 	{
 		LOG("Playback resumed.");
 		mAudioOutput->resume();
@@ -100,6 +102,16 @@ void ViStreamOutput::checkPosition()
 	{
 		mOldPosition = pos;
 		emit positionChanged(pos);
+	}
+}
+
+void ViStreamOutput::checkUnderrun()
+{
+	if(mAudioOutput->error() == QAudio::UnderrunError)
+	{
+		LOG("Audio output underrun.", QtWarningMsg);
+		pause();
+		emit underrun();
 	}
 }
 

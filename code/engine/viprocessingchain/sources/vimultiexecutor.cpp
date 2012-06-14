@@ -3,7 +3,6 @@
 void ViMultiExecutor::runNormal()
 {
 	int size;
-	do
 	{
 		size = mReadStream->read(mInputChunk->data(), mInputChunk->size());
 		if(size > 0)
@@ -16,6 +15,7 @@ void ViMultiExecutor::runNormal()
 			mProcessors.observeDual(mInputSamples, mOutputSamples);
 			mOutputChunk->setSize(mOutputConverter.realToPcm(mOutputSamples->data(), mOutputChunk->data(), mOutputSamples->size()));
 			mWriteStream->write(mOutputChunk);
+			mProcessedBytes += size;
 		}
 	}
 	while(size > 0);
@@ -43,6 +43,7 @@ void ViMultiExecutor::runNotify()
 			mWriteStream->write(mOutputChunk);
 			progress += mInputChunk->size();
 			emit progressed((progress * 100) / bufferSize);
+			mProcessedBytes += size;
 		}
 	}
 	while(size > 0);

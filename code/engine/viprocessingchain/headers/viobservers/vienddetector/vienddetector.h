@@ -16,6 +16,7 @@ class ViEndDetector : public ViObserver
 
 		ViEndDetector();
 		void setThreshold(int milliseconds, qreal value);
+		void setMinimumLength(int milliseconds);
 		void initialize();
 		void run();
 
@@ -28,9 +29,15 @@ class ViEndDetector : public ViObserver
 		bool mDetected;
 		qint64 mSampleCounter;
 		qreal mTotalValue;
-		qreal mValueThreshold;
+
 		int mMillisecondThreshold;
-		int mSamplesThreshold;
+		int mMinimumMilliseconds;
+		qreal mValue;
+
+		qint64 mSamplesThreshold;
+		qint64 mMinimumSamples;
+		qreal mValueThreshold;
+
 		QQueue<qreal> mCache;
 
 };

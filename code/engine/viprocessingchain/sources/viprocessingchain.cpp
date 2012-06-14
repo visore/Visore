@@ -1,5 +1,7 @@
 #include "viprocessingchain.h"
 
+#define DEFAULT_SONG_LENGTH 210000
+
 ViProcessingChain::ViProcessingChain()
 	: QObject()
 {
@@ -48,6 +50,32 @@ void ViProcessingChain::finish()
 	mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
 }
 
+void ViProcessingChain::handleUnderrun()
+{
+	mSecondsPassed = 0;
+	mSecondsNeeded = 0;
+	QObject::connect(&mMultiExecutor, SIGNAL(processingRateChanged(qreal)), this, SLOT(updateBuffering(qreal)));
+}
+
+void ViProcessingChain::updateBuffering(qreal processingRate)
+{
+	if(mSecondsNeeded == 0)
+	{
+		qint64 bytes = ViAudioPosition::convertPosition(DEFAULT_SONG_LENGTH, ViAudioPosition::Milliseconds, ViAudioPosition::Bytes, mOutputBuffer->format()) - mOutput->position().position(ViAudioPosition::Bytes);
+		qint64 bytesNeeded = bytes * (1 - (processingRate / mOutputBuffer->format().sampleRate()));
+		mSecondsNeeded = ViAudioPosition::convertPosition(bytesNeeded, ViAudioPosition::Bytes, ViAudioPosition::Seconds, mOutputBuffer->format());
+		LOG("Buffering started (processing rate: " + QString::number(mMultiExecutor.processingRate(), 'f', 1) + "Hz)");
+	}
+	short progress = mSecondsPassed / (mSecondsNeeded / 100.0);
+	++mSecondsPassed;
+	if(progress >= 100)
+	{
+		QObject::disconnect(&mMultiExecutor, SIGNAL(processingRateChanged(qreal)), this, SLOT(updateBuffering(qreal)));
+		mOutput->start();
+	}
+	emit buffering(progress);
+}
+
 void ViProcessingChain::setWindowSize(int windowSize)
 {
 	mMultiExecutor.setWindowSize(windowSize);
@@ -56,7 +84,7 @@ void ViProcessingChain::setWindowSize(int windowSize)
 void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 {
 	ViAudioInput *input;
-	ViAudioOutput *output;
+	ViStreamOutput *output;
 	if((input = dynamic_cast<ViAudioInput*>(transmission)) != NULL)
 	{
 		mInput = input;
@@ -65,9 +93,10 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 		mInput->setBuffer(mInputBuffer);
 		mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
 	}
-	else if((output = dynamic_cast<ViAudioOutput*>(transmission)) != NULL)
+	else if((output = dynamic_cast<ViStreamOutput*>(transmission)) != NULL)
 	{
 		mOutput = output;
+		QObject::connect(mOutput, SIGNAL(underrun()), this, SLOT(handleUnderrun()));
 		allocateBuffer(ViAudio::AudioOutput);
 		mOutput->setBuffer(mOutputBuffer);
 		mMultiExecutor.setBuffer(ViAudio::AudioOutput, mOutputBuffer);

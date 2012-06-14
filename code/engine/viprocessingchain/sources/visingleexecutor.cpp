@@ -78,6 +78,7 @@ void ViSingleExecutor::runNormal()
 		if(mInputChunk->size() > 0)
 		{
 			(this->*runIt)();
+			mProcessedBytes += mInputChunk->size();
 		}
 	}
 	while(mInputChunk->size() > 0);
@@ -98,6 +99,7 @@ void ViSingleExecutor::runNotify()
 			(this->*runIt)();
 			progress += mInputChunk->size();
 			emit progressed((progress * 100) / size);
+			mProcessedBytes += mInputChunk->size();
 		}
 	}
 	while(mInputChunk->size() > 0);

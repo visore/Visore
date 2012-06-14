@@ -14,6 +14,7 @@ ViExecutor::ViExecutor()
 	mOutputChunk = NULL;
 	mReadStream = NULL;
 	mWriteStream = NULL;
+	QObject::connect(&mTimer, SIGNAL(timeout()), this, SLOT(updateProcessingRate()));
 }
 
 ViExecutor::~ViExecutor()
@@ -38,6 +39,11 @@ ViExecutor::~ViExecutor()
 		delete mOutputChunk;
 		mOutputChunk = NULL;
 	}
+}
+
+int ViExecutor::processingRate()
+{
+	return mProcessingRate;
 }
 
 void ViExecutor::setWindowSize(int windowSize)
@@ -162,6 +168,11 @@ void ViExecutor::initialize()
 	{
 		mOutputChunk->resize(mWindowSize * (mOutputFormat.sampleSize() / 8));
 	}
+
+	mProcessedBytes = 0;
+	mProcessingRate = 0;
+	mRateCounter = 0;
+	mTimer.start(1000);
 }
 
 void ViExecutor::finalize()
@@ -174,7 +185,16 @@ void ViExecutor::finalize()
 			processors[i]->finalize();
 		}
 		mWasInitialized = false;
+		mTimer.stop();
 	}
+}
+
+void ViExecutor::updateProcessingRate()
+{
+	++mRateCounter;
+	mProcessingRate = ((mProcessingRate / mRateCounter) * (mRateCounter - 1)) + (ViAudioPosition::convertPosition(mProcessedBytes, ViAudioPosition::Bytes, ViAudioPosition::Samples, mInputFormat) / mRateCounter);
+	mProcessedBytes = 0;
+	emit processingRateChanged(mProcessingRate);
 }
 
 void ViExecutor::connect(ViProcessor *processor)

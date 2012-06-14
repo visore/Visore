@@ -36,7 +36,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		//File I/O
 		void openFile(QString filePath);
 		void saveFile(QString filePath);
-		
+
 		//Spectrum
 		void calculateSpectrum(qint32 size, QString windowFunction);
 
@@ -47,6 +47,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 
 		//Chain
 		void chainChanged();
+		void buffering(short progress);
 
 		//Playback
 		void positionChanged(ViAudioPosition position);

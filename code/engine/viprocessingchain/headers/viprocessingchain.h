@@ -2,6 +2,8 @@
 #define VIPROCESSINGCHAIN_H
 
 #include <QQueue>
+#include <QTime>
+#include <QTimer>
 #include "viaudioconnection.h"
 #include "vimultiexecutor.h"
 
@@ -12,11 +14,14 @@ class ViProcessingChain : public QObject
 	signals:
 
 		void changed();
+		void buffering(short progress);
 
 	private slots:
 
 		void changeInput(ViAudioPosition position); // Connect song end detector to this slot
 		void finish();
+		void handleUnderrun();
+		void updateBuffering(qreal processingRate);
 
 	public:
 
@@ -39,12 +44,14 @@ class ViProcessingChain : public QObject
 		bool mEndDetected;
 		ViMultiExecutor mMultiExecutor;
 		ViAudioInput *mInput;
-		ViAudioOutput *mOutput;
+		ViStreamOutput *mOutput;
 
 		QQueue<ViAudioBuffer*> mInputBuffers;
 		ViAudioBuffer *mInputBuffer;
-		ViAudioBuffer *mOutputBuffer;	
+		ViAudioBuffer *mOutputBuffer;
 
+		int mSecondsPassed;
+		int mSecondsNeeded;
 };
 
 #endif
