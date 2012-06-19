@@ -29,6 +29,8 @@ ViAudioEngine::ViAudioEngine()
 
 	QObject::connect(&mEndDetector, SIGNAL(endDetected(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
 	mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
+
+	ViFiler("/home/visore/test");
 }
 
 ViAudioEngine::~ViAudioEngine()

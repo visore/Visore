@@ -38,6 +38,7 @@ class ViManager : public ViSingleton<ViManager>
 		static ViVersion version();
 		static QString name();
 		static QUrl url();
+		static QString projectExtension();
 
 		//Main window
 		static QSize windowSize();
@@ -63,6 +64,7 @@ class ViManager : public ViSingleton<ViManager>
 		ViVersion mVersion;
 		QString mName;
 		QUrl mUrl;
+		QString mProjectExtension;
 
 };
 

@@ -37,6 +37,7 @@ ViManager::ViManager()
 	mVersion = ViVersion(QString(VERSION_MAJOR).toInt(), QString(VERSION_MINOR).toInt(), QString(VERSION_PATCH).toInt());
 	mName = QString(NAME);
 	mUrl = QUrl(QString(HOMEPAGE).replace("http://", ""));
+	mProjectExtension = "vip";
 
 	mSettings = new QSettings(mName, mName);
 
@@ -92,6 +93,11 @@ QString ViManager::name()
 QUrl ViManager::url()
 {
 	return instance()->mUrl;
+}
+
+QString ViManager::projectExtension()
+{
+	return instance()->mProjectExtension;
 }
 
 QSize ViManager::windowSize()

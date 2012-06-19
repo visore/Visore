@@ -14,6 +14,8 @@
 #include "vienddetector.h"
 #include "visongdetector.h"
 
+#include "vifiler.h"
+
 class ViAudioEngine : public ViSingleton<ViAudioEngine>
 {
     Q_OBJECT
