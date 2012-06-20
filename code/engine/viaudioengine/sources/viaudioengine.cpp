@@ -1,5 +1,7 @@
 #include "viaudioengine.h"
 
+#include "vidatadriver.h"
+
 ViAudioEngine::ViAudioEngine()
 {
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(progressed(short)), this, SIGNAL(spectrumProgressed(short)));
@@ -30,7 +32,11 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(&mEndDetector, SIGNAL(endDetected(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
 	mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
 
-	ViFiler("/home/visore/test");
+	ViDataDriver d("/home/visore/test.sql");
+	ViPropertiesInfo info = ViPropertiesInfo::defaultProperties();
+	d.save(info);
+	ViPropertiesInfo info2;
+	d.load(info2);
 }
 
 ViAudioEngine::~ViAudioEngine()
