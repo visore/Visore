@@ -2,14 +2,17 @@
 #define VIPROPERTIESINFO_H
 
 #include "vimanager.h"
+#include "viid.h"
+#include "viprojectinfo.h"
 #include <QDateTime>
 
-class ViPropertiesInfo
+class ViPropertiesInfo : public ViProjectInfo, public ViId
 {
 
 	public:
 
-		static ViPropertiesInfo defaultProperties();
+		ViPropertiesInfo();
+		void initializeCurrent();
 
 		ViVersion createdVersion();
 		ViVersion accessedVersion();

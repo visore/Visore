@@ -1,11 +1,14 @@
 #ifndef VIRECORDINGINFO_H
 #define VIRECORDINGINFO_H
 
-class ViRecordingInfo
+#include "viprojectinfo.h"
+
+class ViRecordingInfo : public ViProjectInfo
 {
 
 	public:
 
+		
 
 	private:
 
@@ -13,6 +16,7 @@ class ViRecordingInfo
 		int mAlbumYear;
 		QDateTime mRecordingStarted;
 		QDateTime mRecordingEnded;
+		QList<ViSongInfo> mSongs;
 		
 
 };

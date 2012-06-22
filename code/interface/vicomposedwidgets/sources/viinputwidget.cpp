@@ -15,6 +15,10 @@ ViInputWidget::ViInputWidget(QWidget *parent)
 	mUi->vinylInputButton->setGlow(ViThemeManager::color(14));
 	mUi->fileInputButton->setGlow(ViThemeManager::color(14));
 
+	mUi->recordingProjectButton->setIcon(ViThemeManager::image("recordingproject.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	mUi->recordingProjectButton->setCheckable(true);
+	mUi->recordingProjectButton->setGlow(ViThemeManager::color(14));
+
 	QObject::connect(mUi->vinylInputButton, SIGNAL(clicked()), this, SLOT(selectLineInput()));
 	QObject::connect(mUi->fileInputButton, SIGNAL(clicked()), this, SLOT(selectFileInput()));
 }

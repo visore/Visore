@@ -1,6 +1,5 @@
 #include "vidatadriver.h"
 #include <QSqlRecord>
-#include "vilogger.h"
 
 ViDataDriver::ViDataDriver(QString filePath)
 {
@@ -34,6 +33,7 @@ bool ViDataDriver::save(ViPropertiesInfo &info)
 
 		create("properties");
 		ViInfoMap map;
+		map.insert("id", info.id());
 		map.insert("createddate", info.createdDateTime().toMSecsSinceEpoch());
 		map.insert("createdversion", createdId);
 		map.insert("accesseddate", info.accessedDateTime().toMSecsSinceEpoch());
@@ -54,12 +54,15 @@ bool ViDataDriver::load(ViPropertiesInfo &info)
 {
 	if(mDatabase.open())
 	{
-		
 		ViInfoMap map;
 		select("SELECT * FROM properties", map);
 		if(map.size() == 0)
 		{
 			mDatabase.close();
+			return false;
+		}
+		if(!info.setId(map["id"].toString()))
+		{
 			return false;
 		}
 		info.setCreatedDateTime(QDateTime::fromMSecsSinceEpoch(map["createddate"].toDouble()));
@@ -127,7 +130,7 @@ QSqlError ViDataDriver::create(QString name)
 	QSqlQuery query(mDatabase);
 	if(name.toLower() == "properties")
 	{
-		query.prepare("CREATE TABLE IF NOT EXISTS " + name.toLower() + "( id INTEGER PRIMARY KEY, createddate DATETIME, createdversion INTEGER, accesseddate DATETIME, accessedversion INTEGER, editeddate DATETIME, editedversion INTEGER, FOREIGN KEY(createdversion) REFERENCES version(id), FOREIGN KEY(editedversion) REFERENCES version(id), FOREIGN KEY(editedversion) REFERENCES version(id) );");
+		query.prepare("CREATE TABLE IF NOT EXISTS " + name.toLower() + "( id INTEGER, createddate DATETIME, createdversion INTEGER, accesseddate DATETIME, accessedversion INTEGER, editeddate DATETIME, editedversion INTEGER, FOREIGN KEY(createdversion) REFERENCES version(id), FOREIGN KEY(editedversion) REFERENCES version(id), FOREIGN KEY(editedversion) REFERENCES version(id) );");
 	}
 	else if(name.toLower() == "version")
 	{

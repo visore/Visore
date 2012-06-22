@@ -70,5 +70,8 @@
         <file>animations/loading/36.png</file>
         <file>icons/normal/correlation.png</file>
         <file>icons/normal/spectrum.png</file>
+        <file>icons/normal/recordingproject.png</file>
+        <file>icons/normal/browse.png</file>
+        <file>icons/selected/browse.png</file>
     </qresource>
 </RCC>

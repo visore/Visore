@@ -13,6 +13,7 @@ ViProjectFile::ViProjectFile(QString filePath)
 
 void ViProjectFile::setFilePath(QString filePath)
 {
+	QString oldName = fileName();
 	mFilePath = filePath;
 	QString extension = "." + ViManager::projectExtension();
 	if(!mFilePath.endsWith(extension))
@@ -21,7 +22,7 @@ void ViProjectFile::setFilePath(QString filePath)
 	}
 	mArchive.setFilePath(mFilePath);
 	mProjectName = fileName();
-	mProjectTempPath = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + mProjectName + "_" + QString::number(QDateTime::currentDateTime().toMSecsSinceEpoch());
+	mProjectTempPath = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + mProperties.id();
 }
 
 QString ViProjectFile::filePath()
@@ -32,10 +33,36 @@ QString ViProjectFile::filePath()
 void ViProjectFile::load()
 {
 	mArchive.decompress(mProjectTempPath);
+	QString tempFilePath = mProjectTempPath + QDir::separator() + mProjectName + ".sql";
+	ViDataDriver driver(tempFilePath);
+	if(!driver.load(mProperties))
+	{
+		return;
+	}
+	QDir dir(mProjectTempPath);
+	QString newName = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + mProperties.id();
+	QDir newDir(newName);
+	if(newDir.exists())
+	{
+		newDir.removeRecursively();
+	}
+	if(dir.rename(mProjectTempPath, newName))
+	{
+		mProjectTempPath = newName;
+	}
+	else
+	{
+		dir.removeRecursively();
+	}
 }
 
 void ViProjectFile::save()
 {
+	if(mProperties.isNull())
+	{
+		mProperties.initializeCurrent();
+		mProjectTempPath = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + mProperties.id();
+	}
 	QDir dir(mProjectTempPath);
 	if(!dir.exists())
 	{
@@ -45,6 +72,8 @@ void ViProjectFile::save()
 		}
 	}
 	QString tempFilePath = mProjectTempPath + QDir::separator() + mProjectName + ".sql";
+	QFile file(tempFilePath);
+	file.remove();
 	ViDataDriver driver(tempFilePath);
 	if(!driver.save(mProperties))
 	{
@@ -69,4 +98,12 @@ QString ViProjectFile::fileName()
 ViPropertiesInfo& ViProjectFile::properties()
 {
 	return mProperties;
+}
+
+QString ViProjectFile::toString()
+{
+	QString result = "******************************************\nVisore Project File\n******************************************\n";
+	result += mProperties.toString();
+	result += "\n******************************************";
+	return result;
 }

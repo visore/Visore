@@ -1,8 +1,8 @@
 #include "viid.h"
-#include <QTime>
+#include <QDateTime>
 #include <QtGlobal>
 
-#define RANDOM_LENGTH 16
+#define ID_LENGTH 16
 
 ViId::ViId()
 {
@@ -17,6 +17,27 @@ ViId::~ViId()
 QString ViId::id() const
 {
 	return mId;
+}
+
+bool ViId::setId(QString id)
+{
+	if(id.length() != ID_LENGTH)
+	{
+		return false;
+	}
+	double value = id.toDouble();
+	if(QString::number(value, 'f', 0) != id)
+	{
+		return false;
+	}
+	mId = id;
+	return true;
+}
+
+void ViId::createId()
+{
+	ViIdManager::release(mId);
+	mId = ViIdManager::generate();
 }
 
 bool ViId::operator ==(const ViId &other) const
@@ -61,12 +82,13 @@ void ViIdManager::release(QString id)
 
 QString ViIdManager::random()
 {
-	qsrand(QTime::currentTime().msec());
-	QString random = "";
-	while(random.length() < RANDOM_LENGTH)
+	qint64 current = QDateTime::currentDateTime().toMSecsSinceEpoch();
+	qsrand(current);
+	QString random = QString::number(current);
+	while(random.length() < ID_LENGTH)
 	{
 		random += QString::number(qrand());
 	}
-	random.resize(RANDOM_LENGTH);
+	random.resize(ID_LENGTH);
 	return random;
 }

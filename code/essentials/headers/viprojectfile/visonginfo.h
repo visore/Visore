@@ -1,16 +1,15 @@
 #ifndef VISONGINFO_H
 #define VISONGINFO_H
 
+#include "viprojectinfo.h"
 #include <QString>
 #include <QList>
 
-class ViSongInfo
+class ViSongInfo : public ViProjectInfo
 {
 	public:
 
 		ViSongInfo();
-
-		QString filePath();
 
 		QString message();
 		qint16 score();
@@ -31,8 +30,6 @@ class ViSongInfo
 		qint16 artistFamiliarity();
 
 		QString imagePath(int index = 0);
-
-		void setFilePath(QString path);
 
 		void setMessage(QString message);
 		void setScore(qint16 score);
@@ -59,7 +56,6 @@ class ViSongInfo
 
 	private:
 
-		QString mFilePath;
 		QString mMessage;
 		qint16 mScore;
 		QString mSongId;

@@ -22,6 +22,8 @@ class ViProjectFile : public QObject
 
 		ViPropertiesInfo& properties();
 
+		QString toString();
+
 	protected:
 
 		QString fileName();

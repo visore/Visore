@@ -1,9 +1,8 @@
 #include "visonginfo.h"
 
 ViSongInfo::ViSongInfo()
+	: ViProjectInfo()
 {
-	mFilePath = "";
-
 	mMessage = "";
 	mScore = -1;
 	mDescription = "";
@@ -21,11 +20,6 @@ ViSongInfo::ViSongInfo()
 	mArtistName = "";
 	mArtistHotness = -1;
 	mArtistFamiliarity = -1;
-}
-
-QString ViSongInfo::filePath()
-{
-	return mFilePath;
 }
 
 QString ViSongInfo::message()
@@ -115,86 +109,97 @@ QString ViSongInfo::imagePath(int index)
 void ViSongInfo::setMessage(QString message)
 {
 	mMessage = message;
-}
-
-void ViSongInfo::setFilePath(QString path)
-{
-	mFilePath = path;
+	setNull(false);
 }
 
 void ViSongInfo::setScore(qint16 score)
 {
 	mScore = score;
+	setNull(false);
 }
 
 void ViSongInfo::setDescription(QString description)
 {
 	mDescription = description;
+	setNull(false);
 }
 
 void ViSongInfo::setSongId(QString id)
 {
 	mSongId = id;
+	setNull(false);
 }
 
 void ViSongInfo::setSongTitle(QString title)
 {
 	mSongTitle = title;
+	setNull(false);
 }
 
 void ViSongInfo::setSongHotness(qint16 hotness)
 {
 	mSongHotness = hotness;
+	setNull(false);
 }
 
 void ViSongInfo::setSongDanceability(qint16 danceability)
 {
 	mSongDanceability = danceability;
+	setNull(false);
 }
 
 void ViSongInfo::setSongEnergy(qint16 energy)
 {
 	mSongEnergy = energy;
+	setNull(false);
 }
 
 void ViSongInfo::setSongDuration(double duration)
 {
 	mSongDuration = duration;
+	setNull(false);
 }
 
 void ViSongInfo::setSongTempo(double tempo)
 {
 	mSongTempo = tempo;
+	setNull(false);
 }
 
 void ViSongInfo::setSongLoudness(double loudness)
 {
 	mSongLoudness = loudness;
+	setNull(false);
 }
 
 void ViSongInfo::setArtistId(QString id)
 {
 	mArtistId = id;
+	setNull(false);
 }
 
 void ViSongInfo::setArtistName(QString name)
 {
 	mArtistName = name;
+	setNull(false);
 }
 
 void ViSongInfo::setArtistHotness(qint16 hotness)
 {
 	mArtistHotness = hotness;
+	setNull(false);
 }
 
 void ViSongInfo::setArtistFamiliarity(qint16 familiarity)
 {
 	mArtistFamiliarity = familiarity;
+	setNull(false);
 }
 
 void ViSongInfo::addImagePath(QString path)
 {
 	mImagePaths.append(path);
+	setNull(false);
 }
 
 void ViSongInfo::changeImagePath(QString fromPath, QString toPath)
@@ -212,11 +217,12 @@ void ViSongInfo::changeImagePath(QString fromPath, QString toPath)
 	{
 		addImagePath(toPath);
 	}
+	setNull(false);
 }
 
 QString ViSongInfo::toString()
 {
-	QString result = "Song:";
+	QString result = "Song Info:";
 	result += "\n\tScore: " + QString::number(mScore);
 	result += "\n\tMessage: " + mMessage;
 	result += "\n\tDescription: " + mDescription;

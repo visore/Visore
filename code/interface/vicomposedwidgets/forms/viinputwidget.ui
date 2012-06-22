@@ -32,6 +32,9 @@
    <item row="0" column="1">
     <widget class="ViPushButton" name="fileInputButton" native="true"/>
    </item>
+   <item row="0" column="2">
+    <widget class="ViPushButton" name="recordingProjectButton" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>

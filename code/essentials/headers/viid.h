@@ -16,8 +16,13 @@ class ViId
 		ViId();
 		~ViId();
 		QString id() const;
+		bool setId(QString id);
 		bool operator ==(const ViId &other) const;
 		bool operator !=(const ViId &other) const;
+
+	protected:
+
+		void createId();
 
 	private:
 

@@ -1,7 +1,8 @@
 #include "vimainwindow.h"
 #include "ui_vimainwindow.h"
-#include <iostream>
-using namespace std;
+
+#include "vifilebrowser.h"
+
 ViMainWindow *ViMainWindow::mWindow = NULL;
 
 ViMainWindow::ViMainWindow()
@@ -126,5 +127,10 @@ void ViMainWindow::initialize()
 	QObject::connect(mEngine, SIGNAL(saveProjectStarted()), this, SLOT(saveProject()));
 	QObject::connect(mEngine, SIGNAL(projectFinished()), this, SLOT(hideLoading()));
 
-mEngine->saveProject("/home/visore/t.vip");
+mEngine->loadProject("/home/visore/t.vip");
+
+ViFileBrowser *ff = new ViFileBrowser();
+ff->setMode(ViFileBrowser::OpenFile);
+ff->addFilter("Visore Project (*.vip)");
+ff->show();
 }
