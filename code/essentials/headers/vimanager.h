@@ -40,6 +40,10 @@ class ViManager : public ViSingleton<ViManager>
 		static QUrl url();
 		static QString projectExtension();
 
+		//Paths
+		static QString tempPath();
+		static void setTempPath(QString path);
+
 		//Main window
 		static QSize windowSize();
 		static bool isWindowFullScreen();
@@ -65,6 +69,7 @@ class ViManager : public ViSingleton<ViManager>
 		QString mName;
 		QUrl mUrl;
 		QString mProjectExtension;
+		QString mTempPath;
 
 };
 

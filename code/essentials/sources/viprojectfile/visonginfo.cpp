@@ -2,6 +2,8 @@
 
 ViSongInfo::ViSongInfo()
 {
+	mFilePath = "";
+
 	mMessage = "";
 	mScore = -1;
 	mDescription = "";
@@ -19,6 +21,11 @@ ViSongInfo::ViSongInfo()
 	mArtistName = "";
 	mArtistHotness = -1;
 	mArtistFamiliarity = -1;
+}
+
+QString ViSongInfo::filePath()
+{
+	return mFilePath;
 }
 
 QString ViSongInfo::message()
@@ -108,6 +115,11 @@ QString ViSongInfo::imagePath(int index)
 void ViSongInfo::setMessage(QString message)
 {
 	mMessage = message;
+}
+
+void ViSongInfo::setFilePath(QString path)
+{
+	mFilePath = path;
 }
 
 void ViSongInfo::setScore(qint16 score)

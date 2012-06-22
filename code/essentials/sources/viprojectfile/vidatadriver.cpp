@@ -16,16 +16,19 @@ bool ViDataDriver::save(ViPropertiesInfo &info)
 		int createdId = versionId(info.createdVersion().major(), info.createdVersion().minor(), info.createdVersion().patch());
 		if(createdId < 1)
 		{
+			mDatabase.close();
 			return false;
 		}
 		int accessedId = versionId(info.accessedVersion().major(), info.accessedVersion().minor(), info.accessedVersion().patch());
 		if(accessedId < 1)
 		{
+			mDatabase.close();
 			return false;
 		}
 		int editedId = versionId(info.editedVersion().major(), info.editedVersion().minor(), info.editedVersion().patch());
 		if(editedId < 1)
 		{
+			mDatabase.close();
 			return false;
 		}
 
@@ -56,6 +59,7 @@ bool ViDataDriver::load(ViPropertiesInfo &info)
 		select("SELECT * FROM properties", map);
 		if(map.size() == 0)
 		{
+			mDatabase.close();
 			return false;
 		}
 		info.setCreatedDateTime(QDateTime::fromMSecsSinceEpoch(map["createddate"].toDouble()));
@@ -66,6 +70,7 @@ bool ViDataDriver::load(ViPropertiesInfo &info)
 		select("SELECT * FROM version WHERE id = " + map["createdversion"].toString(), version);
 		if(version.size() == 0)
 		{
+			mDatabase.close();
 			return false;
 		}
 		info.setCreatedVersion(ViVersion(version["major"].toInt(), version["minor"].toInt(), version["patch"].toInt()));
@@ -74,6 +79,7 @@ bool ViDataDriver::load(ViPropertiesInfo &info)
 		select("SELECT * FROM version WHERE id = " + map["accessedversion"].toString(), version);
 		if(version.size() == 0)
 		{
+			mDatabase.close();
 			return false;
 		}
 		info.setAccessedVersion(ViVersion(version["major"].toInt(), version["minor"].toInt(), version["patch"].toInt()));
@@ -82,10 +88,11 @@ bool ViDataDriver::load(ViPropertiesInfo &info)
 		select("SELECT * FROM version WHERE id = " + map["editedversion"].toString(), version);
 		if(version.size() == 0)
 		{
+			mDatabase.close();
 			return false;
 		}
 		info.setEditedVersion(ViVersion(version["major"].toInt(), version["minor"].toInt(), version["patch"].toInt()));
-cout<<info.toString().toAscii().data()<<endl;
+
 		mDatabase.close();
 		return true;
 	}

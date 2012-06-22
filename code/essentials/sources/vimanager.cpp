@@ -41,6 +41,12 @@ ViManager::ViManager()
 
 	mSettings = new QSettings(mName, mName);
 
+	//Paths
+	if(mSettings->value("paths/temp").isNull())
+	{
+		mSettings->setValue("paths/temp", QDir::tempPath());
+	}
+
 	//Main window
 	if(mSettings->value("interface/mainwindow/size").isNull())
 	{
@@ -98,6 +104,16 @@ QUrl ViManager::url()
 QString ViManager::projectExtension()
 {
 	return instance()->mProjectExtension;
+}
+
+QString ViManager::tempPath()
+{
+	return ViManager::value("paths/temp").toString();
+}
+
+void ViManager::setTempPath(QString path)
+{
+	ViManager::setValue("paths/temp", path);
 }
 
 QSize ViManager::windowSize()

@@ -1,6 +1,6 @@
 #include "viaudioengine.h"
 
-#include "vidatadriver.h"
+#include "viprojectfile.h"
 
 ViAudioEngine::ViAudioEngine()
 {
@@ -32,11 +32,14 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(&mEndDetector, SIGNAL(endDetected(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
 	mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
 
-	ViDataDriver d("/home/visore/test.sql");
+	/*ViDataDriver d("/home/visore/test.sql");
 	ViPropertiesInfo info = ViPropertiesInfo::defaultProperties();
 	d.save(info);
 	ViPropertiesInfo info2;
-	d.load(info2);
+	d.load(info2);*/
+
+	ViProjectFile *file = new ViProjectFile("/home/visore/test");
+	file->save();
 }
 
 ViAudioEngine::~ViAudioEngine()
