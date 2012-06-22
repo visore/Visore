@@ -1,7 +1,7 @@
 #include "viloadingwidget.h"
 #include "ui_viloadingwidget.h"
 
-ViLoadingWidget::ViLoadingWidget(QWidget *parent, bool animation, bool button, ViLoadingWidget::TextStyle style)
+ViLoadingWidget::ViLoadingWidget(QWidget *parent, bool animation, bool button, ViLoadingWidget::TextStyle textStyle, ViProgressBar::ProgressStyle progressStyle)
 	: ViWidget(parent)
 {
 	mUi = new Ui::ViLoadingWidget();
@@ -17,7 +17,8 @@ ViLoadingWidget::ViLoadingWidget(QWidget *parent, bool animation, bool button, V
 
 	showAnimation(animation);
 	showButton(button);
-	setTextStyle(style);
+	setTextStyle(textStyle);
+	setProgressStyle(progressStyle);
 	progress(0);
 }
 
@@ -60,6 +61,11 @@ void ViLoadingWidget::setTextStyle(ViLoadingWidget::TextStyle style)
 {
 	mTextStyle = style;
 	setText();
+}
+
+void ViLoadingWidget::setProgressStyle(ViProgressBar::ProgressStyle style)
+{
+	mUi->progressBar->setProgressStyle(style);
 }
 
 void ViLoadingWidget::setVisible(bool visible)

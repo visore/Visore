@@ -53,11 +53,12 @@ void ViMainWindow::hideLoading()
 	mLoadingWidget->setVisible(false);
 }
 
-void ViMainWindow::showLoading(bool animation, bool button, ViLoadingWidget::TextStyle style, QString text)
+void ViMainWindow::showLoading(bool animation, bool button, ViLoadingWidget::TextStyle textStyle, QString text, ViProgressBar::ProgressStyle progressStyle)
 {
 	mLoadingWidget->showAnimation(animation);
 	mLoadingWidget->showButton(button);
-	mLoadingWidget->setTextStyle(style);
+	mLoadingWidget->setTextStyle(textStyle);
+	mLoadingWidget->setProgressStyle(progressStyle);
 	mLoadingWidget->setText(text);
 	mLoadingWidget->setVisible(true);
 }
@@ -75,6 +76,16 @@ void ViMainWindow::buffering(short bufferingProgress)
 		mBufferingStarted = false;
 		hideLoading();
 	}
+}
+
+void ViMainWindow::loadProject()
+{
+	showLoading(true, false, ViLoadingWidget::Text, "Loading Project", ViProgressBar::Infinite);
+}
+
+void ViMainWindow::saveProject()
+{
+	showLoading(true, false, ViLoadingWidget::Text, "Saving Project", ViProgressBar::Infinite);
 }
 
 void ViMainWindow::resizeEvent(QResizeEvent *event)
@@ -110,4 +121,10 @@ void ViMainWindow::initialize()
 
 	mBufferingStarted = false;
 	QObject::connect(mEngine, SIGNAL(buffering(short)), this, SLOT(buffering(short)));
+
+	QObject::connect(mEngine, SIGNAL(loadProjectStarted()), this, SLOT(loadProject()));
+	QObject::connect(mEngine, SIGNAL(saveProjectStarted()), this, SLOT(saveProject()));
+	QObject::connect(mEngine, SIGNAL(projectFinished()), this, SLOT(hideLoading()));
+
+mEngine->saveProject("/home/visore/t.vip");
 }

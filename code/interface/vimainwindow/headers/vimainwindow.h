@@ -18,8 +18,13 @@ class ViMainWindow : public QMainWindow
 
 		void progress(short percentage);
 		void hideLoading();
-		void showLoading(bool animation = true, bool button = true, ViLoadingWidget::TextStyle style = ViLoadingWidget::Percentage, QString text = "");
+		void showLoading(bool animation = true, bool button = true, ViLoadingWidget::TextStyle textStyle = ViLoadingWidget::Percentage, QString text = "", ViProgressBar::ProgressStyle progressStyle = ViProgressBar::Finite);
+
+	private slots:
+
 		void buffering(short bufferingProgress);
+		void loadProject();
+		void saveProject();
 
 	public:
 

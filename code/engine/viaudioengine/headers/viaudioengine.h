@@ -4,6 +4,7 @@
 #include "viaudioconnection.h"
 #include "visingleton.h"
 #include "vimanager.h"
+#include "viprojectfile.h"
 
 #include "viprocessingchain.h"
 #include "visingleexecutor.h"
@@ -43,6 +44,10 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		//Correlation
 		void calculateCorrelation();
 
+		//Project
+		void loadProject(QString filePath);
+		void saveProject(QString filePath);
+
 	signals:
 
 		//Chain
@@ -62,6 +67,11 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		//Correlation
 		void correlationProgressed(short percentage);
 		void correlationFinished();
+
+		//Project
+		void loadProjectStarted();
+		void saveProjectStarted();
+		void projectFinished();
 
 	public:
 
@@ -83,6 +93,8 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		ViFileOutput *mFileOutput;
 		ViStreamInput *mStreamInput;
 		ViStreamOutput *mStreamOutput;
+
+		ViProjectFile mProjectFile;
 
 		ViProcessingChain mProcessingChain;
 		ViSingleExecutor mExecutor;

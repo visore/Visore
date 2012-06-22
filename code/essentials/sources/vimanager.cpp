@@ -32,7 +32,6 @@ QString ViVersion::toString()
 
 ViManager::ViManager()
 {
-
 	//Universal
 	mVersion = ViVersion(QString(VERSION_MAJOR).toInt(), QString(VERSION_MINOR).toInt(), QString(VERSION_PATCH).toInt());
 	mName = QString(NAME);
@@ -44,7 +43,12 @@ ViManager::ViManager()
 	//Paths
 	if(mSettings->value("paths/temp").isNull())
 	{
-		mSettings->setValue("paths/temp", QDir::tempPath());
+		mSettings->setValue("paths/temp", QDir::tempPath() + QDir::separator() + "visore");
+	}
+	QDir dir(mSettings->value("paths/temp").toString());
+	if(!dir.exists())
+	{
+		dir.mkpath(mSettings->value("paths/temp").toString());
 	}
 
 	//Main window

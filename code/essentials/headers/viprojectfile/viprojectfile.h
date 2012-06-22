@@ -12,10 +12,6 @@ class ViProjectFile : public QObject
 
 		void finished();
 
-	private slots:
-
-		void completeArchive();
-
 	public:
 
 		ViProjectFile(QString filePath = "");
@@ -29,12 +25,8 @@ class ViProjectFile : public QObject
 	protected:
 
 		QString fileName();
-		void completeSave();
-		void completeLoad();
 
 	private:
-
-		void (ViProjectFile::*complete)();
 
 		QString mFilePath;
 		QString mProjectName;

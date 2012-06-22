@@ -1,7 +1,5 @@
 #include "viaudioengine.h"
 
-#include "viprojectfile.h"
-
 ViAudioEngine::ViAudioEngine()
 {
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(progressed(short)), this, SIGNAL(spectrumProgressed(short)));
@@ -32,14 +30,7 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(&mEndDetector, SIGNAL(endDetected(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
 	mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
 
-	/*ViDataDriver d("/home/visore/test.sql");
-	ViPropertiesInfo info = ViPropertiesInfo::defaultProperties();
-	d.save(info);
-	ViPropertiesInfo info2;
-	d.load(info2);*/
-
-	ViProjectFile *file = new ViProjectFile("/home/visore/test");
-	file->save();
+	QObject::connect(&mProjectFile, SIGNAL(finished()), this, SIGNAL(projectFinished()));
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -140,4 +131,18 @@ void ViAudioEngine::calculateCorrelation()
 	{
 		emit correlationFinished();
 	}
+}
+
+void ViAudioEngine::loadProject(QString filePath)
+{
+	mProjectFile.setFilePath(filePath);
+	mProjectFile.load();
+	emit loadProjectStarted();
+}
+
+void ViAudioEngine::saveProject(QString filePath)
+{
+	mProjectFile.setFilePath(filePath);
+	mProjectFile.save();
+	emit saveProjectStarted();
 }

@@ -3,6 +3,7 @@
 
 #include "viwidget.h"
 #include "vithememanager.h"
+#include "viprogressbar.h"
 #include <QTimer>
 
 namespace Ui
@@ -30,12 +31,14 @@ class ViLoadingWidget : public ViWidget
 			Percentage = 1,
 			Text = 2
 		};
-		ViLoadingWidget(QWidget *parent = 0, bool animation = true, bool button = true, ViLoadingWidget::TextStyle style = ViLoadingWidget::Percentage);
+
+		ViLoadingWidget(QWidget *parent = 0, bool animation = true, bool button = true, ViLoadingWidget::TextStyle textStyle = ViLoadingWidget::Percentage, ViProgressBar::ProgressStyle progressStyle = ViProgressBar::Finite);
 		~ViLoadingWidget();
 
 		void showAnimation(bool show);
 		void showButton(bool show);
 		void setTextStyle(ViLoadingWidget::TextStyle style);
+		void setProgressStyle(ViProgressBar::ProgressStyle style);
 
 		void setVisible(bool visible);
 		void setText(QString text = "");

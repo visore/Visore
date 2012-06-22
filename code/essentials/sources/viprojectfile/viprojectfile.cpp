@@ -6,7 +6,7 @@
 ViProjectFile::ViProjectFile(QString filePath)
 	: QObject()
 {
-	QObject::connect(&mArchive, SIGNAL(finished()), this, SLOT(completeArchive()));
+	QObject::connect(&mArchive, SIGNAL(finished()), this, SIGNAL(finished()));
 	mArchive.setComment("Visore Project");
 	setFilePath(filePath);
 }
@@ -21,7 +21,7 @@ void ViProjectFile::setFilePath(QString filePath)
 	}
 	mArchive.setFilePath(mFilePath);
 	mProjectName = fileName();
-	mProjectTempPath = ViManager::tempPath() + QDir::separator() + mProjectName;
+	mProjectTempPath = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + mProjectName + "_" + QString::number(QDateTime::currentDateTime().toMSecsSinceEpoch());
 }
 
 QString ViProjectFile::filePath()
@@ -31,7 +31,7 @@ QString ViProjectFile::filePath()
 
 void ViProjectFile::load()
 {
-	complete = &ViProjectFile::completeLoad;
+	mArchive.decompress(mProjectTempPath);
 }
 
 void ViProjectFile::save()
@@ -50,28 +50,9 @@ void ViProjectFile::save()
 	{
 		return;
 	}
-	complete = &ViProjectFile::completeSave;
 	QStringList files;
 	files.append(tempFilePath);
 	mArchive.compress(files);
-
-}
-
-void ViProjectFile::completeArchive()
-{
-	(this->*complete)();
-	emit finished();
-}
-void ViProjectFile::completeSave()
-{
-	QDir dir(mProjectTempPath);
-    dir.removeRecursively();
-	
-}
-
-void ViProjectFile::completeLoad()
-{
-
 }
 
 QString ViProjectFile::fileName()
