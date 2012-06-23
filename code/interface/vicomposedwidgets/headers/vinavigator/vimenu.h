@@ -17,7 +17,6 @@ class ViMenu : public ViWidget
 	protected:
 
 		int addStackWidget(ViWidget *widget);
-		void setStackIndex(int index);
 
 	protected:
 

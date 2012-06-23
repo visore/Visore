@@ -11,6 +11,7 @@ ViMenu::ViMenu(ViNavigator *navigator)
 void ViMenu::setCurrentStackIndex(int index)
 {
 	mCurrentStackIndex = index;
+	mNavigator->setStackIndex(index);
 }
 
 int ViMenu::currentStackIndex()
@@ -21,9 +22,4 @@ int ViMenu::currentStackIndex()
 int ViMenu::addStackWidget(ViWidget *widget)
 {
 	return mNavigator->addStackWidget(widget);
-}
-
-void ViMenu::setStackIndex(int index)
-{
-	mNavigator->setStackIndex(index);
 }

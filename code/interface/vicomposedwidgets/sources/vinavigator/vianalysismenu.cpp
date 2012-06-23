@@ -29,12 +29,10 @@ void ViAnalysisMenu::showSpectrum()
 {
 	mUi->matchButton->setChecked(false);
 	setCurrentStackIndex(mSpectrumIndex);
-	setStackIndex(mSpectrumIndex);
 }
 
 void ViAnalysisMenu::showCorrelation()
 {
 	mUi->spectrumButton->setChecked(false);
 	setCurrentStackIndex(mCorrelationIndex);
-	setStackIndex(mCorrelationIndex);
 }

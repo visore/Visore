@@ -21,6 +21,8 @@ ViInputWidget::ViInputWidget(QWidget *parent)
 
 	QObject::connect(mUi->vinylInputButton, SIGNAL(clicked()), this, SLOT(selectLineInput()));
 	QObject::connect(mUi->fileInputButton, SIGNAL(clicked()), this, SLOT(selectFileInput()));
+
+	
 }
 
 ViInputWidget::~ViInputWidget()

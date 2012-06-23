@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>410</width>
-    <height>98</height>
+    <width>554</width>
+    <height>135</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -23,10 +23,7 @@
    <string/>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
-    <widget class="ViInputWidget" name="inputWidget" native="true"/>
-   </item>
-   <item row="1" column="1">
+   <item row="1" column="3">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -39,13 +36,22 @@
      </property>
     </spacer>
    </item>
+   <item row="1" column="1">
+    <widget class="ViPushButton" name="widget_2" native="true"/>
+   </item>
+   <item row="1" column="2">
+    <widget class="ViPushButton" name="widget_3" native="true"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="ViPushButton" name="recordingProjectButton" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ViInputWidget</class>
+   <class>ViPushButton</class>
    <extends>QWidget</extends>
-   <header>viinputwidget.h</header>
+   <header>vipushbutton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
