@@ -34,6 +34,7 @@ void ViAudioTransmission::setFormat(ViAudioFormat format)
 void ViAudioTransmission::setState(QAudio::State state)
 {
 	mState = state;
+	emit stateChanged(mState);
 }
 
 QAudio::State ViAudioTransmission::state()

@@ -15,7 +15,9 @@ class ViInputMenu : public ViMenu
 
 	private slots:
 
-		void showRecordingProject();
+		void selectRecordingProject();
+		void selectRecording();
+		void selectFile();
 
 	public:
 

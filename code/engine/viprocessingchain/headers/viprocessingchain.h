@@ -6,6 +6,7 @@
 #include <QTimer>
 #include "viaudioconnection.h"
 #include "vimultiexecutor.h"
+#include "viprojectfile.h"
 
 class ViProcessingChain : public QObject
 {
@@ -19,6 +20,7 @@ class ViProcessingChain : public QObject
 	private slots:
 
 		void changeInput(ViAudioPosition position); // Connect song end detector to this slot
+		void finalize();
 		void finish();
 		void handleUnderrun();
 		void updateBuffering(qreal processingRate);
@@ -30,6 +32,7 @@ class ViProcessingChain : public QObject
 
 		void setWindowSize(int windowSize);
 		void setTransmission(ViAudioTransmission *transmission);
+		void setProject(ViProjectFile *project);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
 		ViAudioBuffer* buffer(ViAudio::Mode mode);
@@ -37,21 +40,25 @@ class ViProcessingChain : public QObject
 	protected:
 
 		ViAudioBuffer* allocateBuffer(ViAudio::Mode mode);
-		void nextBuffer();
+		void nextBuffer(ViAudio::Mode mode);
+		void saveToProject();
 
 	private:
 
-		bool mEndDetected;
 		ViMultiExecutor mMultiExecutor;
 		ViAudioInput *mInput;
-		ViStreamOutput *mOutput;
+		ViStreamOutput *mStreamOutput;
+		ViFileOutput *mFileOutput;
 
 		QQueue<ViAudioBuffer*> mInputBuffers;
+		QQueue<ViAudioBuffer*> mOutputBuffers;
 		ViAudioBuffer *mInputBuffer;
 		ViAudioBuffer *mOutputBuffer;
 
 		int mSecondsPassed;
 		int mSecondsNeeded;
+
+		ViProjectFile *mProject;
 };
 
 #endif

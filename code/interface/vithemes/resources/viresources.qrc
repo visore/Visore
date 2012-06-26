@@ -15,22 +15,8 @@
         <file>icons/normal/zoomout.png</file>
         <file>icons/normal/fileinput.png</file>
         <file>icons/normal/vinylinput.png</file>
-        <file>icons/selected/close.png</file>
-        <file>icons/selected/fileinput.png</file>
-        <file>icons/selected/fullscreen.png</file>
-        <file>icons/selected/maximize.png</file>
-        <file>icons/selected/minimize.png</file>
         <file>icons/selected/mute.png</file>
-        <file>icons/selected/pause.png</file>
-        <file>icons/selected/play.png</file>
-        <file>icons/selected/record.png</file>
-        <file>icons/selected/stop.png</file>
         <file>icons/selected/unmute.png</file>
-        <file>icons/selected/vinylinput.png</file>
-        <file>icons/disabled/pause.png</file>
-        <file>icons/disabled/play.png</file>
-        <file>icons/disabled/record.png</file>
-        <file>icons/disabled/stop.png</file>
         <file>icons/normal/star.png</file>
         <file>animations/loading/1.png</file>
         <file>animations/loading/2.png</file>

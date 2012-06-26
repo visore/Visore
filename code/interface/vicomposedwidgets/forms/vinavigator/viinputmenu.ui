@@ -37,10 +37,10 @@
     </spacer>
    </item>
    <item row="1" column="1">
-    <widget class="ViPushButton" name="widget_2" native="true"/>
+    <widget class="ViPushButton" name="recordingButton" native="true"/>
    </item>
    <item row="1" column="2">
-    <widget class="ViPushButton" name="widget_3" native="true"/>
+    <widget class="ViPushButton" name="fileButton" native="true"/>
    </item>
    <item row="1" column="0">
     <widget class="ViPushButton" name="recordingProjectButton" native="true"/>

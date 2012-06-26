@@ -5,6 +5,8 @@ ViFileOutput::ViFileOutput()
 	: ViAudioOutput()
 {
 	mFilePath = "";
+	QObject::connect(&mCoder, SIGNAL(finished()), this, SIGNAL(finished()));
+	setState(QAudio::IdleState);
 }
 
 void ViFileOutput::setFile(QString filePath)
@@ -15,19 +17,19 @@ void ViFileOutput::setFile(QString filePath)
 void ViFileOutput::start()
 {
 	LOG("Writing to file started.");
-	mCoder.encode(mBuffer, mFilePath, mBuffer->format(), mFormat);
-	emit started();
+	mCoder.encode(mBuffer, mFilePath, mBuffer->format(), mFormat);	
+	setState(QAudio::ActiveState);
 }
 
 void ViFileOutput::stop()
 {
 	LOG("Writing to file stopped.");
 	mCoder.stop();
-	emit stopped();
+	setState(QAudio::StoppedState);
 }
 
 void ViFileOutput::pause()
 {
 	LOG("Writing to file pasued.");
-	emit paused();
+	setState(QAudio::SuspendedState);
 }

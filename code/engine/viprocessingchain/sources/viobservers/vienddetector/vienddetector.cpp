@@ -3,62 +3,167 @@
 ViEndDetector::ViEndDetector()
 	: ViObserver()
 {
-	setThreshold(3000, 0.02);
-	setMinimumLength(90000);
+	setThreshold(ViEndDetector::SongStart, 1000, 0.01);
+	setThreshold(ViEndDetector::SongEnd, 3000, 0.01);
+	setThreshold(ViEndDetector::RecordStart, 1000, 0.01);
+	setThreshold(ViEndDetector::RecordEnd, 12000, 0.01);
+	mWasInitialized = false;
 }
 
-void ViEndDetector::setThreshold(int milliseconds, qreal value)
+void ViEndDetector::setThreshold(ViEndDetector::Type type, int milliseconds, qreal value)
 {
-	mMillisecondThreshold = milliseconds;
-	mValue = value;
+	if(type == ViEndDetector::SongStart)
+	{
+		mSongStartTime = milliseconds;
+		mSongStartValue = value;
+	}
+	else if(type == ViEndDetector::SongEnd)
+	{
+		mSongEndTime = milliseconds;
+		mSongEndValue = value;
+	}
+	else if(type == ViEndDetector::RecordStart)
+	{
+		mRecordStartTime = milliseconds;
+		mRecordStartValue = value;
+	}
+	else if(type == ViEndDetector::RecordEnd)
+	{
+		mRecordEndTime = milliseconds;
+		mRecordEndValue = value;
+	}
+	mWasInitialized = false;
 }
 
-void ViEndDetector::setMinimumLength(int milliseconds)
+void ViEndDetector::setFormat(ViAudioFormat format)
 {
-	mMinimumMilliseconds = milliseconds;
+	ViObserver::setFormat(format);
+	mWasInitialized = false;
 }
 
 void ViEndDetector::initialize()
 {
-	mSamplesThreshold = ViAudioPosition::convertPosition(mMillisecondThreshold, ViAudioPosition::Milliseconds, ViAudioPosition::Samples, mFormat);
-	mMinimumSamples = ViAudioPosition::convertPosition(mMinimumMilliseconds, ViAudioPosition::Milliseconds, ViAudioPosition::Samples, mFormat);
-	mValueThreshold = mSamplesThreshold * mValue; //Same as taking the average after each iteration. just saves some computational time.
-	clear();
-	for(int i = 0; i < mSamplesThreshold; ++i)
+	if(!mWasInitialized)
 	{
-		mCache.enqueue(0);
+		mWasInitialized = true;
+
+		mSampleCounter = 0;
+		mSongStarted = false;
+		mRecordStarted = false;
+
+		mSongStartSampleThreshold = ViAudioPosition::convertPosition(mSongStartTime, ViAudioPosition::Milliseconds, ViAudioPosition::Samples, mFormat);
+		mSongEndSampleThreshold = ViAudioPosition::convertPosition(mSongEndTime, ViAudioPosition::Milliseconds, ViAudioPosition::Samples, mFormat);
+		mRecordStartSampleThreshold = ViAudioPosition::convertPosition(mRecordStartTime, ViAudioPosition::Milliseconds, ViAudioPosition::Samples, mFormat);
+		mRecordEndSampleThreshold = ViAudioPosition::convertPosition(mRecordEndTime, ViAudioPosition::Milliseconds, ViAudioPosition::Samples, mFormat);
+
+		//Same as taking the average after each iteration. Just saves some computational time.
+		mSongStartValueThreshold = mSongStartValue * mSongStartSampleThreshold;
+		mSongEndValueThreshold = mSongEndValue * mSongEndSampleThreshold;
+		mRecordStartValueThreshold = mRecordStartValue * mRecordStartSampleThreshold;
+		mRecordEndValueThreshold = mRecordEndValue * mRecordEndSampleThreshold;
+
+		setSongStartCache();
+		setRecordStartCache();
 	}
-	mDetected = false;
 }
 
 void ViEndDetector::run()
 {
 	qreal value;
-	qreal old = mTotalValue;
+
 	for(int i = 0; i < mData->size(); ++i)
 	{
-for(int h = 0; h < 5000; h++) int t = 100*3.25/789+94145-85.20*9654/85;
 		value = qAbs(mData->at(i));
-		mTotalValue += value - mCache.dequeue();
-		mCache.enqueue(value);
-		if(mTotalValue < mValueThreshold 
-			&& (mSampleCounter + i) > mMinimumSamples
-			&& old > mValueThreshold
-			&& !mDetected)
+
+		if(!mSongStarted)
 		{
-			mDetected = true;
-			mSampleCounter += i + 1;
-			LOG(QString("Detected end of song at second " + QString::number(ViAudioPosition::convertPosition(mSampleCounter, ViAudioPosition::Samples, ViAudioPosition::Seconds, mFormat), 'f', 2) + "."));
-			emit endDetected(ViAudioPosition(mSampleCounter, ViAudioPosition::Samples, mFormat));
-			return;
+			mTotalRecordValue += value - mRecordCache.dequeue();
+			mRecordCache.enqueue(value);
+			if(!mRecordStarted && mTotalRecordValue > mRecordStartValueThreshold)
+			{
+				ViAudioPosition position(mSampleCounter + i, ViAudioPosition::Samples, mFormat);
+				LOG(QString("Record started: " + QString::number(position.position(ViAudioPosition::Seconds), 'f', 2) + " sec."));
+				emit recordStarted(position);
+
+				mRecordStarted = true;
+				setRecordEndCache();
+			}
+			else if(mRecordStarted && mTotalRecordValue < mRecordEndValueThreshold)
+			{
+				ViAudioPosition position(mSampleCounter + i, ViAudioPosition::Samples, mFormat);
+				LOG(QString("Record ended: " + QString::number(position.position(ViAudioPosition::Seconds), 'f', 2) + " sec."));
+				emit recordEnded(position);
+
+				mRecordStarted = false;
+				setRecordStartCache();
+			}
+		}
+		
+		if(mRecordStarted)
+		{
+			mTotalSongValue += value - mSongCache.dequeue();
+			mSongCache.enqueue(value);
+			if(!mSongStarted && mTotalSongValue > mSongStartValueThreshold)
+			{
+				ViAudioPosition position(mSampleCounter + i, ViAudioPosition::Samples, mFormat);
+				LOG(QString("Song started: " + QString::number(position.position(ViAudioPosition::Seconds), 'f', 2) + " sec."));
+				emit songStarted(position);
+
+				mSongStarted = true;
+				setSongEndCache();
+			}
+			else if(mSongStarted && mTotalSongValue < mSongEndValueThreshold)
+			{
+				ViAudioPosition position(mSampleCounter + i, ViAudioPosition::Samples, mFormat);
+				LOG(QString("Song ended: " + QString::number(position.position(ViAudioPosition::Seconds), 'f', 2) + " sec."));
+				emit songEnded(position);
+
+				mSongStarted = false;
+				setSongStartCache();
+				setRecordEndCache();
+			}
 		}
 	}
+
 	mSampleCounter += mData->size();
 }
 
-void ViEndDetector::clear()
+void ViEndDetector::setSongStartCache()
 {
-	mCache.clear();
-	mTotalValue = 0;
-	mSampleCounter = 0;
+	mSongCache.clear();
+	for(int i = 0; i < mSongStartSampleThreshold; ++i)
+	{
+		mSongCache.enqueue(0);
+	}
+	mTotalSongValue = 0;
+}
+
+void ViEndDetector::setSongEndCache()
+{
+	mSongCache.clear();
+	for(int i = 0; i < mSongEndSampleThreshold; ++i)
+	{
+		mSongCache.enqueue(1);
+	}
+	mTotalSongValue = mSongEndSampleThreshold;
+}
+
+void ViEndDetector::setRecordStartCache()
+{
+	mRecordCache.clear();
+	for(int i = 0; i < mRecordStartSampleThreshold; ++i)
+	{
+		mRecordCache.enqueue(0);
+	}
+	mTotalRecordValue = 0;
+}
+
+void ViEndDetector::setRecordEndCache()
+{
+	mRecordCache.clear();
+	for(int i = 0; i < mRecordEndSampleThreshold; ++i)
+	{
+		mRecordCache.enqueue(1);
+	}
+	mTotalRecordValue = mRecordEndSampleThreshold;
 }

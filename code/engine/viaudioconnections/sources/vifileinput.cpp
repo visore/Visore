@@ -5,6 +5,8 @@ ViFileInput::ViFileInput()
 	: ViAudioInput()
 {
 	mFilePath = "";
+	QObject::connect(&mCoder, SIGNAL(finished()), this, SIGNAL(finished()));
+	setState(QAudio::IdleState);
 }
 
 void ViFileInput::setFile(QString filePath)
@@ -18,18 +20,18 @@ void ViFileInput::start()
 	mCoder.decode(mFilePath, mBuffer, &mFormat);
 	mBuffer->setFormat(mFormat);
 	emit formatChanged(mFormat);
-	emit started();
+	setState(QAudio::ActiveState);
 }
 
 void ViFileInput::stop()
 {
 	LOG("Reading file stopped.");
 	mCoder.stop();
-	emit stopped();
+	setState(QAudio::StoppedState);
 }
 
 void ViFileInput::pause()
 {
 	LOG("Reading file paused.");
-	emit paused();
+	setState(QAudio::SuspendedState);
 }

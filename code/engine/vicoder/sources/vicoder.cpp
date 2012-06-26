@@ -22,6 +22,8 @@ ViCoder::ViCoder()
 	mDecodingThread = new ViDecodingThread(this);
 	QObject::connect(mEncodingThread, SIGNAL(stateChanged(ViCoder::State)), this, SIGNAL(stateChanged(ViCoder::State)));
 	QObject::connect(mDecodingThread, SIGNAL(stateChanged(ViCoder::State)), this, SIGNAL(stateChanged(ViCoder::State)));
+	QObject::connect(mEncodingThread, SIGNAL(finished()), this, SIGNAL(finished()));
+	QObject::connect(mDecodingThread, SIGNAL(finished()), this, SIGNAL(finished()));
 }
 
 ViCoder::~ViCoder()
@@ -506,6 +508,8 @@ void ViEncodingThread::run()
 	emit stateChanged(mState);
 
 	mState = ViCoder::IdleState;
+
+	emit finished();
 }
 
 ViDecodingThread::ViDecodingThread(QObject *parent)
@@ -663,6 +667,8 @@ void ViDecodingThread::setOutputFormat(ViAudioFormat *format)
 	emit stateChanged(mState);
 
 	mState = ViCoder::IdleState;
+
+	emit finished();
 }
 
 void ViDecodingThread::run()

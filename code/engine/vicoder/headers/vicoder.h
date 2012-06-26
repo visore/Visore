@@ -25,6 +25,7 @@ class ViCoder : public QObject
 			SuccessState = 2,
 			FailureState = 3
 		};
+
 		enum Error
 		{
 			NoError = 0,
@@ -44,6 +45,7 @@ class ViCoder : public QObject
 	signals:
 
 		void stateChanged(ViCoder::State status);
+		void finished();
 
 	public:
 
@@ -67,7 +69,9 @@ class ViCoderThread : public QThread
 	Q_OBJECT
 
 	signals:
+
 		void stateChanged(ViCoder::State status);
+		void finished();
 
 	public:
 		ViCoderThread(QObject *parent = 0);

@@ -13,9 +13,12 @@ class ViAudioTransmission : public QObject
 
 	signals:
 
-		void started();
-		void stopped();
-		void paused();
+		void stateChanged(QAudio::State state);
+		void finished();
+
+	public slots:
+
+		virtual void setState(QAudio::State state);
 
 	public:
 
@@ -28,7 +31,6 @@ class ViAudioTransmission : public QObject
 		virtual ViAudioFormat format();
 		virtual void setFormat(ViAudioFormat format);
 
-		virtual void setState(QAudio::State state);
 		virtual QAudio::State state();
 
 		virtual void start() = 0;

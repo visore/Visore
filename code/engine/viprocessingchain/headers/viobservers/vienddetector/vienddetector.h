@@ -10,35 +10,67 @@ class ViEndDetector : public ViObserver
 
 	signals:
 
-		void endDetected(ViAudioPosition position);
+		void songStarted(ViAudioPosition position);
+		void songEnded(ViAudioPosition position);
+		void recordStarted(ViAudioPosition position);
+		void recordEnded(ViAudioPosition position);
 
 	public:
 
+		enum Type
+		{
+			SongStart = 0,
+			SongEnd = 1,
+			RecordStart = 2,
+			RecordEnd = 3
+		};
+
 		ViEndDetector();
-		void setThreshold(int milliseconds, qreal value);
-		void setMinimumLength(int milliseconds);
+		void setFormat(ViAudioFormat format);
+		void setThreshold(ViEndDetector::Type type, int milliseconds, qreal value);
 		void initialize();
 		void run();
 
 	protected:
 
-		void clear();
+		void setSongStartCache();
+		void setSongEndCache();
+		void setRecordStartCache();
+		void setRecordEndCache();
 
 	private:
+
+		bool mWasInitialized;
+
+		bool mSongStarted;
+		bool mRecordStarted;
 		
-		bool mDetected;
+		int mSongStartTime;
+		int mSongEndTime;
+		int mRecordStartTime;
+		int mRecordEndTime;
+		
+		qreal mSongStartValue;
+		qreal mSongEndValue;
+		qreal mRecordStartValue;
+		qreal mRecordEndValue;
+
+		int mSongStartSampleThreshold;
+		int mSongEndSampleThreshold;
+		int mRecordStartSampleThreshold;
+		int mRecordEndSampleThreshold;
+
+		qreal mSongStartValueThreshold;
+		qreal mSongEndValueThreshold;
+		qreal mRecordStartValueThreshold;
+		qreal mRecordEndValueThreshold;
+
+		QQueue<qreal> mSongCache;
+		QQueue<qreal> mRecordCache;
+
+		qreal mTotalSongValue;
+		qreal mTotalRecordValue;
 		qint64 mSampleCounter;
-		qreal mTotalValue;
-
-		int mMillisecondThreshold;
-		int mMinimumMilliseconds;
-		qreal mValue;
-
-		qint64 mSamplesThreshold;
-		qint64 mMinimumSamples;
-		qreal mValueThreshold;
-
-		QQueue<qreal> mCache;
 
 };
 

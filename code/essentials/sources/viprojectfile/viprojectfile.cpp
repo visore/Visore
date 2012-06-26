@@ -21,8 +21,29 @@ void ViProjectFile::setFilePath(QString filePath)
 		mFilePath += extension;
 	}
 	mArchive.setFilePath(mFilePath);
+
 	mProjectName = fileName();
 	mProjectTempPath = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + mProperties.id();
+	mInfoPath = mProjectTempPath + QDir::separator() + mProjectName + ".sql";
+	mDataPath = mProjectTempPath + QDir::separator() + "data";
+
+	QDir dir(mProjectTempPath);
+	if(!dir.exists())
+	{
+		if(!dir.mkpath(dir.absolutePath()))
+		{
+			return;
+		}
+	}
+
+	dir = QDir(mDataPath);
+	if(!dir.exists())
+	{
+		if(!dir.mkpath(dir.absolutePath()))
+		{
+			return;
+		}
+	}
 }
 
 QString ViProjectFile::filePath()
@@ -30,11 +51,20 @@ QString ViProjectFile::filePath()
 	return mFilePath;
 }
 
+QString ViProjectFile::infoPath()
+{
+	return mInfoPath;
+}
+
+QString ViProjectFile::dataPath()
+{
+	return mDataPath;
+}
+
 void ViProjectFile::load()
 {
 	mArchive.decompress(mProjectTempPath);
-	QString tempFilePath = mProjectTempPath + QDir::separator() + mProjectName + ".sql";
-	ViDataDriver driver(tempFilePath);
+	ViDataDriver driver(mInfoPath);
 	if(!driver.load(mProperties))
 	{
 		return;
@@ -63,24 +93,15 @@ void ViProjectFile::save()
 		mProperties.initializeCurrent();
 		mProjectTempPath = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + mProperties.id();
 	}
-	QDir dir(mProjectTempPath);
-	if(!dir.exists())
-	{
-		if(!dir.mkpath(dir.absolutePath()))
-		{
-			return;
-		}
-	}
-	QString tempFilePath = mProjectTempPath + QDir::separator() + mProjectName + ".sql";
-	QFile file(tempFilePath);
+	QFile file(mInfoPath);
 	file.remove();
-	ViDataDriver driver(tempFilePath);
+	ViDataDriver driver(mInfoPath);
 	if(!driver.save(mProperties))
 	{
 		return;
 	}
 	QStringList files;
-	files.append(tempFilePath);
+	files.append(mInfoPath);
 	mArchive.compress(files);
 }
 

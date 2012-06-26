@@ -21,13 +21,16 @@ ViAudioEngine::ViAudioEngine()
 	mStreamOutput->setFormat(ViAudioFormat::defaultFormat());
 	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
 
+	mProcessingChain.setTransmission(mFileOutput);
+	mFileOutput->setFormat(ViAudioFormat::defaultFormat());
+
 	mStreamInput->setFormat(ViAudioFormat::defaultFormat());
 	mStreamInput->setDevice(QAudioDeviceInfo::defaultInputDevice());
 
 	mProcessingChain.attach(ViAudio::AudioInput, &mInputWaveFormer);
 	mProcessingChain.attach(ViAudio::AudioOutput, &mOutputWaveFormer);
 
-	QObject::connect(&mEndDetector, SIGNAL(endDetected(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
+	QObject::connect(&mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
 	mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
 
 	QObject::connect(&mProjectFile, SIGNAL(finished()), this, SIGNAL(projectFinished()));
@@ -145,4 +148,12 @@ void ViAudioEngine::saveProject(QString filePath)
 	mProjectFile.setFilePath(filePath);
 	mProjectFile.save();
 	emit saveProjectStarted();
+}
+
+void ViAudioEngine::startRecordingProject()
+{
+	mProjectFile.setFilePath("/home/visore/test_visore.vip");
+	mProcessingChain.setProject(&mProjectFile);
+	changeInput(ViAudio::Line);
+	startRecording();
 }

@@ -5,11 +5,12 @@
 ViProcessingChain::ViProcessingChain()
 	: QObject()
 {
-	mEndDetected = false;
 	mInput = NULL;
-	mOutput = NULL;
+	mStreamOutput = NULL;
+	mFileOutput = NULL;
 	mInputBuffer = NULL;
 	mOutputBuffer = NULL;
+	mProject = NULL;
 	mMultiExecutor.setNotify(true);
 	QObject::connect(&mMultiExecutor, SIGNAL(progressed(short)), this, SIGNAL(changed()));
 }
@@ -28,26 +29,39 @@ ViProcessingChain::~ViProcessingChain()
 		delete mOutputBuffer;
 		mOutputBuffer = NULL;
 	}
+	qDeleteAll(mOutputBuffers);
+	mOutputBuffers.clear();
 }
 
 void ViProcessingChain::changeInput(ViAudioPosition position)
 {
-	if(!mEndDetected)
+	QObject::connect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finalize()));
+	mInput->setBuffer(allocateBuffer(ViAudio::AudioInput));
+}
+
+void ViProcessingChain::finalize()
+{
+	mMultiExecutor.finalize();
+	QObject::disconnect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finalize()));
+
+	nextBuffer(ViAudio::AudioInput);
+	mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
+	mMultiExecutor.setBuffer(ViAudio::AudioOutput, allocateBuffer(ViAudio::AudioOutput));
+	
+	if(mProject != NULL)
 	{
-		mEndDetected = true;
-		QObject::connect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finish()));
-		mInput->setBuffer(allocateBuffer(ViAudio::AudioInput));
+		mFileOutput->setBuffer(mOutputBuffer);
+		mFileOutput->setFile(mProject->dataPath() + QDir::separator() + "vis.wav");
+		mFileOutput->start();
+		QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
 	}
 }
 
 void ViProcessingChain::finish()
 {
-	mMultiExecutor.finalize();
-	QObject::disconnect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finish()));
-	//Save to file here
-	nextBuffer();
-	mEndDetected = false;
-	mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
+	QObject::disconnect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
+	nextBuffer(ViAudio::AudioOutput);
+cout<<"********++++++++++++++++++++++++"<<endl;
 }
 
 void ViProcessingChain::handleUnderrun()
@@ -64,7 +78,7 @@ void ViProcessingChain::updateBuffering(qreal processingRate)
 		qreal ratio = 1 - (processingRate / mOutputBuffer->format().sampleRate());
 		ratio *= 1 + ratio;
 		qint64 bytesNeeded = ViAudioPosition::convertPosition(DEFAULT_SONG_LENGTH, ViAudioPosition::Milliseconds, ViAudioPosition::Bytes, mOutputBuffer->format());
-		bytesNeeded -= mOutput->position().position(ViAudioPosition::Bytes);
+		bytesNeeded -= mStreamOutput->position().position(ViAudioPosition::Bytes);
 		bytesNeeded *= ratio;
 		mSecondsNeeded = ViAudioPosition::convertPosition(bytesNeeded, ViAudioPosition::Bytes, ViAudioPosition::Seconds, mOutputBuffer->format());
 		LOG("Buffering started (processing rate: " + QString::number(mMultiExecutor.processingRate(), 'f', 1) + "Hz, buffer needed: " + QString::number(mSecondsNeeded) + "s)");
@@ -79,7 +93,7 @@ void ViProcessingChain::updateBuffering(qreal processingRate)
 	if(progress >= 100)
 	{
 		QObject::disconnect(&mMultiExecutor, SIGNAL(processingRateChanged(qreal)), this, SLOT(updateBuffering(qreal)));
-		mOutput->start();
+		mStreamOutput->start();
 	}
 	emit buffering(progress);
 }
@@ -92,23 +106,34 @@ void ViProcessingChain::setWindowSize(int windowSize)
 void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 {
 	ViAudioInput *input;
-	ViStreamOutput *output;
+	ViStreamOutput *streamOutput;
+	ViFileOutput *fileOutput;
 	if((input = dynamic_cast<ViAudioInput*>(transmission)) != NULL)
 	{
 		mInput = input;
 		allocateBuffer(ViAudio::AudioInput);
-		nextBuffer();
+		nextBuffer(ViAudio::AudioInput);
 		mInput->setBuffer(mInputBuffer);
 		mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
 	}
-	else if((output = dynamic_cast<ViStreamOutput*>(transmission)) != NULL)
+	else if((streamOutput = dynamic_cast<ViStreamOutput*>(transmission)) != NULL)
 	{
-		mOutput = output;
-		QObject::connect(mOutput, SIGNAL(underrun()), this, SLOT(handleUnderrun()));
+		mStreamOutput = streamOutput;
+		QObject::connect(mStreamOutput, SIGNAL(underrun()), this, SLOT(handleUnderrun()));
 		allocateBuffer(ViAudio::AudioOutput);
-		mOutput->setBuffer(mOutputBuffer);
+		nextBuffer(ViAudio::AudioOutput);
+		mStreamOutput->setBuffer(mOutputBuffer);
 		mMultiExecutor.setBuffer(ViAudio::AudioOutput, mOutputBuffer);
 	}
+	else if((fileOutput = dynamic_cast<ViFileOutput*>(transmission)) != NULL)
+	{
+		mFileOutput = fileOutput;
+	}
+}
+
+void ViProcessingChain::setProject(ViProjectFile *project)
+{
+	mProject = project;
 }
 
 bool ViProcessingChain::attach(ViAudio::Mode mode, ViProcessor *processor)
@@ -142,31 +167,48 @@ ViAudioBuffer* ViProcessingChain::allocateBuffer(ViAudio::Mode mode)
 	}
 	else if(mode == ViAudio::AudioOutput)
 	{
-		if(mOutputBuffer != NULL)
-		{
-			delete mOutputBuffer;
-		}
-		mOutputBuffer = buffer;
+		mOutputBuffers.enqueue(buffer);
 	}
 	return buffer;
 }
 
-void ViProcessingChain::nextBuffer()
+void ViProcessingChain::nextBuffer(ViAudio::Mode mode)
 {
-	if(mInputBuffer != NULL)
+	if(mode == ViAudio::AudioInput)
 	{
-		delete mInputBuffer;
+		if(mInputBuffer != NULL)
+		{
+			delete mInputBuffer;
+		}
+		if(mInputBuffers.isEmpty())
+		{
+			mInputBuffer = NULL;
+		}
+		else
+		{
+			mInputBuffer = mInputBuffers.dequeue();
+		}
 	}
-	if(mInputBuffers.isEmpty())
+	else if(mode == ViAudio::AudioOutput)
 	{
-		mInputBuffer = NULL;
+		if(mOutputBuffer != NULL)
+		{
+			delete mOutputBuffer;
+		}
+		if(mOutputBuffers.isEmpty())
+		{
+			mOutputBuffer = NULL;
+		}
+		else
+		{
+			mOutputBuffer = mOutputBuffers.dequeue();
+		}
 	}
-	else
-	{
-		mInputBuffer = mInputBuffers.dequeue();
-	}
-	if(mOutputBuffer != NULL)
-	{
-		mOutputBuffer->clear();
-	}
+}
+
+void ViProcessingChain::saveToProject()
+{
+	mFileOutput->setBuffer(mOutputBuffer);
+	mFileOutput->setFile(mProject->dataPath() + QDir::separator() + "vis.wav");
+	mFileOutput->start();
 }

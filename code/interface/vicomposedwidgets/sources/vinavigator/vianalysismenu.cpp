@@ -10,8 +10,8 @@ ViAnalysisMenu::ViAnalysisMenu(ViNavigator *navigator)
 	//Spectrum
 	/*mUi->spectrumButton->setIcon(ViThemeManager::image("spectrum.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 	mUi->spectrumButton->setCheckable(true);
-	mSpectrumIndex = addStackWidget(&mSpectrumWidget);
-	QObject::connect(mUi->spectrumButton, SIGNAL(clicked()), this, SLOT(showSpectrum()));*/
+	mSpectrumIndex = addStackWidget(&mSpectrumWidget);*/
+	QObject::connect(mUi->spectrumButton, SIGNAL(clicked()), this, SLOT(showSpectrum()));
 
 	//Correlation
 	mUi->matchButton->setIcon(ViThemeManager::image("correlation.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
@@ -27,8 +27,9 @@ ViAnalysisMenu::~ViAnalysisMenu()
 
 void ViAnalysisMenu::showSpectrum()
 {
-	mUi->matchButton->setChecked(false);
-	setCurrentStackIndex(mSpectrumIndex);
+	mEngine->startRecordingProject();
+	//mUi->matchButton->setChecked(false);
+	//setCurrentStackIndex(mSpectrumIndex);
 }
 
 void ViAnalysisMenu::showCorrelation()

@@ -7,6 +7,7 @@ ViStreamOutput::ViStreamOutput()
 	mAudioOutput = NULL;
 	mVolume = 0;
 	mIsMute = false;
+	setState(QAudio::IdleState);
 }
 
 ViStreamOutput::~ViStreamOutput()
@@ -58,26 +59,23 @@ void ViStreamOutput::start()
 		LOG("Playback started.");
 		mAudioOutput->start(&mBufferDevice);
 	}
-	mState = QAudio::ActiveState;
-	emit started();
+	setState(QAudio::ActiveState);
 }
 
 void ViStreamOutput::stop()
 {
 	LOG("Playback stopped.");
 	mBufferDevice.seek(0);
-	mState = QAudio::StoppedState;
 	mAudioOutput->stop();
 	checkPosition();
-	emit stopped();
+	setState(QAudio::StoppedState);
 }
 
 void ViStreamOutput::pause()
 {
 	LOG("Playback paused.");
-	mState = QAudio::SuspendedState;
 	mAudioOutput->suspend();
-	emit paused();
+	setState(QAudio::SuspendedState);
 }
 
 bool ViStreamOutput::setPosition(ViAudioPosition position)

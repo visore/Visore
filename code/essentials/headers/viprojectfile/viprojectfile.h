@@ -17,6 +17,10 @@ class ViProjectFile : public QObject
 		ViProjectFile(QString filePath = "");
 		void setFilePath(QString filePath);
 		QString filePath();
+
+		QString infoPath();
+		QString dataPath();
+
 		void load();
 		void save();
 
@@ -33,6 +37,10 @@ class ViProjectFile : public QObject
 		QString mFilePath;
 		QString mProjectName;
 		QString mProjectTempPath;
+
+		QString mInfoPath;
+		QString mDataPath;
+
 		ViPropertiesInfo mProperties;
 		ViArchive mArchive;
 

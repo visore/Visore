@@ -47,6 +47,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		//Project
 		void loadProject(QString filePath);
 		void saveProject(QString filePath);
+		void startRecordingProject();
 
 	signals:
 

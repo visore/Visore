@@ -35,6 +35,7 @@ ViStreamInput::ViStreamInput()
 {
 	mDevice = QAudioDeviceInfo::defaultInputDevice();
 	mAudioInput = NULL;
+	setState(QAudio::IdleState);
 }
 
 ViStreamInput::~ViStreamInput()
@@ -85,25 +86,22 @@ void ViStreamInput::start()
 		LOG("Recording started.");
 		mAudioInput->start(&mBufferDevice);
 	}
-	mState = QAudio::ActiveState;
-	emit started();
+	setState(QAudio::ActiveState);
 }
 
 void ViStreamInput::stop()
 {
 	LOG("Recording stopped.");
 	mBufferDevice.seek(0);
-	mState = QAudio::StoppedState;
 	mAudioInput->stop();
-	emit stopped();
+	setState(QAudio::StoppedState);
 }
 
 void ViStreamInput::pause()
 {
 	LOG("Recording paused.");
-	mState = QAudio::SuspendedState;
 	mAudioInput->suspend();
-	emit paused();
+	setState(QAudio::SuspendedState);
 }
 
 qreal ViStreamInput::volume()
