@@ -6,7 +6,7 @@
 #include <QTimer>
 #include "viaudioconnection.h"
 #include "vimultiexecutor.h"
-#include "viprojectfile.h"
+#include "viproject.h"
 
 class ViProcessingChain : public QObject
 {
@@ -32,7 +32,7 @@ class ViProcessingChain : public QObject
 
 		void setWindowSize(int windowSize);
 		void setTransmission(ViAudioTransmission *transmission);
-		void setProject(ViProjectFile *project);
+		void setProject(QString filePath);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
 		ViAudioBuffer* buffer(ViAudio::Mode mode);
@@ -41,7 +41,6 @@ class ViProcessingChain : public QObject
 
 		ViAudioBuffer* allocateBuffer(ViAudio::Mode mode);
 		void nextBuffer(ViAudio::Mode mode);
-		void saveToProject();
 
 	private:
 
@@ -58,7 +57,7 @@ class ViProcessingChain : public QObject
 		int mSecondsPassed;
 		int mSecondsNeeded;
 
-		ViProjectFile *mProject;
+		ViProject *mProject;
 };
 
 #endif

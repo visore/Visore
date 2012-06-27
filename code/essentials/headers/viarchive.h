@@ -2,7 +2,7 @@
 #define VIARCHIVE_H
 
 #include <QString>
-#include <QStringList>
+#include <QFileInfoList>
 #include <QThread>
 
 class ViArchiveThread;
@@ -38,9 +38,12 @@ class ViArchive : public QObject
 		void setFilePath(QString filePath);
 		void setCompression(int compression);
 		void setComment(QString comment);
+
+		QString filePath();
 		ViArchive::Error error();
 
-		void compress(QStringList filesAndDirs = QStringList());
+		void compress(QFileInfoList filesAndDirs);
+		void compress(QString directory);
 		void decompress(QString location);
 
 	private:
@@ -64,17 +67,18 @@ class ViArchiveThread : public QThread
 		void setFilePath(QString filePath);
 		void setCompression(int compression);
 		void setComment(QString comment);
+
+		QString filePath();
 		ViArchive::Error error();
 
-		void setInput(QStringList files);
+		void setInput(QFileInfoList files);
 		void setOutput(QString location);
 
 		void run();
 		void compress();
 		void decompress();
+
 	protected:
-
-
 		
 		bool convertZipError(int code);
 		bool convertUnzipError(int code);
@@ -84,7 +88,7 @@ class ViArchiveThread : public QThread
 		void (ViArchiveThread::*doAction)();
 
 		QString mFilePath;
-		QStringList mInputFiles;
+		QFileInfoList mInput;
 		QString mOutputLocation;
 		int mCompression;
 		QString mComment;

@@ -1,11 +1,10 @@
 #ifndef VISONGINFO_H
 #define VISONGINFO_H
 
-#include "viprojectinfo.h"
 #include <QString>
 #include <QList>
 
-class ViSongInfo : public ViProjectInfo
+class ViSongInfo
 {
 	public:
 

@@ -4,7 +4,6 @@
 #include "viaudioconnection.h"
 #include "visingleton.h"
 #include "vimanager.h"
-#include "viprojectfile.h"
 
 #include "viprocessingchain.h"
 #include "visingleexecutor.h"
@@ -94,8 +93,6 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		ViFileOutput *mFileOutput;
 		ViStreamInput *mStreamInput;
 		ViStreamOutput *mStreamOutput;
-
-		ViProjectFile mProjectFile;
 
 		ViProcessingChain mProcessingChain;
 		ViSingleExecutor mExecutor;

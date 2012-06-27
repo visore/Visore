@@ -1,130 +1,79 @@
 #include "viprojectfile.h"
-#include "viarchive.h"
+#include <QDir>
 
-#include "vilogger.h"
-
-ViProjectFile::ViProjectFile(QString filePath)
-	: QObject()
+ViProjectFile::ViProjectFile()
 {
-	QObject::connect(&mArchive, SIGNAL(finished()), this, SIGNAL(finished()));
-	mArchive.setComment("Visore Project");
-	setFilePath(filePath);
+	mFilePath = "";
+	setNull(true);
+	setName("Project");
 }
 
-void ViProjectFile::setFilePath(QString filePath)
+void ViProjectFile::setDirectory(QString directory)
 {
-	QString oldName = fileName();
-	mFilePath = filePath;
-	QString extension = "." + ViManager::projectExtension();
-	if(!mFilePath.endsWith(extension))
-	{
-		mFilePath += extension;
-	}
-	mArchive.setFilePath(mFilePath);
+	mFilePath = directory + QDir::separator() + mName + ".vml";
+}
 
-	mProjectName = fileName();
-	mProjectTempPath = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + mProperties.id();
-	mInfoPath = mProjectTempPath + QDir::separator() + mProjectName + ".sql";
-	mDataPath = mProjectTempPath + QDir::separator() + "data";
+QString ViProjectFile::name()
+{
+	return mName;
+}
 
-	QDir dir(mProjectTempPath);
-	if(!dir.exists())
+bool ViProjectFile::isNull()
+{
+	return mIsNull;
+}
+
+bool ViProjectFile::load()
+{
+	bool success = false;
+	QFile file(mFilePath);
+	if(file.open(QIODevice::ReadOnly))
 	{
-		if(!dir.mkpath(dir.absolutePath()))
+		QDomDocument document;
+		if(document.setContent(file.readAll(), false))
 		{
-			return;
+			fromXml(document);
+			success = true;
 		}
+		file.close();
 	}
-
-	dir = QDir(mDataPath);
-	if(!dir.exists())
+	if(success)
 	{
-		if(!dir.mkpath(dir.absolutePath()))
-		{
-			return;
-		}
-	}
-}
-
-QString ViProjectFile::filePath()
-{
-	return mFilePath;
-}
-
-QString ViProjectFile::infoPath()
-{
-	return mInfoPath;
-}
-
-QString ViProjectFile::dataPath()
-{
-	return mDataPath;
-}
-
-void ViProjectFile::load()
-{
-	mArchive.decompress(mProjectTempPath);
-	ViDataDriver driver(mInfoPath);
-	if(!driver.load(mProperties))
-	{
-		return;
-	}
-	QDir dir(mProjectTempPath);
-	QString newName = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + mProperties.id();
-	QDir newDir(newName);
-	if(newDir.exists())
-	{
-		newDir.removeRecursively();
-	}
-	if(dir.rename(mProjectTempPath, newName))
-	{
-		mProjectTempPath = newName;
+		setNull(true);
 	}
 	else
 	{
-		dir.removeRecursively();
+		setNull(false);
 	}
+	return success;
 }
 
-void ViProjectFile::save()
+bool ViProjectFile::save()
 {
-	if(mProperties.isNull())
+	bool success = false;
+	QFile file(mFilePath);
+	if(file.open(QIODevice::WriteOnly))
 	{
-		mProperties.initializeCurrent();
-		mProjectTempPath = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + mProperties.id();
+		success = (file.write(toXml().toByteArray()) > 0);
+		file.close();
 	}
-	QFile file(mInfoPath);
-	file.remove();
-	ViDataDriver driver(mInfoPath);
-	if(!driver.save(mProperties))
+	if(success)
 	{
-		return;
+		setNull(true);
 	}
-	QStringList files;
-	files.append(mInfoPath);
-	mArchive.compress(files);
-}
-
-QString ViProjectFile::fileName()
-{
-	if(mFilePath == "")
+	else
 	{
-		return "";
+		setNull(false);
 	}
-	int start = mFilePath.lastIndexOf(QDir::separator()) + 1;
-	int end = mFilePath.indexOf(".", start);
-	return mFilePath.mid(start, end - start);
+	return success;
 }
 
-ViPropertiesInfo& ViProjectFile::properties()
+void ViProjectFile::setName(QString name)
 {
-	return mProperties;
+	mName = name;
 }
 
-QString ViProjectFile::toString()
+void ViProjectFile::setNull(bool null)
 {
-	QString result = "******************************************\nVisore Project File\n******************************************\n";
-	result += mProperties.toString();
-	result += "\n******************************************";
-	return result;
+	mIsNull = null;
 }

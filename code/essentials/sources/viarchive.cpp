@@ -3,6 +3,7 @@
 #include "unzip.h"
 #include <QDir>
 #include <QFileInfo>
+#include "vilogger.h"
 
 ViArchiveThread::ViArchiveThread()
 	: QThread()
@@ -40,14 +41,19 @@ void ViArchiveThread::setComment(QString comment)
 	mComment = comment;
 }
 
+QString ViArchiveThread::filePath()
+{
+	return mFilePath;
+}
+
 ViArchive::Error ViArchiveThread::error()
 {
 	return mError;
 }
 
-void ViArchiveThread::setInput(QStringList files)
+void ViArchiveThread::setInput(QFileInfoList files)
 {
-	mInputFiles = files;
+	mInput = files;
 }
 
 void ViArchiveThread::setOutput(QString location)
@@ -113,22 +119,15 @@ void ViArchiveThread::compress()
 		return;
 	}
 
-	for(int i = 0; i < mInputFiles.size(); ++i)
+	for(int i = 0; i < mInput.size(); ++i)
 	{
-		QFileInfo info(mInputFiles[i]);
-		if(info.isDir())
+		if(mInput[i].isDir())
 		{
-			if(!convertZipError(zip.addDirectory(mInputFiles[i], compression)))
-			{
-				return;
-			}
+			convertZipError(zip.addDirectory(mInput[i].absoluteFilePath(), compression));
 		}
-		if(info.isFile())
+		else if(mInput[i].isFile())
 		{
-			if(!convertZipError(zip.addFile(mInputFiles[i], compression)))
-			{
-				return;
-			}
+			convertZipError(zip.addFile(mInput[i].absoluteFilePath(), compression));
 		}
 	}
 
@@ -277,16 +276,28 @@ void ViArchive::setComment(QString comment)
 	mThread->setComment(comment);
 }
 
+QString ViArchive::filePath()
+{
+	return mThread->filePath();
+}
+
 ViArchive::Error ViArchive::error()
 {
 	return mThread->error();
 }
 
-void ViArchive::compress(QStringList filesAndDirs)
+void ViArchive::compress(QFileInfoList filesAndDirs)
 {
 	mThread->setInput(filesAndDirs);
 	mThread->setAction(ViArchiveThread::Compress);
 	mThread->start();
+}
+
+void ViArchive::compress(QString directory)
+{
+	QDir dir(directory);
+	QFileInfoList filesAndDirs = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+	compress(filesAndDirs);
 }
 
 void ViArchive::decompress(QString location)

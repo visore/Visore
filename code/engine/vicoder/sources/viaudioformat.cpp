@@ -18,7 +18,7 @@ ViAudioFormat ViAudioFormat::defaultFormat()
 {
 	ViAudioFormat result;
 	result.setBitRate(128);
-	result.setSampleSize(16);
+	result.setSampleSize(32);
 	result.setSampleRate(44100);
 	result.setSampleType(QAudioFormat::SignedInt);
 	result.setCodec(ViCodecManager::selected("WAV"));

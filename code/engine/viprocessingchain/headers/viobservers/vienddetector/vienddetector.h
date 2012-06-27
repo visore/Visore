@@ -26,7 +26,6 @@ class ViEndDetector : public ViObserver
 		};
 
 		ViEndDetector();
-		void setFormat(ViAudioFormat format);
 		void setThreshold(ViEndDetector::Type type, int milliseconds, qreal value);
 		void initialize();
 		void run();
@@ -39,8 +38,6 @@ class ViEndDetector : public ViObserver
 		void setRecordEndCache();
 
 	private:
-
-		bool mWasInitialized;
 
 		bool mSongStarted;
 		bool mRecordStarted;

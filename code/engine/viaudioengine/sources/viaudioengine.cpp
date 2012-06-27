@@ -32,8 +32,6 @@ ViAudioEngine::ViAudioEngine()
 
 	QObject::connect(&mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
 	mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
-
-	QObject::connect(&mProjectFile, SIGNAL(finished()), this, SIGNAL(projectFinished()));
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -138,22 +136,21 @@ void ViAudioEngine::calculateCorrelation()
 
 void ViAudioEngine::loadProject(QString filePath)
 {
-	mProjectFile.setFilePath(filePath);
+	/*mProjectFile.setFilePath(filePath);
 	mProjectFile.load();
-	emit loadProjectStarted();
+	emit loadProjectStarted();*/
 }
 
 void ViAudioEngine::saveProject(QString filePath)
 {
-	mProjectFile.setFilePath(filePath);
+	/*mProjectFile.setFilePath(filePath);
 	mProjectFile.save();
-	emit saveProjectStarted();
+	emit saveProjectStarted();*/
 }
 
 void ViAudioEngine::startRecordingProject()
 {
-	mProjectFile.setFilePath("/home/visore/test_visore.vip");
-	mProcessingChain.setProject(&mProjectFile);
+	mProcessingChain.setProject("/home/visore/test_visore.vip");
 	changeInput(ViAudio::Line);
 	startRecording();
 }

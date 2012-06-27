@@ -1,48 +1,35 @@
 #ifndef VIPROJECTFILE_H
 #define VIPROJECTFILE_H
 
-#include "vidatadriver.h"
-#include "viarchive.h"
+#include <QDomDocument>
 
-class ViProjectFile : public QObject
+class ViProjectFile
 {
-	Q_OBJECT
-
-	signals:
-
-		void finished();
 
 	public:
 
-		ViProjectFile(QString filePath = "");
-		void setFilePath(QString filePath);
-		QString filePath();
+		ViProjectFile();
 
-		QString infoPath();
-		QString dataPath();
+		void setDirectory(QString directory);
+		QString name();
+		bool isNull();
 
-		void load();
-		void save();
-
-		ViPropertiesInfo& properties();
-
-		QString toString();
+		bool load();
+		bool save();
 
 	protected:
 
-		QString fileName();
+		virtual QDomDocument toXml() = 0;
+		virtual void fromXml(QDomDocument document) = 0;
+
+		void setName(QString name);
+		void setNull(bool null);
 
 	private:
 
+		bool mIsNull;
+		QString mName;
 		QString mFilePath;
-		QString mProjectName;
-		QString mProjectTempPath;
-
-		QString mInfoPath;
-		QString mDataPath;
-
-		ViPropertiesInfo mProperties;
-		ViArchive mArchive;
 
 };
 

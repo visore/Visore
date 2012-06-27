@@ -1,6 +1,7 @@
 #include "viprocessingchain.h"
 
 #define DEFAULT_SONG_LENGTH 240000
+#define MINIMUM_SONG_LENGTH 15000
 
 ViProcessingChain::ViProcessingChain()
 	: QObject()
@@ -31,6 +32,12 @@ ViProcessingChain::~ViProcessingChain()
 	}
 	qDeleteAll(mOutputBuffers);
 	mOutputBuffers.clear();
+
+	if(mProject != NULL)
+	{
+		delete mProject;
+		mProject = NULL;
+	}
 }
 
 void ViProcessingChain::changeInput(ViAudioPosition position)
@@ -48,12 +55,18 @@ void ViProcessingChain::finalize()
 	mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
 	mMultiExecutor.setBuffer(ViAudio::AudioOutput, allocateBuffer(ViAudio::AudioOutput));
 	
-	if(mProject != NULL)
+	qreal songLength = ViAudioPosition::convertPosition(mOutputBuffer->size(), ViAudioPosition::Samples, ViAudioPosition::Milliseconds, mOutputBuffer->format());
+	if(mProject != NULL && songLength >= MINIMUM_SONG_LENGTH)
 	{
-		mFileOutput->setBuffer(mOutputBuffer);
-		mFileOutput->setFile(mProject->dataPath() + QDir::separator() + "vis.wav");
-		mFileOutput->start();
-		QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
+		mProject->save();
+		//QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
+		//mFileOutput->setBuffer(mOutputBuffer);
+		//mFileOutput->setFile(mProject->dataPath() + QDir::separator() + "vis.wav");
+		//mFileOutput->start();cout<<"*********************1.5"<<endl;
+	}
+	else
+	{
+		nextBuffer(ViAudio::AudioOutput);
 	}
 }
 
@@ -61,7 +74,6 @@ void ViProcessingChain::finish()
 {
 	QObject::disconnect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
 	nextBuffer(ViAudio::AudioOutput);
-cout<<"********++++++++++++++++++++++++"<<endl;
 }
 
 void ViProcessingChain::handleUnderrun()
@@ -85,7 +97,7 @@ void ViProcessingChain::updateBuffering(qreal processingRate)
 	}
 	if(mSecondsNeeded < 0)
 	{
-		return;
+		mSecondsNeeded = 5;
 	}
 
 	short progress = mSecondsPassed / (mSecondsNeeded / 100.0);
@@ -131,9 +143,14 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 	}
 }
 
-void ViProcessingChain::setProject(ViProjectFile *project)
+void ViProcessingChain::setProject(QString filePath)
 {
-	mProject = project;
+	if(mProject != NULL)
+	{
+		delete mProject;
+	}
+	mProject = new ViProject(filePath);
+	mProject->save();
 }
 
 bool ViProcessingChain::attach(ViAudio::Mode mode, ViProcessor *processor)
@@ -204,11 +221,4 @@ void ViProcessingChain::nextBuffer(ViAudio::Mode mode)
 			mOutputBuffer = mOutputBuffers.dequeue();
 		}
 	}
-}
-
-void ViProcessingChain::saveToProject()
-{
-	mFileOutput->setBuffer(mOutputBuffer);
-	mFileOutput->setFile(mProject->dataPath() + QDir::separator() + "vis.wav");
-	mFileOutput->start();
 }
