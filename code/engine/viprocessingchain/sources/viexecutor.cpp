@@ -125,7 +125,8 @@ void ViExecutor::initialize()
 	}
 	if(mWriteStream != NULL)
 	{
-		mOutputFormat = mWriteStream->buffer()->format();
+		mOutputFormat = mInputFormat;
+		mWriteStream->buffer()->setFormat(mOutputFormat);
 		mOutputConverter.setSize(mOutputFormat.sampleSize());
 	}
 

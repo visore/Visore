@@ -21,6 +21,7 @@ class ViProject : public QObject, public ViId
 	public:
 
 		ViProject(QString filePath = "");
+		~ViProject();
 
 		void setFilePath(QString filePath);
 		QString filePath();
@@ -32,15 +33,24 @@ class ViProject : public QObject, public ViId
 		ViVersion createdVersion();
 		ViVersion editedVersion();
 
+		//Recordings
+		QString nextSongName();
+		QString originalPath();
+		QString correctedPath();
+
 	protected:
 
 		bool createTempStructure();
 		bool removeTempStructure();
 
+		QString padName(int number);
+
 	private:
 
 		QString mTempPath;
 		QString mDataPath;
+		QString mOriginalPath;
+		QString mCorrectedPath;
 
 		ViArchive mArchive;
 

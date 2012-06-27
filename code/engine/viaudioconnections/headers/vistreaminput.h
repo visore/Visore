@@ -35,6 +35,7 @@ class ViStreamInput : public ViAudioInput
 
 		void setDevice(QAudioDeviceInfo device);
 		void setBuffer(ViAudioBuffer *buffer);
+		ViAudioFormat format();
 		void setFormat(ViAudioFormat format);
 
 		void start();
@@ -54,6 +55,7 @@ class ViStreamInput : public ViAudioInput
 		ViAudioPosition mOldPosition;
 		qreal mMuteVolume;
 		bool mIsMute;
+		ViAudioFormat mFormat;
 
 };
 

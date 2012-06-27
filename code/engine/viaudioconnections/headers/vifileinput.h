@@ -13,6 +13,7 @@ class ViFileInput : public ViAudioInput
 		ViFileInput();
 
 		void setFile(QString filePath);
+		ViAudioFormat format();
 
 		void start();
 		void stop();

@@ -23,12 +23,10 @@ ViAudioBuffer* ViAudioTransmission::buffer()
 
 ViAudioFormat ViAudioTransmission::format()
 {
-	return mFormat;
 }
 
 void ViAudioTransmission::setFormat(ViAudioFormat format)
 {
-	mFormat = format;
 }
 
 void ViAudioTransmission::setState(QAudio::State state)

@@ -60,9 +60,15 @@ void ViStreamInput::setBuffer(ViAudioBuffer *buffer)
 	mBufferDevice.open(QIODevice::WriteOnly);
 }
 
+ViAudioFormat ViStreamInput::format()
+{
+	return mFormat;
+}
+
 void ViStreamInput::setFormat(ViAudioFormat format)
 {
-	ViAudioInput::setFormat(format);
+	mFormat = format;
+	emit formatChanged(mFormat);
 	if(mBuffer != NULL)
 	{
 		mBuffer->setFormat(mFormat);

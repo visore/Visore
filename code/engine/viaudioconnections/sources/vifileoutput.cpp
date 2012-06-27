@@ -14,6 +14,17 @@ void ViFileOutput::setFile(QString filePath)
 	mFilePath = filePath;
 }
 
+ViAudioFormat ViFileOutput::format()
+{
+	return mFormat;
+}
+
+void ViFileOutput::setFormat(ViAudioFormat format)
+{
+	mFormat = format;
+	emit formatChanged(format);
+}
+
 void ViFileOutput::start()
 {
 	LOG("Writing to file started.");

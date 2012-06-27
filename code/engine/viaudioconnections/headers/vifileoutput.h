@@ -13,6 +13,8 @@ class ViFileOutput : public ViAudioOutput
 		ViFileOutput();
 
 		void setFile(QString filePath);
+		ViAudioFormat format();
+		void setFormat(ViAudioFormat format);
 
 		void start();
 		void stop();
@@ -22,6 +24,8 @@ class ViFileOutput : public ViAudioOutput
 
 		QString mFilePath;
 		ViCoder mCoder;
+		ViAudioFormat mFormat;
+
 };
 
 #endif

@@ -7,10 +7,6 @@ class ViAudioInput : public ViAudioTransmission
 {
     Q_OBJECT
 
-	signals:
-
-		void formatChanged(ViAudioFormat format);
-
 	public:
 
 		ViAudioInput();

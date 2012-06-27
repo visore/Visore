@@ -50,19 +50,16 @@ void ViProcessingChain::finalize()
 {
 	mMultiExecutor.finalize();
 	QObject::disconnect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finalize()));
-
 	nextBuffer(ViAudio::AudioInput);
 	mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
 	mMultiExecutor.setBuffer(ViAudio::AudioOutput, allocateBuffer(ViAudio::AudioOutput));
-	
 	qreal songLength = ViAudioPosition::convertPosition(mOutputBuffer->size(), ViAudioPosition::Samples, ViAudioPosition::Milliseconds, mOutputBuffer->format());
 	if(mProject != NULL && songLength >= MINIMUM_SONG_LENGTH)
 	{
-		mProject->save();
-		//QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
-		//mFileOutput->setBuffer(mOutputBuffer);
-		//mFileOutput->setFile(mProject->dataPath() + QDir::separator() + "vis.wav");
-		//mFileOutput->start();cout<<"*********************1.5"<<endl;
+		QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
+		mFileOutput->setBuffer(mOutputBuffer);
+		mFileOutput->setFile(mProject->correctedPath() + QDir::separator() + mProject->nextSongName() + "." + mFileOutput->format().codec().extensions()[0]);
+		mFileOutput->start();
 	}
 	else
 	{
@@ -72,8 +69,10 @@ void ViProcessingChain::finalize()
 
 void ViProcessingChain::finish()
 {
+	mProject->save();;
 	QObject::disconnect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
 	nextBuffer(ViAudio::AudioOutput);
+	mMultiExecutor.initialize();
 }
 
 void ViProcessingChain::handleUnderrun()

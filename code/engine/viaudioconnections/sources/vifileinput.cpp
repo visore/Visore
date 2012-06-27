@@ -14,12 +14,18 @@ void ViFileInput::setFile(QString filePath)
 	mFilePath = filePath;
 }
 
+ViAudioFormat ViFileInput::format()
+{
+	mBuffer->format();
+}
+
 void ViFileInput::start()
 {
 	LOG("Reading file started.");
-	mCoder.decode(mFilePath, mBuffer, &mFormat);
-	mBuffer->setFormat(mFormat);
-	emit formatChanged(mFormat);
+	ViAudioFormat format;
+	mCoder.decode(mFilePath, mBuffer, &format);
+	mBuffer->setFormat(format);
+	emit formatChanged(format);
 	setState(QAudio::ActiveState);
 }
 

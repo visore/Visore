@@ -29,22 +29,26 @@ void ViStreamOutput::setBuffer(ViAudioBuffer *buffer)
 	mBufferDevice.close();
 	mBufferDevice.setBuffer(mBuffer->data());
 	mBufferDevice.open(QIODevice::ReadOnly);
-}
-
-void ViStreamOutput::setFormat(ViAudioFormat format)
-{
-	ViAudioOutput::setFormat(format);
-	mBuffer->setFormat(mFormat);
+	emit formatChanged(mBuffer->format());
 	if(mAudioOutput != NULL)
 	{
 		QObject::disconnect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
 		QObject::disconnect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
 		delete mAudioOutput;
 	}
-	mAudioOutput = new QAudioOutput(mDevice, mFormat, this);
+	mAudioOutput = new QAudioOutput(mDevice, format(), this);
 	mAudioOutput->setNotifyInterval(25);
 	QObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
 	QObject::connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
+}
+
+ViAudioFormat ViStreamOutput::format()
+{
+	if(mBuffer != NULL)
+	{
+		return mBuffer->format();
+	}
+	return ViAudioFormat();
 }
 
 void ViStreamOutput::start()
@@ -86,11 +90,15 @@ bool ViStreamOutput::setPosition(ViAudioPosition position)
 
 ViAudioPosition ViStreamOutput::position()
 {
-	if(mState == QAudio::StoppedState)
+	if(mBuffer != NULL)
 	{
-		return ViAudioPosition(0, ViAudioPosition::Microseconds, mFormat);
+		if(mState == QAudio::StoppedState)
+		{
+			return ViAudioPosition(0, ViAudioPosition::Microseconds, format());
+		}
+		return ViAudioPosition(mBufferDevice.pos(), ViAudioPosition::Bytes, format());
 	}
-	return ViAudioPosition(mBufferDevice.pos(), ViAudioPosition::Bytes, mFormat);
+	return ViAudioPosition();
 }
 
 void ViStreamOutput::checkPosition()

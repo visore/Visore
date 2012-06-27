@@ -27,7 +27,7 @@ class ViStreamOutput : public ViAudioOutput
 
 		void setDevice(QAudioDeviceInfo device);
 		void setBuffer(ViAudioBuffer *buffer);
-		void setFormat(ViAudioFormat format);
+		ViAudioFormat format();
 
 		void start();
 		void stop();
