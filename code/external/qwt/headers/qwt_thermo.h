@@ -13,7 +13,6 @@
 #include "qwt_global.h"
 #include "qwt_abstract_scale.h"
 #include "qwt_interval.h"
-#include <qwidget.h>
 
 class QwtScaleDraw;
 class QwtColorMap;
@@ -80,7 +79,7 @@ int main(int argc, char **argv)
 
   \todo Improve the support for a logarithmic range and/or scale.
 */
-class QWT_EXPORT QwtThermo: public QWidget, public QwtAbstractScale
+class QWT_EXPORT QwtThermo: public QwtAbstractScale
 {
     Q_OBJECT
 
@@ -169,7 +168,7 @@ public:
 
     double value() const;
 
-    void setRange( double vmin, double vmax, bool lg = false );
+    void setRange( double vmin, double vmax );
 
     virtual QSize sizeHint() const;
     virtual QSize minimumSizeHint() const;

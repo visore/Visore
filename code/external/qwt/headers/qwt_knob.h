@@ -12,7 +12,6 @@
 
 #include "qwt_global.h"
 #include "qwt_abstract_slider.h"
-#include "qwt_abstract_scale.h"
 
 class QwtRoundScaleDraw;
 
@@ -22,8 +21,7 @@ class QwtRoundScaleDraw;
   The QwtKnob widget imitates look and behaviour of a volume knob on a radio.
   It contains a scale around the knob which is set up automatically or can
   be configured manually (see QwtAbstractScale).
-  Automatic scrolling is enabled when the user presses a mouse
-  button on the scale. For a description of signals, slots and other
+  For a description of signals, slots and other
   members, see QwtAbstractSlider.
 
   \image html knob.png
@@ -31,7 +29,7 @@ class QwtRoundScaleDraw;
     of the inherited members.
 */
 
-class QWT_EXPORT QwtKnob : public QwtAbstractSlider, public QwtAbstractScale
+class QWT_EXPORT QwtKnob: public QwtAbstractSlider
 {
     Q_OBJECT
 
@@ -39,10 +37,10 @@ class QWT_EXPORT QwtKnob : public QwtAbstractSlider, public QwtAbstractScale
     Q_ENUMS ( MarkerStyle )
 
     Q_PROPERTY( KnobStyle knobStyle READ knobStyle WRITE setKnobStyle )
-    Q_PROPERTY( MarkerStyle markerStyle READ markerStyle WRITE setMarkerStyle )
     Q_PROPERTY( int knobWidth READ knobWidth WRITE setKnobWidth )
-    Q_PROPERTY( int borderWidth READ borderWidth WRITE setBorderWidth )
     Q_PROPERTY( double totalAngle READ totalAngle WRITE setTotalAngle )
+    Q_PROPERTY( int numTurns READ numTurns WRITE setNumTurns )
+    Q_PROPERTY( MarkerStyle markerStyle READ markerStyle WRITE setMarkerStyle )
     Q_PROPERTY( int markerSize READ markerSize WRITE setMarkerSize )
     Q_PROPERTY( int borderWidth READ borderWidth WRITE setBorderWidth )
 
@@ -108,6 +106,9 @@ public:
     void setKnobWidth( int w );
     int knobWidth() const;
 
+    void setNumTurns( int );
+    int numTurns() const;
+
     void setTotalAngle ( double angle );
     double totalAngle() const;
 
@@ -139,16 +140,10 @@ protected:
     virtual void drawMarker( QPainter *, 
         const QRectF &, double arc ) const;
 
-    virtual double getValue( const QPoint &p );
-    virtual void getScrollMode( const QPoint &, 
-        QwtAbstractSlider::ScrollMode &, int &direction ) const;
+    virtual double valueAt( const QPoint & );
+    virtual bool isScrollPosition( const QPoint & ) const;
 
 private:
-    void initKnob();
-    void layoutKnob( bool update );
-    void recalcAngle();
-
-    virtual void valueChange();
     virtual void rangeChange();
     virtual void scaleChange();
 

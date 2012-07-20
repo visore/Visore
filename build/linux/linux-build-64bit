@@ -6,7 +6,6 @@ current_directory=`cd $current_directory; pwd`
 code_directory="$current_directory"/../../code
 build_directory="$current_directory"/../../../build
 install_directory="$current_directory"/../../../install/usr/local/visore
-qt5base_directory=/home/visore/Project/qt5/qtbase
 
 export PATH=$PATH:"$code_directory"/external/bass/libraries/64bit:"$code_directory"/external/echonest/libraries/64bit
 
@@ -35,12 +34,12 @@ if $cmake; then
 	cd "$build_directory"
 	if [ -f /etc/debian_version ];
 	then
-		ccmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit -DDISTRO=Debian -DQT5BASE="$qt5base_directory"
+		ccmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit -DDISTRO=Debian
 	elif [ -f /etc/redhat_version ];
 	then
-		ccmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit -DDISTRO=Redhat -DQT5BASE="$qt5base_directory"
+		ccmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit -DDISTRO=Redhat
 	else
-		ccmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit -DQT5BASE="$qt5base_directory"
+		ccmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit
 	fi
 	make -j4 install -j4
 fi

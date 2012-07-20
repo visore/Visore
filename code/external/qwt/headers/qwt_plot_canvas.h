@@ -12,20 +12,23 @@
 
 #include "qwt_global.h"
 #include <qframe.h>
-#include <qpen.h>
 #include <qpainterpath.h>
-#include <qbitmap.h>
 
 class QwtPlot;
 class QPixmap;
 
 /*!
   \brief Canvas of a QwtPlot.
-  \sa QwtPlot
+  
+   Canvas is the widget where all plot items are displayed
+
+  \sa QwtPlot::setCanvas(), QwtPlotGLCanvas
 */
 class QWT_EXPORT QwtPlotCanvas : public QFrame
 {
     Q_OBJECT
+
+    Q_PROPERTY( double borderRadius READ borderRadius WRITE setBorderRadius )
 
 public:
 
@@ -99,30 +102,30 @@ public:
 
     /*!
       \brief Focus indicator
-
-      - NoFocusIndicator\n
-        Don't paint a focus indicator
-
-      - CanvasFocusIndicator\n
-        The focus is related to the complete canvas.
-        Paint the focus indicator using paintFocus()
-
-      - ItemFocusIndicator\n
-        The focus is related to an item (curve, point, ...) on
-        the canvas. It is up to the application to display a
-        focus indication using f.e. highlighting.
-
+      The default setting is NoFocusIndicator
       \sa setFocusIndicator(), focusIndicator(), paintFocus()
     */
 
     enum FocusIndicator
     {
+        //! Don't paint a focus indicator
         NoFocusIndicator,
+
+        /*!
+          The focus is related to the complete canvas.
+          Paint the focus indicator using paintFocus()
+         */
         CanvasFocusIndicator,
+
+        /*!
+          The focus is related to an item (curve, point, ...) on
+          the canvas. It is up to the application to display a
+          focus indication using f.e. highlighting.
+         */
         ItemFocusIndicator
     };
 
-    explicit QwtPlotCanvas( QwtPlot * );
+    explicit QwtPlotCanvas( QwtPlot * = NULL );
     virtual ~QwtPlotCanvas();
 
     QwtPlot *plot();
@@ -134,18 +137,18 @@ public:
     void setBorderRadius( double );
     double borderRadius() const;
 
-    QPainterPath borderPath( const QRect &rect ) const;
-    QBitmap borderMask( const QSize & ) const;
-
     void setPaintAttribute( PaintAttribute, bool on = true );
     bool testPaintAttribute( PaintAttribute ) const;
 
     const QPixmap *backingStore() const;
     void invalidateBackingStore();
 
-    void replot();
-
     virtual bool event( QEvent * );
+
+    Q_INVOKABLE QPainterPath borderPath( const QRect & ) const;
+
+public Q_SLOTS:
+    void replot();
 
 protected:
     virtual void paintEvent( QPaintEvent * );

@@ -1,7 +1,7 @@
 #include "viprocessingchain.h"
 
 #define DEFAULT_SONG_LENGTH 240000
-#define MINIMUM_SONG_LENGTH 15000
+#define MINIMUM_SONG_LENGTH 1500
 
 ViProcessingChain::ViProcessingChain()
 	: QObject()

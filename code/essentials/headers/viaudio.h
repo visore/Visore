@@ -1,6 +1,8 @@
 #ifndef VIAUDIO_H
 #define VIAUDIO_H
 
+ #include <qaudio.h>
+
 namespace ViAudio
 {
 	enum Mode

@@ -27,7 +27,7 @@
   \sa QwtPlot::autoReplot(), QwtPlot::replot(), scaleRect()
 */
 
-QwtPlotPicker::QwtPlotPicker( QwtPlotCanvas *canvas ):
+QwtPlotPicker::QwtPlotPicker( QWidget *canvas ):
     QwtPicker( canvas ),
     d_xAxis( -1 ),
     d_yAxis( -1 )
@@ -65,7 +65,7 @@ QwtPlotPicker::QwtPlotPicker( QwtPlotCanvas *canvas ):
 
   \sa QwtPlot::autoReplot(), QwtPlot::replot(), scaleRect()
 */
-QwtPlotPicker::QwtPlotPicker( int xAxis, int yAxis, QwtPlotCanvas *canvas ):
+QwtPlotPicker::QwtPlotPicker( int xAxis, int yAxis, QWidget *canvas ):
     QwtPicker( canvas ),
     d_xAxis( xAxis ),
     d_yAxis( yAxis )
@@ -88,7 +88,7 @@ QwtPlotPicker::QwtPlotPicker( int xAxis, int yAxis, QwtPlotCanvas *canvas ):
 */
 QwtPlotPicker::QwtPlotPicker( int xAxis, int yAxis,
         RubberBand rubberBand, DisplayMode trackerMode,
-        QwtPlotCanvas *canvas ):
+        QWidget *canvas ):
     QwtPicker( rubberBand, trackerMode, canvas ),
     d_xAxis( xAxis ),
     d_yAxis( yAxis )
@@ -101,35 +101,35 @@ QwtPlotPicker::~QwtPlotPicker()
 }
 
 //! Return observed plot canvas
-QwtPlotCanvas *QwtPlotPicker::canvas()
+QWidget *QwtPlotPicker::canvas()
 {
-    return qobject_cast<QwtPlotCanvas *>( parentWidget() );
+    return parentWidget();
 }
 
 //! Return Observed plot canvas
-const QwtPlotCanvas *QwtPlotPicker::canvas() const
+const QWidget *QwtPlotPicker::canvas() const
 {
-    return qobject_cast<const QwtPlotCanvas *>( parentWidget() );
+    return parentWidget();
 }
 
 //! Return plot widget, containing the observed plot canvas
 QwtPlot *QwtPlotPicker::plot()
 {
-    QwtPlotCanvas *w = canvas();
+    QWidget *w = canvas();
     if ( w )
-        return w->plot();
+        w = w->parentWidget();
 
-    return NULL;
+    return qobject_cast<QwtPlot *>( w );
 }
 
 //! Return plot widget, containing the observed plot canvas
 const QwtPlot *QwtPlotPicker::plot() const
 {
-    const QwtPlotCanvas *w = canvas();
+    const QWidget *w = canvas();
     if ( w )
-        return w->plot();
+        w = w->parentWidget();
 
-    return NULL;
+    return qobject_cast<const QwtPlot *>( w );
 }
 
 /*!
@@ -143,15 +143,12 @@ QRectF QwtPlotPicker::scaleRect() const
 
     if ( plot() )
     {
-        const QwtScaleDiv *xs = plot()->axisScaleDiv( xAxis() );
-        const QwtScaleDiv *ys = plot()->axisScaleDiv( yAxis() );
+        const QwtScaleDiv &xs = plot()->axisScaleDiv( xAxis() );
+        const QwtScaleDiv &ys = plot()->axisScaleDiv( yAxis() );
 
-        if ( xs && ys )
-        {
-            rect = QRectF( xs->lowerBound(), ys->lowerBound(),
-                xs->range(), ys->range() );
-            rect = rect.normalized();
-        }
+        rect = QRectF( xs.lowerBound(), ys.lowerBound(),
+            xs.range(), ys.range() );
+        rect = rect.normalized();
     }
 
     return rect;
@@ -277,8 +274,8 @@ bool QwtPlotPicker::end( bool ok )
     if ( !plot )
         return false;
 
-    const QPolygon pa = selection();
-    if ( pa.count() == 0 )
+    const QPolygon points = selection();
+    if ( points.count() == 0 )
         return false;
 
     QwtPickerMachine::SelectionType selectionType =
@@ -291,16 +288,16 @@ bool QwtPlotPicker::end( bool ok )
     {
         case QwtPickerMachine::PointSelection:
         {
-            const QPointF pos = invTransform( pa[0] );
+            const QPointF pos = invTransform( points.first() );
             Q_EMIT selected( pos );
             break;
         }
         case QwtPickerMachine::RectSelection:
         {
-            if ( pa.count() >= 2 )
+            if ( points.count() >= 2 )
             {
-                const QPoint p1 = pa[0];
-                const QPoint p2 = pa[int( pa.count() - 1 )];
+                const QPoint p1 = points.first();
+                const QPoint p2 = points.last();
 
                 const QRect rect = QRect( p1, p2 ).normalized();
                 Q_EMIT selected( invTransform( rect ) );
@@ -309,9 +306,9 @@ bool QwtPlotPicker::end( bool ok )
         }
         case QwtPickerMachine::PolygonSelection:
         {
-            QVector<QPointF> dpa( pa.count() );
-            for ( int i = 0; i < int( pa.count() ); i++ )
-                dpa[i] = invTransform( pa[i] );
+            QVector<QPointF> dpa( points.count() );
+            for ( int i = 0; i < points.count(); i++ )
+                dpa[i] = invTransform( points[i] );
 
             Q_EMIT selected( dpa );
         }

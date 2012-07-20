@@ -11,104 +11,11 @@
 #define QWT_SERIES_DATA_H 1
 
 #include "qwt_global.h"
-#include "qwt_interval.h"
+#include "qwt_samples.h"
 #include "qwt_point_3d.h"
 #include "qwt_point_polar.h"
 #include <qvector.h>
 #include <qrect.h>
-
-//! \brief A sample of the types (x1-x2, y) or (x, y1-y2)
-class QWT_EXPORT QwtIntervalSample
-{
-public:
-    QwtIntervalSample();
-    QwtIntervalSample( double, const QwtInterval & );
-    QwtIntervalSample( double value, double min, double max );
-
-    bool operator==( const QwtIntervalSample & ) const;
-    bool operator!=( const QwtIntervalSample & ) const;
-
-    //! Value
-    double value;
-
-    //! Interval
-    QwtInterval interval;
-};
-
-/*!
-  Constructor
-  The value is set to 0.0, the interval is invalid
-*/
-inline QwtIntervalSample::QwtIntervalSample():
-    value( 0.0 )
-{
-}
-
-//! Constructor
-inline QwtIntervalSample::QwtIntervalSample(
-        double v, const QwtInterval &intv ):
-    value( v ),
-    interval( intv )
-{
-}
-
-//! Constructor
-inline QwtIntervalSample::QwtIntervalSample(
-        double v, double min, double max ):
-    value( v ),
-    interval( min, max )
-{
-}
-
-//! Compare operator
-inline bool QwtIntervalSample::operator==( 
-    const QwtIntervalSample &other ) const
-{
-    return value == other.value && interval == other.interval;
-}
-
-//! Compare operator
-inline bool QwtIntervalSample::operator!=( 
-    const QwtIntervalSample &other ) const
-{
-    return !( *this == other );
-}
-
-//! \brief A sample of the types (x1...xn, y) or (x, y1..yn)
-class QWT_EXPORT QwtSetSample
-{
-public:
-    QwtSetSample();
-    bool operator==( const QwtSetSample &other ) const;
-    bool operator!=( const QwtSetSample &other ) const;
-
-    //! value
-    double value;
-
-    //! Vector of values associated to value
-    QVector<double> set;
-};
-
-/*!
-  Constructor
-  The value is set to 0.0
-*/
-inline QwtSetSample::QwtSetSample():
-    value( 0.0 )
-{
-}
-
-//! Compare operator
-inline bool QwtSetSample::operator==( const QwtSetSample &other ) const
-{
-    return value == other.value && set == other.set;
-}
-
-//! Compare operator
-inline bool QwtSetSample::operator!=( const QwtSetSample &other ) const
-{
-    return !( *this == other );
-}
 
 /*!
    \brief Abstract interface for iterating over samples
@@ -117,6 +24,24 @@ inline bool QwtSetSample::operator!=( const QwtSetSample &other ) const
    but in situations, where data of an application specific format
    needs to be displayed, without having to copy it, it is recommended
    to implement an individual data access.
+
+   A subclass of QwtSeriesData<QPointF> must implement: 
+
+   - size()\n 
+     Should return number of data points.
+
+   - sample()\n
+     Should return values x and y values of the sample at specific position
+     as QPointF object.
+
+   - boundingRect()\n 
+     Should return the bounding rectangle of the data series.
+     It is used for autoscaling and might help certain algorithms for displaying
+     the data. You can use qwtBoundingRect() for an implementation
+     but often it is possible to implement a more efficient alogrithm 
+     depending on the characteristics of the series.
+     The member d_boundingRect is intended for caching the calculated rectangle.
+    
 */
 template <typename T>
 class QwtSeriesData
@@ -257,7 +182,7 @@ size_t QwtArraySeriesData<T>::size() const
 template <typename T>
 T QwtArraySeriesData<T>::sample( size_t i ) const
 {
-    return d_samples[i];
+    return d_samples[ static_cast<int>( i ) ];
 }
 
 //! Interface for iterating over an array of points
@@ -300,143 +225,33 @@ public:
 };
 
 /*!
-  \brief Interface for iterating over two QVector<double> objects.
+    Interface for iterating over an array of OHLC samples
 */
-class QWT_EXPORT QwtPointArrayData: public QwtSeriesData<QPointF>
+class QWT_EXPORT QwtTradingChartData: public QwtArraySeriesData<QwtOHLCSample>
 {
 public:
-    QwtPointArrayData( const QVector<double> &x, const QVector<double> &y );
-    QwtPointArrayData( const double *x, const double *y, size_t size );
+    QwtTradingChartData(
+        const QVector<QwtOHLCSample> & = QVector<QwtOHLCSample>() );
 
     virtual QRectF boundingRect() const;
-
-    virtual size_t size() const;
-    virtual QPointF sample( size_t i ) const;
-
-    const QVector<double> &xData() const;
-    const QVector<double> &yData() const;
-
-private:
-    QVector<double> d_x;
-    QVector<double> d_y;
-};
-
-/*!
-  \brief Data class containing two pointers to memory blocks of doubles.
- */
-class QWT_EXPORT QwtCPointerData: public QwtSeriesData<QPointF>
-{
-public:
-    QwtCPointerData( const double *x, const double *y, size_t size );
-
-    virtual QRectF boundingRect() const;
-    virtual size_t size() const;
-    virtual QPointF sample( size_t i ) const;
-
-    const double *xData() const;
-    const double *yData() const;
-
-private:
-    const double *d_x;
-    const double *d_y;
-    size_t d_size;
-};
-
-/*!
-  \brief Synthetic point data
-
-  QwtSyntheticPointData provides a fixed number of points for an interval.
-  The points are calculated in equidistant steps in x-direction.
-
-  If the interval is invalid, the points are calculated for
-  the "rect of interest", what normally is the displayed area on the
-  plot canvas. In this mode you get different levels of detail, when
-  zooming in/out.
-
-  \par Example
-
-  The following example shows how to implement a sinus curve.
-
-  \verbatim
-#include <cmath>
-#include <qwt_series_data.h>
-#include <qwt_plot_curve.h>
-#include <qwt_plot.h>
-#include <qapplication.h>
-
-class SinusData: public QwtSyntheticPointData
-{
-public:
-    SinusData():
-        QwtSyntheticPointData(100)
-    {
-    }
-    virtual double y(double x) const
-    {
-        return qSin(x);
-    }
-};
-
-int main(int argc, char **argv)
-{
-    QApplication a(argc, argv);
-
-    QwtPlot plot;
-    plot.setAxisScale(QwtPlot::xBottom, 0.0, 10.0);
-    plot.setAxisScale(QwtPlot::yLeft, -1.0, 1.0);
-
-    QwtPlotCurve *curve = new QwtPlotCurve("y = sin(x)");
-    curve->setData(SinusData());
-    curve->attach(&plot);
-
-    plot.show();
-    return a.exec();
-}
-   \endverbatim
-*/
-class QWT_EXPORT QwtSyntheticPointData: public QwtSeriesData<QPointF>
-{
-public:
-    QwtSyntheticPointData( size_t size,
-        const QwtInterval & = QwtInterval() );
-
-    void setSize( size_t size );
-    size_t size() const;
-
-    void setInterval( const QwtInterval& );
-    QwtInterval interval() const;
-
-    virtual QRectF boundingRect() const;
-    virtual QPointF sample( size_t i ) const;
-
-    /*!
-       Calculate a y value for a x value
-
-       \param x x value
-       \return Corresponding y value
-     */
-    virtual double y( double x ) const = 0;
-    virtual double x( uint index ) const;
-
-    virtual void setRectOfInterest( const QRectF & );
-    QRectF rectOfInterest() const;
-
-private:
-    size_t d_size;
-    QwtInterval d_interval;
-    QRectF d_rectOfInterest;
-    QwtInterval d_intervalOfInterest;
 };
 
 QWT_EXPORT QRectF qwtBoundingRect(
     const QwtSeriesData<QPointF> &, int from = 0, int to = -1 );
+
 QWT_EXPORT QRectF qwtBoundingRect(
     const QwtSeriesData<QwtPoint3D> &, int from = 0, int to = -1 );
+
 QWT_EXPORT QRectF qwtBoundingRect(
     const QwtSeriesData<QwtPointPolar> &, int from = 0, int to = -1 );
+
 QWT_EXPORT QRectF qwtBoundingRect(
     const QwtSeriesData<QwtIntervalSample> &, int from = 0, int to = -1 );
+
 QWT_EXPORT QRectF qwtBoundingRect(
     const QwtSeriesData<QwtSetSample> &, int from = 0, int to = -1 );
 
-#endif 
+QWT_EXPORT QRectF qwtBoundingRect(
+    const QwtSeriesData<QwtOHLCSample> &, int from = 0, int to = -1 );
+
+#endif

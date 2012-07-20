@@ -9,7 +9,6 @@
 
 #include "qwt_plot_zoomer.h"
 #include "qwt_plot.h"
-#include "qwt_plot_canvas.h"
 #include "qwt_scale_div.h"
 #include "qwt_picker_machine.h"
 #include <qalgorithms.h>
@@ -42,7 +41,7 @@ public:
 
   \sa QwtPlot::autoReplot(), QwtPlot::replot(), setZoomBase()
 */
-QwtPlotZoomer::QwtPlotZoomer( QwtPlotCanvas *canvas, bool doReplot ):
+QwtPlotZoomer::QwtPlotZoomer( QWidget *canvas, bool doReplot ):
     QwtPlotPicker( canvas )
 {
     if ( canvas )
@@ -67,7 +66,7 @@ QwtPlotZoomer::QwtPlotZoomer( QwtPlotCanvas *canvas, bool doReplot ):
 */
 
 QwtPlotZoomer::QwtPlotZoomer( int xAxis, int yAxis,
-        QwtPlotCanvas *canvas, bool doReplot ):
+        QWidget *canvas, bool doReplot ):
     QwtPlotPicker( xAxis, yAxis, canvas )
 {
     if ( canvas )
@@ -360,21 +359,16 @@ void QwtPlotZoomer::rescale()
 
         double x1 = rect.left();
         double x2 = rect.right();
-        if ( plt->axisScaleDiv( xAxis() )->lowerBound() >
-            plt->axisScaleDiv( xAxis() )->upperBound() )
-        {
+        if ( !plt->axisScaleDiv( xAxis() ).isIncreasing() )
             qSwap( x1, x2 );
-        }
 
         plt->setAxisScale( xAxis(), x1, x2 );
 
         double y1 = rect.top();
         double y2 = rect.bottom();
-        if ( plt->axisScaleDiv( yAxis() )->lowerBound() >
-            plt->axisScaleDiv( yAxis() )->upperBound() )
-        {
+        if ( !plt->axisScaleDiv( yAxis() ).isIncreasing() )
             qSwap( y1, y2 );
-        }
+
         plt->setAxisScale( yAxis(), y1, y2 );
 
         plt->setAutoReplot( doReplot );

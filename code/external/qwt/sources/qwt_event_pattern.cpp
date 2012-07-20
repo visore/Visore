@@ -108,10 +108,10 @@ void QwtEventPattern::initKeyPattern()
 */
 void QwtEventPattern::setMousePattern( uint pattern, int button, int state )
 {
-    if ( pattern < ( uint )d_mousePattern.count() )
+    if ( pattern < static_cast<uint>( d_mousePattern.count() ) )
     {
-        d_mousePattern[int( pattern )].button = button;
-        d_mousePattern[int( pattern )].state = state;
+        d_mousePattern[ pattern ].button = button;
+        d_mousePattern[ pattern ].state = state;
     }
 }
 
@@ -126,10 +126,10 @@ void QwtEventPattern::setMousePattern( uint pattern, int button, int state )
 */
 void QwtEventPattern::setKeyPattern( uint pattern, int key, int state )
 {
-    if ( pattern < ( uint )d_keyPattern.count() )
+    if ( pattern < static_cast<uint>( d_keyPattern.count() ) )
     {
-        d_keyPattern[int( pattern )].key = key;
-        d_keyPattern[int( pattern )].state = state;
+        d_keyPattern[ pattern ].key = key;
+        d_keyPattern[ pattern ].state = state;
     }
 }
 
@@ -189,8 +189,8 @@ bool QwtEventPattern::mouseMatch( uint pattern,
 {
     bool ok = false;
 
-    if ( event && pattern < ( uint )d_mousePattern.count() )
-        ok = mouseMatch( d_mousePattern[int( pattern )], event );
+    if ( event && pattern < static_cast<uint>( d_mousePattern.count() ) )
+        ok = mouseMatch( d_mousePattern[ pattern ], event );
 
     return ok;
 }
@@ -240,8 +240,8 @@ bool QwtEventPattern::keyMatch( uint pattern,
 {
     bool ok = false;
 
-    if ( event && pattern < ( uint )d_keyPattern.count() )
-        ok = keyMatch( d_keyPattern[int( pattern )], event );
+    if ( event && pattern < static_cast<uint>( d_keyPattern.count() ) )
+        ok = keyMatch( d_keyPattern[ pattern ], event );
 
     return ok;
 }

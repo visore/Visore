@@ -31,7 +31,8 @@
 bool QwtPainter::d_polylineSplitting = true;
 bool QwtPainter::d_roundingAlignment = true;
 
-static inline bool isClippingNeeded( const QPainter *painter, QRectF &clipRect )
+static inline bool qwtIsClippingNeeded( 
+    const QPainter *painter, QRectF &clipRect )
 {
     bool doClipping = false;
     const QPaintEngine *pe = painter->paintEngine();
@@ -49,8 +50,9 @@ static inline bool isClippingNeeded( const QPainter *painter, QRectF &clipRect )
     return doClipping;
 }
 
-static inline void drawPolyline( QPainter *painter,
-    const QPointF *points, int pointCount, bool polylineSplitting )
+template <class T>
+static inline void qwtDrawPolyline( QPainter *painter,
+    const T *points, int pointCount, bool polylineSplitting )
 {
     bool doSplit = false;
     if ( polylineSplitting )
@@ -81,7 +83,7 @@ static inline void drawPolyline( QPainter *painter,
         painter->drawPolyline( points, pointCount );
 }
 
-static inline void unscaleFont( QPainter *painter )
+static inline void qwtUnscaleFont( QPainter *painter )
 {
     if ( painter->font().pixelSize() >= 0 )
         return;
@@ -109,12 +111,37 @@ static inline void unscaleFont( QPainter *painter )
 }
 
 /*!
+  Check is the application is running with the X11 graphics system
+  that has some special capabilities that can be used for incremental
+  painting to a widget.
+
+  \return True, when the graphicssystem is X11
+*/
+bool QwtPainter::isX11GraphicsSystem()
+{
+    static int onX11 = -1;
+    if ( onX11 < 0 )
+    {
+        QPixmap pm( 1, 1 );
+        QPainter painter( &pm );
+
+        onX11 = ( painter.paintEngine()->type() == QPaintEngine::X11 ) ? 1 : 0;
+    }
+
+    return onX11 == 1;
+}
+
+/*!
   Check if the painter is using a paint engine, that aligns
   coordinates to integers. Today these are all paint engines
   beside QPaintEngine::Pdf and QPaintEngine::SVG.
 
+  If we have an integer based paint engine it is also
+  checked if the painter has a transformation matrix,
+  that rotates or scales.
+
   \param  painter Painter
-  \return true, when the paint engine is aligning
+  \return true, when the painter is aligning
 
   \sa setRoundingAlignment()
 */
@@ -129,6 +156,13 @@ bool QwtPainter::isAligning( QPainter *painter )
                 return false;
 
             default:;
+        }
+
+        const QTransform tr = painter->transform();
+        if ( tr.isRotating() || tr.isScaling() )
+        {
+            // we might have to check translations too
+            return false;
         }
     }
 
@@ -182,7 +216,7 @@ void QwtPainter::drawRect( QPainter *painter, const QRectF &rect )
     const QRectF r = rect;
 
     QRectF clipRect;
-    const bool deviceClipping = isClippingNeeded( painter, clipRect );
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
 
     if ( deviceClipping )
     {
@@ -213,7 +247,7 @@ void QwtPainter::fillRect( QPainter *painter,
         return;
 
     QRectF clipRect;
-    const bool deviceClipping = isClippingNeeded( painter, clipRect );
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
 
     /*
       Performance of Qt4 is horrible for non trivial brushs. Without
@@ -242,7 +276,7 @@ void QwtPainter::drawPie( QPainter *painter, const QRectF &rect,
     int a, int alen )
 {
     QRectF clipRect;
-    const bool deviceClipping = isClippingNeeded( painter, clipRect );
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
     if ( deviceClipping && !clipRect.contains( rect ) )
         return;
 
@@ -253,7 +287,7 @@ void QwtPainter::drawPie( QPainter *painter, const QRectF &rect,
 void QwtPainter::drawEllipse( QPainter *painter, const QRectF &rect )
 {
     QRectF clipRect;
-    const bool deviceClipping = isClippingNeeded( painter, clipRect );
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
 
     if ( deviceClipping && !clipRect.contains( rect ) )
         return;
@@ -273,14 +307,14 @@ void QwtPainter::drawText( QPainter *painter, const QPointF &pos,
         const QString &text )
 {
     QRectF clipRect;
-    const bool deviceClipping = isClippingNeeded( painter, clipRect );
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
 
     if ( deviceClipping && !clipRect.contains( pos ) )
         return;
 
 
     painter->save();
-    unscaleFont( painter );
+    qwtUnscaleFont( painter );
     painter->drawText( pos, text );
     painter->restore();
 }
@@ -298,7 +332,7 @@ void QwtPainter::drawText( QPainter *painter, const QRectF &rect,
         int flags, const QString &text )
 {
     painter->save();
-    unscaleFont( painter );
+    qwtUnscaleFont( painter );
     painter->drawText( rect, flags, text );
     painter->restore();
 }
@@ -321,7 +355,7 @@ void QwtPainter::drawSimpleRichText( QPainter *painter, const QRectF &rect,
     painter->save();
 
     painter->setFont( txt->defaultFont() );
-    unscaleFont( painter );
+    qwtUnscaleFont( painter );
 
     txt->setDefaultFont( painter->font() );
     txt->setPageSize( QSizeF( rect.width(), QWIDGETSIZE_MAX ) );
@@ -353,7 +387,7 @@ void QwtPainter::drawLine( QPainter *painter,
     const QPointF &p1, const QPointF &p2 )
 {
     QRectF clipRect;
-    const bool deviceClipping = isClippingNeeded( painter, clipRect );
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
 
     if ( deviceClipping &&
         !( clipRect.contains( p1 ) && clipRect.contains( p2 ) ) )
@@ -372,7 +406,7 @@ void QwtPainter::drawLine( QPainter *painter,
 void QwtPainter::drawPolygon( QPainter *painter, const QPolygonF &polygon )
 {
     QRectF clipRect;
-    const bool deviceClipping = isClippingNeeded( painter, clipRect );
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
 
     QPolygonF cpa = polygon;
     if ( deviceClipping )
@@ -385,13 +419,13 @@ void QwtPainter::drawPolygon( QPainter *painter, const QPolygonF &polygon )
 void QwtPainter::drawPolyline( QPainter *painter, const QPolygonF &polygon )
 {
     QRectF clipRect;
-    const bool deviceClipping = isClippingNeeded( painter, clipRect );
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
 
     QPolygonF cpa = polygon;
     if ( deviceClipping )
         cpa = QwtClipper::clipPolygonF( clipRect, cpa );
 
-    ::drawPolyline( painter,
+    qwtDrawPolyline<QPointF>( painter,
         cpa.constData(), cpa.size(), d_polylineSplitting );
 }
 
@@ -400,7 +434,7 @@ void QwtPainter::drawPolyline( QPainter *painter,
     const QPointF *points, int pointCount )
 {
     QRectF clipRect;
-    const bool deviceClipping = isClippingNeeded( painter, clipRect );
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
 
     if ( deviceClipping )
     {
@@ -408,23 +442,154 @@ void QwtPainter::drawPolyline( QPainter *painter,
         qMemCopy( polygon.data(), points, pointCount * sizeof( QPointF ) );
 
         polygon = QwtClipper::clipPolygonF( clipRect, polygon );
-        ::drawPolyline( painter,
+        qwtDrawPolyline<QPointF>( painter,
             polygon.constData(), polygon.size(), d_polylineSplitting );
     }
     else
-        ::drawPolyline( painter, points, pointCount, d_polylineSplitting );
+    {
+        qwtDrawPolyline<QPointF>( painter, points, pointCount, d_polylineSplitting );
+    }
+}
+
+//! Wrapper for QPainter::drawPolygon()
+void QwtPainter::drawPolygon( QPainter *painter, const QPolygon &polygon )
+{
+    QRectF clipRect;
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
+
+    QPolygon cpa = polygon;
+    if ( deviceClipping )
+        cpa = QwtClipper::clipPolygon( clipRect, polygon );
+
+    painter->drawPolygon( cpa );
+}
+
+//! Wrapper for QPainter::drawPolyline()
+void QwtPainter::drawPolyline( QPainter *painter, const QPolygon &polygon )
+{
+    QRectF clipRect;
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
+
+    QPolygon cpa = polygon;
+    if ( deviceClipping )
+        cpa = QwtClipper::clipPolygon( clipRect, cpa );
+
+    qwtDrawPolyline<QPoint>( painter,
+        cpa.constData(), cpa.size(), d_polylineSplitting );
+}
+
+//! Wrapper for QPainter::drawPolyline()
+void QwtPainter::drawPolyline( QPainter *painter,
+    const QPoint *points, int pointCount )
+{
+    QRectF clipRect;
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
+
+    if ( deviceClipping )
+    {
+        QPolygon polygon( pointCount );
+        qMemCopy( polygon.data(), points, pointCount * sizeof( QPoint ) );
+
+        polygon = QwtClipper::clipPolygon( clipRect, polygon );
+        qwtDrawPolyline<QPoint>( painter,
+            polygon.constData(), polygon.size(), d_polylineSplitting );
+    }
+    else
+        qwtDrawPolyline<QPoint>( painter, points, pointCount, d_polylineSplitting );
 }
 
 //! Wrapper for QPainter::drawPoint()
 void QwtPainter::drawPoint( QPainter *painter, const QPointF &pos )
 {
     QRectF clipRect;
-    const bool deviceClipping = isClippingNeeded( painter, clipRect );
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
 
     if ( deviceClipping && !clipRect.contains( pos ) )
         return;
 
     painter->drawPoint( pos );
+}
+
+//! Wrapper for QPainter::drawPoint()
+void QwtPainter::drawPoint( QPainter *painter, const QPoint &pos )
+{
+    QRectF clipRect;
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
+
+    if ( deviceClipping )
+    {
+        const int minX = qCeil( clipRect.left() );
+        const int maxX = qFloor( clipRect.right() );
+        const int minY = qCeil( clipRect.top() );
+        const int maxY = qFloor( clipRect.bottom() );
+
+        if ( pos.x() < minX || pos.x() > maxX 
+            || pos.y() < minY || pos.y() > maxY )
+        {
+            return;
+        }
+    }
+
+    painter->drawPoint( pos );
+}
+
+//! Wrapper for QPainter::drawPoints()
+void QwtPainter::drawPoints( QPainter *painter, 
+    const QPoint *points, int pointCount )
+{
+    QRectF clipRect;
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
+
+    if ( deviceClipping )
+    {
+        const int minX = qCeil( clipRect.left() );
+        const int maxX = qFloor( clipRect.right() );
+        const int minY = qCeil( clipRect.top() );
+        const int maxY = qFloor( clipRect.bottom() );
+
+        const QRect r( minX, minY, maxX - minX, maxY - minY );
+
+        QPolygon clippedPolygon( pointCount );
+        QPoint *clippedData = clippedPolygon.data();
+
+        int numClippedPoints = 0;
+        for ( int i = 0; i < pointCount; i++ )
+        {
+            if ( r.contains( points[i] ) )
+                clippedData[ numClippedPoints++ ] = points[i];
+        }
+        painter->drawPoints( clippedData, numClippedPoints );
+    }
+    else
+    {
+        painter->drawPoints( points, pointCount );
+    }
+}
+
+//! Wrapper for QPainter::drawPoints()
+void QwtPainter::drawPoints( QPainter *painter, 
+    const QPointF *points, int pointCount )
+{
+    QRectF clipRect;
+    const bool deviceClipping = qwtIsClippingNeeded( painter, clipRect );
+
+    if ( deviceClipping )
+    {
+        QPolygonF clippedPolygon( pointCount );
+        QPointF *clippedData = clippedPolygon.data();
+
+        int numClippedPoints = 0;
+        for ( int i = 0; i < pointCount; i++ )
+        {
+            if ( clipRect.contains( points[i] ) )
+                clippedData[ numClippedPoints++ ] = points[i];
+        }
+        painter->drawPoints( clippedData, numClippedPoints );
+    }
+    else
+    {
+        painter->drawPoints( points, pointCount );
+    }
 }
 
 //! Wrapper for QPainter::drawImage()
@@ -702,3 +867,70 @@ void QwtPainter::drawColorBar( QPainter *painter,
 
     drawPixmap( painter, rect, pixmap );
 }
+
+#if QT_VERSION >= 0x050000
+
+static inline void fillRect(QPainter *painter, const QRect &rect, const QBrush &brush)
+{
+    if ( brush.style() == Qt::TexturePattern ) 
+    {
+        painter->setClipRect( rect );
+        painter->drawTiledPixmap(rect, brush.texture(), rect.topLeft());
+    } 
+    else if (brush.gradient()
+        && brush.gradient()->coordinateMode() == QGradient::ObjectBoundingMode) 
+    {
+        painter->save();
+        painter->setClipRect( rect );
+        painter->fillRect(0, 0, painter->device()->width(), 
+            painter->device()->height(), brush);
+        painter->restore();
+    } 
+    else 
+    {
+        painter->fillRect(rect, brush);
+    }
+}
+
+#endif
+
+void QwtPainter::fillPixmap( const QWidget *widget, 
+    QPixmap &pixmap, const QPoint &offset )
+{
+#if QT_VERSION >= 0x050000
+
+    // Qwt 5.0.0 Alpha doesn't offer a replacement for QPixmap::fill
+#if 1
+    const QRect rect( offset, pixmap.size() );
+
+    QPainter painter( &pixmap );
+    painter.translate( -offset );
+
+    const QBrush autoFillBrush = 
+        widget->palette().brush( widget->backgroundRole() );
+
+    if ( !( widget->autoFillBackground() && autoFillBrush.isOpaque() ) ) 
+    {
+        const QBrush bg = widget->palette().brush( QPalette::Window );
+        fillRect( &painter, rect, bg);
+    }
+
+    if ( widget->autoFillBackground() )
+        fillRect( &painter, rect, autoFillBrush);
+
+    if ( widget->testAttribute(Qt::WA_StyledBackground) ) 
+    {
+        painter.setClipRegion( rect );
+
+        QStyleOption opt;
+        opt.initFrom( widget );
+        widget->style()->drawPrimitive( QStyle::PE_Widget, 
+            &opt, &painter, widget );
+    }
+#endif
+
+#else
+    pixmap.fill( widget, offset );
+#endif
+}
+

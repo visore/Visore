@@ -42,9 +42,9 @@ class QWT_EXPORT QwtPlotZoomer: public QwtPlotPicker
 {
     Q_OBJECT
 public:
-    explicit QwtPlotZoomer( QwtPlotCanvas *, bool doReplot = true );
+    explicit QwtPlotZoomer( QWidget *, bool doReplot = true );
     explicit QwtPlotZoomer( int xAxis, int yAxis,
-                            QwtPlotCanvas *, bool doReplot = true );
+                            QWidget *, bool doReplot = true );
 
     virtual ~QwtPlotZoomer();
 

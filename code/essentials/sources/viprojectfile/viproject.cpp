@@ -34,7 +34,7 @@ void ViProject::load()
 {
 	createTempStructure();
 	QObject::connect(&mArchive, SIGNAL(finished()), this, SLOT(readInfo()));
-	mArchive.decompress(mTempPath);
+	mArchive.decompressData(mTempPath);
 }
 
 void ViProject::save()
@@ -45,7 +45,7 @@ void ViProject::save()
 		mProjectFiles[i]->save();
 	}
 	QObject::connect(&mArchive, SIGNAL(finished()), this, SLOT(readInfo()));
-	mArchive.compress(mTempPath);
+	mArchive.compressData(mTempPath);
 }
 
 void ViProject::readInfo()

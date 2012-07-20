@@ -17,7 +17,7 @@
 class QPalette;
 class QPainter;
 class QFont;
-class QwtScaleTransformation;
+class QwtTransform;
 class QwtScaleMap;
 
 /*!
@@ -58,7 +58,7 @@ public:
     void setScaleDiv( const QwtScaleDiv &s );
     const QwtScaleDiv& scaleDiv() const;
 
-    void setTransformation( QwtScaleTransformation * );
+    void setTransformation( QwtTransform * );
     const QwtScaleMap &scaleMap() const;
     QwtScaleMap &scaleMap();
 

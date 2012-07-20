@@ -55,7 +55,11 @@ public:
         DiscardLegend           = 0x04,
 
         //! Don't render the background of the canvas
-        DiscardCanvasBackground = 0x08
+        DiscardCanvasBackground = 0x08,
+
+        //! Don't render the footer of the plot
+        DiscardFooter           = 0x10
+
     };
 
     //! Disard flags
@@ -98,11 +102,11 @@ public:
     void setLayoutFlags( LayoutFlags flags );
     LayoutFlags layoutFlags() const;
 
-    void renderDocument( QwtPlot *, const QString &format,
+    void renderDocument( QwtPlot *, const QString &fileName,
         const QSizeF &sizeMM, int resolution = 85 );
 
     void renderDocument( QwtPlot *,
-        const QString &title, const QString &format,
+        const QString &title, const QString &fileName,
         const QSizeF &sizeMM, int resolution = 85 );
 
 #ifndef QWT_NO_SVG
@@ -122,10 +126,10 @@ public:
     virtual void render( QwtPlot *,
         QPainter *, const QRectF &rect ) const;
 
-    virtual void renderLegendItem( const QwtPlot *, 
-        QPainter *, const QWidget *, const QRectF & ) const;
-
     virtual void renderTitle( const QwtPlot *,
+        QPainter *, const QRectF & ) const;
+
+    virtual void renderFooter( const QwtPlot *,
         QPainter *, const QRectF & ) const;
 
     virtual void renderScale( const QwtPlot *, QPainter *,
@@ -139,9 +143,14 @@ public:
     virtual void renderLegend( 
         const QwtPlot *, QPainter *, const QRectF & ) const;
 
+    bool exportTo( QwtPlot *, const QString &documentName );
+
 protected:
     void buildCanvasMaps( const QwtPlot *,
         const QRectF &, QwtScaleMap maps[] ) const;
+
+    bool updateCanvasMargins( QwtPlot *,
+        const QRectF &, const QwtScaleMap maps[] ) const;
 
 private:
     class PrivateData;

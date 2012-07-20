@@ -42,9 +42,9 @@ class ViArchive : public QObject
 		QString filePath();
 		ViArchive::Error error();
 
-		void compress(QFileInfoList filesAndDirs);
-		void compress(QString directory);
-		void decompress(QString location);
+		void compressData(QFileInfoList filesAndDirs);
+		void compressData(QString directory);
+		void decompressData(QString location);
 
 	private:
 
@@ -75,8 +75,8 @@ class ViArchiveThread : public QThread
 		void setOutput(QString location);
 
 		void run();
-		void compress();
-		void decompress();
+		void compressData();
+		void decompressData();
 
 	protected:
 		

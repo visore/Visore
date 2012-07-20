@@ -43,7 +43,13 @@ public:
         IgnoreFrames = 0x04,
 
         //! Ignore the legend.
-        IgnoreLegend = 0x08
+        IgnoreLegend = 0x08,
+
+        //! Ignore the title.
+        IgnoreTitle = 0x10,
+
+        //! Ignore the footer.
+        IgnoreFooter = 0x20
     };
 
     //! Layout options
@@ -56,7 +62,9 @@ public:
     int canvasMargin( int axis ) const;
 
     void setAlignCanvasToScales( bool );
-    bool alignCanvasToScales() const;
+
+    void setAlignCanvasToScale( int axisId, bool );
+    bool alignCanvasToScale( int axisId ) const;
 
     void setSpacing( int );
     int spacing() const;
@@ -76,6 +84,7 @@ public:
     virtual void invalidate();
 
     const QRectF &titleRect() const;
+    const QRectF &footerRect() const;
     const QRectF &legendRect() const;
     const QRectF &scaleRect( int axis ) const;
     const QRectF &canvasRect() const;
@@ -88,10 +97,10 @@ protected:
     QRectF alignLegend( const QRectF &canvasRect,
         const QRectF &legendRect ) const;
 
-    void expandLineBreaks( int options, const QRectF &rect,
-        int &dimTitle, int dimAxes[QwtPlot::axisCnt] ) const;
+    void expandLineBreaks( Options options, const QRectF &rect,
+        int &dimTitle, int &dimFooter, int dimAxes[QwtPlot::axisCnt] ) const;
 
-    void alignScales( int options, QRectF &canvasRect,
+    void alignScales( Options options, QRectF &canvasRect,
         QRectF scaleRect[QwtPlot::axisCnt] ) const;
 
 private:

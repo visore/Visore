@@ -22,7 +22,9 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
 
 	mProcessingChain.setTransmission(mFileOutput);
-	mFileOutput->setFormat(ViAudioFormat::defaultFormat());
+	ViAudioFormat fileFormat = ViAudioFormat::defaultFormat();
+	fileFormat.setCodec(ViCodecManager::selected("AC3"));
+	mFileOutput->setFormat(fileFormat);
 
 	mStreamInput->setFormat(ViAudioFormat::defaultFormat());
 	mStreamInput->setDevice(QAudioDeviceInfo::defaultInputDevice());

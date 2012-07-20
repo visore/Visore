@@ -14,6 +14,7 @@
 #include <qstring.h>
 #include <qsize.h>
 #include <qfont.h>
+#include <qmetatype.h>
 
 class QColor;
 class QPen;
@@ -212,5 +213,7 @@ inline bool QwtText::isEmpty() const
 
 Q_DECLARE_OPERATORS_FOR_FLAGS( QwtText::PaintAttributes )
 Q_DECLARE_OPERATORS_FOR_FLAGS( QwtText::LayoutAttributes )
+
+Q_DECLARE_METATYPE( QwtText )
 
 #endif

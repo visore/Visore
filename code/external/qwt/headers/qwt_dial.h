@@ -12,32 +12,12 @@
 
 #include "qwt_global.h"
 #include "qwt_abstract_slider.h"
-#include "qwt_round_scale_draw.h"
+#include "qwt_abstract_scale_draw.h"
 #include <qframe.h>
 #include <qpalette.h>
 
 class QwtDialNeedle;
-class QwtDial;
-
-/*!
-  \brief A special scale draw made for QwtDial
-
-  \sa QwtDial, QwtCompass
-*/
-class QWT_EXPORT QwtDialScaleDraw: public QwtRoundScaleDraw
-{
-public:
-    explicit QwtDialScaleDraw( QwtDial * );
-
-    virtual QwtText label( double value ) const;
-
-    void setPenWidth( double );
-    double penWidth() const;
-
-private:
-    QwtDial *d_parent;
-    double d_penWidth;
-};
+class QwtRoundScaleDraw;
 
 /*!
   \brief QwtDial class provides a rounded range control.
@@ -75,7 +55,6 @@ class QWT_EXPORT QwtDial: public QwtAbstractSlider
     Q_PROPERTY( Shadow frameShadow READ frameShadow WRITE setFrameShadow )
     Q_PROPERTY( Mode mode READ mode WRITE setMode )
     Q_PROPERTY( double origin READ origin WRITE setOrigin )
-    Q_PROPERTY( bool wrapping READ wrapping WRITE setWrapping )
     Q_PROPERTY( Direction direction READ direction WRITE setDirection )
 
     friend class QwtDialScaleDraw;
@@ -133,14 +112,7 @@ public:
     void setMode( Mode );
     Mode mode() const;
 
-    virtual void setWrapping( bool );
-    bool wrapping() const;
-
-    virtual void setScale( int maxMajIntv, int maxMinIntv, double step = 0.0 );
-
     void setScaleArc( double min, double max );
-    void setScaleComponents( QwtAbstractScaleDraw::ScaleComponents );
-    void setScaleTicks( int minLen, int medLen, int majLen, int penWidth = 1 );
 
     double minScaleArc() const;
     double maxScaleArc() const;
@@ -151,25 +123,27 @@ public:
     void setDirection( Direction );
     Direction direction() const;
 
-    virtual void setNeedle( QwtDialNeedle * );
+    void setNeedle( QwtDialNeedle * );
     const QwtDialNeedle *needle() const;
     QwtDialNeedle *needle();
 
     QRectF boundingRect() const;
     QRectF innerRect() const;
+
     virtual QRectF scaleInnerRect() const;
 
     virtual QSize sizeHint() const;
     virtual QSize minimumSizeHint() const;
 
-    virtual void setScaleDraw( QwtDialScaleDraw * );
+    void setScaleDraw( QwtRoundScaleDraw * );
 
-    QwtDialScaleDraw *scaleDraw();
-    const QwtDialScaleDraw *scaleDraw() const;
+    QwtRoundScaleDraw *scaleDraw();
+    const QwtRoundScaleDraw *scaleDraw() const;
 
 protected:
+    virtual void mousePressEvent( QMouseEvent * );
+    virtual void wheelEvent( QWheelEvent * );
     virtual void paintEvent( QPaintEvent * );
-    virtual void keyPressEvent( QKeyEvent * );
 
     virtual void drawFrame( QPainter *p );
     virtual void drawContents( QPainter * ) const;
@@ -195,19 +169,12 @@ protected:
     virtual void drawNeedle( QPainter *, const QPointF &,
         double radius, double direction, QPalette::ColorGroup ) const;
 
-    virtual QwtText scaleLabel( double ) const;
-    void updateScale();
+    virtual void scaleChange();
 
-    virtual void rangeChange();
-    virtual void valueChange();
-
-    virtual double getValue( const QPoint & );
-    virtual void getScrollMode( const QPoint &,
-        QwtAbstractSlider::ScrollMode &, int &direction ) const;
+    virtual double valueAt( const QPoint & );
+    virtual bool isScrollPosition( const QPoint & ) const;
 
 private:
-    void initDial();
-
     class PrivateData;
     PrivateData *d_data;
 };

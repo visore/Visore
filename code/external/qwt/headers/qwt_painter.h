@@ -69,12 +69,23 @@ public:
     static void drawLine( QPainter *, const QPointF &p1, const QPointF &p2 );
     static void drawLine( QPainter *, const QLineF & );
 
-    static void drawPolygon( QPainter *, const QPolygonF &pa );
-    static void drawPolyline( QPainter *, const QPolygonF &pa );
+    static void drawPolygon( QPainter *, const QPolygonF & );
+    static void drawPolyline( QPainter *, const QPolygonF & );
     static void drawPolyline( QPainter *, const QPointF *, int pointCount );
+
+    static void drawPolygon( QPainter *, const QPolygon & );
+    static void drawPolyline( QPainter *, const QPolygon & );
+    static void drawPolyline( QPainter *, const QPoint *, int pointCount );
+
+    static void drawPoint( QPainter *, int x, int y );
+    static void drawPoint( QPainter *, const QPoint & );
+    static void drawPoints( QPainter *, const QPolygon & );
+    static void drawPoints( QPainter *, const QPoint *, int pointCount );
 
     static void drawPoint( QPainter *, double x, double y );
     static void drawPoint( QPainter *, const QPointF & );
+    static void drawPoints( QPainter *, const QPolygonF & );
+    static void drawPoints( QPainter *, const QPointF *, int pointCount );
 
     static void drawPath( QPainter *, const QPainterPath & );
     static void drawImage( QPainter *, const QRectF &, const QImage & );
@@ -92,6 +103,10 @@ public:
         const QwtScaleMap &, Qt::Orientation, const QRectF & );
 
     static bool isAligning( QPainter *painter );
+    static bool isX11GraphicsSystem();
+
+    static void fillPixmap( const QWidget *, 
+        QPixmap &, const QPoint &offset = QPoint() );
 
 private:
     static bool d_polylineSplitting;
@@ -102,6 +117,18 @@ private:
 inline void QwtPainter::drawPoint( QPainter *painter, double x, double y )
 {
     QwtPainter::drawPoint( painter, QPointF( x, y ) );
+}
+
+//! Wrapper for QPainter::drawPoints()
+inline void QwtPainter::drawPoints( QPainter *painter, const QPolygon &polygon )
+{
+    drawPoints( painter, polygon.data(), polygon.size() );
+}
+
+//! Wrapper for QPainter::drawPoints()
+inline void QwtPainter::drawPoints( QPainter *painter, const QPolygonF &polygon )
+{
+    drawPoints( painter, polygon.data(), polygon.size() );
 }
 
 //!  Wrapper for QPainter::drawLine()

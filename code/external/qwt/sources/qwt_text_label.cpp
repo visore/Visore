@@ -176,8 +176,8 @@ QSize QwtTextLabel::minimumSizeHint() const
 }
 
 /*!
-   Returns the preferred height for this widget, given the width.
    \param width Width
+   \return Preferred height for this widget, given the width.
 */
 int QwtTextLabel::heightForWidth( int width ) const
 {
@@ -191,8 +191,8 @@ int QwtTextLabel::heightForWidth( int width ) const
     if ( renderFlags & Qt::AlignLeft || renderFlags & Qt::AlignRight )
         width -= indent;
 
-    int height = d_data->text.heightForWidth( width, font() );
-    if ( renderFlags & Qt::AlignTop || renderFlags & Qt::AlignBottom )
+    int height = qCeil( d_data->text.heightForWidth( width, font() ) );
+    if ( ( renderFlags & Qt::AlignTop ) || ( renderFlags & Qt::AlignBottom ) )
         height += indent;
 
     height += 2 * frameWidth();
@@ -235,12 +235,9 @@ void QwtTextLabel::drawContents( QPainter *painter )
 
     if ( hasFocus() )
     {
-        const int margin = 2;
+        const int m = 2;
 
-        QRect focusRect = contentsRect();
-        focusRect.setRect( focusRect.x() + margin, focusRect.y() + margin,
-            focusRect.width() - 2 * margin - 2,
-            focusRect.height() - 2 * margin - 2 );
+        QRect focusRect = contentsRect().adjusted( m, m, -m + 1, -m + 1);
 
         QwtPainter::drawFocusRect( painter, this, focusRect );
     }

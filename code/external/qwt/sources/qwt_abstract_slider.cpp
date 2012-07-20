@@ -8,68 +8,95 @@
  *****************************************************************************/
 
 #include "qwt_abstract_slider.h"
+#include "qwt_abstract_scale_draw.h"
 #include "qwt_math.h"
 #include <qevent.h>
-#include <qdatetime.h>
 
 #if QT_VERSION < 0x040601
 #define qFabs(x) ::fabs(x)
-#define qExp(x) ::exp(x)
 #endif
 
 class QwtAbstractSlider::PrivateData
 {
 public:
     PrivateData():
-        scrollMode( QwtAbstractSlider::ScrNone ),
+        isScrolling( false ),
         mouseOffset( 0.0 ),
         tracking( true ),
-        tmrID( 0 ),
-        updTime( 150 ),
-        mass( 0.0 ),
-        readOnly( false )
+        pendingValueChanged( false ),
+        readOnly( false ),
+        minimum( 0.0 ),
+        maximum( 0.0 ),
+        singleStep( 1.0 ),
+        pageStepCount( 1 ),
+        stepAlignment( true ),
+        isValid( false ),
+        value( 0.0 ),
+        wrapping( false )
     {
     }
 
-    QwtAbstractSlider::ScrollMode scrollMode;
+    bool isScrolling;
     double mouseOffset;
-    int direction;
-    int tracking;
+    bool tracking;
+    bool pendingValueChanged;
 
-    int tmrID;
-    int updTime;
-    int timerTick;
-    QTime time;
-    double speed;
-    double mass;
-    Qt::Orientation orientation;
     bool readOnly;
+
+    double minimum;
+    double maximum;
+
+    double singleStep;
+    int pageStepCount;
+    bool stepAlignment;
+
+    bool isValid;
+    double value;
+
+    bool wrapping;
 };
 
 /*!
    \brief Constructor
 
-   \param orientation Orientation
+   The range is initialized to [0.0, 100.0], the
+   step size to 1.0, and the value to 0.0.
+
    \param parent Parent widget
 */
-QwtAbstractSlider::QwtAbstractSlider(
-        Qt::Orientation orientation, QWidget *parent ):
-    QWidget( parent, NULL )
+QwtAbstractSlider::QwtAbstractSlider( QWidget *parent ):
+    QwtAbstractScale( parent )
 {
     d_data = new QwtAbstractSlider::PrivateData;
-    d_data->orientation = orientation;
+    setFocusPolicy( Qt::StrongFocus );
 
-    setFocusPolicy( Qt::TabFocus );
+    connect( this, SIGNAL( valueChanged( double ) ), 
+        SLOT( emitScaleValue() ) );
 }
 
 //! Destructor
 QwtAbstractSlider::~QwtAbstractSlider()
 {
-    if ( d_data->tmrID )
-        killTimer( d_data->tmrID );
-
     delete d_data;
 }
+
+//! Set the value to be valid/invalid
+void QwtAbstractSlider::setValid( bool isValid )
+{
+    if ( isValid != d_data->isValid )
+    {
+        d_data->isValid = isValid;
+        update();
+
+        Q_EMIT valueChanged( d_data->value );
+    }   
+}   
+
+//! Indicates if the value is valid
+bool QwtAbstractSlider::isValid() const
+{
+    return d_data->isValid;
+}   
 
 /*!
   En/Disable read only mode
@@ -99,207 +126,55 @@ bool QwtAbstractSlider::isReadOnly() const
 }
 
 /*!
-  \brief Set the orientation.
-  \param o Orientation. Allowed values are
-           Qt::Horizontal and Qt::Vertical.
+  \brief Enables or disables tracking.
+
+  If tracking is enabled, the slider emits the valueChanged() 
+  signal while the slider is being dragged. If tracking is disabled, the 
+  slider emits the valueChanged() signal only when the user releases the slider.
+
+  Tracking is enabled by default.
+  \param enable \c true (enable) or \c false (disable) tracking.
+
+  \sa isTracking()
 */
-void QwtAbstractSlider::setOrientation( Qt::Orientation o )
+void QwtAbstractSlider::setTracking( bool enable )
 {
-    d_data->orientation = o;
+    d_data->tracking = enable;
 }
 
 /*!
-  \return Orientation
-  \sa setOrientation()
+  \return True, when tracking has been enabled
+  \sa setTracking()
 */
-Qt::Orientation QwtAbstractSlider::orientation() const
+bool QwtAbstractSlider::isTracking() const
 {
-    return d_data->orientation;
+    return d_data->tracking;
 }
-
-//! Stop updating if automatic scrolling is active
-
-void QwtAbstractSlider::stopMoving()
-{
-    if ( d_data->tmrID )
-    {
-        killTimer( d_data->tmrID );
-        d_data->tmrID = 0;
-    }
-}
-
-/*!
-  \brief Specify the update interval for automatic scrolling
-  \param t update interval in milliseconds
-  \sa getScrollMode()
-*/
-void QwtAbstractSlider::setUpdateTime( int t )
-{
-    if ( t < 50 )
-        t = 50;
-    d_data->updTime = t;
-}
-
 
 /*!
    Mouse press event handler
    \param e Mouse event
 */
-void QwtAbstractSlider::mousePressEvent( QMouseEvent *e )
+void QwtAbstractSlider::mousePressEvent( QMouseEvent *event )
 {
     if ( isReadOnly() )
     {
-        e->ignore();
+        event->ignore();
         return;
     }
-    if ( !isValid() )
+
+    if ( !d_data->isValid || d_data->minimum == d_data->maximum )
         return;
 
-    const QPoint &p = e->pos();
+    d_data->isScrolling = isScrollPosition( event->pos() );
 
-    d_data->timerTick = 0;
-
-    getScrollMode( p, d_data->scrollMode, d_data->direction );
-    stopMoving();
-
-    switch ( d_data->scrollMode )
+    if ( d_data->isScrolling )
     {
-        case ScrPage:
-        case ScrTimer:
-            d_data->mouseOffset = 0;
-            d_data->tmrID = startTimer( qMax( 250, 2 * d_data->updTime ) );
-            break;
+        d_data->mouseOffset = valueAt( event->pos() ) - d_data->value;
+        d_data->pendingValueChanged = false;
 
-        case ScrMouse:
-            d_data->time.start();
-            d_data->speed = 0;
-            d_data->mouseOffset = getValue( p ) - value();
-            Q_EMIT sliderPressed();
-            break;
-
-        default:
-            d_data->mouseOffset = 0;
-            d_data->direction = 0;
-            break;
+        Q_EMIT sliderPressed();
     }
-}
-
-
-//! Emits a valueChanged() signal if necessary
-void QwtAbstractSlider::buttonReleased()
-{
-    if ( ( !d_data->tracking ) || ( value() != prevValue() ) )
-        Q_EMIT valueChanged( value() );
-}
-
-
-/*!
-   Mouse Release Event handler
-   \param e Mouse event
-*/
-void QwtAbstractSlider::mouseReleaseEvent( QMouseEvent *e )
-{
-    if ( isReadOnly() )
-    {
-        e->ignore();
-        return;
-    }
-    if ( !isValid() )
-        return;
-
-    const double inc = step();
-
-    switch ( d_data->scrollMode )
-    {
-        case ScrMouse:
-        {
-            setPosition( e->pos() );
-            d_data->direction = 0;
-            d_data->mouseOffset = 0;
-            if ( d_data->mass > 0.0 )
-            {
-                const int ms = d_data->time.elapsed();
-                if ( ( qFabs( d_data->speed ) >  0.0 ) && ( ms < 50 ) )
-                    d_data->tmrID = startTimer( d_data->updTime );
-            }
-            else
-            {
-                d_data->scrollMode = ScrNone;
-                buttonReleased();
-            }
-            Q_EMIT sliderReleased();
-
-            break;
-        }
-
-        case ScrDirect:
-        {
-            setPosition( e->pos() );
-            d_data->direction = 0;
-            d_data->mouseOffset = 0;
-            d_data->scrollMode = ScrNone;
-            buttonReleased();
-            break;
-        }
-
-        case ScrPage:
-        {
-            stopMoving();
-            if ( !d_data->timerTick )
-                QwtDoubleRange::incPages( d_data->direction );
-            d_data->timerTick = 0;
-            buttonReleased();
-            d_data->scrollMode = ScrNone;
-            break;
-        }
-
-        case ScrTimer:
-        {
-            stopMoving();
-            if ( !d_data->timerTick )
-                QwtDoubleRange::fitValue( value() + double( d_data->direction ) * inc );
-            d_data->timerTick = 0;
-            buttonReleased();
-            d_data->scrollMode = ScrNone;
-            break;
-        }
-
-        default:
-        {
-            d_data->scrollMode = ScrNone;
-            buttonReleased();
-        }
-    }
-}
-
-
-/*!
-  Move the slider to a specified point, adjust the value
-  and emit signals if necessary.
-*/
-void QwtAbstractSlider::setPosition( const QPoint &p )
-{
-    QwtDoubleRange::fitValue( getValue( p ) - d_data->mouseOffset );
-}
-
-
-/*!
-  \brief Enables or disables tracking.
-
-  If tracking is enabled, the slider emits a
-  valueChanged() signal whenever its value
-  changes (the default behaviour). If tracking
-  is disabled, the value changed() signal will only
-  be emitted if:<ul>
-  <li>the user releases the mouse
-      button and the value has changed or
-  <li>at the end of automatic scrolling.</ul>
-  Tracking is enabled by default.
-  \param enable \c true (enable) or \c false (disable) tracking.
-*/
-void QwtAbstractSlider::setTracking( bool enable )
-{
-    d_data->tracking = enable;
 }
 
 /*!
@@ -314,22 +189,52 @@ void QwtAbstractSlider::mouseMoveEvent( QMouseEvent *e )
         return;
     }
 
-    if ( !isValid() )
-        return;
-
-    if ( d_data->scrollMode == ScrMouse )
+    if ( d_data->isValid && d_data->isScrolling )
     {
-        setPosition( e->pos() );
-        if ( d_data->mass > 0.0 )
+        double value = valueAt( e->pos() ) - d_data->mouseOffset;
+
+        value = boundedValue( value );
+
+        if ( d_data->stepAlignment )
+            value = alignedValue( value );
+
+        if ( value != d_data->value )
         {
-            double ms = double( d_data->time.elapsed() );
-            if ( ms < 1.0 )
-                ms = 1.0;
-            d_data->speed = ( exactValue() - exactPrevValue() ) / ms;
-            d_data->time.start();
+            d_data->value = value;
+
+            update();
+
+            if ( d_data->tracking )
+                Q_EMIT valueChanged( d_data->value );
+            else
+                d_data->pendingValueChanged = true;
+
+            Q_EMIT sliderMoved( d_data->value );
         }
-        if ( value() != prevValue() )
-            Q_EMIT sliderMoved( value() );
+    }
+}
+
+/*!
+   Mouse Release Event handler
+   \param e Mouse event
+*/
+void QwtAbstractSlider::mouseReleaseEvent( QMouseEvent *event )
+{
+    if ( isReadOnly() )
+    {
+        event->ignore();
+        return;
+    }
+
+    if ( d_data->isScrolling && d_data->isValid )
+    {
+        d_data->mouseOffset = 0.0;
+        d_data->isScrolling = false;
+
+        if ( d_data->pendingValueChanged )
+            Q_EMIT valueChanged( d_data->value );
+
+        Q_EMIT sliderReleased();
     }
 }
 
@@ -337,31 +242,45 @@ void QwtAbstractSlider::mouseMoveEvent( QMouseEvent *e )
    Wheel Event handler
    \param e Whell event
 */
-void QwtAbstractSlider::wheelEvent( QWheelEvent *e )
+void QwtAbstractSlider::wheelEvent( QWheelEvent *event )
 {
     if ( isReadOnly() )
     {
-        e->ignore();
+        event->ignore();
         return;
     }
 
-    if ( !isValid() )
+    if ( !d_data->isValid || d_data->isScrolling )
         return;
 
-    QwtAbstractSlider::ScrollMode mode = ScrNone; 
-    int direction = 0;
+    double increment = 0.0;
 
-    // Give derived classes a chance to say ScrNone
-    getScrollMode( e->pos(), mode, direction );
-    if ( mode != QwtAbstractSlider::ScrNone )
+    if ( ( event->modifiers() & Qt::ControlModifier) ||
+        ( event->modifiers() & Qt::ShiftModifier ) )
     {
-        // Most mouse types work in steps of 15 degrees, in which case
-        // the delta value is a multiple of 120
+        // one page regardless of delta
+        increment = d_data->singleStep * d_data->pageStepCount;
+        if ( event->delta() < 0 )
+            increment = -increment;
+    }
+    else
+    {
+        const int numSteps = event->delta() / 120;
+        increment = d_data->singleStep * numSteps;
+    }
 
-        const int inc = e->delta() / 120;
-        QwtDoubleRange::incPages( inc );
-        if ( value() != prevValue() )
-            Q_EMIT sliderMoved( value() );
+    double value = boundedValue( d_data->value + increment );
+
+    if ( d_data->stepAlignment )
+        value = alignedValue( value );
+
+    if ( value != d_data->value )
+    {
+        d_data->value = value;
+        update();
+
+        Q_EMIT valueChanged( d_data->value );
+        Q_EMIT sliderMoved( d_data->value );
     }
 }
 
@@ -376,161 +295,274 @@ void QwtAbstractSlider::wheelEvent( QWheelEvent *e )
   \param e Key event
   \sa isReadOnly()
 */
-void QwtAbstractSlider::keyPressEvent( QKeyEvent *e )
+void QwtAbstractSlider::keyPressEvent( QKeyEvent *event )
 {
     if ( isReadOnly() )
     {
-        e->ignore();
+        event->ignore();
         return;
     }
 
-    if ( !isValid() )
+    if ( !d_data->isValid || d_data->isScrolling )
         return;
 
-    int increment = 0;
-    switch ( e->key() )
+    const double stepSize = qAbs( d_data->singleStep );
+
+    double value = d_data->value;
+    double increment = 0.0;
+
+#if 1
+    // better use key mapping from QAbstractSlider or QDial
+    switch ( event->key() )
     {
         case Qt::Key_Down:
-            if ( orientation() == Qt::Vertical )
-                increment = -1;
-            break;
-        case Qt::Key_Up:
-            if ( orientation() == Qt::Vertical )
-                increment = 1;
-            break;
         case Qt::Key_Left:
-            if ( orientation() == Qt::Horizontal )
-                increment = -1;
+        {
+            increment = -stepSize;
             break;
+        }
+        case Qt::Key_Up:
         case Qt::Key_Right:
-            if ( orientation() == Qt::Horizontal )
-                increment = 1;
+        {
+            increment = stepSize;
             break;
+        }
+        case Qt::Key_PageUp:
+        {
+            increment = d_data->pageStepCount * stepSize;
+            break;
+        }
+        case Qt::Key_PageDown:
+        {
+            increment = -d_data->pageStepCount * stepSize;
+            break;
+        }
+        case Qt::Key_Home:
+        {
+            value = d_data->minimum;
+            break;
+        }
+        case Qt::Key_End:
+        {
+            value = d_data->maximum;
+            break;
+        }
         default:;
-            e->ignore();
+        {
+            event->ignore();
+        }
     }
+#endif
 
-    if ( increment != 0 )
+    if ( increment != 0.0 )
     {
-        QwtDoubleRange::incValue( increment );
-        if ( value() != prevValue() )
-            Q_EMIT sliderMoved( value() );
+        value = boundedValue( d_data->value + increment );
+
+        if ( d_data->stepAlignment )
+            value = alignedValue( value );
     }
-}
 
-/*!
-   Qt timer event
-   \param e Timer event
-*/
-void QwtAbstractSlider::timerEvent( QTimerEvent * )
-{
-    const double inc = step();
-
-    switch ( d_data->scrollMode )
+    if ( value != d_data->value )
     {
-        case ScrMouse:
-        {
-            if ( d_data->mass > 0.0 )
-            {
-                d_data->speed *= qExp( - double( d_data->updTime ) * 0.001 / d_data->mass );
-                const double newval =
-                    exactValue() + d_data->speed * double( d_data->updTime );
-                QwtDoubleRange::fitValue( newval );
-                // stop if d_data->speed < one step per second
-                if ( qFabs( d_data->speed ) < 0.001 * qFabs( step() ) )
-                {
-                    d_data->speed = 0;
-                    stopMoving();
-                    buttonReleased();
-                }
+        d_data->value = value;
+        update();
 
-            }
-            else
-                stopMoving();
-            break;
-        }
-
-        case ScrPage:
-        {
-            QwtDoubleRange::incPages( d_data->direction );
-            if ( !d_data->timerTick )
-            {
-                killTimer( d_data->tmrID );
-                d_data->tmrID = startTimer( d_data->updTime );
-            }
-            break;
-        }
-        case ScrTimer:
-        {
-            QwtDoubleRange::fitValue( value() +  double( d_data->direction ) * inc );
-            if ( !d_data->timerTick )
-            {
-                killTimer( d_data->tmrID );
-                d_data->tmrID = startTimer( d_data->updTime );
-            }
-            break;
-        }
-        default:
-        {
-            stopMoving();
-            break;
-        }
+        Q_EMIT valueChanged( d_data->value );
+        Q_EMIT sliderMoved( d_data->value );
     }
-
-    d_data->timerTick = 1;
-}
-
-
-/*!
-  Notify change of value
-
-  This function can be reimplemented by derived classes
-  in order to keep track of changes, i.e. repaint the widget.
-  The default implementation emits a valueChanged() signal
-  if tracking is enabled.
-*/
-void QwtAbstractSlider::valueChange()
-{
-    if ( d_data->tracking )
-        Q_EMIT valueChanged( value() );
 }
 
 /*!
-  \brief Set the slider's mass for flywheel effect.
+  \brief Notify a change of the range
 
-  If the slider's mass is greater then 0, it will continue
-  to move after the mouse button has been released. Its speed
-  decreases with time at a rate depending on the slider's mass.
-  A large mass means that it will continue to move for a
-  long time.
-
-  Derived widgets may overload this function to make it public.
-
-  \param val New mass in kg
-
-  \bug If the mass is smaller than 1g, it is set to zero.
-       The maximal mass is limited to 100kg.
-  \sa mass()
+  This virtual function is called whenever the range changes.
 */
-void QwtAbstractSlider::setMass( double val )
+void QwtAbstractSlider::rangeChange()
 {
-    if ( val < 0.001 )
-        d_data->mass = 0.0;
-    else if ( val > 100.0 )
-        d_data->mass = 100.0;
+    if ( autoScale() )
+        rescale( minimum(), maximum() );
+
+    updateGeometry();
+    update();
+}
+
+/*!
+  \brief Specify  range and step size
+
+  \param minimum   lower boundary of the interval
+  \param maximum   higher boundary of the interval
+  \warning
+  \li A change of the range changes the value if it lies outside the
+      new range. The current value
+      will *not* be adjusted to the new step raster.
+  \li maximum < minimum is allowed.
+*/
+void QwtAbstractSlider::setRange( double minimum, double maximum )
+{   
+    if ( d_data->minimum == minimum && d_data->maximum == maximum )
+        return;
+    
+    d_data->minimum = minimum;
+    d_data->maximum = maximum;
+
+    const double vmin = qMin( d_data->minimum, d_data->maximum );
+    const double vmax = qMax( d_data->minimum, d_data->maximum );
+    
+    const double value = qBound( vmin, value, vmax );
+
+#if 0
+    setSingleStep( singleStep() );
+#endif
+
+    const bool changed = value != d_data->value;
+
+    if ( changed )
+    {
+        d_data->value = value;
+    }
+    
+    rangeChange();
+
+    if ( d_data->isValid || changed )
+    {
+        update();
+        Q_EMIT valueChanged( d_data->value );
+    }   
+}
+
+/*!
+  \brief Change the step raster
+  \param vstep new step width
+  \warning The value will \e not be adjusted to the new step raster.
+*/
+void QwtAbstractSlider::setSingleStep( double vstep )
+{
+    const double range = d_data->maximum - d_data->minimum;
+    
+    double newStep;
+    if ( vstep == 0.0 )
+    {
+        const double defaultRelStep = 1.0e-2;
+        newStep = range * defaultRelStep;
+    }   
     else
-        d_data->mass = val;
+    {
+        if ( ( range > 0.0 && vstep < 0.0 ) || ( range < 0.0 && vstep > 0.0 ) )
+            newStep = -vstep;
+        else
+            newStep = vstep;
+            
+        const double minRelStep = 1.0e-10;
+        if ( qFabs( newStep ) < qFabs( minRelStep * range ) )
+            newStep = minRelStep * range;
+    }       
+    
+    d_data->singleStep = newStep;
+}   
+
+/*!
+  \brief Set the page step count 
+
+  pageStepCount is a multiplicator for the single step size
+  that typically corresponds to the user pressing PageUp or PageDown.
+
+  A value of 0 disables page stepping. The value is floored to
+  ( maximum() - minimum() ) / singleStep().
+
+  The default value is 1.
+
+  \param count Multiplicator for the single step size
+
+  \sa pageStepCount(), setSingleStep()
+ */
+void QwtAbstractSlider::setPageStepCount( int count )
+{
+    const double range = d_data->maximum - d_data->minimum;
+
+    const int max = int( qAbs( range / d_data->singleStep ) );
+    d_data->pageStepCount = qBound( 0, count, max );
+}
+
+/*! 
+  \return Page step count
+  \sa setPageStepCount(), singleStep()
+ */
+int QwtAbstractSlider::pageStepCount() const
+{
+    return d_data->pageStepCount;
+}
+
+void QwtAbstractSlider::setStepAlignment( bool on )
+{   
+    if ( on != d_data->stepAlignment )
+    {
+        d_data->stepAlignment = on;
+    }
+}   
+    
+bool QwtAbstractSlider::stepAlignment() const
+{
+    return d_data->stepAlignment;
 }
 
 /*!
-    \return mass
-    \sa setMass()
+  \return The absolute step size
+  \sa setStep(), setRange()
 */
-double QwtAbstractSlider::mass() const
+double QwtAbstractSlider::singleStep() const
 {
-    return d_data->mass;
+    return d_data->singleStep;
+}   
+
+/*!
+  Set the maximum value of the range
+
+  \param value Maximum value
+  \sa setRange(), setMinimum(), maximum()
+*/
+void QwtAbstractSlider::setMaximum( double max )
+{
+    setRange( minimum(), max );
 }
 
+/*!
+  \brief Returns the value of the second border of the range
+
+  maximum returns the value which has been specified
+  as the second parameter in  QwtAbstractSlider::setRange.
+
+  \sa setRange()
+*/
+double QwtAbstractSlider::maximum() const
+{
+    return d_data->maximum;
+}   
+
+/*!
+  Set the minimum value of the range
+
+  \param value Minimum value
+  \sa setRange(), setMaximum(), minimum()
+
+  \note The maximum is adjusted if necessary to ensure that the range remains valid.
+*/
+void QwtAbstractSlider::setMinimum( double min )
+{
+    setRange( min, maximum() );
+}
+
+/*!
+  \brief Returns the value at the first border of the range
+
+  minimum returns the value which has been specified
+  as the first parameter in  setRange().
+
+  \sa setRange()
+*/
+double QwtAbstractSlider::minimum() const
+{
+    return d_data->minimum;
+}   
 
 /*!
   \brief Move the slider to a specified value
@@ -540,38 +572,62 @@ double QwtAbstractSlider::mass() const
   \param val new value
   \sa fitValue()
 */
-void QwtAbstractSlider::setValue( double val )
+void QwtAbstractSlider::setValue( double value )
 {
-    if ( d_data->scrollMode == ScrMouse )
-        stopMoving();
-    QwtDoubleRange::setValue( val );
+    const double vmin = qMin( d_data->minimum, d_data->maximum );
+    const double vmax = qMax( d_data->minimum, d_data->maximum );
+    
+    value = qBound( vmin, value, vmax );
+
+    const bool changed = ( d_data->value != value ) || !d_data->isValid;
+
+    d_data->value = value;
+    d_data->isValid = true;
+
+    if ( changed )
+    {
+        update();
+        Q_EMIT valueChanged( d_data->value );
+    }
 }
 
-
-/*!
-  \brief Set the slider's value to the nearest integer multiple
-         of the step size.
-
-   \param value Value
-   \sa setValue(), incValue()
-*/
-void QwtAbstractSlider::fitValue( double value )
+//! Returns the current value.
+double QwtAbstractSlider::value() const
 {
-    if ( d_data->scrollMode == ScrMouse )
-        stopMoving();
-    QwtDoubleRange::fitValue( value );
+    return d_data->value;
+}
+
+double QwtAbstractSlider::scaleValue() const
+{
+    const double v = sliderMap().transform( value() );
+    return abstractScaleDraw()->scaleMap().invTransform( v );
+}
+
+void QwtAbstractSlider::setScaleValue( double value )
+{
+    const double v = abstractScaleDraw()->scaleMap().transform( value );
+    setValue( sliderMap().invTransform( v ) );
 }
 
 /*!
-  \brief Increment the value by a specified number of steps
-  \param steps number of steps
-  \sa setValue()
+  If wrapping is true stepping up from maximum() value will take you to the minimum() 
+  value and vica versa. 
+
+  \param on En/Disable wrapping
+  \sa wrapping()
 */
-void QwtAbstractSlider::incValue( int steps )
+void QwtAbstractSlider::setWrapping( bool on )
 {
-    if ( d_data->scrollMode == ScrMouse )
-        stopMoving();
-    QwtDoubleRange::incValue( steps );
+    d_data->wrapping = on;
+}   
+
+/*!
+  \return True, when wrapping is set
+  \sa setWrapping()
+ */ 
+bool QwtAbstractSlider::wrapping() const
+{
+    return d_data->wrapping;
 }
 
 /*!
@@ -590,8 +646,77 @@ double QwtAbstractSlider::mouseOffset() const
     return d_data->mouseOffset;
 }
 
-//! sa ScrollMode
-int QwtAbstractSlider::scrollMode() const
+void QwtAbstractSlider::incrementValue( double increment )
 {
-    return d_data->scrollMode;
+    double value = boundedValue( d_data->value + increment );
+    if ( d_data->stepAlignment )
+        value = alignedValue( value );
+
+    if ( value != d_data->value )
+    {
+        d_data->value = value;
+        update();
+    }
+}
+
+double QwtAbstractSlider::boundedValue( double value ) const
+{
+    const double vmin = qMin( d_data->minimum, d_data->maximum );
+    const double vmax = qMax( d_data->minimum, d_data->maximum );
+
+    if ( d_data->wrapping && vmin != vmax )
+    {
+        const double range = vmax - vmin;
+
+        if ( value < vmin )
+        {
+            value += ::ceil( ( vmin - value ) / range ) * range;
+        }
+        else if ( value > vmax )
+        {
+            value -= ::ceil( ( value - vmax ) / range ) * range;
+        }
+    }
+    else
+    {
+        value = qBound( vmin, value, vmax );
+    }
+
+    return value;
+}
+
+double QwtAbstractSlider::alignedValue( double value ) const
+{
+    const double stepSize = d_data->singleStep;
+
+    if ( stepSize > 0.0 )
+    {
+        value = d_data->minimum +
+            qRound( ( value - d_data->minimum ) / stepSize ) * stepSize;
+
+        // correct rounding error at the border
+        if ( qFuzzyCompare( value, d_data->maximum ) )
+            value = d_data->maximum;
+
+        // correct rounding error if value = 0
+        if ( qFuzzyCompare( value + 1.0, 1.0 ) )
+            value = 0.0;
+    }
+
+    return value;
+}
+
+QwtScaleMap QwtAbstractSlider::sliderMap() const
+{
+    QwtScaleMap map;
+    map.setPaintInterval( abstractScaleDraw()->scaleMap().p1(),
+        abstractScaleDraw()->scaleMap().p2() );
+    map.setScaleInterval( minimum(), maximum() );
+
+    return map;
+}
+
+void QwtAbstractSlider::emitScaleValue()
+{
+	Q_EMIT scaleValueChanged( scaleValue() );
 }

@@ -18,11 +18,11 @@ void ViArchiveThread::setAction(ViArchiveThread::Action action)
 {
 	if(action == ViArchiveThread::Compress)
 	{
-		doAction = &ViArchiveThread::compress;
+		doAction = &ViArchiveThread::compressData;
 	}
 	else if(action == ViArchiveThread::Decompress)
 	{
-		doAction = &ViArchiveThread::decompress;
+		doAction = &ViArchiveThread::decompressData;
 	}
 }
 
@@ -61,7 +61,7 @@ void ViArchiveThread::setOutput(QString location)
 	mOutputLocation = location;
 }
 
-void ViArchiveThread::compress()
+void ViArchiveThread::compressData()
 {
 	QDir dir(mFilePath.mid(0, mFilePath.lastIndexOf(QDir::separator())));
 	if(!dir.exists())
@@ -134,7 +134,7 @@ void ViArchiveThread::compress()
 	convertZipError(zip.closeArchive());
 }
 
-void ViArchiveThread::decompress()
+void ViArchiveThread::decompressData()
 {
 	QDir dir(mOutputLocation);
 	if(!dir.exists())
@@ -286,21 +286,21 @@ ViArchive::Error ViArchive::error()
 	return mThread->error();
 }
 
-void ViArchive::compress(QFileInfoList filesAndDirs)
+void ViArchive::compressData(QFileInfoList filesAndDirs)
 {
 	mThread->setInput(filesAndDirs);
 	mThread->setAction(ViArchiveThread::Compress);
 	mThread->start();
 }
 
-void ViArchive::compress(QString directory)
+void ViArchive::compressData(QString directory)
 {
 	QDir dir(directory);
 	QFileInfoList filesAndDirs = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
-	compress(filesAndDirs);
+	compressData(filesAndDirs);
 }
 
-void ViArchive::decompress(QString location)
+void ViArchive::decompressData(QString location)
 {
 	mThread->setOutput(location);
 	mThread->setAction(ViArchiveThread::Decompress);
