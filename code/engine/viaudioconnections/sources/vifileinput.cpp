@@ -23,7 +23,7 @@ void ViFileInput::start()
 {
 	LOG("Reading file started.");
 	ViAudioFormat format;
-	mCoder.decode(mFilePath, mBuffer, &format);
+	//mCoder.decode(mFilePath, mBuffer, &format);
 	mBuffer->setFormat(format);
 	emit formatChanged(format);
 	setState(QAudio::ActiveState);
@@ -32,7 +32,7 @@ void ViFileInput::start()
 void ViFileInput::stop()
 {
 	LOG("Reading file stopped.");
-	mCoder.stop();
+	//mCoder.stop();
 	setState(QAudio::StoppedState);
 }
 

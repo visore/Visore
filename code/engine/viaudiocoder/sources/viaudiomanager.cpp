@@ -34,7 +34,7 @@ ViAudioManager& ViAudioManager::instance()
 
 ViCoder::Error ViAudioManager::error()
 {
-	return mError;
+	return instance().mError;
 }
 
 void ViAudioManager::setError(ViCoder::Error error)
@@ -44,217 +44,224 @@ void ViAudioManager::setError(ViCoder::Error error)
 
 void ViAudioManager::addFileName(const QString coderName, const QString name)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	ViAbstractCoder *theCoder = coder(coderName, ViAudioManager::Available);
 	if(theCoder != NULL)
 	{
 		theCoder->addFileName(name);
-		testLibrary(theCoder);
+		manager.testLibrary(theCoder);
 	}
 }
 
 void ViAudioManager::addFileExtension(const QString coderName, const QString extension)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	ViAbstractCoder *theCoder = coder(coderName, ViAudioManager::Available);
 	if(theCoder != NULL)
 	{
 		theCoder->addFileExtension(extension);
-		testLibrary(theCoder);
+		manager.testLibrary(theCoder);
 	}
 }
 
 void ViAudioManager::addSearchPath(const QString searchPath)
 {
-	setError(ViCoder::NoError);
-	mSearchPaths.append(searchPath);
-	testLibraries();
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
+	manager.mSearchPaths.append(searchPath);
+	manager.testLibraries();
 }
 
 ViAudioCodec* ViAudioManager::codec(const QString name, const ViAudioManager::Mode mode)
 {
+	ViAudioManager &manager = ViAudioManager::instance();
 	QString newName = name.trimmed().toLower();
 	if(mode == ViAudioManager::Available)
 	{
-		for(int i = 0; i < mAvailableCodecs.size(); ++i)
+		for(int i = 0; i < manager.mAvailableCodecs.size(); ++i)
 		{
-			if(mAvailableCodecs[i]->longName().toLower() == newName || mAvailableCodecs[i]->shortName().toLower() == newName)
+			if(manager.mAvailableCodecs[i]->longName().toLower() == newName || manager.mAvailableCodecs[i]->shortName().toLower() == newName)
 			{
-				setError(ViCoder::NoError);
-				return mAvailableCodecs[i];
+				manager.setError(ViCoder::NoError);
+				return manager.mAvailableCodecs[i];
 			}
-			QStringList abbreviations = mAvailableCodecs[i]->abbreviations();
+			QStringList abbreviations = manager.mAvailableCodecs[i]->abbreviations();
 			for(int k = 0; k < abbreviations.size(); ++k)
 			{
 				if(abbreviations[k].toLower() == newName)
 				{
-					setError(ViCoder::NoError);
-					return mAvailableCodecs[i];
+					manager.setError(ViCoder::NoError);
+					return manager.mAvailableCodecs[i];
 				}
 			}
 		}
-		if(codec(name, ViAudioManager::Supported) != NULL)
+		if(manager.codec(name, ViAudioManager::Supported) != NULL)
 		{
-			setError(ViCoder::UnavailableCodecError);
+			manager.setError(ViCoder::UnavailableCodecError);
 		}
 	}
 	else
 	{
-		for(int i = 0; i < mSupportedCodecs.size(); ++i)
+		for(int i = 0; i < manager.mSupportedCodecs.size(); ++i)
 		{
-			if(mSupportedCodecs[i]->longName().toLower() == newName || mSupportedCodecs[i]->shortName().toLower() == newName)
+			if(manager.mSupportedCodecs[i]->longName().toLower() == newName || manager.mSupportedCodecs[i]->shortName().toLower() == newName)
 			{
-				setError(ViCoder::NoError);
-				return mSupportedCodecs[i];
+				manager.setError(ViCoder::NoError);
+				return manager.mSupportedCodecs[i];
 			}
-			QStringList abbreviations = mSupportedCodecs[i]->abbreviations();
+			QStringList abbreviations = manager.mSupportedCodecs[i]->abbreviations();
 			for(int k = 0; k < abbreviations.size(); ++k)
 			{
 				if(abbreviations[k].toLower() == newName)
 				{
-					setError(ViCoder::NoError);
-					return mSupportedCodecs[i];
+					manager.setError(ViCoder::NoError);
+					return manager.mSupportedCodecs[i];
 				}
 			}
 		}
-		setError(ViCoder::UnsupportedCodecError);
+		manager.setError(ViCoder::UnsupportedCodecError);
 	}
 	return NULL;
 }
 
 ViAbstractCoder* ViAudioManager::coder(const QString name, const ViAudioManager::Mode mode)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	QString newName = name.trimmed().toLower(); 
 	if(mode == ViAudioManager::Available)
 	{
-		for(int i = 0; i < mAvailableCoders.size(); ++i)
+		for(int i = 0; i < manager.mAvailableCoders.size(); ++i)
 		{
-			if(mAvailableCoders[i]->name().toLower() == newName)
+			if(manager.mAvailableCoders[i]->name().toLower() == newName)
 			{
-				return mAvailableCoders[i];
+				return manager.mAvailableCoders[i];
 			}
-			QList<ViAudioCodec*> codecs = mAvailableCoders[i]->supportedCodecs();
+			QList<ViAudioCodec*> codecs = manager.mAvailableCoders[i]->supportedCodecs();
 			for(int j = 0; j < codecs.size(); ++j)
 			{
 				if(codecs[j]->longName().toLower() == newName || codecs[j]->shortName().toLower() == newName)
 				{
-					return mAvailableCoders[i];
+					return manager.mAvailableCoders[i];
 				}
 				QStringList abbreviations = codecs[j]->abbreviations();
 				for(int k = 0; k < abbreviations.size(); ++k)
 				{
 					if(abbreviations[k].toLower() == newName)
 					{
-						return mAvailableCoders[i];
+						return manager.mAvailableCoders[i];
 					}
 				}
 			}
 		}
-		if(coder(name, ViAudioManager::Supported) != NULL)
+		if(manager.coder(name, ViAudioManager::Supported) != NULL)
 		{
-			setError(ViCoder::UnavailableCodecError);
+			manager.setError(ViCoder::UnavailableCodecError);
 		}
 	}
 	else
 	{
-		for(int i = 0; i < mSupportedCoders.size(); ++i)
+		for(int i = 0; i < manager.mSupportedCoders.size(); ++i)
 		{
-			if(mSupportedCoders[i]->name().toLower() == newName)
+			if(manager.mSupportedCoders[i]->name().toLower() == newName)
 			{
-				return mSupportedCoders[i];
+				return manager.mSupportedCoders[i];
 			}
-			QList<ViAudioCodec*> codecs = mSupportedCoders[i]->supportedCodecs();
+			QList<ViAudioCodec*> codecs = manager.mSupportedCoders[i]->supportedCodecs();
 			for(int j = 0; j < codecs.size(); ++j)
 			{
 				if(codecs[j]->longName().toLower() == newName || codecs[j]->shortName().toLower() == newName)
 				{
-					return mSupportedCoders[i];
+					return manager.mSupportedCoders[i];
 				}
 				QStringList abbreviations = codecs[j]->abbreviations();
 				for(int k = 0; k < abbreviations.size(); ++k)
 				{
 					if(abbreviations[k].toLower() == newName)
 					{
-						return mSupportedCoders[i];
+						return manager.mSupportedCoders[i];
 					}
 				}
 			}
 		}
-		setError(ViCoder::UnsupportedCodecError);
+		manager.setError(ViCoder::UnsupportedCodecError);
 	}
 	return NULL;
 }
 
 ViAbstractCoder* ViAudioManager::coder(const ViAudioCodec *codec, const ViAudioManager::Mode mode)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	if(codec != NULL)
 	{
 		if(mode == ViAudioManager::Available)
 		{
-			for(int i = 0; i < mAvailableCoders.size(); ++i)
+			for(int i = 0; i < manager.mAvailableCoders.size(); ++i)
 			{
-				QList<ViAudioCodec*> codecs = mAvailableCoders[i]->supportedCodecs();
+				QList<ViAudioCodec*> codecs = manager.mAvailableCoders[i]->supportedCodecs();
 				for(int j = 0; j < codecs.size(); ++j)
 				{
 					if((*codecs[j]) == (*codec))
 					{
-						return mAvailableCoders[i];
+						return manager.mAvailableCoders[i];
 					}
 				}
 			}
-			if(coder(codec, ViAudioManager::Supported) != NULL)
+			if(manager.coder(codec, ViAudioManager::Supported) != NULL)
 			{
-				setError(ViCoder::UnavailableCodecError);
+				manager.setError(ViCoder::UnavailableCodecError);
 			}
 		}
 		else
 		{
-			for(int i = 0; i < mSupportedCoders.size(); ++i)
+			for(int i = 0; i < manager.mSupportedCoders.size(); ++i)
 			{
-				QList<ViAudioCodec*> codecs = mSupportedCoders[i]->supportedCodecs();
+				QList<ViAudioCodec*> codecs = manager.mSupportedCoders[i]->supportedCodecs();
 				for(int j = 0; j < codecs.size(); ++j)
 				{
 					if((*codecs[j]) == (*codec))
 					{
-						return mSupportedCoders[i];
+						return manager.mSupportedCoders[i];
 					}
 				}
 			}
-			setError(ViCoder::UnsupportedCodecError);
+			manager.setError(ViCoder::UnsupportedCodecError);
 		}
 	}
 	else
 	{
-		setError(ViCoder::UnsupportedCodecError);
+		manager.setError(ViCoder::UnsupportedCodecError);
 	}
 	return NULL;
 }
 
 ViAbstractCoder* ViAudioManager::coder(const ViAudioFormat &format, const ViAudioManager::Mode mode)
 {
-	return coder(format.codec(), mode);
+	return instance().coder(format.codec(), mode);
 }
 
 ViAbstractCoder* ViAudioManager::detect(const QString filePath, const ViAudioManager::Mode mode)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	QFile file(filePath);
 	if(!file.open(QIODevice::ReadOnly))
 	{
-		setError(ViCoder::InputFileError);
+		manager.setError(ViCoder::InputFileError);
 		return NULL;
 	}
 
 	ViCoderList *coders;
 	if(mode == ViAudioManager::Available)
 	{
-		coders = &mAvailableCoders;
+		coders = &manager.mAvailableCoders;
 	}
 	else
 	{
-		coders = &mSupportedCoders;
+		coders = &manager.mSupportedCoders;
 	} 
 
 	QByteArray data;
@@ -273,14 +280,14 @@ ViAbstractCoder* ViAudioManager::detect(const QString filePath, const ViAudioMan
 
 	if(mode == ViAudioManager::Available)
 	{
-		if(detect(filePath, ViAudioManager::Supported) != NULL)
+		if(manager.detect(filePath, ViAudioManager::Supported) != NULL)
 		{
-			setError(ViCoder::UnavailableCodecError);
+			manager.setError(ViCoder::UnavailableCodecError);
 		}
 	}
 	else
 	{
-		setError(ViCoder::UnsupportedCodecError);
+		manager.setError(ViCoder::UnsupportedCodecError);
 	}
 
 	file.close();
@@ -289,15 +296,16 @@ ViAbstractCoder* ViAudioManager::detect(const QString filePath, const ViAudioMan
 
 ViAbstractCoder* ViAudioManager::detect(const QByteArray &data, const ViAudioManager::Mode mode)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	ViCoderList *coders;
 	if(mode == ViAudioManager::Available)
 	{
-		coders = &mAvailableCoders;
+		coders = &manager.mAvailableCoders;
 	}
 	else
 	{
-		coders = &mSupportedCoders;
+		coders = &manager.mSupportedCoders;
 	}
 	for(int i = 0; i < coders->size(); ++i)
 	{
@@ -308,26 +316,27 @@ ViAbstractCoder* ViAudioManager::detect(const QByteArray &data, const ViAudioMan
 	}
 	if(mode == ViAudioManager::Available)
 	{
-		if(detect(data, ViAudioManager::Supported) != NULL)
+		if(manager.detect(data, ViAudioManager::Supported) != NULL)
 		{
-			setError(ViCoder::UnavailableCodecError);
+			manager.setError(ViCoder::UnavailableCodecError);
 		}
 	}
 	else
 	{
-		setError(ViCoder::UnsupportedCodecError);
+		manager.setError(ViCoder::UnsupportedCodecError);
 	}
 	return NULL;
 }
 
 bool ViAudioManager::isAvailable(const ViAbstractCoder *coder)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	if(coder != NULL)
 	{
-		for(int i = 0; i < mAvailableCoders.size(); ++i)
+		for(int i = 0; i < manager.mAvailableCoders.size(); ++i)
 		{
-			if((*mAvailableCoders[i]) == (*coder))
+			if((*manager.mAvailableCoders[i]) == (*coder))
 			{
 				return true;
 			}
@@ -338,12 +347,13 @@ bool ViAudioManager::isAvailable(const ViAbstractCoder *coder)
 
 bool ViAudioManager::isAvailable(const ViAudioCodec *codec)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	if(codec != NULL)
 	{
-		for(int i = 0; i < mAvailableCodecs.size(); ++i)
+		for(int i = 0; i < manager.mAvailableCodecs.size(); ++i)
 		{
-			if((*mAvailableCodecs[i]) == (*codec))
+			if((*manager.mAvailableCodecs[i]) == (*codec))
 			{
 				return true;
 			}
@@ -354,12 +364,13 @@ bool ViAudioManager::isAvailable(const ViAudioCodec *codec)
 
 bool ViAudioManager::isSupported(const ViAbstractCoder *coder)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	if(coder != NULL)
 	{
-		for(int i = 0; i < mSupportedCoders.size(); ++i)
+		for(int i = 0; i < manager.mSupportedCoders.size(); ++i)
 		{
-			if((*mSupportedCoders[i]) == (*coder))
+			if((*manager.mSupportedCoders[i]) == (*coder))
 			{
 				return true;
 			}
@@ -370,12 +381,13 @@ bool ViAudioManager::isSupported(const ViAbstractCoder *coder)
 
 bool ViAudioManager::isSupported(const ViAudioCodec *codec)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	if(codec != NULL)
 	{
-		for(int i = 0; i < mSupportedCodecs.size(); ++i)
+		for(int i = 0; i < manager.mSupportedCodecs.size(); ++i)
 		{
-			if((*mSupportedCodecs[i]) == (*codec))
+			if((*manager.mSupportedCodecs[i]) == (*codec))
 			{
 				return true;
 			}
@@ -386,27 +398,29 @@ bool ViAudioManager::isSupported(const ViAudioCodec *codec)
 
 ViCoderList ViAudioManager::coders(const ViAudioManager::Mode mode)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	if(mode == ViAudioManager::Available)
 	{
-		return mAvailableCoders;
+		return manager.mAvailableCoders;
 	}
 	else
 	{
-		return mSupportedCoders;
+		return manager.mSupportedCoders;
 	}
 }
 
 ViCodecList ViAudioManager::codecs(const ViAudioManager::Mode mode)
 {
-	setError(ViCoder::NoError);
+	ViAudioManager &manager = ViAudioManager::instance();
+	manager.setError(ViCoder::NoError);
 	if(mode == ViAudioManager::Available)
 	{
-		return mAvailableCodecs;
+		return manager.mAvailableCodecs;
 	}
 	else
 	{
-		return mSupportedCodecs;
+		return manager.mSupportedCodecs;
 	}
 }
 

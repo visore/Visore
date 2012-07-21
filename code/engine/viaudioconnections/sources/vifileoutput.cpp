@@ -28,14 +28,14 @@ void ViFileOutput::setFormat(ViAudioFormat format)
 void ViFileOutput::start()
 {
 	LOG("Writing to file started.");
-	mCoder.encode(mBuffer, mFilePath, mBuffer->format(), mFormat);	
+	//mCoder.encode(mBuffer, mFilePath, mBuffer->format(), mFormat);	
 	setState(QAudio::ActiveState);
 }
 
 void ViFileOutput::stop()
 {
 	LOG("Writing to file stopped.");
-	mCoder.stop();
+	//mCoder.stop();
 	setState(QAudio::StoppedState);
 }
 

@@ -13,33 +13,41 @@
 #include "visonginfo.h"
 #include "vipcmconverter.h"
 #include "viechonestresponse.h"
-#include "vicoder.h"
+#include "viaudiocoder.h"
 
 class ViSongCodeGeneratorThread : public QThread
 {
+
 	Q_OBJECT
 
 	signals:
+
 		void finished(QString code, QString version, int codeLength);
 
 	public:
+
 		ViSongCodeGeneratorThread(QObject *parent = 0);
 		void setData(QByteArray *data);
 		void setOffset(int offset);
 
 	protected:
+
 		void run();
 
 	private:
+
 		QByteArray *mData;
 		int mOffset;
+
 };
 
 class ViSongDetector : public QObject
 {
+
 	Q_OBJECT
 
 	public:
+
 		enum State
 		{
 			Idle = 0,
@@ -56,17 +64,20 @@ class ViSongDetector : public QObject
 		};
 
 	signals:
+
 		void stateChanged(ViSongDetector::State state);
 		void songFound(ViSongInfo info);
 
 	private slots:
+
 		void bufferChanged(int size = -1);
 		void codeFinished(QString code, QString version, int codeLength);
 		void replyFinished(QNetworkReply *reply);
 		void downloadFinished(QNetworkReply *reply);
-		void encodingStateChanged(ViCoder::State state);
+		void encodingFinished();
 
 	public:
+
 		ViSongDetector(ViAudioOutput *output);
 		~ViSongDetector();
 		void reset();
@@ -78,11 +89,13 @@ class ViSongDetector : public QObject
 		QList<ViSongInfo> songInfo();
 
 	private:
+
 		void setState(ViSongDetector::State state);
 
 	private:
+
 		QByteArray *mOutput;
-		ViCoder mCoder;
+		ViAudioCoder mCoder;
 
 		ViEchoNestResponse mResponse;
 		ViSongCodeGeneratorThread mThread;
@@ -98,6 +111,7 @@ class ViSongDetector : public QObject
 		QNetworkReply::NetworkError mNetworkError;
 
 		qint8 mRequestsSent;
+
 };
 
 #endif

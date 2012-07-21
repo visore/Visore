@@ -2,7 +2,7 @@
 #define VIFILEINPUT_H
 
 #include "viaudioinput.h"
-#include "vicoder.h"
+#include "viaudiocoder.h"
 
 class ViFileInput : public ViAudioInput
 {
@@ -22,7 +22,7 @@ class ViFileInput : public ViAudioInput
 	protected:
 
 		QString mFilePath;
-		ViCoder mCoder;
+		ViAudioCoder mCoder;
 };
 
 #endif

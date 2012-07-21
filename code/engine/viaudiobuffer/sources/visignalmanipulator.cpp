@@ -1,6 +1,6 @@
 #include "visignalmanipulator.h"
+#include "viaudiomanager.h"
 #include "vipcmconverter.h"
-#include "vicodecmanager.h"
 #include <time.h>
 #include <QtCore/qmath.h>
 
@@ -60,7 +60,7 @@ void ViSignalManipulator::createSignal(QList<qreal> samples, ViAudioBuffer *buff
 	format.setSampleRate(44100);
 	format.setChannelCount(1);
 	format.setSampleSize(16);
-	format.setCodec(ViCodecManager::selected("PCM"));
+	format.setCodec(ViAudioManager::codec("PCM"));
 	format.setSampleType(QAudioFormat::SignedInt);
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	buffer->setFormat(format);

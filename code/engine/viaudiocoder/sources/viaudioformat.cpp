@@ -226,7 +226,7 @@ void ViAudioFormat::setCodec(ViAudioCodec *codec)
 
 bool ViAudioFormat::setCodec(QString codecName)
 {
-	mCodec = ViAudioManager::instance().codec(codecName, ViAudioManager::Supported);
+	mCodec = ViAudioManager::codec(codecName, ViAudioManager::Supported);
 	return mCodec != NULL;
 }
 

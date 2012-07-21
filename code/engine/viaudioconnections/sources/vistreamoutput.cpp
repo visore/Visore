@@ -36,7 +36,7 @@ void ViStreamOutput::setBuffer(ViAudioBuffer *buffer)
 		QObject::disconnect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
 		delete mAudioOutput;
 	}
-	mAudioOutput = new QAudioOutput(mDevice, format(), this);
+	mAudioOutput = new QAudioOutput(mDevice, format().toQAudioFormat(), this);
 	mAudioOutput->setNotifyInterval(25);
 	QObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
 	QObject::connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));

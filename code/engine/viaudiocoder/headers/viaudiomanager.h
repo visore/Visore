@@ -20,33 +20,33 @@ class ViAudioManager
 		};
 
 		~ViAudioManager();
-		static ViAudioManager& instance();
-		ViCoder::Error error();
+		static ViCoder::Error error();
 
-		void addSearchPath(const QString searchPath);
-		void addFileName(const QString coderName, const QString name);
-		void addFileExtension(const QString coderName, const QString extension);
+		static void addSearchPath(const QString searchPath);
+		static void addFileName(const QString coderName, const QString name);
+		static void addFileExtension(const QString coderName, const QString extension);
 
-		ViAudioCodec* codec(const QString name, const ViAudioManager::Mode mode = ViAudioManager::Available);
+		static ViAudioCodec* codec(const QString name, const ViAudioManager::Mode mode = ViAudioManager::Available);
 
-		ViAbstractCoder* coder(const QString name, const ViAudioManager::Mode mode = ViAudioManager::Available);
-		ViAbstractCoder* coder(const ViAudioCodec *codec, const ViAudioManager::Mode mode = ViAudioManager::Available);
-		ViAbstractCoder* coder(const ViAudioFormat &format, const ViAudioManager::Mode mode = ViAudioManager::Available);
+		static ViAbstractCoder* coder(const QString name, const ViAudioManager::Mode mode = ViAudioManager::Available);
+		static ViAbstractCoder* coder(const ViAudioCodec *codec, const ViAudioManager::Mode mode = ViAudioManager::Available);
+		static ViAbstractCoder* coder(const ViAudioFormat &format, const ViAudioManager::Mode mode = ViAudioManager::Available);
 
-		ViAbstractCoder* detect(const QString filePath, const ViAudioManager::Mode mode = ViAudioManager::Available);
-		ViAbstractCoder* detect(const QByteArray &data, const ViAudioManager::Mode mode = ViAudioManager::Available);
+		static ViAbstractCoder* detect(const QString filePath, const ViAudioManager::Mode mode = ViAudioManager::Available);
+		static ViAbstractCoder* detect(const QByteArray &data, const ViAudioManager::Mode mode = ViAudioManager::Available);
 
-		bool isAvailable(const ViAbstractCoder *coder);
-		bool isAvailable(const ViAudioCodec *codec);
-		bool isSupported(const ViAbstractCoder *coder);
-		bool isSupported(const ViAudioCodec *codec);
+		static bool isAvailable(const ViAbstractCoder *coder);
+		static bool isAvailable(const ViAudioCodec *codec);
+		static bool isSupported(const ViAbstractCoder *coder);
+		static bool isSupported(const ViAudioCodec *codec);
 
-		ViCoderList coders(const ViAudioManager::Mode mode = ViAudioManager::Available);
-		ViCodecList codecs(const ViAudioManager::Mode mode = ViAudioManager::Available);
+		static ViCoderList coders(const ViAudioManager::Mode mode = ViAudioManager::Available);
+		static ViCodecList codecs(const ViAudioManager::Mode mode = ViAudioManager::Available);
 
 	protected:
 
 		ViAudioManager();
+		static ViAudioManager& instance();
 		void setError(ViCoder::Error error);
 
 		void initializeSearchPaths();

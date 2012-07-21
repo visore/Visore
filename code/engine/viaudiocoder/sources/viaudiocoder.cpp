@@ -114,10 +114,10 @@ void ViAudioCoder::encode(QByteArray &input, ViAudioFormat inputFormat, QByteArr
 
 ViCoderList ViAudioCoder::coders(ViAudioManager::Mode mode)
 {
-	return ViAudioManager::instance().coders(mode);
+	return ViAudioManager::coders(mode);
 }
 
 ViCodecList ViAudioCoder::codecs(ViAudioManager::Mode mode)
 {
-	return ViAudioManager::instance().codecs(mode);
+	return ViAudioManager::codecs(mode);
 }

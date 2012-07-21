@@ -58,7 +58,7 @@ void ViProcessingChain::finalize()
 	{
 		QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
 		mFileOutput->setBuffer(mOutputBuffer);
-		mFileOutput->setFile(mProject->correctedPath() + QDir::separator() + mProject->nextSongName() + "." + mFileOutput->format().codec().extensions()[0]);
+		mFileOutput->setFile(mProject->correctedPath() + QDir::separator() + mProject->nextSongName() + "." + mFileOutput->format().codec()->extensions()[0]);
 		mFileOutput->start();
 	}
 	else

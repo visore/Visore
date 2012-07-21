@@ -1,10 +1,10 @@
 #include <vicodingchain.h>
+#include <viaudiomanager.h>
 #include <QFile>
 
 ViCodingChain::ViCodingChain()
 	: QThread()
 {
-	mManager = &ViAudioManager::instance();
 	mInputFormat = NULL;
 	mOutputFormat = NULL;
 	mInput = NULL;
@@ -163,12 +163,12 @@ void ViCodingChain::setOutputFormat(ViAudioFormat &format)
 
 void ViCodingChain::detectCoderData()
 {
-	mInputCoder = mManager->detect(*mInputData);
+	mInputCoder = ViAudioManager::detect(*mInputData);
 }
 
 void ViCodingChain::detectCoderFile()
 {
-	mInputCoder = mManager->detect(mInputFilePath);
+	mInputCoder = ViAudioManager::detect(mInputFilePath);
 }
 
 void ViCodingChain::run()
@@ -189,7 +189,7 @@ void ViCodingChain::run()
 		(this->*detectCoder)();
 		if(mInputCoder == NULL)
 		{
-			ViCoder::Error error = mManager->error();
+			ViCoder::Error error = ViAudioManager::error();
 			if(error == ViCoder::UnsupportedCodecError)
 			{
 				setError(ViCoder::UnsupportedInputCodecError);
@@ -213,10 +213,10 @@ void ViCodingChain::run()
 
 	if(mMode != ViCodingChain::DecodeFile && mMode != ViCodingChain::DecodeData)
 	{
-		mOutputCoder = mManager->coder(*mOutputFormat);
+		mOutputCoder = ViAudioManager::coder(*mOutputFormat);
 		if(mOutputCoder == NULL)
 		{
-			ViCoder::Error error = mManager->error();
+			ViCoder::Error error = ViAudioManager::error();
 			if(error == ViCoder::UnsupportedCodecError)
 			{
 				setError(ViCoder::UnsupportedOutputCodecError);

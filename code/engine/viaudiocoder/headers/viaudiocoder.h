@@ -2,6 +2,7 @@
 #define VIAUDIOCODER_H
 
 #include <vicodingchain.h>
+#include <viaudiomanager.h>
 
 class ViAudioCoder : public QObject
 {

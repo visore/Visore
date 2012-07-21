@@ -62,7 +62,7 @@ ViSongDetector::ViSongDetector(ViAudioOutput *output)
 	mKey = "";
 	QObject::connect(&mThread, SIGNAL(finished(QString, QString, int)), this, SLOT(codeFinished(QString, QString, int)));
 	QObject::connect(mAudioOutput->buffer(), SIGNAL(changed(int)), this, SLOT(bufferChanged(int)));
-	QObject::connect(&mCoder, SIGNAL(stateChanged(ViCoder::State)), this, SLOT(encodingStateChanged(ViCoder::State)));
+	QObject::connect(&mCoder, SIGNAL(finished()), this, SLOT(encodingFinished()));
 }
 
 ViSongDetector::~ViSongDetector()
@@ -115,22 +115,22 @@ void ViSongDetector::bufferChanged(int size)
 			format.setSampleSize(16);
 			format.setByteOrder(ViAudioFormat::LittleEndian);
 			format.setChannelCount(1);
-			format.setCodec(ViCodecManager::selected("WAV"));
+			format.setCodec(ViAudioManager::codec("WAV"));
 			mOutput = new QByteArray();
-			mCoder.encode(mAudioOutput->buffer(), mOutput, mAudioOutput->buffer()->format(), format);
+			//mCoder.encode(mAudioOutput->buffer(), mOutput, mAudioOutput->buffer()->format(), format);
 		}
 	}
 }
 
-void ViSongDetector::encodingStateChanged(ViCoder::State state)
+void ViSongDetector::encodingFinished()
 {
-	if(state == ViCoder::SuccessState)
+	if(mCoder.error() == ViCoder::NoError)
 	{
 		setState(ViSongDetector::CodeGeneration);
 		mThread.setData(mOutput);
 		mThread.start();
 	}
-	else if(state != ViCoder::ActiveState)
+	else
 	{
 		delete mOutput;
 		mOutput = NULL;

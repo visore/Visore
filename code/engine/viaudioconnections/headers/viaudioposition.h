@@ -2,7 +2,7 @@
 #define VIAUDIOPOSITION_H
 
 #include <QtGlobal>
-#include <QAudioFormat>
+#include <viaudioformat.h>
 
 class ViAudioPosition
 {
@@ -21,22 +21,22 @@ class ViAudioPosition
 	public:
 
 		ViAudioPosition();
-		ViAudioPosition(const qreal microseconds, const ViAudioPosition::Unit unit, const QAudioFormat format);
+		ViAudioPosition(const qreal microseconds, const ViAudioPosition::Unit unit, const ViAudioFormat format);
 
-		static qreal convertPosition(const qreal position, const ViAudioPosition::Unit fromUnit, const ViAudioPosition::Unit toUnit, const QAudioFormat &format);
+		static qreal convertPosition(const qreal position, const ViAudioPosition::Unit fromUnit, const ViAudioPosition::Unit toUnit, const ViAudioFormat &format);
 
-		void setPosition(const qreal position, const ViAudioPosition::Unit unit, const QAudioFormat format);
+		void setPosition(const qreal position, const ViAudioPosition::Unit unit, const ViAudioFormat format);
 		void setPosition(const qreal position, const ViAudioPosition::Unit unit);
 		qreal position(const ViAudioPosition::Unit unit) const;
 
-		QAudioFormat format() const;
+		ViAudioFormat format() const;
 		
 		bool operator ==(const ViAudioPosition &other) const;
 		bool operator !=(const ViAudioPosition &other) const;
 
 	private:
 		qreal mMicroseconds;
-		QAudioFormat mFormat;
+		ViAudioFormat mFormat;
 };
 
 #endif

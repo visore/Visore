@@ -2,7 +2,7 @@
 #define VIFILEOUTPUT_H
 
 #include "viaudiooutput.h"
-#include "vicoder.h"
+#include "viaudiocoder.h"
 
 class ViFileOutput : public ViAudioOutput
 {
@@ -23,7 +23,7 @@ class ViFileOutput : public ViAudioOutput
 	protected:
 
 		QString mFilePath;
-		ViCoder mCoder;
+		ViAudioCoder mCoder;
 		ViAudioFormat mFormat;
 
 };

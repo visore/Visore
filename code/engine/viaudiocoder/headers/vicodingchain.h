@@ -2,7 +2,6 @@
 #define VICODINGCHAIN_H
 
 #include <vicodingchaincomponent.h>
-#include <viaudiomanager.h>
 
 class ViCodingChain : public QThread
 {
@@ -70,8 +69,6 @@ class ViCodingChain : public QThread
 		ViAudioFormat *mInputFormat;
 		ViAudioFormat *mOutputFormat;
 		bool mReferenceInputFormat;
-
-		ViAudioManager *mManager; //If not here, will automatically destruct coders
 
 		ViAbstractCoder *mInputCoder;
 		ViAbstractCoder *mOutputCoder;

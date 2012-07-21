@@ -9,7 +9,7 @@ FILE(GLOB VI_SONGDETECTOR_HEADERS ${HEADERS}/*.h)
 
 #Create library
 ADD_LIBRARY(visongdetector SHARED ${VI_SONGDETECTOR_HEADERS} ${VI_SONGDETECTOR_SOURCES})
-TARGET_LINK_LIBRARIES(visongdetector vicoder echonest)
+TARGET_LINK_LIBRARIES(visongdetector viaudiocoder ${ECHONEST_LIBRARY})
 QT5_USE_MODULES(visongdetector Network)
 
 #Install file

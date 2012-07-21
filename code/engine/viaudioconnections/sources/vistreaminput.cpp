@@ -77,7 +77,7 @@ void ViStreamInput::setFormat(ViAudioFormat format)
 	{
 		delete mAudioInput;
 	}
-	mAudioInput = new QAudioInput(mDevice, mFormat, this);
+	mAudioInput = new QAudioInput(mDevice, mFormat.toQAudioFormat(), this);
 }
 
 void ViStreamInput::start()

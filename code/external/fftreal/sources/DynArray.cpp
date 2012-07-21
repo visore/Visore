@@ -30,6 +30,12 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include	<cassert>
 //#include	"DynArray.h"
 
+//Visore function for Qt conflict
+#ifndef assert
+	#include <stdio.h> 
+	#define assert(exp) if(!(exp)) printf("FFTReal failed!")
+#endif
+
 
 namespace ffft
 {
