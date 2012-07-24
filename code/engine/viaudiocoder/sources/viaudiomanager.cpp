@@ -240,7 +240,7 @@ ViAbstractCoder* ViAudioManager::coder(const ViAudioCodec *codec, const ViAudioM
 
 ViAbstractCoder* ViAudioManager::coder(const ViAudioFormat &format, const ViAudioManager::Mode mode)
 {
-	return instance().coder(format.codec(), mode);
+	return ViAudioManager::coder(format.codec(), mode);
 }
 
 ViAbstractCoder* ViAudioManager::detect(const QString filePath, const ViAudioManager::Mode mode)
@@ -330,13 +330,12 @@ ViAbstractCoder* ViAudioManager::detect(const QByteArray &data, const ViAudioMan
 
 bool ViAudioManager::isAvailable(const ViAbstractCoder *coder)
 {
-	ViAudioManager &manager = ViAudioManager::instance();
-	manager.setError(ViCoder::NoError);
+	setError(ViCoder::NoError);
 	if(coder != NULL)
 	{
-		for(int i = 0; i < manager.mAvailableCoders.size(); ++i)
+		for(int i = 0; i < mAvailableCoders.size(); ++i)
 		{
-			if((*manager.mAvailableCoders[i]) == (*coder))
+			if((*mAvailableCoders[i]) == (*coder))
 			{
 				return true;
 			}
@@ -347,13 +346,12 @@ bool ViAudioManager::isAvailable(const ViAbstractCoder *coder)
 
 bool ViAudioManager::isAvailable(const ViAudioCodec *codec)
 {
-	ViAudioManager &manager = ViAudioManager::instance();
-	manager.setError(ViCoder::NoError);
+	setError(ViCoder::NoError);
 	if(codec != NULL)
 	{
-		for(int i = 0; i < manager.mAvailableCodecs.size(); ++i)
+		for(int i = 0; i < mAvailableCodecs.size(); ++i)
 		{
-			if((*manager.mAvailableCodecs[i]) == (*codec))
+			if((*mAvailableCodecs[i]) == (*codec))
 			{
 				return true;
 			}
@@ -364,13 +362,12 @@ bool ViAudioManager::isAvailable(const ViAudioCodec *codec)
 
 bool ViAudioManager::isSupported(const ViAbstractCoder *coder)
 {
-	ViAudioManager &manager = ViAudioManager::instance();
-	manager.setError(ViCoder::NoError);
+	setError(ViCoder::NoError);
 	if(coder != NULL)
 	{
-		for(int i = 0; i < manager.mSupportedCoders.size(); ++i)
+		for(int i = 0; i < mSupportedCoders.size(); ++i)
 		{
-			if((*manager.mSupportedCoders[i]) == (*coder))
+			if((*mSupportedCoders[i]) == (*coder))
 			{
 				return true;
 			}
@@ -381,13 +378,12 @@ bool ViAudioManager::isSupported(const ViAbstractCoder *coder)
 
 bool ViAudioManager::isSupported(const ViAudioCodec *codec)
 {
-	ViAudioManager &manager = ViAudioManager::instance();
-	manager.setError(ViCoder::NoError);
+	setError(ViCoder::NoError);
 	if(codec != NULL)
 	{
-		for(int i = 0; i < manager.mSupportedCodecs.size(); ++i)
+		for(int i = 0; i < mSupportedCodecs.size(); ++i)
 		{
-			if((*manager.mSupportedCodecs[i]) == (*codec))
+			if((*mSupportedCodecs[i]) == (*codec))
 			{
 				return true;
 			}

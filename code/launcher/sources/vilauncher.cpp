@@ -81,6 +81,8 @@ int main(int argc, char** argv)
 		command += files[i] + separator;
 	}
 
+	command += string(QTPATH) + separator;
+
 	#ifdef WINDOWS
 		command += " && start visore.exe";
 	#else

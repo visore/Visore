@@ -35,11 +35,6 @@ class ViAudioManager
 		static ViAbstractCoder* detect(const QString filePath, const ViAudioManager::Mode mode = ViAudioManager::Available);
 		static ViAbstractCoder* detect(const QByteArray &data, const ViAudioManager::Mode mode = ViAudioManager::Available);
 
-		static bool isAvailable(const ViAbstractCoder *coder);
-		static bool isAvailable(const ViAudioCodec *codec);
-		static bool isSupported(const ViAbstractCoder *coder);
-		static bool isSupported(const ViAudioCodec *codec);
-
 		static ViCoderList coders(const ViAudioManager::Mode mode = ViAudioManager::Available);
 		static ViCodecList codecs(const ViAudioManager::Mode mode = ViAudioManager::Available);
 
@@ -48,6 +43,11 @@ class ViAudioManager
 		ViAudioManager();
 		static ViAudioManager& instance();
 		void setError(ViCoder::Error error);
+
+		bool isAvailable(const ViAbstractCoder *coder);
+		bool isAvailable(const ViAudioCodec *codec);
+		bool isSupported(const ViAbstractCoder *coder);
+		bool isSupported(const ViAudioCodec *codec);
 
 		void initializeSearchPaths();
 		void testLibraries();

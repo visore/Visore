@@ -265,3 +265,17 @@ QAudioFormat ViAudioFormat::toQAudioFormat()
 	
 	return format;
 }
+
+ViAudioFormat ViAudioFormat::defaultFormat()
+{
+	ViAudioFormat format;
+	format.setSampleSize(16);
+	format.setSampleRate(44100);
+	format.setSampleType(ViAudioFormat::SignedInt);
+	format.setChannelCount(2);
+	format.setBitrateMode(ViAudioFormat::ConstantBitrate);
+	format.setBitrate(256);
+	format.setByteOrder(ViAudioFormat::LittleEndian);
+	format.setCodec(ViAudioManager::codec("WAVE"));
+	return format;
+}

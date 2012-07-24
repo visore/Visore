@@ -1,5 +1,6 @@
 #include "viformatwidget.h"
 #include "ui_viformatwidget.h"
+#include "viaudiomanager.h"
 
 ViFormatWidget::ViFormatWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -18,7 +19,7 @@ ViFormatWidget::~ViFormatWidget()
 ViAudioFormat ViFormatWidget::format()
 {
 	ViAudioFormat result;
-	result.setCodec(ViCodecManager::selected(mUi->codecBox->itemData(mUi->codecBox->currentIndex()).toString()));
+	result.setCodec(ViAudioManager::codec(mUi->codecBox->itemData(mUi->codecBox->currentIndex()).toString()));
 	result.setByteOrder((ViAudioFormat::Endian) mUi->byteOrderBox->itemData(mUi->byteOrderBox->currentIndex()).toInt());
 	result.setSampleType((ViAudioFormat::SampleType) mUi->sampleTypeBox->itemData(mUi->sampleTypeBox->currentIndex()).toInt());
 	result.setSampleRate(mUi->sampleRateBox->itemData(mUi->sampleRateBox->currentIndex()).toInt());
@@ -29,7 +30,7 @@ ViAudioFormat ViFormatWidget::format()
 
 void ViFormatWidget::populate()
 {
-	QList<ViCodec> codecs = ViCodecManager::selected(ViCodec::OutputType);
+	/*QList<ViCodec> codecs = ViCodecManager::selected(ViCodec::OutputType);
 	codecs.append(ViCodecManager::selected(ViCodec::InputOutputType));
 	for(int i = 0; i < codecs.size(); ++i)
 	{
@@ -89,7 +90,7 @@ void ViFormatWidget::populate()
 		{
 			mUi->channelsBox->addItem("Stereo (2 channels)", 2);
 		}
-	}
+	}*/
 }
 
 void ViFormatWidget::setDefaults()

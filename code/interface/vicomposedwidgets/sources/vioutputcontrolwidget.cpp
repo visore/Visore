@@ -1,5 +1,6 @@
 #include "vioutputcontrolwidget.h"
 #include "ui_vioutputcontrolwidget.h"
+#include "viaudiomanager.h"
 
 ViOutputControlWidget::ViOutputControlWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -20,9 +21,9 @@ ViOutputControlWidget::~ViOutputControlWidget()
 
 void ViOutputControlWidget::selectFileOutput()
 {
-	ViCodec codec = ViCodecManager::selected(mUi->formatBox->itemData(mUi->formatBox->currentIndex()).toString());
-	QString extensions = codec.abbreviation() + " (";
-	QList<QString> list = codec.starExtensions();
+	ViAudioCodec *codec = ViAudioManager::codec(mUi->formatBox->itemData(mUi->formatBox->currentIndex()).toString());
+	QString extensions = codec->abbreviation() + " (";
+	QList<QString> list = codec->extensions(".*");
 	for(int i = 0; i < list.size(); ++i)
 	{
 		extensions += list[i];
@@ -32,7 +33,7 @@ void ViOutputControlWidget::selectFileOutput()
 		}
 	}
 	extensions += ")";
-	QString file = QFileDialog::getSaveFileName(this, "Save Audio File", QDir::homePath() + QDir::separator() + "output." + codec.extensions()[0], extensions);
+	QString file = QFileDialog::getSaveFileName(this, "Save Audio File", QDir::homePath() + QDir::separator() + "output." + codec->extensions()[0], extensions);
 	mUi->fileLineEdit->setText(file);
 }
 
@@ -50,14 +51,13 @@ void ViOutputControlWidget::save()
 
 void ViOutputControlWidget::populate()
 {
-	QList<ViCodec> codecs = ViCodecManager::selected(ViCodec::OutputType);
-	codecs.append(ViCodecManager::selected(ViCodec::InputOutputType));
+	ViCodecList codecs = ViAudioManager::codecs();
 	for(int i = 0; i < codecs.size(); ++i)
 	{
-		mUi->formatBox->addItem(codecs[i].abbreviation() + " (" + codecs[i].name() + ")", codecs[i].abbreviation());
+		mUi->formatBox->addItem(codecs[i]->abbreviation() + " (" + codecs[i]->name() + ")", codecs[i]->abbreviation());
 	}
 
-	QList<ViAudioFormat::Endian> byteOrders = ViCodecManager::byteOrders();
+	/*QList<ViAudioFormat::Endian> byteOrders = ViCodecManager::byteOrders();
 	for(int i = 0; i < byteOrders.size(); ++i)
 	{
 		if(byteOrders[i] == ViAudioFormat::LittleEndian)
@@ -110,7 +110,7 @@ void ViOutputControlWidget::populate()
 		{
 			mUi->channelsBox->addItem("Stereo (2 channels)", 2);
 		}
-	}
+	}*/
 }
 
 void ViOutputControlWidget::setDefaults()

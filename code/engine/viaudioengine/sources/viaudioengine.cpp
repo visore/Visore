@@ -23,7 +23,7 @@ ViAudioEngine::ViAudioEngine()
 
 	mProcessingChain.setTransmission(mFileOutput);
 	ViAudioFormat fileFormat = ViAudioFormat::defaultFormat();
-	fileFormat.setCodec(ViCodecManager::selected("AC3"));
+	fileFormat.setCodec(ViAudioManager::codec("WAVE"));
 	mFileOutput->setFormat(fileFormat);
 
 	mStreamInput->setFormat(ViAudioFormat::defaultFormat());

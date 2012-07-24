@@ -14,7 +14,6 @@ int main(int argc, char *argv[])
 	application.setApplicationVersion(ViManager::version().toString());
 
 	//Register SIGNAL/SLOT parameter types
-	qRegisterMetaType<ViCoder::State>("ViCoder::State");
 	qRegisterMetaType<ViAudioPosition>("ViAudioPosition");
 
 	ViMainWindow *window = ViMainWindow::instance();

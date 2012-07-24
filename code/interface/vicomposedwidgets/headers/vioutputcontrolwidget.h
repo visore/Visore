@@ -2,7 +2,6 @@
 #define VIOUTPUTCONTROLWIDGET_H
 
 #include <QFileDialog>
-#include "vicodecmanager.h"
 #include "vithememanager.h"
 #include "viwidget.h"
 

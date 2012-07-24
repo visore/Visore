@@ -93,6 +93,7 @@ class ViAudioFormat
 		bool setCodec(QString codecName);
 
 		QAudioFormat toQAudioFormat();
+		static ViAudioFormat defaultFormat();
 
 	private:
 

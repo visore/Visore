@@ -10,7 +10,6 @@ ViThemeManager::ViThemeManager()
 
 ViThemeManager::~ViThemeManager()
 {
-	delete mCurrentTheme;
 }
 
 ViThemeManager* ViThemeManager::instance()

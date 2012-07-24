@@ -2,6 +2,11 @@
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 SET(SOURCES ${ROOT}/sources)
 
+#Definitions
+GET_TARGET_PROPERTY(QtCoreLocation Qt5::Core LOCATION)
+GET_FILENAME_COMPONENT(QtPath ${QtCoreLocation} PATH)
+ADD_DEFINITIONS(-DQTPATH="${QtPath}")
+
 #Initiate source files
 FILE(GLOB VI_LAUNCHER_SOURCES ${SOURCES}/*.cpp)
 

@@ -9,7 +9,7 @@ FILE(GLOB VI_AUDIOCODER_HEADERS ${HEADERS}/*.h ${HEADERS}/*/*.h)
 
 #Create library
 ADD_LIBRARY(viaudiocoder SHARED ${VI_AUDIOCODER_HEADERS} ${VI_AUDIOCODER_SOURCES})
-TARGET_LINK_LIBRARIES(viaudiocoder viessentials)
+TARGET_LINK_LIBRARIES(viaudiocoder viessentials resample)
 
 #Install file
 INSTALL(TARGETS viaudiocoder DESTINATION engine)
