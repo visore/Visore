@@ -22,10 +22,9 @@ ViAudioFormat ViFileInput::format()
 void ViFileInput::start()
 {
 	LOG("Reading file started.");
-	ViAudioFormat format;
-	//mCoder.decode(mFilePath, mBuffer, &format);
-	mBuffer->setFormat(format);
-	emit formatChanged(format);
+	mCoder.disconnect();
+	QObject::connect(&mCoder, SIGNAL(formatChanged(ViAudioFormat)), mBuffer, SLOT(setFormat(ViAudioFormat)));
+	mCoder.decode(mFilePath, mBuffer);
 	setState(QAudio::ActiveState);
 }
 

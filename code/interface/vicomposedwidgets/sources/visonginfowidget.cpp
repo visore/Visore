@@ -22,7 +22,7 @@ ViSongInfoWidget::ViSongInfoWidget(QWidget *parent)
 	QObject::connect(mTimer, SIGNAL(timeout()), this, SLOT(switchInfo()));
 	mTimer->start(INFO_CHANGE_TIMEOUT);
 
-	//QObject::connect(mEngine, SIGNAL(songInfoChanged(ViSongInfo)), this, SLOT(changeSongInfo(ViSongInfo)));
+	QObject::connect(mEngine, SIGNAL(songDetected(ViSongInfo)), this, SLOT(changeSongInfo(ViSongInfo)));
 }
 
 ViSongInfoWidget::~ViSongInfoWidget()

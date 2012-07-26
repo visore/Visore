@@ -5,9 +5,7 @@
 #include <QThread>
 #include <QFile>
 #include <viabstractcoder.h>
-
-#include<iostream>
-using namespace std;
+#include <viaudiobuffer.h>
 
 /**********************************************************
 ViCodingChainComponent
@@ -15,10 +13,12 @@ ViCodingChainComponent
 
 class ViCodingChainFileInput;
 class ViCodingChainDataInput;
+class ViCodingChainBufferInput;
 class ViCodingChainDecoder;
 class ViCodingChainEncoder;
 class ViCodingChainFileOutput;
 class ViCodingChainDataOutput;
+class ViCodingChainBufferOutput;
 
 class ViCodingChainComponent : public QObject
 {
@@ -27,10 +27,12 @@ class ViCodingChainComponent : public QObject
 
 	friend class ViCodingChainFileInput;
 	friend class ViCodingChainDataInput;
+	friend class ViCodingChainBufferInput;
 	friend class ViCodingChainDecoder;
 	friend class ViCodingChainEncoder;
 	friend class ViCodingChainFileOutput;
 	friend class ViCodingChainDataOutput;
+	friend class ViCodingChainBufferOutput;
 
 	signals:
 
@@ -140,6 +142,33 @@ class ViCodingChainDataInput : public ViCodingChainInput
 
 		QByteArray *mByteArray;
 		QDataStream *mStream;
+
+};
+
+/**********************************************************
+ViCodingChainBufferInput
+**********************************************************/
+
+class ViCodingChainBufferInput : public ViCodingChainInput
+{
+
+	Q_OBJECT
+
+	public:
+
+		ViCodingChainBufferInput();
+		~ViCodingChainBufferInput();
+		void setBuffer(ViAudioBuffer *buffer);
+		bool hasData();
+		int size();
+		void initialize();
+		void execute();
+		void finalize();
+
+	protected:
+
+		ViAudioBuffer *mBuffer;
+		ViAudioBufferStream *mStream;
 
 };
 
@@ -267,6 +296,33 @@ class ViCodingChainDataOutput : public ViCodingChainOutput
 
 		QByteArray *mByteArray;
 		QDataStream *mStream;
+
+};
+
+/**********************************************************
+ViCodingChainBufferOutput
+**********************************************************/
+
+class ViCodingChainBufferOutput : public ViCodingChainOutput
+{
+
+	Q_OBJECT
+
+	public:
+
+		ViCodingChainBufferOutput();
+		~ViCodingChainBufferOutput();
+		void setBuffer(ViAudioBuffer *buffer);
+		void seek(qint64 position);
+		void initialize();
+		void execute();
+		void finalize();
+
+	protected:
+
+		ViAudioBuffer *mBuffer;
+		ViAudioBufferStream *mStream;
+
 
 };
 

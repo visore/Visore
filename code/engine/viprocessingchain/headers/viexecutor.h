@@ -26,6 +26,7 @@ class ViExecutor : public QThread
 	protected slots:
 
 		void updateProcessingRate();
+		void setFormat(ViAudioFormat format);
 
 	public:
 

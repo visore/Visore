@@ -13,7 +13,6 @@ class ViAudioTransmission : public QObject
 
 	signals:
 
-		void formatChanged(ViAudioFormat format);
 		void stateChanged(QAudio::State state);
 		void finished();
 

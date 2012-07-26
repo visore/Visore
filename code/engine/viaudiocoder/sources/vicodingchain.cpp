@@ -5,25 +5,9 @@
 ViCodingChain::ViCodingChain()
 	: QThread()
 {
-	mInputFormat = NULL;
-	mOutputFormat = NULL;
 	mInput = NULL;
 	mOutput = NULL;
 	setMode(ViCodingChain::Unknown);
-}
-
-ViCodingChain::~ViCodingChain()
-{
-	if(!mReferenceInputFormat && mInputFormat != NULL)
-	{
-		delete mInputFormat;
-		mInputFormat = NULL;
-	}
-	if(mOutputFormat != NULL)
-	{
-		delete mOutputFormat;
-		mOutputFormat = NULL;
-	}
 }
 
 void ViCodingChain::setMode(ViCodingChain::Mode mode)
@@ -53,18 +37,6 @@ void ViCodingChain::reset()
 	mOutput = NULL;
 	mInputCoder = NULL;
 	mOutputCoder = NULL;
-
-	if(!mReferenceInputFormat && mInputFormat != NULL)
-	{
-		delete mInputFormat;
-	}
-	if(mOutputFormat != NULL)
-	{
-		delete mOutputFormat;
-	}
-	mInputFormat = NULL;
-	mOutputFormat = NULL;
-	mReferenceInputFormat = false;
 }
 
 void ViCodingChain::setError(ViCoder::Error error)
@@ -129,36 +101,26 @@ void ViCodingChain::setOutputData(QByteArray &array)
 	mOutput = &mDataOutput;
 }
 
-void ViCodingChain::setInputFormat(ViAudioFormat *format)
+void ViCodingChain::setInputBuffer(ViAudioBuffer *buffer)
 {
-	if(!mReferenceInputFormat && mInputFormat != NULL)
-	{
-		delete mInputFormat;
-		mInputFormat = NULL;
-	}
-	mReferenceInputFormat = true;
+	mBufferInput.setBuffer(buffer);
+	mInput = &mBufferInput;
+}
+
+void ViCodingChain::setOutputBuffer(ViAudioBuffer *buffer)
+{
+	mBufferOutput.setBuffer(buffer);
+	mOutput = &mBufferOutput;
+}
+
+void ViCodingChain::setInputFormat(ViAudioFormat format)
+{
 	mInputFormat = format;
 }
 
-void ViCodingChain::setInputFormat(ViAudioFormat &format)
+void ViCodingChain::setOutputFormat(ViAudioFormat format)
 {
-	if(!mReferenceInputFormat && mInputFormat != NULL)
-	{
-		delete mInputFormat;
-		mInputFormat = NULL;
-	}
-	mReferenceInputFormat = false;
-	mInputFormat = new ViAudioFormat(format);
-}
-
-void ViCodingChain::setOutputFormat(ViAudioFormat &format)
-{
-	if(mOutputFormat != NULL)
-	{
-		delete mOutputFormat;
-		mOutputFormat = NULL;
-	}
-	mOutputFormat = new ViAudioFormat(format);
+	mOutputFormat = format;
 }
 
 void ViCodingChain::detectCoderData()
@@ -213,7 +175,7 @@ void ViCodingChain::run()
 
 	if(mMode != ViCodingChain::DecodeFile && mMode != ViCodingChain::DecodeData)
 	{
-		mOutputCoder = ViAudioManager::coder(*mOutputFormat);
+		mOutputCoder = ViAudioManager::coder(mOutputFormat);
 		if(mOutputCoder == NULL)
 		{
 			ViCoder::Error error = ViAudioManager::error();
@@ -258,10 +220,10 @@ void ViCodingChain::run()
 		mInput->setNext(&mDecoder);
 		mDecoder.setNext(&mEncoder);
 		mEncoder.setNext(mOutput);
-		mOutputCoder->setFormat(ViAudio::AudioOutput, *mOutputFormat);
+		mOutputCoder->setFormat(ViAudio::AudioOutput, mOutputFormat);
 		if(mMode == ViCodingChain::ConvertDataToFile || mMode == ViCodingChain::ConvertDataToData)
 		{
-			mInputCoder->setFormat(ViAudio::AudioInput, *mInputFormat);
+			mInputCoder->setFormat(ViAudio::AudioInput, mInputFormat);
 		}
 	}
 	else if(mMode == ViCodingChain::DecodeFile || mMode == ViCodingChain::DecodeData)
@@ -270,14 +232,14 @@ void ViCodingChain::run()
 		mDecoder.setNext(mOutput);
 		if(mMode == ViCodingChain::DecodeData)
 		{
-			mInputCoder->setFormat(ViAudio::AudioInput, *mInputFormat);
+			mInputCoder->setFormat(ViAudio::AudioInput, mInputFormat);
 		}
 	}
 	else if(mMode == ViCodingChain::EncodeFile || mMode == ViCodingChain::EncodeData)
 	{
 		mInput->setNext(&mEncoder);
 		mEncoder.setNext(mOutput);
-		mOutputCoder->setFormat(ViAudio::AudioOutput, *mOutputFormat);
+		mOutputCoder->setFormat(ViAudio::AudioOutput, mOutputFormat);
 	}
 
 	mInput->initialize();
@@ -289,6 +251,7 @@ void ViCodingChain::run()
 	if(mMode != ViCodingChain::EncodeFile && mMode != ViCodingChain::EncodeData)
 	{
 		mDecoder.setCoder(mInputCoder);
+		QObject::connect(mInputCoder, SIGNAL(formatChanged(ViAudioFormat)), this, SIGNAL(formatChanged(ViAudioFormat)), Qt::UniqueConnection);
 		mInputCoder->load();
 		if(mError != ViCoder::NoError) return;
 		mDecoder.initialize();
@@ -303,9 +266,9 @@ void ViCodingChain::run()
 		if(mError != ViCoder::NoError) return;
 		if(mMode == ViCodingChain::EncodeFile || mMode == ViCodingChain::EncodeData)
 		{
-			mOutputCoder->setFormat(ViAudio::AudioInput, *mInputFormat);
-			mInput->setSampleSize(mInputFormat->sampleSize());
-			mEncoder.changeFormat(*mInputFormat);
+			mOutputCoder->setFormat(ViAudio::AudioInput, mInputFormat);
+			mInput->setSampleSize(mInputFormat.sampleSize());
+			mEncoder.changeFormat(mInputFormat);
 		}
 	}
 
@@ -349,7 +312,7 @@ void ViCodingChain::run()
 	{
 		if(mMode == ViCodingChain::DecodeFile || mMode == ViCodingChain::DecodeData)
 		{
-			*mInputFormat = mInputCoder->format(ViAudio::AudioInput);
+			mInputFormat = mInputCoder->format(ViAudio::AudioInput);
 		}
 		mDecoder.finalize();
 		if(mError != ViCoder::NoError) return;

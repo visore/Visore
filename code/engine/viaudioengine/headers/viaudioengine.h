@@ -60,6 +60,9 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		//Input
 		void inputChanged(ViAudio::Input input);		
 
+		//Song detector
+		void songDetected(ViSongInfo info);
+
 		//Spectrum
 		void spectrumProgressed(short percentage);
 		void spectrumFinished();
@@ -97,6 +100,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		ViProcessingChain mProcessingChain;
 		ViSingleExecutor mExecutor;
 
+		ViSongDetector mSongDetector;
 		ViSpectrumAnalyzer mSpectrumAnalyzer;
 		ViCorrelator mCorrelator;
 		ViEndDetector mEndDetector;

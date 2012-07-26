@@ -3,6 +3,7 @@
 void ViMultiExecutor::runNormal()
 {
 	int size;
+	do
 	{
 		size = mReadStream->read(mInputChunk->data(), mInputChunk->size());
 		if(size > 0)

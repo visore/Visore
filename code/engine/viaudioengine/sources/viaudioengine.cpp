@@ -21,10 +21,10 @@ ViAudioEngine::ViAudioEngine()
 	mStreamOutput->setFormat(ViAudioFormat::defaultFormat());
 	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
 
-	mProcessingChain.setTransmission(mFileOutput);
+	/*mProcessingChain.setTransmission(mFileOutput);
 	ViAudioFormat fileFormat = ViAudioFormat::defaultFormat();
 	fileFormat.setCodec(ViAudioManager::codec("WAVE"));
-	mFileOutput->setFormat(fileFormat);
+	mFileOutput->setFormat(fileFormat);*/
 
 	mStreamInput->setFormat(ViAudioFormat::defaultFormat());
 	mStreamInput->setDevice(QAudioDeviceInfo::defaultInputDevice());
@@ -32,8 +32,12 @@ ViAudioEngine::ViAudioEngine()
 	mProcessingChain.attach(ViAudio::AudioInput, &mInputWaveFormer);
 	mProcessingChain.attach(ViAudio::AudioOutput, &mOutputWaveFormer);
 
+	//Song detector
+	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
+	mSongDetector.setKey("G1TZBE4IHJAYUSNCN");
+	mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
+
 	QObject::connect(&mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
-	mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -67,10 +71,12 @@ void ViAudioEngine::changeInput(ViAudio::Input input)
 {
 	if(input == ViAudio::File)
 	{
+		//mProcessingChain.detach(&mEndDetector);
 		mProcessingChain.setTransmission(mFileInput);
 	}
 	else if(input == ViAudio::Line)
 	{
+		//mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
 		mProcessingChain.setTransmission(mStreamInput);
 	}
 	emit inputChanged(input);

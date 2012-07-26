@@ -22,7 +22,6 @@ ViAudioFormat ViFileOutput::format()
 void ViFileOutput::setFormat(ViAudioFormat format)
 {
 	mFormat = format;
-	emit formatChanged(format);
 }
 
 void ViFileOutput::start()

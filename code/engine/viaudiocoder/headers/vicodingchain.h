@@ -12,6 +12,7 @@ class ViCodingChain : public QThread
 
 		void failed(ViCoder::Error error);
 		void progressed(qreal percentage);
+		void formatChanged(ViAudioFormat format);
 
 	protected slots:
 
@@ -33,7 +34,6 @@ class ViCodingChain : public QThread
 		};
 
 		ViCodingChain();
-		~ViCodingChain();
 
 		void setMode(ViCodingChain::Mode mode);
 
@@ -43,9 +43,11 @@ class ViCodingChain : public QThread
 		void setInputData(QByteArray &array);
 		void setOutputData(QByteArray &array);
 
-		void setInputFormat(ViAudioFormat *format);
-		void setInputFormat(ViAudioFormat &format);
-		void setOutputFormat(ViAudioFormat &format);
+		void setInputBuffer(ViAudioBuffer *buffer);
+		void setOutputBuffer(ViAudioBuffer *buffer);
+
+		void setInputFormat(ViAudioFormat format);
+		void setOutputFormat(ViAudioFormat format);
 
 		void run();
 
@@ -66,8 +68,8 @@ class ViCodingChain : public QThread
 		QString mInputFilePath;
 		QByteArray *mInputData;
 
-		ViAudioFormat *mInputFormat;
-		ViAudioFormat *mOutputFormat;
+		ViAudioFormat mInputFormat;
+		ViAudioFormat mOutputFormat;
 		bool mReferenceInputFormat;
 
 		ViAbstractCoder *mInputCoder;
@@ -81,6 +83,9 @@ class ViCodingChain : public QThread
 
 		ViCodingChainDataInput mDataInput;
 		ViCodingChainDataOutput mDataOutput;
+
+		ViCodingChainBufferInput mBufferInput;
+		ViCodingChainBufferOutput mBufferOutput;
 
 		ViCodingChainDecoder mDecoder;
 		ViCodingChainEncoder mEncoder;

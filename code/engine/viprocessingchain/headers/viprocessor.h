@@ -7,6 +7,7 @@
 #include "vichunk.h"
 #include "viaudioformat.h"
 #include "vilogger.h"
+#include "viaudiobuffer.h"
 
 class ViProcessor : public QObject, public QRunnable, public ViId
 {
@@ -21,6 +22,8 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 	public:
 
 		ViProcessor();
+
+		virtual void setBuffer(ViAudioBuffer *buffer, ViAudio::Mode mode = ViAudio::AudioInput) = 0;
 
 		virtual void setWindowSize(int windowSize);
 		virtual int windowSize();
@@ -46,10 +49,12 @@ class ViObserver : public ViProcessor
 	public:
 
 		ViObserver();
+		virtual void setBuffer(ViAudioBuffer *buffer, ViAudio::Mode mode);
 		virtual void setData(const ViSampleChunk *data);
 
 	protected:
 
+		ViAudioBuffer *mBuffer;
 		const ViSampleChunk *mData;
 
 };
@@ -60,10 +65,12 @@ class ViModifier : public ViProcessor
 	public:
 
 		ViModifier();
+		virtual void setBuffer(ViAudioBuffer *buffer, ViAudio::Mode mode);
 		virtual void setData(ViSampleChunk *data);
 
 	protected:
 
+		ViAudioBuffer *mBuffer;
 		ViSampleChunk *mData;
 
 };
@@ -74,10 +81,12 @@ class ViDualObserver : public ViObserver
 	public:
 
 		ViDualObserver();
+		virtual void setBuffer(ViAudioBuffer *buffer, ViAudio::Mode mode);
 		virtual void setData(const ViSampleChunk *data, const ViSampleChunk *data2);
 
 	protected:
 
+		ViAudioBuffer *mBuffer2;
 		const ViSampleChunk *mData2;
 
 };

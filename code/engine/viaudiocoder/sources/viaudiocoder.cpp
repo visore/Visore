@@ -10,6 +10,7 @@ ViAudioCoder::ViAudioCoder()
 	QObject::connect(mChain, SIGNAL(finished()), this, SIGNAL(finished()));
 	QObject::connect(mChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(mChain, SIGNAL(failed(ViCoder::Error)), this, SLOT(setError(ViCoder::Error)));
+	QObject::connect(mChain, SIGNAL(formatChanged(ViAudioFormat)), this, SIGNAL(formatChanged(ViAudioFormat)));
 }
 
 ViAudioCoder::~ViAudioCoder()
@@ -34,6 +35,16 @@ ViCoder::Error ViAudioCoder::error()
 QString ViAudioCoder::errorString()
 {
 	return ViCoder::errorString(mError);
+}
+
+bool ViAudioCoder::isRunning()
+{
+	return mChain->isRunning();
+}
+
+bool ViAudioCoder::isFinished()
+{
+	return mChain->isFinished();
 }
 
 void ViAudioCoder::convert(QString inputFilePath, QString outputFilePath, ViAudioFormat outputFormat)
@@ -74,21 +85,57 @@ void ViAudioCoder::convert(QByteArray &input, ViAudioFormat inputFormat, QString
 	mChain->start();
 }
 
-void ViAudioCoder::decode(QString inputFilePath, QByteArray &output, ViAudioFormat &inputFormat)
+void ViAudioCoder::convert(ViAudioBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat)
+{
+	mChain->setMode(ViCodingChain::ConvertDataToData);
+	mChain->setInputBuffer(buffer);
+	mChain->setOutputData(output);
+	mChain->setInputFormat(buffer->formatReference());
+	mChain->setOutputFormat(outputFormat);
+	mChain->start();
+}
+
+void ViAudioCoder::decode(QString inputFilePath, ViAudioBuffer *buffer)
+{
+	mChain->setMode(ViCodingChain::DecodeFile);
+	mChain->setInputPath(inputFilePath);
+	mChain->setOutputBuffer(buffer);
+	mChain->start();
+}
+
+void ViAudioCoder::decode(QString inputFilePath, QByteArray &output)
 {
 	mChain->setMode(ViCodingChain::DecodeFile);
 	mChain->setInputPath(inputFilePath);
 	mChain->setOutputData(output);
-	mChain->setInputFormat(&inputFormat);
 	mChain->start();
 }
 
-void ViAudioCoder::decode(QByteArray &input, QByteArray &output, ViAudioFormat &inputFormat)
+void ViAudioCoder::decode(QByteArray &input, QByteArray &output)
 {
 	mChain->setMode(ViCodingChain::DecodeData);
 	mChain->setInputData(input);
 	mChain->setOutputData(output);
-	mChain->setInputFormat(&inputFormat);
+	mChain->start();
+}
+
+void ViAudioCoder::encode(ViAudioBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat)
+{
+	mChain->setMode(ViCodingChain::EncodeData);
+	mChain->setInputBuffer(buffer);
+	mChain->setOutputPath(outputFilePath);
+	mChain->setInputFormat(buffer->formatReference());
+	mChain->setOutputFormat(outputFormat);
+	mChain->start();
+}
+
+void ViAudioCoder::encode(ViAudioBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat)
+{
+	mChain->setMode(ViCodingChain::EncodeData);
+	mChain->setInputBuffer(buffer);
+	mChain->setOutputData(output);
+	mChain->setInputFormat(buffer->formatReference());
+	mChain->setOutputFormat(outputFormat);
 	mChain->start();
 }
 

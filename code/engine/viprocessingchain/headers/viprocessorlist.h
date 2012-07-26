@@ -13,6 +13,15 @@ class ViProcessorList : public QObject
 
 	public:
 
+		enum Type
+		{
+			InputObservers,
+			OutputObservers,
+			DualObservers,
+			InputManipulators,
+			All = InputObservers | OutputObservers | DualObservers | InputManipulators
+		};
+
 		ViProcessorList();
 		~ViProcessorList();
 
@@ -20,7 +29,7 @@ class ViProcessorList : public QObject
 		bool remove(ViProcessor *processor);
 
 		void clear();
-		QList<ViProcessor*> all();
+		QList<ViProcessor*> processors(int type = ViProcessorList::All);
 
 		void observeInput(const ViSampleChunk *data);
 		void manipulateInput(ViSampleChunk *data);

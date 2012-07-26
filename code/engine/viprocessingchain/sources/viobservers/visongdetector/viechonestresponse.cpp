@@ -43,30 +43,33 @@ void ViEchoNestResponse::analyzeInfo(QVariantMap map)
 		QVariantMap song = songs[i].toMap();
 		ViSongInfo info;
 
-		info.setScore(song["score"].toInt());
-		info.setMessage(song["message"].toString());
-		info.setSongId(song["id"].toString());
-		info.setSongTitle(song["title"].toString());
-		info.setArtistId(song["artist_id"].toString());
-		info.setArtistName(song["artist_name"].toString());
-
-		info.setArtistHotness(song["artist_hotttnesss"].toDouble() * 100);
-		info.setSongHotness(song["song_hotttnesss"].toDouble() * 100);
-		info.setArtistFamiliarity(song["artist_familiarity"].toDouble() * 100);
-		QVariantMap summary = song["audio_summary"].toMap();
-		info.setSongDuration(summary["duration"].toDouble());
-		info.setSongLoudness(summary["loudness"].toDouble());
-		info.setSongEnergy(summary["energy"].toDouble() * 100);
-		info.setSongTempo(summary["tempo"].toDouble());
-		info.setSongDanceability(summary["danceability"].toDouble() * 100);
-		QVariantList tracks = song["tracks"].toList();
-		for(int j = 0; j < tracks.size(); ++j)
+		if(song["message"].toString().toLower().trimmed().startsWith("ok"))
 		{
-			QVariantMap track = tracks[j].toMap();
-			info.addImagePath(track["release_image"].toString());
-		}
+			info.setScore(song["score"].toInt());
+			info.setMessage(song["message"].toString());
+			info.setSongId(song["id"].toString());
+			info.setSongTitle(song["title"].toString());
+			info.setArtistId(song["artist_id"].toString());
+			info.setArtistName(song["artist_name"].toString());
 
-		mSongs.append(info);
+			info.setArtistHotness(song["artist_hotttnesss"].toDouble() * 100);
+			info.setSongHotness(song["song_hotttnesss"].toDouble() * 100);
+			info.setArtistFamiliarity(song["artist_familiarity"].toDouble() * 100);
+			QVariantMap summary = song["audio_summary"].toMap();
+			info.setSongDuration(summary["duration"].toDouble());
+			info.setSongLoudness(summary["loudness"].toDouble());
+			info.setSongEnergy(summary["energy"].toDouble() * 100);
+			info.setSongTempo(summary["tempo"].toDouble());
+			info.setSongDanceability(summary["danceability"].toDouble() * 100);
+			QVariantList tracks = song["tracks"].toList();
+			for(int j = 0; j < tracks.size(); ++j)
+			{
+				QVariantMap track = tracks[j].toMap();
+				info.addImagePath(track["release_image"].toString());
+			}
+
+			mSongs.append(info);
+		}
 	}
 	if(mSongs.size() > 0)
 	{

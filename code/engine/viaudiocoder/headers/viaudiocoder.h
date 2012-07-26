@@ -14,6 +14,7 @@ class ViAudioCoder : public QObject
 		void failed(ViCoder::Error error);
 		void progressed(qreal percentage);
 		void finished();
+		void formatChanged(ViAudioFormat format);
 
 	private slots:
 
@@ -25,6 +26,8 @@ class ViAudioCoder : public QObject
 		~ViAudioCoder();
 		ViCoder::Error error();
 		QString errorString();
+		bool isRunning();
+		bool isFinished();
 
 		void addSearchPath(QString path);
 		void addFileName(QString coder, QString name);
@@ -34,10 +37,14 @@ class ViAudioCoder : public QObject
 		void convert(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat);
 		void convert(QString inputFilePath, QByteArray &output, ViAudioFormat outputFormat);
 		void convert(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat);
+		void convert(ViAudioBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat);
 
-		void decode(QString inputFilePath, QByteArray &output, ViAudioFormat &inputFormat);
-		void decode(QByteArray &input, QByteArray &output, ViAudioFormat &inputFormat);
+		void decode(QString inputFilePath, ViAudioBuffer *buffer);
+		void decode(QString inputFilePath, QByteArray &output);
+		void decode(QByteArray &input, QByteArray &output);
 
+		void encode(ViAudioBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat);
+		void encode(ViAudioBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat);
 		void encode(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat);
 		void encode(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat);
 

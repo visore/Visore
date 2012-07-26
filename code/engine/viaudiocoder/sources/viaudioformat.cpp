@@ -262,6 +262,8 @@ QAudioFormat ViAudioFormat::toQAudioFormat()
 	{
 		format.setByteOrder(QAudioFormat::LittleEndian);
 	}
+
+	format.setCodec("audio/pcm");
 	
 	return format;
 }

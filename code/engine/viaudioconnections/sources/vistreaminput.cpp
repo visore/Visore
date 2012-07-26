@@ -68,7 +68,6 @@ ViAudioFormat ViStreamInput::format()
 void ViStreamInput::setFormat(ViAudioFormat format)
 {
 	mFormat = format;
-	emit formatChanged(mFormat);
 	if(mBuffer != NULL)
 	{
 		mBuffer->setFormat(mFormat);

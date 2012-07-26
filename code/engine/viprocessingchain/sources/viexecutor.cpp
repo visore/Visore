@@ -84,7 +84,7 @@ void ViExecutor::setBuffer(ViAudio::Mode mode, ViAudioBuffer *buffer)
 		QObject::disconnect(this, SLOT(execute()));
 		QObject::connect(buffer, SIGNAL(changed(int)), this, SLOT(execute()));
 	}
-	else
+	else if(mode == ViAudio::AudioOutput)
 	{
 		if(mOutputChunk == NULL)
 		{
@@ -101,6 +101,16 @@ void ViExecutor::setBuffer(ViAudio::Mode mode, ViAudioBuffer *buffer)
 int ViExecutor::defaultWindowSize()
 {
 	return DEFAULT_WINDOW_SIZE;
+}
+
+void ViExecutor::setFormat(ViAudioFormat format)
+{
+	mOutputFormat = format;
+	if(mWriteStream != NULL)
+	{
+		mWriteStream->buffer()->setFormat(mOutputFormat);
+		mOutputConverter.setSize(mOutputFormat.sampleSize());
+	}
 }
 
 void ViExecutor::execute()
@@ -122,6 +132,7 @@ void ViExecutor::initialize()
 	{
 		mInputFormat = mReadStream->buffer()->format();
 		mInputConverter.setSize(mInputFormat.sampleSize());
+		QObject::connect(mReadStream->buffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)), Qt::UniqueConnection);
 	}
 	if(mWriteStream != NULL)
 	{
@@ -130,7 +141,19 @@ void ViExecutor::initialize()
 		mOutputConverter.setSize(mOutputFormat.sampleSize());
 	}
 
-	QList<ViProcessor*> processors = mProcessors.all();
+	QList<ViProcessor*> processors = mProcessors.processors((ViProcessorList::InputObservers | ViProcessorList::InputManipulators | ViProcessorList::DualObservers));
+	for(int i = 0; i < processors.size(); ++i)
+	{
+		processors[i]->setBuffer(mReadStream->buffer(), ViAudio::AudioInput);
+		processors[i]->setBuffer(mWriteStream->buffer(), ViAudio::AudioOutput);
+	}
+	processors = mProcessors.processors(ViProcessorList::OutputObservers);
+	for(int i = 0; i < processors.size(); ++i)
+	{
+		processors[i]->setBuffer(mWriteStream->buffer(), ViAudio::AudioInput);
+	}
+
+	processors = mProcessors.processors();
 	for(int i = 0; i < processors.size(); ++i)
 	{
 		processors[i]->setWindowSize(mWindowSize);
@@ -180,7 +203,7 @@ void ViExecutor::finalize()
 {
 	if(mWasInitialized)
 	{
-		QList<ViProcessor*> processors = mProcessors.all();
+		QList<ViProcessor*> processors = mProcessors.processors();
 		for(int i = 0; i < processors.size(); ++i)
 		{
 			processors[i]->finalize();

@@ -26,20 +26,6 @@ void ViStreamOutput::setDevice(QAudioDeviceInfo device)
 void ViStreamOutput::setBuffer(ViAudioBuffer *buffer)
 {
 	ViAudioOutput::setBuffer(buffer);
-	mBufferDevice.close();
-	mBufferDevice.setBuffer(mBuffer->data());
-	mBufferDevice.open(QIODevice::ReadOnly);
-	emit formatChanged(mBuffer->format());
-	if(mAudioOutput != NULL)
-	{
-		QObject::disconnect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
-		QObject::disconnect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
-		delete mAudioOutput;
-	}
-	mAudioOutput = new QAudioOutput(mDevice, format().toQAudioFormat(), this);
-	mAudioOutput->setNotifyInterval(25);
-	QObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
-	QObject::connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
 }
 
 ViAudioFormat ViStreamOutput::format()
@@ -53,7 +39,7 @@ ViAudioFormat ViStreamOutput::format()
 
 void ViStreamOutput::start()
 {
-	if(mAudioOutput->state() == QAudio::SuspendedState )
+	if(mAudioOutput != NULL && mAudioOutput->state() == QAudio::SuspendedState)
 	{
 		LOG("Playback resumed.");
 		mAudioOutput->resume();
@@ -61,6 +47,20 @@ void ViStreamOutput::start()
 	else
 	{
 		LOG("Playback started.");
+		mBufferDevice.close();
+		mBufferDevice.setBuffer(mBuffer->data());
+		mBufferDevice.open(QIODevice::ReadOnly);
+		if(mAudioOutput != NULL)
+		{
+			QObject::disconnect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
+			QObject::disconnect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
+			delete mAudioOutput;
+		}
+		mAudioOutput = new QAudioOutput(mDevice, format().toQAudioFormat(), this);
+		mAudioOutput->setNotifyInterval(25);
+		QObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
+		QObject::connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
+
 		mAudioOutput->start(&mBufferDevice);
 	}
 	setState(QAudio::ActiveState);

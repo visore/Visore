@@ -103,3 +103,8 @@ ViAudioFormat ViAudioBuffer::format()
 {
 	return mFormat;
 }
+
+ViAudioFormat& ViAudioBuffer::formatReference()
+{
+	return mFormat;
+}

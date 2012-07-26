@@ -39,6 +39,15 @@ ViObserver::ViObserver()
 	: ViProcessor()
 {
 	mData = NULL;
+	mBuffer = NULL;
+}
+
+void ViObserver::setBuffer(ViAudioBuffer *buffer, ViAudio::Mode mode)
+{
+	if(mode == ViAudio::AudioInput)
+	{
+		mBuffer = buffer;
+	}
 }
 
 void ViObserver::setData(const ViSampleChunk *data)
@@ -50,6 +59,15 @@ ViModifier::ViModifier()
 	: ViProcessor()
 {
 	mData = NULL;
+	mBuffer = NULL;
+}
+
+void ViModifier::setBuffer(ViAudioBuffer *buffer, ViAudio::Mode mode)
+{
+	if(mode == ViAudio::AudioInput)
+	{
+		mBuffer = buffer;
+	}
 }
 
 void ViModifier::setData(ViSampleChunk *data)
@@ -61,6 +79,19 @@ ViDualObserver::ViDualObserver()
 	: ViObserver()
 {
 	mData2 = NULL;
+	mBuffer2 = NULL;
+}
+
+void ViDualObserver::setBuffer(ViAudioBuffer *buffer, ViAudio::Mode mode)
+{
+	if(mode == ViAudio::AudioInput)
+	{
+		mBuffer = buffer;
+	}
+	else
+	{
+		mBuffer2 = buffer;
+	}
 }
 
 void ViDualObserver::setData(const ViSampleChunk *data, const ViSampleChunk *data2)

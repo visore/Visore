@@ -186,6 +186,68 @@ void ViCodingChainDataInput::finalize()
 }
 
 /**********************************************************
+ViCodingChainBufferInput
+**********************************************************/
+
+ViCodingChainBufferInput::ViCodingChainBufferInput()
+	: ViCodingChainInput()
+{
+	mStream = NULL;
+	mBuffer = NULL;
+}
+
+ViCodingChainBufferInput::~ViCodingChainBufferInput()
+{
+	if(mStream != NULL)
+	{
+		mBuffer->deleteStream(mStream);
+		mStream = NULL;
+	}
+	mBuffer= NULL;
+}
+
+void ViCodingChainBufferInput::setBuffer(ViAudioBuffer *buffer)
+{
+	mBuffer = buffer;
+}
+
+bool ViCodingChainBufferInput::hasData()
+{
+	return !mStream->atEnd();
+}
+
+int ViCodingChainBufferInput::size()
+{
+	return mBuffer->size();
+}
+
+void ViCodingChainBufferInput::initialize()
+{
+	if(mStream != NULL)
+	{
+		mBuffer->deleteStream(mStream);
+	}
+	mStream = mBuffer->createReadStream();
+}
+
+void ViCodingChainBufferInput::execute()
+{
+	char *data = new char[CHUNK_SIZE];
+	int size = mStream->read(data, CHUNK_SIZE);
+	mNext->addData(new ViSampleArray(data, size, size / mSampleSize));
+}
+
+void ViCodingChainBufferInput::finalize()
+{
+	if(mStream != NULL)
+	{
+		mBuffer->deleteStream(mStream);
+		mStream = NULL;
+	}
+	mBuffer= NULL;
+}
+
+/**********************************************************
 ViCodingChainCoder
 **********************************************************/
 
@@ -424,5 +486,68 @@ void ViCodingChainDataOutput::execute()
 {
 	ViSampleArray *array = mData.dequeue();
 	mStream->writeRawData(array->charData(), array->size());
+	delete array;
+}
+
+/**********************************************************
+ViCodingChainBufferOutput
+**********************************************************/
+
+ViCodingChainBufferOutput::ViCodingChainBufferOutput()
+	: ViCodingChainOutput()
+{
+	mBuffer = NULL;
+	mStream = NULL;
+}
+
+ViCodingChainBufferOutput::~ViCodingChainBufferOutput()
+{
+	if(mStream != NULL)
+	{
+		mBuffer->deleteStream(mStream);
+		mStream = NULL;
+	}
+	mBuffer = NULL;
+}
+
+void ViCodingChainBufferOutput::setBuffer(ViAudioBuffer *buffer)
+{
+	mBuffer = buffer;
+}
+
+void ViCodingChainBufferOutput::seek(qint64 position)
+{
+	if(mStream != NULL)
+	{
+		mBuffer->deleteStream(mStream);
+		mStream = NULL;
+	}
+	mStream = mBuffer->createWriteStream();
+	mStream->skipRawData(position);
+}
+
+void ViCodingChainBufferOutput::initialize()
+{
+	if(mStream != NULL)
+	{
+		mBuffer->deleteStream(mStream);
+	}
+	mStream = mBuffer->createWriteStream();
+}
+
+void ViCodingChainBufferOutput::finalize()
+{
+	if(mStream != NULL)
+	{
+		mBuffer->deleteStream(mStream);
+		mStream = NULL;
+	}
+	mBuffer = NULL;
+}
+
+void ViCodingChainBufferOutput::execute()
+{
+	ViSampleArray *array = mData.dequeue();
+	mStream->write(array->charData(), array->size());
 	delete array;
 }

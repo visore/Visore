@@ -11,24 +11,36 @@ ViProcessorList::~ViProcessorList()
 	clear();
 }
 
-QList<ViProcessor*> ViProcessorList::all()
+QList<ViProcessor*> ViProcessorList::processors(int type)
 {
 	QList<ViProcessor*> result;
-	for(int i = 0; i < mInputObservers.size(); ++i)
+	if(type & InputObservers)
 	{
-		result.append(mInputObservers[i]);
+		for(int i = 0; i < mInputObservers.size(); ++i)
+		{
+			result.append(mInputObservers[i]);
+		}
 	}
-	for(int i = 0; i < mInputModifiers.size(); ++i)
+	if(type & InputManipulators)
 	{
-		result.append(mInputModifiers[i]);
+		for(int i = 0; i < mInputModifiers.size(); ++i)
+		{
+			result.append(mInputModifiers[i]);
+		}
 	}
-	for(int i = 0; i < mOutputObservers.size(); ++i)
+	if(type & OutputObservers)
 	{
-		result.append(mOutputObservers[i]);
+		for(int i = 0; i < mOutputObservers.size(); ++i)
+		{
+			result.append(mOutputObservers[i]);
+		}
 	}
-	for(int i = 0; i < mDualObservers.size(); ++i)
+	if(type & DualObservers)
 	{
-		result.append(mDualObservers[i]);
+		for(int i = 0; i < mDualObservers.size(); ++i)
+		{
+			result.append(mDualObservers[i]);
+		}
 	}
 	return result;
 }

@@ -45,6 +45,7 @@ class ViAudioBuffer : public QObject, public ViId
 		void change(int startIndex);
 
 		ViAudioFormat format();
+		ViAudioFormat& formatReference();
 
 	private:
 
