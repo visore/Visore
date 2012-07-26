@@ -3,24 +3,49 @@
 
 #include "viwidget.h"
 #include <QList>
+#include <QHBoxLayout>
 
-namespace Ui
+class ViRatingItem : public ViWidget
 {
-    class ViRatingWidget;
-}
+
+	public:
+
+		ViRatingItem(QWidget *parent = NULL, bool grayScale = false);
+		int imageWidth();
+		void setOffset(int offset);
+		
+	protected:
+
+		void paintEvent(QPaintEvent *event);
+
+	private:
+
+		QImage mImage;
+		int mOffset;
+
+};
 
 class ViRatingWidget : public ViWidget
 {
 
 	public:
+
 		ViRatingWidget(QWidget *parent = 0);
 		~ViRatingWidget();
-
 		void setRating(qint16 percentage);
 
 	private:
-		Ui::ViRatingWidget *mUi;
-		QList<QWidget*> mStars;
+
+		QHBoxLayout *mLayout;
+		QSpacerItem *mSpacer;
+
+		QList<ViRatingItem*> mNormalStars;
+		QWidget *mNormalWidget;
+		QHBoxLayout *mNormalLayout;
+
+		QList<ViRatingItem*> mGrayStars;
+		QWidget *mGrayWidget;
+		QHBoxLayout *mGrayLayout;
 
 };
 
