@@ -1,6 +1,7 @@
 #include <viflaccoder.h>
 #include <viflaccodec.h>
 #include <vichannelconverter.h>
+#include <vimanager.h>
 
 ViFlacCoder::ViFlacCoder()
 	: ViAbstractCoder(), QThread()
@@ -117,7 +118,7 @@ bool ViFlacCoder::initializeEncode()
 	if(ok)
 	{
 		flacWriteEncodePointer = &ViFlacCoder::flacWriteEncodeHeader;
-		FLAC__StreamEncoderInitStatus initStatus = m_FLAC__stream_encoder_init_stream(mEncoder, flacWriteEncode, flacSeekEncode, flacTellEncode, NULL, this);
+		FLAC__StreamEncoderInitStatus initStatus = m_FLAC__stream_encoder_init_stream(mEncoder, flacWriteEncode, NULL, NULL, flacMetadataEncode, this);
 		if(initStatus == FLAC__STREAM_ENCODER_INIT_STATUS_INVALID_NUMBER_OF_CHANNELS)
 		{
 			setError(ViCoder::OutputChannelError);
@@ -380,16 +381,6 @@ FLAC__StreamEncoderWriteStatus ViFlacCoder::flacWriteEncode(const FLAC__StreamEn
 
 FLAC__StreamEncoderWriteStatus ViFlacCoder::flacWriteEncodeHeader(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t numberOfBytes, unsigned numberOfSamples, unsigned currentFrame, void *client)
 {
-	ViFlacCoder *coder = (ViFlacCoder*) client;
-	if(coder->mHeaderPosition < coder->mHeader.size())
-	{
-		coder->mHeader.replace(coder->mHeaderPosition, numberOfBytes, (char*) buffer, numberOfBytes);
-	}
-	else
-	{
-		coder->mHeader.append((char*) buffer, numberOfBytes);
-		coder->mHeaderPosition += numberOfBytes;
-	}
 	return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 }
 
@@ -402,17 +393,72 @@ FLAC__StreamEncoderWriteStatus ViFlacCoder::flacWriteEncodeData(const FLAC__Stre
 	return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 }
 
-FLAC__StreamEncoderSeekStatus ViFlacCoder::flacSeekEncode(const FLAC__StreamEncoder *encoder, FLAC__uint64 absolute_byte_offset, void *client)
+void ViFlacCoder::flacMetadataEncode(const FLAC__StreamEncoder *encoder, const FLAC__StreamMetadata *metadata, void *client)
 {
 	ViFlacCoder *coder = (ViFlacCoder*) client;
-	coder->mHeaderPosition = absolute_byte_offset + 4; // + 4, because the "fLaC" word at the start is not considered data
-	coder->flacWriteEncodePointer = &ViFlacCoder::flacWriteEncodeHeader;
-	return FLAC__STREAM_ENCODER_SEEK_STATUS_OK;
+
+	coder->mHeader.clear();
+	FLAC__StreamEncoder *headerEncoder;
+	if((headerEncoder = coder->m_FLAC__stream_encoder_new()) != NULL)
+	{
+		FLAC__bool ok = true;
+		ok &= coder->m_FLAC__stream_encoder_set_verify(headerEncoder, true);
+		ok &= coder->m_FLAC__stream_encoder_set_compression_level(headerEncoder, ViAudioFormat::Minimum - coder->mOutputFormat.quality());
+		ok &= coder-> m_FLAC__stream_encoder_set_channels(headerEncoder, coder->mOutputFormat.channelCount());
+		ok &= coder->m_FLAC__stream_encoder_set_bits_per_sample(headerEncoder, coder->mOutputFormat.sampleSize());
+		ok &= coder->m_FLAC__stream_encoder_set_sample_rate(headerEncoder, coder->mOutputFormat.sampleRate());
+
+		if(ok)
+		{
+			coder->m_FLAC__stream_encoder_set_total_samples_estimate(headerEncoder, metadata->data.stream_info.total_samples);
+
+			FLAC__StreamMetadata_VorbisComment_Entry entry;
+			int blocks = 1;
+			FLAC__StreamMetadata **info = new FLAC__StreamMetadata*[blocks];
+			FLAC__StreamMetadata *songInfo = coder->m_FLAC__metadata_object_new(FLAC__METADATA_TYPE_VORBIS_COMMENT);
+			info[0] = songInfo;
+
+			if(coder->mSongInfo.songTitle() != "")
+			{
+				coder->m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "TITLE", coder->mSongInfo.songTitle().toAscii().data());
+				coder->m_FLAC__metadata_object_vorbiscomment_append_comment(songInfo, entry, true);
+			}
+			if(coder->mSongInfo.artistName() != "")
+			{
+				coder->m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ARTIST", coder->mSongInfo.artistName().toAscii().data());
+				coder->m_FLAC__metadata_object_vorbiscomment_append_comment(songInfo, entry, true);
+			}
+			QString comment = "Created with " + ViManager::name() + " (" + ViManager::version().toString() + ") - " + ViManager::url().toString();
+			coder->m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "DESCRIPTION", comment.toAscii().data());
+			coder->m_FLAC__metadata_object_vorbiscomment_append_comment(songInfo, entry, true);
+
+			coder->m_FLAC__stream_encoder_set_metadata(headerEncoder, info, blocks);
+			FLAC__StreamEncoderInitStatus initStatus = coder->m_FLAC__stream_encoder_init_stream(headerEncoder, ViFlacCoder::flacWriteHeaderEncode, NULL, NULL, NULL, client);
+			if(initStatus != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
+			{
+				coder->setError(ViCoder::HeaderError);
+			}
+
+			coder->m_FLAC__metadata_object_delete(songInfo);
+			delete [] info;
+		}
+		else
+		{
+			coder->setError(ViCoder::HeaderError);
+		}
+		coder->m_FLAC__stream_encoder_delete(headerEncoder);
+	}
+	else
+	{
+		coder->setError(ViCoder::HeaderError);
+	}
 }
 
-FLAC__StreamEncoderTellStatus ViFlacCoder::flacTellEncode(const FLAC__StreamEncoder *encoder, FLAC__uint64 *absolute_byte_offset, void *client)
+FLAC__StreamEncoderWriteStatus ViFlacCoder::flacWriteHeaderEncode(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t numberOfBytes, unsigned numberOfSamples, unsigned currentFrame, void *client)
 {
-	return FLAC__STREAM_ENCODER_TELL_STATUS_OK;
+	ViFlacCoder *coder = (ViFlacCoder*) client;
+	coder->mHeader.append((char*) buffer, numberOfBytes);
+	return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 }
 
 void ViFlacCoder::flacErrorDecode(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client)
@@ -595,6 +641,13 @@ ViCoder::Error ViFlacCoder::initializeLibrary()
 	loaded.append((m_FLAC__stream_encoder_set_channels = (FLAC__bool (*)(FLAC__StreamEncoder*, unsigned)) mLibrary.resolve("FLAC__stream_encoder_set_channels")) != NULL);
 	loaded.append((m_FLAC__stream_encoder_set_bits_per_sample = (FLAC__bool (*)(FLAC__StreamEncoder*, unsigned)) mLibrary.resolve("FLAC__stream_encoder_set_bits_per_sample")) != NULL);
 	loaded.append((m_FLAC__stream_encoder_set_sample_rate = (FLAC__bool (*)(FLAC__StreamEncoder*, unsigned)) mLibrary.resolve("FLAC__stream_encoder_set_sample_rate")) != NULL);
+	loaded.append((m_FLAC__stream_encoder_set_total_samples_estimate = (FLAC__bool (*)(FLAC__StreamEncoder*, FLAC__uint64)) mLibrary.resolve("FLAC__stream_encoder_set_total_samples_estimate")) != NULL);
+
+	loaded.append((m_FLAC__stream_encoder_set_metadata = (FLAC__bool (*)(FLAC__StreamEncoder*, FLAC__StreamMetadata**, unsigned)) mLibrary.resolve("FLAC__stream_encoder_set_metadata")) != NULL);
+	loaded.append((m_FLAC__metadata_object_new = (FLAC__StreamMetadata* (*)(FLAC__MetadataType)) mLibrary.resolve("FLAC__metadata_object_new")) != NULL);
+	loaded.append((m_FLAC__metadata_object_delete = (void (*)(FLAC__StreamMetadata*)) mLibrary.resolve("FLAC__metadata_object_delete")) != NULL);
+	loaded.append((m_FLAC__metadata_object_vorbiscomment_append_comment = (FLAC__bool (*)(FLAC__StreamMetadata*, FLAC__StreamMetadata_VorbisComment_Entry, FLAC__bool)) mLibrary.resolve("FLAC__metadata_object_vorbiscomment_append_comment")) != NULL);
+	loaded.append((m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair = (FLAC__bool (*)(FLAC__StreamMetadata_VorbisComment_Entry*, const char*, const char*)) mLibrary.resolve("FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair")) != NULL);
 
 	loaded.append((m_FLAC__stream_encoder_process_interleaved = (FLAC__bool (*)(FLAC__StreamEncoder*, const FLAC__int32[], unsigned)) mLibrary.resolve("FLAC__stream_encoder_process_interleaved")) != NULL);
 

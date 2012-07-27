@@ -3,6 +3,7 @@
 
 #include <vicodingchain.h>
 #include <viaudiomanager.h>
+#include <visonginfo.h>
 
 class ViAudioCoder : public QObject
 {
@@ -43,10 +44,10 @@ class ViAudioCoder : public QObject
 		void decode(QString inputFilePath, QByteArray &output);
 		void decode(QByteArray &input, QByteArray &output);
 
-		void encode(ViAudioBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat);
-		void encode(ViAudioBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat);
-		void encode(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat);
-		void encode(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat);
+		void encode(ViAudioBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo());
+		void encode(ViAudioBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo());
+		void encode(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo());
+		void encode(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo());
 
 		static ViCoderList coders(ViAudioManager::Mode mode = ViAudioManager::Available);
 		static ViCodecList codecs(ViAudioManager::Mode mode = ViAudioManager::Available);

@@ -1,4 +1,6 @@
 #include <vicodingchaincomponent.h>
+#include <QFileInfo>
+#include <vimanager.h>
 
 #define CHUNK_SIZE 8192
 
@@ -22,6 +24,11 @@ void ViCodingChainComponent::setError(ViCoder::Error error)
 {
 	mError = error;
 	emit failed(mError);
+}
+
+void ViCodingChainComponent::setHeader(QByteArray header)
+{
+	mHeader = header;
 }
 
 void ViCodingChainComponent::setNext(ViCodingChainComponent *next)
@@ -332,7 +339,7 @@ void ViCodingChainEncoder::changeFormat(ViAudioFormat format)
 		{
 			int size = mCoder->headerSize();
 			qbyte *data = new qbyte[size];
-			mNext->addData(new ViSampleArray(data, size));
+			//mNext->addData(new ViSampleArray(data, size));
 			mCoder->disconnect(mCoder, SIGNAL(encoded(ViSampleArray*)));
 			QObject::connect(mCoder, SIGNAL(encoded(ViSampleArray*)), mNext, SLOT(addData(ViSampleArray*)), Qt::DirectConnection);
 		}
@@ -358,7 +365,7 @@ void ViCodingChainEncoder::finalize()
 		}
 		mCoder->disconnect();
 	}
-	mNext->addData(new ViSampleArray(mCoder->header()), 0);
+	mNext->setHeader(mCoder->header());
 }
 
 void ViCodingChainEncoder::execute()
@@ -394,7 +401,7 @@ void ViCodingChainFileOutput::setFilePath(QString filePath)
 
 void ViCodingChainFileOutput::seek(qint64 position)
 {
-	mFile.seek(position);
+	//mFile.seek(position);
 }
 
 void ViCodingChainFileOutput::initialize()
@@ -405,8 +412,15 @@ void ViCodingChainFileOutput::initialize()
 		setError(ViCoder::OutputFileError);
 		return;
 	}
-	mFile.setFileName(mFilePath);
-	if(!mFile.open(QIODevice::WriteOnly))
+	QFileInfo info(mFilePath);
+	QString folder = ViManager::tempPath() + QDir::separator() + "coder";
+	QDir dir(folder);
+	if(!dir.exists())
+	{
+		dir.mkpath(folder);
+	}
+	mTempFile.setFileName(folder + QDir::separator() + info.fileName());
+	if(!mTempFile.open(QIODevice::WriteOnly))
 	{
 		setError(ViCoder::OutputFileError);
 	}
@@ -414,13 +428,31 @@ void ViCodingChainFileOutput::initialize()
 
 void ViCodingChainFileOutput::finalize()
 {
+	mTempFile.close();
+	mFile.setFileName(mFilePath);
+	if(!mTempFile.open(QIODevice::ReadOnly) || !mFile.open(QIODevice::WriteOnly))
+	{
+		setError(ViCoder::OutputFileError);
+	}
+
+	mFile.write(mHeader);
+	mHeader.clear();	
+
+	char data[CHUNK_SIZE];
+	qint64 size = 0;
+	while(!mTempFile.atEnd())
+	{
+		size = mTempFile.read(data, CHUNK_SIZE);
+		mFile.write(data, size);
+	}
+	mTempFile.close();
 	mFile.close();
 }
 
 void ViCodingChainFileOutput::execute()
 {
 	ViSampleArray *array = mData.dequeue();
-	mFile.write(array->charData(), array->size());
+	mTempFile.write(array->charData(), array->size());
 	delete array;
 }
 

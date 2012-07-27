@@ -90,3 +90,8 @@ QString ViFileBrowser::fileName()
 {
 	return mLineEdit->text();
 }
+
+void ViFileBrowser::setFileName(QString fileName)
+{
+	mLineEdit->setText(fileName);
+}

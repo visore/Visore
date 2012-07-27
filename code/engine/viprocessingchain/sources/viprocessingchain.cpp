@@ -59,7 +59,7 @@ void ViProcessingChain::finalize()
 	{
 		QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
 		mFileOutput->setBuffer(mOutputBuffer);
-		mFileOutput->setFile(mProject->correctedPath() + QDir::separator() + mProject->nextSongName() + "." + mFileOutput->format().codec()->extensions()[0]);
+		mFileOutput->setFile(mProject->originalPath() + QDir::separator() + mProject->nextSongName() + "." + mFileOutput->format().codec()->extensions()[0]);
 		mFileOutput->start();
 	}
 	else
@@ -143,8 +143,9 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 	}
 }
 
-void ViProcessingChain::setProject(QString filePath)
+void ViProcessingChain::setProject(QString filePath, ViAudioFormat format)
 {
+	mFileOutput->setFormat(format);
 	if(mProject != NULL)
 	{
 		delete mProject;

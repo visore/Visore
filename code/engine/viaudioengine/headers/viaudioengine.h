@@ -44,9 +44,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		void calculateCorrelation();
 
 		//Project
-		void loadProject(QString filePath);
-		void saveProject(QString filePath);
-		void startRecordingProject();
+		void startProject(QString name, QString filePath, ViAudioFormat format);
 
 	signals:
 

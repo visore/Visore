@@ -43,7 +43,7 @@
     <widget class="ViPushButton" name="fileButton" native="true"/>
    </item>
    <item row="1" column="0">
-    <widget class="ViPushButton" name="recordingProjectButton" native="true"/>
+    <widget class="ViPushButton" name="projectButton" native="true"/>
    </item>
   </layout>
  </widget>

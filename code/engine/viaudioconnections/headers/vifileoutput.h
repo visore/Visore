@@ -8,6 +8,10 @@ class ViFileOutput : public ViAudioOutput
 {
     Q_OBJECT
 
+	public slots:
+
+		void setSongInfo(ViSongInfo info);
+
 	public:
 
 		ViFileOutput();
@@ -25,6 +29,7 @@ class ViFileOutput : public ViAudioOutput
 		QString mFilePath;
 		ViAudioCoder mCoder;
 		ViAudioFormat mFormat;
+		ViSongInfo mSongInfo;
 
 };
 

@@ -16,6 +16,11 @@ void ViCodingChain::setMode(ViCodingChain::Mode mode)
 	mMode = mode;
 }
 
+void ViCodingChain::setSongInfo(ViSongInfo info)
+{
+	mSongInfo = info;
+}
+
 void ViCodingChain::reset()
 {
 	mError = ViCoder::NoError;
@@ -195,6 +200,7 @@ void ViCodingChain::run()
 		}
 		else
 		{
+			mOutputCoder->setSongInfo(mSongInfo);
 			QObject::connect(mOutputCoder, SIGNAL(failed(ViCoder::Error)), this, SLOT(setError(ViCoder::Error)), Qt::DirectConnection);
 		}
 	}

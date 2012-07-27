@@ -9,6 +9,11 @@ ViFileOutput::ViFileOutput()
 	setState(QAudio::IdleState);
 }
 
+void ViFileOutput::setSongInfo(ViSongInfo info)
+{
+	mSongInfo = info;
+}
+
 void ViFileOutput::setFile(QString filePath)
 {
 	mFilePath = filePath;
@@ -27,7 +32,7 @@ void ViFileOutput::setFormat(ViAudioFormat format)
 void ViFileOutput::start()
 {
 	LOG("Writing to file started.");
-	//mCoder.encode(mBuffer, mFilePath, mBuffer->format(), mFormat);	
+	mCoder.encode(mBuffer, mFilePath, mFormat, mSongInfo);	
 	setState(QAudio::ActiveState);
 }
 

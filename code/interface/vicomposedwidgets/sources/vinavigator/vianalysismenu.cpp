@@ -27,9 +27,8 @@ ViAnalysisMenu::~ViAnalysisMenu()
 
 void ViAnalysisMenu::showSpectrum()
 {
-	mEngine->startRecordingProject();
-	//mUi->matchButton->setChecked(false);
-	//setCurrentStackIndex(mSpectrumIndex);
+	mUi->matchButton->setChecked(false);
+	setCurrentStackIndex(mSpectrumIndex);
 }
 
 void ViAnalysisMenu::showCorrelation()

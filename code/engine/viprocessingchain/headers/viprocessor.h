@@ -20,6 +20,11 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 		void progressed(short progress);
 		void finished();
 
+	public slots:
+
+		virtual void enable();
+		virtual void disable();
+
 	public:
 
 		ViProcessor();
@@ -41,6 +46,9 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 
 		ViAudioFormat mFormat;
 		int mWindowSize;
+
+		bool mIsEnabled;
+		QMutex mIsEnabledMutex;
 
 };
 

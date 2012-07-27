@@ -3,7 +3,6 @@
 
 #include <QStringList>
 #include <QByteArray>
-#include <viaudioinfo.h>
 #include <vicoder.h>
 #include <viaudioformat.h>
 

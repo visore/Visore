@@ -119,43 +119,47 @@ void ViAudioCoder::decode(QByteArray &input, QByteArray &output)
 	mChain->start();
 }
 
-void ViAudioCoder::encode(ViAudioBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat)
+void ViAudioCoder::encode(ViAudioBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat, ViSongInfo info)
 {
 	mChain->setMode(ViCodingChain::EncodeData);
 	mChain->setInputBuffer(buffer);
 	mChain->setOutputPath(outputFilePath);
 	mChain->setInputFormat(buffer->formatReference());
 	mChain->setOutputFormat(outputFormat);
+	mChain->setSongInfo(info);
 	mChain->start();
 }
 
-void ViAudioCoder::encode(ViAudioBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat)
+void ViAudioCoder::encode(ViAudioBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat, ViSongInfo info)
 {
 	mChain->setMode(ViCodingChain::EncodeData);
 	mChain->setInputBuffer(buffer);
 	mChain->setOutputData(output);
 	mChain->setInputFormat(buffer->formatReference());
 	mChain->setOutputFormat(outputFormat);
+	mChain->setSongInfo(info);
 	mChain->start();
 }
 
-void ViAudioCoder::encode(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat)
+void ViAudioCoder::encode(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat, ViSongInfo info)
 {
 	mChain->setMode(ViCodingChain::EncodeData);
 	mChain->setInputData(input);
 	mChain->setOutputPath(outputFilePath);
 	mChain->setInputFormat(inputFormat);
 	mChain->setOutputFormat(outputFormat);
+	mChain->setSongInfo(info);
 	mChain->start();
 }
 
-void ViAudioCoder::encode(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat)
+void ViAudioCoder::encode(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat, ViSongInfo info)
 {
 	mChain->setMode(ViCodingChain::EncodeData);
 	mChain->setInputData(input);
 	mChain->setOutputData(output);
 	mChain->setInputFormat(inputFormat);
 	mChain->setOutputFormat(outputFormat);
+	mChain->setSongInfo(info);
 	mChain->start();
 }
 

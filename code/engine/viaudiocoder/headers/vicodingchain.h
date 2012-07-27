@@ -37,6 +37,8 @@ class ViCodingChain : public QThread
 
 		void setMode(ViCodingChain::Mode mode);
 
+		void setSongInfo(ViSongInfo info);
+
 		void setInputPath(QString filePath);
 		void setOutputPath(QString filePath);
 
@@ -64,6 +66,7 @@ class ViCodingChain : public QThread
 
 		ViCoder::Error mError;
 		ViCodingChain::Mode mMode;
+		ViSongInfo mSongInfo;
 
 		QString mInputFilePath;
 		QByteArray *mInputData;

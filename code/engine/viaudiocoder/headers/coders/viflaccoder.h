@@ -46,8 +46,8 @@ class ViFlacCoder : public ViAbstractCoder, public QThread
 		static FLAC__StreamEncoderWriteStatus flacWriteEncode(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t numberOfBytes, unsigned numberOfSamples, unsigned currentFrame, void *client);
 		static FLAC__StreamEncoderWriteStatus flacWriteEncodeHeader(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t numberOfBytes, unsigned numberOfSamples, unsigned currentFrame, void *client);
 		static FLAC__StreamEncoderWriteStatus flacWriteEncodeData(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t numberOfBytes, unsigned numberOfSamples, unsigned currentFrame, void *client);
-		static FLAC__StreamEncoderSeekStatus flacSeekEncode(const FLAC__StreamEncoder *encoder, FLAC__uint64 absolute_byte_offset, void *client);
-		static FLAC__StreamEncoderTellStatus flacTellEncode(const FLAC__StreamEncoder *encoder, FLAC__uint64 *absolute_byte_offset, void *client);
+		static void flacMetadataEncode(const FLAC__StreamEncoder *encoder, const FLAC__StreamMetadata *metadata, void *client);
+		static FLAC__StreamEncoderWriteStatus flacWriteHeaderEncode(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t numberOfBytes, unsigned numberOfSamples, unsigned currentFrame, void *client);
 
 		static void flacErrorDecode(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client);
 		static void flacMetadataDecode(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *client);
@@ -71,6 +71,15 @@ class ViFlacCoder : public ViAbstractCoder, public QThread
 		FLAC__bool (*m_FLAC__stream_encoder_set_channels)(FLAC__StreamEncoder*, unsigned);
 		FLAC__bool (*m_FLAC__stream_encoder_set_bits_per_sample)(FLAC__StreamEncoder*, unsigned);
 		FLAC__bool (*m_FLAC__stream_encoder_set_sample_rate)(FLAC__StreamEncoder*, unsigned);
+		FLAC__bool (*m_FLAC__stream_encoder_set_total_samples_estimate)(FLAC__StreamEncoder*, FLAC__uint64);
+
+		FLAC__bool (*m_FLAC__stream_encoder_set_metadata)(FLAC__StreamEncoder*, FLAC__StreamMetadata**, unsigned);
+		FLAC__StreamMetadata* (*m_FLAC__metadata_object_new)(FLAC__MetadataType);
+		void (*m_FLAC__metadata_object_delete)(FLAC__StreamMetadata*);
+		FLAC__bool (*m_FLAC__metadata_object_vorbiscomment_append_comment)(FLAC__StreamMetadata*, FLAC__StreamMetadata_VorbisComment_Entry, FLAC__bool);
+		FLAC__bool (*m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair)(FLAC__StreamMetadata_VorbisComment_Entry*, const char*, const char*);
+
+		FLAC_API FLAC__StreamMetadata *FLAC__metadata_object_new(FLAC__MetadataType type);
 
 		FLAC__bool (*m_FLAC__stream_encoder_process_interleaved)(FLAC__StreamEncoder*, const FLAC__int32[], unsigned);
 

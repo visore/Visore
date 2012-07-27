@@ -32,7 +32,7 @@ class ViProcessingChain : public QObject
 
 		void setWindowSize(int windowSize);
 		void setTransmission(ViAudioTransmission *transmission);
-		void setProject(QString filePath);
+		void setProject(QString filePath, ViAudioFormat format);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
 		ViAudioBuffer* buffer(ViAudio::Mode mode);

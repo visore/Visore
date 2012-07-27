@@ -30,6 +30,7 @@ class ViFileBrowser : public ViWidget
 		void addFilter(QString filter);
 		void setDirectory(QString directory);
 		QString fileName();
+		void setFileName(QString fileName);
 	
 	protected:
 

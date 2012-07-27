@@ -15,10 +15,10 @@ class ViProcessorList : public QObject
 
 		enum Type
 		{
-			InputObservers,
-			OutputObservers,
-			DualObservers,
-			InputManipulators,
+			InputObservers = 0x1,
+			OutputObservers = 0x2,
+			DualObservers = 0x4,
+			InputManipulators = 0x8,
 			All = InputObservers | OutputObservers | DualObservers | InputManipulators
 		};
 

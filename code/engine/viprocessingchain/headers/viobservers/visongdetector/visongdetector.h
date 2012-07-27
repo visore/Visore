@@ -109,6 +109,7 @@ class ViSongDetector : public ViObserver
 		QString mKey;
 
 		bool mFound;
+		bool mRequestSent;
 		ViSongDetector::State mState;
 		ViSongDetector::Error mError;
 		QNetworkReply::NetworkError mNetworkError;

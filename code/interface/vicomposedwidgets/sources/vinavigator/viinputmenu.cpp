@@ -7,10 +7,10 @@ ViInputMenu::ViInputMenu(ViNavigator *navigator)
 	mUi = new Ui::ViInputMenu();
 	mUi->setupUi(this);
 
-	mUi->recordingProjectButton->setIcon(ViThemeManager::image("recordingproject.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
-	mUi->recordingProjectButton->setCheckable(true);
-	mRecordingProjectIndex = addStackWidget(&mRecordingProjectWidget);
-	QObject::connect(mUi->recordingProjectButton, SIGNAL(clicked()), this, SLOT(selectRecordingProject()));
+	mUi->projectButton->setIcon(ViThemeManager::image("recordingproject.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	mUi->projectButton->setCheckable(true);
+	mProjectIndex = addStackWidget(&mProjectWidget);
+	QObject::connect(mUi->projectButton, SIGNAL(clicked()), this, SLOT(selectProject()));
 
 	mUi->recordingButton->setIcon(ViThemeManager::image("vinylinput.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 	mUi->recordingButton->setCheckable(true);
@@ -26,9 +26,9 @@ ViInputMenu::~ViInputMenu()
 	delete mUi;
 }
 
-void ViInputMenu::selectRecordingProject()
+void ViInputMenu::selectProject()
 {
-	setCurrentStackIndex(mRecordingProjectIndex);
+	setCurrentStackIndex(mProjectIndex);
 	mUi->recordingButton->setChecked(false);
 	mUi->fileButton->setChecked(false);
 }
@@ -36,7 +36,7 @@ void ViInputMenu::selectRecordingProject()
 void ViInputMenu::selectRecording()
 {
 	mEngine->changeInput(ViAudio::Line);
-	mUi->recordingProjectButton->setChecked(false);
+	mUi->projectButton->setChecked(false);
 	mUi->fileButton->setChecked(false);
 }
 
@@ -47,7 +47,7 @@ void ViInputMenu::selectFile()
 	QString file = "/home/visore/Project/Data/a.wav";
 	if(file != "")
 	{
-		mUi->recordingProjectButton->setChecked(false);
+		mUi->projectButton->setChecked(false);
 		mUi->recordingButton->setChecked(false);
 		mEngine->openFile(file);
 	}

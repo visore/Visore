@@ -27,12 +27,14 @@ ViFormatWidget::~ViFormatWidget()
 ViAudioFormat ViFormatWidget::format()
 {
 	ViAudioFormat result;
-	/*result.setCodec(ViAudioManager::codec(mUi->codecBox->itemData(mUi->codecBox->currentIndex()).toString()));
-	result.setByteOrder((ViAudioFormat::Endian) mUi->byteOrderBox->itemData(mUi->byteOrderBox->currentIndex()).toInt());
-	result.setSampleType((ViAudioFormat::SampleType) mUi->sampleTypeBox->itemData(mUi->sampleTypeBox->currentIndex()).toInt());
-	result.setSampleRate(mUi->sampleRateBox->itemData(mUi->sampleRateBox->currentIndex()).toInt());
-	result.setSampleSize(mUi->sampleSizeBox->itemData(mUi->sampleSizeBox->currentIndex()).toInt());
-	result.setChannelCount(mUi->channelsBox->itemData(mUi->channelsBox->currentIndex()).toInt());*/
+	result.setCodec(ViAudioManager::codec(codec()));
+	result.setByteOrder(ViAudioFormat::LittleEndian);
+	result.setSampleType(ViAudioFormat::SignedInt);
+	result.setSampleRate(sampleRate());
+	result.setSampleSize(sampleSize());
+	result.setChannelCount(channels());
+	result.setQuality(ViAudioFormat::Quality(quality()));
+	result.setBitrate(ViAudioBitrate(ViAudioBitrate::Mode(bitrateMode()), bitrate(), minimumBitrate(), maximumBitrate()));
 	return result;
 }
 

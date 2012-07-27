@@ -5,6 +5,7 @@ ViProcessor::ViProcessor()
 {
 	setAutoDelete(false); //Ensures that QThreadPool doesn't automatically delete object
 	mWindowSize = 0;
+	mIsEnabled = true;
 }
 
 void ViProcessor::setWindowSize(int windowSize)
@@ -33,6 +34,20 @@ void ViProcessor::initialize()
 
 void ViProcessor::finalize()
 {
+}
+
+void ViProcessor::enable()
+{
+	mIsEnabledMutex.lock();
+	mIsEnabled = true;
+	mIsEnabledMutex.unlock();
+}
+
+void ViProcessor::disable()
+{
+	mIsEnabledMutex.lock();
+	mIsEnabled = false;
+	mIsEnabledMutex.unlock();
 }
 
 ViObserver::ViObserver()

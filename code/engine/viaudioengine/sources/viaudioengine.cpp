@@ -21,8 +21,8 @@ ViAudioEngine::ViAudioEngine()
 	mStreamOutput->setFormat(ViAudioFormat::defaultFormat());
 	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
 
-	/*mProcessingChain.setTransmission(mFileOutput);
-	ViAudioFormat fileFormat = ViAudioFormat::defaultFormat();
+	mProcessingChain.setTransmission(mFileOutput);
+	/*ViAudioFormat fileFormat = ViAudioFormat::defaultFormat();
 	fileFormat.setCodec(ViAudioManager::codec("WAVE"));
 	mFileOutput->setFormat(fileFormat);*/
 
@@ -34,10 +34,14 @@ ViAudioEngine::ViAudioEngine()
 
 	//Song detector
 	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
+	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), mFileOutput, SLOT(setSongInfo(ViSongInfo)));
 	mSongDetector.setKey("G1TZBE4IHJAYUSNCN");
-	//mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
+	mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
 
+	QObject::connect(&mEndDetector, SIGNAL(songStarted(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
 	QObject::connect(&mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
+	QObject::connect(&mEndDetector, SIGNAL(songStarted(ViAudioPosition)), &mSongDetector, SLOT(enable()), Qt::DirectConnection);
+	QObject::connect(&mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mSongDetector, SLOT(disable()), Qt::DirectConnection);
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -71,12 +75,12 @@ void ViAudioEngine::changeInput(ViAudio::Input input)
 {
 	if(input == ViAudio::File)
 	{
-		//mProcessingChain.detach(&mEndDetector);
+		mProcessingChain.detach(&mEndDetector);
 		mProcessingChain.setTransmission(mFileInput);
 	}
 	else if(input == ViAudio::Line)
 	{
-		//mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
+		mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
 		mProcessingChain.setTransmission(mStreamInput);
 	}
 	emit inputChanged(input);
@@ -142,23 +146,9 @@ void ViAudioEngine::calculateCorrelation()
 	}
 }
 
-void ViAudioEngine::loadProject(QString filePath)
+void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat format)
 {
-	/*mProjectFile.setFilePath(filePath);
-	mProjectFile.load();
-	emit loadProjectStarted();*/
-}
-
-void ViAudioEngine::saveProject(QString filePath)
-{
-	/*mProjectFile.setFilePath(filePath);
-	mProjectFile.save();
-	emit saveProjectStarted();*/
-}
-
-void ViAudioEngine::startRecordingProject()
-{
-	mProcessingChain.setProject("/home/visore/test_visore.vip");
+	mProcessingChain.setProject(filePath, format);
 	changeInput(ViAudio::Line);
 	startRecording();
 }

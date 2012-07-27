@@ -8,8 +8,8 @@
 #include <QLibrary>
 #include <viaudio.h>
 #include <viaudioformat.h>
-#include <viaudioinfo.h>
 #include <visamplearray.h>
+#include <visonginfo.h>
 
 class ViAbstractCoder : public QObject
 {
@@ -51,6 +51,9 @@ class ViAbstractCoder : public QObject
 		ViAudioFormat format(ViAudio::Mode mode) const;
 		void setFormat(ViAudio::Mode mode, ViAudioFormat format);
 
+		ViSongInfo songInfo() const;
+		void setSongInfo(ViSongInfo info);
+
 		QString name() const;
 		QString version() const;
 		QStringList fileNames() const;
@@ -83,6 +86,8 @@ class ViAbstractCoder : public QObject
 
 		ViAudioFormat mInputFormat;
 		ViAudioFormat mOutputFormat;
+
+		ViSongInfo mSongInfo;
 
 	private:
 

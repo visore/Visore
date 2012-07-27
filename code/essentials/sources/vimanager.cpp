@@ -51,6 +51,11 @@ ViManager::ViManager()
 		dir.mkpath(mSettings->value("paths/temp").toString());
 	}
 
+	if(mSettings->value("paths/project").isNull())
+	{
+		mSettings->setValue("paths/project", QDir::homePath() + QDir::separator() + "Visore Projects");
+	}
+
 	//Main window
 	if(mSettings->value("interface/mainwindow/size").isNull())
 	{
@@ -118,6 +123,16 @@ QString ViManager::tempPath()
 void ViManager::setTempPath(QString path)
 {
 	ViManager::setValue("paths/temp", path);
+}
+
+QString ViManager::projectPath()
+{
+	return ViManager::value("paths/project").toString();
+}
+
+void ViManager::setProjectPath(QString path)
+{
+	ViManager::setValue("paths/project", path);
 }
 
 QSize ViManager::windowSize()

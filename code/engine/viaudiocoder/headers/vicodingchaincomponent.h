@@ -50,6 +50,7 @@ class ViCodingChainComponent : public QObject
 
 		ViCoder::Error error();
 
+		void setHeader(QByteArray header);
 		void setNext(ViCodingChainComponent *next);
 		int chunkSize();
 
@@ -67,6 +68,7 @@ class ViCodingChainComponent : public QObject
 		ViCoder::Error mError;
 		QQueue<ViSampleArray*> mData;
 		ViCodingChainComponent *mNext;
+		QByteArray mHeader;
 
 };
 
@@ -269,6 +271,7 @@ class ViCodingChainFileOutput : public ViCodingChainOutput
 	protected:
 
 		QString mFilePath;
+		QFile mTempFile;
 		QFile mFile;
 
 };

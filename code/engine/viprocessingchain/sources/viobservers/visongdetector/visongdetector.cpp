@@ -56,6 +56,8 @@ ViSongDetector::ViSongDetector()
 	mNetworkError = QNetworkReply::NoError;
 	mFound = false;
 
+	mIsEnabled = false;
+
 	mRequestsSent = 0;
 	mKey = "";
 	QObject::connect(&mThread, SIGNAL(finished(QString, QString, int)), this, SLOT(codeFinished(QString, QString, int)));
@@ -73,13 +75,17 @@ void ViSongDetector::initialize()
 	mNetworkError = QNetworkReply::NoError;
 	mError = ViSongDetector::NoError;
 	mFound = false;
+	mRequestSent = false;
 	mRequestsSent = 0;
 	mResponse.reset();
 }
 
 void ViSongDetector::run()
 {
-	if(!mCoder.isRunning() && !mThread.isRunning() && mError != ViSongDetector::NetworkError && !mFound)
+	mIsEnabledMutex.lock();
+	bool isEnabled = mIsEnabled;
+	mIsEnabledMutex.unlock();
+	if(isEnabled && mError != ViSongDetector::NetworkError && !mFound)
 	{
 		if(mKey == "")
 		{
@@ -87,11 +93,12 @@ void ViSongDetector::run()
 			return;
 		}
 		qint64 bufferLength = ViAudioPosition::convertPosition(mBuffer->size(), ViAudioPosition::Bytes, ViAudioPosition::Milliseconds, mBuffer->format());
-		if((mRequestsSent == 0 && bufferLength >= REQUEST_SAMPLES_1)
+		if(!mRequestSent && (mRequestsSent == 0 && bufferLength >= REQUEST_SAMPLES_1)
 			|| (mRequestsSent == 1 && bufferLength >= REQUEST_SAMPLES_2)
 			|| (mRequestsSent == 2 && bufferLength >= REQUEST_SAMPLES_3)
 			|| (mRequestsSent == 3 && bufferLength >= REQUEST_SAMPLES_4))
 		{
+			mRequestSent = true;
 			if(bufferLength >= REQUEST_SAMPLES_4)
 			{
 				mRequestsSent = 4;
@@ -117,13 +124,13 @@ void ViSongDetector::run()
 			format.setChannelCount(1);
 			format.setCodec(ViAudioManager::codec("WAVE"));
 			mOutput.clear();
-			mCoder.encode(mBuffer, mOutput, format);
+			mCoder.encode(mBuffer, mOutput, format);cout<<"song emitted: "<<(int)mRequestsSent<<endl;
 		}
 	}
 }
 
 void ViSongDetector::encodingFinished()
-{
+{cout<<"song coded1"<<endl;
 	if(mCoder.error() == ViCoder::NoError)
 	{
 		setState(ViSongDetector::CodeGeneration);
@@ -146,18 +153,22 @@ void ViSongDetector::codeFinished(QString code, QString version, int codeLength)
 	QJsonObject jsonObject;
 	jsonObject.insert("code", code);
 	mNetworkManager->post(request, QJsonDocument(jsonObject).toJson());
+cout<<"song coded2: "<<code.toAscii().data()<<endl;
 }
 
 void ViSongDetector::replyFinished(QNetworkReply *reply)
 {
+	mRequestSent = false;
 	mNetworkError = reply->error();
 	if(mNetworkError != QNetworkReply::NoError)
 	{
 		mError = ViSongDetector::NetworkError;
-		setState(ViSongDetector::Idle);
+		setState(ViSongDetector::Idle);cout<<"***********+++++++++++"<<endl;
 		return;
 	}
-	mResponse.analyze(reply->readAll());
+QByteArray aa = reply->readAll();
+cout<<QString(aa).toAscii().data()<<endl;
+	mResponse.analyze(aa);
 	if(mResponse.message().contains("api") && mResponse.message().contains("key"))
 	{
 		mError = ViSongDetector::KeyError;
@@ -165,7 +176,7 @@ void ViSongDetector::replyFinished(QNetworkReply *reply)
 		return;
 	}
 	else if(mResponse.numberOfSongs() == 0)
-	{
+	{cout<<"pokkk"<<endl;
 		run();
 	}
 	else
@@ -174,6 +185,7 @@ void ViSongDetector::replyFinished(QNetworkReply *reply)
 		setState(ViSongDetector::ImageRetrieval);
 		emit songDetected(mResponse.songInfo());
 		mFound = true;
+		LOG("Song info detected (" + mResponse.songInfo().artistName() + " - " + mResponse.songInfo().songTitle() + ").");
 		QUrl url;
 		if(mResponse.songInfo().imagePath() != "")
 		{
@@ -188,6 +200,7 @@ void ViSongDetector::replyFinished(QNetworkReply *reply)
 		QNetworkRequest request(url);
 		mNetworkManager->get(request);
 	}
+
 }
 
 void ViSongDetector::downloadFinished(QNetworkReply *reply)
