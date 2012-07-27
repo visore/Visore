@@ -1,14 +1,22 @@
 #include "viformatwidget.h"
 #include "ui_viformatwidget.h"
 #include "viaudiomanager.h"
+#include "viaudiocodec.h"
 
 ViFormatWidget::ViFormatWidget(QWidget *parent)
 	: ViWidget(parent)
 {
 	mUi = new Ui::ViFormatWidget();
 	mUi->setupUi(this);
-	populate();
-	setDefaults();
+	QObject::connect(mUi->codecBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeCodec()));
+	QObject::connect(mUi->bitrateModeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeBitrate()));
+	
+	ViCodecList codecs = ViAudioManager::codecs();
+	for(int i = 0; i < codecs.size(); ++i)
+	{
+		mUi->codecBox->addItem(codecs[i]->abbreviations()[0], codecs[i]->abbreviations()[0]);
+	}
+	changeCodec();
 }
 
 ViFormatWidget::~ViFormatWidget()
@@ -19,133 +27,257 @@ ViFormatWidget::~ViFormatWidget()
 ViAudioFormat ViFormatWidget::format()
 {
 	ViAudioFormat result;
-	result.setCodec(ViAudioManager::codec(mUi->codecBox->itemData(mUi->codecBox->currentIndex()).toString()));
+	/*result.setCodec(ViAudioManager::codec(mUi->codecBox->itemData(mUi->codecBox->currentIndex()).toString()));
 	result.setByteOrder((ViAudioFormat::Endian) mUi->byteOrderBox->itemData(mUi->byteOrderBox->currentIndex()).toInt());
 	result.setSampleType((ViAudioFormat::SampleType) mUi->sampleTypeBox->itemData(mUi->sampleTypeBox->currentIndex()).toInt());
 	result.setSampleRate(mUi->sampleRateBox->itemData(mUi->sampleRateBox->currentIndex()).toInt());
 	result.setSampleSize(mUi->sampleSizeBox->itemData(mUi->sampleSizeBox->currentIndex()).toInt());
-	result.setChannelCount(mUi->channelsBox->itemData(mUi->channelsBox->currentIndex()).toInt());
+	result.setChannelCount(mUi->channelsBox->itemData(mUi->channelsBox->currentIndex()).toInt());*/
 	return result;
 }
 
-void ViFormatWidget::populate()
+void ViFormatWidget::changeCodec()
 {
-	/*QList<ViCodec> codecs = ViCodecManager::selected(ViCodec::OutputType);
-	codecs.append(ViCodecManager::selected(ViCodec::InputOutputType));
-	for(int i = 0; i < codecs.size(); ++i)
+	ViAudioCodec *currentCodec = ViAudioManager::codec(codec());
+	if(currentCodec != NULL)
 	{
-		mUi->codecBox->addItem(codecs[i].abbreviation() + " (" + codecs[i].name() + ")", codecs[i].abbreviation());
+		mUi->sampleSizeBox->clear();
+		mUi->sampleRateBox->clear();
+		mUi->channelsBox->clear();
+		mUi->qualityBox->clear();
+		mUi->bitrateModeBox->clear();
+
+		QList<QString> names;
+		QList<int> values;
+		ViFormatMap formats;
+
+		formats = currentCodec->supportedSampleSizes();
+		if(formats.isEmpty())
+		{
+			setSampleSizeVisible(false);
+		}
+		else
+		{
+			setSampleSizeVisible(true);
+			values = formats.keys();
+			names = formats.values();
+			for(int i = 0; i < formats.size(); ++i)
+			{
+				mUi->sampleSizeBox->addItem(names[i], values[i]);
+			}
+			mUi->sampleSizeBox->setCurrentIndex(mUi->sampleSizeBox->findData(formats.defaultValue()));
+		}
+
+		formats = currentCodec->supportedSampleRates();
+		if(formats.isEmpty())
+		{
+			setSampleRateVisible(false);
+		}
+		else
+		{
+			setSampleRateVisible(true);
+			values = formats.keys();
+			names = formats.values();
+			for(int i = 0; i < formats.size(); ++i)
+			{
+				mUi->sampleRateBox->addItem(names[i], values[i]);
+			}
+			mUi->sampleRateBox->setCurrentIndex(mUi->sampleRateBox->findData(formats.defaultValue()));
+		}
+
+		formats = currentCodec->supportedChannels();
+		if(formats.isEmpty())
+		{
+			setChannelsVisible(false);
+		}
+		else
+		{
+			setChannelsVisible(true);
+			values = formats.keys();
+			names = formats.values();
+			for(int i = 0; i < formats.size(); ++i)
+			{
+				mUi->channelsBox->addItem(names[i], values[i]);
+			}
+			mUi->channelsBox->setCurrentIndex(mUi->channelsBox->findData(formats.defaultValue()));
+		}
+
+		formats = currentCodec->supportedQualities();
+		if(formats.isEmpty())
+		{
+			setQualityVisible(false);
+		}
+		else
+		{
+			setQualityVisible(true);
+			values = formats.keys();
+			names = formats.values();
+			for(int i = 0; i < formats.size(); ++i)
+			{
+				mUi->qualityBox->addItem(names[i], values[i]);
+			}
+			mUi->qualityBox->setCurrentIndex(mUi->qualityBox->findData(formats.defaultValue()));
+		}
+
+		formats = currentCodec->supportedBitrateModes();
+		if(formats.isEmpty())
+		{
+			setBitrateModeVisible(false);
+		}
+		else
+		{
+			setBitrateModeVisible(true);
+			values = formats.keys();
+			names = formats.values();
+			for(int i = 0; i < formats.size(); ++i)
+			{
+				mUi->bitrateModeBox->addItem(names[i], values[i]);
+			}
+			mUi->bitrateModeBox->setCurrentIndex(mUi->bitrateModeBox->findData(formats.defaultValue()));
+		}
 	}
 
-	QList<ViAudioFormat::Endian> byteOrders = ViCodecManager::byteOrders();
-	for(int i = 0; i < byteOrders.size(); ++i)
-	{
-		if(byteOrders[i] == ViAudioFormat::LittleEndian)
-		{
-			mUi->byteOrderBox->addItem("Little Endian", ViAudioFormat::LittleEndian);
-		}
-		else if(byteOrders[i] == ViAudioFormat::BigEndian)
-		{
-			mUi->byteOrderBox->addItem("Big Endian", ViAudioFormat::BigEndian);
-		}
-	}
-
-	QList<ViAudioFormat::SampleType> sampleTypes = ViCodecManager::sampleTypes();
-	for(int i = 0; i < sampleTypes.size(); ++i)
-	{
-		if(sampleTypes[i] == ViAudioFormat::SignedInt)
-		{
-			mUi->sampleTypeBox->addItem("Signed Integer", ViAudioFormat::SignedInt);
-		}
-		else if(sampleTypes[i] == ViAudioFormat::UnSignedInt)
-		{
-			mUi->sampleTypeBox->addItem("Unsigned Integer", ViAudioFormat::UnSignedInt);
-		}
-		else if(sampleTypes[i] == ViAudioFormat::Float)
-		{
-			mUi->sampleTypeBox->addItem("Float", ViAudioFormat::Float);
-		}
-	}
-
-	QList<qint32> sampleRates = ViCodecManager::sampleRates();
-	for(int i = 0; i < sampleRates.size(); ++i)
-	{
-		mUi->sampleRateBox->addItem(QString::number(sampleRates[i]) + " Hz", sampleRates[i]);
-	}
-
-	QList<qint8> sampleSizes = ViCodecManager::sampleSizes();
-	for(int i = 0; i < sampleSizes.size(); ++i)
-	{
-		mUi->sampleSizeBox->addItem(QString::number(sampleSizes[i]) + " bit", sampleSizes[i]);
-	}
-
-	QList<qint8> channels = ViCodecManager::channels();
-		for(int i = 0; i < channels.size(); ++i)
-	{
-		if(channels[i] == 1)
-		{
-			mUi->channelsBox->addItem("Mono (1 channel)", 1);
-		}
-		else if (channels[i] == 2)
-		{
-			mUi->channelsBox->addItem("Stereo (2 channels)", 2);
-		}
-	}*/
+	changeBitrate();
 }
 
-void ViFormatWidget::setDefaults()
+void ViFormatWidget::changeBitrate()
 {
-	for(int i = 0; i < mUi->codecBox->count(); ++i)
-	{
-		if(mUi->codecBox->itemData(i) == "WAV")
-		{
-			mUi->codecBox->setCurrentIndex(i);
-			break;
-		}
-	}
+	ViAudioCodec *currentCodec = ViAudioManager::codec(codec());
 
-	for(int i = 0; i < mUi->byteOrderBox->count(); ++i)
-	{
-		if(mUi->byteOrderBox->itemData(i) == ViAudioFormat::LittleEndian)
-		{
-			mUi->byteOrderBox->setCurrentIndex(i);
-			break;
-		}
-	}
+	mUi->bitrateBox->clear();
+	mUi->minimumBitrateBox->clear();
+	mUi->maximumBitrateBox->clear();
 
-	for(int i = 0; i < mUi->sampleTypeBox->count(); ++i)
-	{
-		if(mUi->sampleTypeBox->itemData(i) == ViAudioFormat::SignedInt)
-		{
-			mUi->sampleTypeBox->setCurrentIndex(i);
-			break;
-		}
-	}
+	QList<QString> names;
+	QList<int> values;
+	ViFormatMap formats;
 
-	for(int i = 0; i < mUi->sampleRateBox->count(); ++i)
+	if(bitrateMode() == ViAudioBitrate::Variable)
 	{
-		if(mUi->sampleRateBox->itemData(i) == 44100)
+		formats = currentCodec->supportedBitrates();
+		setBitrateVisible(false);
+		setMinimumBitrateVisible(true);
+		setMaximumBitrateVisible(true);
+		values = formats.keys();
+		names = formats.values();
+		for(int i = 0; i < formats.size(); ++i)
 		{
-			mUi->sampleRateBox->setCurrentIndex(i);
-			break;
+			mUi->minimumBitrateBox->addItem(names[i], values[i]);
+			mUi->maximumBitrateBox->addItem(names[i], values[i]);
 		}
+		mUi->minimumBitrateBox->setCurrentIndex(mUi->minimumBitrateBox->findData(formats.defaultValue()));
+		mUi->maximumBitrateBox->setCurrentIndex(mUi->maximumBitrateBox->findData(formats.defaultValue()));
 	}
+	else if(bitrateMode() == ViAudioBitrate::Constant || bitrateMode() == ViAudioBitrate::Average)
+	{
+		formats = currentCodec->supportedBitrates();
+		setBitrateVisible(true);
+		setMinimumBitrateVisible(false);
+		setMaximumBitrateVisible(false);
+		values = formats.keys();
+		names = formats.values();
+		for(int i = 0; i < formats.size(); ++i)
+		{
+			mUi->bitrateBox->addItem(names[i], values[i]);
+		}
+		mUi->bitrateBox->setCurrentIndex(mUi->bitrateBox->findData(formats.defaultValue()));
+	}
+	else
+	{
+		setBitrateVisible(false);
+		setMinimumBitrateVisible(false);
+		setMaximumBitrateVisible(false);
+	}
+}
 
-	for(int i = 0; i < mUi->sampleSizeBox->count(); ++i)
-	{
-		if(mUi->sampleSizeBox->itemData(i) == 16)
-		{
-			mUi->sampleSizeBox->setCurrentIndex(i);
-			break;
-		}
-	}
+QString ViFormatWidget::codec()
+{
+	return mUi->codecBox->itemData(mUi->codecBox->currentIndex()).toString();
+}
 
-	for(int i = 0; i < mUi->channelsBox->count(); ++i)
-	{
-		if(mUi->channelsBox->itemData(i) == 2)
-		{
-			mUi->channelsBox->setCurrentIndex(i);
-			break;
-		}
-	}
+int ViFormatWidget::sampleSize()
+{
+	return mUi->sampleSizeBox->itemData(mUi->sampleSizeBox->currentIndex()).toInt();
+}
+
+int ViFormatWidget::sampleRate()
+{
+	return mUi->sampleRateBox->itemData(mUi->sampleRateBox->currentIndex()).toInt();
+}
+
+int ViFormatWidget::channels()
+{
+	return mUi->channelsBox->itemData(mUi->channelsBox->currentIndex()).toInt();
+}
+
+int ViFormatWidget::quality()
+{
+	return mUi->qualityBox->itemData(mUi->qualityBox->currentIndex()).toInt();
+}
+
+int ViFormatWidget::bitrateMode()
+{
+	return mUi->bitrateModeBox->itemData(mUi->bitrateModeBox->currentIndex()).toInt();
+}
+
+int ViFormatWidget::bitrate()
+{
+	return mUi->bitrateBox->itemData(mUi->bitrateBox->currentIndex()).toInt();
+}
+
+int ViFormatWidget::minimumBitrate()
+{
+	return mUi->minimumBitrateBox->itemData(mUi->minimumBitrateBox->currentIndex()).toInt();
+}
+
+int ViFormatWidget::maximumBitrate()
+{
+	return mUi->maximumBitrateBox->itemData(mUi->maximumBitrateBox->currentIndex()).toInt();
+}
+
+void ViFormatWidget::setSampleSizeVisible(bool visible)
+{
+	mUi->sampleSizeBox->setVisible(visible);
+	mUi->sampleSizeLabel->setVisible(visible);
+}
+
+void ViFormatWidget::setSampleRateVisible(bool visible)
+{
+	mUi->sampleRateBox->setVisible(visible);
+	mUi->sampleRateLabel->setVisible(visible);
+}
+void ViFormatWidget::setChannelsVisible(bool visible)
+{
+	mUi->channelsBox->setVisible(visible);
+	mUi->channelsLabel->setVisible(visible);
+}
+
+void ViFormatWidget::setQualityVisible(bool visible)
+{
+	mUi->qualityBox->setVisible(visible);
+	mUi->qualityLabel->setVisible(visible);
+}
+
+void ViFormatWidget::setBitrateModeVisible(bool visible)
+{
+	mUi->bitrateModeBox->setVisible(visible);
+	mUi->bitrateModeLabel->setVisible(visible);
+}
+
+void ViFormatWidget::setBitrateVisible(bool visible)
+{
+	mUi->bitrateBox->setVisible(visible);
+	mUi->bitrateLabel->setVisible(visible);
+}
+
+void ViFormatWidget::setMinimumBitrateVisible(bool visible)
+{
+	mUi->minimumBitrateBox->setVisible(visible);
+	mUi->minimumBitrateLabel->setVisible(visible);
+}
+
+void ViFormatWidget::setMaximumBitrateVisible(bool visible)
+{
+	mUi->maximumBitrateBox->setVisible(visible);
+	mUi->maximumBitrateLabel->setVisible(visible);
 }

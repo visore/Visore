@@ -21,7 +21,7 @@ ViOutputControlWidget::~ViOutputControlWidget()
 
 void ViOutputControlWidget::selectFileOutput()
 {
-	ViAudioCodec *codec = ViAudioManager::codec(mUi->formatBox->itemData(mUi->formatBox->currentIndex()).toString());
+	/*ViAudioCodec *codec = ViAudioManager::codec(mUi->formatBox->itemData(mUi->formatBox->currentIndex()).toString());
 	QString extensions = codec->abbreviation() + " (";
 	QList<QString> list = codec->extensions(".*");
 	for(int i = 0; i < list.size(); ++i)
@@ -34,7 +34,7 @@ void ViOutputControlWidget::selectFileOutput()
 	}
 	extensions += ")";
 	QString file = QFileDialog::getSaveFileName(this, "Save Audio File", QDir::homePath() + QDir::separator() + "output." + codec->extensions()[0], extensions);
-	mUi->fileLineEdit->setText(file);
+	mUi->fileLineEdit->setText(file);*/
 }
 
 void ViOutputControlWidget::save()
@@ -51,11 +51,11 @@ void ViOutputControlWidget::save()
 
 void ViOutputControlWidget::populate()
 {
-	ViCodecList codecs = ViAudioManager::codecs();
+	/*ViCodecList codecs = ViAudioManager::codecs();
 	for(int i = 0; i < codecs.size(); ++i)
 	{
 		mUi->formatBox->addItem(codecs[i]->abbreviation() + " (" + codecs[i]->name() + ")", codecs[i]->abbreviation());
-	}
+	}*/
 
 	/*QList<ViAudioFormat::Endian> byteOrders = ViCodecManager::byteOrders();
 	for(int i = 0; i < byteOrders.size(); ++i)

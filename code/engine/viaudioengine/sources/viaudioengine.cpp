@@ -35,7 +35,7 @@ ViAudioEngine::ViAudioEngine()
 	//Song detector
 	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
 	mSongDetector.setKey("G1TZBE4IHJAYUSNCN");
-	mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
+	//mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
 
 	QObject::connect(&mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
 }

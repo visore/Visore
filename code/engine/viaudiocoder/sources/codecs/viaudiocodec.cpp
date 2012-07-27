@@ -95,3 +95,123 @@ bool ViAudioCodec::operator != (const ViAudioCodec &other) const
 {
 	return mShortName.trimmed().toLower() != other.mShortName.trimmed().toLower();
 }
+
+void ViAudioCodec::addSampleSize(int value, QString text)
+{
+	mSampleSizes.insert(value, text);
+}
+
+void ViAudioCodec::addSampleRate(int value, QString text)
+{
+	mSampleRates.insert(value, text);
+}
+
+void ViAudioCodec::addSampleType(int value, QString text)
+{
+	mSampleTypes.insert(value, text);
+}
+
+void ViAudioCodec::addEndianness(int value, QString text)
+{
+	mEndianness.insert(value, text);
+}
+
+void ViAudioCodec::addBitrate(int value, QString text)
+{
+	mBitrates.insert(value, text);
+}
+
+void ViAudioCodec::addBitrateMode(int value, QString text)
+{
+	mBitrateModes.insert(value, text);
+}
+
+void ViAudioCodec::addQuality(int value, QString text)
+{
+	mQualities.insert(value, text);
+}
+
+void ViAudioCodec::addChannel(int value, QString text)
+{
+	mChannels.insert(value, text);
+}
+
+void ViAudioCodec::setDefaultSampleSize(int value)
+{
+	mSampleSizes.setDefault(value);
+}
+
+void ViAudioCodec::setDefaultSampleRate(int value)
+{
+	mSampleRates.setDefault(value);
+}
+
+void ViAudioCodec::setDefaultSampleType(int value)
+{
+	mSampleTypes.setDefault(value);
+}
+
+void ViAudioCodec::setDefaultEndianness(int value)
+{
+	mEndianness.setDefault(value);
+}
+
+void ViAudioCodec::setDefaultBitrate(int value)
+{
+	mBitrates.setDefault(value);
+}
+
+void ViAudioCodec::setDefaultBitrateMode(int value)
+{
+	mBitrateModes.setDefault(value);
+}
+
+void ViAudioCodec::setDefaultQuality(int value)
+{
+	mQualities.setDefault(value);
+}
+
+void ViAudioCodec::setDefaultChannel(int value)
+{
+	mChannels.setDefault(value);
+}
+
+ViFormatMap ViAudioCodec::supportedSampleSizes()
+{
+	return mSampleSizes;
+}
+
+ViFormatMap ViAudioCodec::supportedSampleRates()
+{
+	return mSampleRates;
+}
+
+ViFormatMap ViAudioCodec::supportedSampleType()
+{
+	return mSampleTypes;
+}
+
+ViFormatMap ViAudioCodec::supportedEndianness()
+{
+	return mEndianness;
+}
+
+ViFormatMap ViAudioCodec::supportedBitrates()
+{
+	return mBitrates;
+}
+
+ViFormatMap ViAudioCodec::supportedBitrateModes()
+{
+	return mBitrateModes;
+}
+
+ViFormatMap ViAudioCodec::supportedQualities()
+{
+	return mQualities;
+}
+
+ViFormatMap ViAudioCodec::supportedChannels()
+{
+	return mChannels;
+}

@@ -41,8 +41,6 @@ class ViLameCoder : public ViAbstractCoder
 		const char* (*m_get_lame_short_version)();
 		int (*m_lame_get_version)(lame_t);
 
-		int (*m_InitVbrTag)(lame_global_flags*);
-
 		//Decode
 
 		hip_t (*m_hip_decode_init)(void);
@@ -62,12 +60,12 @@ class ViLameCoder : public ViAbstractCoder
 		int (*m_lame_set_num_channels)(lame_t, int);
 
 		int (*m_lame_set_VBR)(lame_t, vbr_mode);
-		int (*m_lame_set_VBR_vi)(lame_t, int);
+		int (*m_lame_set_VBR_q)(lame_t, int);
 		int (*m_lame_set_VBR_mean_bitrate_kbps)(lame_t, int);
 		int (*m_lame_set_VBR_min_bitrate_kbps)(lame_t, int);
 		int (*m_lame_set_VBR_max_bitrate_kbps)(lame_t, int);
 
-		int (*m_lame_set_viuality)(lame_t, int);
+		int (*m_lame_set_quality)(lame_t, int);
 		int (*m_lame_set_out_samplerate)(lame_t, int);
 		int (*m_lame_set_mode)(lame_t, MPEG_mode);
 

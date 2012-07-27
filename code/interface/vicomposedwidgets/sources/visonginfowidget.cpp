@@ -13,6 +13,9 @@ ViSongInfoWidget::ViSongInfoWidget(QWidget *parent)
 {
 	mUi = new Ui::ViSongInfoWidget();
 	mUi->setupUi(this);
+
+	setBorder(ViThemeManager::color(14), 5, 10);
+
 	mUi->button->setIcon(ViThemeManager::image("", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Selected);
 	mUi->button->setCheckable(false);
 	mUi->button->setGlow(ViThemeManager::color(14));

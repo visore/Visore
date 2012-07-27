@@ -109,7 +109,7 @@ bool ViFlacCoder::initializeEncode()
 
 	FLAC__bool ok = true;
 	ok &= m_FLAC__stream_encoder_set_verify(mEncoder, true);
-	ok &= m_FLAC__stream_encoder_set_compression_level(mEncoder, ViAudioFormat::Minimum - mOutputFormat.viuality());
+	ok &= m_FLAC__stream_encoder_set_compression_level(mEncoder, ViAudioFormat::Minimum - mOutputFormat.quality());
 	ok &= m_FLAC__stream_encoder_set_channels(mEncoder, mOutputFormat.channelCount());
 	ok &= m_FLAC__stream_encoder_set_bits_per_sample(mEncoder, mOutputFormat.sampleSize());
 	ok &= m_FLAC__stream_encoder_set_sample_rate(mEncoder, mOutputFormat.sampleRate());

@@ -1,8 +1,69 @@
 #ifndef VIAUDIOFORMAT_H
 #define VIAUDIOFORMAT_H
 
-#include <viaudiocodec.h>
 #include <QAudioFormat>
+#include <QMap>
+
+class ViAudioCodec;
+
+class ViFormatMap : public QMap<int, QString>
+{
+	
+	public:
+
+		ViFormatMap();
+		void setDefault(int value);
+		int defaultValue();
+		QString defaultName();
+
+	private:
+
+		int mDefaultValue;
+
+};
+
+class ViAudioBitrate
+{
+
+	public:
+
+		enum Type
+		{
+			Normal,
+			Minimum,
+			Maximum
+		};
+
+		enum Mode
+		{
+			Unknown,
+			Constant,
+			Variable,
+			Average
+		};
+
+		ViAudioBitrate(const ViAudioBitrate::Mode mode = ViAudioBitrate::Unknown, const int normal = 0, const int minimum = 0, const int maximum = 0);
+
+		void setMode(const ViAudioBitrate::Mode mode);
+		void setRate(const int rate, const ViAudioBitrate::Type type = ViAudioBitrate::Normal);
+		void setNormal(const int rate);
+		void setMinimum(const int rate);
+		void setMaximum(const int rate);
+
+		ViAudioBitrate::Mode mode() const;
+		int rate(const ViAudioBitrate::Type type = ViAudioBitrate::Normal) const;
+		int normal() const;
+		int minimum() const;
+		int maximum() const;
+
+	private:
+
+		ViAudioBitrate::Mode mMode;
+		int mNormal;
+		int mMinimum;
+		int mMaximum;
+
+};
 
 class ViAudioFormat
 {
@@ -11,53 +72,39 @@ class ViAudioFormat
 
 		enum SampleType
 		{
-			Unknown = 0,
-			SignedInt = 1,
-			UnSignedInt = 2,
-			Float = 3,
-			Double = 4,
+			Unknown,
+			SignedInt,
+			UnSignedInt,
+			Float,
+			Double,
 			Real = Double
 		};
 
 		enum Endian
 		{
-			BigEndian = 0,
-			LittleEndian = 1
-		};
-
-		enum BitrateMode
-		{
-			ConstantBitrate = 0,
-			VariableBitrate = 1,
-			AverageBitrate = 2
-		};
-
-		enum BitrateType
-		{
-			NormalBitrate = 0,
-			MinimumBitrate = 1,
-			MaximumBitrate = 2
+			BigEndian,
+			LittleEndian
 		};
 
 		/*
 			Depended on codec:
-			 1. File size might be larger on higher viuality, because samples were compressed less and therefore less information loss (typically lossy codecs).
-			 2. File size might be smaller on higher viuality, because samples were compressed more without information loss - longer execution time (typcially lossless codecs).
+			 1. File size might be larger on higher quality, because samples were compressed less and therefore less information loss (typically lossy codecs).
+			 2. File size might be smaller on higher quality, because samples were compressed more without information loss - longer execution time (typcially lossless codecs).
 
-			Hence these values might indicate the viuality of sound for lossy codecs, or the level of compression for lossless codecs (higher viuality indicates higher compression).
+			Hence these values might indicate the quality of sound for lossy codecs, or the level of compression for lossless codecs (higher quality indicates higher compression).
 		*/
-		enum Viuality
+		enum Quality
 		{
-			InsaneHigh = 0,
-			ExtremeHigh = 1,
-			VeryHigh = 2,
-			High = 3,
-			AboveAverage = 4,
-			Average = 5,
-			BelowAverage = 6,
-			Low = 7,
-			VeryLow = 8,
-			ExtremeLow = 9,
+			InsaneHigh,
+			ExtremeHigh,
+			VeryHigh,
+			High,
+			AboveAverage,
+			Average,
+			BelowAverage,
+			Low,
+			VeryLow,
+			ExtremeLow,
 
 			Maximum = InsaneHigh, //Internal use only
 			Minimum = ExtremeLow //Internal use only
@@ -69,9 +116,10 @@ class ViAudioFormat
 
 		ViAudioFormat::SampleType sampleType() const;
 		ViAudioFormat::Endian byteOrder() const;
-		ViAudioFormat::Viuality viuality() const;
-		ViAudioFormat::BitrateMode bitrateMode() const;
-		int bitrate(const ViAudioFormat::BitrateType type = ViAudioFormat::NormalBitrate) const;
+		ViAudioFormat::Quality quality() const;
+		ViAudioBitrate bitrate() const;
+		ViAudioBitrate::Mode bitrateMode() const;
+		int bitrate(const ViAudioBitrate::Type type = ViAudioBitrate::Normal) const;
 		int sampleSize() const;
 		int sampleRate() const;
 		int channelCount() const;
@@ -82,9 +130,10 @@ class ViAudioFormat
 		void setSampleType(const QAudioFormat::SampleType type);
 		void setByteOrder(const ViAudioFormat::Endian order);
 		void setByteOrder(const QAudioFormat::Endian order);
-		void setViuality(const ViAudioFormat::Viuality viuality);
-		void setBitrateMode(const ViAudioFormat::BitrateMode mode);
-		void setBitrate(const int rate, const ViAudioFormat::BitrateType type = ViAudioFormat::NormalBitrate);
+		void setQuality(const ViAudioFormat::Quality quality);
+		void setBitrate(const ViAudioBitrate bitrate);
+		void setBitrateMode(const ViAudioBitrate::Mode mode);
+		void setBitrate(const int rate, const ViAudioBitrate::Type type = ViAudioBitrate::Normal);
 		void setSampleSize(const int size);
 		void setSampleRate(const int rate);
 		void setChannelCount(const int channels);
@@ -95,15 +144,21 @@ class ViAudioFormat
 		QAudioFormat toQAudioFormat();
 		static ViAudioFormat defaultFormat();
 
+		static ViFormatMap supportedSampleSizes();
+		static ViFormatMap supportedSampleRates();
+		static ViFormatMap supportedSampleType();
+		static ViFormatMap supportedEndianness();
+		static ViFormatMap supportedBitrates();
+		static ViFormatMap supportedBitrateModes();
+		static ViFormatMap supportedQualities();
+		static ViFormatMap supportedChannels();
+
 	private:
 
 		ViAudioFormat::SampleType mSampleType;
 		ViAudioFormat::Endian mByteOrder;
-		ViAudioFormat::Viuality mViuality;
-		ViAudioFormat::BitrateMode mBitrateMode;
-		int mNormalBitrate;
-		int mMinimumBitrate;
-		int mMaximumBitrate;
+		ViAudioFormat::Quality mQuality;
+		ViAudioBitrate mBitrate;
 		int mSampleSize;
 		int mSampleRate;
 		int mChannelCount;	

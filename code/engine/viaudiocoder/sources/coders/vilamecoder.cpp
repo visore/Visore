@@ -93,11 +93,11 @@ bool ViLameCoder::initializeEncode()
 	m_lame_set_in_samplerate(mLameEncoder, mInputFormat.sampleRate());
 	m_lame_set_num_channels(mLameEncoder, mInputFormat.channelCount());
 
-	if(mOutputFormat.bitrateMode() == ViAudioFormat::VariableBitrate)
+	if(mOutputFormat.bitrateMode() == ViAudioBitrate::Variable)
 	{
 		m_lame_set_VBR(mLameEncoder, vbr_default);
 	}
-	else if(mOutputFormat.bitrateMode() == ViAudioFormat::AverageBitrate)
+	else if(mOutputFormat.bitrateMode() == ViAudioBitrate::Average)
 	{
 		m_lame_set_VBR(mLameEncoder, vbr_abr);
 	}
@@ -105,12 +105,12 @@ bool ViLameCoder::initializeEncode()
 	{
 		m_lame_set_VBR(mLameEncoder, vbr_off);
 	}
-	m_lame_set_VBR_vi(mLameEncoder, mOutputFormat.viuality());
-	m_lame_set_VBR_mean_bitrate_kbps(mLameEncoder, mOutputFormat.bitrate(ViAudioFormat::NormalBitrate));
-	m_lame_set_VBR_min_bitrate_kbps(mLameEncoder, mOutputFormat.bitrate(ViAudioFormat::MinimumBitrate));
-	m_lame_set_VBR_max_bitrate_kbps(mLameEncoder, mOutputFormat.bitrate(ViAudioFormat::MaximumBitrate));
+	m_lame_set_VBR_q(mLameEncoder, mOutputFormat.quality());
+	m_lame_set_VBR_mean_bitrate_kbps(mLameEncoder, mOutputFormat.bitrate(ViAudioBitrate::Normal));
+	m_lame_set_VBR_min_bitrate_kbps(mLameEncoder, mOutputFormat.bitrate(ViAudioBitrate::Minimum));
+	m_lame_set_VBR_max_bitrate_kbps(mLameEncoder, mOutputFormat.bitrate(ViAudioBitrate::Maximum));
 
-	m_lame_set_viuality(mLameEncoder, mOutputFormat.viuality());
+	m_lame_set_quality(mLameEncoder, mOutputFormat.quality());
 	m_lame_set_out_samplerate(mLameEncoder, mOutputFormat.sampleRate());
 	if(mOutputFormat.channelCount() == 1)
 	{
@@ -428,14 +428,14 @@ void ViLameCoder::decode(const void *input, int size)
 		if(mp3Header.bitrate < mMinimumBitrate)
 		{
 			mMinimumBitrate = mp3Header.bitrate;
-			mInputFormat.setBitrate(mMinimumBitrate, ViAudioFormat::MinimumBitrate);
+			mInputFormat.setBitrate(mMinimumBitrate, ViAudioBitrate::Minimum);
 		}
 		else if(mp3Header.bitrate > mMaximumBitrate)
 		{
 			mMaximumBitrate = mp3Header.bitrate;
-			mInputFormat.setBitrate(mMaximumBitrate, ViAudioFormat::MaximumBitrate);
+			mInputFormat.setBitrate(mMaximumBitrate, ViAudioBitrate::Maximum);
 		}
-		mInputFormat.setBitrate(mTotalBitrate / mBitrateCounter, ViAudioFormat::NormalBitrate);
+		mInputFormat.setBitrate(mTotalBitrate / mBitrateCounter, ViAudioBitrate::Normal);
 
 		if(!mFormatWasDetected)
 		{
@@ -493,8 +493,6 @@ ViCoder::Error ViLameCoder::initializeLibrary()
 
 	loaded.append((m_lame_get_version = (int (*)(lame_t)) mLibrary.resolve("lame_get_version")) != NULL);
 
-loaded.append((m_InitVbrTag = (int (*)(lame_global_flags*)) mLibrary.resolve("InitVbrTag")) != NULL);
-
 	//Decode
 
 	loaded.append((m_hip_decode_init = (hip_t (*)()) mLibrary.resolve("hip_decode_init")) != NULL);
@@ -514,12 +512,12 @@ loaded.append((m_InitVbrTag = (int (*)(lame_global_flags*)) mLibrary.resolve("In
 	loaded.append((m_lame_set_num_channels = (int (*)(lame_t, int)) mLibrary.resolve("lame_set_num_channels")) != NULL);
 
 	loaded.append((m_lame_set_VBR = (int (*)(lame_t, vbr_mode)) mLibrary.resolve("lame_set_VBR")) != NULL);
-	loaded.append((m_lame_set_VBR_vi = (int (*)(lame_t, int)) mLibrary.resolve("lame_set_VBR_vi")) != NULL);
+	loaded.append((m_lame_set_VBR_q = (int (*)(lame_t, int)) mLibrary.resolve("lame_set_VBR_q")) != NULL);
 	loaded.append((m_lame_set_VBR_mean_bitrate_kbps = (int (*)(lame_t, int)) mLibrary.resolve("lame_set_VBR_mean_bitrate_kbps")) != NULL);
 	loaded.append((m_lame_set_VBR_min_bitrate_kbps = (int (*)(lame_t, int)) mLibrary.resolve("lame_set_VBR_min_bitrate_kbps")) != NULL);
 	loaded.append((m_lame_set_VBR_max_bitrate_kbps = (int (*)(lame_t, int)) mLibrary.resolve("lame_set_VBR_max_bitrate_kbps")) != NULL);
 
-	loaded.append((m_lame_set_viuality = (int (*)(lame_t, int)) mLibrary.resolve("lame_set_viuality")) != NULL);
+	loaded.append((m_lame_set_quality = (int (*)(lame_t, int)) mLibrary.resolve("lame_set_quality")) != NULL);
 	loaded.append((m_lame_set_out_samplerate = (int (*)(lame_t, int)) mLibrary.resolve("lame_set_out_samplerate")) != NULL);
 	loaded.append((m_lame_set_mode = (int (*)(lame_t, MPEG_mode)) mLibrary.resolve("lame_set_mode")) != NULL);
 
@@ -534,11 +532,11 @@ loaded.append((m_InitVbrTag = (int (*)(lame_global_flags*)) mLibrary.resolve("In
 			++success;
 		}
 		else
-		{
+		{cout<<"*"<<i<<endl;
 			++failure;
 		}
 	}
-
+cout<<failure<<endl;
 	if(success == loaded.size())
 	{
 		return ViCoder::NoError;

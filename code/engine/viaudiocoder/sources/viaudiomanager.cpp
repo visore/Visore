@@ -1,10 +1,14 @@
 #include <viaudiomanager.h>
+#include <viaudiocodec.h>
 #include <viwavecoder.h>
 #include <vilamecoder.h>
 #include <viflaccoder.h>
 #include <QSharedPointer>
 #include <QDir>
 
+
+#include<iostream>
+using namespace std;
 #define DEFAUL_HEADER_SIZE 8192
 #define MAXIMUM_HEADER_TESTS 50
 
@@ -509,7 +513,7 @@ bool ViAudioManager::testLibrary(ViAbstractCoder *coder)
 					}
 
 					//Check for libraries that end in version number. Eg: libflac.so.8
-
+//cout<<path.toAscii().data()<<" "<<fileName.toAscii().data()<<endl;
 					nameFilters.clear();
 					possibles.clear();
 

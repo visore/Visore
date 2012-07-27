@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QRunnable>
 #include "viid.h"
+#include "viaudio.h"
 #include "vichunk.h"
 #include "viaudioformat.h"
 #include "vilogger.h"

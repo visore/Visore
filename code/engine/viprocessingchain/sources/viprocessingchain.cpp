@@ -1,4 +1,5 @@
 #include "viprocessingchain.h"
+#include "viaudiocodec.h"
 
 #define DEFAULT_SONG_LENGTH 240000
 #define MINIMUM_SONG_LENGTH 1500

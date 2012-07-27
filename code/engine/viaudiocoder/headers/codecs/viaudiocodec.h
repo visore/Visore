@@ -5,8 +5,7 @@
 #include <QByteArray>
 #include <viaudioinfo.h>
 #include <vicoder.h>
-
-class ViAudioFormat;
+#include <viaudioformat.h>
 
 namespace ViAudio
 {
@@ -37,6 +36,15 @@ class ViAudioCodec
 		bool operator == (const ViAudioCodec &other) const;
 		bool operator != (const ViAudioCodec &other) const;
 
+		ViFormatMap supportedSampleSizes();
+		ViFormatMap supportedSampleRates();
+		ViFormatMap supportedSampleType();
+		ViFormatMap supportedEndianness();
+		ViFormatMap supportedBitrates();
+		ViFormatMap supportedBitrateModes();
+		ViFormatMap supportedQualities();
+		ViFormatMap supportedChannels();
+
 	protected:
 
 		ViAudioCodec();
@@ -47,6 +55,24 @@ class ViAudioCodec
 		void addAbbreviation(const QString abbreviation);
 		void addExtension(const QString extension);
 
+		void addSampleSize(int value, QString text);
+		void addSampleRate(int value, QString text);
+		void addSampleType(int value, QString text);
+		void addEndianness(int value, QString text);
+		void addBitrate(int value, QString text);
+		void addBitrateMode(int value, QString text);
+		void addQuality(int value, QString text);
+		void addChannel(int value, QString text);
+
+		void setDefaultSampleSize(int value);
+		void setDefaultSampleRate(int value);
+		void setDefaultSampleType(int value);
+		void setDefaultEndianness(int value);
+		void setDefaultBitrate(int value);
+		void setDefaultBitrateMode(int value);
+		void setDefaultQuality(int value);
+		void setDefaultChannel(int value);
+
 	private:
 
 		QString mShortName;
@@ -54,6 +80,15 @@ class ViAudioCodec
 		ViAudio::Compression mCompression;
 		QStringList mAbbreviations;
 		QStringList mExtensions;
+
+		ViFormatMap mSampleSizes;
+		ViFormatMap mSampleRates;
+		ViFormatMap mSampleTypes;
+		ViFormatMap mEndianness;
+		ViFormatMap mBitrates;
+		ViFormatMap mBitrateModes;
+		ViFormatMap mQualities;
+		ViFormatMap mChannels;
 		
 };
 

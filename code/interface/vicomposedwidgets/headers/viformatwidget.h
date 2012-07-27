@@ -14,6 +14,11 @@ class ViFormatWidget : public ViWidget
 {
 	Q_OBJECT
 
+	private slots:
+
+		void changeCodec();
+		void changeBitrate();
+
 	public:
 
 		ViFormatWidget(QWidget *parent = 0);
@@ -22,8 +27,24 @@ class ViFormatWidget : public ViWidget
 
 	private:
 
-		void populate();
-		void setDefaults();
+		QString codec();
+		int sampleSize();
+		int sampleRate();
+		int channels();
+		int quality();
+		int bitrateMode();
+		int bitrate();
+		int minimumBitrate();
+		int maximumBitrate();
+
+		void setSampleSizeVisible(bool visible);
+		void setSampleRateVisible(bool visible);
+		void setChannelsVisible(bool visible);
+		void setQualityVisible(bool visible);
+		void setBitrateModeVisible(bool visible);
+		void setBitrateVisible(bool visible);
+		void setMinimumBitrateVisible(bool visible);
+		void setMaximumBitrateVisible(bool visible);
 
 	private:
 
