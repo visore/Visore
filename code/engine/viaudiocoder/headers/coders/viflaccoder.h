@@ -78,6 +78,9 @@ class ViFlacCoder : public ViAbstractCoder, public QThread
 		void (*m_FLAC__metadata_object_delete)(FLAC__StreamMetadata*);
 		FLAC__bool (*m_FLAC__metadata_object_vorbiscomment_append_comment)(FLAC__StreamMetadata*, FLAC__StreamMetadata_VorbisComment_Entry, FLAC__bool);
 		FLAC__bool (*m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair)(FLAC__StreamMetadata_VorbisComment_Entry*, const char*, const char*);
+		FLAC__bool (*m_FLAC__metadata_object_picture_set_mime_type)(FLAC__StreamMetadata*, char*, FLAC__bool);
+		FLAC__bool (*m_FLAC__metadata_object_picture_set_description)(FLAC__StreamMetadata*, FLAC__byte*, FLAC__bool);
+		FLAC__bool (*m_FLAC__metadata_object_picture_set_data)(FLAC__StreamMetadata*, FLAC__byte*, FLAC__uint32, FLAC__bool);
 
 		FLAC_API FLAC__StreamMetadata *FLAC__metadata_object_new(FLAC__MetadataType type);
 

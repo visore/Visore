@@ -42,7 +42,6 @@ class ViCodingChainComponent : public QObject
 
 		virtual void changeFormat(ViAudioFormat format);
 		void addData(ViSampleArray *data);
-		void addData(ViSampleArray *data, qint64 position);
 
 	public:
 
@@ -60,7 +59,6 @@ class ViCodingChainComponent : public QObject
 
 	protected:
 
-		virtual void seek(qint64 position);
 		void setError(ViCoder::Error error);
 
 	protected:
@@ -263,7 +261,6 @@ class ViCodingChainFileOutput : public ViCodingChainOutput
 
 		ViCodingChainFileOutput();
 		void setFilePath(QString filePath);
-		void seek(qint64 position);
 		void initialize();
 		void execute();
 		void finalize();
@@ -290,7 +287,6 @@ class ViCodingChainDataOutput : public ViCodingChainOutput
 		ViCodingChainDataOutput();
 		~ViCodingChainDataOutput();
 		void setData(QByteArray &data);
-		void seek(qint64 position);
 		void initialize();
 		void execute();
 		void finalize();
@@ -316,7 +312,6 @@ class ViCodingChainBufferOutput : public ViCodingChainOutput
 		ViCodingChainBufferOutput();
 		~ViCodingChainBufferOutput();
 		void setBuffer(ViAudioBuffer *buffer);
-		void seek(qint64 position);
 		void initialize();
 		void execute();
 		void finalize();

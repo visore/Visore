@@ -52,6 +52,17 @@ int ViAudioBufferStream::write(ViAudioBufferChunk *chunk)
 	return write(chunk, chunk->size());
 }
 
+void ViAudioBufferStream::insert(qint64 position, char *data, int length)
+{
+	if(length > 0)
+	{
+		mMutex->lock();
+		mBuffer->data()->insert(position, data, length);
+		mMutex->unlock();
+		change();
+	}
+}
+
 void ViAudioBufferStream::setBufferHeadStart(int bufferHeadStart)
 {
 	mBufferHeadStart = bufferHeadStart;

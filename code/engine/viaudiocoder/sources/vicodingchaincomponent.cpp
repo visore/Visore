@@ -51,16 +51,6 @@ void ViCodingChainComponent::addData(ViSampleArray *data)
 	execute();
 }
 
-void ViCodingChainComponent::addData(ViSampleArray *data, qint64 position)
-{
-	seek(position);
-	addData(data);
-}
-
-void ViCodingChainComponent::seek(qint64 position)
-{
-}
-
 /**********************************************************
 ViCodingChainInput
 **********************************************************/
@@ -337,9 +327,6 @@ void ViCodingChainEncoder::changeFormat(ViAudioFormat format)
 		mCoder->setFormat(ViAudio::AudioInput, format);
 		if(mCoder->initializeEncode())
 		{
-			int size = mCoder->headerSize();
-			qbyte *data = new qbyte[size];
-			//mNext->addData(new ViSampleArray(data, size));
 			mCoder->disconnect(mCoder, SIGNAL(encoded(ViSampleArray*)));
 			QObject::connect(mCoder, SIGNAL(encoded(ViSampleArray*)), mNext, SLOT(addData(ViSampleArray*)), Qt::DirectConnection);
 		}
@@ -399,11 +386,6 @@ void ViCodingChainFileOutput::setFilePath(QString filePath)
 	mFilePath = filePath;
 }
 
-void ViCodingChainFileOutput::seek(qint64 position)
-{
-	//mFile.seek(position);
-}
-
 void ViCodingChainFileOutput::initialize()
 {
 	mData.clear();
@@ -446,6 +428,7 @@ void ViCodingChainFileOutput::finalize()
 		mFile.write(data, size);
 	}
 	mTempFile.close();
+	mTempFile.remove();
 	mFile.close();
 }
 
@@ -482,17 +465,6 @@ void ViCodingChainDataOutput::setData(QByteArray &data)
 	mByteArray = &data;
 }
 
-void ViCodingChainDataOutput::seek(qint64 position)
-{
-	if(mStream != NULL)
-	{
-		delete mStream;
-		mStream = NULL;
-	}
-	mStream = new QDataStream(mByteArray, QIODevice::WriteOnly);
-	mStream->skipRawData(position);
-}
-
 void ViCodingChainDataOutput::initialize()
 {
 	mData.clear();
@@ -506,6 +478,8 @@ void ViCodingChainDataOutput::initialize()
 
 void ViCodingChainDataOutput::finalize()
 {
+	mByteArray->insert(0, mHeader);
+	mHeader.clear();
 	if(mStream != NULL)
 	{
 		delete mStream;
@@ -547,17 +521,6 @@ void ViCodingChainBufferOutput::setBuffer(ViAudioBuffer *buffer)
 	mBuffer = buffer;
 }
 
-void ViCodingChainBufferOutput::seek(qint64 position)
-{
-	if(mStream != NULL)
-	{
-		mBuffer->deleteStream(mStream);
-		mStream = NULL;
-	}
-	mStream = mBuffer->createWriteStream();
-	mStream->skipRawData(position);
-}
-
 void ViCodingChainBufferOutput::initialize()
 {
 	if(mStream != NULL)
@@ -569,6 +532,8 @@ void ViCodingChainBufferOutput::initialize()
 
 void ViCodingChainBufferOutput::finalize()
 {
+	mStream->insert(0, mHeader.data(), mHeader.size());
+	mHeader.clear();
 	if(mStream != NULL)
 	{
 		mBuffer->deleteStream(mStream);

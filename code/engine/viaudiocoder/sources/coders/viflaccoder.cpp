@@ -413,10 +413,12 @@ void ViFlacCoder::flacMetadataEncode(const FLAC__StreamEncoder *encoder, const F
 			coder->m_FLAC__stream_encoder_set_total_samples_estimate(headerEncoder, metadata->data.stream_info.total_samples);
 
 			FLAC__StreamMetadata_VorbisComment_Entry entry;
-			int blocks = 1;
+			int blocks = 2;
 			FLAC__StreamMetadata **info = new FLAC__StreamMetadata*[blocks];
 			FLAC__StreamMetadata *songInfo = coder->m_FLAC__metadata_object_new(FLAC__METADATA_TYPE_VORBIS_COMMENT);
+			FLAC__StreamMetadata *pictureInfo = coder->m_FLAC__metadata_object_new(FLAC__METADATA_TYPE_PICTURE);
 			info[0] = songInfo;
+			info[1] = pictureInfo;
 
 			if(coder->mSongInfo.songTitle() != "")
 			{
@@ -432,6 +434,15 @@ void ViFlacCoder::flacMetadataEncode(const FLAC__StreamEncoder *encoder, const F
 			coder->m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "DESCRIPTION", comment.toAscii().data());
 			coder->m_FLAC__metadata_object_vorbiscomment_append_comment(songInfo, entry, true);
 
+			if(coder->mSongInfo.imagePath() != "" && coder->m_FLAC__metadata_object_picture_set_mime_type(pictureInfo, coder->mSongInfo.imageMimeType().toAscii().data(), true))
+			{
+				if(coder->m_FLAC__metadata_object_picture_set_description(pictureInfo, (FLAC__byte*) coder->mSongInfo.artistName().toAscii().data(), true))
+				{
+					QByteArray imageData = coder->mSongInfo.imageData();
+					coder->m_FLAC__metadata_object_picture_set_data(pictureInfo, (FLAC__byte*) imageData.data(), imageData.size(), true);
+				}
+			}
+
 			coder->m_FLAC__stream_encoder_set_metadata(headerEncoder, info, blocks);
 			FLAC__StreamEncoderInitStatus initStatus = coder->m_FLAC__stream_encoder_init_stream(headerEncoder, ViFlacCoder::flacWriteHeaderEncode, NULL, NULL, NULL, client);
 			if(initStatus != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
@@ -440,6 +451,7 @@ void ViFlacCoder::flacMetadataEncode(const FLAC__StreamEncoder *encoder, const F
 			}
 
 			coder->m_FLAC__metadata_object_delete(songInfo);
+			coder->m_FLAC__metadata_object_delete(pictureInfo);
 			delete [] info;
 		}
 		else
@@ -648,6 +660,9 @@ ViCoder::Error ViFlacCoder::initializeLibrary()
 	loaded.append((m_FLAC__metadata_object_delete = (void (*)(FLAC__StreamMetadata*)) mLibrary.resolve("FLAC__metadata_object_delete")) != NULL);
 	loaded.append((m_FLAC__metadata_object_vorbiscomment_append_comment = (FLAC__bool (*)(FLAC__StreamMetadata*, FLAC__StreamMetadata_VorbisComment_Entry, FLAC__bool)) mLibrary.resolve("FLAC__metadata_object_vorbiscomment_append_comment")) != NULL);
 	loaded.append((m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair = (FLAC__bool (*)(FLAC__StreamMetadata_VorbisComment_Entry*, const char*, const char*)) mLibrary.resolve("FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair")) != NULL);
+	loaded.append((m_FLAC__metadata_object_picture_set_mime_type = (FLAC__bool (*)(FLAC__StreamMetadata*, char*, FLAC__bool)) mLibrary.resolve("FLAC__metadata_object_picture_set_mime_type")) != NULL);
+	loaded.append((m_FLAC__metadata_object_picture_set_description = (FLAC__bool (*)(FLAC__StreamMetadata*, FLAC__byte*, FLAC__bool)) mLibrary.resolve("FLAC__metadata_object_picture_set_description")) != NULL);
+	loaded.append((m_FLAC__metadata_object_picture_set_data = (FLAC__bool (*)(FLAC__StreamMetadata*, FLAC__byte*, FLAC__uint32, FLAC__bool)) mLibrary.resolve("FLAC__metadata_object_picture_set_data")) != NULL);
 
 	loaded.append((m_FLAC__stream_encoder_process_interleaved = (FLAC__bool (*)(FLAC__StreamEncoder*, const FLAC__int32[], unsigned)) mLibrary.resolve("FLAC__stream_encoder_process_interleaved")) != NULL);
 

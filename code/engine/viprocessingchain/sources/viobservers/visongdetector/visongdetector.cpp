@@ -1,14 +1,15 @@
 #include "visongdetector.h"
+#include "vimanager.h"
 #include "Codegen.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDir>
 
 //Interval (milliseconds) use to request info
-#define REQUEST_SAMPLES_1 5000
-#define REQUEST_SAMPLES_2 10000
-#define REQUEST_SAMPLES_3 15000
-#define REQUEST_SAMPLES_4 25000
+#define REQUEST_SAMPLES_1 10000
+#define REQUEST_SAMPLES_2 15000
+#define REQUEST_SAMPLES_3 20000
+#define REQUEST_SAMPLES_4 30000
 
 ViSongCodeGeneratorThread::ViSongCodeGeneratorThread(QObject *parent)
 	: QThread(parent)
@@ -124,13 +125,13 @@ void ViSongDetector::run()
 			format.setChannelCount(1);
 			format.setCodec(ViAudioManager::codec("WAVE"));
 			mOutput.clear();
-			mCoder.encode(mBuffer, mOutput, format);cout<<"song emitted: "<<(int)mRequestsSent<<endl;
+			mCoder.encode(mBuffer, mOutput, format);
 		}
 	}
 }
 
 void ViSongDetector::encodingFinished()
-{cout<<"song coded1"<<endl;
+{
 	if(mCoder.error() == ViCoder::NoError)
 	{
 		setState(ViSongDetector::CodeGeneration);
@@ -153,7 +154,6 @@ void ViSongDetector::codeFinished(QString code, QString version, int codeLength)
 	QJsonObject jsonObject;
 	jsonObject.insert("code", code);
 	mNetworkManager->post(request, QJsonDocument(jsonObject).toJson());
-cout<<"song coded2: "<<code.toAscii().data()<<endl;
 }
 
 void ViSongDetector::replyFinished(QNetworkReply *reply)
@@ -163,12 +163,11 @@ void ViSongDetector::replyFinished(QNetworkReply *reply)
 	if(mNetworkError != QNetworkReply::NoError)
 	{
 		mError = ViSongDetector::NetworkError;
-		setState(ViSongDetector::Idle);cout<<"***********+++++++++++"<<endl;
+		setState(ViSongDetector::Idle);
 		return;
 	}
-QByteArray aa = reply->readAll();
-cout<<QString(aa).toAscii().data()<<endl;
-	mResponse.analyze(aa);
+
+	mResponse.analyze(reply->readAll());
 	if(mResponse.message().contains("api") && mResponse.message().contains("key"))
 	{
 		mError = ViSongDetector::KeyError;
@@ -176,29 +175,40 @@ cout<<QString(aa).toAscii().data()<<endl;
 		return;
 	}
 	else if(mResponse.numberOfSongs() == 0)
-	{cout<<"pokkk"<<endl;
+	{
 		run();
 	}
 	else
 	{
 		mNetworkManager->disconnect();
-		setState(ViSongDetector::ImageRetrieval);
-		emit songDetected(mResponse.songInfo());
-		mFound = true;
-		LOG("Song info detected (" + mResponse.songInfo().artistName() + " - " + mResponse.songInfo().songTitle() + ").");
-		QUrl url;
 		if(mResponse.songInfo().imagePath() != "")
 		{
-			QObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadFinished(QNetworkReply*)));
-			url = QUrl(mResponse.songInfo().imagePath());
+			mFound = true;
+			QString imagePath = ViManager::tempPath() + QDir::separator() + "albumart" + QDir::separator() + mResponse.songInfo().songId();
+			QFile image(imagePath);
+			if(image.exists())
+			{
+				mResponse.songInfo().changeImagePath(mResponse.songInfo().imagePath(), imagePath);
+				setState(ViSongDetector::Idle);
+			}
+			else
+			{
+				setState(ViSongDetector::ImageRetrieval);
+				QObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadFinished(QNetworkReply*)));
+				QUrl url(mResponse.songInfo().imagePath());
+				QNetworkRequest request(url);
+				mNetworkManager->get(request);
+			}
+			LOG("Song info detected (" + mResponse.songInfo().artistName() + " - " + mResponse.songInfo().songTitle() + ").");
+			emit songDetected(mResponse.songInfo());
 		}
 		else
 		{
-			url = QUrl("http://developer.echonest.com/api/v4/artist/images?api_key=" + mKey + "&id=" + mResponse.songInfo().artistId() + "&format=json&results=1&start=0&license=unknown");
-			QObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));	
+			QUrl url("http://developer.echonest.com/api/v4/artist/images?api_key=" + mKey + "&id=" + mResponse.songInfo().artistId() + "&format=json&results=1&start=0&license=unknown");
+			QObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+			QNetworkRequest request(url);
+			mNetworkManager->get(request);
 		}
-		QNetworkRequest request(url);
-		mNetworkManager->get(request);
 	}
 
 }
@@ -212,7 +222,13 @@ void ViSongDetector::downloadFinished(QNetworkReply *reply)
 		mError = ViSongDetector::NetworkError;
 	}
 
-	QString newPath = QDir::tempPath() + QDir::separator() + mResponse.songInfo().songId();
+	QString newPath = ViManager::tempPath() + QDir::separator() + "albumart";
+	QDir dir(newPath);
+	if(!dir.exists())
+	{
+		dir.mkpath(newPath);
+	}
+	newPath += QDir::separator() + mResponse.songInfo().songId();
 	QFile file(newPath);
 	if(!file.open(QIODevice::WriteOnly))
 	{

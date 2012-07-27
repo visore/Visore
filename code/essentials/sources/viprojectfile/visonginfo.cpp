@@ -1,4 +1,6 @@
 #include "visonginfo.h"
+#include <QImageReader>
+#include <QBuffer>
 
 ViSongInfo::ViSongInfo()
 {
@@ -103,6 +105,38 @@ QString ViSongInfo::imagePath(int index)
 		return mImagePaths[index];
 	}
 	return "";
+}
+
+QString ViSongInfo::imageMimeType(int index)
+{
+	if(index < mImagePaths.size())
+	{
+		return "image/" + QString(QImageReader::imageFormat(mImagePaths[index])).toLower();
+	}
+	return "";
+}
+
+QImage ViSongInfo::image(int index)
+{
+	if(index < mImagePaths.size())
+	{
+		return QImage(mImagePaths[index]);
+	}
+	return QImage();
+}
+
+QByteArray ViSongInfo::imageData(int index)
+{
+	if(index < mImagePaths.size())
+	{
+		QImage image(mImagePaths[index]);
+		QByteArray data;
+		QBuffer buffer(&data);
+		buffer.open(QIODevice::WriteOnly);
+		image.save(&buffer, QImageReader::imageFormat(mImagePaths[index]));
+		return data;
+	}
+	return QByteArray();
 }
 
 void ViSongInfo::setMessage(QString message)

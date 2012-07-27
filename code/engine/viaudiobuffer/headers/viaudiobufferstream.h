@@ -24,6 +24,7 @@ class ViAudioBufferStream : public QObject, public QDataStream
 		int write(char *data, int length);
 		int write(ViAudioBufferChunk *chunk, int length);
 		int write(ViAudioBufferChunk *chunk);
+		void insert(qint64 position, char *data, int length);
 
 		void setBufferHeadStart(int bufferHeadStart);
 		void setHasBufferHeadStart(bool hasHeadStart);

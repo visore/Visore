@@ -32,7 +32,7 @@ void ViMultiExecutor::runNotify()
 	{
 		bufferSize = mReadStream->bufferSize();
 		size = mReadStream->read(mInputChunk->data(), mInputChunk->size());
-		if(mInputChunk->size() > 0)
+		if(size > 0)
 		{
 			mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), size));
 			ViSampleChunk::copy(mInputSamples, mOutputSamples);

@@ -47,6 +47,18 @@ void ViProcessingChain::changeInput(ViAudioPosition position)
 	mInput->setBuffer(allocateBuffer(ViAudio::AudioInput));
 }
 
+void ViProcessingChain::startInput(ViAudioPosition position)
+{
+	allocateBuffer(ViAudio::AudioInput);
+	allocateBuffer(ViAudio::AudioOutput);
+	nextBuffer(ViAudio::AudioInput);
+	nextBuffer(ViAudio::AudioOutput);
+	mInput->setBuffer(mInputBuffer);
+	mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
+	mMultiExecutor.setBuffer(ViAudio::AudioOutput, mOutputBuffer);
+	mMultiExecutor.initialize();
+}
+
 void ViProcessingChain::finalize()
 {
 	mMultiExecutor.finalize();
@@ -70,7 +82,7 @@ void ViProcessingChain::finalize()
 
 void ViProcessingChain::finish()
 {
-	mProject->save();;
+	mProject->save();
 	QObject::disconnect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
 	nextBuffer(ViAudio::AudioOutput);
 	mMultiExecutor.initialize();

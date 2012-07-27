@@ -20,6 +20,7 @@ class ViProcessingChain : public QObject
 	private slots:
 
 		void changeInput(ViAudioPosition position); // Connect song end detector to this slot
+		void startInput(ViAudioPosition position);
 		void finalize();
 		void finish();
 		void handleUnderrun();

@@ -3,6 +3,8 @@
 
 #include <QString>
 #include <QList>
+#include <QImage>
+#include <QByteArray>
 
 class ViSongInfo
 {
@@ -29,6 +31,9 @@ class ViSongInfo
 		qint16 artistFamiliarity();
 
 		QString imagePath(int index = 0);
+		QString imageMimeType(int index = 0);
+		QImage image(int index = 0);
+		QByteArray imageData(int index = 0);
 
 		void setMessage(QString message);
 		void setScore(qint16 score);
