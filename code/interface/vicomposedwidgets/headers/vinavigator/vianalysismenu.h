@@ -3,7 +3,7 @@
 
 #include "vimenu.h"
 #include "vithememanager.h"
-#include "vispectrumwidget.h"
+#include "vispectrumanalysiswidget.h"
 #include "vicorrelationwidget.h"
 
 namespace Ui

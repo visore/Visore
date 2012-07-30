@@ -25,6 +25,8 @@ class ViSpectrum
 		void initialize(qint32 size, qint32 frequency);
 		void finalize();
 
+		void clear();
+
 	private:
 
 		void findRanges();
@@ -40,6 +42,7 @@ class ViSpectrum
 
 };
 
+typedef ViSpectrum<short> ViShortSpectrum;
 typedef ViSpectrum<float> ViFloatSpectrum;
 typedef ViSpectrum<double> ViDoubleSpectrum;
 typedef ViDoubleSpectrum ViRealSpectrum;

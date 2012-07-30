@@ -220,6 +220,16 @@ void ViSongDetector::downloadFinished(QNetworkReply *reply)
 	if(mNetworkError != QNetworkReply::NoError)
 	{
 		mError = ViSongDetector::NetworkError;
+		setState(ViSongDetector::Idle);
+		return;
+	}
+	
+	QByteArray data = reply->readAll();
+	if(data.startsWith("{\"response\""))
+	{
+		mResponse.songInfo().changeImagePath(reply->url().toString(), "");
+		setState(ViSongDetector::Idle);
+		return;
 	}
 
 	QString newPath = ViManager::tempPath() + QDir::separator() + "albumart";
@@ -234,7 +244,7 @@ void ViSongDetector::downloadFinished(QNetworkReply *reply)
 	{
 		return;
 	}
-	file.write(reply->readAll());
+	file.write(data);
 	file.close();
 	mResponse.songInfo().changeImagePath(reply->url().toString(), newPath);
 	setState(ViSongDetector::Idle);

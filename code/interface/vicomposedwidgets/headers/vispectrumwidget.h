@@ -1,14 +1,9 @@
 #ifndef VISPECTRUMWIDGET_H
 #define VISPECTRUMWIDGET_H
 
-#include <QFileDialog>
 #include "vithememanager.h"
+#include "viaudioposition.h"
 #include "viwidget.h"
-
-namespace Ui
-{
-    class ViSpectrumWidget;
-}
 
 class ViSpectrumWidget : public ViWidget
 {
@@ -16,23 +11,27 @@ class ViSpectrumWidget : public ViWidget
 
 	public slots:
 
-		void recalculate();
-		void replot();
+		void addSpectrum(ViRealSpectrum spectrum, qint64 milliseconds);
+		void update(ViAudioPosition position);
 
 	public:
 
 		ViSpectrumWidget(QWidget *parent = 0);
-		~ViSpectrumWidget();
+		void setBars(int bars);
 
 	protected:
 
-		void showEvent(QShowEvent *event);
+		void paintEvent(QPaintEvent *event);
+		QVector<qbyte16u> summarizeSpectrum(QVector<qbyte16u> spectrum);
 
 	private:
 
-		Ui::ViSpectrumWidget *mUi;
-		bool mWasInitialized;
-
+		QList<QVector<qbyte16u> > mSpectrums;
+		QList<qint64> mIntervals;
+		QVector<qbyte16u> mCurrentSpectrum;
+		int mCurrentSpectrumIndex;
+		int mBars;
+		bool mSpectrumChanged;
 };
 
 #endif

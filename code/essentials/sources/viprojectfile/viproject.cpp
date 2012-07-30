@@ -1,6 +1,6 @@
 #include "viproject.h"
 
-#define RECORDING_NAME_LENGTH 5
+#define RECORDING_NAME_LENGTH 2
 
 ViProject::ViProject(QString filePath)
 	: QObject()
@@ -9,9 +9,11 @@ ViProject::ViProject(QString filePath)
 	mDataPath = "";
 	mOriginalPath = "";
 	mCorrectedPath = "";
+	mAlbumArtPath = "";
 	setFilePath(filePath);
 
 	mProjectFiles.append(&mProperties);
+	mProjectFiles.append(&mSongs);
 }
 
 ViProject::~ViProject()
@@ -64,6 +66,7 @@ bool ViProject::createTempStructure()
 	mDataPath = mTempPath + QDir::separator() + "data";
 	mOriginalPath = mDataPath + QDir::separator() + "original";
 	mCorrectedPath = mDataPath + QDir::separator() + "corrected";
+	mAlbumArtPath = mDataPath + QDir::separator() + "albumart";
 
 	for(int i = 0; i < mProjectFiles.size(); ++i)
 	{
@@ -71,7 +74,8 @@ bool ViProject::createTempStructure()
 	}
 	QDir originalDir(mOriginalPath);
 	QDir correctedDir(mCorrectedPath);
-	return originalDir.mkpath(originalDir.absolutePath()) && correctedDir.mkpath(correctedDir.absolutePath());
+	QDir albumArtDir(mAlbumArtPath);
+	return originalDir.mkpath(originalDir.absolutePath()) && correctedDir.mkpath(correctedDir.absolutePath()) && albumArtDir.mkpath(albumArtDir.absolutePath());
 }
 
 bool ViProject::removeTempStructure()
@@ -90,33 +94,63 @@ ViVersion ViProject::editedVersion()
 	return mProperties.editedVersion();
 }
 
-QString ViProject::nextSongName()
+ViFileSongInfoList ViProject::songs()
 {
-	QDir originalDir(mOriginalPath);
-	QDir correctedDir(mCorrectedPath);
-	QFileInfoList originalFiles = originalDir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
-	QFileInfoList correctedFiles = correctedDir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
-
-	QStringList originalNames;
-	QStringList correctedNames;
-	for(int i = 0; i < originalFiles.size(); ++i)
+	ViFileSongInfoList list = mSongs.songInfos();
+	for(int i = 0; i < list.size(); ++i)
 	{
-		originalNames.append(originalFiles[i].baseName());
+		if(list[i].originalFilePath() != "")
+		{
+			list[i].setOriginalFilePath(mOriginalPath + QDir::separator() + list[i].originalFilePath());
+		}
+		if(list[i].correctedFilePath() != "")
+		{
+			list[i].setCorrectedFilePath(mCorrectedPath + QDir::separator() + list[i].correctedFilePath());
+		}
+		if(list[i].albumArtPath() != "")
+		{
+			list[i].setAlbumArtPath(mAlbumArtPath + QDir::separator() + list[i].albumArtPath());
+		}
+	}
+	return list;
+}
+
+void ViProject::addSong(ViFileSongInfo info)
+{
+	QFileInfo fileInfo;
+	QString fileName = "";
+	fileInfo.setFile(info.originalFilePath());
+	fileName = fileInfo.fileName();
+	info.setOriginalFilePath(fileName);
+
+	if(fileName == "")
+	{
+		fileName = fileInfo.fileName();
+	}
+	fileInfo.setFile(info.correctedFilePath());
+	info.setCorrectedFilePath(fileInfo.fileName());
+
+	if(info.albumArtPath() != "")
+	{
+		QFile file(info.albumArtPath());
+		QString albumArt = mAlbumArtPath + QDir::separator() + fileName;
+cout<<info.albumArtPath().toAscii().data()<<"    "<<albumArt.toAscii().data()<<endl;
+		file.copy(albumArt);
+		fileInfo.setFile(albumArt);
+		info.setAlbumArtPath(albumArt);
 	}
 
-	for(int i = 0; i < correctedFiles.size(); ++i)
-	{
-		correctedNames.append(correctedFiles[i].baseName());
-	}
+	mSongs.addSongInfo(info);
+}
 
-	int number = 1;
-	QString name = padName(number);
-	while(originalNames.contains(name) || correctedNames.contains(name))
-	{
-		++number;
-		name = padName(number);
-	}
-	return name;
+QString ViProject::nextOriginalSongNumber()
+{
+	return nextSongNumber(mOriginalPath);
+}
+
+QString ViProject::nextCorrectedSongNumber()
+{
+	return nextSongNumber(mCorrectedPath);
 }
 
 QString ViProject::originalPath()
@@ -127,6 +161,32 @@ QString ViProject::originalPath()
 QString ViProject::correctedPath()
 {
 	return mCorrectedPath;
+}
+
+QString ViProject::albumArtPath()
+{
+	return mAlbumArtPath;
+}
+
+QString ViProject::nextSongNumber(QString path)
+{
+	QDir dir(path);
+	QFileInfoList files = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+
+	QStringList names;
+	for(int i = 0; i < files.size(); ++i)
+	{
+		names.append(files[i].baseName());
+	}
+
+	int number = 1;
+	QString name = padName(number);
+	while(names.contains(name))
+	{
+		++number;
+		name = padName(number);
+	}
+	return name;
 }
 
 QString ViProject::padName(int number)

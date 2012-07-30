@@ -56,6 +56,7 @@ void ViProcessingChain::startInput(ViAudioPosition position)
 	mInput->setBuffer(mInputBuffer);
 	mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
 	mMultiExecutor.setBuffer(ViAudio::AudioOutput, mOutputBuffer);
+	mStreamOutput->setBuffer(mOutputBuffer);
 	mMultiExecutor.initialize();
 }
 
@@ -71,20 +72,25 @@ void ViProcessingChain::finalize()
 	{
 		QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
 		mFileOutput->setBuffer(mOutputBuffer);
-		mFileOutput->setFile(mProject->originalPath() + QDir::separator() + mProject->nextSongName() + "." + mFileOutput->format().codec()->extensions()[0]);
+		mFileOutput->setFile(mProject->originalPath(), mProject->nextOriginalSongNumber(), mFileOutput->format().codec()->extensions()[0]);
 		mFileOutput->start();
 	}
 	else
 	{
 		nextBuffer(ViAudio::AudioOutput);
+		mStreamOutput->setBuffer(mOutputBuffer);
 	}
 }
 
 void ViProcessingChain::finish()
 {
+	ViFileSongInfo info = ViFileSongInfo(mFileOutput->songInfo());
+	info.setOriginalFilePath(mFileOutput->filePath());
+	mProject->addSong(info);
 	mProject->save();
 	QObject::disconnect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
 	nextBuffer(ViAudio::AudioOutput);
+	mStreamOutput->setBuffer(mOutputBuffer);
 	mMultiExecutor.initialize();
 }
 

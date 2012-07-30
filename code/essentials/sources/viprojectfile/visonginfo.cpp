@@ -23,6 +23,26 @@ ViSongInfo::ViSongInfo()
 	mArtistFamiliarity = -1;
 }
 
+ViSongInfo::ViSongInfo(const ViSongInfo &other)
+{
+	mMessage = other.mMessage;
+	mScore = other.mScore;
+	mSongId = other.mSongId;
+	mSongTitle = other.mSongTitle;
+	mSongHotness = other.mSongHotness;
+	mSongDanceability = other.mSongDanceability;
+	mSongEnergy = other.mSongEnergy;
+	mSongDuration = other.mSongDuration;
+	mSongTempo = other.mSongTempo;
+	mSongLoudness = other.mSongLoudness;
+	mArtistId = other.mArtistId;
+	mArtistName = other.mArtistName;
+	mArtistHotness = other.mArtistHotness;
+	mArtistFamiliarity = other.mArtistFamiliarity;
+	mDescription = other.mDescription;
+	mImagePaths = QList<QString>(other.mImagePaths);
+}
+
 QString ViSongInfo::message()
 {
 	return mMessage;
@@ -234,6 +254,11 @@ void ViSongInfo::changeImagePath(QString fromPath, QString toPath)
 	{
 		addImagePath(toPath);
 	}
+}
+
+void ViSongInfo::setImagePath(QString path)
+{
+	changeImagePath(imagePath(), path);
 }
 
 QString ViSongInfo::toString()

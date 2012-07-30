@@ -82,6 +82,17 @@ void ViSpectrum<T>::finalize()
 }
 
 template <typename T>
+void ViSpectrum<T>::clear()
+{
+	mRawValues.clear();
+	mValues.clear();
+	mAdditionCounter = 0;
+	mPreviousAdditionCounter = 0;
+	mMaximum.clear();
+	mMinimum.clear();
+}
+
+template <typename T>
 void ViSpectrum<T>::findRanges()
 {
 	mMaximum.setPolar(ViSpectrumElementForm<T>(ViComplexNumber<T>(-FLT_MAX, -FLT_MAX), ViComplexNumber<T>(-FLT_MAX, -FLT_MAX)));

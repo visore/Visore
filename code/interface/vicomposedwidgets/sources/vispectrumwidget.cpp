@@ -1,147 +1,94 @@
 #include "vispectrumwidget.h"
-#include "ui_vispectrumwidget.h"
-#include "vimainwindow.h"
+#include "visamplesizeconverter.h"
+#include <QPainter>
 
-#define EXTRA_SPACE 0.05
+#define DEFAULT_BARS 40
+#define SHORT_MAX 65535
 
 ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 	: ViWidget(parent)
 {
-	mUi = new Ui::ViSpectrumWidget();
-	mUi->setupUi(this);
+	mBars = DEFAULT_BARS;
+	mSpectrumChanged = false;
+	mCurrentSpectrumIndex = -1;
 
-	/*mWasInitialized = false;
-
-	QObject::connect(mUi->sizeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
-	QObject::connect(mUi->windowBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
-
-	QObject::connect(mUi->frequencyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
-	QObject::connect(mUi->valueBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
-	QObject::connect(mUi->notationBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
-
-	QObject::connect(mEngine, SIGNAL(spectrumFinished()), this, SLOT(replot()));
-	QObject::connect(mEngine, SIGNAL(spectrumProgressed(short)), ViMainWindow::instance(), SLOT(progress(short)));*/
+	QObject::connect(engine(), SIGNAL(spectrumChanged(ViRealSpectrum, qint64)), this, SLOT(addSpectrum(ViRealSpectrum, qint64)));
+	QObject::connect(engine(), SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(update(ViAudioPosition)));
 }
 
-ViSpectrumWidget::~ViSpectrumWidget()
+void ViSpectrumWidget::setBars(int bars)
 {
-	//delete mUi;
+	mBars = bars;
 }
 
-void ViSpectrumWidget::showEvent(QShowEvent *event)
+void ViSpectrumWidget::addSpectrum(ViRealSpectrum spectrum, qint64 milliseconds)
 {
-	if(!mWasInitialized)
+	QVector<qbyte16u> data(spectrum.size());
+	for(int i = 0; i < data.size(); ++i)
 	{
-		mWasInitialized = true;
-		recalculate();
+		data[i] = ViSampleSizeConverter::convertTo16u(spectrum[i].polar().decibel().real());
 	}
-	ViWidget::showEvent(event);
+	mSpectrums.append(data);
+	mIntervals.append(milliseconds);
 }
 
-void ViSpectrumWidget::recalculate()
+void ViSpectrumWidget::update(ViAudioPosition position)
 {
-	ViMainWindow::instance()->showLoading(true, false, ViLoadingWidget::Text, "Calculating Spectrum");
-	mEngine->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
-}
-
-void ViSpectrumWidget::replot()
-{
-	ViRealSpectrum plot = mEngine->spectrum();
-	qint32 size = plot.size();
-
-	if(size > 0)
+	int milliseconds = position.position(ViAudioPosition::Milliseconds);
+	int end = mIntervals.size() - 1;
+	for(int i = mCurrentSpectrumIndex + 1; i < end; ++i)
 	{
-		QVector<qreal> x(size);
-		QVector<qreal> y(size);
-
-		QString labelX = "Frequency";
-		QString labelY = "Amplitude";
-		QString unitX = "";
-		QString unitY = "";
-
-		bool fill = false;
-		bool drawImaginary = true;
-
-		qreal xMaximum, yMinimum, yMaximum;
-		if(mUi->frequencyBox->currentIndex() == 0)
+		if(milliseconds > mIntervals[i] && milliseconds <= mIntervals[i + 1])
 		{
-			xMaximum = plot[size - 1].frequencyRange();
-			for(int i = 0; i < size; ++i)
-			{
-				x[i] = plot[i].frequencyRange();
-			}
-			unitX = "";
+			mSpectrumChanged = true;
+			mCurrentSpectrumIndex = i;
 		}
-		else
-		{
-			xMaximum = plot[size - 1].frequencyHertz();
-			for(int i = 0; i < size; ++i)
-			{
-				x[i] = plot[i].frequencyHertz();
-			}
-			unitX = "Hz";
-		}
-
-		if(mUi->notationBox->currentIndex() == 0)
-		{
-			fill = true;
-			if(mUi->valueBox->currentIndex() == 0)
-			{
-				yMinimum = plot.minimum().polar().amplitude().real() * (1 + EXTRA_SPACE);
-				yMaximum = plot.maximum().polar().amplitude().real() * (1 + EXTRA_SPACE);
-				for(int i = 0; i < size; ++i)
-				{
-					y[i] = plot[i].polar().amplitude().real();
-				}
-				unitY = "";
-			}
-			else
-			{
-			
-				yMinimum = plot.minimum().polar().decibel().real() * (1 + EXTRA_SPACE);
-				yMaximum = plot.maximum().polar().decibel().real() * (1 + EXTRA_SPACE);
-				for(int i = 0; i < size; ++i)
-				{
-					y[i] = plot[i].polar().decibel().real();
-				}
-				unitY = "dB";
-			}
-		}
-		else
-		{
-			if(mUi->valueBox->currentIndex() == 0)
-			{
-				yMinimum = plot.minimum().rectangular().amplitude().real() * (1 + EXTRA_SPACE);
-				yMaximum = plot.maximum().rectangular().amplitude().real() * (1 + EXTRA_SPACE);
-				for(int i = 0; i < size; ++i)
-				{
-					y[i] = plot[i].rectangular().amplitude().real();
-				}
-				unitY = "";
-			}
-			else
-			{
-				yMinimum = plot.minimum().rectangular().decibel().real() * (1 + EXTRA_SPACE);
-				yMaximum = plot.maximum().rectangular().decibel().real() * (1 + EXTRA_SPACE);
-				for(int i = 0; i < size; ++i)
-				{
-					y[i] = plot[i].rectangular().decibel().real();
-				}
-				unitY = "dB";
-			}
-		}
-
-		mUi->plot->setScale(ViSpectrumPlot::X, 0, xMaximum);
-		mUi->plot->setScale(ViSpectrumPlot::Y, yMinimum, yMaximum);
-		mUi->plot->setLabel(ViSpectrumPlot::X, labelX);
-		mUi->plot->setLabel(ViSpectrumPlot::Y, labelY);
-		mUi->plot->setUnit(ViSpectrumPlot::X, unitX);
-		mUi->plot->setUnit(ViSpectrumPlot::Y, unitY);
-		mUi->plot->fill(fill);
-		mUi->plot->setData(x, y);
-
 	}
-	ViMainWindow::instance()->hideLoading();
+	
+	//Test for the last spectrum
+	if(!mSpectrumChanged && mIntervals.size() > 1 && milliseconds > mIntervals[mIntervals.size() - 1] && milliseconds <= mIntervals[mIntervals.size()])
+	{ 
+		mSpectrumChanged = true;
+		mCurrentSpectrumIndex = mIntervals.size() - 1;
+	}
+
+	if(mSpectrumChanged)
+	{
+		mCurrentSpectrum = summarizeSpectrum(mSpectrums[mCurrentSpectrumIndex]);
+		repaint();
+	}
 }
 
+void ViSpectrumWidget::paintEvent(QPaintEvent *event)
+{QPainter painter(this);
+	if(mSpectrumChanged)
+	{
+		mSpectrumChanged = false;
+		
+		int barWidth = width() / qreal(mBars);
+		for(int i = 0; i < mBars; ++i)
+		{
+			painter.fillRect(i * barWidth, height() - ((mCurrentSpectrum[i] / qfloat(SHORT_MAX)) * height() * 10), barWidth, height(), Qt::red);
+		}
+	}
+	
+	ViWidget::paintEvent(event);
+}
 
+QVector<qbyte16u> ViSpectrumWidget::summarizeSpectrum(QVector<qbyte16u> spectrum)
+{
+	QVector<qbyte16u> data(mBars);
+	int end;
+	qbyte16u average;
+	for(int i = 0; i < mBars; ++i)
+	{
+		end = mBars + (i * mBars);
+		average = 0;
+		for(int j = i * mBars; j < end; ++j)
+		{
+			average += spectrum[j];
+		}
+		data[i] = ROUND(average / qreal(mBars));
+	}
+	return data;
+}

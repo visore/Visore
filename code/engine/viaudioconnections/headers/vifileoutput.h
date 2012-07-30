@@ -16,9 +16,13 @@ class ViFileOutput : public ViAudioOutput
 
 		ViFileOutput();
 
+		void setFile(QString directory, QString trackNumber, QString extension);
 		void setFile(QString filePath);
 		ViAudioFormat format();
 		void setFormat(ViAudioFormat format);
+
+		ViSongInfo songInfo();
+		QString filePath();
 
 		void start();
 		void stop();

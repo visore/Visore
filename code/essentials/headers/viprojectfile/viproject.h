@@ -5,6 +5,7 @@
 #include "vimanager.h"
 #include "viarchive.h"
 #include "vipropertiesfile.h"
+#include "visongfile.h"
 
 class ViProject : public QObject, public ViId
 {
@@ -33,16 +34,23 @@ class ViProject : public QObject, public ViId
 		ViVersion createdVersion();
 		ViVersion editedVersion();
 
+		//Songs
+		ViFileSongInfoList songs();
+		void addSong(ViFileSongInfo info);
+
 		//Recordings
-		QString nextSongName();
+		QString nextOriginalSongNumber();
+		QString nextCorrectedSongNumber();
 		QString originalPath();
 		QString correctedPath();
+		QString albumArtPath();
 
 	protected:
 
 		bool createTempStructure();
 		bool removeTempStructure();
 
+		QString nextSongNumber(QString path);
 		QString padName(int number);
 
 	private:
@@ -51,11 +59,13 @@ class ViProject : public QObject, public ViId
 		QString mDataPath;
 		QString mOriginalPath;
 		QString mCorrectedPath;
+		QString mAlbumArtPath;
 
 		ViArchive mArchive;
 
 		QList<ViProjectFile*> mProjectFiles;
 		ViPropertiesFile mProperties;
+		ViSongFile mSongs;
 
 };
 

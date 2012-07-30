@@ -1,18 +1,22 @@
 #include "vispectrumanalyzer.h"
+#include "viaudioposition.h"
 
 ViSpectrumAnalyzer::ViSpectrumAnalyzer()
 	: ViObserver()
 {
+	mMilliseconds = 100;
+	mInterval = 0;
 	mHalfWindowSize = 0;
+	mBuffer = NULL;
 }
 
-ViRealSpectrum ViSpectrumAnalyzer::spectrum()
+ViSpectrumAnalyzer::~ViSpectrumAnalyzer()
 {
-	mMutex.lock();
-	mSpectrum.finalize();
-	ViRealSpectrum result = mSpectrum;
-	mMutex.unlock();
-	return result;
+	if(mBuffer != NULL)
+	{
+		delete [] mBuffer;
+		mBuffer = NULL;
+	}
 }
 
 void ViSpectrumAnalyzer::setWindowFunction(QString functionName)
@@ -25,17 +29,72 @@ void ViSpectrumAnalyzer::setWindowSize(int windowSize)
 	ViObserver::setWindowSize(windowSize);
 	mTransformer.setSize(mWindowSize);
 	mHalfWindowSize = mWindowSize / 2;
-	mSpectrum.initialize(mHalfWindowSize + 1, mFormat.sampleRate() / 2);
 }
 
-void ViSpectrumAnalyzer::setFormat(ViAudioFormat format)
+void ViSpectrumAnalyzer::setInterval(int milliseconds)
 {
-	ViObserver::setFormat(format);
-	mSpectrum.initialize(mHalfWindowSize + 1, mFormat.sampleRate() / 2);
+	mMilliseconds = milliseconds;
+}
+
+void ViSpectrumAnalyzer::initialize()
+{
+	mInterval = ViAudioPosition::convertPosition(mMilliseconds, ViAudioPosition::Milliseconds, ViAudioPosition::Samples, mFormat);
+	mBuffer = new qreal[mWindowSize];
+	mBufferSize = 0;
+	mCurrentPosition = 0;
+}
+
+void ViSpectrumAnalyzer::finalize()
+{
+	if(mBuffer != NULL)
+	{
+		delete [] mBuffer;
+		mBuffer = NULL;
+	}
 }
 
 void ViSpectrumAnalyzer::run()
 {
+	int size = mData->size();
+	qreal *data = mData->data();
+	int bufferSize;
+	do
+	{
+		bufferSize = mWindowSize - mBufferSize;
+		if(bufferSize > 0)
+		{
+			memcpy(mBuffer, data, sizeof(qreal) * bufferSize);
+			data += bufferSize;
+			mBufferSize += bufferSize;
+		}
+		else
+		{
+			break; //Need more data to do a FFT
+		}
+		
+		if(mBufferSize == mWindowSize)
+		{
+			double fourier[mWindowSize];
+			mTransformer.forwardTransform(mBuffer, fourier);
+			ViRealSpectrum spectrum;
+			spectrum.initialize(mHalfWindowSize + 1, mFormat.sampleRate() / 2);
+			spectrum.add(0, ViRealComplex(fourier[0], 0));
+			for(int i = 1; i < mHalfWindowSize; ++i)
+			{
+				spectrum.add(i, ViRealComplex(fourier[i], -fourier[i + mHalfWindowSize]));
+			}
+			spectrum.add(mHalfWindowSize, ViRealComplex(fourier[mHalfWindowSize], 0));
+			spectrum.finalize();
+			mCurrentPosition += mMilliseconds;
+			emit changed(spectrum, mCurrentPosition);
+			size -= mBufferSize;
+			mBufferSize = 0;
+		}
+	}
+	while(size > 0);
+
+
+/*
 	int index;
 	bool tooSmall = false;
 	double *samples;
@@ -70,5 +129,5 @@ void ViSpectrumAnalyzer::run()
 	if(tooSmall)
 	{
 		delete [] samples;
-	}
+	}*/
 }

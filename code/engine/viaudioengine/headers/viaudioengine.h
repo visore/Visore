@@ -62,6 +62,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		void songDetected(ViSongInfo info);
 
 		//Spectrum
+		void spectrumChanged(ViRealSpectrum spectrum, qint64 milliseconds);
 		void spectrumProgressed(short percentage);
 		void spectrumFinished();
 
@@ -78,7 +79,6 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 
 		~ViAudioEngine();
 
-		ViRealSpectrum spectrum();
 		ViWaveForm& wave(ViAudio::Mode mode);
 		ViCorrelationResult& correlation();
 

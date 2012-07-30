@@ -1,5 +1,5 @@
 #include "vifileoutput.h"
-#include <QFile>
+#include <QDir>
 
 ViFileOutput::ViFileOutput()
 	: ViAudioOutput()
@@ -12,6 +12,48 @@ ViFileOutput::ViFileOutput()
 void ViFileOutput::setSongInfo(ViSongInfo info)
 {
 	mSongInfo = info;
+}
+
+void ViFileOutput::setFile(QString directory, QString trackNumber, QString extension)
+{
+	if(!directory.endsWith(QDir::separator()))
+	{
+		directory.append(QDir::separator());
+	}
+	if(trackNumber.endsWith(". "))
+	{
+		directory += trackNumber;
+	}
+	else if(trackNumber.endsWith("."))
+	{
+		directory += trackNumber + " ";
+	}
+	else
+	{
+		directory += trackNumber + ". ";
+	}
+	if(mSongInfo.artistName() == "")
+	{
+		directory += "Unknown Artist - ";
+	}
+	else
+	{
+		directory += mSongInfo.artistName() + " - ";
+	}
+	if(mSongInfo.songTitle() == "")
+	{
+		directory += "Unknown Title";
+	}
+	else
+	{
+		directory += mSongInfo.songTitle();
+	}
+	if(!extension.startsWith("."))
+	{
+		directory += ".";
+	}
+	directory += extension;
+	setFile(directory);
 }
 
 void ViFileOutput::setFile(QString filePath)
@@ -27,6 +69,16 @@ ViAudioFormat ViFileOutput::format()
 void ViFileOutput::setFormat(ViAudioFormat format)
 {
 	mFormat = format;
+}
+
+ViSongInfo ViFileOutput::songInfo()
+{
+	return mSongInfo;
+}
+
+QString ViFileOutput::filePath()
+{
+	return mFilePath;
 }
 
 void ViFileOutput::start()

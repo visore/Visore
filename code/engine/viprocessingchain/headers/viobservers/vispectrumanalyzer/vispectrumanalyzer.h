@@ -1,7 +1,6 @@
 #ifndef VISPECTRUMANALYZER_H
 #define VISPECTRUMANALYZER_H
 
-#include <QMutex>
 #include "vispectrum.h"
 #include "viprocessor.h"
 #include "vifouriertransformer.h"
@@ -9,22 +8,33 @@
 class ViSpectrumAnalyzer : public ViObserver
 {
 
+	Q_OBJECT
+
+	signals:
+
+		void changed(ViRealSpectrum spectrum, qint64 milliseconds);
+
 	public:
 
 		ViSpectrumAnalyzer();
-		ViRealSpectrum spectrum();
-		void setWindowFunction(QString functionName);
+		~ViSpectrumAnalyzer();
 
+		void setWindowFunction(QString functionName);
 		void setWindowSize(int windowSize);
-		void setFormat(ViAudioFormat format);
+		void setInterval(int milliseconds);
+		void initialize();
+		void finalize();
 		void run();
 
 	private:
 
-		QMutex mMutex;
 		int mHalfWindowSize;
+		int mInterval;
+		int mMilliseconds;
 		ViFourierTransformer mTransformer;
-		ViRealSpectrum mSpectrum;
+		qreal *mBuffer;
+		int mBufferSize;
+		qint64 mCurrentPosition;
 
 };
 

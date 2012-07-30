@@ -32,6 +32,10 @@ ViAudioEngine::ViAudioEngine()
 	mProcessingChain.attach(ViAudio::AudioInput, &mInputWaveFormer);
 	mProcessingChain.attach(ViAudio::AudioOutput, &mOutputWaveFormer);
 
+	//Spectrum analyzer
+	QObject::connect(&mSpectrumAnalyzer, SIGNAL(changed(ViRealSpectrum, qint64)), this, SIGNAL(spectrumChanged(ViRealSpectrum, qint64)));
+	mProcessingChain.attach(ViAudio::AudioOutput, &mSpectrumAnalyzer);
+	
 	//Song detector
 	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
 	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), mFileOutput, SLOT(setSongInfo(ViSongInfo)));
@@ -47,11 +51,6 @@ ViAudioEngine::ViAudioEngine()
 ViAudioEngine::~ViAudioEngine()
 {
 
-}
-
-ViRealSpectrum ViAudioEngine::spectrum()
-{
-	return mSpectrumAnalyzer.spectrum();
 }
 
 ViWaveForm& ViAudioEngine::wave(ViAudio::Mode mode)
@@ -75,12 +74,12 @@ void ViAudioEngine::changeInput(ViAudio::Input input)
 {
 	if(input == ViAudio::File)
 	{
-		mProcessingChain.detach(&mEndDetector);
+		//mProcessingChain.detach(&mEndDetector);
 		mProcessingChain.setTransmission(mFileInput);
 	}
 	else if(input == ViAudio::Line)
 	{
-		mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
+		//mProcessingChain.attach(ViAudio::AudioInput, &mEndDetector);
 		mProcessingChain.setTransmission(mStreamInput);
 	}
 	emit inputChanged(input);

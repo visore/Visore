@@ -11,6 +11,7 @@ class ViSongInfo
 	public:
 
 		ViSongInfo();
+		ViSongInfo(const ViSongInfo &other);
 
 		QString message();
 		qint16 score();
@@ -55,6 +56,7 @@ class ViSongInfo
 
 		void addImagePath(QString path);
 		void changeImagePath(QString fromPath, QString toPath);
+		void setImagePath(QString path);
 
 		QString toString();
 
@@ -78,5 +80,7 @@ class ViSongInfo
 		QList<QString> mImagePaths;
 		
 };
+
+typedef QList<ViSongInfo> ViSongInfoList;
 
 #endif
