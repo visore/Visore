@@ -6,6 +6,7 @@
 #include <QList>
 #include <QSharedPointer>
 #include <iostream>
+#include <typeinfo>
 
 using namespace std;
 
@@ -14,7 +15,8 @@ class ViLogEntry
 
 	public:
 
-		ViLogEntry(QString className, QString functionName, int lineNumber, QString message, QtMsgType type);
+		ViLogEntry(QString fileName, QString className, QString functionName, int lineNumber, QString message, QtMsgType type);
+		QString fileName();
 		QString className();
 		QString functionName();
 		int lineNumber();
@@ -23,8 +25,15 @@ class ViLogEntry
 		QString toString();
 		void print();
 
+	protected:
+
+		void printShort();
+		void printMedium();
+		void printLong();
+
 	private:
 
+		QString mFileName;
 		QString mClassName;
 		QString mFunctionName;
 		QString mMessage;
@@ -54,8 +63,10 @@ class ViLogger
 	
 };
 
-#define LOG1(message) log(__FILE__, Q_FUNC_INFO, __LINE__, message, QtDebugMsg)
-#define LOG2(message, type) log(__FILE__, Q_FUNC_INFO, __LINE__, message, type)
+QString className(const char *text);
+
+#define LOG1(message) log(__FILE__, className(typeid(*this).name()), Q_FUNC_INFO, __LINE__, message, QtDebugMsg)
+#define LOG2(message, type) log(__FILE__, className(typeid(*this).name()), Q_FUNC_INFO, __LINE__, message, type)
 
 #define GET_ARGUMENT(arg1, arg2, arg3, ...) arg3
 #define LOG_CHOOSER(...) GET_ARGUMENT(__VA_ARGS__, LOG2, LOG1, )
@@ -64,6 +75,6 @@ class ViLogger
 
 ViLogger * const LOGGER = ViLogger::instance();
 
-void log(const char *file, const char *function, const int line, const QString message, QtMsgType type);
+void log(const char *file, const QString className, const char *function, const int line, const QString message, QtMsgType type);
 
 #endif

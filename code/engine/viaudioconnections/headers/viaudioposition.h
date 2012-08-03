@@ -35,8 +35,10 @@ class ViAudioPosition
 		bool operator !=(const ViAudioPosition &other) const;
 
 	private:
+
 		qreal mMicroseconds;
 		ViAudioFormat mFormat;
+
 };
 
 #endif

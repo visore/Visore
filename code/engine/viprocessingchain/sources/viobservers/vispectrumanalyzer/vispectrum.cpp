@@ -88,8 +88,18 @@ void ViSpectrum<T>::clear()
 	mValues.clear();
 	mAdditionCounter = 0;
 	mPreviousAdditionCounter = 0;
-	mMaximum.clear();
-	mMinimum.clear();
+}
+
+template <typename T>
+ViAudioPosition ViSpectrum<T>::interval()
+{
+	return mInterval;
+}
+
+template <typename T>
+void ViSpectrum<T>::setInterval(ViAudioPosition interval)
+{
+	mInterval = interval;
 }
 
 template <typename T>

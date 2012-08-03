@@ -1,11 +1,12 @@
 #ifndef VIENDDETECTOR_H
+#define VIENDDETECTOR_H
 
 #include "viprocessor.h"
 #include "viaudioposition.h"
-#include <QQueue>
 
 class ViEndDetector : public ViObserver
 {
+
 	Q_OBJECT
 
 	signals:
@@ -26,48 +27,19 @@ class ViEndDetector : public ViObserver
 		};
 
 		ViEndDetector();
-		void setThreshold(ViEndDetector::Type type, int milliseconds, qreal value);
-		void initialize();
-		void run();
+		virtual void initialize();
 
 	protected:
 
-		void setSongStartCache();
-		void setSongEndCache();
-		void setRecordStartCache();
-		void setRecordEndCache();
+		void setRecordStart(ViAudioPosition position);
+		void setSongStart(ViAudioPosition position);
+		void setRecordEnd(ViAudioPosition position);
+		void setSongEnd(ViAudioPosition position);
 
-	private:
+	protected:
 
-		bool mSongStarted;
-		bool mRecordStarted;
-		
-		int mSongStartTime;
-		int mSongEndTime;
-		int mRecordStartTime;
-		int mRecordEndTime;
-		
-		qreal mSongStartValue;
-		qreal mSongEndValue;
-		qreal mRecordStartValue;
-		qreal mRecordEndValue;
-
-		int mSongStartSampleThreshold;
-		int mSongEndSampleThreshold;
-		int mRecordStartSampleThreshold;
-		int mRecordEndSampleThreshold;
-
-		qreal mSongStartValueThreshold;
-		qreal mSongEndValueThreshold;
-		qreal mRecordStartValueThreshold;
-		qreal mRecordEndValueThreshold;
-
-		QQueue<qreal> mSongCache;
-		QQueue<qreal> mRecordCache;
-
-		qreal mTotalSongValue;
-		qreal mTotalRecordValue;
-		qint64 mSampleCounter;
+		bool mSongRunning;
+		bool mRecordRunning;
 
 };
 

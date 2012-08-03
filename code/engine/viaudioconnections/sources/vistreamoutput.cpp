@@ -52,13 +52,12 @@ void ViStreamOutput::start()
 		mBufferDevice.open(QIODevice::ReadOnly);
 		if(mAudioOutput != NULL)
 		{
-			QObject::disconnect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
-			QObject::disconnect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
+			mAudioOutput->disconnect();
 			delete mAudioOutput;
 		}
 		mAudioOutput = new QAudioOutput(mDevice, format().toQAudioFormat(), this);
-		mAudioOutput->setNotifyInterval(100);
-		QObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()));
+		mAudioOutput->setNotifyInterval(150);
+		QObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()), Qt::DirectConnection);
 		QObject::connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
 
 		mAudioOutput->start(&mBufferDevice);

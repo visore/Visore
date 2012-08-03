@@ -4,6 +4,7 @@
 #include <QVector>
 #include "float.h"
 #include "vispectrumelement.h"
+#include "viaudioposition.h"
 
 template <typename T>
 class ViSpectrum
@@ -27,6 +28,9 @@ class ViSpectrum
 
 		void clear();
 
+		ViAudioPosition interval();
+		void setInterval(ViAudioPosition interval);
+
 	private:
 
 		void findRanges();
@@ -39,6 +43,7 @@ class ViSpectrum
 		qint32 mPreviousAdditionCounter;
 		ViSpectrumElement<T> mMaximum;
 		ViSpectrumElement<T> mMinimum;
+		ViAudioPosition mInterval;
 
 };
 

@@ -4,7 +4,7 @@
 ViSpectrumAnalyzer::ViSpectrumAnalyzer()
 	: ViObserver()
 {
-	mMilliseconds = 100;
+	mMilliseconds = 150;
 	mInterval = 0;
 	mHalfWindowSize = 0;
 	mBuffer = NULL;
@@ -42,6 +42,9 @@ void ViSpectrumAnalyzer::initialize()
 	mBuffer = new qreal[mWindowSize];
 	mBufferSize = 0;
 	mCurrentPosition = 0;
+	mSampleCounter = 0;
+	mSpectrum.setInterval(ViAudioPosition(mMilliseconds, ViAudioPosition::Milliseconds, mFormat));
+	mSpectrum.initialize(mHalfWindowSize + 1, mFormat.sampleRate() / 2);
 }
 
 void ViSpectrumAnalyzer::finalize()
@@ -66,6 +69,7 @@ void ViSpectrumAnalyzer::run()
 			memcpy(mBuffer, data, sizeof(qreal) * bufferSize);
 			data += bufferSize;
 			mBufferSize += bufferSize;
+			mSampleCounter += bufferSize;
 		}
 		else
 		{
@@ -76,58 +80,26 @@ void ViSpectrumAnalyzer::run()
 		{
 			double fourier[mWindowSize];
 			mTransformer.forwardTransform(mBuffer, fourier);
-			ViRealSpectrum spectrum;
-			spectrum.initialize(mHalfWindowSize + 1, mFormat.sampleRate() / 2);
-			spectrum.add(0, ViRealComplex(fourier[0], 0));
+			
+			mSpectrum.add(0, ViRealComplex(fourier[0], 0));
 			for(int i = 1; i < mHalfWindowSize; ++i)
 			{
-				spectrum.add(i, ViRealComplex(fourier[i], -fourier[i + mHalfWindowSize]));
+				mSpectrum.add(i, ViRealComplex(fourier[i], -fourier[i + mHalfWindowSize]));
 			}
-			spectrum.add(mHalfWindowSize, ViRealComplex(fourier[mHalfWindowSize], 0));
-			spectrum.finalize();
-			mCurrentPosition += mMilliseconds;
-			emit changed(spectrum, mCurrentPosition);
+			mSpectrum.add(mHalfWindowSize, ViRealComplex(fourier[mHalfWindowSize], 0));
+
+			if(mSampleCounter >= mInterval)
+			{
+				mCurrentPosition += mMilliseconds;
+				mSampleCounter = 0;
+				mSpectrum.finalize();
+				emit changed(mSpectrum, mCurrentPosition);
+				mSpectrum.clear();
+				mSpectrum.initialize(mHalfWindowSize + 1, mFormat.sampleRate() / 2);
+			}
 			size -= mBufferSize;
 			mBufferSize = 0;
 		}
 	}
 	while(size > 0);
-
-
-/*
-	int index;
-	bool tooSmall = false;
-	double *samples;
-	if(mData->size() != mWindowSize)
-	{
-		double *paddedSamples = new double[mWindowSize];
-		memcpy(paddedSamples, mData->data(), sizeof(double) * mData->size());
-		for(index = mData->size(); index < mWindowSize; ++index)
-		{
-			paddedSamples[index] = 0;
-		}
-		tooSmall = true;
-		samples = paddedSamples;
-	}
-	else
-	{
-		samples = mData->data();
-	}
-
-	double fourier[mWindowSize];
-	mTransformer.forwardTransform(samples, fourier);
-
-	mMutex.lock();
-	mSpectrum.add(0, ViRealComplex(fourier[0], 0));
-	for(index = 1; index < mHalfWindowSize; ++index)
-	{
-		mSpectrum.add(index, ViRealComplex(fourier[index], -fourier[index + mHalfWindowSize]));
-	}
-	mSpectrum.add(mHalfWindowSize, ViRealComplex(fourier[mHalfWindowSize], 0));
-	mMutex.unlock();
-
-	if(tooSmall)
-	{
-		delete [] samples;
-	}*/
 }

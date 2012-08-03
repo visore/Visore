@@ -32,8 +32,10 @@ class ViSpectrumAnalyzer : public ViObserver
 		int mInterval;
 		int mMilliseconds;
 		ViFourierTransformer mTransformer;
+		ViRealSpectrum mSpectrum;
 		qreal *mBuffer;
 		int mBufferSize;
+		int mSampleCounter;
 		qint64 mCurrentPosition;
 
 };

@@ -101,7 +101,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		ViSongDetector mSongDetector;
 		ViSpectrumAnalyzer mSpectrumAnalyzer;
 		ViCorrelator mCorrelator;
-		ViEndDetector mEndDetector;
+		ViEndDetector *mEndDetector;
 		ViWaveFormer mInputWaveFormer;
 		ViWaveFormer mOutputWaveFormer;
 

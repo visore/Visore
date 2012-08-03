@@ -1,13 +1,24 @@
 #include "vilogger.h"
 #include <QDir>
 
-ViLogEntry::ViLogEntry(QString className, QString functionName, int lineNumber, QString message, QtMsgType type)
+// 0: Lite logging
+// 1: Medium logging
+// 2: Heavy logging
+#define LOGGER_TYPE 1
+
+ViLogEntry::ViLogEntry(QString fileName, QString className, QString functionName, int lineNumber, QString message, QtMsgType type)
 {
+	mFileName = fileName;
 	mClassName = className;
 	mFunctionName = functionName;
 	mMessage = message;
 	mLineNumber = lineNumber;
 	mType = type;
+}
+
+QString ViLogEntry::fileName()
+{
+	return mFileName;
 }
 
 QString ViLogEntry::className()
@@ -52,11 +63,27 @@ QString ViLogEntry::toString()
         case QtFatalMsg:
 			result = "Fatal Error: ";
 	}
-	result += mFunctionName + "(" + mClassName + ":" + QString::number(mLineNumber) + ") " + mMessage;
+	result += mFunctionName + "(" + mClassName + " " + mFileName + ":" + QString::number(mLineNumber) + ") " + mMessage;
 	return result;
 }
 
 void ViLogEntry::print()
+{
+	if(LOGGER_TYPE == 0)
+	{
+		printShort();
+	}
+	else if(LOGGER_TYPE == 1)
+	{
+		printMedium();
+	}
+	else
+	{
+		printLong();
+	}
+}
+
+void ViLogEntry::printShort()
 {
 	switch(mType)
 	{
@@ -72,7 +99,45 @@ void ViLogEntry::print()
         case QtFatalMsg:
 			cout << "\033[1;31mFatal Error: ";
 	}
-	cout << "\033[1;34m" << mFunctionName.toAscii().data() << " \033[1;30m(" << mClassName.toAscii().data() << ":" << mLineNumber << ")\033[1;37m " << mMessage.toAscii().data() << " \033[0m" << endl;
+	cout << "\033[1;37m" << mMessage.toAscii().data() << " \033[0m" << endl;
+}
+
+void ViLogEntry::printMedium()
+{
+	switch(mType)
+	{
+		case QtDebugMsg:
+			cout << "\033[1;32mStatus: ";
+			break;
+		case QtWarningMsg:
+			cout << "\033[1;33mWarning: ";
+			break;
+		case QtCriticalMsg:
+			cout << "\033[1;31mCritical Error: ";
+			break;
+        case QtFatalMsg:
+			cout << "\033[1;31mFatal Error: ";
+	}
+	cout << "\033[1;34m" << mClassName.toAscii().data() << "\033[1;37m " << mMessage.toAscii().data() << " \033[0m" << endl;
+}
+
+void ViLogEntry::printLong()
+{
+	switch(mType)
+	{
+		case QtDebugMsg:
+			cout << "\033[1;32mStatus: ";
+			break;
+		case QtWarningMsg:
+			cout << "\033[1;33mWarning: ";
+			break;
+		case QtCriticalMsg:
+			cout << "\033[1;31mCritical Error: ";
+			break;
+        case QtFatalMsg:
+			cout << "\033[1;31mFatal Error: ";
+	}
+	cout << "\033[1;34m" << mClassName.toAscii().data() << "\033[1;30m (" << mFileName.toAscii().data() << ":" << mLineNumber << ")\033[1;37m " << mMessage.toAscii().data() << " \033[0m" << endl;
 }
 
 QSharedPointer<ViLogger> ViLogger::mInstance;
@@ -105,9 +170,19 @@ void ViLogger::append(ViLogEntry entry)
 	}
 }
 
-void log(const char *file, const char *function, const int line, const QString message, QtMsgType type)
+QString className(const char *text)
+{
+	QString name(text);
+	while(name.size() > 0 && name[0].isDigit())
+	{
+		name.remove(0, 1);
+	}
+	return name;
+}
+
+void log(const char *file, const QString className, const char *function, const int line, const QString message, QtMsgType type)
 {
 	QString fileName(file);
 	fileName = fileName.mid(fileName.lastIndexOf(QDir::separator()) + 1);
-	LOGGER->append(ViLogEntry(fileName, QString(function), line, message, type));
+	LOGGER->append(ViLogEntry(fileName, className, QString(function), line, message, type));
 }
