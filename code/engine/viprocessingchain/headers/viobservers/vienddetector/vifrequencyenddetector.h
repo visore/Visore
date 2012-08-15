@@ -58,6 +58,8 @@ class ViFrequencyEndDetector : public ViEndDetector
 		qreal mSongStartTotalValue;
 		qreal mSongEndTotalValue;
 
+		qint64 mTotalSamples;
+
 		QQueue<qreal> mRecordStartAverages;
 		QQueue<qreal> mRecordEndAverages;
 		QQueue<qreal> mSongStartAverages;

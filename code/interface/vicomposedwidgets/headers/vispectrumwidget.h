@@ -47,6 +47,7 @@ class ViSpectrumWidget : public ViWidget
 		QList<qint64> mIntervals;
 		QVector<qbyte16u> mCurrentSpectrum;
 		int mCurrentSpectrumIndex;
+		qint64 mCurrentTime;
 
 		int mBars;
 		int mOriginalBars;

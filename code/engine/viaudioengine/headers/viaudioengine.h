@@ -27,6 +27,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		void startPlayback();
 		void stopPlayback();
 		void pausePlayback();
+		void setPosition(int seconds);
 
 		//Recording
 		void startRecording();
@@ -48,18 +49,31 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 
 	signals:
 
+		//General
+		void progressStarted();
+		void progress(short progress);
+		void progressFinished();
+		void statusChanged(QString status);
+
 		//Chain
 		void chainChanged();
 		void buffering(short progress);
 
 		//Playback
 		void positionChanged(ViAudioPosition position);
+		void lengthChanged(ViAudioPosition length);
 
 		//Input
 		void inputChanged(ViAudio::Input input);		
 
 		//Song detector
 		void songDetected(ViSongInfo info);
+
+		//Song start/end
+		void recordStarted();
+		void recordEnded();
+		void songStarted();
+		void songEnded();
 
 		//Spectrum
 		void spectrumChanged(ViRealSpectrum spectrum, qint64 milliseconds);
@@ -74,6 +88,10 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		void loadProjectStarted();
 		void saveProjectStarted();
 		void projectFinished();
+
+	private slots:
+
+		void changeStatus(QString status = "");
 
 	public:
 

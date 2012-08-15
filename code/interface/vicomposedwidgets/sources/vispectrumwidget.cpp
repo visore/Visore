@@ -10,6 +10,7 @@ ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 	: ViWidget(parent)
 {
 	mCurrentSpectrumIndex = -1;
+	mCurrentTime = -1;
 	mMainHeight = height() * MIRROR_RATIO;
 
 	setMode(ViSpectrumWidget::Amplitude);
@@ -76,6 +77,12 @@ void ViSpectrumWidget::addDecibelData(ViRealSpectrum &spectrum)
 void ViSpectrumWidget::update(ViAudioPosition position)
 {
 	int milliseconds = position.position(ViAudioPosition::Milliseconds);
+	if(mCurrentTime < milliseconds)
+	{
+		mCurrentSpectrumIndex = -1;
+	}
+	mCurrentTime = milliseconds;
+
 	//When stopped
 	if(milliseconds == 0)
 	{

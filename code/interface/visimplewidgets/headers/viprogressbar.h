@@ -21,6 +21,13 @@ class ViProgressBar : public ViWidget
 			Infinite = 1
 		};
 
+		enum TextStyle
+		{
+			None = 0,
+			Percentage = 1,
+			Text = 2
+		};
+
 		ViProgressBar(QWidget *parent = 0);
 		~ViProgressBar();
 
@@ -29,12 +36,15 @@ class ViProgressBar : public ViWidget
 		void setValue(int value);
 		void setText(QString text);
 		void setProgressStyle(ViProgressBar::ProgressStyle style);
+		void setTextStyle(ViProgressBar::TextStyle style);
 		
 		Qt::Alignment alignment();
 		int value();
 
 	private:
+
 		Ui::ViProgressBar *mUi;
+		QString mText;
 
 };
 

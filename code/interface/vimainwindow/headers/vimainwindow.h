@@ -14,18 +14,6 @@ class ViMainWindow : public QMainWindow
 {
 	Q_OBJECT
 
-	public slots:
-
-		void progress(short percentage);
-		void hideLoading();
-		void showLoading(bool animation = true, bool button = true, ViLoadingWidget::TextStyle textStyle = ViLoadingWidget::Percentage, QString text = "", ViProgressBar::ProgressStyle progressStyle = ViProgressBar::Finite);
-
-	private slots:
-
-		void buffering(short bufferingProgress);
-		void loadProject();
-		void saveProject();
-
 	public:
 
 		~ViMainWindow();
@@ -48,8 +36,6 @@ class ViMainWindow : public QMainWindow
 
 		Ui::ViMainWindow *mUi;
 		ViAudioEngine *mEngine;
-		ViLoadingWidget *mLoadingWidget;
-		bool mBufferingStarted;
 };
 
 #endif

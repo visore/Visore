@@ -17,43 +17,41 @@ class ViLoadingWidget : public ViWidget
 
 	public slots:
 
-		void progress(short percentage);
+		void start();
+		void start(bool animation, bool button, QString text, ViProgressBar::TextStyle textStyle, ViProgressBar::ProgressStyle progressStyle);
+		void stop();
+		void setText(QString text = "");
 
 	private slots:
 
+		void progress(short percentage);
 		void displayNextImage();
 
 	public:
 
-		enum TextStyle
-		{
-			None = 0,
-			Percentage = 1,
-			Text = 2
-		};
-
-		ViLoadingWidget(QWidget *parent = 0, bool animation = true, bool button = true, ViLoadingWidget::TextStyle textStyle = ViLoadingWidget::Percentage, ViProgressBar::ProgressStyle progressStyle = ViProgressBar::Finite);
 		~ViLoadingWidget();
+
+		static ViLoadingWidget& instance();
 
 		void showAnimation(bool show);
 		void showButton(bool show);
-		void setTextStyle(ViLoadingWidget::TextStyle style);
+		void setTextStyle(ViProgressBar::TextStyle style);
 		void setProgressStyle(ViProgressBar::ProgressStyle style);
 
-		void setVisible(bool visible);
-		void setText(QString text = "");
+	protected:
+
+		ViLoadingWidget();
 
 	private:
 
-		void start();
-		void stop();
+		void startAnimation();
+		void stopAnimation();
 
 	private:
 
 		Ui::ViLoadingWidget *mUi;
-		QTimer *mTimer;
+		QTimer mTimer;
 		int mCurrentImage;
-		ViLoadingWidget::TextStyle mTextStyle;
 		bool mHasAnimation;
 
 };

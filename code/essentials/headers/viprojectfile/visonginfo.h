@@ -59,6 +59,7 @@ class ViSongInfo
 		void setImagePath(QString path);
 
 		QString toString();
+		void clear();
 
 	private:
 

@@ -112,20 +112,21 @@ void ViProcessingChain::updateBuffering(qreal processingRate)
 		bytesNeeded *= ratio;
 		mSecondsNeeded = ViAudioPosition::convertPosition(bytesNeeded, ViAudioPosition::Bytes, ViAudioPosition::Seconds, mOutputBuffer->format());
 		LOG("Buffering started (processing rate: " + QString::number(mMultiExecutor.processingRate(), 'f', 1) + "Hz, buffer needed: " + QString::number(mSecondsNeeded) + "s)");
+		emit statusChanged("Buffering");
 	}
 	if(mSecondsNeeded < 0)
 	{
 		mSecondsNeeded = 5;
 	}
 
-	short progress = mSecondsPassed / (mSecondsNeeded / 100.0);
+	short progressValue = mSecondsPassed / (mSecondsNeeded / 100.0);
 	++mSecondsPassed;
-	if(progress >= 100)
+	if(progressValue >= 100)
 	{
 		QObject::disconnect(&mMultiExecutor, SIGNAL(processingRateChanged(qreal)), this, SLOT(updateBuffering(qreal)));
 		mStreamOutput->start();
 	}
-	emit buffering(progress);
+	emit progress(progressValue);
 }
 
 void ViProcessingChain::setWindowSize(int windowSize)

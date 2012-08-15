@@ -13,11 +13,18 @@ class ViStreamOutput : public ViAudioOutput
 	signals:
 
 		void positionChanged(ViAudioPosition position);
+		void lengthChanged(ViAudioPosition length);
 		void underrun();
+
+	public slots:
+
+		bool setPosition(ViAudioPosition position); //returns negative number if position is invalid
+		bool setPosition(int seconds);
 
 	private slots:
 
 		void checkPosition();
+		void checkLength();
 		void checkUnderrun();
 
 	public:
@@ -33,7 +40,6 @@ class ViStreamOutput : public ViAudioOutput
 		void stop();
 		void pause();
 
-		bool setPosition(ViAudioPosition position); //returns negative number if position is invalid
 		ViAudioPosition position();
 
 		qreal volume();
@@ -47,6 +53,7 @@ class ViStreamOutput : public ViAudioOutput
 		QAudioOutput *mAudioOutput;
 		QBuffer mBufferDevice;
 		ViAudioPosition mOldPosition;
+		qint64 mOldLength;
 		qreal mMuteVolume;
 		bool mIsMute;
 };

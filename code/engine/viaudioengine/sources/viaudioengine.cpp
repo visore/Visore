@@ -3,6 +3,8 @@
 #include "visampleenddetector.h"
 #include "vifrequencyenddetector.h"
 
+#include <tr1/functional>
+
 ViAudioEngine::ViAudioEngine()
 {
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(progressed(short)), this, SIGNAL(spectrumProgressed(short)));
@@ -17,12 +19,14 @@ ViAudioEngine::ViAudioEngine()
 	mStreamOutput = mConnection.streamOutput();
 
 	QObject::connect(&mProcessingChain, SIGNAL(changed()), this, SIGNAL(chainChanged()));
-	QObject::connect(&mProcessingChain, SIGNAL(buffering(short)), this, SIGNAL(buffering(short)));
+	QObject::connect(&mProcessingChain, SIGNAL(progress(short)), this, SIGNAL(progress(short)));
+	QObject::connect(&mProcessingChain, SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
 
 	mProcessingChain.setTransmission(mStreamOutput);
 	mStreamOutput->setDevice(QAudioDeviceInfo::defaultOutputDevice());
 	mStreamOutput->setFormat(ViAudioFormat::defaultFormat());
 	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)), Qt::DirectConnection);
+	QObject::connect(mStreamOutput, SIGNAL(lengthChanged(ViAudioPosition)), this, SIGNAL(lengthChanged(ViAudioPosition)), Qt::DirectConnection);
 
 	mProcessingChain.setTransmission(mFileOutput);
 	/*ViAudioFormat fileFormat = ViAudioFormat::defaultFormat();
@@ -43,7 +47,7 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
 	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), mFileOutput, SLOT(setSongInfo(ViSongInfo)));
 	mSongDetector.setKey("G1TZBE4IHJAYUSNCN");
-	//mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
+	mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
 
 	ViFrequencyEndDetector *endDetector = new ViFrequencyEndDetector();
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(changed(ViRealSpectrum, qint64)), endDetector, SLOT(addSpectrum(ViRealSpectrum)), Qt::DirectConnection);
@@ -52,6 +56,12 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
 	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), &mSongDetector, SLOT(enable()), Qt::DirectConnection);
 	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mSongDetector, SLOT(disable()), Qt::DirectConnection);
+	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), mFileOutput, SLOT(clearSongInfo()));
+	
+	QObject::connect(mEndDetector, SIGNAL(recordStarted(ViAudioPosition)), this, SIGNAL(recordStarted()), Qt::DirectConnection);
+	QObject::connect(mEndDetector, SIGNAL(recordEnded(ViAudioPosition)), this, SIGNAL(recordEnded()), Qt::DirectConnection);
+	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), this, SIGNAL(songStarted()), Qt::DirectConnection);
+	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SIGNAL(songEnded()), Qt::DirectConnection);
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -111,6 +121,11 @@ void ViAudioEngine::pausePlayback()
 	mStreamOutput->pause();
 }
 
+void ViAudioEngine::setPosition(int seconds)
+{
+	mStreamOutput->setPosition(seconds);
+}
+
 void ViAudioEngine::startRecording()
 {
 	mStreamInput->start();
@@ -161,4 +176,23 @@ void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat f
 	mProcessingChain.setProject(filePath, format);
 	changeInput(ViAudio::Line);
 	startRecording();
+	emit progressStarted();
+	emit statusChanged("Waiting for record to start");
+	QObject::connect(this, SIGNAL(recordStarted()), this, SLOT(changeStatus()));
+	QObject::connect(this, SIGNAL(recordEnded()), this, SLOT(changeStatus()));
+	QObject::connect(this, SIGNAL(songStarted()), this, SLOT(changeStatus()));
+	QObject::connect(this, SIGNAL(songEnded()), this, SLOT(changeStatus()));
+}
+
+void ViAudioEngine::changeStatus(QString status)
+{
+	if(metaObject()->indexOfSignal("recordStarted()") == senderSignalIndex() || metaObject()->indexOfSignal("songEnded()") == senderSignalIndex())
+	{
+		status = "Waiting for song to start";
+	}
+	else if(metaObject()->indexOfSignal("songStarted()") == senderSignalIndex())
+	{
+		status = "Processing song";
+	}
+	emit statusChanged(status);
 }

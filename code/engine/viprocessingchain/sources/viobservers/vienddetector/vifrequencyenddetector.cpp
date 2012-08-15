@@ -7,8 +7,8 @@
 ViFrequencyEndDetector::ViFrequencyEndDetector()
 	: ViEndDetector()
 {
-	setThreshold(ViEndDetector::SongStart, ViRange(0.05, 0.2), ViRange(0.0001, 1.0), 1500);
-	setThreshold(ViEndDetector::SongEnd, ViRange(0.05, 0.3), ViRange(0.0, 0.0001), 3000);
+	setThreshold(ViEndDetector::SongStart, ViRange(0.05, 0.2), ViRange(0.00015, 1.0), 1500);
+	setThreshold(ViEndDetector::SongEnd, ViRange(0.05, 0.3), ViRange(0.0, 0.00015), 3000);
 	setThreshold(ViEndDetector::RecordStart, ViRange(0.05, 0.2), ViRange(0.0001, 1.0), 500);
 	setThreshold(ViEndDetector::RecordEnd, ViRange(0.05, 0.3), ViRange(0.0, 0.00005), 7000);
 }
@@ -50,6 +50,7 @@ void ViFrequencyEndDetector::addSpectrum(ViRealSpectrum spectrum)
 
 void ViFrequencyEndDetector::initialize()
 {
+	mTotalSamples = 0;
 	mRecordStartTotalValue = 0;
 	mRecordEndTotalValue = 0;
 	mSongStartTotalValue = 0;
@@ -63,6 +64,7 @@ void ViFrequencyEndDetector::initialize()
 
 void ViFrequencyEndDetector::run()
 {
+	mTotalSamples += mData->size();
 	mMutex.lock();
 	bool isEmpty = mSpectrums.isEmpty();
 	mMutex.unlock();
@@ -70,7 +72,7 @@ void ViFrequencyEndDetector::run()
 	{
 		mMutex.lock();
 		ViRealSpectrum spectrum = mSpectrums.dequeue();
-		mMutex.unlock();
+		mMutex.unlock();//cout<<"****: "<<mSongRunning<<" "<<mRecordRunning<<endl;
 		if(!mSongRunning)
 		{
 			updateRecordStartAverage(spectrum);
@@ -78,7 +80,7 @@ void ViFrequencyEndDetector::run()
 				mRecordStartAverages.size() * spectrum.interval().position(ViAudioPosition::Milliseconds) >= mRecordStartTimeThreshold &&
 				inRange(mRecordStartAverages, mRecordStartValueThreshold))
 			{
-				setRecordStart(ViAudioPosition(99.88, ViAudioPosition::Seconds, mFormat));
+				setRecordStart(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, mFormat));
 			}
 
 			updateSongStartAverage(spectrum);
@@ -88,24 +90,28 @@ void ViFrequencyEndDetector::run()
 				mSongStartAverages.size() * spectrum.interval().position(ViAudioPosition::Milliseconds) >= mSongStartTimeThreshold &&
 				inRange(mSongStartAverages, mSongStartValueThreshold))
 			{
-				setSongStart(ViAudioPosition(99.88, ViAudioPosition::Seconds, mFormat));
-			}
-		}
-		else
-		{
-			updateRecordEndAverage(spectrum);
-			if(	mRecordEndAverages.size() * spectrum.interval().position(ViAudioPosition::Milliseconds) >= mRecordEndTimeThreshold &&
-				mRecordEndValueThreshold.contains(mRecordEndTotalValue / mRecordEndAverages.size()))
-			{
-				setRecordEnd(ViAudioPosition(99.88, ViAudioPosition::Seconds, mFormat));
+				setSongStart(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, mFormat));
 			}
 
-			updateSongEndAverage(spectrum);
-//cout<<"  --  "<<mRecordEndTotalValue / mRecordEndAverages.size()<<" "<<mSongEndTotalValue / mSongEndAverages.size()<<"  ("<<mSongEndAverages.size() * spectrum.interval().position(ViAudioPosition::Milliseconds)<<", "<<mSongEndTimeThreshold<<")"<<endl;
-			if(	mSongEndAverages.size() * spectrum.interval().position(ViAudioPosition::Milliseconds) >= mSongEndTimeThreshold &&
-				mSongEndValueThreshold.contains(mSongEndTotalValue / mSongEndAverages.size()))
+			if(mRecordRunning)
 			{
-				setSongEnd(ViAudioPosition(99.88, ViAudioPosition::Seconds, mFormat));
+				updateRecordEndAverage(spectrum);
+				if(	mRecordEndAverages.size() * spectrum.interval().position(ViAudioPosition::Milliseconds) >= mRecordEndTimeThreshold &&
+					inRange(mRecordEndAverages, mRecordEndValueThreshold))
+				{
+					setRecordEnd(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, mFormat));
+					initialize();
+				}
+			}
+		}
+		else if(mRecordRunning)
+		{
+			updateSongEndAverage(spectrum);
+//cout<<"  --  "<<" "<<inRange(mSongEndAverages, mSongEndValueThreshold) <<" "<<mSongRunning<<" "<<mRecordRunning<<endl;
+			if(	mSongEndAverages.size() * spectrum.interval().position(ViAudioPosition::Milliseconds) >= mSongEndTimeThreshold &&
+				inRange(mSongEndAverages, mSongEndValueThreshold))
+			{
+				setSongEnd(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, mFormat));
 			}
 		}
 

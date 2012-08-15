@@ -117,10 +117,8 @@ ViFileSongInfoList ViProject::songs()
 
 void ViProject::addSong(ViFileSongInfo info)
 {
-	QFileInfo fileInfo;
-	QString fileName = "";
-	fileInfo.setFile(info.originalFilePath());
-	fileName = fileInfo.fileName();
+	QFileInfo fileInfo(info.originalFilePath());
+	QString fileName = fileInfo.completeBaseName();
 	info.setOriginalFilePath(fileName);
 
 	if(fileName == "")
@@ -128,13 +126,13 @@ void ViProject::addSong(ViFileSongInfo info)
 		fileName = fileInfo.fileName();
 	}
 	fileInfo.setFile(info.correctedFilePath());
-	info.setCorrectedFilePath(fileInfo.fileName());
+	info.setCorrectedFilePath(fileInfo.completeBaseName());
 
 	if(info.albumArtPath() != "")
 	{
 		QFile file(info.albumArtPath());
-		QString albumArt = mAlbumArtPath + QDir::separator() + fileName;
-cout<<info.albumArtPath().toAscii().data()<<"    "<<albumArt.toAscii().data()<<endl;
+		QFileInfo imageInfo(info.albumArtPath());
+		QString albumArt = mAlbumArtPath + QDir::separator() + fileName + "." + imageInfo.suffix();
 		file.copy(albumArt);
 		fileInfo.setFile(albumArt);
 		info.setAlbumArtPath(albumArt);

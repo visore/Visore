@@ -26,6 +26,7 @@ ViSongInfoWidget::ViSongInfoWidget(QWidget *parent)
 	mTimer->start(INFO_CHANGE_TIMEOUT);
 
 	QObject::connect(mEngine, SIGNAL(songDetected(ViSongInfo)), this, SLOT(changeSongInfo(ViSongInfo)));
+	QObject::connect(mEngine, SIGNAL(songEnded()), this, SLOT(clearSongInfo()));
 }
 
 ViSongInfoWidget::~ViSongInfoWidget()
@@ -56,6 +57,24 @@ void ViSongInfoWidget::changeSongInfo(ViSongInfo info)
 		cover = cover.scaled(mUi->coverPicture->width(), mUi->coverPicture->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 		mUi->coverPicture->setPixmap(cover);
 	}
+}
+
+void ViSongInfoWidget::clearSongInfo()
+{
+	mUi->artistLabel->setText("");
+	mUi->titleLabel->setText("");
+
+	mUi->artistHotnessWidget->setRating(0);
+	mUi->artistFamiliarityWidget->setRating(0);
+	mUi->songHotnessWidget->setRating(0);
+	mUi->songDanceabilityWidget->setRating(0);
+	mUi->songEnergyWidget->setRating(0);
+
+	mUi->durationLabel->setText("");
+	mUi->loudnessLabel->setText("");
+	mUi->tempoLabel->setText("");
+
+	mUi->coverPicture->setPixmap(QPixmap());
 }
 
 void ViSongInfoWidget::switchInfo()

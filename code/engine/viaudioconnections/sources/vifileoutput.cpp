@@ -14,6 +14,11 @@ void ViFileOutput::setSongInfo(ViSongInfo info)
 	mSongInfo = info;
 }
 
+void ViFileOutput::clearSongInfo()
+{
+	mSongInfo.clear();
+}
+
 void ViFileOutput::setFile(QString directory, QString trackNumber, QString extension)
 {
 	if(!directory.endsWith(QDir::separator()))

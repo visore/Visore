@@ -15,7 +15,8 @@ class ViProcessingChain : public QObject
 	signals:
 
 		void changed();
-		void buffering(short progress);
+		void progress(short progress);
+		void statusChanged(QString status);
 
 	private slots:
 

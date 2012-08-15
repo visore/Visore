@@ -1,35 +1,57 @@
 #include "viloadingwidget.h"
 #include "ui_viloadingwidget.h"
+#include "vimainwindow.h"
 
-ViLoadingWidget::ViLoadingWidget(QWidget *parent, bool animation, bool button, ViLoadingWidget::TextStyle textStyle, ViProgressBar::ProgressStyle progressStyle)
-	: ViWidget(parent)
+ViLoadingWidget::ViLoadingWidget()
+	: ViWidget(ViMainWindow::instance())
 {
 	mUi = new Ui::ViLoadingWidget();
 	mUi->setupUi(this);
 
-	setStyleSheet("QWidget#ViLoadingWidget{background-color: rgba(0, 0, 0, 200);}");
+	setStyleSheet("ViLoadingWidget{background-color: rgba(0, 0, 0, 200);}");
 
-	mTimer = new QTimer(this);
-
-	mUi->cancelButton->setSize(500,200);
+	mUi->cancelButton->setSize(50, 20);
 	mUi->cancelButton->setGlow(ViThemeManager::color(14));
-	mUi->cancelButton->setIcon(ViThemeManager::image("record.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	//mUi->cancelButton->setIcon(ViThemeManager::image("record.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 
-	showAnimation(animation);
-	showButton(button);
-	setTextStyle(textStyle);
-	setProgressStyle(progressStyle);
-	progress(0);
+	QObject::connect(engine(), SIGNAL(progressStarted()), this, SLOT(start()));
+	QObject::connect(engine(), SIGNAL(statusChanged(QString)), this, SLOT(setText(QString)));
+
+	stop();
 }
 
 ViLoadingWidget::~ViLoadingWidget()
 {
-	if(mTimer != NULL)
-	{
-		delete mTimer;
-		mTimer = NULL;
-	}
 	delete mUi;
+}
+
+ViLoadingWidget& ViLoadingWidget::instance()
+{
+	static ViLoadingWidget widget;
+	return widget;
+}
+
+void ViLoadingWidget::start()
+{
+	start(true, false, "", ViProgressBar::None, ViProgressBar::Finite);
+}
+
+void ViLoadingWidget::start(bool animation, bool button, QString text, ViProgressBar::TextStyle textStyle, ViProgressBar::ProgressStyle progressStyle)
+{
+	showAnimation(animation);
+	showButton(button);
+	setText(text);
+	setTextStyle(textStyle);
+	setProgressStyle(progressStyle);
+
+	startAnimation();
+	show();
+}
+
+void ViLoadingWidget::stop()
+{
+	stopAnimation();
+	hide();
 }
 
 void ViLoadingWidget::progress(short percentage)
@@ -41,14 +63,14 @@ void ViLoadingWidget::showAnimation(bool show)
 {
 	mHasAnimation = show;
 	mUi->animationWidget->setVisible(mHasAnimation);
-	if(mHasAnimation)
+	if(show)
 	{
-		QObject::connect(mTimer, SIGNAL(timeout()), this, SLOT(displayNextImage()));
+		QObject::connect(&mTimer, SIGNAL(timeout()), this, SLOT(displayNextImage()));
 	}
 	else
 	{
-		stop();
-		QObject::disconnect(mTimer, SIGNAL(timeout()), this, SLOT(displayNextImage()));
+		stopAnimation();
+		QObject::disconnect(&mTimer, SIGNAL(timeout()), this, SLOT(displayNextImage()));
 	}
 }
 
@@ -57,10 +79,9 @@ void ViLoadingWidget::showButton(bool show)
 	mUi->cancelButton->setVisible(show);
 }
 
-void ViLoadingWidget::setTextStyle(ViLoadingWidget::TextStyle style)
+void ViLoadingWidget::setTextStyle(ViProgressBar::TextStyle style)
 {
-	mTextStyle = style;
-	setText();
+	mUi->progressBar->setTextStyle(style);
 }
 
 void ViLoadingWidget::setProgressStyle(ViProgressBar::ProgressStyle style)
@@ -68,40 +89,25 @@ void ViLoadingWidget::setProgressStyle(ViProgressBar::ProgressStyle style)
 	mUi->progressBar->setProgressStyle(style);
 }
 
-void ViLoadingWidget::setVisible(bool visible)
-{
-	if(visible)
-	{
-		start();
-	}
-	else
-	{
-		stop();
-	}
-	ViWidget::setVisible(visible);
-}
-
 void ViLoadingWidget::setText(QString text)
 {
-	if(mTextStyle == ViLoadingWidget::Text || mTextStyle == ViLoadingWidget::None)
-	{
-		mUi->progressBar->setText(text);
-	}
+	mUi->progressBar->setTextStyle(ViProgressBar::Text);
+	mUi->progressBar->setText(text);
 }
 
-void ViLoadingWidget::start()
+void ViLoadingWidget::startAnimation()
 {
 	if(mHasAnimation)
 	{
 		mCurrentImage = 0;
 		displayNextImage();
-		mTimer->start(100);
+		mTimer.start(100);
 	}
 }
 
-void ViLoadingWidget::stop()
+void ViLoadingWidget::stopAnimation()
 {
-	mTimer->stop();
+	mTimer.stop();
 }
 
 void ViLoadingWidget::displayNextImage()

@@ -104,6 +104,7 @@ void ViRatingWidget::setRating(qint16 percentage)
 	qfloat reduction = width * (ratio - fullStars);
 	for(int i = 0; i < NUMBER_OF_STARS; ++i)
 	{
+		mGrayStars[i]->setOffset(0);
 		if(i < fullStars)
 		{
 			mNormalStars[i]->setFixedWidth(width);

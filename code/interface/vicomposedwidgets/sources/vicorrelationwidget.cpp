@@ -24,7 +24,7 @@ ViCorrelationWidget::ViCorrelationWidget(QWidget *parent)
 	mUi->tableWidget->setItem(1, 3, new QTableWidgetItem("-"));
 
 	QObject::connect(mEngine, SIGNAL(correlationFinished()), this, SLOT(update()));
-	QObject::connect(mEngine, SIGNAL(correlationProgressed(short)), ViMainWindow::instance(), SLOT(progress(short)));
+	//QObject::connect(mEngine, SIGNAL(correlationProgressed(short)), ViMainWindow::instance(), SLOT(progress(short)));
 }
 
 ViCorrelationWidget::~ViCorrelationWidget()
@@ -44,7 +44,7 @@ void ViCorrelationWidget::showEvent(QShowEvent *event)
 
 void ViCorrelationWidget::recalculate()
 {
-	ViMainWindow::instance()->showLoading(true, false, ViLoadingWidget::Text, "Correlating Signals");
+	//ViLoadingWidget::show(true, false, ViLoadingWidget::Text, "Correlating Signals");
 	mEngine->calculateCorrelation();
 }
 
@@ -61,7 +61,7 @@ void ViCorrelationWidget::update()
 	mUi->tableWidget->item(1, 3)->setText(QString::number(result.crossCorrelation(ViCorrelationResult::Average) * 100, 'f', 5) + "%");
 
 	adjustTable();
-	ViMainWindow::instance()->hideLoading();
+	//ViLoadingWidget::hide();
 }
 
 void ViCorrelationWidget::adjustTable()

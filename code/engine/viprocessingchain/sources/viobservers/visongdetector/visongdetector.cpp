@@ -9,7 +9,8 @@
 #define REQUEST_SAMPLES_1 10000
 #define REQUEST_SAMPLES_2 15000
 #define REQUEST_SAMPLES_3 20000
-#define REQUEST_SAMPLES_4 30000
+#define REQUEST_SAMPLES_4 35000
+#define REQUEST_SAMPLES_5 90000
 
 ViSongCodeGeneratorThread::ViSongCodeGeneratorThread(QObject *parent)
 	: QThread(parent)
@@ -97,10 +98,15 @@ void ViSongDetector::run()
 		if(!mRequestSent && (mRequestsSent == 0 && bufferLength >= REQUEST_SAMPLES_1)
 			|| (mRequestsSent == 1 && bufferLength >= REQUEST_SAMPLES_2)
 			|| (mRequestsSent == 2 && bufferLength >= REQUEST_SAMPLES_3)
-			|| (mRequestsSent == 3 && bufferLength >= REQUEST_SAMPLES_4))
+			|| (mRequestsSent == 3 && bufferLength >= REQUEST_SAMPLES_4)
+			|| (mRequestsSent == 4 && bufferLength >= REQUEST_SAMPLES_5))
 		{
 			mRequestSent = true;
-			if(bufferLength >= REQUEST_SAMPLES_4)
+			if(bufferLength >= REQUEST_SAMPLES_5)
+			{
+				mRequestsSent = 5;
+			}
+			else if(bufferLength >= REQUEST_SAMPLES_4)
 			{
 				mRequestsSent = 4;
 			}
@@ -184,7 +190,8 @@ void ViSongDetector::replyFinished(QNetworkReply *reply)
 		if(mResponse.songInfo().imagePath() != "")
 		{
 			mFound = true;
-			QString imagePath = ViManager::tempPath() + QDir::separator() + "albumart" + QDir::separator() + mResponse.songInfo().songId();
+			QFileInfo info(mResponse.songInfo().imagePath());
+			QString imagePath = ViManager::tempPath() + QDir::separator() + "albumart" + QDir::separator() + mResponse.songInfo().songId() + "." + info.suffix();
 			QFile image(imagePath);
 			if(image.exists())
 			{
@@ -238,7 +245,8 @@ void ViSongDetector::downloadFinished(QNetworkReply *reply)
 	{
 		dir.mkpath(newPath);
 	}
-	newPath += QDir::separator() + mResponse.songInfo().songId();
+	QFileInfo info(mResponse.songInfo().imagePath());
+	newPath += QDir::separator() + mResponse.songInfo().songId() + "." + info.suffix();
 	QFile file(newPath);
 	if(!file.open(QIODevice::WriteOnly))
 	{

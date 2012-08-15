@@ -4,23 +4,7 @@
 
 ViSongInfo::ViSongInfo()
 {
-	mMessage = "";
-	mScore = -1;
-	mDescription = "";
-
-	mSongId = "";
-	mSongTitle = "";
-	mSongHotness = -1;
-	mSongDanceability = -1;
-	mSongEnergy = -1;
-	mSongDuration = -1;
-	mSongTempo = -1;
-	mSongLoudness = -1;
-	
-	mArtistId = "";
-	mArtistName = "";
-	mArtistHotness = -1;
-	mArtistFamiliarity = -1;
+	clear();
 }
 
 ViSongInfo::ViSongInfo(const ViSongInfo &other)
@@ -283,4 +267,25 @@ QString ViSongInfo::toString()
 		result += "\n\tImage " + QString::number(i + 1) + ": " + mImagePaths[i];
 	}
 	return result;
+}
+
+void ViSongInfo::clear()
+{
+	mMessage = "";
+	mScore = -1;
+	mDescription = "";
+
+	mSongId = "";
+	mSongTitle = "";
+	mSongHotness = -1;
+	mSongDanceability = -1;
+	mSongEnergy = -1;
+	mSongDuration = -1;
+	mSongTempo = -1;
+	mSongLoudness = -1;
+	
+	mArtistId = "";
+	mArtistName = "";
+	mArtistHotness = -1;
+	mArtistFamiliarity = -1;
 }

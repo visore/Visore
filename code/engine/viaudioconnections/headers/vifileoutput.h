@@ -11,6 +11,7 @@ class ViFileOutput : public ViAudioOutput
 	public slots:
 
 		void setSongInfo(ViSongInfo info);
+		void clearSongInfo();
 
 	public:
 
