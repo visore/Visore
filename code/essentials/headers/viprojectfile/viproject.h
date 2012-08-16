@@ -21,7 +21,7 @@ class ViProject : public QObject, public ViId
 
 	public:
 
-		ViProject(QString filePath = "");
+		ViProject(QString filePath = "", QString projectName = "");
 		~ViProject();
 
 		void setFilePath(QString filePath);
@@ -31,6 +31,8 @@ class ViProject : public QObject, public ViId
 		void save();
 
 		//Properties
+		void setProjectName(QString name);
+		QString projectName();
 		ViVersion createdVersion();
 		ViVersion editedVersion();
 

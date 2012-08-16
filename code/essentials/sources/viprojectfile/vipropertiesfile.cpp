@@ -6,6 +6,7 @@ ViPropertiesFile::ViPropertiesFile()
 	setName("Properties");
 	mCreatedVersion = ViManager::version();
 	mEditedVersion = ViManager::version();
+	mProjectName = "";
 }
 
 ViVersion ViPropertiesFile::createdVersion()
@@ -18,6 +19,16 @@ ViVersion ViPropertiesFile::editedVersion()
 	return mEditedVersion;
 }
 
+QString ViPropertiesFile::projectName()
+{
+	return mProjectName;
+}
+
+void ViPropertiesFile::setProjectName(QString name)
+{
+	mProjectName = name;
+}
+
 QDomDocument ViPropertiesFile::toXml()
 {
 	mEditedVersion = ViManager::version();
@@ -26,6 +37,12 @@ QDomDocument ViPropertiesFile::toXml()
 
 	QDomElement root = document.createElement(name());
 	document.appendChild(root);
+
+	//Project name
+	QDomElement project = document.createElement("ProjectName");
+	root.appendChild(project);
+	QDomText projectText = document.createTextNode(mProjectName);
+	project.appendChild(projectText);
 
 	//Created
 	QDomElement created = document.createElement("Created");
@@ -74,6 +91,7 @@ QDomDocument ViPropertiesFile::toXml()
 
 void ViPropertiesFile::fromXml(QDomDocument document)
 {
+	mProjectName  = document.firstChildElement("ProjectName").text();
 	QDomElement created = document.firstChildElement("Created");
 	QDomElement createdVersion = created.firstChildElement("Version");
 	mCreatedVersion = ViVersion(createdVersion.firstChildElement("Major").text().toInt(), createdVersion.firstChildElement("Minor").text().toInt(), createdVersion.firstChildElement("Patch").text().toInt());

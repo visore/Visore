@@ -70,7 +70,7 @@ void ViProcessingChain::finalize()
 	qreal songLength = ViAudioPosition::convertPosition(mOutputBuffer->size(), ViAudioPosition::Samples, ViAudioPosition::Milliseconds, mOutputBuffer->format());
 	if(mProject != NULL && songLength >= MINIMUM_SONG_LENGTH)
 	{
-		QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
+		QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
 		mFileOutput->setBuffer(mOutputBuffer);
 		mFileOutput->setFile(mProject->originalPath(), mProject->nextOriginalSongNumber(), mFileOutput->format().codec()->extensions()[0]);
 		mFileOutput->start();
@@ -82,14 +82,25 @@ void ViProcessingChain::finalize()
 	}
 }
 
-void ViProcessingChain::finish()
+void ViProcessingChain::finishWriting()
 {
 	ViFileSongInfo info = ViFileSongInfo(mFileOutput->songInfo());
 	info.setOriginalFilePath(mFileOutput->filePath());
 	mProject->addSong(info);
 	mProject->save();
-	QObject::disconnect(mFileOutput, SIGNAL(finished()), this, SLOT(finish()));
+	QObject::disconnect(mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
 	nextBuffer(ViAudio::AudioOutput);
+
+	QObject::connect(mStreamOutput, SIGNAL(finished()), this, SLOT(finishPlaying()));
+	if(mStreamOutput->state() != QAudio::ActiveState)
+	{
+		finishPlaying();
+	}
+}
+
+void ViProcessingChain::finishPlaying()
+{
+	QObject::disconnect(mStreamOutput, SIGNAL(finished()), this, SLOT(finishPlaying()));
 	mStreamOutput->setBuffer(mOutputBuffer);
 	mMultiExecutor.initialize();
 }
@@ -111,17 +122,17 @@ void ViProcessingChain::updateBuffering(qreal processingRate)
 		bytesNeeded -= mStreamOutput->position().position(ViAudioPosition::Bytes);
 		bytesNeeded *= ratio;
 		mSecondsNeeded = ViAudioPosition::convertPosition(bytesNeeded, ViAudioPosition::Bytes, ViAudioPosition::Seconds, mOutputBuffer->format());
-		LOG("Buffering started (processing rate: " + QString::number(mMultiExecutor.processingRate(), 'f', 1) + "Hz, buffer needed: " + QString::number(mSecondsNeeded) + "s)");
-		emit statusChanged("Buffering");
 	}
-	if(mSecondsNeeded < 0)
+
+	if(mSecondsNeeded > 0)
 	{
-		mSecondsNeeded = 5;
+		LOG("Buffering started (processing rate: " + QString::number(mMultiExecutor.processingRate(), 'f', 1) + "Hz, buffer needed: " + QString::number(mSecondsNeeded - mSecondsPassed) + "s)");
+		emit statusChanged("Buffering");
 	}
 
 	short progressValue = mSecondsPassed / (mSecondsNeeded / 100.0);
 	++mSecondsPassed;
-	if(progressValue >= 100)
+	if(progressValue >= 100 || mSecondsNeeded <= 0)
 	{
 		QObject::disconnect(&mMultiExecutor, SIGNAL(processingRateChanged(qreal)), this, SLOT(updateBuffering(qreal)));
 		mStreamOutput->start();
@@ -150,6 +161,7 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 	else if((streamOutput = dynamic_cast<ViStreamOutput*>(transmission)) != NULL)
 	{
 		mStreamOutput = streamOutput;
+		emit streamOutputChanged(mStreamOutput);
 		QObject::connect(mStreamOutput, SIGNAL(underrun()), this, SLOT(handleUnderrun()));
 		allocateBuffer(ViAudio::AudioOutput);
 		nextBuffer(ViAudio::AudioOutput);
@@ -162,14 +174,10 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 	}
 }
 
-void ViProcessingChain::setProject(QString filePath, ViAudioFormat format)
+void ViProcessingChain::setProject(ViProject *project, ViAudioFormat format)
 {
 	mFileOutput->setFormat(format);
-	if(mProject != NULL)
-	{
-		delete mProject;
-	}
-	mProject = new ViProject(filePath);
+	mProject = project;
 	mProject->save();
 }
 
@@ -193,6 +201,11 @@ ViAudioBuffer* ViProcessingChain::buffer(ViAudio::Mode mode)
 	{
 		return mOutputBuffer;
 	}
+}
+
+ViStreamOutput* ViProcessingChain::streamOutput()
+{
+	return mStreamOutput;
 }
 
 ViAudioBuffer* ViProcessingChain::allocateBuffer(ViAudio::Mode mode)

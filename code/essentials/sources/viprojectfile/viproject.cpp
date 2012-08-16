@@ -2,7 +2,7 @@
 
 #define RECORDING_NAME_LENGTH 2
 
-ViProject::ViProject(QString filePath)
+ViProject::ViProject(QString filePath, QString projectName)
 	: QObject()
 {
 	mTempPath = "";
@@ -11,6 +11,7 @@ ViProject::ViProject(QString filePath)
 	mCorrectedPath = "";
 	mAlbumArtPath = "";
 	setFilePath(filePath);
+	setProjectName(projectName);
 
 	mProjectFiles.append(&mProperties);
 	mProjectFiles.append(&mSongs);
@@ -82,6 +83,16 @@ bool ViProject::removeTempStructure()
 {
 	QDir dir(mTempPath);
 	return dir.removeRecursively();
+}
+
+void ViProject::setProjectName(QString name)
+{
+	mProperties.setProjectName(name);
+}
+
+QString ViProject::projectName()
+{
+	return mProperties.projectName();
 }
 
 ViVersion ViProject::createdVersion()

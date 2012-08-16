@@ -22,5 +22,5 @@ ViProjectWidget::~ViProjectWidget()
 
 void ViProjectWidget::start()
 {
-	engine()->startProject(mUi->nameLineEdit->text(), mUi->fileBrowser->fileName(), mUi->formatWidget->format());
+	engine()->startProject(mUi->nameLineEdit->text(), mUi->fileBrowser->fileName(), mUi->formatWidget->format(), mUi->sidesSpinBox->value(), mUi->playCheckBox->isChecked());
 }

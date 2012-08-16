@@ -45,7 +45,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		void calculateCorrelation();
 
 		//Project
-		void startProject(QString name, QString filePath, ViAudioFormat format);
+		void startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, bool play);
 
 	signals:
 
@@ -89,10 +89,6 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		void saveProjectStarted();
 		void projectFinished();
 
-	private slots:
-
-		void changeStatus(QString status = "");
-
 	public:
 
 		~ViAudioEngine();
@@ -113,6 +109,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		ViStreamInput *mStreamInput;
 		ViStreamOutput *mStreamOutput;
 
+		ViProjectManager mProjectManager;
 		ViProcessingChain mProcessingChain;
 		ViSingleExecutor mExecutor;
 

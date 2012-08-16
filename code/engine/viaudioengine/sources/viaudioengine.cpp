@@ -62,6 +62,17 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(mEndDetector, SIGNAL(recordEnded(ViAudioPosition)), this, SIGNAL(recordEnded()), Qt::DirectConnection);
 	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), this, SIGNAL(songStarted()), Qt::DirectConnection);
 	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SIGNAL(songEnded()), Qt::DirectConnection);
+
+	//Project manager
+	QObject::connect(mEndDetector, SIGNAL(recordStarted(ViAudioPosition)), &mProjectManager, SLOT(startRecord()), Qt::DirectConnection);
+	QObject::connect(mEndDetector, SIGNAL(recordEnded(ViAudioPosition)), &mProjectManager, SLOT(endRecord()), Qt::DirectConnection);
+	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), &mProjectManager, SLOT(startSong()), Qt::DirectConnection);
+	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProjectManager, SLOT(endSong()), Qt::DirectConnection);
+	QObject::connect(&mProjectManager, SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)), Qt::DirectConnection);
+	QObject::connect(&mProjectManager, SIGNAL(started()), this, SIGNAL(progressStarted()), Qt::DirectConnection);
+	QObject::connect(&mProjectManager, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::DirectConnection);
+	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), this, SLOT(startPlayback()));
+	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SLOT(stopPlayback()));
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -171,28 +182,14 @@ void ViAudioEngine::calculateCorrelation()
 	}
 }
 
-void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat format)
+void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, bool play)
 {
-	mProcessingChain.setProject(filePath, format);
+	mProjectManager.setProjectName(name);
+	mProjectManager.setFilePath(filePath);
+	mProjectManager.setSideCount(recordSides);
+	mProjectManager.setPlayback(play);
 	changeInput(ViAudio::Line);
+	mProcessingChain.setProject(mProjectManager.project(), format);
+	mProjectManager.start();
 	startRecording();
-	emit progressStarted();
-	emit statusChanged("Waiting for record to start");
-	QObject::connect(this, SIGNAL(recordStarted()), this, SLOT(changeStatus()));
-	QObject::connect(this, SIGNAL(recordEnded()), this, SLOT(changeStatus()));
-	QObject::connect(this, SIGNAL(songStarted()), this, SLOT(changeStatus()));
-	QObject::connect(this, SIGNAL(songEnded()), this, SLOT(changeStatus()));
-}
-
-void ViAudioEngine::changeStatus(QString status)
-{
-	if(metaObject()->indexOfSignal("recordStarted()") == senderSignalIndex() || metaObject()->indexOfSignal("songEnded()") == senderSignalIndex())
-	{
-		status = "Waiting for song to start";
-	}
-	else if(metaObject()->indexOfSignal("songStarted()") == senderSignalIndex())
-	{
-		status = "Processing song";
-	}
-	emit statusChanged(status);
 }

@@ -16,6 +16,7 @@ ViLoadingWidget::ViLoadingWidget()
 
 	QObject::connect(engine(), SIGNAL(progressStarted()), this, SLOT(start()));
 	QObject::connect(engine(), SIGNAL(statusChanged(QString)), this, SLOT(setText(QString)));
+	QObject::connect(engine(), SIGNAL(progressFinished()), this, SLOT(stop()));
 
 	stop();
 }

@@ -12,6 +12,8 @@ class ViPropertiesFile : public ViProjectFile
 		ViPropertiesFile();
 		ViVersion createdVersion();
 		ViVersion editedVersion();
+		QString projectName();
+		void setProjectName(QString name);
 
 	protected:
 
@@ -22,6 +24,7 @@ class ViPropertiesFile : public ViProjectFile
 
 		ViVersion mCreatedVersion;
 		ViVersion mEditedVersion;
+		QString mProjectName;
 
 };
 
