@@ -41,7 +41,7 @@ ViExecutor::~ViExecutor()
 	}
 }
 
-int ViExecutor::processingRate()
+qreal ViExecutor::processingRate()
 {
 	return mProcessingRate;
 }

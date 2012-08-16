@@ -8,6 +8,8 @@
 #include "vimultiexecutor.h"
 #include "viprojectmanager.h"
 
+class ViHandler;
+
 class ViProcessingChain : public QObject
 {
     Q_OBJECT
@@ -27,8 +29,6 @@ class ViProcessingChain : public QObject
 		void finalize();
 		void finishWriting();
 		void finishPlaying();
-		void handleUnderrun();
-		void updateBuffering(qreal processingRate);
 
 	public:
 
@@ -43,6 +43,7 @@ class ViProcessingChain : public QObject
 		ViAudioBuffer* buffer(ViAudio::Mode mode);
 
 		ViStreamOutput* streamOutput();
+		ViExecutor* executor();
 
 	protected:
 
@@ -61,10 +62,9 @@ class ViProcessingChain : public QObject
 		ViAudioBuffer *mInputBuffer;
 		ViAudioBuffer *mOutputBuffer;
 
-		int mSecondsPassed;
-		int mSecondsNeeded;
-
 		ViProject *mProject;
+
+		QList<ViHandler*> mHandlers;
 };
 
 #endif

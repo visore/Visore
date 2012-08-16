@@ -32,7 +32,7 @@ class ViExecutor : public QThread
 
 		ViExecutor();
 		~ViExecutor();
-		int processingRate();
+		qreal processingRate();
 		void setWindowSize(int windowSize);
 		void setNotify(bool notify);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
