@@ -50,10 +50,10 @@ ViAudioEngine::ViAudioEngine()
 	mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
 
 	ViFrequencyEndDetector *endDetector = new ViFrequencyEndDetector();
-	QObject::connect(&mSpectrumAnalyzer, SIGNAL(changed(ViRealSpectrum, qint64)), endDetector, SLOT(addSpectrum(ViRealSpectrum)), Qt::DirectConnection);
+	//QObject::connect(&mSpectrumAnalyzer, SIGNAL(changed(ViRealSpectrum, qint64)), endDetector, SLOT(addSpectrum(ViRealSpectrum)), Qt::DirectConnection);
 	mEndDetector = endDetector;
-	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), &mProcessingChain, SLOT(startInput(ViAudioPosition)), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProcessingChain, SLOT(changeInput(ViAudioPosition)), Qt::DirectConnection);
+	//QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), &mProcessingChain, SLOT(startInput()), Qt::DirectConnection);
+	//QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProcessingChain, SLOT(endInput()), Qt::DirectConnection);
 	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), &mSongDetector, SLOT(enable()), Qt::DirectConnection);
 	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mSongDetector, SLOT(disable()), Qt::DirectConnection);
 	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), mFileOutput, SLOT(clearSongInfo()));
@@ -63,21 +63,16 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), this, SIGNAL(songStarted()), Qt::DirectConnection);
 	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SIGNAL(songEnded()), Qt::DirectConnection);
 
+	mProcessingChain.attach(ViAudio::AudioInput, mEndDetector);
+
 	//Project manager
-	QObject::connect(mEndDetector, SIGNAL(recordStarted(ViAudioPosition)), &mProjectManager, SLOT(startRecord()), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(recordEnded(ViAudioPosition)), &mProjectManager, SLOT(endRecord()), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), &mProjectManager, SLOT(startSong()), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProjectManager, SLOT(endSong()), Qt::DirectConnection);
 	QObject::connect(&mProjectManager, SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)), Qt::DirectConnection);
 	QObject::connect(&mProjectManager, SIGNAL(started()), this, SIGNAL(progressStarted()), Qt::DirectConnection);
 	QObject::connect(&mProjectManager, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), this, SLOT(startPlayback()));
-	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SLOT(stopPlayback()));
 }
 
 ViAudioEngine::~ViAudioEngine()
 {
-
 	if(mEndDetector != NULL)
 	{
 		delete mEndDetector;
@@ -106,12 +101,12 @@ void ViAudioEngine::changeInput(ViAudio::Input input)
 {
 	if(input == ViAudio::File)
 	{
-		mProcessingChain.detach(mEndDetector);
+		//mProcessingChain.detach(mEndDetector);
 		mProcessingChain.setTransmission(mFileInput);
 	}
 	else if(input == ViAudio::Line)
 	{
-		mProcessingChain.attach(ViAudio::AudioInput, mEndDetector);
+		//mProcessingChain.attach(ViAudio::AudioInput, mEndDetector);
 		mProcessingChain.setTransmission(mStreamInput);
 	}
 	emit inputChanged(input);

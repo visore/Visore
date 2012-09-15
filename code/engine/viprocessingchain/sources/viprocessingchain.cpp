@@ -1,9 +1,9 @@
 #include "viprocessingchain.h"
-#include "viaudiocodec.h"
 
 #include "viunderrunhandler.h"
-
-#define MINIMUM_SONG_LENGTH 1500
+#include "viprojecthandler.h"
+#include "visectionhandler.h"
+#include "viplaybackhandler.h"
 
 ViProcessingChain::ViProcessingChain()
 	: QObject()
@@ -13,11 +13,17 @@ ViProcessingChain::ViProcessingChain()
 	mFileOutput = NULL;
 	mInputBuffer = NULL;
 	mOutputBuffer = NULL;
-	mProject = NULL;
 	mMultiExecutor.setNotify(true);
 	QObject::connect(&mMultiExecutor, SIGNAL(progressed(short)), this, SIGNAL(changed()));
 
-	mHandlers.append(new ViUnderrunHandler(this));
+	mUnderrunHandler = new ViUnderrunHandler(this);
+	//mProjectHandler = new ViProjectHandler(this);
+	mSectionHandler = new ViSectionHandler(this);
+	//mPlaybackHandler = new ViPlaybackHandler(this);
+	mHandlers.append(mUnderrunHandler);
+	//mHandlers.append(mProjectHandler);
+	mHandlers.append(mSectionHandler);
+	//mHandlers.append(mPlaybackHandler);
 }
 
 ViProcessingChain::~ViProcessingChain()
@@ -37,78 +43,77 @@ ViProcessingChain::~ViProcessingChain()
 	qDeleteAll(mOutputBuffers);
 	mOutputBuffers.clear();
 
-	if(mProject != NULL)
-	{
-		delete mProject;
-		mProject = NULL;
-	}
-
 	qDeleteAll(mHandlers);
 	mHandlers.clear();
 }
 
-void ViProcessingChain::changeInput(ViAudioPosition position)
+void ViProcessingChain::startInput()
 {
-	QObject::connect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finalize()));
-	mInput->setBuffer(allocateBuffer(ViAudio::AudioInput));
-}
-
-void ViProcessingChain::startInput(ViAudioPosition position)
-{
-	allocateBuffer(ViAudio::AudioInput);
-	allocateBuffer(ViAudio::AudioOutput);
-	nextBuffer(ViAudio::AudioInput);
-	nextBuffer(ViAudio::AudioOutput);
+	/*nextBuffer(ViAudio::AudioInput);
+	ViAudioBuffer *buffer = allocateBuffer(ViAudio::AudioOutput);
+	mMutex.lock();
 	mInput->setBuffer(mInputBuffer);
 	mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
-	mMultiExecutor.setBuffer(ViAudio::AudioOutput, mOutputBuffer);
-	mStreamOutput->setBuffer(mOutputBuffer);
+	mMultiExecutor.setBuffer(ViAudio::AudioOutput, buffer);
 	mMultiExecutor.initialize();
+	mMutex.unlock();*/
 }
 
-void ViProcessingChain::finalize()
+void ViProcessingChain::endInput()
 {
-	mMultiExecutor.finalize();
-	QObject::disconnect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finalize()));
-	nextBuffer(ViAudio::AudioInput);
-	mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
-	mMultiExecutor.setBuffer(ViAudio::AudioOutput, allocateBuffer(ViAudio::AudioOutput));
-	qreal songLength = ViAudioPosition::convertPosition(mOutputBuffer->size(), ViAudioPosition::Samples, ViAudioPosition::Milliseconds, mOutputBuffer->format());
-	if(mProject != NULL && songLength >= MINIMUM_SONG_LENGTH)
+	/*if(wasSongRunning())
 	{
-		QObject::connect(mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
-		mFileOutput->setBuffer(mOutputBuffer);
-		mFileOutput->setFile(mProject->originalPath(), mProject->nextOriginalSongNumber(), mFileOutput->format().codec()->extensions()[0]);
-		mFileOutput->start();
+		//deallocateBuffer(ViAudio::AudioOutput);
+		//QObject::connect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finishProcessing()));
 	}
 	else
 	{
-		nextBuffer(ViAudio::AudioOutput);
-		mStreamOutput->setBuffer(mOutputBuffer);
+		//finishProcessing();
 	}
+	finishProcessing();*/
+	//mInput->setBuffer(allocateBuffer(ViAudio::AudioInput));
 }
 
-void ViProcessingChain::finishWriting()
-{
-	ViFileSongInfo info = ViFileSongInfo(mFileOutput->songInfo());
-	info.setOriginalFilePath(mFileOutput->filePath());
-	mProject->addSong(info);
-	mProject->save();
-	QObject::disconnect(mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
+void ViProcessingChain::startOutput()
+{/*LOG("+++: "+QString::number(mOutputBuffers.size()));
 	nextBuffer(ViAudio::AudioOutput);
-
-	QObject::connect(mStreamOutput, SIGNAL(finished()), this, SLOT(finishPlaying()));
-	if(mStreamOutput->state() != QAudio::ActiveState)
-	{
-		finishPlaying();
-	}
+	mMutex.lock();
+	mStreamOutput->setBuffer(mOutputBuffer);
+	mMutex.unlock();
+	mStreamOutput->start();*/
+	//emit outputStarted();
 }
 
-void ViProcessingChain::finishPlaying()
+void ViProcessingChain::endOutput()
+{/*LOG("+++1");
+	mStreamOutput->stop();
+	mMutex.lock();
+	delete mOutputBuffer;
+	mMutex.unlock();LOG("+++2");*/
+}
+
+void ViProcessingChain::finishProcessing()
 {
-	QObject::disconnect(mStreamOutput, SIGNAL(finished()), this, SLOT(finishPlaying()));
-	mStreamOutput->setBuffer(mOutputBuffer);
-	mMultiExecutor.initialize();
+	/*mMutex.lock();
+	mMultiExecutor.finalize();
+	QObject::disconnect(&mMultiExecutor, SIGNAL(finished()), this, SLOT(finishProcessing()));
+	mMutex.unlock();*/
+	/*if(wasSongRunning())
+	{
+		QObject::connect(mStreamOutput, SIGNAL(finished()), this, SLOT(endOutput()));
+	}
+	else
+	{
+		endOutput();
+	}**/
+	//nextBuffer(ViAudio::AudioInput);
+	//mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
+	//mMultiExecutor.setBuffer(ViAudio::AudioOutput, allocateBuffer(ViAudio::AudioOutput));
+	/*if(!mProjectHandler)
+	{
+		endOutput();
+	}
+	emit finishedProcessing();*/
 }
 
 void ViProcessingChain::setWindowSize(int windowSize)
@@ -124,41 +129,53 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 	if((input = dynamic_cast<ViAudioInput*>(transmission)) != NULL)
 	{
 		mInput = input;
-		allocateBuffer(ViAudio::AudioInput);
-		nextBuffer(ViAudio::AudioInput);
-		mInput->setBuffer(mInputBuffer);
-		mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
+		//mInput->setBuffer(nextBuffer(ViAudio::AudioInput));
+		//mMultiExecutor.setBuffer(ViAudio::AudioInput, mInputBuffer);
+		emit inputChanged();
 	}
 	else if((streamOutput = dynamic_cast<ViStreamOutput*>(transmission)) != NULL)
 	{
 		mStreamOutput = streamOutput;
-		emit streamOutputChanged(mStreamOutput);
-		allocateBuffer(ViAudio::AudioOutput);
-		nextBuffer(ViAudio::AudioOutput);
-		mStreamOutput->setBuffer(mOutputBuffer);
-		mMultiExecutor.setBuffer(ViAudio::AudioOutput, mOutputBuffer);
+		//mStreamOutput->setBuffer(nextBuffer(ViAudio::AudioOutput));
+		//mMultiExecutor.setBuffer(ViAudio::AudioOutput, mOutputBuffer);
+		emit outputChanged();
 	}
 	else if((fileOutput = dynamic_cast<ViFileOutput*>(transmission)) != NULL)
 	{
 		mFileOutput = fileOutput;
+		emit outputChanged();
+	}
+
+	if(mStreamOutput != NULL && mInput != NULL)
+	{
+		startInput();
 	}
 }
 
 void ViProcessingChain::setProject(ViProject *project, ViAudioFormat format)
 {
-	mFileOutput->setFormat(format);
-	mProject = project;
-	mProject->save();
+	mProjectHandler->create(project, format);
 }
 
 bool ViProcessingChain::attach(ViAudio::Mode mode, ViProcessor *processor)
 {
 	mMultiExecutor.attach(mode, processor);
+	emit attached(processor);
 }
 
 bool ViProcessingChain::detach(ViProcessor *processor)
 {
 	mMultiExecutor.detach(processor);
+}
+
+bool ViProcessingChain::isSongRunning()
+{
+	return mSectionHandler->isSongRunning();
+}
+
+bool ViProcessingChain::wasSongRunning()
+{
+	return mSectionHandler->wasSongRunning();
 }
 
 ViAudioBuffer* ViProcessingChain::buffer(ViAudio::Mode mode)
@@ -173,19 +190,10 @@ ViAudioBuffer* ViProcessingChain::buffer(ViAudio::Mode mode)
 	}
 }
 
-ViStreamOutput* ViProcessingChain::streamOutput()
-{
-	return mStreamOutput;
-}
-
-ViExecutor* ViProcessingChain::executor()
-{
-	return &mMultiExecutor;
-}
-
 ViAudioBuffer* ViProcessingChain::allocateBuffer(ViAudio::Mode mode)
 {
 	ViAudioBuffer *buffer = new ViAudioBuffer();
+	mMutex.lock();
 	if(mode == ViAudio::AudioInput)
 	{
 		mInputBuffers.enqueue(buffer);
@@ -194,11 +202,33 @@ ViAudioBuffer* ViProcessingChain::allocateBuffer(ViAudio::Mode mode)
 	{
 		mOutputBuffers.enqueue(buffer);
 	}
+	mMutex.unlock();
 	return buffer;
 }
 
-void ViProcessingChain::nextBuffer(ViAudio::Mode mode)
+void ViProcessingChain::deallocateBuffer(ViAudio::Mode mode)
 {
+	ViAudioBuffer *buffer = NULL;
+	mMutex.lock();
+	if(mode == ViAudio::AudioInput)
+	{
+		buffer = mInputBuffers.dequeue();
+	}
+	else if(mode == ViAudio::AudioOutput)
+	{
+		buffer = mOutputBuffers.dequeue();
+	}
+	if(buffer != NULL)
+	{
+		delete buffer;
+		buffer = NULL;
+	}
+	mMutex.unlock();
+}
+
+ViAudioBuffer* ViProcessingChain::nextBuffer(ViAudio::Mode mode)
+{
+	mMutex.lock();
 	if(mode == ViAudio::AudioInput)
 	{
 		if(mInputBuffer != NULL)
@@ -207,12 +237,13 @@ void ViProcessingChain::nextBuffer(ViAudio::Mode mode)
 		}
 		if(mInputBuffers.isEmpty())
 		{
-			mInputBuffer = NULL;
+			mMutex.unlock();
+			allocateBuffer(ViAudio::AudioInput);
+			mMutex.lock();
 		}
-		else
-		{
-			mInputBuffer = mInputBuffers.dequeue();
-		}
+		mInputBuffer = mInputBuffers.dequeue();
+		mMutex.unlock();
+		return mInputBuffer;
 	}
 	else if(mode == ViAudio::AudioOutput)
 	{
@@ -222,11 +253,12 @@ void ViProcessingChain::nextBuffer(ViAudio::Mode mode)
 		}
 		if(mOutputBuffers.isEmpty())
 		{
-			mOutputBuffer = NULL;
+			mMutex.unlock();
+			allocateBuffer(ViAudio::AudioOutput);
+			mMutex.lock();
 		}
-		else
-		{
-			mOutputBuffer = mOutputBuffers.dequeue();
-		}
+		mOutputBuffer = mOutputBuffers.dequeue();
+		mMutex.unlock();
+		return mOutputBuffer;
 	}
 }

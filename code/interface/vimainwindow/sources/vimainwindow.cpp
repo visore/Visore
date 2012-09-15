@@ -3,7 +3,7 @@
 
 #include "vifilebrowser.h"
 
-ViMainWindow *ViMainWindow::mWindow = NULL;
+ViMainWindow* ViMainWindow::mWindow = NULL;
 
 ViMainWindow::ViMainWindow()
 	: QMainWindow()

@@ -14,7 +14,9 @@ class ViAudioTransmission : public QObject
 	signals:
 
 		void stateChanged(QAudio::State state);
+		void started();
 		void finished();
+		void bufferChanged();
 
 	public slots:
 

@@ -13,6 +13,8 @@ cmake=false;
 build=false;
 run=false;
 package=false;
+valgrind=false;
+gdb=false;
 for i in $*
 do
 	if [ $i = "cmake" ]; then
@@ -23,6 +25,10 @@ do
 		run=true;
 	elif [ $i = "package" ]; then
 		package=true;
+	elif [ $i = "valgrind" ]; then
+		valgrind=true;
+	elif [ $i = "gdb" ]; then
+		gdb=true;
 	fi
 done
 
@@ -54,7 +60,13 @@ if $package; then
 	make package
 fi
 
-if $run; then
+if $gdb; then
+	cd $install_directory
+	gdb launcher
+elif $run; then
+	cd $install_directory
+	./launcher
+elif $run; then
 	cd $install_directory
 	./launcher
 fi

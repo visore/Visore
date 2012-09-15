@@ -9,10 +9,20 @@
 #include "viprojectmanager.h"
 
 class ViHandler;
+class ViUnderrunHandler;
+class ViProjectHandler;
+class ViSectionHandler;
+class ViPlaybackHandler;
 
 class ViProcessingChain : public QObject
 {
     Q_OBJECT
+
+	friend class ViHandler;
+	friend class ViUnderrunHandler;
+	friend class ViProjectHandler;
+	friend class ViSectionHandler;
+	friend class ViPlaybackHandler;
 
 	signals:
 
@@ -20,15 +30,27 @@ class ViProcessingChain : public QObject
 		void progress(short progress);
 		void statusChanged(QString status);
 
-		void streamOutputChanged(ViStreamOutput*);
+		void inputChanged();
+		void outputChanged();
+		void inputStarted();
+		void outputStarted();
+		void finishedProcessing();
+
+		void attached(ViProcessor *processor);
+
+		void songStarted();
+		void songEnded();
+		void recordStarted();
+		void recordEnded();
 
 	private slots:
 
-		void changeInput(ViAudioPosition position); // Connect song end detector to this slot
-		void startInput(ViAudioPosition position);
-		void finalize();
-		void finishWriting();
-		void finishPlaying();
+		void startInput();
+		void endInput();
+		void startOutput();
+		void endOutput();
+
+		void finishProcessing();
 
 	public:
 
@@ -42,15 +64,18 @@ class ViProcessingChain : public QObject
 		bool detach(ViProcessor *processor);
 		ViAudioBuffer* buffer(ViAudio::Mode mode);
 
-		ViStreamOutput* streamOutput();
-		ViExecutor* executor();
-
 	protected:
 
 		ViAudioBuffer* allocateBuffer(ViAudio::Mode mode);
-		void nextBuffer(ViAudio::Mode mode);
+		void deallocateBuffer(ViAudio::Mode mode);
+		ViAudioBuffer* nextBuffer(ViAudio::Mode mode);
+
+		bool isSongRunning();
+		bool wasSongRunning();
 
 	private:
+
+		QMutex mMutex;
 
 		ViMultiExecutor mMultiExecutor;
 		ViAudioInput *mInput;
@@ -62,9 +87,11 @@ class ViProcessingChain : public QObject
 		ViAudioBuffer *mInputBuffer;
 		ViAudioBuffer *mOutputBuffer;
 
-		ViProject *mProject;
-
 		QList<ViHandler*> mHandlers;
+		ViUnderrunHandler *mUnderrunHandler;
+		ViProjectHandler *mProjectHandler;
+		ViSectionHandler *mSectionHandler;
+		ViPlaybackHandler *mPlaybackHandler;
 };
 
 #endif

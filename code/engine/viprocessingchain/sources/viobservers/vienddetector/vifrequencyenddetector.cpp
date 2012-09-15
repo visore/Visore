@@ -50,6 +50,7 @@ void ViFrequencyEndDetector::addSpectrum(ViRealSpectrum spectrum)
 
 void ViFrequencyEndDetector::initialize()
 {
+	mMutex.lock();
 	mTotalSamples = 0;
 	mRecordStartTotalValue = 0;
 	mRecordEndTotalValue = 0;
@@ -60,6 +61,7 @@ void ViFrequencyEndDetector::initialize()
 	mSongStartAverages.clear();
 	mSongEndAverages.clear();
 	mSpectrums.clear();
+	mMutex.unlock();
 }
 
 void ViFrequencyEndDetector::run()
@@ -114,7 +116,6 @@ void ViFrequencyEndDetector::run()
 				setSongEnd(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, mFormat));
 			}
 		}
-
 		mMutex.lock();
 		isEmpty = mSpectrums.isEmpty();
 		mMutex.unlock();

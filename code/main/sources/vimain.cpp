@@ -23,8 +23,6 @@ int main(int argc, char *argv[])
 	
 	application.exec();
 
-	delete window;
-
 	return 0;
 }
 

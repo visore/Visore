@@ -8,6 +8,13 @@ ViComplexNumber<T>::ViComplexNumber()
 }
 
 template <typename T>
+ViComplexNumber<T>::ViComplexNumber(const ViComplexNumber<T> &other)
+{
+	mReal = other.mReal;
+	mImaginary = other.mImaginary;
+}
+
+template <typename T>
 ViComplexNumber<T>::ViComplexNumber(T real, T imaginary)
 {
 	mReal = real;

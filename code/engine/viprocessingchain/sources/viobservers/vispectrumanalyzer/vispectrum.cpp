@@ -6,6 +6,24 @@ ViSpectrum<T>::ViSpectrum()
 }
 
 template <typename T>
+ViSpectrum<T>::ViSpectrum(const ViSpectrum<T> &other)
+{
+	for(int i = 0; i < other.mRawValues.size(); ++i)
+	{
+		mRawValues.push_back(ViSpectrumElement<T>(other.mRawValues[i]));
+	}
+	for(int i = 0; i < other.mValues.size(); ++i)
+	{
+		mValues.push_back(ViSpectrumElement<T>(other.mValues[i]));
+	}
+	mAdditionCounter = other.mAdditionCounter;
+	mPreviousAdditionCounter = other.mPreviousAdditionCounter;
+	mMaximum = ViSpectrumElement<T>(other.mMaximum);
+	mMinimum = ViSpectrumElement<T>(other.mMinimum);
+	mInterval = other.mInterval;
+}
+
+template <typename T>
 ViSpectrumElement<T> ViSpectrum<T>::at(const qint32 index)
 {
 	return mValues[index];

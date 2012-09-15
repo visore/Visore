@@ -13,6 +13,7 @@ class ViSpectrumElementForm
 	public:
 
 		ViSpectrumElementForm();
+		ViSpectrumElementForm(const ViSpectrumElementForm<T> &other);
 		ViSpectrumElementForm(ViComplexNumber<T> amplitude, ViComplexNumber<T> decibel);
 
 		void setAmplitude(ViComplexNumber<T> amplitude);
@@ -34,6 +35,7 @@ class ViSpectrumElement
 	public:
 
 		ViSpectrumElement();
+		ViSpectrumElement(const ViSpectrumElement<T> &other);
 		ViSpectrumElement(ViSpectrumElementForm<T> rectangular, ViSpectrumElementForm<T> polar);
 
 		void setFrequencyRange(T frequencyRange);

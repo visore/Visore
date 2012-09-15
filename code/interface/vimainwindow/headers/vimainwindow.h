@@ -12,11 +12,12 @@ namespace Ui
 
 class ViMainWindow : public QMainWindow
 {
+
 	Q_OBJECT
 
 	public:
 
-		~ViMainWindow();
+		virtual ~ViMainWindow();
 		static ViMainWindow* instance();
 		void show();
 
@@ -28,6 +29,7 @@ class ViMainWindow : public QMainWindow
 		void changeEvent(QEvent *event);
 
 	private:
+
 		void initialize();
 
 	private:
@@ -36,6 +38,7 @@ class ViMainWindow : public QMainWindow
 
 		Ui::ViMainWindow *mUi;
 		ViAudioEngine *mEngine;
+
 };
 
 #endif

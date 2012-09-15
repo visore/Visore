@@ -8,6 +8,7 @@ class ViComplexNumber
 	public:
 
 		ViComplexNumber();
+		ViComplexNumber(const ViComplexNumber<T> &other);
 		ViComplexNumber(T real, T imaginary);
 
 		void setReal(T real);

@@ -13,6 +13,7 @@ class ViSpectrum
 	public:
 	
 		ViSpectrum();
+		ViSpectrum(const ViSpectrum<T> &other);
 
 		ViSpectrumElement<T> at(const qint32 index);
 		ViSpectrumElement<T> operator[](const qint32 index) const;

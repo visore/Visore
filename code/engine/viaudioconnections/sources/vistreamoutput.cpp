@@ -35,7 +35,6 @@ void ViStreamOutput::setBuffer(ViAudioBuffer *buffer)
 	{
 		QObject::connect(buffer, SIGNAL(changed(int)), this, SLOT(checkLength()));
 	}
-
 }
 
 ViAudioFormat ViStreamOutput::format()
@@ -78,18 +77,24 @@ void ViStreamOutput::start()
 
 void ViStreamOutput::stop()
 {
-	LOG("Playback stopped.");
-	mBufferDevice.seek(0);
-	mAudioOutput->stop();
-	checkPosition();
-	setState(QAudio::StoppedState);
+	if(mState != QAudio::StoppedState)
+	{
+		LOG("Playback stopped.");
+		mBufferDevice.seek(0);
+		mAudioOutput->stop();
+		checkPosition();
+		setState(QAudio::StoppedState);
+	}
 }
 
 void ViStreamOutput::pause()
 {
-	LOG("Playback paused.");
-	mAudioOutput->suspend();
-	setState(QAudio::SuspendedState);
+	if(mState != QAudio::SuspendedState)
+	{
+		LOG("Playback paused.");
+		mAudioOutput->suspend();
+		setState(QAudio::SuspendedState);
+	}
 }
 
 bool ViStreamOutput::setPosition(ViAudioPosition position)
