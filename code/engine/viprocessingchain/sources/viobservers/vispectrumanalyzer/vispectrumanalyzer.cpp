@@ -1,5 +1,6 @@
 #include "vispectrumanalyzer.h"
 #include "viaudioposition.h"
+#include <string>
 
 ViSpectrumAnalyzer::ViSpectrumAnalyzer()
 	: ViObserver()
@@ -64,12 +65,18 @@ void ViSpectrumAnalyzer::run()
 	do
 	{
 		bufferSize = mWindowSize - mBufferSize;
-		if(bufferSize > 0)
+		if(bufferSize > 0 && size >= bufferSize)
 		{
 			memcpy(mBuffer, data, sizeof(qreal) * bufferSize);
-			data += bufferSize;
 			mBufferSize += bufferSize;
 			mSampleCounter += bufferSize;
+		}
+		else if(bufferSize > 0 && size < bufferSize)
+		{
+			memcpy(mBuffer, data, sizeof(qreal) * size);
+			mBufferSize += size;
+			mSampleCounter += size;
+			break; //Need more data to do a FFT
 		}
 		else
 		{

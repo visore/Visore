@@ -4,6 +4,8 @@
 #include "vihandler.h"
 #include "vienddetector.h"
 #include "vispectrumanalyzer.h"
+#include "viaudioobject.h"
+#include <QMutexLocker>
 
 class ViSectionHandler : public ViHandler
 {
@@ -17,7 +19,7 @@ class ViSectionHandler : public ViHandler
 		void startSong();
 		void endSong();
 
-		void startInput();
+		void startInput(bool isSong = false);
 		void endInput();
 		void finish();
 		void startOutput();
@@ -28,6 +30,8 @@ class ViSectionHandler : public ViHandler
 	public:
 
 		ViSectionHandler(ViProcessingChain *chain);
+		~ViSectionHandler();
+
 		bool isSongRunning();
 		bool wasSongRunning();
 
@@ -37,11 +41,12 @@ class ViSectionHandler : public ViHandler
 		ViAudioOutput* output();
 		ViExecutor* executor();
 
-		ViAudioBuffer* allocateBuffer(ViAudio::Mode mode);
+		ViAudioBuffer* allocateBuffer();
 		void deallocateBuffer(ViAudioBuffer *buffer);
-		ViAudioBuffer* nextBuffer(ViAudio::Mode mode);
 
 	private:
+
+		QMutex mMutex;
 
 		ViEndDetector *mEndDetector;
 		ViSpectrumAnalyzer *mSpectrumAnalyzer;
@@ -52,10 +57,7 @@ class ViSectionHandler : public ViHandler
 		bool mPlayAutomatically;
 		bool mIsPlaying;
 
-		QQueue<ViAudioBuffer*> mInputBuffers;
-		QQueue<ViAudioBuffer*> mOutputBuffers;
-		ViAudioBuffer *mInputBuffer;
-		ViAudioBuffer *mOutputBuffer;
+		QQueue<ViAudioObject*> mNoSongObjects;
 
 };
 

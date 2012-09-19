@@ -6,7 +6,7 @@
 class ViProjectHandler : public ViHandler
 {
 
-    Q_OBJECT
+   /* Q_OBJECT
 
 	private slots:
 
@@ -21,7 +21,7 @@ class ViProjectHandler : public ViHandler
 
 	private:
 
-		ViProject *mProject;
+		ViProject *mProject;*/
 
 };
 

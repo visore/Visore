@@ -62,7 +62,14 @@ fi
 
 if $gdb; then
 	cd $install_directory
-	gdb launcher
+	cp ./*/*.so .
+	cp ./*/*/*.so .
+	cp /home/visore/Project/External/Qt5/qt5/qtbase/lib/*.so* .
+	cp /home/visore/Project/External/Qt5/qt5/qtmultimedia/lib/*.so* .
+	cp /home/visore/Project/External/Qt5/qt5/qtsvg/lib/*.so* .
+	LD_LIBRARY_PATH=/home/visore/Project/Visore/GitHub/install/usr/local/visore
+	export LD_LIBRARY_PATH
+	gdb visore
 elif $run; then
 	cd $install_directory
 	./launcher

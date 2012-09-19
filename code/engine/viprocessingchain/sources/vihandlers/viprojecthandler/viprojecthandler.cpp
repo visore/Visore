@@ -2,7 +2,7 @@
 #include "viaudiocodec.h"
 
 #define MINIMUM_SONG_LENGTH 1500
-
+/*
 ViProjectHandler::ViProjectHandler(ViProcessingChain *chain)
 	: ViHandler(chain)
 {
@@ -22,7 +22,7 @@ void ViProjectHandler::finishOff()
 {
 	QObject::disconnect(mChain, SIGNAL(finishedProcessing()), this, SLOT(finishOff()));
 	qreal songLength = ViAudioPosition::convertPosition(mChain->mOutputBuffer->size(), ViAudioPosition::Samples, ViAudioPosition::Milliseconds, mChain->mOutputBuffer->format());
-	if(mChain->wasSongRunning() /*&& songLength > MINIMUM_SONG_LENGTH*/)
+	if(mChain->wasSongRunning()) //&& songLength > MINIMUM_SONG_LENGTH)
 	{
 		QObject::connect(mChain->mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
 		mChain->mFileOutput->setBuffer(mChain->mOutputBuffer);
@@ -39,11 +39,11 @@ void ViProjectHandler::finishWriting()
 	mProject->save();
 	QObject::disconnect(mChain->mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
 	mChain->nextBuffer(ViAudio::AudioOutput);
-	/*QObject::connect(mChain->mStreamOutput, SIGNAL(finished()), this, SLOT(finishPlaying()));
-	if(mChain->mStreamOutput->state() != QAudio::ActiveState)
-	{
-		finishPlaying();
-	}*/
+	//QObject::connect(mChain->mStreamOutput, SIGNAL(finished()), this, SLOT(finishPlaying()));
+	//if(mChain->mStreamOutput->state() != QAudio::ActiveState)
+	//{
+	//	finishPlaying();
+	//}
 }
 
 void ViProjectHandler::finishPlaying()
@@ -52,4 +52,4 @@ void ViProjectHandler::finishPlaying()
 	//mChain->endOutput();
 	//mChain->startOutput();
 	enableAll();
-}
+}*/

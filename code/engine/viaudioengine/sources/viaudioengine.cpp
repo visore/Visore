@@ -160,21 +160,21 @@ void ViAudioEngine::saveFile(QString filePath)
 
 void ViAudioEngine::calculateSpectrum(qint32 size, QString windowFunction)
 {
-	mExecutor.setWindowSize(size);
+	/*mExecutor.setWindowSize(size);
 	mSpectrumAnalyzer.setWindowFunction(windowFunction);
 	if(!mExecutor.execute(mProcessingChain.buffer(ViAudio::AudioInput), &mSpectrumAnalyzer))
 	{
 		emit spectrumFinished();
-	}
+	}*/
 }
 
 void ViAudioEngine::calculateCorrelation()
 {
-	mExecutor.setWindowSize(ViExecutor::defaultWindowSize());
+	/*mExecutor.setWindowSize(ViExecutor::defaultWindowSize());
 	if(!mExecutor.execute(mProcessingChain.buffer(ViAudio::AudioInput), mProcessingChain.buffer(ViAudio::AudioOutput), &mCorrelator))
 	{
 		emit correlationFinished();
-	}
+	}*/
 }
 
 void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, bool play)

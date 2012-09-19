@@ -7,12 +7,12 @@
 #include "viaudioconnection.h"
 #include "vimultiexecutor.h"
 #include "viprojectmanager.h"
+#include "viaudioobject.h"
 
 class ViHandler;
 class ViUnderrunHandler;
 class ViProjectHandler;
 class ViSectionHandler;
-class ViPlaybackHandler;
 
 class ViProcessingChain : public QObject
 {
@@ -22,7 +22,6 @@ class ViProcessingChain : public QObject
 	friend class ViUnderrunHandler;
 	friend class ViProjectHandler;
 	friend class ViSectionHandler;
-	friend class ViPlaybackHandler;
 
 	signals:
 
@@ -32,25 +31,12 @@ class ViProcessingChain : public QObject
 
 		void inputChanged();
 		void outputChanged();
-		void inputStarted();
-		void outputStarted();
-		void finishedProcessing();
-
 		void attached(ViProcessor *processor);
 
 		void songStarted();
 		void songEnded();
 		void recordStarted();
 		void recordEnded();
-
-	private slots:
-
-		void startInput();
-		void endInput();
-		void startOutput();
-		void endOutput();
-
-		void finishProcessing();
 
 	public:
 
@@ -62,14 +48,12 @@ class ViProcessingChain : public QObject
 		void setProject(ViProject *project, ViAudioFormat format);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
-		ViAudioBuffer* buffer(ViAudio::Mode mode);
+		
+		ViAudioObject* dequeueObject();
 
 	protected:
 
-		ViAudioBuffer* allocateBuffer(ViAudio::Mode mode);
-		void deallocateBuffer(ViAudio::Mode mode);
-		ViAudioBuffer* nextBuffer(ViAudio::Mode mode);
-
+		void enqueueObject(ViAudioObject *object);
 		bool isSongRunning();
 		bool wasSongRunning();
 
@@ -82,16 +66,12 @@ class ViProcessingChain : public QObject
 		ViStreamOutput *mStreamOutput;
 		ViFileOutput *mFileOutput;
 
-		QQueue<ViAudioBuffer*> mInputBuffers;
-		QQueue<ViAudioBuffer*> mOutputBuffers;
-		ViAudioBuffer *mInputBuffer;
-		ViAudioBuffer *mOutputBuffer;
-
 		QList<ViHandler*> mHandlers;
 		ViUnderrunHandler *mUnderrunHandler;
 		ViProjectHandler *mProjectHandler;
 		ViSectionHandler *mSectionHandler;
-		ViPlaybackHandler *mPlaybackHandler;
+
+		QQueue<ViAudioObject*> mAudioObjects;
 };
 
 #endif

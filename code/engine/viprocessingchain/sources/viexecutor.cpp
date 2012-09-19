@@ -81,8 +81,6 @@ void ViExecutor::setBuffer(ViAudio::Mode mode, ViAudioBuffer *buffer)
 			mInputSamples = new ViSampleChunk();
 		}
 		mReadStream = buffer->createReadStream();
-		QObject::disconnect(this, SLOT(execute()));
-		QObject::connect(buffer, SIGNAL(changed(int)), this, SLOT(execute()));
 	}
 	else if(mode == ViAudio::AudioOutput)
 	{
@@ -197,12 +195,19 @@ void ViExecutor::initialize()
 	mProcessingRate = 0;
 	mRateCounter = 0;
 	mTimer.start(1000);
+
+	QObject::connect(mReadStream->buffer(), SIGNAL(changed(int)), this, SLOT(execute()));
 }
 
 void ViExecutor::finalize()
 {
 	if(mWasInitialized)
 	{
+		while(isRunning()); // TODO: busy waiting here?
+		if(mReadStream != NULL && mReadStream->buffer() != NULL)
+		{
+			QObject::disconnect(mReadStream->buffer(), SIGNAL(changed(int)), this, SLOT(execute()));
+		}
 		QList<ViProcessor*> processors = mProcessors.processors();
 		for(int i = 0; i < processors.size(); ++i)
 		{

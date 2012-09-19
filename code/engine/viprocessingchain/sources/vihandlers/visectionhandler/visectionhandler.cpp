@@ -10,43 +10,49 @@ ViSectionHandler::ViSectionHandler(ViProcessingChain *chain)
 	mWasSongRunning = false;
 	QObject::connect(mChain, SIGNAL(attached(ViProcessor*)), this, SLOT(setDetector(ViProcessor*)));
 
-	mInputBuffer = NULL;
-	mOutputBuffer = NULL;
 	mAcceptFinish = false;
 	mPlayAutomatically = true;
 	mIsPlaying = false;
 	QObject::connect(mChain, SIGNAL(inputChanged()), this, SLOT(startInput()));
 }
 
+ViSectionHandler::~ViSectionHandler()
+{
+	qDeleteAll(mNoSongObjects);
+	mNoSongObjects.clear();
+}
+
 bool ViSectionHandler::isSongRunning()
 {
+	QMutexLocker locker(&mMutex);
 	return mIsSongRunning;
 }
 
 bool ViSectionHandler::wasSongRunning()
 {
+	QMutexLocker locker(&mMutex);
 	return mWasSongRunning;
 }
 
 void ViSectionHandler::startRecord()
 {
+	QMutexLocker locker(&mMutex);
 	//mChain->startInput();
 	emit mChain->recordStarted();
 }
 
 void ViSectionHandler::endRecord()
 {
+	QMutexLocker locker(&mMutex);
 	emit mChain->recordEnded();
 }
 
 void ViSectionHandler::startSong()
 {
+	QMutexLocker locker(&mMutex);
 	endInput();
-	startInput();
-	startOutput();
-
-
-
+	startInput(true);
+	//startOutput();
 
 	mIsSongRunning = true;
 	mWasSongRunning = false;
@@ -61,6 +67,7 @@ void ViSectionHandler::startSong()
 
 void ViSectionHandler::endSong()
 {
+	QMutexLocker locker(&mMutex);
 	endInput();
 	startInput();
 	mAcceptFinish = true;
@@ -78,34 +85,47 @@ void ViSectionHandler::endSong()
 	emit mChain->songEnded();
 }
 
-void ViSectionHandler::startInput()
+void ViSectionHandler::startInput(bool isSong)
 {
-	mInputBuffer = allocateBuffer(ViAudio::AudioInput);
-	mOutputBuffer = allocateBuffer(ViAudio::AudioOutput);
+	//QMutexLocker locker(&mMutex);
+	ViAudioBuffer *inputBuffer = allocateBuffer();
+	ViAudioBuffer *outputBuffer = allocateBuffer();
 
-	input()->setBuffer(mInputBuffer);
-	executor()->setBuffer(ViAudio::AudioInput, mInputBuffer);
-	executor()->setBuffer(ViAudio::AudioOutput, mOutputBuffer);
+	ViAudioObject *object = new ViAudioObject(inputBuffer, outputBuffer);
+	if(isSong)
+	{
+		mChain->enqueueObject(object);
+	}
+	else
+	{
+		mNoSongObjects.enqueue(object);
+	}
+
+	input()->setBuffer(inputBuffer);
+	executor()->setBuffer(ViAudio::AudioInput, inputBuffer);
+	executor()->setBuffer(ViAudio::AudioOutput, outputBuffer);
 	executor()->initialize();
-	mOutputBuffers.enqueue(mOutputBuffer);
 }
 
 void ViSectionHandler::endInput()
 {
+	
 	executor()->finalize();
-	if(mInputBuffer != NULL)
+	qDeleteAll(mNoSongObjects);
+	mNoSongObjects.clear();
+	/*if(mInputBuffer != NULL)
 	{
 		mInputBuffers.enqueue(mInputBuffer);
-	}
-	if((!mPlayAutomatically || (!mWasSongRunning && !mIsSongRunning)) && mOutputBuffers.size() >= 1)
+	}*/
+	/*if((!mPlayAutomatically || (!mWasSongRunning && !mIsSongRunning)) && mOutputBuffers.size() >= 1)
 	{
-			deallocateBuffer(mOutputBuffers.dequeue());
-	}
+		deallocateBuffer(mOutputBuffers.dequeue());
+	}*/
 }
 
 void ViSectionHandler::finish()
 {
-	if(mAcceptFinish)
+	/*if(mAcceptFinish)
 	{
 		deallocateBuffer(mInputBuffers.dequeue());
 		if(!mIsPlaying && mOutputBuffers.size() >= 1)
@@ -113,27 +133,27 @@ void ViSectionHandler::finish()
 			deallocateBuffer(mOutputBuffers.dequeue());
 		}
 		mAcceptFinish = false;
-	}
+	}*/
 }
 
 void ViSectionHandler::startOutput()
 {
-	if(!mIsPlaying && mPlayAutomatically && mOutputBuffers.size() >= 1)
+	/*if(!mIsPlaying && mPlayAutomatically && mOutputBuffers.size() >= 1)
 	{
 		QObject::connect(output(), SIGNAL(finished()), this, SLOT(endOutput()));
 		mIsPlaying = true;
 		output()->setBuffer(mOutputBuffers.first());
 		output()->start();
-	}
+	}*/
 }
 
 void ViSectionHandler::endOutput()
 {
-	QObject::disconnect(output(), SIGNAL(finished()), this, SLOT(endOutput()));
+	/*QObject::disconnect(output(), SIGNAL(finished()), this, SLOT(endOutput()));
 	mIsPlaying = false;
-	deallocateBuffer(mOutputBuffers.dequeue());
+	//deallocateBuffer(mOutputBuffers.dequeue());
 	output()->start();
-	startOutput();
+	startOutput();*/
 }
 
 void ViSectionHandler::setDetector(ViProcessor *processor)
@@ -177,52 +197,13 @@ ViExecutor* ViSectionHandler::executor()
 	return &mChain->mMultiExecutor;
 }
 
-ViAudioBuffer* ViSectionHandler::allocateBuffer(ViAudio::Mode mode)
+ViAudioBuffer* ViSectionHandler::allocateBuffer()
 {
-	ViAudioBuffer *buffer = new ViAudioBuffer();
-	if(mode == ViAudio::AudioInput)
-	{
-		//mInputBuffers.enqueue(buffer);
-	}
-	else if(mode == ViAudio::AudioOutput)
-	{
-		//mOutputBuffers.enqueue(buffer);
-	}
-	return buffer;
+	return new ViAudioBuffer();
 }
 
 void ViSectionHandler::deallocateBuffer(ViAudioBuffer *buffer)
 {
 	delete buffer;
 	buffer = NULL;
-}
-
-ViAudioBuffer* ViSectionHandler::nextBuffer(ViAudio::Mode mode)
-{
-	if(mode == ViAudio::AudioInput)
-	{
-		if(mInputBuffer != NULL)
-		{
-			delete mInputBuffer;
-		}
-		if(mInputBuffers.isEmpty())
-		{
-			allocateBuffer(ViAudio::AudioInput);
-		}
-		mInputBuffer = mInputBuffers.dequeue();
-		return mInputBuffer;
-	}
-	else if(mode == ViAudio::AudioOutput)
-	{
-		if(mOutputBuffer != NULL)
-		{
-			delete mOutputBuffer;
-		}
-		if(mOutputBuffers.isEmpty())
-		{
-			allocateBuffer(ViAudio::AudioOutput);
-		}
-		mOutputBuffer = mOutputBuffers.dequeue();
-		return mOutputBuffer;
-	}
 }

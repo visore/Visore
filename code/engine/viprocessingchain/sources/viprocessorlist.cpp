@@ -47,16 +47,26 @@ QList<ViProcessor*> ViProcessorList::processors(int type)
 
 void ViProcessorList::observeInput(const ViSampleChunk *data)
 {
-	for(int i = 0; i < mInputObservers.size(); ++i)
+	/*for(int i = 0; i < mInputObservers.size(); ++i)
 	{
 		mInputObservers[i]->setData(data);
 		mThreadPool.start(mInputObservers[i]);
 	}
-	mThreadPool.waitForDone();
+	mThreadPool.waitForDone();*/
+	for(int i = 0; i < mInputObservers.size(); ++i)
+	{
+		mInputObservers[i]->setData(data);
+		mInputObservers[i]->run();
+	}
 }
 
 void ViProcessorList::manipulateInput(ViSampleChunk *data)
 {
+	/*for(int i = 0; i < mInputModifiers.size(); ++i)
+	{
+		mInputModifiers[i]->setData(data);
+		mInputModifiers[i]->run();
+	}*/
 	for(int i = 0; i < mInputModifiers.size(); ++i)
 	{
 		mInputModifiers[i]->setData(data);
@@ -66,22 +76,32 @@ void ViProcessorList::manipulateInput(ViSampleChunk *data)
 
 void ViProcessorList::observeOutput(const ViSampleChunk *data)
 {
-	for(int i = 0; i < mOutputObservers.size(); ++i)
+	/*for(int i = 0; i < mOutputObservers.size(); ++i)
 	{
 		mOutputObservers[i]->setData(data);
 		mThreadPool.start(mOutputObservers[i]);
 	}
-	mThreadPool.waitForDone();
+	mThreadPool.waitForDone();*/
+	for(int i = 0; i < mOutputObservers.size(); ++i)
+	{
+		mOutputObservers[i]->setData(data);
+		mOutputObservers[i]->run();
+	}
 }
 
 void ViProcessorList::observeDual(const ViSampleChunk *data, const ViSampleChunk *data2)
 {
-	for(int i = 0; i < mDualObservers.size(); ++i)
+	/*for(int i = 0; i < mDualObservers.size(); ++i)
 	{
 		mDualObservers[i]->setData(data, data2);
 		mThreadPool.start(mDualObservers[i]);
 	}
-	mThreadPool.waitForDone();
+	mThreadPool.waitForDone();*/
+	for(int i = 0; i < mDualObservers.size(); ++i)
+	{
+		mDualObservers[i]->setData(data, data2);
+		mDualObservers[i]->run();
+	}
 }
 
 bool ViProcessorList::add(ViAudio::Mode mode, ViProcessor *processor)

@@ -27,6 +27,7 @@ class ViChunk
 		static void copy(const ViChunk<T> *source, ViChunk<T> *destination);
 
 	private:
+
 		T *mData;
 		int mSize;
 
