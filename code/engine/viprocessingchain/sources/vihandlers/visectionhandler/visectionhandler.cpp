@@ -94,7 +94,7 @@ void ViSectionHandler::startInput(bool isSong)
 	ViAudioObject *object = new ViAudioObject(inputBuffer, outputBuffer);
 	if(isSong)
 	{
-		mChain->enqueueObject(object);
+		mChain->mAudioObjects.enqueue(object);
 	}
 	else
 	{
@@ -109,8 +109,14 @@ void ViSectionHandler::startInput(bool isSong)
 
 void ViSectionHandler::endInput()
 {
-	
 	executor()->finalize();
+
+	ViAudioObject *object = mChain->mAudioObjects.current();
+	if(object != NULL)
+	{
+		object->setFinished();
+	}
+
 	qDeleteAll(mNoSongObjects);
 	mNoSongObjects.clear();
 	/*if(mInputBuffer != NULL)
@@ -173,7 +179,6 @@ void ViSectionHandler::setDetector(ViProcessor *processor)
 			QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SLOT(endSong()));
 			QObject::connect(mEndDetector, SIGNAL(recordStarted(ViAudioPosition)), this, SLOT(startRecord()));
 			QObject::connect(mEndDetector, SIGNAL(recordEnded(ViAudioPosition)), this, SLOT(endRecord()));
-			//checkInput();
 		}
 	}
 	if(mSpectrumAnalyzer != NULL && mEndDetector != NULL)

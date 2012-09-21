@@ -8,6 +8,9 @@ class ViAudioObject : public QObject
 
     Q_OBJECT
 
+	signals:
+
+		void finished(); // emitted when all writing to buffers has finished
 
 	public:
 
@@ -19,10 +22,18 @@ class ViAudioObject : public QObject
 		void setOriginalBuffer(ViAudioBuffer *buffer);
 		void setCorrectedBuffer(ViAudioBuffer *buffer);
 		void clearBuffers();
+		void clearOriginalBuffer();
+		void clearCorrectedBuffer();
+		ViAudioBuffer* originalBuffer();
+		ViAudioBuffer* correctedBuffer();
+
+		void setFinished(bool isFinished = true);
+		bool isFinished();
 
 	private:
 
 		bool mAutoDestruct;
+		bool mIsFinished;
 		ViAudioBuffer *mOriginalBuffer;
 		ViAudioBuffer *mCorrectedBuffer;
 };

@@ -2,15 +2,16 @@
 #define VIPROJECTHANDLER_H
 
 #include "vihandler.h"
+#include "viaudioobject.h"
 
 class ViProjectHandler : public ViHandler
 {
 
-   /* Q_OBJECT
+    Q_OBJECT
 
 	private slots:
 
-		void finishOff();
+		void addAudioObject(ViAudioObject *object);
 		void finishWriting();
 		void finishPlaying();
 
@@ -21,7 +22,7 @@ class ViProjectHandler : public ViHandler
 
 	private:
 
-		ViProject *mProject;*/
+		ViProject *mProject;
 
 };
 

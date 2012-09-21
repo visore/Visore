@@ -4,6 +4,7 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	: QObject()
 {
 	mAutoDestruct = autoDestruct;
+	mIsFinished = false;
 	mOriginalBuffer = NULL;
 	mCorrectedBuffer = NULL;
 }
@@ -41,14 +42,48 @@ void ViAudioObject::setCorrectedBuffer(ViAudioBuffer *buffer)
 
 void ViAudioObject::clearBuffers()
 {
+	clearOriginalBuffer();
+	clearCorrectedBuffer();
+}
+
+void ViAudioObject::clearOriginalBuffer()
+{
 	if(mOriginalBuffer != NULL)
 	{
 		delete mOriginalBuffer;
 		mOriginalBuffer = NULL;
 	}
+}
+
+void ViAudioObject::clearCorrectedBuffer()
+{
 	if(mCorrectedBuffer != NULL)
 	{
 		delete mCorrectedBuffer;
 		mCorrectedBuffer = NULL;
 	}
+}
+
+ViAudioBuffer* ViAudioObject::originalBuffer()
+{
+	return mOriginalBuffer;
+}
+
+ViAudioBuffer* ViAudioObject::correctedBuffer()
+{
+	return mCorrectedBuffer;
+}
+
+void ViAudioObject::setFinished(bool isFinished)
+{
+	mIsFinished = isFinished;
+	if(mIsFinished)
+	{
+		emit finished();
+	}
+}
+
+bool ViAudioObject::isFinished()
+{
+	return mIsFinished;
 }

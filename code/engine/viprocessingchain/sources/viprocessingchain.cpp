@@ -82,13 +82,3 @@ bool ViProcessingChain::wasSongRunning()
 {
 	return mSectionHandler->wasSongRunning();
 }
-
-ViAudioObject* ViProcessingChain::dequeueObject()
-{
-	return mAudioObjects.dequeue();
-}
-
-void ViProcessingChain::enqueueObject(ViAudioObject *object)
-{
-	mAudioObjects.enqueue(object);
-}

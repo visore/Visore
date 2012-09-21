@@ -69,7 +69,9 @@ if $gdb; then
 	cp /home/visore/Project/External/Qt5/qt5/qtsvg/lib/*.so* .
 	LD_LIBRARY_PATH=/home/visore/Project/Visore/GitHub/install/usr/local/visore
 	export LD_LIBRARY_PATH
-	gdb visore
+	ulimit -c unlimited
+	./visore
+	gdb visore core
 elif $run; then
 	cd $install_directory
 	./launcher

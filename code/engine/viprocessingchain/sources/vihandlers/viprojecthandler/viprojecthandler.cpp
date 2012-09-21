@@ -2,11 +2,12 @@
 #include "viaudiocodec.h"
 
 #define MINIMUM_SONG_LENGTH 1500
-/*
+
 ViProjectHandler::ViProjectHandler(ViProcessingChain *chain)
 	: ViHandler(chain)
 {
 	mProject = NULL;
+	QObject::connect(&mChain->mAudioObjects, SIGNAL(finished(ViAudioObject*)), this, SLOT(addAudioObject(ViAudioObject*)));
 }
 
 void ViProjectHandler::create(ViProject *project, ViAudioFormat format)
@@ -15,17 +16,16 @@ void ViProjectHandler::create(ViProject *project, ViAudioFormat format)
 	mChain->mFileOutput->setFormat(format);
 	mProject = project;
 	mProject->save();
-	QObject::connect(mChain, SIGNAL(finishedProcessing()), this, SLOT(finishOff()));
 }
 
-void ViProjectHandler::finishOff()
+void ViProjectHandler::addAudioObject(ViAudioObject *object)
 {
-	QObject::disconnect(mChain, SIGNAL(finishedProcessing()), this, SLOT(finishOff()));
-	qreal songLength = ViAudioPosition::convertPosition(mChain->mOutputBuffer->size(), ViAudioPosition::Samples, ViAudioPosition::Milliseconds, mChain->mOutputBuffer->format());
+	ViAudioBuffer *buffer = object->correctedBuffer();
+	qreal songLength = ViAudioPosition::convertPosition(buffer->size(), ViAudioPosition::Samples, ViAudioPosition::Milliseconds, buffer->format());
 	if(mChain->wasSongRunning()) //&& songLength > MINIMUM_SONG_LENGTH)
 	{
 		QObject::connect(mChain->mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
-		mChain->mFileOutput->setBuffer(mChain->mOutputBuffer);
+		mChain->mFileOutput->setBuffer(buffer);
 		mChain->mFileOutput->setFile(mProject->originalPath(), mProject->nextOriginalSongNumber(), mChain->mFileOutput->format().codec()->extensions()[0]);
 		mChain->mFileOutput->start();
 	}
@@ -38,7 +38,6 @@ void ViProjectHandler::finishWriting()
 	mProject->addSong(info);
 	mProject->save();
 	QObject::disconnect(mChain->mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
-	mChain->nextBuffer(ViAudio::AudioOutput);
 	//QObject::connect(mChain->mStreamOutput, SIGNAL(finished()), this, SLOT(finishPlaying()));
 	//if(mChain->mStreamOutput->state() != QAudio::ActiveState)
 	//{
@@ -52,4 +51,4 @@ void ViProjectHandler::finishPlaying()
 	//mChain->endOutput();
 	//mChain->startOutput();
 	enableAll();
-}*/
+}

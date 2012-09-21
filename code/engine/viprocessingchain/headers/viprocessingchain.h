@@ -7,7 +7,7 @@
 #include "viaudioconnection.h"
 #include "vimultiexecutor.h"
 #include "viprojectmanager.h"
-#include "viaudioobject.h"
+#include "viaudioobjectqueue.h"
 
 class ViHandler;
 class ViUnderrunHandler;
@@ -48,12 +48,9 @@ class ViProcessingChain : public QObject
 		void setProject(ViProject *project, ViAudioFormat format);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
-		
-		ViAudioObject* dequeueObject();
 
 	protected:
 
-		void enqueueObject(ViAudioObject *object);
 		bool isSongRunning();
 		bool wasSongRunning();
 
@@ -71,7 +68,7 @@ class ViProcessingChain : public QObject
 		ViProjectHandler *mProjectHandler;
 		ViSectionHandler *mSectionHandler;
 
-		QQueue<ViAudioObject*> mAudioObjects;
+		ViAudioObjectQueue mAudioObjects;
 };
 
 #endif
