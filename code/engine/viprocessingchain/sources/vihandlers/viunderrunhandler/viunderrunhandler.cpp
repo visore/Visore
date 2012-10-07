@@ -8,28 +8,39 @@ ViUnderrunHandler::ViUnderrunHandler(ViProcessingChain *chain)
 {
 	mTimer.setInterval(1000);
 	QObject::connect(&mTimer, SIGNAL(timeout()), this, SLOT(update()));
-	QObject::connect(chain, SIGNAL(outputChanged()), this, SLOT(changeOutput()));
+	QObject::connect(chain, SIGNAL(streamOutputChanged(ViStreamOutput*)), this, SLOT(changeOutput(ViStreamOutput*)));
 }
 
-void ViUnderrunHandler::changeOutput()
+void ViUnderrunHandler::changeOutput(ViStreamOutput *output)
 {
 	QObject::disconnect(this, SLOT(handleUnderrun()));
-	if(mChain->mStreamOutput != NULL)
-	{
-		QObject::connect(mChain->mStreamOutput, SIGNAL(underrun()), this, SLOT(handleUnderrun()));
-	}
+	QObject::connect(output, SIGNAL(underrun()), this, SLOT(handleUnderrun()));
 }
 
 void ViUnderrunHandler::handleUnderrun()
 {
-	if(!mBufferingStarted)
+	LOG("***1");
+	ViAudioObject *object = mChain->playingObject();
+	if(object != NULL)
 	{
-		mSecondsPassed = 0;
-		mSecondsNeeded = 0;
-		mBufferingStarted = false;
-		QObject::connect(&mChain->mMultiExecutor, SIGNAL(processingRateChanged(qreal)), this, SLOT(calculate(qreal)));
-		calculate(mChain->mMultiExecutor.processingRate());
+		LOG("***2");
+		if(object->isFinished())
+		{
+			LOG("***3");
+			mChain->mStreamOutput->stop();
+		}
+		else if(!mBufferingStarted)
+		{
+			LOG("***4");
+			mSecondsPassed = 0;
+			mSecondsNeeded = 0;
+			mBufferingStarted = false;
+			QObject::connect(&mChain->mMultiExecutor, SIGNAL(processingRateChanged(qreal)), this, SLOT(calculate(qreal)));
+			calculate(mChain->mMultiExecutor.processingRate());
+		}
+		LOG("***5");
 	}
+	LOG("***6");
 }
 
 void ViUnderrunHandler::calculate(qreal processingRate)

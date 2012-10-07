@@ -184,7 +184,7 @@ void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat f
 	mProjectManager.setSideCount(recordSides);
 	mProjectManager.setPlayback(play);
 	changeInput(ViAudio::Line);
-	mProcessingChain.setProject(mProjectManager.project(), format);
+	mProcessingChain.setProject(mProjectManager.project(), format, play);
 	mProjectManager.start();
 	startRecording();
 }

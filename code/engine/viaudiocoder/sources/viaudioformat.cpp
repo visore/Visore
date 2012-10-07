@@ -161,6 +161,36 @@ ViAudioFormat::ViAudioFormat(const QAudioFormat &other)
 	mCodec = NULL;
 }
 
+bool ViAudioFormat::isValid()
+{
+	ViFormatMap sizes = supportedSampleSizes();
+	if(!sizes.contains(mSampleSize))
+	{
+		return false;
+	}
+	ViFormatMap rates = supportedSampleRates();
+	if(!rates.contains(mSampleRate))
+	{
+		return false;
+	}
+	ViFormatMap types = supportedSampleTypes();
+	if(!types.contains(mSampleType))
+	{
+		return false;
+	}
+	ViFormatMap endianness = supportedEndianness();
+	if(!endianness.contains(mByteOrder))
+	{
+		return false;
+	}
+	ViFormatMap channels = supportedChannels();
+	if(!channels.contains(mChannelCount))
+	{
+		return false;
+	}
+	return true;
+}
+
 ViAudioFormat::SampleType ViAudioFormat::sampleType() const
 {
 	return mSampleType;
@@ -374,7 +404,7 @@ ViAudioFormat ViAudioFormat::defaultFormat()
 	ViAudioFormat format;
 	format.setSampleSize(supportedSampleSizes().defaultValue());
 	format.setSampleRate(supportedSampleRates().defaultValue());
-	format.setSampleType(ViAudioFormat::SampleType(supportedSampleType().defaultValue()));
+	format.setSampleType(ViAudioFormat::SampleType(supportedSampleTypes().defaultValue()));
 	format.setChannelCount(supportedChannels().defaultValue());
 	format.setBitrate(ViAudioBitrate(ViAudioBitrate::Mode(supportedBitrateModes().defaultValue()), supportedBitrates().defaultValue()));
 	format.setByteOrder(ViAudioFormat::Endian(supportedEndianness().defaultValue()));
@@ -419,7 +449,7 @@ ViFormatMap ViAudioFormat::supportedSampleRates()
 	return map;
 }
 
-ViFormatMap ViAudioFormat::supportedSampleType()
+ViFormatMap ViAudioFormat::supportedSampleTypes()
 {
 	static ViFormatMap map;
 	if(map.isEmpty())

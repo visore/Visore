@@ -17,6 +17,7 @@ class ViHandler : public QObject
 	public:
 
 		ViHandler(ViProcessingChain *chain);
+		virtual ~ViHandler(){}
 		ViProcessingChain* chain();
 
 		virtual void enable(bool enable = true);

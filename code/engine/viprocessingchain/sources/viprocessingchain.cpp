@@ -3,6 +3,7 @@
 #include "viunderrunhandler.h"
 #include "viprojecthandler.h"
 #include "visectionhandler.h"
+#include "viplaybackhandler.h"
 
 ViProcessingChain::ViProcessingChain()
 	: QObject()
@@ -16,9 +17,11 @@ ViProcessingChain::ViProcessingChain()
 	mUnderrunHandler = new ViUnderrunHandler(this);
 	mProjectHandler = new ViProjectHandler(this);
 	mSectionHandler = new ViSectionHandler(this);
+	mPlaybackHandler = new ViPlaybackHandler(this);
 	mHandlers.append(mUnderrunHandler);
 	mHandlers.append(mProjectHandler);
 	mHandlers.append(mSectionHandler);
+	mHandlers.append(mPlaybackHandler);
 }
 
 ViProcessingChain::~ViProcessingChain()
@@ -48,18 +51,26 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 	else if((streamOutput = dynamic_cast<ViStreamOutput*>(transmission)) != NULL)
 	{
 		mStreamOutput = streamOutput;
-		emit outputChanged();
+		emit streamOutputChanged(mStreamOutput);
 	}
 	else if((fileOutput = dynamic_cast<ViFileOutput*>(transmission)) != NULL)
 	{
 		mFileOutput = fileOutput;
-		emit outputChanged();
+		emit fileOutputChanged(mFileOutput);
 	}
 }
 
-void ViProcessingChain::setProject(ViProject *project, ViAudioFormat format)
+void ViProcessingChain::setProject(ViProject *project, ViAudioFormat format, bool play)
 {
 	mProjectHandler->create(project, format);
+	if(play)
+	{
+		mPlaybackHandler->enable();
+	}
+	else
+	{
+		mPlaybackHandler->disable();
+	}
 }
 
 bool ViProcessingChain::attach(ViAudio::Mode mode, ViProcessor *processor)
@@ -71,6 +82,16 @@ bool ViProcessingChain::attach(ViAudio::Mode mode, ViProcessor *processor)
 bool ViProcessingChain::detach(ViProcessor *processor)
 {
 	mMultiExecutor.detach(processor);
+}
+
+ViAudioObject* ViProcessingChain::recordingObject()
+{
+	return mSectionHandler->currentObject();
+}
+
+ViAudioObject* ViProcessingChain::playingObject()
+{
+	return mPlaybackHandler->currentObject();
 }
 
 bool ViProcessingChain::isSongRunning()

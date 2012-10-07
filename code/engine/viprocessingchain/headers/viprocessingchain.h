@@ -13,6 +13,7 @@ class ViHandler;
 class ViUnderrunHandler;
 class ViProjectHandler;
 class ViSectionHandler;
+class ViPlaybackHandler;
 
 class ViProcessingChain : public QObject
 {
@@ -22,6 +23,7 @@ class ViProcessingChain : public QObject
 	friend class ViUnderrunHandler;
 	friend class ViProjectHandler;
 	friend class ViSectionHandler;
+	friend class ViPlaybackHandler;
 
 	signals:
 
@@ -30,7 +32,8 @@ class ViProcessingChain : public QObject
 		void statusChanged(QString status);
 
 		void inputChanged();
-		void outputChanged();
+		void streamOutputChanged(ViStreamOutput *output);
+		void fileOutputChanged(ViFileOutput *output);
 		void attached(ViProcessor *processor);
 
 		void songStarted();
@@ -45,9 +48,12 @@ class ViProcessingChain : public QObject
 
 		void setWindowSize(int windowSize);
 		void setTransmission(ViAudioTransmission *transmission);
-		void setProject(ViProject *project, ViAudioFormat format);
+		void setProject(ViProject *project, ViAudioFormat format, bool play);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
+
+		ViAudioObject* recordingObject();
+		ViAudioObject* playingObject();
 
 	protected:
 
@@ -67,6 +73,7 @@ class ViProcessingChain : public QObject
 		ViUnderrunHandler *mUnderrunHandler;
 		ViProjectHandler *mProjectHandler;
 		ViSectionHandler *mSectionHandler;
+		ViPlaybackHandler *mPlaybackHandler;
 
 		ViAudioObjectQueue mAudioObjects;
 };

@@ -215,3 +215,8 @@ void ViSectionHandler::deallocateBuffer(ViAudioBuffer *buffer)
 	delete buffer;
 	buffer = NULL;
 }
+
+ViAudioObject* ViSectionHandler::currentObject()
+{
+	return mCurrentSongObject;
+}

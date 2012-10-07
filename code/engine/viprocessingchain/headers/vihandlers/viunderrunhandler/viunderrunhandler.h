@@ -12,7 +12,7 @@ class ViUnderrunHandler : public ViHandler
 
 	private slots:
 
-		void changeOutput();
+		void changeOutput(ViStreamOutput *output);
 		void handleUnderrun();
 		void calculate(qreal processingRate);
 		void update();

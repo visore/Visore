@@ -32,6 +32,7 @@ class ViSectionHandler : public ViHandler
 		ViSectionHandler(ViProcessingChain *chain);
 		~ViSectionHandler();
 
+		ViAudioObject* currentObject();
 		bool isSongRunning();
 		bool wasSongRunning();
 

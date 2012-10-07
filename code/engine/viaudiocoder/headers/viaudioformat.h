@@ -114,6 +114,8 @@ class ViAudioFormat
 		ViAudioFormat(const ViAudioFormat &other);
 		ViAudioFormat(const QAudioFormat &other);
 
+		bool isValid();
+
 		ViAudioFormat::SampleType sampleType() const;
 		ViAudioFormat::Endian byteOrder() const;
 		ViAudioFormat::Quality quality() const;
@@ -146,7 +148,7 @@ class ViAudioFormat
 
 		static ViFormatMap supportedSampleSizes();
 		static ViFormatMap supportedSampleRates();
-		static ViFormatMap supportedSampleType();
+		static ViFormatMap supportedSampleTypes();
 		static ViFormatMap supportedEndianness();
 		static ViFormatMap supportedBitrates();
 		static ViFormatMap supportedBitrateModes();

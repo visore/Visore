@@ -3,6 +3,8 @@
 
 #include "vifilebrowser.h"
 
+#include "viinfowidget.h"
+
 ViMainWindow* ViMainWindow::mWindow = NULL;
 
 ViMainWindow::ViMainWindow()
@@ -73,4 +75,10 @@ void ViMainWindow::initialize()
 	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile.png", ViThemeImage::Normal, ViThemeManager::Background).path() + ") repeat-x;}");
 
 	//ViLoadingWidget::stop();
+
+	ViInfoWidget *w = new ViInfoWidget();
+	w->addEntry("asrthvcbmldsgnlkmdngcfm,nsd");
+	w->addEntry("asrt", "sdfsdfdsfsdfdsf***************");
+	w->addEntry("asrt999999999999", "sdfsdfdsfsdfdsf");
+	w->show();
 }
