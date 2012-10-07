@@ -14,10 +14,10 @@ ViProcessingChain::ViProcessingChain()
 	QObject::connect(&mMultiExecutor, SIGNAL(progressed(short)), this, SIGNAL(changed()));
 
 	mUnderrunHandler = new ViUnderrunHandler(this);
-	//mProjectHandler = new ViProjectHandler(this);
+	mProjectHandler = new ViProjectHandler(this);
 	mSectionHandler = new ViSectionHandler(this);
 	mHandlers.append(mUnderrunHandler);
-	//mHandlers.append(mProjectHandler);
+	mHandlers.append(mProjectHandler);
 	mHandlers.append(mSectionHandler);
 }
 
@@ -59,7 +59,7 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 
 void ViProcessingChain::setProject(ViProject *project, ViAudioFormat format)
 {
-	//mProjectHandler->create(project, format);
+	mProjectHandler->create(project, format);
 }
 
 bool ViProcessingChain::attach(ViAudio::Mode mode, ViProcessor *processor)

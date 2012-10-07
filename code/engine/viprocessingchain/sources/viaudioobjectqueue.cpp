@@ -32,5 +32,5 @@ ViAudioObject* ViAudioObjectQueue::current()
 
 void ViAudioObjectQueue::finish()
 {
-	//emit finished(sender());
+	emit finished((ViAudioObject*) sender());
 }

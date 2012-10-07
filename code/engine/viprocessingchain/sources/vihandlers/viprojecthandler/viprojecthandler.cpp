@@ -7,24 +7,28 @@ ViProjectHandler::ViProjectHandler(ViProcessingChain *chain)
 	: ViHandler(chain)
 {
 	mProject = NULL;
-	QObject::connect(&mChain->mAudioObjects, SIGNAL(finished(ViAudioObject*)), this, SLOT(addAudioObject(ViAudioObject*)));
 }
 
 void ViProjectHandler::create(ViProject *project, ViAudioFormat format)
 {
-	disableAll();
-	mChain->mFileOutput->setFormat(format);
+	//disableAll();
+	if(mProject != NULL)
+	{
+		QObject::disconnect(&mChain->mAudioObjects, SIGNAL(finished(ViAudioObject*)), this, SLOT(addAudioObject(ViAudioObject*)));
+	}
 	mProject = project;
 	mProject->save();
+	QObject::connect(&mChain->mAudioObjects, SIGNAL(finished(ViAudioObject*)), this, SLOT(addAudioObject(ViAudioObject*)));
 }
 
 void ViProjectHandler::addAudioObject(ViAudioObject *object)
 {
 	ViAudioBuffer *buffer = object->correctedBuffer();
 	qreal songLength = ViAudioPosition::convertPosition(buffer->size(), ViAudioPosition::Samples, ViAudioPosition::Milliseconds, buffer->format());
-	if(mChain->wasSongRunning()) //&& songLength > MINIMUM_SONG_LENGTH)
+	if(songLength > MINIMUM_SONG_LENGTH)
 	{
 		QObject::connect(mChain->mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
+		mChain->mFileOutput->setFormat(buffer->format());
 		mChain->mFileOutput->setBuffer(buffer);
 		mChain->mFileOutput->setFile(mProject->originalPath(), mProject->nextOriginalSongNumber(), mChain->mFileOutput->format().codec()->extensions()[0]);
 		mChain->mFileOutput->start();
@@ -50,5 +54,5 @@ void ViProjectHandler::finishPlaying()
 	QObject::disconnect(mChain->mStreamOutput, SIGNAL(finished()), this, SLOT(finishPlaying()));
 	//mChain->endOutput();
 	//mChain->startOutput();
-	enableAll();
+//	enableAll();
 }

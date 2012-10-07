@@ -1,5 +1,5 @@
 #include "viaudiobuffer.h"
-
+#include "vilogger.h"
 ViAudioBuffer::ViAudioBuffer(QObject *parent, int bufferHeadStart)
 	: QObject(parent), ViId()
 {

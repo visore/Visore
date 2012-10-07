@@ -29,6 +29,7 @@ class ViAudioCoder : public QObject
 		QString errorString();
 		bool isRunning();
 		bool isFinished();
+		void stop();
 
 		void addSearchPath(QString path);
 		void addFileName(QString coder, QString name);

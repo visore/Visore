@@ -285,7 +285,7 @@ void ViCodingChain::run()
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
 	qreal progressedData = 0;
-	qint64 totalSize = mInput->size(); 
+	qint64 totalSize = mInput->size();
 	static qint32 chunkSize = mInput->chunkSize();
 	qreal progress = 0;
 

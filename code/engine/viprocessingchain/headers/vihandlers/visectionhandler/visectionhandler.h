@@ -57,6 +57,7 @@ class ViSectionHandler : public ViHandler
 		bool mPlayAutomatically;
 		bool mIsPlaying;
 
+		ViAudioObject *mCurrentSongObject;
 		QQueue<ViAudioObject*> mNoSongObjects;
 
 };

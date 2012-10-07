@@ -47,6 +47,11 @@ bool ViAudioCoder::isFinished()
 	return mChain->isFinished();
 }
 
+void ViAudioCoder::stop()
+{
+	mChain->quit();
+}
+
 void ViAudioCoder::convert(QString inputFilePath, QString outputFilePath, ViAudioFormat outputFormat)
 {
 	mChain->setMode(ViCodingChain::ConvertFileToFile);

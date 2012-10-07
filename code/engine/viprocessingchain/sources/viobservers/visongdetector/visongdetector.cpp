@@ -82,6 +82,11 @@ void ViSongDetector::initialize()
 	mResponse.reset();
 }
 
+void ViSongDetector::finalize()
+{
+	mCoder.stop();
+}
+
 void ViSongDetector::run()
 {
 	mIsEnabledMutex.lock();
