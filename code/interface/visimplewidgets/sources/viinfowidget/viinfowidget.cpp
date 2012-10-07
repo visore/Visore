@@ -34,17 +34,18 @@ void ViInfoWidget::update()
 	}
 }
 
-void ViInfoWidget::addEntry(QString description, QString text)
+ViInfoLabel* ViInfoWidget::addEntry(QString description, QString text)
 {
 	ViInfoLabel *label = new ViInfoLabel(this, description, text);
 	mItems.append(label);
 	mLayout->addWidget(label);
 	update();
+	return label;
 }
 
-void ViInfoWidget::addEntry(QString text)
+ViInfoLabel* ViInfoWidget::addEntry(QString text)
 {
-	addEntry("", text);
+	return addEntry("", text);
 }
 
 void ViInfoWidget::updateEntry(int index, QString description, QString text)

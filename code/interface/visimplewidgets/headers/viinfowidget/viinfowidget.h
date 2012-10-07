@@ -12,8 +12,8 @@ class ViInfoWidget : public ViWidget
 
 	public slots:
 
-		void addEntry(QString description, QString text);
-		void addEntry(QString text);
+		ViInfoLabel* addEntry(QString description, QString text);
+		ViInfoLabel* addEntry(QString text);
 
 		void updateEntry(int index, QString description, QString text);
 		void updateEntry(int index, QString text);
