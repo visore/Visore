@@ -195,11 +195,7 @@ ViCodingChainBufferInput::ViCodingChainBufferInput()
 
 ViCodingChainBufferInput::~ViCodingChainBufferInput()
 {
-	if(mStream != NULL)
-	{
-		mBuffer->deleteStream(mStream);
-		mStream = NULL;
-	}
+	mStream = NULL;
 	mBuffer= NULL;
 }
 
@@ -215,15 +211,11 @@ bool ViCodingChainBufferInput::hasData()
 
 int ViCodingChainBufferInput::size()
 {
-	return mBuffer->size();
+	return mStream->size();
 }
 
 void ViCodingChainBufferInput::initialize()
 {
-	if(mStream != NULL)
-	{
-		mBuffer->deleteStream(mStream);
-	}
 	mStream = mBuffer->createReadStream();
 }
 
@@ -236,11 +228,7 @@ void ViCodingChainBufferInput::execute()
 
 void ViCodingChainBufferInput::finalize()
 {
-	if(mStream != NULL)
-	{
-		mBuffer->deleteStream(mStream);
-		mStream = NULL;
-	}
+	mStream = NULL;
 	mBuffer= NULL;
 }
 
@@ -508,11 +496,7 @@ ViCodingChainBufferOutput::ViCodingChainBufferOutput()
 
 ViCodingChainBufferOutput::~ViCodingChainBufferOutput()
 {
-	if(mStream != NULL)
-	{
-		mBuffer->deleteStream(mStream);
-		mStream = NULL;
-	}
+	mStream = NULL;
 	mBuffer = NULL;
 }
 
@@ -523,10 +507,6 @@ void ViCodingChainBufferOutput::setBuffer(ViAudioBuffer *buffer)
 
 void ViCodingChainBufferOutput::initialize()
 {
-	if(mStream != NULL)
-	{
-		mBuffer->deleteStream(mStream);
-	}
 	mStream = mBuffer->createWriteStream();
 }
 
@@ -534,11 +514,7 @@ void ViCodingChainBufferOutput::finalize()
 {
 	mStream->insert(0, mHeader.data(), mHeader.size());
 	mHeader.clear();
-	if(mStream != NULL)
-	{
-		mBuffer->deleteStream(mStream);
-		mStream = NULL;
-	}
+	mStream = NULL;
 	mBuffer = NULL;
 }
 

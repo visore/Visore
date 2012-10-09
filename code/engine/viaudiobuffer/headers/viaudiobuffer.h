@@ -5,54 +5,84 @@
 #include "viaudioformat.h"
 #include "vichunk.h"
 #include "viid.h"
+#include <QMutex>
 
 typedef ViChunk<char> ViAudioBufferChunk;
 
-class ViAudioBufferStream;
-
 class ViAudioBuffer : public QObject, public ViId
 {
+
     Q_OBJECT
 
+	friend class ViAudioBufferStream;
+
 	signals:
-		//startIndex = index of the first new byte added (chunk start index), size = chunk size added to buffer
-		void changed(int size);
+
+		void changed();
 		void formatChanged(ViAudioFormat format);
 
 	public slots:
+
 		void setFormat(ViAudioFormat format);
 
 	public:
-		enum ViAudioBufferType
-		{
-			Original = 0,
-			Corrected= 1
-		};
-		ViAudioBuffer(QObject *parent = 0, int bufferHeadStart = 100000);
+
+
+		ViAudioBuffer();
 		~ViAudioBuffer();
+
 		QByteArray* data();
 		void setData(QByteArray *data);
-		
-		int write(ViAudioBufferStream *stream, ViAudioBufferChunk *chunk, int length);
-		int read(ViAudioBufferStream *stream, ViAudioBufferChunk *chunk, int length);
 
-		ViAudioBufferStream* createWriteStream();
 		ViAudioBufferStream* createReadStream();
-		void deleteStream(ViAudioBufferStream* stream);
+		ViAudioBufferStream* createWriteStream();
+		ViAudioBufferStream* createStream(QIODevice::OpenMode mode);
 		
 		int size();
-		void clear(); //Clears all data from the stream
-		void change(int startIndex);
+		void clear();
 
 		ViAudioFormat format();
 		ViAudioFormat& formatReference();
 
+		int retrieve(int start, char *data, int length);
+		int retrieve(int start, QByteArray &data);
+		int retrieve(int start, QByteArray &data, int length);
+		int retrieve(int start, ViAudioBufferChunk &data);
+		int retrieve(int start, ViAudioBufferChunk &data, int length);
+
+		int append(const char *data, int length);
+		int append(const QByteArray &data);
+		int append(const QByteArray &data, int length);
+		int append(const ViAudioBufferChunk &data);
+		int append(const ViAudioBufferChunk &data, int length);
+
+		int replace(int start, const char *data, int length);
+		int replace(int start, const QByteArray &data);
+		int replace(int start, const QByteArray &data, int length);
+		int replace(int start, const ViAudioBufferChunk &data);
+		int replace(int start, const ViAudioBufferChunk &data, int length);
+
+		int insert(int start, const char *data, int length);
+		int insert(int start, const QByteArray &data);
+		int insert(int start, const QByteArray &data, int length);
+		int insert(int start, const ViAudioBufferChunk &data);
+		int insert(int start, const ViAudioBufferChunk &data, int length);
+
+		int remove(int start);
+		int remove(int start, int end);
+
+	protected:
+
+		int availableSize(int start, int length) const;
+		bool deleteStream(ViAudioBufferStream *stream);
+
 	private:
 
 		QByteArray *mData;
-		QList<ViAudioBufferStream*> mStreams;
-		int mBufferHeadStart;
 		ViAudioFormat mFormat;
+		QMutex mMutex;
+		QList<QSharedPointer<ViAudioBufferStream> > mStreams;
+
 };
 
 #endif

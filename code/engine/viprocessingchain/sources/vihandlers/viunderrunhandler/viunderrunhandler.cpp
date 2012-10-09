@@ -38,9 +38,7 @@ void ViUnderrunHandler::handleUnderrun()
 			QObject::connect(&mChain->mMultiExecutor, SIGNAL(processingRateChanged(qreal)), this, SLOT(calculate(qreal)));
 			calculate(mChain->mMultiExecutor.processingRate());
 		}
-		LOG("***5");
 	}
-	LOG("***6");
 }
 
 void ViUnderrunHandler::calculate(qreal processingRate)

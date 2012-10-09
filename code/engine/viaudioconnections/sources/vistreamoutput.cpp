@@ -33,7 +33,7 @@ void ViStreamOutput::setBuffer(ViAudioBuffer *buffer)
 	ViAudioOutput::setBuffer(buffer);
 	if(mBuffer != NULL)
 	{
-		QObject::connect(buffer, SIGNAL(changed(int)), this, SLOT(checkLength()));
+		QObject::connect(buffer, SIGNAL(changed()), this, SLOT(checkLength()));
 	}
 }
 

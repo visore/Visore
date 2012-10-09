@@ -83,7 +83,7 @@ void ViStreamInput::start()
 {
 	if(mAudioInput->state() == QAudio::SuspendedState)
 	{
-		LOG("Recordingresumed.");
+		LOG("Recording resumed.");
 		mAudioInput->resume();
 	}
 	else

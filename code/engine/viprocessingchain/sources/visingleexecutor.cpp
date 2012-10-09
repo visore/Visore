@@ -74,7 +74,7 @@ void ViSingleExecutor::runNormal()
 {
 	do
 	{
-		mInputChunk->setSize(mReadStream->read(mInputChunk));
+		mReadStream->read(*mInputChunk);
 		if(mInputChunk->size() > 0)
 		{
 			(this->*runIt)();
@@ -91,8 +91,8 @@ void ViSingleExecutor::runNotify()
 	qint64 progress = 0;
 	do
 	{
-		size = mReadStream->bufferSize();
-		mInputChunk->setSize(mReadStream->read(mInputChunk));
+		size = mReadStream->size();
+		mReadStream->read(*mInputChunk);
 		if(mInputChunk->size() > 0)
 		{
 			(this->*runIt)();
@@ -117,14 +117,14 @@ void ViSingleExecutor::runModify()
 	mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), mInputChunk->size()));
 	mProcessors.manipulateInput(mInputSamples);
 	mOutputChunk->setSize(mOutputConverter.realToPcm(mInputSamples->data(), mOutputChunk->data(), mInputSamples->size()));
-	mWriteStream->write(mOutputChunk);
+	mWriteStream->write(*mOutputChunk);
 	mProcessedSamples += mInputSamples->size();
 }
 
 void ViSingleExecutor::runDualObserve()
 {
 	mInputSamples->setSize(mInputConverter.pcmToReal(mInputChunk->data(), mInputSamples->data(), mInputChunk->size()));
-	mOutputChunk->setSize(mReadStream2->read(mOutputChunk));
+	mReadStream2->read(*mOutputChunk);
 	mOutputSamples->setSize(mInputConverter.pcmToReal(mOutputChunk->data(), mOutputSamples->data(), mOutputChunk->size()));
 	mProcessors.observeDual(mInputSamples, mOutputSamples);
 	mProcessedSamples += mInputSamples->size();

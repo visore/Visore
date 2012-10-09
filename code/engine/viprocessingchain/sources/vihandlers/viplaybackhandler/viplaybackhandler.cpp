@@ -37,24 +37,27 @@ void ViPlaybackHandler::update(ViAudioObject *object)
 
 void ViPlaybackHandler::start()
 {
-	if(mWaitingForFormat)
+	if(isEnabled())
 	{
-		mWaitingForFormat = false;
-		QObject::disconnect(mObjects.first()->correctedBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(start()));
-	}
-	if(mChain->mStreamOutput->state() != QAudio::ActiveState && mObjects.size() > 0)
-	{
-		if(!mObjects.first()->correctedBuffer()->format().isValid())
+		if(mWaitingForFormat)
 		{
-			mCurrentObject = NULL;
-			mWaitingForFormat = true;
-			QObject::connect(mObjects.first()->correctedBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(start()));
+			mWaitingForFormat = false;
+			QObject::disconnect(mObjects.first()->correctedBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(start()));
 		}
-		else
+		if(mChain->mStreamOutput->state() != QAudio::ActiveState && mObjects.size() > 0)
 		{
-			mCurrentObject = mObjects.dequeue();
-			mChain->mStreamOutput->setBuffer(mCurrentObject->correctedBuffer());
-			mChain->mStreamOutput->start();
+			if(!mObjects.first()->correctedBuffer()->format().isValid())
+			{
+				mCurrentObject = NULL;
+				mWaitingForFormat = true;
+				QObject::connect(mObjects.first()->correctedBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(start()));
+			}
+			else
+			{
+				mCurrentObject = mObjects.dequeue();
+				mChain->mStreamOutput->setBuffer(mCurrentObject->correctedBuffer());
+				mChain->mStreamOutput->start();
+			}
 		}
 	}
 }

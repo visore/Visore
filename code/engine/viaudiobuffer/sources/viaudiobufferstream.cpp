@@ -1,137 +1,109 @@
 #include "viaudiobufferstream.h"
+#include "viaudiobuffer.h"
+#include <QMutexLocker>
 
-#include <iostream>
-using namespace std;
-
-ViAudioBufferStream::ViAudioBufferStream(ViAudioBuffer *buffer, QIODevice::OpenMode mode, int bufferHeadStart)
-	: QDataStream(buffer->data(), mode)
+ViAudioBufferStream::ViAudioBufferStream(QIODevice::OpenMode mode, ViAudioBuffer *buffer, QByteArray *data, QMutex *mutex)
+	: ViId()
 {
 	mBuffer = buffer;
-	mOldSize = 0;
-	mBufferHeadStart = bufferHeadStart;
-	mHasHeadStart = false;
-	mMutex = ViAudioBufferMutex::instance();
+	mMutex = mutex;
+
+	mDevice = new QBuffer(data); // We need to pass the array to the constructor, otherwise we get a deadlock, calling mBuffer->data()
+	mDevice->open(mode);
+}
+
+ViAudioBufferStream::~ViAudioBufferStream()
+{
+	mDevice->close();
+	delete mDevice;
+	mBuffer->deleteStream(this);
 }
 
 int ViAudioBufferStream::read(char *data, int length)
 {
-	mMutex->lock();
-	int read = readRawData(data, length);
-	mMutex->unlock();
-	return read;
+	QMutexLocker locker(mMutex);
+	return mDevice->read(data, length);
 }
 
-int ViAudioBufferStream::read(ViAudioBufferChunk *chunk, int length)
+int ViAudioBufferStream::read(ViAudioBufferChunk &chunk, int length)
 {
-	int dataRead = read(chunk->data(), length);
-	chunk->setSize(dataRead);
-	return dataRead;
-}
-
-int ViAudioBufferStream::read(ViAudioBufferChunk *chunk)
-{
-	return read(chunk, chunk->size());
-}
-
-int ViAudioBufferStream::write(char *data, int length)
-{
-	mMutex->lock();
-	int dataWritten = writeRawData(data, length);
-	mMutex->unlock();
-	change();
-	return dataWritten;
-}
-
-int ViAudioBufferStream::write(ViAudioBufferChunk *chunk, int length)
-{
-	return write(chunk->data(), length);
-}
-
-int ViAudioBufferStream::write(ViAudioBufferChunk *chunk)
-{
-	return write(chunk, chunk->size());
-}
-
-void ViAudioBufferStream::insert(qint64 position, char *data, int length)
-{
-	if(length > 0)
+	if(chunk.size() < length)
 	{
-		mMutex->lock();
-		mBuffer->data()->insert(position, data, length);
-		mMutex->unlock();
-		change();
+		chunk.resize(length);
 	}
+	return read(chunk.data(), length);
 }
 
-void ViAudioBufferStream::setBufferHeadStart(int bufferHeadStart)
+int ViAudioBufferStream::read(ViAudioBufferChunk &chunk)
 {
-	mBufferHeadStart = bufferHeadStart;
+	return read(chunk, chunk.size());
 }
 
-void ViAudioBufferStream::setHasBufferHeadStart(bool hasHeadStart)
+int ViAudioBufferStream::write(const char *data, int length)
 {
-	mHasHeadStart = hasHeadStart;
+	QMutexLocker locker(mMutex);
+	int written = mDevice->write(data, length);
+	emit mBuffer->changed();
+	return written;
 }
 
-int ViAudioBufferStream::bufferHeadStart()
+int ViAudioBufferStream::write(const ViAudioBufferChunk &chunk, int length)
 {
-	return mBufferHeadStart;
-}
-
-int ViAudioBufferStream::bufferSize()
-{
-	mMutex->lock();
-	int size = mBuffer->size();
-	mMutex->unlock();
-	return size;
-}
-
-void ViAudioBufferStream::change()
-{
-	if(mHasHeadStart && mBuffer->size() != mOldSize)
+	if(length > chunk.size())
 	{
-		int oldSize = mBuffer->size() - mOldSize;
-		mBuffer->change(oldSize);
-		mOldSize = mBuffer->size();
+		length = chunk.size();
 	}
-	else if(mBuffer->size() - mOldSize >= mBufferHeadStart)
-	{
-		int oldSize = mBuffer->size() - mOldSize;
-		mBuffer->change(oldSize);
-		mOldSize = mBuffer->size();
-		mHasHeadStart = true;
-	}	
+	return write(chunk.data(), length);
+}
+
+int ViAudioBufferStream::write(const ViAudioBufferChunk &chunk)
+{
+	return write(chunk.data(), chunk.size());
+}
+
+void ViAudioBufferStream::insert(int position, const char *data, int length)
+{
+	mBuffer->insert(position, data, length);
+}
+
+void ViAudioBufferStream::insert(int position, const ViAudioBufferChunk &chunk, int length)
+{
+	mBuffer->insert(position, chunk, length);
+}
+
+void ViAudioBufferStream::insert(int position, const ViAudioBufferChunk &chunk)
+{
+	mBuffer->insert(position, chunk);
+}
+
+int ViAudioBufferStream::size()
+{
+	return mBuffer->size();
 }
 
 void ViAudioBufferStream::restart()
 {
-	//mOldSize = 0;
-	//mHasHeadStart = false;
-	device()->reset();
-	//change();
+	setPosition(0);
 }
 
-bool ViAudioBufferStream::isValidPosition(qint64 position)
+int ViAudioBufferStream::position()
 {
-	return device()->size() >= position;
+	return mDevice->pos();
 }
 
-qint64 ViAudioBufferStream::setPosition(qint64 position)
+int ViAudioBufferStream::setPosition(int position)
 {
-	if(!isValidPosition(position))
-	{
-		return -1;
-	}
-	qint64 read = device()->seek(position);
-	mOldSize = 0;
-	mHasHeadStart = false;
-	change();
-	return read;
+	mDevice->seek(position);
 }
 
-qint64 ViAudioBufferStream::position()
+bool ViAudioBufferStream::isValidPosition(int position)
 {
-	return device()->pos();
+	return position < size();
+}
+
+bool ViAudioBufferStream::atEnd()
+{
+	return mDevice->atEnd();
 }
 
 ViAudioBuffer* ViAudioBufferStream::buffer()

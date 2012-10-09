@@ -50,7 +50,7 @@ void ViSectionHandler::endRecord()
 
 void ViSectionHandler::startSong()
 {
-	QMutexLocker locker(&mMutex);
+	//QMutexLocker locker(&mMutex);
 	endInput();
 	startInput(true);
 	//startOutput();
@@ -63,7 +63,7 @@ void ViSectionHandler::startSong()
 	{
 		//mChain->startOutput();
 	}*/
-	emit mChain->songStarted();
+	//emit mChain->songStarted();
 }
 
 void ViSectionHandler::endSong()
@@ -101,11 +101,12 @@ void ViSectionHandler::startInput(bool isSong)
 	{
 		mNoSongObjects.enqueue(object);
 	}
-
-	input()->setBuffer(inputBuffer);
-	executor()->setBuffer(ViAudio::AudioInput, inputBuffer);
-	executor()->setBuffer(ViAudio::AudioOutput, outputBuffer);
+LOG("+++++++5");
+	input()->setBuffer(inputBuffer);LOG("++++++6");
+	executor()->setBuffer(ViAudio::AudioInput, inputBuffer);LOG("++++++7");
+	executor()->setBuffer(ViAudio::AudioOutput, outputBuffer);LOG("++++++8");
 	executor()->initialize();
+LOG("+++++++9");
 }
 
 void ViSectionHandler::endInput()

@@ -27,6 +27,7 @@ bool ViSampleRateConverter::initialize(short channels, qreal inputRate, qreal ou
 	if(mResampler != NULL)
 	{
 		resample_close(mResampler);
+		mResampler = NULL;
 	}
 
 	mFactor = outputRate / inputRate;

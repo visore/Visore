@@ -13,6 +13,7 @@ class ViChunk
 		~ViChunk();
 
 		T* data() const;
+		const T* constData() const;
 		int size() const;
 
 		void setData(T *data, int size);

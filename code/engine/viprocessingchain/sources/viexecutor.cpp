@@ -124,21 +124,21 @@ void ViExecutor::execute()
 }
 
 void ViExecutor::initialize()
-{
+{LOG("****+++0");
 	mWasInitialized = true;
 	if(mReadStream != NULL)
-	{
-		mInputFormat = mReadStream->buffer()->format();
-		mInputConverter.setSize(mInputFormat.sampleSize());
-		QObject::connect(mReadStream->buffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)), Qt::UniqueConnection);
+	{LOG("****+++1");
+		mInputFormat = mReadStream->buffer()->format();LOG("****+++2");
+		mInputConverter.setSize(mInputFormat.sampleSize());LOG("****+++3");
+		QObject::connect(mReadStream->buffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)), Qt::UniqueConnection);LOG("****+++4");
 	}
 	if(mWriteStream != NULL)
-	{
-		mOutputFormat = mInputFormat;
-		mWriteStream->buffer()->setFormat(mOutputFormat);
-		mOutputConverter.setSize(mOutputFormat.sampleSize());
+	{LOG("****+++6");
+		mOutputFormat = mInputFormat;LOG("****+++7");
+		mWriteStream->buffer()->setFormat(mOutputFormat);LOG("****+++8");
+		mOutputConverter.setSize(mOutputFormat.sampleSize());LOG("****++9");
 	}
-
+LOG("****+++5");
 	QList<ViProcessor*> processors = mProcessors.processors((ViProcessorList::InputObservers | ViProcessorList::InputManipulators | ViProcessorList::DualObservers));
 	for(int i = 0; i < processors.size(); ++i)
 	{
@@ -196,7 +196,7 @@ void ViExecutor::initialize()
 	mRateCounter = 0;
 	mTimer.start(1000);
 
-	QObject::connect(mReadStream->buffer(), SIGNAL(changed(int)), this, SLOT(execute()));
+	QObject::connect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(execute()));
 }
 
 void ViExecutor::finalize()
@@ -206,7 +206,7 @@ void ViExecutor::finalize()
 		while(isRunning()); // TODO: busy waiting here?
 		if(mReadStream != NULL && mReadStream->buffer() != NULL)
 		{
-			QObject::disconnect(mReadStream->buffer(), SIGNAL(changed(int)), this, SLOT(execute()));
+			QObject::disconnect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(execute()));
 		}
 		QList<ViProcessor*> processors = mProcessors.processors();
 		for(int i = 0; i < processors.size(); ++i)

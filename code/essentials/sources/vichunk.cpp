@@ -3,7 +3,7 @@
 template<typename T>
 ViChunk<T>::ViChunk()
 {
-	mData = NULL;
+	mData = 0;
 	mSize = 0;
 }
 
@@ -23,15 +23,21 @@ ViChunk<T>::ViChunk(int size)
 template<typename T>
 ViChunk<T>::~ViChunk()
 {
-	if(mData != NULL)
+	if(mData != 0)
 	{
 		delete [] mData;
-		mData = NULL;
+		mData = 0;
 	}
 }
 
 template<typename T>
 T* ViChunk<T>::data() const
+{
+	return mData;
+}
+
+template<typename T>
+const T* ViChunk<T>::constData() const
 {
 	return mData;
 }
@@ -45,7 +51,7 @@ int ViChunk<T>::size() const
 template<typename T>
 void ViChunk<T>::setData(T *data, int size)
 {
-	if(mData != NULL)
+	if(mData != 0)
 	{
 		delete [] mData;
 	}
@@ -64,7 +70,7 @@ void ViChunk<T>::resize(int size)
 {
 	if(size != mSize)
 	{
-		if(mData != NULL)
+		if(mData != 0)
 		{
 			delete [] mData;
 		}
