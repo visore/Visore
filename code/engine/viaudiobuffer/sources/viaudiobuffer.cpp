@@ -1,7 +1,7 @@
 #include "viaudiobuffer.h"
 #include <QMutexLocker>
 #include <QSharedPointer>
-#include "vilogger.h"
+
 ViAudioBuffer::ViAudioBuffer()
 	: QObject(), ViId()
 {
@@ -60,15 +60,16 @@ void ViAudioBuffer::clear()
 {
 	QMutexLocker locker(&mMutex);
 	mData->clear();
+	locker.unlock();
 	emit changed();
 }
 
 void ViAudioBuffer::setFormat(ViAudioFormat format)
-{LOG("***uuu: 0");
-	QMutexLocker locker(&mMutex);LOG("***uuu: 1");
-	mFormat = format;LOG("***uuu: 2");
+{
+	QMutexLocker locker(&mMutex);
+	mFormat = format;
 	locker.unlock();
-	emit formatChanged(mFormat);LOG("***uuu: 3");
+	emit formatChanged(mFormat);
 }
 
 ViAudioFormat ViAudioBuffer::format()
@@ -154,6 +155,7 @@ int ViAudioBuffer::append(const char *data, int length)
 {
 	QMutexLocker locker(&mMutex);
 	length = mData->append(data, length).size();
+	locker.unlock();
 	emit changed();
 	return length;
 }
@@ -162,6 +164,7 @@ int ViAudioBuffer::append(const QByteArray &data)
 {
 	QMutexLocker locker(&mMutex);
 	int newSize = mData->append(data).size();
+	locker.unlock();
 	emit changed();
 	return newSize;
 }
@@ -174,6 +177,7 @@ int ViAudioBuffer::append(const QByteArray &data, int length)
 		length = data.size();
 	}
 	length = mData->append(data.constData(), length).size();
+	locker.unlock();
 	emit changed();
 	return length;
 }
@@ -182,6 +186,7 @@ int ViAudioBuffer::append(const ViAudioBufferChunk &data)
 {
 	QMutexLocker locker(&mMutex);
 	int newSize = mData->append(data.constData(), data.size()).size();
+	locker.unlock();
 	emit changed();
 	return newSize;
 }
@@ -194,6 +199,7 @@ int ViAudioBuffer::append(const ViAudioBufferChunk &data, int length)
 		length = data.size();
 	}
 	length = mData->append(data.constData(), length).size();
+	locker.unlock();
 	emit changed();
 	return length;
 }
@@ -202,6 +208,7 @@ int ViAudioBuffer::replace(int start, const char *data, int length)
 {
 	QMutexLocker locker(&mMutex);
 	length = mData->replace(start, length, data).size();
+	locker.unlock();
 	emit changed();
 	return length;
 }
@@ -219,6 +226,7 @@ int ViAudioBuffer::replace(int start, const QByteArray &data, int length)
 		length = data.size();
 	}
 	length = mData->replace(start, length, data).size();
+	locker.unlock();
 	emit changed();
 	return length;
 }
@@ -236,6 +244,7 @@ int ViAudioBuffer::replace(int start, const ViAudioBufferChunk &data, int length
 		length = data.size();
 	}
 	length = mData->replace(start, length, data.constData()).size();
+	locker.unlock();
 	emit changed();
 	return length;
 }
@@ -244,6 +253,7 @@ int ViAudioBuffer::insert(int start, const char *data, int length)
 {
 	QMutexLocker locker(&mMutex);
 	length = mData->insert(start, data, length).size();
+	locker.unlock();
 	emit changed();
 	return length;
 }
@@ -252,6 +262,7 @@ int ViAudioBuffer::insert(int start, const QByteArray &data)
 {
 	QMutexLocker locker(&mMutex);
 	int newSize = mData->insert(start, data).size();
+	locker.unlock();
 	emit changed();
 	return newSize;
 }
@@ -264,6 +275,7 @@ int ViAudioBuffer::insert(int start, const QByteArray &data, int length)
 		length = data.size();
 	}
 	length = mData->insert(start, data.constData(), length).size();
+	locker.unlock();
 	emit changed();
 	return length;
 }
@@ -281,6 +293,7 @@ int ViAudioBuffer::insert(int start, const ViAudioBufferChunk &data, int length)
 		length = data.size();
 	}
 	length = mData->insert(start, data.constData(), length).size();
+	locker.unlock();
 	emit changed();
 	return length;
 }
@@ -294,6 +307,7 @@ int ViAudioBuffer::remove(int start, int end)
 {
 	QMutexLocker locker(&mMutex);
 	end = mData->remove(start, end).size();
+	locker.unlock();
 	emit changed();
 	return end;
 }

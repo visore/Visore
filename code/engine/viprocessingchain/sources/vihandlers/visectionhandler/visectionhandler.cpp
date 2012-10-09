@@ -101,12 +101,12 @@ void ViSectionHandler::startInput(bool isSong)
 	{
 		mNoSongObjects.enqueue(object);
 	}
-LOG("+++++++5");
-	input()->setBuffer(inputBuffer);LOG("++++++6");
-	executor()->setBuffer(ViAudio::AudioInput, inputBuffer);LOG("++++++7");
-	executor()->setBuffer(ViAudio::AudioOutput, outputBuffer);LOG("++++++8");
+
+	input()->setBuffer(inputBuffer);
+	executor()->setBuffer(ViAudio::AudioInput, inputBuffer);
+	executor()->setBuffer(ViAudio::AudioOutput, outputBuffer);
 	executor()->initialize();
-LOG("+++++++9");
+
 }
 
 void ViSectionHandler::endInput()
