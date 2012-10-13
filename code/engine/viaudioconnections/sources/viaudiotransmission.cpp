@@ -3,7 +3,6 @@
 ViAudioTransmission::ViAudioTransmission()
 {
 	mBuffer = NULL;
-	mStream = NULL;
 	mState = QAudio::IdleState;
 }
 
@@ -11,13 +10,13 @@ ViAudioTransmission::~ViAudioTransmission()
 {
 }
 
-void ViAudioTransmission::setBuffer(ViAudioBuffer *buffer)
+void ViAudioTransmission::setBuffer(ViBuffer *buffer)
 {
 	mBuffer = buffer;
 	emit bufferChanged();
 }
 
-ViAudioBuffer* ViAudioTransmission::buffer()
+ViBuffer* ViAudioTransmission::buffer()
 {
 	return mBuffer;
 }

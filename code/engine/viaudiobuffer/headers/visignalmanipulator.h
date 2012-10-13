@@ -1,7 +1,7 @@
 #ifndef VISIGNALMANIPULATOR_H
 #define VISIGNALMANIPULATOR_H
 
-#include "viaudiobuffer.h"
+#include "vibuffer.h"
 
 class ViSignalManipulator
 {
@@ -23,23 +23,23 @@ class ViSignalManipulator
 
 	public:
 
-		static void createDefaultSignal(ViAudioBuffer *buffer, qint32 cycles, Type type);
+		static void createDefaultSignal(ViBuffer *buffer, qint32 cycles, Type type);
 
-		static void createSignal(QList<qreal> samples, ViAudioBuffer *buffer);
+		static void createSignal(QList<qreal> samples, ViBuffer *buffer);
 
-		static void createNoise(ViAudioBuffer *input, ViAudioBuffer *output, qreal percentage);
+		static void createNoise(ViBuffer *input, ViBuffer *output, qreal percentage);
 
 	private:
 
-		static void createFlatSignal(ViAudioBuffer *buffer, qint32 cycles);
-		static void createToothSignal(ViAudioBuffer *buffer, qint32 cycles);
-		static void createTriangleSignal(ViAudioBuffer *buffer, qint32 cycles);
-		static void createMountainSignal(ViAudioBuffer *buffer, qint32 cycles);
-		static void createFlatMountainSignal(ViAudioBuffer *buffer, qint32 cycles);
-		static void createTrapezoidSignal(ViAudioBuffer *buffer, qint32 cycles);
-		static void createSinSignal(ViAudioBuffer *buffer, qint32 cycles);
-		static void createCosSignal(ViAudioBuffer *buffer, qint32 cycles);
-		static void createTanSignal(ViAudioBuffer *buffer, qint32 cycles);
+		static void createFlatSignal(ViBuffer *buffer, qint32 cycles);
+		static void createToothSignal(ViBuffer *buffer, qint32 cycles);
+		static void createTriangleSignal(ViBuffer *buffer, qint32 cycles);
+		static void createMountainSignal(ViBuffer *buffer, qint32 cycles);
+		static void createFlatMountainSignal(ViBuffer *buffer, qint32 cycles);
+		static void createTrapezoidSignal(ViBuffer *buffer, qint32 cycles);
+		static void createSinSignal(ViBuffer *buffer, qint32 cycles);
+		static void createCosSignal(ViBuffer *buffer, qint32 cycles);
+		static void createTanSignal(ViBuffer *buffer, qint32 cycles);
 
 };
 

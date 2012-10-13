@@ -24,7 +24,7 @@ void ViStreamOutput::setDevice(QAudioDeviceInfo device)
 	mDevice = device;
 }
 
-void ViStreamOutput::setBuffer(ViAudioBuffer *buffer)
+void ViStreamOutput::setBuffer(ViBuffer *buffer)
 {
 	if(mBuffer != NULL)
 	{

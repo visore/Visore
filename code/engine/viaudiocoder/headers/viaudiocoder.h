@@ -39,14 +39,14 @@ class ViAudioCoder : public QObject
 		void convert(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat);
 		void convert(QString inputFilePath, QByteArray &output, ViAudioFormat outputFormat);
 		void convert(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat);
-		void convert(ViAudioBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat);
+		void convert(ViBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat);
 
-		void decode(QString inputFilePath, ViAudioBuffer *buffer);
+		void decode(QString inputFilePath, ViBuffer *buffer);
 		void decode(QString inputFilePath, QByteArray &output);
 		void decode(QByteArray &input, QByteArray &output);
 
-		void encode(ViAudioBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo());
-		void encode(ViAudioBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo());
+		void encode(ViBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo());
+		void encode(ViBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo());
 		void encode(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo());
 		void encode(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo());
 

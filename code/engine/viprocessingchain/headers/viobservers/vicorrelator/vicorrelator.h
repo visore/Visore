@@ -14,7 +14,7 @@ class ViCorrelator : public ViDualObserver
 		ViCorrelator();
 		~ViCorrelator();
 		ViCorrelationResult& result();
-		void setData(const ViSampleChunk *data, const ViSampleChunk *data2);
+		void setData(const ViSampleChunk *inputData, const ViSampleChunk *outputData);
 		void setWindowSize(int windowSize);
 		void initialize();
 		void finalize();

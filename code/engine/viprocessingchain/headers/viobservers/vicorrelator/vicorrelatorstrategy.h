@@ -2,7 +2,7 @@
 #define VICORRELATORSTRATEGY_H
 
 #include "vicorrelationresult.h"
-#include "viaudiobuffer.h"
+#include "vibuffer.h"
 #include "vipcmconverter.h"
 #include "viprocessor.h"
 

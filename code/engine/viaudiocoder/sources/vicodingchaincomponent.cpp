@@ -189,17 +189,15 @@ ViCodingChainBufferInput
 ViCodingChainBufferInput::ViCodingChainBufferInput()
 	: ViCodingChainInput()
 {
-	mStream = NULL;
 	mBuffer = NULL;
 }
 
 ViCodingChainBufferInput::~ViCodingChainBufferInput()
 {
-	mStream = NULL;
 	mBuffer= NULL;
 }
 
-void ViCodingChainBufferInput::setBuffer(ViAudioBuffer *buffer)
+void ViCodingChainBufferInput::setBuffer(ViBuffer *buffer)
 {
 	mBuffer = buffer;
 }
@@ -228,7 +226,6 @@ void ViCodingChainBufferInput::execute()
 
 void ViCodingChainBufferInput::finalize()
 {
-	mStream = NULL;
 	mBuffer= NULL;
 }
 
@@ -491,16 +488,14 @@ ViCodingChainBufferOutput::ViCodingChainBufferOutput()
 	: ViCodingChainOutput()
 {
 	mBuffer = NULL;
-	mStream = NULL;
 }
 
 ViCodingChainBufferOutput::~ViCodingChainBufferOutput()
 {
-	mStream = NULL;
 	mBuffer = NULL;
 }
 
-void ViCodingChainBufferOutput::setBuffer(ViAudioBuffer *buffer)
+void ViCodingChainBufferOutput::setBuffer(ViBuffer *buffer)
 {
 	mBuffer = buffer;
 }
@@ -512,9 +507,8 @@ void ViCodingChainBufferOutput::initialize()
 
 void ViCodingChainBufferOutput::finalize()
 {
-	//mStream->insert(0, mHeader.data(), mHeader.size());
+	mStream->insert(0, mHeader.data(), mHeader.size());
 	mHeader.clear();
-	mStream = NULL;
 	mBuffer = NULL;
 }
 

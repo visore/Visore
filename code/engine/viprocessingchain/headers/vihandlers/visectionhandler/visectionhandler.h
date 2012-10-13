@@ -42,8 +42,8 @@ class ViSectionHandler : public ViHandler
 		ViAudioOutput* output();
 		ViExecutor* executor();
 
-		ViAudioBuffer* allocateBuffer();
-		void deallocateBuffer(ViAudioBuffer *buffer);
+		ViBuffer* allocateBuffer();
+		void deallocateBuffer(ViBuffer *buffer);
 
 	private:
 

@@ -2,7 +2,7 @@
 #define VIAUDIOTRANSMISSION_H
 
 #include <qaudio.h>
-#include "viaudiobuffer.h"
+#include "vibuffer.h"
 #include "viaudioformat.h"
 #include "viaudioposition.h"
 #include "vilogger.h"
@@ -27,8 +27,8 @@ class ViAudioTransmission : public QObject
 		ViAudioTransmission();
 		~ViAudioTransmission();
 
-		virtual void setBuffer(ViAudioBuffer *buffer);
-		virtual ViAudioBuffer* buffer();
+		virtual void setBuffer(ViBuffer *buffer);
+		virtual ViBuffer* buffer();
 
 		virtual ViAudioFormat format();
 		virtual void setFormat(ViAudioFormat format);
@@ -41,8 +41,8 @@ class ViAudioTransmission : public QObject
 
 	protected:
 
-		ViAudioBuffer *mBuffer;
-		ViAudioBufferStream *mStream;
+		ViBuffer *mBuffer;
+		ViBufferStreamPointer mStream;
 		QAudio::State mState;
 };
 

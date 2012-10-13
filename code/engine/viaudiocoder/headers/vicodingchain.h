@@ -45,8 +45,8 @@ class ViCodingChain : public QThread
 		void setInputData(QByteArray &array);
 		void setOutputData(QByteArray &array);
 
-		void setInputBuffer(ViAudioBuffer *buffer);
-		void setOutputBuffer(ViAudioBuffer *buffer);
+		void setInputBuffer(ViBuffer *buffer);
+		void setOutputBuffer(ViBuffer *buffer);
 
 		void setInputFormat(ViAudioFormat format);
 		void setOutputFormat(ViAudioFormat format);

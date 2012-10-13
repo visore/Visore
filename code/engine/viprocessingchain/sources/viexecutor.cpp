@@ -12,8 +12,6 @@ ViExecutor::ViExecutor()
 	mInputSamples = NULL;
 	mOutputSamples = NULL;
 	mOutputChunk = NULL;
-	mReadStream = NULL;
-	mWriteStream = NULL;
 	mObject = NULL;
 	QObject::connect(&mTimer, SIGNAL(timeout()), this, SLOT(updateProcessingRate()));
 }
@@ -195,7 +193,7 @@ void ViExecutor::finalize()
 	if(mWasInitialized)
 	{
 		while(isRunning()); // TODO: busy waiting here?
-		if(mReadStream != NULL && mObject->originalBuffer() != NULL)
+		if(!mReadStream.isNull() && mObject->originalBuffer() != NULL)
 		{
 			QObject::disconnect(mObject->originalBuffer(), SIGNAL(changed()), this, SLOT(execute()));
 		}

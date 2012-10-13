@@ -5,7 +5,7 @@
 #include <QThread>
 #include <QFile>
 #include <viabstractcoder.h>
-#include <viaudiobuffer.h>
+#include <vibuffer.h>
 #include <QMutexLocker>
 
 /**********************************************************
@@ -159,7 +159,7 @@ class ViCodingChainBufferInput : public ViCodingChainInput
 
 		ViCodingChainBufferInput();
 		~ViCodingChainBufferInput();
-		void setBuffer(ViAudioBuffer *buffer);
+		void setBuffer(ViBuffer *buffer);
 		bool hasData();
 		int size();
 		void initialize();
@@ -168,8 +168,8 @@ class ViCodingChainBufferInput : public ViCodingChainInput
 
 	protected:
 
-		ViAudioBuffer *mBuffer;
-		ViAudioBufferStream *mStream;
+		ViBuffer *mBuffer;
+		ViBufferStreamPointer mStream;
 		QMutex mMutex;
 
 };
@@ -313,15 +313,15 @@ class ViCodingChainBufferOutput : public ViCodingChainOutput
 
 		ViCodingChainBufferOutput();
 		~ViCodingChainBufferOutput();
-		void setBuffer(ViAudioBuffer *buffer);
+		void setBuffer(ViBuffer *buffer);
 		void initialize();
 		void execute();
 		void finalize();
 
 	protected:
 
-		ViAudioBuffer *mBuffer;
-		ViAudioBufferStream *mStream;
+		ViBuffer *mBuffer;
+		ViBufferStreamPointer mStream;
 
 
 };

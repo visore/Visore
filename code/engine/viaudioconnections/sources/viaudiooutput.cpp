@@ -5,7 +5,7 @@ ViAudioOutput::ViAudioOutput()
 {
 }
 
-void ViAudioOutput::setBuffer(ViAudioBuffer *buffer)
+void ViAudioOutput::setBuffer(ViBuffer *buffer)
 {
 	ViAudioTransmission::setBuffer(buffer);
 	mStream = mBuffer->createReadStream();

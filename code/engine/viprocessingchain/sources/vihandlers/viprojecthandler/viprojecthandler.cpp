@@ -23,7 +23,7 @@ void ViProjectHandler::create(ViProject *project, ViAudioFormat format)
 
 void ViProjectHandler::addAudioObject(ViAudioObject *object)
 {
-	ViAudioBuffer *buffer = object->correctedBuffer();
+	ViBuffer *buffer = object->correctedBuffer();
 	qreal songLength = ViAudioPosition::convertPosition(buffer->size(), ViAudioPosition::Samples, ViAudioPosition::Milliseconds, buffer->format());
 	if(songLength > MINIMUM_SONG_LENGTH)
 	{

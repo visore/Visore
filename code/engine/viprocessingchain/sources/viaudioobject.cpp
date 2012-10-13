@@ -10,7 +10,7 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	mCorrectedBuffer = NULL;
 }
 
-ViAudioObject::ViAudioObject(ViAudioBuffer *original, ViAudioBuffer *corrected, bool autoDestruct)
+ViAudioObject::ViAudioObject(ViBuffer *original, ViBuffer *corrected, bool autoDestruct)
 	: QObject()
 {
 	mAutoDestruct = autoDestruct;
@@ -32,19 +32,19 @@ void ViAudioObject::setSong(bool song)
 	mIsSong = song;
 }
 		
-void ViAudioObject::setBuffers(ViAudioBuffer *original, ViAudioBuffer *corrected)
+void ViAudioObject::setBuffers(ViBuffer *original, ViBuffer *corrected)
 {
 	setOriginalBuffer(original);
 	setCorrectedBuffer(corrected);
 }
 
-void ViAudioObject::setOriginalBuffer(ViAudioBuffer *buffer)
+void ViAudioObject::setOriginalBuffer(ViBuffer *buffer)
 {
 	QMutexLocker locker(&mMutex);
 	mOriginalBuffer = buffer;
 }
 
-void ViAudioObject::setCorrectedBuffer(ViAudioBuffer *buffer)
+void ViAudioObject::setCorrectedBuffer(ViBuffer *buffer)
 {
 	QMutexLocker locker(&mMutex);
 	mCorrectedBuffer = buffer;
@@ -82,13 +82,13 @@ void ViAudioObject::clearCorrectedBuffer()
 	}
 }
 
-ViAudioBuffer* ViAudioObject::originalBuffer()
+ViBuffer* ViAudioObject::originalBuffer()
 {
 	QMutexLocker locker(&mMutex);
 	return mOriginalBuffer;
 }
 
-ViAudioBuffer* ViAudioObject::correctedBuffer()
+ViBuffer* ViAudioObject::correctedBuffer()
 {
 	QMutexLocker locker(&mMutex);
 	return mCorrectedBuffer;

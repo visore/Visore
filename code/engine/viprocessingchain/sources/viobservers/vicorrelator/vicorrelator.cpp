@@ -25,9 +25,9 @@ ViCorrelationResult& ViCorrelator::result()
 	return mResult;
 }
 
-void ViCorrelator::setData(const ViSampleChunk *data, const ViSampleChunk *data2)
+void ViCorrelator::setData(const ViSampleChunk *inputData, const ViSampleChunk *outputData)
 {
-	ViDualObserver::setData(data, data2);
+	ViDualObserver::setData(inputData, outputData);
 	for(int i = 0; i < mCorrelators.size(); ++i)
 	{
 		mCorrelators[i]->setData(mData, mData2);

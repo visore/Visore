@@ -67,6 +67,18 @@ void ViObserver::setData(const ViSampleChunk *data)
 	mData = data;
 }
 
+ViDualObserver::ViDualObserver()
+	: ViObserver()
+{
+	mData2 = NULL;
+}
+
+void ViDualObserver::setData(const ViSampleChunk *inputData, const ViSampleChunk *outputData)
+{
+	mData = inputData;
+	mData2 = outputData;
+}
+
 ViModifier::ViModifier()
 	: ViProcessor()
 {
@@ -77,16 +89,3 @@ void ViModifier::setData(ViSampleChunk *data)
 {
 	mData = data;
 }
-
-ViDualObserver::ViDualObserver()
-	: ViObserver()
-{
-	mData2 = NULL;
-}
-
-void ViDualObserver::setData(const ViSampleChunk *data, const ViSampleChunk *data2)
-{
-	mData = data;
-	mData2 = data2;
-}
-

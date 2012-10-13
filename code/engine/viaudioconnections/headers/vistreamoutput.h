@@ -33,7 +33,7 @@ class ViStreamOutput : public ViAudioOutput
 		~ViStreamOutput();
 
 		void setDevice(QAudioDeviceInfo device);
-		void setBuffer(ViAudioBuffer *buffer);
+		void setBuffer(ViBuffer *buffer);
 		ViAudioFormat format();
 
 		void start();

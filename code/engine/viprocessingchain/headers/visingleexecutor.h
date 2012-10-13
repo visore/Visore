@@ -22,7 +22,7 @@ class ViSingleExecutor : public ViExecutor
 	private:
 
 		void (ViSingleExecutor::*runIt)();
-		ViAudioBufferStream *mReadStream2;
+		ViBufferStream *mReadStream2;
 
 };
 

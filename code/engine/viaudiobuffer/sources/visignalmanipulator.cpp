@@ -12,7 +12,7 @@
 #include <iostream>
 using namespace std;
 
-void ViSignalManipulator::createDefaultSignal(ViAudioBuffer *buffer, qint32 cycles, Type type)
+void ViSignalManipulator::createDefaultSignal(ViBuffer *buffer, qint32 cycles, Type type)
 {
 	if(type == ViSignalManipulator::Flat)
 	{
@@ -52,10 +52,10 @@ void ViSignalManipulator::createDefaultSignal(ViAudioBuffer *buffer, qint32 cycl
 	}
 }
 
-void ViSignalManipulator::createSignal(QList<qreal> samples, ViAudioBuffer *buffer)
+void ViSignalManipulator::createSignal(QList<qreal> samples, ViBuffer *buffer)
 {
 	buffer->clear();
-	ViAudioBufferStream *stream = buffer->createWriteStream();
+	ViBufferStreamPointer stream = buffer->createWriteStream();
 	ViAudioFormat format;
 	format.setSampleRate(44100);
 	format.setChannelCount(1);
@@ -76,10 +76,10 @@ void ViSignalManipulator::createSignal(QList<qreal> samples, ViAudioBuffer *buff
 	stream->write(rawData, size);
 }
 
-void ViSignalManipulator::createNoise(ViAudioBuffer *input, ViAudioBuffer *output, qreal percentage)
+void ViSignalManipulator::createNoise(ViBuffer *input, ViBuffer *output, qreal percentage)
 {
-	ViAudioBufferStream *readStream = input->createReadStream();
-	ViAudioBufferStream *writeStream = output->createWriteStream();
+	ViBufferStreamPointer readStream = input->createReadStream();
+	ViBufferStreamPointer writeStream = output->createWriteStream();
 	
 	srand(time(NULL));
 	qreal randomMax = RAND_MAX / percentage;
@@ -145,7 +145,7 @@ void ViSignalManipulator::createNoise(ViAudioBuffer *input, ViAudioBuffer *outpu
 	}
 }
 
-void ViSignalManipulator::createFlatSignal(ViAudioBuffer *buffer, qint32 cycles)
+void ViSignalManipulator::createFlatSignal(ViBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
 	static const qreal width = 100;
@@ -161,7 +161,7 @@ list<<1;
 	ViSignalManipulator::createSignal(list, buffer);
 }
 
-void ViSignalManipulator::createToothSignal(ViAudioBuffer *buffer, qint32 cycles)
+void ViSignalManipulator::createToothSignal(ViBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
 	static const qreal width = 200;
@@ -187,7 +187,7 @@ void ViSignalManipulator::createToothSignal(ViAudioBuffer *buffer, qint32 cycles
 	ViSignalManipulator::createSignal(list, buffer);
 }
 
-void ViSignalManipulator::createTriangleSignal(ViAudioBuffer *buffer, qint32 cycles)
+void ViSignalManipulator::createTriangleSignal(ViBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
 	static const qreal width = 500;
@@ -205,7 +205,7 @@ void ViSignalManipulator::createTriangleSignal(ViAudioBuffer *buffer, qint32 cyc
 	ViSignalManipulator::createSignal(list, buffer);
 }
 
-void ViSignalManipulator::createMountainSignal(ViAudioBuffer *buffer, qint32 cycles)
+void ViSignalManipulator::createMountainSignal(ViBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
 	static const qreal width = 200;
@@ -235,7 +235,7 @@ void ViSignalManipulator::createMountainSignal(ViAudioBuffer *buffer, qint32 cyc
 	ViSignalManipulator::createSignal(list, buffer);
 }
 
-void ViSignalManipulator::createFlatMountainSignal(ViAudioBuffer *buffer, qint32 cycles)
+void ViSignalManipulator::createFlatMountainSignal(ViBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
 	static const qreal width = 75;
@@ -278,7 +278,7 @@ void ViSignalManipulator::createFlatMountainSignal(ViAudioBuffer *buffer, qint32
 	ViSignalManipulator::createSignal(list, buffer);
 }
 
-void ViSignalManipulator::createTrapezoidSignal(ViAudioBuffer *buffer, qint32 cycles)
+void ViSignalManipulator::createTrapezoidSignal(ViBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
 	static const qreal width = 75;
@@ -303,7 +303,7 @@ void ViSignalManipulator::createTrapezoidSignal(ViAudioBuffer *buffer, qint32 cy
 	ViSignalManipulator::createSignal(list, buffer);
 }
 
-void ViSignalManipulator::createSinSignal(ViAudioBuffer *buffer, qint32 cycles)
+void ViSignalManipulator::createSinSignal(ViBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
 	static const qreal width = 200;
@@ -317,7 +317,7 @@ void ViSignalManipulator::createSinSignal(ViAudioBuffer *buffer, qint32 cycles)
 	ViSignalManipulator::createSignal(list, buffer);
 }
 
-void ViSignalManipulator::createCosSignal(ViAudioBuffer *buffer, qint32 cycles)
+void ViSignalManipulator::createCosSignal(ViBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
 	static const qreal width = 200;
@@ -331,7 +331,7 @@ void ViSignalManipulator::createCosSignal(ViAudioBuffer *buffer, qint32 cycles)
 	ViSignalManipulator::createSignal(list, buffer);
 }
 
-void ViSignalManipulator::createTanSignal(ViAudioBuffer *buffer, qint32 cycles)
+void ViSignalManipulator::createTanSignal(ViBuffer *buffer, qint32 cycles)
 {
 	QList<qreal> list;
 	static const qreal width = 200;

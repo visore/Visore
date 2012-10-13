@@ -7,7 +7,7 @@
 #include <QNetworkReply>
 #include <QNetworkProxy>
 #include <QNetworkAccessManager>
-#include "viaudiobuffer.h"
+#include "vibuffer.h"
 #include "viaudiooutput.h"
 #include "viaudioposition.h"
 #include "visonginfo.h"

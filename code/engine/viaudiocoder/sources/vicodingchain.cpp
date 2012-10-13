@@ -106,13 +106,13 @@ void ViCodingChain::setOutputData(QByteArray &array)
 	mOutput = &mDataOutput;
 }
 
-void ViCodingChain::setInputBuffer(ViAudioBuffer *buffer)
+void ViCodingChain::setInputBuffer(ViBuffer *buffer)
 {
 	mBufferInput.setBuffer(buffer);
 	mInput = &mBufferInput;
 }
 
-void ViCodingChain::setOutputBuffer(ViAudioBuffer *buffer)
+void ViCodingChain::setOutputBuffer(ViBuffer *buffer)
 {
 	mBufferOutput.setBuffer(buffer);
 	mOutput = &mBufferOutput;

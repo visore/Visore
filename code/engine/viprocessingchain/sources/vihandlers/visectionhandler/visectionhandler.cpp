@@ -89,8 +89,8 @@ void ViSectionHandler::endSong()
 void ViSectionHandler::startInput(bool isSong)
 {
 	//QMutexLocker locker(&mMutex);
-	ViAudioBuffer *inputBuffer = allocateBuffer();
-	ViAudioBuffer *outputBuffer = allocateBuffer();
+	ViBuffer *inputBuffer = allocateBuffer();
+	ViBuffer *outputBuffer = allocateBuffer();
 	ViAudioObject *object = new ViAudioObject(inputBuffer, outputBuffer);
 	if(isSong)
 	{
@@ -207,12 +207,12 @@ ViExecutor* ViSectionHandler::executor()
 	return &mChain->mMultiExecutor;
 }
 
-ViAudioBuffer* ViSectionHandler::allocateBuffer()
+ViBuffer* ViSectionHandler::allocateBuffer()
 {
-	return new ViAudioBuffer();
+	return new ViBuffer();
 }
 
-void ViSectionHandler::deallocateBuffer(ViAudioBuffer *buffer)
+void ViSectionHandler::deallocateBuffer(ViBuffer *buffer)
 {
 	delete buffer;
 	buffer = NULL;

@@ -5,7 +5,7 @@ ViStreamBuffer::ViStreamBuffer()
 {
 }
 
-void ViStreamBuffer::setBuffer(ViAudioBuffer *buffer)
+void ViStreamBuffer::setBuffer(ViBuffer *buffer)
 {
 	mStream = buffer->createWriteStream();
 }
@@ -51,7 +51,7 @@ void ViStreamInput::setDevice(QAudioDeviceInfo device)
 	mDevice = device;
 }
 
-void ViStreamInput::setBuffer(ViAudioBuffer *buffer)
+void ViStreamInput::setBuffer(ViBuffer *buffer)
 {
 	ViAudioInput::setBuffer(buffer);
 	mBuffer->setFormat(mFormat);

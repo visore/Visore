@@ -1,7 +1,7 @@
 #ifndef VIEXECUTOR_H
 #define VIEXECUTOR_H
 
-#include "viaudiobuffer.h"
+#include "vibuffer.h"
 #include "viprocessor.h"
 #include "viprocessorlist.h"
 #include "vipcmconverter.h"
@@ -67,8 +67,8 @@ class ViExecutor : public QThread
 		ViPcmConverter<qreal> mOutputConverter;
 
 		ViAudioObject *mObject;
-		ViAudioBufferStream *mReadStream;
-		ViAudioBufferStream *mWriteStream;
+		ViBufferStreamPointer mReadStream;
+		ViBufferStreamPointer mWriteStream;
 
 		ViAudioFormat mInputFormat;
 		ViAudioFormat mOutputFormat;

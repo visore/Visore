@@ -8,7 +8,7 @@
 #include "vichunk.h"
 #include "viaudioformat.h"
 #include "vilogger.h"
-#include "viaudiobuffer.h"
+#include "vibuffer.h"
 #include "viaudioobject.h"
 
 class ViProcessor : public QObject, public QRunnable, public ViId
@@ -51,7 +51,7 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 		int mWindowSize;
 
 		bool mIsEnabled;
-		ViMutex mIsEnabledMutex;
+		QMutex mIsEnabledMutex;
 
 };
 
@@ -69,6 +69,20 @@ class ViObserver : public ViProcessor
 
 };
 
+class ViDualObserver : public ViObserver
+{
+
+	public:
+
+		ViDualObserver();
+		virtual void setData(const ViSampleChunk *inputData, const ViSampleChunk *outputData);
+
+	protected:
+
+		const ViSampleChunk *mData2;
+
+};
+
 class ViModifier : public ViProcessor
 {
 
@@ -80,20 +94,6 @@ class ViModifier : public ViProcessor
 	protected:
 
 		ViSampleChunk *mData;
-
-};
-
-class ViDualObserver : public ViObserver
-{
-
-	public:
-
-		ViDualObserver();
-		virtual void setData(const ViSampleChunk *data, const ViSampleChunk *data2);
-
-	protected:
-
-		const ViSampleChunk *mData2;
 
 };
 

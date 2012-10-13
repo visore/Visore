@@ -12,7 +12,7 @@ class ViStreamBuffer : public QBuffer
 	public:
 
 		ViStreamBuffer();
-		void setBuffer(ViAudioBuffer *buffer);
+		void setBuffer(ViBuffer *buffer);
 		qint64 write(const char *data, qint64 maxSize);
 		qint64 write(const char *data);
 		qint64 write(const QByteArray &byteArray);
@@ -20,7 +20,7 @@ class ViStreamBuffer : public QBuffer
 
 	private:
 
-		ViAudioBufferStream *mStream;
+		ViBufferStreamPointer mStream;
 
 };
 
@@ -34,7 +34,7 @@ class ViStreamInput : public ViAudioInput
 		~ViStreamInput();
 
 		void setDevice(QAudioDeviceInfo device);
-		void setBuffer(ViAudioBuffer *buffer);
+		void setBuffer(ViBuffer *buffer);
 		ViAudioFormat format();
 		void setFormat(ViAudioFormat format);
 
