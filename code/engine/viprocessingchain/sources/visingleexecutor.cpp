@@ -6,36 +6,9 @@ ViSingleExecutor::ViSingleExecutor()
 	mNotify = true;
 }
 
-bool ViSingleExecutor::execute(ViAudioBuffer *buffer, ViProcessor *processor)
+bool ViSingleExecutor::execute(ViAudioObject *object, ViProcessor *processor)
 {
-	mProcessors.clear();
-	if(buffer == NULL)
-	{
-		return false;
-	}
-	if(dynamic_cast<ViDualObserver*>(processor) != NULL)
-	{
-		return false;
-	}
-	else if(dynamic_cast<ViObserver*>(processor) != NULL)
-	{
-		attach(ViAudio::AudioInput, processor);
-		ViSingleExecutor::runIt = &ViSingleExecutor::runObserve;
-	}
-	else if(dynamic_cast<ViDualObserver*>(processor) != NULL)
-	{
-		attach(ViAudio::AudioOutput, processor);
-		setBuffer(ViAudio::AudioOutput, buffer);
-		ViSingleExecutor::runIt = &ViSingleExecutor::runModify;
-	}
-	setBuffer(ViAudio::AudioInput, buffer);
-	ViExecutor::execute();
-	return true;
-}
-
-bool ViSingleExecutor::execute(ViAudioBuffer *inputBuffer, ViAudioBuffer *outputBuffer, ViProcessor *processor)
-{
-	mProcessors.clear();
+	/*mProcessors.clear();
 	if(dynamic_cast<ViDualObserver*>(processor) != NULL)
 	{
 		if(inputBuffer == NULL || outputBuffer == NULL)
@@ -67,7 +40,7 @@ bool ViSingleExecutor::execute(ViAudioBuffer *inputBuffer, ViAudioBuffer *output
 	setBuffer(ViAudio::AudioInput, inputBuffer);
 	setBuffer(ViAudio::AudioOutput, outputBuffer);
 	ViExecutor::execute();
-	return true;
+	return true;*/
 }
 
 void ViSingleExecutor::runNormal()

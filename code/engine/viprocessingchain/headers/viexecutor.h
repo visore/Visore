@@ -6,6 +6,7 @@
 #include "viprocessorlist.h"
 #include "vipcmconverter.h"
 #include "viaudio.h"
+#include "viaudioobject.h"
 #include <QTimer>
 
 class ViExecutor : public QThread
@@ -37,7 +38,7 @@ class ViExecutor : public QThread
 		void setNotify(bool notify);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
-		void setBuffer(ViAudio::Mode mode, ViAudioBuffer *buffer);
+		void setObject(ViAudioObject *object);
 
 		static int defaultWindowSize();
 
@@ -64,8 +65,11 @@ class ViExecutor : public QThread
 
 		ViPcmConverter<qreal> mInputConverter;
 		ViPcmConverter<qreal> mOutputConverter;
+
+		ViAudioObject *mObject;
 		ViAudioBufferStream *mReadStream;
 		ViAudioBufferStream *mWriteStream;
+
 		ViAudioFormat mInputFormat;
 		ViAudioFormat mOutputFormat;
 

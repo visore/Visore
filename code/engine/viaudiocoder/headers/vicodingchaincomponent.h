@@ -6,6 +6,7 @@
 #include <QFile>
 #include <viabstractcoder.h>
 #include <viaudiobuffer.h>
+#include <QMutexLocker>
 
 /**********************************************************
 ViCodingChainComponent
@@ -169,6 +170,7 @@ class ViCodingChainBufferInput : public ViCodingChainInput
 
 		ViAudioBuffer *mBuffer;
 		ViAudioBufferStream *mStream;
+		QMutex mMutex;
 
 };
 

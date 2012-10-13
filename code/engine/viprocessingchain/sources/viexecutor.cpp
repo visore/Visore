@@ -14,6 +14,7 @@ ViExecutor::ViExecutor()
 	mOutputChunk = NULL;
 	mReadStream = NULL;
 	mWriteStream = NULL;
+	mObject = NULL;
 	QObject::connect(&mTimer, SIGNAL(timeout()), this, SLOT(updateProcessingRate()));
 }
 
@@ -68,32 +69,28 @@ bool ViExecutor::detach(ViProcessor *processor)
 	return mProcessors.remove(processor);
 }
 
-void ViExecutor::setBuffer(ViAudio::Mode mode, ViAudioBuffer *buffer)
+void ViExecutor::setObject(ViAudioObject *object)
 {
-	if(mode == ViAudio::AudioInput)
+	mObject = object;
+	if(mInputChunk == NULL)
 	{
-		if(mInputChunk == NULL)
-		{
-			mInputChunk = new ViRawChunk();
-		}
-		if(mInputSamples == NULL)
-		{
-			mInputSamples = new ViSampleChunk();
-		}
-		mReadStream = buffer->createReadStream();
+		mInputChunk = new ViRawChunk();
 	}
-	else if(mode == ViAudio::AudioOutput)
+	if(mInputSamples == NULL)
 	{
-		if(mOutputChunk == NULL)
-		{
-			mOutputChunk = new ViRawChunk();
-		}
-		if(mOutputSamples == NULL)
-		{
-			mOutputSamples = new ViSampleChunk();
-		}
-		mWriteStream = buffer->createWriteStream();
+		mInputSamples = new ViSampleChunk();
 	}
+	mReadStream = mObject->originalBuffer()->createReadStream();
+	
+	if(mOutputChunk == NULL)
+	{
+		mOutputChunk = new ViRawChunk();
+	}
+	if(mOutputSamples == NULL)
+	{
+		mOutputSamples = new ViSampleChunk();
+	}
+	mWriteStream = mObject->correctedBuffer()->createWriteStream();
 }
 
 int ViExecutor::defaultWindowSize()
@@ -106,7 +103,7 @@ void ViExecutor::setFormat(ViAudioFormat format)
 	mOutputFormat = format;
 	if(mWriteStream != NULL)
 	{
-		mWriteStream->buffer()->setFormat(mOutputFormat);
+		mObject->correctedBuffer()->setFormat(mOutputFormat);
 		mOutputConverter.setSize(mOutputFormat.sampleSize());
 	}
 }
@@ -124,31 +121,25 @@ void ViExecutor::execute()
 }
 
 void ViExecutor::initialize()
-{LOG("****+++0");
+{
 	mWasInitialized = true;
 	if(mReadStream != NULL)
-	{LOG("****+++1");
-		mInputFormat = mReadStream->buffer()->format();LOG("****+++2");
-		mInputConverter.setSize(mInputFormat.sampleSize());LOG("****+++3");
-		QObject::connect(mReadStream->buffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)), Qt::UniqueConnection);LOG("****+++4");
+	{
+		mInputFormat = mObject->originalBuffer()->format();
+		mInputConverter.setSize(mInputFormat.sampleSize());
+		QObject::connect(mObject->originalBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)), Qt::UniqueConnection);
 	}
 	if(mWriteStream != NULL)
-	{LOG("****+++6");
-		mOutputFormat = mInputFormat;LOG("****+++7");
-		mWriteStream->buffer()->setFormat(mOutputFormat);LOG("****+++8");
-		mOutputConverter.setSize(mOutputFormat.sampleSize());LOG("****++9");
+	{
+		mOutputFormat = mInputFormat;
+		mObject->correctedBuffer()->setFormat(mOutputFormat);
+		mOutputConverter.setSize(mOutputFormat.sampleSize());
 	}
-LOG("****+++5");
-	QList<ViProcessor*> processors = mProcessors.processors((ViProcessorList::InputObservers | ViProcessorList::InputManipulators | ViProcessorList::DualObservers));
+
+	QList<ViProcessor*> processors = mProcessors.processors(ViProcessorList::All);
 	for(int i = 0; i < processors.size(); ++i)
 	{
-		processors[i]->setBuffer(mReadStream->buffer(), ViAudio::AudioInput);
-		processors[i]->setBuffer(mWriteStream->buffer(), ViAudio::AudioOutput);
-	}
-	processors = mProcessors.processors(ViProcessorList::OutputObservers);
-	for(int i = 0; i < processors.size(); ++i)
-	{
-		processors[i]->setBuffer(mWriteStream->buffer(), ViAudio::AudioInput);
+		processors[i]->setObject(mObject);
 	}
 
 	processors = mProcessors.processors();
@@ -196,7 +187,7 @@ LOG("****+++5");
 	mRateCounter = 0;
 	mTimer.start(1000);
 
-	QObject::connect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(execute()));
+	QObject::connect(mObject->originalBuffer(), SIGNAL(changed()), this, SLOT(execute()));
 }
 
 void ViExecutor::finalize()
@@ -204,9 +195,9 @@ void ViExecutor::finalize()
 	if(mWasInitialized)
 	{
 		while(isRunning()); // TODO: busy waiting here?
-		if(mReadStream != NULL && mReadStream->buffer() != NULL)
+		if(mReadStream != NULL && mObject->originalBuffer() != NULL)
 		{
-			QObject::disconnect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(execute()));
+			QObject::disconnect(mObject->originalBuffer(), SIGNAL(changed()), this, SLOT(execute()));
 		}
 		QList<ViProcessor*> processors = mProcessors.processors();
 		for(int i = 0; i < processors.size(); ++i)

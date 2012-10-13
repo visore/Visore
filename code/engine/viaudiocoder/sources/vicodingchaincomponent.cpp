@@ -512,7 +512,7 @@ void ViCodingChainBufferOutput::initialize()
 
 void ViCodingChainBufferOutput::finalize()
 {
-	mStream->insert(0, mHeader.data(), mHeader.size());
+	//mStream->insert(0, mHeader.data(), mHeader.size());
 	mHeader.clear();
 	mStream = NULL;
 	mBuffer = NULL;

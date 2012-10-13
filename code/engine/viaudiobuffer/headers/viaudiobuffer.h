@@ -5,7 +5,6 @@
 #include "viaudioformat.h"
 #include "vichunk.h"
 #include "viid.h"
-#include <QMutex>
 
 typedef ViChunk<char> ViAudioBufferChunk;
 
@@ -44,7 +43,7 @@ class ViAudioBuffer : public QObject, public ViId
 		ViAudioFormat format();
 		ViAudioFormat& formatReference();
 
-		int retrieve(int start, char *data, int length);
+		/*int retrieve(int start, char *data, int length);
 		int retrieve(int start, QByteArray &data);
 		int retrieve(int start, QByteArray &data, int length);
 		int retrieve(int start, ViAudioBufferChunk &data);
@@ -61,26 +60,29 @@ class ViAudioBuffer : public QObject, public ViId
 		int replace(int start, const QByteArray &data, int length);
 		int replace(int start, const ViAudioBufferChunk &data);
 		int replace(int start, const ViAudioBufferChunk &data, int length);
-
+*/
 		int insert(int start, const char *data, int length);
 		int insert(int start, const QByteArray &data);
 		int insert(int start, const QByteArray &data, int length);
 		int insert(int start, const ViAudioBufferChunk &data);
 		int insert(int start, const ViAudioBufferChunk &data, int length);
-
+/*
 		int remove(int start);
-		int remove(int start, int end);
+		int remove(int start, int end);*/
 
 	protected:
 
 		int availableSize(int start, int length) const;
 		bool deleteStream(ViAudioBufferStream *stream);
 
+		void lock();
+		void unlock();
+
 	private:
 
 		QByteArray *mData;
 		ViAudioFormat mFormat;
-		QMutex mMutex;
+		ViMutex mMutex;
 		QList<QSharedPointer<ViAudioBufferStream> > mStreams;
 
 };

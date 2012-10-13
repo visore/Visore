@@ -14,14 +14,14 @@ ViProcessingChain::ViProcessingChain()
 	mMultiExecutor.setNotify(true);
 	QObject::connect(&mMultiExecutor, SIGNAL(progressed(short)), this, SIGNAL(changed()));
 
-	mUnderrunHandler = new ViUnderrunHandler(this);
-	mProjectHandler = new ViProjectHandler(this);
+	//mUnderrunHandler = new ViUnderrunHandler(this);
+	//mProjectHandler = new ViProjectHandler(this);
 	mSectionHandler = new ViSectionHandler(this);
-	mPlaybackHandler = new ViPlaybackHandler(this);
-	mHandlers.append(mUnderrunHandler);
-	mHandlers.append(mProjectHandler);
+	//mPlaybackHandler = new ViPlaybackHandler(this);
+	//mHandlers.append(mUnderrunHandler);
+	//mHandlers.append(mProjectHandler);
 	mHandlers.append(mSectionHandler);
-	mHandlers.append(mPlaybackHandler);
+	//mHandlers.append(mPlaybackHandler);
 }
 
 ViProcessingChain::~ViProcessingChain()

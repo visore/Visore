@@ -19,7 +19,8 @@ ViAudioBuffer::~ViAudioBuffer()
 QByteArray* ViAudioBuffer::data()
 {
 	QMutexLocker locker(&mMutex);
-	return mData;
+	QByteArray *data = mData;
+	return data;
 }
 
 void ViAudioBuffer::setData(QByteArray *data)
@@ -45,22 +46,28 @@ ViAudioBufferStream* ViAudioBuffer::createWriteStream()
 ViAudioBufferStream* ViAudioBuffer::createStream(QIODevice::OpenMode mode)
 {
 	QMutexLocker locker(&mMutex);
-	QSharedPointer<ViAudioBufferStream> pointer = QSharedPointer<ViAudioBufferStream>(new ViAudioBufferStream(mode, this, mData, &mMutex));
+	QSharedPointer<ViAudioBufferStream> pointer = QSharedPointer<ViAudioBufferStream>(new ViAudioBufferStream(mode, this, mData));
 	mStreams.append(pointer);
 	return pointer.data();
+	/*ViAudioBufferStream *s = new ViAudioBufferStream(mode, this, mData);
+	return s;*/
 }
 
 int ViAudioBuffer::size()
 {
 	QMutexLocker locker(&mMutex);
-	return mData->size();
+	int theSize = mData->size();
+	return theSize;
+	/*mMutex.lock();
+	int result= mData->size();
+	mMutex.unlock();
+	return result;*/
 }
 
 void ViAudioBuffer::clear()
 {
 	QMutexLocker locker(&mMutex);
 	mData->clear();
-	locker.unlock();
 	emit changed();
 }
 
@@ -68,24 +75,26 @@ void ViAudioBuffer::setFormat(ViAudioFormat format)
 {
 	QMutexLocker locker(&mMutex);
 	mFormat = format;
-	locker.unlock();
 	emit formatChanged(mFormat);
 }
 
 ViAudioFormat ViAudioBuffer::format()
 {
 	QMutexLocker locker(&mMutex);
-	return mFormat;
+	ViAudioFormat format = mFormat;
+	return format;
 }
 
 ViAudioFormat& ViAudioBuffer::formatReference()
 {
 	QMutexLocker locker(&mMutex);
-	return mFormat;
+	ViAudioFormat &format = mFormat;
+	return format;
 }
 
 bool ViAudioBuffer::deleteStream(ViAudioBufferStream *stream)
 {
+	QMutexLocker locker(&mMutex);
 	for(int i = 0; i < mStreams.size(); ++i)
 	{
 		if(*stream == *mStreams[i].data()) // Compare IDs
@@ -98,7 +107,7 @@ bool ViAudioBuffer::deleteStream(ViAudioBufferStream *stream)
 }
 
 /* Buffer access */
-
+/*
 int ViAudioBuffer::availableSize(int start, int length) const
 {
 	start = mData->size() - start;
@@ -111,7 +120,7 @@ int ViAudioBuffer::availableSize(int start, int length) const
 
 int ViAudioBuffer::retrieve(int start, char *data, int length)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	length = availableSize(start, length);
 	memcpy(data, mData->constData(), length);
 	return length;
@@ -124,7 +133,7 @@ int ViAudioBuffer::retrieve(int start, QByteArray &data)
 
 int ViAudioBuffer::retrieve(int start, QByteArray &data, int length)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	length = availableSize(start, length);
 	if(length != data.size())
 	{
@@ -141,7 +150,7 @@ int ViAudioBuffer::retrieve(int start, ViAudioBufferChunk &data)
 
 int ViAudioBuffer::retrieve(int start, ViAudioBufferChunk &data, int length)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	length = availableSize(start, length);
 	if(length != data.size())
 	{
@@ -153,7 +162,7 @@ int ViAudioBuffer::retrieve(int start, ViAudioBufferChunk &data, int length)
 
 int ViAudioBuffer::append(const char *data, int length)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	length = mData->append(data, length).size();
 	locker.unlock();
 	emit changed();
@@ -162,7 +171,7 @@ int ViAudioBuffer::append(const char *data, int length)
 
 int ViAudioBuffer::append(const QByteArray &data)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	int newSize = mData->append(data).size();
 	locker.unlock();
 	emit changed();
@@ -171,7 +180,7 @@ int ViAudioBuffer::append(const QByteArray &data)
 
 int ViAudioBuffer::append(const QByteArray &data, int length)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	if(data.size() < length)
 	{
 		length = data.size();
@@ -184,7 +193,7 @@ int ViAudioBuffer::append(const QByteArray &data, int length)
 
 int ViAudioBuffer::append(const ViAudioBufferChunk &data)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	int newSize = mData->append(data.constData(), data.size()).size();
 	locker.unlock();
 	emit changed();
@@ -193,7 +202,7 @@ int ViAudioBuffer::append(const ViAudioBufferChunk &data)
 
 int ViAudioBuffer::append(const ViAudioBufferChunk &data, int length)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	if(data.size() < length)
 	{
 		length = data.size();
@@ -206,7 +215,7 @@ int ViAudioBuffer::append(const ViAudioBufferChunk &data, int length)
 
 int ViAudioBuffer::replace(int start, const char *data, int length)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	length = mData->replace(start, length, data).size();
 	locker.unlock();
 	emit changed();
@@ -220,7 +229,7 @@ int ViAudioBuffer::replace(int start, const QByteArray &data)
 
 int ViAudioBuffer::replace(int start, const QByteArray &data, int length)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	if(data.size() < length)
 	{
 		length = data.size();
@@ -238,7 +247,7 @@ int ViAudioBuffer::replace(int start, const ViAudioBufferChunk &data)
 
 int ViAudioBuffer::replace(int start, const ViAudioBufferChunk &data, int length)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	if(data.size() < length)
 	{
 		length = data.size();
@@ -247,7 +256,7 @@ int ViAudioBuffer::replace(int start, const ViAudioBufferChunk &data, int length
 	locker.unlock();
 	emit changed();
 	return length;
-}
+}*/
 
 int ViAudioBuffer::insert(int start, const char *data, int length)
 {
@@ -297,7 +306,7 @@ int ViAudioBuffer::insert(int start, const ViAudioBufferChunk &data, int length)
 	emit changed();
 	return length;
 }
-
+/*
 int ViAudioBuffer::remove(int start)
 {
 	return remove(start, mData->size() - start);
@@ -305,9 +314,19 @@ int ViAudioBuffer::remove(int start)
 
 int ViAudioBuffer::remove(int start, int end)
 {
-	QMutexLocker locker(&mMutex);
+	QMutexLocker locker(mMutex);
 	end = mData->remove(start, end).size();
 	locker.unlock();
 	emit changed();
 	return end;
+}
+*/
+void ViAudioBuffer::lock()
+{
+	mMutex.lock();
+}
+
+void ViAudioBuffer::unlock()
+{
+	mMutex.unlock();
 }

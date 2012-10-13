@@ -9,7 +9,7 @@
 #define REQUEST_SAMPLES_1 10000
 #define REQUEST_SAMPLES_2 15000
 #define REQUEST_SAMPLES_3 20000
-#define REQUEST_SAMPLES_4 35000
+#define REQUEST_SAMPLES_4 45000
 #define REQUEST_SAMPLES_5 90000
 
 ViSongCodeGeneratorThread::ViSongCodeGeneratorThread(QObject *parent)
@@ -89,6 +89,10 @@ void ViSongDetector::finalize()
 
 void ViSongDetector::run()
 {
+	if(!mObject->isSong())
+	{
+		return;
+	}
 	mIsEnabledMutex.lock();
 	bool isEnabled = mIsEnabled;
 	mIsEnabledMutex.unlock();
@@ -99,7 +103,7 @@ void ViSongDetector::run()
 			mError = ViSongDetector::KeyError;
 			return;
 		}
-		qint64 bufferLength = ViAudioPosition::convertPosition(mBuffer->size(), ViAudioPosition::Bytes, ViAudioPosition::Milliseconds, mBuffer->format());
+		qint64 bufferLength = ViAudioPosition::convertPosition(mObject->originalBuffer()->size(), ViAudioPosition::Bytes, ViAudioPosition::Milliseconds, mObject->originalBuffer()->format());
 		if(!mRequestSent && (mRequestsSent == 0 && bufferLength >= REQUEST_SAMPLES_1)
 			|| (mRequestsSent == 1 && bufferLength >= REQUEST_SAMPLES_2)
 			|| (mRequestsSent == 2 && bufferLength >= REQUEST_SAMPLES_3)
@@ -136,7 +140,7 @@ void ViSongDetector::run()
 			format.setChannelCount(1);
 			format.setCodec(ViAudioManager::codec("WAVE"));
 			mOutput.clear();
-			mCoder.encode(mBuffer, mOutput, format);
+			mCoder.encode(mObject->originalBuffer(), mOutput, format);
 		}
 	}
 }
@@ -158,7 +162,7 @@ void ViSongDetector::encodingFinished()
 void ViSongDetector::codeFinished(QString code, QString version, int codeLength)
 {
 	setState(ViSongDetector::SongDetection);
-	QObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+	QObject::connect(mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)), Qt::UniqueConnection);
 	QUrl url("http://developer.echonest.com/api/v4/song/identify?api_key=" + mKey + "&bucket=id:7digital-US&bucket=tracks&bucket=audio_summary&bucket=artist_familiarity&bucket=artist_hotttnesss&bucket=song_hotttnesss");
 	QNetworkRequest request(url);
 	request.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/octet-stream"));

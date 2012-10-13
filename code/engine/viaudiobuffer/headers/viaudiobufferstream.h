@@ -1,10 +1,10 @@
 #ifndef VIAUDIOBUFFERSTREAM_H
 #define VIAUDIOBUFFERSTREAM_H
 
+#include "vimutexlocker.h"
 #include "vichunk.h"
 #include "viid.h"
 #include <QBuffer>
-#include <QMutex>
 
 typedef ViChunk<char> ViAudioBufferChunk;
 
@@ -41,7 +41,7 @@ class ViAudioBufferStream : public ViId
 		void restart();
 
 		int position();
-		int setPosition(int position);
+		bool setPosition(int position);
 		bool isValidPosition(int position);
 		bool atEnd();
 		
@@ -50,13 +50,13 @@ class ViAudioBufferStream : public ViId
 	protected:
 
 		//Protected constructor, to ensure that a QSharePointer is created from within ViBuffer
-		ViAudioBufferStream(QIODevice::OpenMode mode, ViAudioBuffer *buffer, QByteArray *data, QMutex *mutex);
+		ViAudioBufferStream(QIODevice::OpenMode mode, ViAudioBuffer *buffer, QByteArray *data);
 
 	private:
 
 		ViAudioBuffer *mBuffer;
-		QMutex *mMutex;
 		QBuffer *mDevice;
+		ViMutex mStreamMutex;
 
 };
 

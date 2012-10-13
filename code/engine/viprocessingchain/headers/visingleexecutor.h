@@ -9,8 +9,7 @@ class ViSingleExecutor : public ViExecutor
 	public:
 
 		ViSingleExecutor();
-		bool execute(ViAudioBuffer *buffer, ViProcessor *processor);
-		bool execute(ViAudioBuffer *inputBuffer, ViAudioBuffer *outputBuffer, ViProcessor *processor);
+		bool execute(ViAudioObject *object, ViProcessor *processor);
 
 	protected:
 

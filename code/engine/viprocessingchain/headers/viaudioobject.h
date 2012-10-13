@@ -2,6 +2,8 @@
 #define VIAUDIOOBJECT_H
 
 #include "viaudiobuffer.h"
+#include <QMutex>
+#include <QMutexLocker>
 
 class ViAudioObject : public QObject
 {
@@ -18,9 +20,12 @@ class ViAudioObject : public QObject
 		ViAudioObject(ViAudioBuffer *original, ViAudioBuffer *corrected, bool autoDestruct = true);
 		~ViAudioObject();
 		
+		void setSong(bool song = true); //If the buffers represent a song, or if they are just intermediate buffers
 		void setBuffers(ViAudioBuffer *original, ViAudioBuffer *corrected);
 		void setOriginalBuffer(ViAudioBuffer *buffer);
 		void setCorrectedBuffer(ViAudioBuffer *buffer);
+
+		bool isSong();
 		void clearBuffers();
 		void clearOriginalBuffer();
 		void clearCorrectedBuffer();
@@ -32,8 +37,10 @@ class ViAudioObject : public QObject
 
 	private:
 
+		QMutex mMutex;
 		bool mAutoDestruct;
 		bool mIsFinished;
+		bool mIsSong;
 		ViAudioBuffer *mOriginalBuffer;
 		ViAudioBuffer *mCorrectedBuffer;
 };

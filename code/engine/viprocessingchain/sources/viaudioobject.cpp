@@ -5,6 +5,7 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 {
 	mAutoDestruct = autoDestruct;
 	mIsFinished = false;
+	mIsSong = false;
 	mOriginalBuffer = NULL;
 	mCorrectedBuffer = NULL;
 }
@@ -13,6 +14,7 @@ ViAudioObject::ViAudioObject(ViAudioBuffer *original, ViAudioBuffer *corrected, 
 	: QObject()
 {
 	mAutoDestruct = autoDestruct;
+	mIsSong = false;
 	setBuffers(original, corrected);
 }
 
@@ -23,6 +25,12 @@ ViAudioObject::~ViAudioObject()
 		clearBuffers();
 	}
 }
+
+void ViAudioObject::setSong(bool song)
+{
+	QMutexLocker locker(&mMutex);
+	mIsSong = song;
+}
 		
 void ViAudioObject::setBuffers(ViAudioBuffer *original, ViAudioBuffer *corrected)
 {
@@ -32,12 +40,20 @@ void ViAudioObject::setBuffers(ViAudioBuffer *original, ViAudioBuffer *corrected
 
 void ViAudioObject::setOriginalBuffer(ViAudioBuffer *buffer)
 {
+	QMutexLocker locker(&mMutex);
 	mOriginalBuffer = buffer;
 }
 
 void ViAudioObject::setCorrectedBuffer(ViAudioBuffer *buffer)
 {
+	QMutexLocker locker(&mMutex);
 	mCorrectedBuffer = buffer;
+}
+
+bool ViAudioObject::isSong()
+{
+	QMutexLocker locker(&mMutex);
+	return mIsSong;
 }
 
 void ViAudioObject::clearBuffers()
@@ -48,6 +64,7 @@ void ViAudioObject::clearBuffers()
 
 void ViAudioObject::clearOriginalBuffer()
 {
+	QMutexLocker locker(&mMutex);
 	if(mOriginalBuffer != NULL)
 	{
 		delete mOriginalBuffer;
@@ -57,6 +74,7 @@ void ViAudioObject::clearOriginalBuffer()
 
 void ViAudioObject::clearCorrectedBuffer()
 {
+	QMutexLocker locker(&mMutex);
 	if(mCorrectedBuffer != NULL)
 	{
 		delete mCorrectedBuffer;
@@ -66,16 +84,19 @@ void ViAudioObject::clearCorrectedBuffer()
 
 ViAudioBuffer* ViAudioObject::originalBuffer()
 {
+	QMutexLocker locker(&mMutex);
 	return mOriginalBuffer;
 }
 
 ViAudioBuffer* ViAudioObject::correctedBuffer()
 {
+	QMutexLocker locker(&mMutex);
 	return mCorrectedBuffer;
 }
 
 void ViAudioObject::setFinished(bool isFinished)
 {
+	QMutexLocker locker(&mMutex);
 	mIsFinished = isFinished;
 	if(mIsFinished)
 	{
@@ -85,5 +106,6 @@ void ViAudioObject::setFinished(bool isFinished)
 
 bool ViAudioObject::isFinished()
 {
+	QMutexLocker locker(&mMutex);
 	return mIsFinished;
 }

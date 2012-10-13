@@ -63,7 +63,7 @@ void ViSectionHandler::startSong()
 	{
 		//mChain->startOutput();
 	}*/
-	//emit mChain->songStarted();
+	emit mChain->songStarted();
 }
 
 void ViSectionHandler::endSong()
@@ -94,6 +94,7 @@ void ViSectionHandler::startInput(bool isSong)
 	ViAudioObject *object = new ViAudioObject(inputBuffer, outputBuffer);
 	if(isSong)
 	{
+		object->setSong();
 		mChain->mAudioObjects.enqueue(object);
 		mCurrentSongObject = object;
 	}
@@ -103,8 +104,7 @@ void ViSectionHandler::startInput(bool isSong)
 	}
 
 	input()->setBuffer(inputBuffer);
-	executor()->setBuffer(ViAudio::AudioInput, inputBuffer);
-	executor()->setBuffer(ViAudio::AudioOutput, outputBuffer);
+	executor()->setObject(object);
 	executor()->initialize();
 
 }
@@ -120,6 +120,7 @@ void ViSectionHandler::endInput()
 
 	qDeleteAll(mNoSongObjects);
 	mNoSongObjects.clear();
+
 	/*if(mInputBuffer != NULL)
 	{
 		mInputBuffers.enqueue(mInputBuffer);

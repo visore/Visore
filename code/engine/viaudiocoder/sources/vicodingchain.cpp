@@ -253,7 +253,6 @@ void ViCodingChain::run()
 
 	mOutput->initialize();
 	if(mError != ViCoder::NoError) return;
-
 	if(mMode != ViCodingChain::EncodeFile && mMode != ViCodingChain::EncodeData)
 	{
 		mDecoder.setCoder(mInputCoder);
