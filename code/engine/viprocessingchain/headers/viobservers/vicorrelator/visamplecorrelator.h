@@ -11,7 +11,7 @@ class ViSampleCorrelator : public ViCorrelatorStrategy
 		ViSampleCorrelator();
 		void initialize();
 		void finalize();
-		void run();
+		void execute();
 
 	private:
 

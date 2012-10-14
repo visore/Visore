@@ -98,12 +98,8 @@ int ViExecutor::defaultWindowSize()
 
 void ViExecutor::setFormat(ViAudioFormat format)
 {
-	mOutputFormat = format;
-	if(mWriteStream != NULL)
-	{
-		mObject->correctedBuffer()->setFormat(mOutputFormat);
-		mOutputConverter.setSize(mOutputFormat.sampleSize());
-	}
+	QObject::disconnect(mObject->originalBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)));
+	initialize();
 }
 
 void ViExecutor::execute()
@@ -124,8 +120,13 @@ void ViExecutor::initialize()
 	if(mReadStream != NULL)
 	{
 		mInputFormat = mObject->originalBuffer()->format();
+		if(!mInputFormat.isValid())
+		{
+			mWasInitialized = false;
+			QObject::connect(mObject->originalBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)), Qt::UniqueConnection);
+			return;
+		}
 		mInputConverter.setSize(mInputFormat.sampleSize());
-		QObject::connect(mObject->originalBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)), Qt::UniqueConnection);
 	}
 	if(mWriteStream != NULL)
 	{
@@ -185,7 +186,7 @@ void ViExecutor::initialize()
 	mRateCounter = 0;
 	mTimer.start(1000);
 
-	QObject::connect(mObject->originalBuffer(), SIGNAL(changed()), this, SLOT(execute()));
+	QObject::connect(mObject->originalBuffer(), SIGNAL(changed()), this, SLOT(execute()), Qt::UniqueConnection);
 }
 
 void ViExecutor::finalize()

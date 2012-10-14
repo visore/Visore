@@ -41,7 +41,11 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 		virtual void initialize();
 		virtual void finalize();
 
-		virtual void run() = 0;
+		virtual void execute() = 0;
+		virtual void run();
+
+		bool isEnabled();
+		bool isDisabled();
 
 	protected:
 

@@ -24,7 +24,7 @@ class ViSpectrumAnalyzer : public ViObserver
 		void setInterval(int milliseconds);
 		void initialize();
 		void finalize();
-		void run();
+		void execute();
 
 	private:
 

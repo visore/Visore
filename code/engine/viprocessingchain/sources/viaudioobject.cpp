@@ -100,6 +100,7 @@ void ViAudioObject::setFinished(bool isFinished)
 	mIsFinished = isFinished;
 	if(mIsFinished)
 	{
+		locker.unlock();
 		emit finished();
 	}
 }

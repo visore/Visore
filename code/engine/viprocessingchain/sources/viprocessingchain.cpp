@@ -15,11 +15,11 @@ ViProcessingChain::ViProcessingChain()
 	QObject::connect(&mMultiExecutor, SIGNAL(progressed(short)), this, SIGNAL(changed()));
 
 	//mUnderrunHandler = new ViUnderrunHandler(this);
-	//mProjectHandler = new ViProjectHandler(this);
+	mProjectHandler = new ViProjectHandler(this);
 	mSectionHandler = new ViSectionHandler(this);
 	//mPlaybackHandler = new ViPlaybackHandler(this);
 	//mHandlers.append(mUnderrunHandler);
-	//mHandlers.append(mProjectHandler);
+	mHandlers.append(mProjectHandler);
 	mHandlers.append(mSectionHandler);
 	//mHandlers.append(mPlaybackHandler);
 }
@@ -65,11 +65,11 @@ void ViProcessingChain::setProject(ViProject *project, ViAudioFormat format, boo
 	mProjectHandler->create(project, format);
 	if(play)
 	{
-		mPlaybackHandler->enable();
+		//mPlaybackHandler->enable();
 	}
 	else
 	{
-		mPlaybackHandler->disable();
+		//mPlaybackHandler->disable();
 	}
 }
 

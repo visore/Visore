@@ -12,7 +12,7 @@ class ViSampleEndDetector : public ViEndDetector
 		ViSampleEndDetector();
 		void setThreshold(ViEndDetector::Type type, int milliseconds, qreal value);
 		void initialize();
-		void run();
+		void execute();
 
 	protected:
 

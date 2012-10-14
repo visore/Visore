@@ -15,7 +15,7 @@ class ViCrossCorrelator : public ViCorrelatorStrategy
 		void setWindowSize(int windowSize);
 		void initialize();
 		void finalize();
-		void run();
+		void execute();
 
 	protected:
 

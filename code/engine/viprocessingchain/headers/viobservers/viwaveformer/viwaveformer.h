@@ -12,7 +12,7 @@ class ViWaveFormer : public ViObserver
 		ViWaveFormer();
 		ViWaveForm& wave();
 		void initialize();
-		void run();
+		void execute();
 
 	private:
 		

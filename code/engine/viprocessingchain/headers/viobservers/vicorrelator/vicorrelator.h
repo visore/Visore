@@ -18,7 +18,7 @@ class ViCorrelator : public ViDualObserver
 		void setWindowSize(int windowSize);
 		void initialize();
 		void finalize();
-		void run();
+		void execute();
 		
 	private:
 		

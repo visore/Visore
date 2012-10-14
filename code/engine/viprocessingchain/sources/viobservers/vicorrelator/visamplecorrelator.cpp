@@ -24,7 +24,7 @@ void ViSampleCorrelator::finalize()
 	));
 }
 
-void ViSampleCorrelator::run()
+void ViSampleCorrelator::execute()
 {
 	qreal difference;
 	qreal *data = mData->data();

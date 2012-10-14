@@ -87,7 +87,7 @@ void ViSongDetector::finalize()
 	mCoder.stop();
 }
 
-void ViSongDetector::run()
+void ViSongDetector::execute()
 {
 	if(!mObject->isSong())
 	{

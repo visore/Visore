@@ -42,6 +42,14 @@ void ViProcessor::finalize()
 {
 }
 
+void ViProcessor::run()
+{
+	if(mIsEnabled)
+	{
+		execute();
+	}
+}
+
 void ViProcessor::enable()
 {
 	mIsEnabledMutex.lock();
@@ -54,6 +62,16 @@ void ViProcessor::disable()
 	mIsEnabledMutex.lock();
 	mIsEnabled = false;
 	mIsEnabledMutex.unlock();
+}
+
+bool ViProcessor::isEnabled()
+{
+	return mIsEnabled;
+}
+
+bool ViProcessor::isDisabled()
+{
+	return !mIsEnabled;
 }
 
 ViObserver::ViObserver()

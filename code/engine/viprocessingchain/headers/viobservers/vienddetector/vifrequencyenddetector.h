@@ -26,7 +26,7 @@ class ViFrequencyEndDetector : public ViEndDetector
 		void setThreshold(ViEndDetector::Type type, ViRange rangeThreshold, ViRange valueThreshold, qint64 timeThreshold);
 
 		void initialize();
-		void run();
+		void execute();
 
 	private:
 

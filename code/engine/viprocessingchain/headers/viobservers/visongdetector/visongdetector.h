@@ -83,7 +83,7 @@ class ViSongDetector : public ViObserver
 
 		void initialize();
 		void finalize();
-		void run();
+		void execute();
 
 		void setProxy(QNetworkProxy::ProxyType type, QString host, quint16 port, QString username, QString password);
 		void setKey(QString key);

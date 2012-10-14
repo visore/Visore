@@ -44,7 +44,7 @@ void ViCrossCorrelator::finalize()
 	));
 }
 
-void ViCrossCorrelator::run()
+void ViCrossCorrelator::execute()
 {
 	qreal subAverageDifference, subSampleCounter, difference, firstNorm, secondNorm, multipliedNorm;
 

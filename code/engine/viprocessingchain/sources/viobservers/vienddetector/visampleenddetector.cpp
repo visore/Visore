@@ -54,7 +54,7 @@ void ViSampleEndDetector::initialize()
 	setRecordStartCache();
 }
 
-void ViSampleEndDetector::run()
+void ViSampleEndDetector::execute()
 {
 	qreal value;
 

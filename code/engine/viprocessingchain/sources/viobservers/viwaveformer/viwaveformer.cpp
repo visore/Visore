@@ -15,7 +15,7 @@ void ViWaveFormer::initialize()
 	mForm.clear();
 }
 
-void ViWaveFormer::run()
+void ViWaveFormer::execute()
 {
 	for(int i = 0; i < mData->size(); ++i)
 	{

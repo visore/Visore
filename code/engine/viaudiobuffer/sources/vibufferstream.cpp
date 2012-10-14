@@ -119,14 +119,14 @@ bool ViBufferStream::setPosition(int position)
 
 bool ViBufferStream::isValidPosition(int position)
 {
-	QMutexLocker streamLocker(&mStreamMutex);
 	return position < mBuffer->size();
 }
 
 bool ViBufferStream::atEnd()
 {
 	QMutexLocker streamLocker(&mStreamMutex);
-	return mDevice->pos() >= (mBuffer->size() - 1);
+	int position = mDevice->pos();
+	return position >= (mBuffer->size() - 1);
 }
 
 ViBuffer* ViBufferStream::buffer()

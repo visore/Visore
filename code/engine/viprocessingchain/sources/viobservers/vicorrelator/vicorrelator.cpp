@@ -59,7 +59,7 @@ void ViCorrelator::finalize()
 	}
 }
 
-void ViCorrelator::run()
+void ViCorrelator::execute()
 {
 	for(int i = 0; i < mCorrelators.size(); ++i)
 	{

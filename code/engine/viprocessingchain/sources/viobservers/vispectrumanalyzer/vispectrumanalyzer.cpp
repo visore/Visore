@@ -57,7 +57,7 @@ void ViSpectrumAnalyzer::finalize()
 	}
 }
 
-void ViSpectrumAnalyzer::run()
+void ViSpectrumAnalyzer::execute()
 {
 	int size = mData->size();
 	qreal *data = mData->data();
