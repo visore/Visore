@@ -1,12 +1,5 @@
 #include "viaudioobjectqueue.h"
 #include "vilogger.h"
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
-void d(ViAudioObject *object)
-{
-
-}
 
 ViAudioObjectQueue::ViAudioObjectQueue()
 	: QObject()
@@ -20,21 +13,17 @@ ViAudioObjectQueue::~ViAudioObjectQueue()
 
 void ViAudioObjectQueue::enqueue(ViAudioObjectPointer object)
 {
-	boost::function<void(ViAudioObject*)> f = bind(&ViAudioObjectQueue::remove, this, _1);
-	void *ff = f;
-	object.setDeleter(ViFunctorObject<ViAudioObjectQueue, ViAudioObject>(this, &ViAudioObjectQueue::remove));
-	//object.setUnusedLimit(1);
+	object.setUnusedLimit(1);
+	object.setDeleter(this);
+	//QObject::connect(object.data(), SIGNAL(finished()), this, SLOT(finish()), Qt::UniqueConnection);
 	mQueue.enqueue(object);
-	QObject::connect(object.data(), SIGNAL(finished()), this, SLOT(finish()), Qt::UniqueConnection);
-	//QObject::connect(&object, SIGNAL(unused()), this, SLOT(remove()), Qt::UniqueConnection);
-	emit enqueued(object);
+	//emit enqueued(object);
 }
 
 ViAudioObjectPointer ViAudioObjectQueue::dequeue()
 {
 	ViAudioObjectPointer object = mQueue.dequeue();
-	QObject::disconnect(object.data(), SIGNAL(finished()), this, SLOT(finish()));
-	//QObject::disconnect(&object, SIGNAL(unused()), this, SLOT(remove()));
+	//QObject::disconnect(object.data(), SIGNAL(finished()), this, SLOT(finish()));
 	emit dequeued(object);
 	return object;
 }
@@ -54,27 +43,17 @@ void ViAudioObjectQueue::finish()
 }
 
 void ViAudioObjectQueue::remove(ViAudioObject *object)
-{LOG("zxxxx11");
-	/*for(int i = 0; i < size(); ++i)
-	{
-		if(object == mQueue[i])
-		{
-			QObject::disconnect(mQueue[i].data(), SIGNAL(finished()), this, SLOT(finish()));
-			QObject::disconnect(&mQueue[i], SIGNAL(unused()), this, SLOT(remove()));
-			mQueue.removeAt(i);
-			return;
-		}
-	}*/
-	/*for(int i = 0; i < size(); ++i)
+{
+	for(int i = 0; i < size(); ++i)
 	{
 		if(object == mQueue[i].data())
 		{
-			QObject::disconnect(mQueue[i].data(), SIGNAL(finished()), this, SLOT(finish()));
-			//QObject::disconnect(&mQueue[i], SIGNAL(unused()), this, SLOT(remove()));
+			//QObject::disconnect(mQueue[i].data(), SIGNAL(finished()), this, SLOT(finish()));
 			mQueue.removeAt(i);
-			return;
+			break;
 		}
-	}*/
+	}
+	cout<<"xxx2: "<<size()<<endl;
 }
 
 int ViAudioObjectQueue::size()
@@ -100,4 +79,13 @@ ViAudioObjectPointer ViAudioObjectQueue::first()
 ViAudioObjectPointer ViAudioObjectQueue::last()
 {
 	return mQueue.last();
+}
+
+void ViAudioObjectQueue::execute(ViFunctorParameter *data)
+{
+	ViAudioObject *object = static_cast<ViAudioObject*>(data);
+	if(object != NULL)
+	{
+		remove(object);
+	}
 }

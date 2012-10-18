@@ -4,7 +4,7 @@
 #include "viaudioobject.h"
 #include <QQueue>
 
-class ViAudioObjectQueue : public QObject
+class ViAudioObjectQueue : public QObject, public ViFunctor
 {
 
     Q_OBJECT
@@ -36,6 +36,10 @@ class ViAudioObjectQueue : public QObject
 
 		ViAudioObjectPointer first();
 		ViAudioObjectPointer last();
+
+	protected:
+
+		void execute(ViFunctorParameter *data = NULL);
 
 	private:
 

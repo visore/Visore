@@ -2,41 +2,30 @@
 #define VIPOINTER_H
 
 #include "viatomicint.h"
-/*
-#include <QSharedPointer>
+#include "vifunctor.h"
 
 template<class T>
-class ViPointer : public QSharedPointer<T>
+class ViPointerData
 {
 
 	public:
 
+		ViPointerData()
+		{
+		mData = NULL;
+		mCounter = NULL;
+		mLimiter = NULL;
+		mDeleter = NULL;
+		}
 
-		typedef void (*Deleter)(T*);
+	//private:
 
-	public:
-
-		ViPointer();
-		ViPointer(T *pointer);
-		ViPointer(T *pointer, Deleter deleter);
-		ViPointer(const ViPointer<T> &other);
-		ViPointer(const QSharedPointer<T> &other);
-		ViPointer(const QWeakPointer<T> &other);
-		virtual ~ViPointer();
-
-		int referenceCount();
-		bool isUsed();
-
-		ViPointer<T>& operator = (const QSharedPointer<T> &other);
-
-	private:
-
+		T* mData;
 		ViAtomicInt *mCounter;
-		
-};
-*/
+		ViAtomicInt *mLimiter;
+		ViFunctor *mDeleter;
 
-#include "vifunctor.h"
+};
 
 template<class T>
 class ViPointer
@@ -49,7 +38,8 @@ class ViPointer
 		ViPointer(const ViPointer<T> &other);
 		virtual ~ViPointer();
 
-		void setDeleter(ViFunctor deleter){mDeleter = deleter;}
+		void setDeleter(ViFunctor *deleter);
+		void setUnusedLimit(int limit);
 
 		int referenceCount();
 		bool isUsed();
@@ -58,17 +48,26 @@ class ViPointer
 		T* data();
 		T& operator * ();
 		T* operator -> ();
+		ViPointer<T>& operator = (const ViPointer<T> &other);
+
+		bool operator == (const ViPointer<T> &other);
+		bool operator == (const T &other);
+		bool operator == (const T *other);
+		bool operator != (const ViPointer<T> &other);
+		bool operator != (const T &other);
+		bool operator != (const T *other);
+
+	protected:
+
+		void destruct();
 
 	private:
 
-		T* mData;
-		ViAtomicInt *mCounter;
-		ViAtomicInt *mLimiter;
-		ViFunctor mDeleter;
+		ViPointerData<T> *mData;
 		
 };
 
 //Template decleration and implementation should actually be in the same file
-#include "../sources/vipointer.cpp"
+#include "vipointer.cpp"
 
 #endif

@@ -95,12 +95,13 @@ void ViSectionHandler::startInput(bool isSong)
 	//QMutexLocker locker(&mMutex);
 	ViBuffer *inputBuffer = allocateBuffer();
 	ViBuffer *outputBuffer = allocateBuffer();
+
 	ViAudioObjectPointer object = ViAudioObject::create(inputBuffer, outputBuffer);
 	if(isSong)
 	{
 		object->setSong();
 		mChain->mAudioObjects.enqueue(object);
-		mCurrentSongObject = object;
+		//mCurrentSongObject = object;
 	}
 	else
 	{
@@ -108,21 +109,26 @@ void ViSectionHandler::startInput(bool isSong)
 	}
 
 	input()->setBuffer(inputBuffer);
+//LOG("**1: "+QString::number(object.referenceCount()));
 	executor()->setObject(object);
+//LOG("**2: "+QString::number(object.referenceCount()));
 	executor()->initialize();
+//LOG("**4: "+QString::number(object.referenceCount()));
 
 }
 
 void ViSectionHandler::endInput()
 {
 	executor()->finalize();
-	if(!mCurrentSongObject.isNull())
+	/*if(!mCurrentSongObject.isNull())
 	{
 		mCurrentSongObject->setFinished();
 		mCurrentSongObject = ViAudioObject::createNull();
 	}
-
+*/
 	mNoSongObjects.clear();
+
+
 
 	/*if(mInputBuffer != NULL)
 	{

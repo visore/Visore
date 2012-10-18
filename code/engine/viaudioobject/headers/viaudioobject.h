@@ -1,6 +1,7 @@
 #ifndef VIAUDIOOBJECT_H
 #define VIAUDIOOBJECT_H
 
+#include "vifunctor.h"
 #include "vibuffer.h"
 #include "viaudioobjectpointer.h"
 #include <QMutex>
@@ -9,7 +10,7 @@
 class ViAudioObject;
 typedef ViPointer<ViAudioObject> ViAudioObjectPointer;
 
-class ViAudioObject : public QObject
+class ViAudioObject : public QObject, public ViFunctorParameter
 {
 
     Q_OBJECT
