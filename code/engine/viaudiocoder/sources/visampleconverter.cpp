@@ -1,5 +1,6 @@
 #include <visampleconverter.h>
-
+#include <iostream>
+using namespace std;
 ViSampleConverter::ViSampleConverter()
 {
 	mFloatSampleSize = 1;

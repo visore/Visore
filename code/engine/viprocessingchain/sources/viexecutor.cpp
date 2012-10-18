@@ -12,7 +12,7 @@ ViExecutor::ViExecutor()
 	mInputSamples = NULL;
 	mOutputSamples = NULL;
 	mOutputChunk = NULL;
-	mObject = NULL;
+	mObject = ViAudioObject::createNull();
 	QObject::connect(&mTimer, SIGNAL(timeout()), this, SLOT(updateProcessingRate()));
 }
 
@@ -67,7 +67,7 @@ bool ViExecutor::detach(ViProcessor *processor)
 	return mProcessors.remove(processor);
 }
 
-void ViExecutor::setObject(ViAudioObject *object)
+void ViExecutor::setObject(ViAudioObjectPointer object)
 {
 	mObject = object;
 	if(mInputChunk == NULL)
@@ -194,7 +194,7 @@ void ViExecutor::finalize()
 	if(mWasInitialized)
 	{
 		while(isRunning()); // TODO: busy waiting here?
-		if(!mReadStream.isNull() && mObject->originalBuffer() != NULL)
+		if(!mReadStream.isNull() && !mObject.isNull())
 		{
 			QObject::disconnect(mObject->originalBuffer(), SIGNAL(changed()), this, SLOT(execute()));
 		}

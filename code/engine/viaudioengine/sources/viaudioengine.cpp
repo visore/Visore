@@ -19,7 +19,9 @@ ViAudioEngine::ViAudioEngine()
 	mStreamOutput = mConnection.streamOutput();
 
 	QObject::connect(&mProcessingChain, SIGNAL(changed()), this, SIGNAL(chainChanged()));
+	QObject::connect(&mProcessingChain, SIGNAL(progressStarted()), this, SIGNAL(progressStarted()));
 	QObject::connect(&mProcessingChain, SIGNAL(progress(short)), this, SIGNAL(progress(short)));
+	QObject::connect(&mProcessingChain, SIGNAL(progressFinished()), this, SIGNAL(progressFinished()));
 	QObject::connect(&mProcessingChain, SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
 
 	mProcessingChain.setTransmission(mStreamOutput);
@@ -44,9 +46,10 @@ ViAudioEngine::ViAudioEngine()
 	mProcessingChain.attach(ViAudio::AudioOutput, &mSpectrumAnalyzer);
 	
 	//Song detector
+	mSongIdentifier.setKey("G1TZBE4IHJAYUSNCN");
+	mSongDetector.setIdentifier(&mSongIdentifier);
 	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
 	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), mFileOutput, SLOT(setSongInfo(ViSongInfo)));
-	mSongDetector.setKey("G1TZBE4IHJAYUSNCN");
 	mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
 
 	ViFrequencyEndDetector *endDetector = new ViFrequencyEndDetector();
@@ -64,11 +67,6 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SIGNAL(songEnded()), Qt::DirectConnection);
 
 	mProcessingChain.attach(ViAudio::AudioInput, mEndDetector);
-
-	//Project manager
-	QObject::connect(&mProjectManager, SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)), Qt::DirectConnection);
-	QObject::connect(&mProjectManager, SIGNAL(started()), this, SIGNAL(progressStarted()), Qt::DirectConnection);
-	QObject::connect(&mProjectManager, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::DirectConnection);
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -179,12 +177,7 @@ void ViAudioEngine::calculateCorrelation()
 
 void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, bool play)
 {
-	mProjectManager.setProjectName(name);
-	mProjectManager.setFilePath(filePath);
-	mProjectManager.setSideCount(recordSides);
-	mProjectManager.setPlayback(play);
 	changeInput(ViAudio::Line);
-	mProcessingChain.setProject(mProjectManager.project(), format, play);
-	mProjectManager.start();
+	mProcessingChain.setProject(name, filePath, format, recordSides);
 	startRecording();
 }

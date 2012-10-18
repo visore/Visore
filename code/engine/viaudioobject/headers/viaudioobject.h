@@ -2,8 +2,12 @@
 #define VIAUDIOOBJECT_H
 
 #include "vibuffer.h"
+#include "viaudioobjectpointer.h"
 #include <QMutex>
 #include <QMutexLocker>
+
+class ViAudioObject;
+typedef ViPointer<ViAudioObject> ViAudioObjectPointer;
 
 class ViAudioObject : public QObject
 {
@@ -16,8 +20,10 @@ class ViAudioObject : public QObject
 
 	public:
 
-		ViAudioObject(bool autoDestruct = true); //autoDestruct determines if the buffers will be deleted automatically.
-		ViAudioObject(ViBuffer *original, ViBuffer *corrected, bool autoDestruct = true);
+		static ViAudioObjectPointer create(ViAudioObject *object);
+		static ViAudioObjectPointer create(bool autoDestruct = true);
+		static ViAudioObjectPointer create(ViBuffer *original, ViBuffer *corrected, bool autoDestruct = true);
+		static ViAudioObjectPointer createNull();
 		~ViAudioObject();
 		
 		void setSong(bool song = true); //If the buffers represent a song, or if they are just intermediate buffers
@@ -34,6 +40,11 @@ class ViAudioObject : public QObject
 
 		void setFinished(bool isFinished = true);
 		bool isFinished();
+
+	private:
+
+		ViAudioObject(bool autoDestruct); //autoDestruct determines if the buffers will be deleted automatically.
+		ViAudioObject(ViBuffer *original, ViBuffer *corrected, bool autoDestruct);
 
 	private:
 

@@ -6,7 +6,6 @@
 #include <QTimer>
 #include "viaudioconnection.h"
 #include "vimultiexecutor.h"
-#include "viprojectmanager.h"
 #include "viaudioobjectqueue.h"
 
 class ViHandler;
@@ -28,7 +27,9 @@ class ViProcessingChain : public QObject
 	signals:
 
 		void changed();
+		void progressStarted();
 		void progress(short progress);
+		void progressFinished();
 		void statusChanged(QString status);
 
 		void inputChanged();
@@ -48,12 +49,12 @@ class ViProcessingChain : public QObject
 
 		void setWindowSize(int windowSize);
 		void setTransmission(ViAudioTransmission *transmission);
-		void setProject(ViProject *project, ViAudioFormat format, bool play);
+		void setProject(QString name, QString filePath, ViAudioFormat format, short recordSides);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
 
-		ViAudioObject* recordingObject();
-		ViAudioObject* playingObject();
+		ViAudioObjectPointer recordingObject();
+		ViAudioObjectPointer playingObject();
 
 	protected:
 

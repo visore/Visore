@@ -38,7 +38,7 @@ class ViExecutor : public QThread
 		void setNotify(bool notify);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
-		void setObject(ViAudioObject *object);
+		void setObject(ViAudioObjectPointer object);
 
 		static int defaultWindowSize();
 
@@ -66,7 +66,7 @@ class ViExecutor : public QThread
 		ViPcmConverter<qreal> mInputConverter;
 		ViPcmConverter<qreal> mOutputConverter;
 
-		ViAudioObject *mObject;
+		ViAudioObjectPointer mObject;
 		ViBufferStreamPointer mReadStream;
 		ViBufferStreamPointer mWriteStream;
 

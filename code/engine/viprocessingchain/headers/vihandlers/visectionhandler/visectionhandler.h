@@ -12,6 +12,13 @@ class ViSectionHandler : public ViHandler
 
     Q_OBJECT
 
+	signals:
+
+		void songStarted();
+		void songEnded();
+		void recordStarted();
+		void recordEnded();
+
 	private slots:
 
 		void startRecord();
@@ -32,7 +39,7 @@ class ViSectionHandler : public ViHandler
 		ViSectionHandler(ViProcessingChain *chain);
 		~ViSectionHandler();
 
-		ViAudioObject* currentObject();
+		ViAudioObjectPointer currentObject();
 		bool isSongRunning();
 		bool wasSongRunning();
 
@@ -58,8 +65,8 @@ class ViSectionHandler : public ViHandler
 		bool mPlayAutomatically;
 		bool mIsPlaying;
 
-		ViAudioObject *mCurrentSongObject;
-		QQueue<ViAudioObject*> mNoSongObjects;
+		ViAudioObjectPointer mCurrentSongObject;
+		ViAudioObjectQueue mNoSongObjects;
 
 };
 

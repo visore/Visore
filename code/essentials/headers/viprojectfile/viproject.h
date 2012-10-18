@@ -30,6 +30,11 @@ class ViProject : public QObject, public ViId
 		void load();
 		void save();
 
+		int sideCount();
+		int currentSide();
+		void setSideCount(int count);
+		bool nextSide();
+
 		//Properties
 		void setProjectName(QString name);
 		QString projectName();
@@ -57,6 +62,8 @@ class ViProject : public QObject, public ViId
 
 	private:
 
+		int mSideCount;
+		int mCurrentSide;
 		QString mTempPath;
 		QString mDataPath;
 		QString mOriginalPath;

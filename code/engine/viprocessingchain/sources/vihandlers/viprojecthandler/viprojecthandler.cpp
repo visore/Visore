@@ -1,31 +1,60 @@
 #include "viprojecthandler.h"
 #include "viaudiocodec.h"
 
-#define MINIMUM_SONG_LENGTH 1500
+#define MINIMUM_SONG_LENGTH 20
 
 ViProjectHandler::ViProjectHandler(ViProcessingChain *chain)
 	: ViHandler(chain)
 {
 	mProject = NULL;
+	mObject = ViAudioObject::createNull();
+	QObject::connect(this, SIGNAL(statusChanged(QString)), mChain, SIGNAL(statusChanged(QString)));
+	QObject::connect(this, SIGNAL(progressStarted()), mChain, SIGNAL(progressStarted()));
+	QObject::connect(this, SIGNAL(progressFinished()), mChain, SIGNAL(progressFinished()));
 }
 
-void ViProjectHandler::create(ViProject *project, ViAudioFormat format)
+ViProjectHandler::~ViProjectHandler()
 {
-	//disableAll();
+	clearProject();
+}
+
+void ViProjectHandler::clearProject()
+{
 	if(mProject != NULL)
 	{
-		QObject::disconnect(&mChain->mAudioObjects, SIGNAL(finished(ViAudioObject*)), this, SLOT(addAudioObject(ViAudioObject*)));
+		delete mProject;
+		mProject = NULL;
 	}
-	mProject = project;
-	mProject->save();
-	QObject::connect(&mChain->mAudioObjects, SIGNAL(finished(ViAudioObject*)), this, SLOT(addAudioObject(ViAudioObject*)));
 }
 
-void ViProjectHandler::addAudioObject(ViAudioObject *object)
+void ViProjectHandler::create(QString name, QString filePath, short recordSides)
 {
+	if(mProject != NULL)
+	{
+		QObject::disconnect(&mChain->mAudioObjects, SIGNAL(finished(ViAudioObjectPointer)), this, SLOT(addAudioObject(ViAudioObjectPointer)));
+	}
+	clearProject();
+	mProject = new ViProject(filePath, name);
+	mProject->setSideCount(recordSides);
+	mProject->nextSide();
+	mProject->save();
+
+	QObject::connect(mChain, SIGNAL(recordStarted()), this, SLOT(startRecord()));
+	QObject::connect(mChain, SIGNAL(recordEnded()), this, SLOT(endRecord()));
+	QObject::connect(mChain, SIGNAL(songStarted()), this, SLOT(startSong()));
+	QObject::connect(mChain, SIGNAL(songEnded()), this, SLOT(endSong()));
+
+	QObject::connect(&mChain->mAudioObjects, SIGNAL(finished(ViAudioObjectPointer)), this, SLOT(addAudioObject(ViAudioObjectPointer)));
+	emit progressStarted();
+	changeStatus("Please start the record");
+}
+
+void ViProjectHandler::addAudioObject(ViAudioObjectPointer object)
+{
+	mObject = object;
 	ViBuffer *buffer = object->correctedBuffer();
-	qreal songLength = ViAudioPosition::convertPosition(buffer->size(), ViAudioPosition::Samples, ViAudioPosition::Milliseconds, buffer->format());
-	if(songLength > MINIMUM_SONG_LENGTH)
+	qreal songLength = ViAudioPosition::convertPosition(buffer->size(), ViAudioPosition::Samples, ViAudioPosition::Seconds, buffer->format());
+	if(/*songLength > MINIMUM_SONG_LENGTH*/true)
 	{
 		QObject::connect(mChain->mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
 		mChain->mFileOutput->setFormat(buffer->format());
@@ -37,22 +66,53 @@ void ViProjectHandler::addAudioObject(ViAudioObject *object)
 
 void ViProjectHandler::finishWriting()
 {
+	mObject = ViAudioObject::createNull(); // Ensures that we have a reference to the object until the buffer was written.
 	ViFileSongInfo info = ViFileSongInfo(mChain->mFileOutput->songInfo());
 	info.setOriginalFilePath(mChain->mFileOutput->filePath());
 	mProject->addSong(info);
 	mProject->save();
 	QObject::disconnect(mChain->mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
-	//QObject::connect(mChain->mStreamOutput, SIGNAL(finished()), this, SLOT(finishPlaying()));
-	//if(mChain->mStreamOutput->state() != QAudio::ActiveState)
-	//{
-	//	finishPlaying();
-	//}
 }
 
-void ViProjectHandler::finishPlaying()
+void ViProjectHandler::changeStatus(QString status)
 {
-	QObject::disconnect(mChain->mStreamOutput, SIGNAL(finished()), this, SLOT(finishPlaying()));
-	//mChain->endOutput();
-	//mChain->startOutput();
-//	enableAll();
+	emit statusChanged(status);
+}
+
+void ViProjectHandler::startRecord()
+{
+	changeStatus("Waiting for song to start");
+}
+
+void ViProjectHandler::endRecord()
+{
+	if(mProject->nextSide())
+	{
+		if(mProject->currentSide() % 2 == 0)
+		{
+			changeStatus("Please turn over the record");
+		}
+		else
+		{
+			changeStatus("Please start the next record");
+		}
+	}
+	else
+	{
+		QObject::disconnect(mChain, SIGNAL(recordStarted()), this, SLOT(startRecord()));
+		QObject::disconnect(mChain, SIGNAL(recordEnded()), this, SLOT(endRecord()));
+		QObject::disconnect(mChain, SIGNAL(songStarted()), this, SLOT(startSong()));
+		QObject::disconnect(mChain, SIGNAL(songEnded()), this, SLOT(endSong()));
+		emit progressFinished();
+	}
+}
+
+void ViProjectHandler::startSong()
+{
+	changeStatus("Processing song");
+}
+
+void ViProjectHandler::endSong()
+{
+	changeStatus("Waiting for song to start");
 }

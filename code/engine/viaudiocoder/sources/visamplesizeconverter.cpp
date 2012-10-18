@@ -165,11 +165,11 @@ bool ViSampleSizeConverter::initialize(int inputSize, ViAudioFormat::SampleType 
 		}
 		else if(outputType == ViAudioFormat::Float)
 		{
-			convert = &ViSampleSizeConverter::convertFloatToReal;
+			convert = &ViSampleSizeConverter::convertFloatToFloat;
 		}
 		else if(outputType == ViAudioFormat::Real)
 		{
-			convert = &ViSampleSizeConverter::convertFloatToFloat;
+			convert = &ViSampleSizeConverter::convertFloatToReal;
 		}
 	}
 	else if(inputType == ViAudioFormat::Real)

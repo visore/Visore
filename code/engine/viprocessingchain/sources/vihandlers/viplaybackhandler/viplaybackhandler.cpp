@@ -5,9 +5,9 @@ ViPlaybackHandler::ViPlaybackHandler(ViProcessingChain *chain)
 {
 	mWaitingForFormat = false;
 	mOutput = NULL;
-	mCurrentObject = NULL;
+	mCurrentObject = ViAudioObject::createNull();
 	QObject::connect(mChain, SIGNAL(streamOutputChanged(ViStreamOutput*)), this, SLOT(changeOutput(ViStreamOutput*)));
-	QObject::connect(&mChain->mAudioObjects, SIGNAL(enqueued(ViAudioObject*)), this, SLOT(update(ViAudioObject*)));
+	QObject::connect(&mChain->mAudioObjects, SIGNAL(enqueued(ViAudioObjectPointer)), this, SLOT(update(ViAudioObjectPointer)));
 }
 
 ViPlaybackHandler::~ViPlaybackHandler()
@@ -29,7 +29,7 @@ void ViPlaybackHandler::changeOutput(ViStreamOutput *output)
 	QObject::connect(mOutput, SIGNAL(finished()), this, SLOT(start()));
 }
 
-void ViPlaybackHandler::update(ViAudioObject *object)
+void ViPlaybackHandler::update(ViAudioObjectPointer object)
 {
 	mObjects.enqueue(object);
 	start();
@@ -48,7 +48,7 @@ void ViPlaybackHandler::start()
 		{
 			if(!mObjects.first()->correctedBuffer()->format().isValid())
 			{
-				mCurrentObject = NULL;
+				mCurrentObject = ViAudioObject::createNull();
 				mWaitingForFormat = true;
 				QObject::connect(mObjects.first()->correctedBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(start()));
 			}
@@ -62,7 +62,7 @@ void ViPlaybackHandler::start()
 	}
 }
 
-ViAudioObject* ViPlaybackHandler::currentObject()
+ViAudioObjectPointer ViPlaybackHandler::currentObject()
 {
 	return mCurrentObject;
 }

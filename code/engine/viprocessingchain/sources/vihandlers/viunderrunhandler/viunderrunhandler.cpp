@@ -19,19 +19,15 @@ void ViUnderrunHandler::changeOutput(ViStreamOutput *output)
 
 void ViUnderrunHandler::handleUnderrun()
 {
-	LOG("***1");
-	ViAudioObject *object = mChain->playingObject();
-	if(object != NULL)
+	ViAudioObjectPointer object = mChain->playingObject();
+	if(!object.isNull())
 	{
-		LOG("***2");
 		if(object->isFinished())
 		{
-			LOG("***3");
 			mChain->mStreamOutput->stop();
 		}
 		else if(!mBufferingStarted)
 		{
-			LOG("***4");
 			mSecondsPassed = 0;
 			mSecondsNeeded = 0;
 			mBufferingStarted = false;

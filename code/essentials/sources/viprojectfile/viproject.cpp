@@ -5,6 +5,8 @@
 ViProject::ViProject(QString filePath, QString projectName)
 	: QObject()
 {
+	mSideCount = 0;
+	mCurrentSide = 0;
 	mTempPath = "";
 	mDataPath = "";
 	mOriginalPath = "";
@@ -49,6 +51,31 @@ void ViProject::save()
 	}
 	QObject::connect(&mArchive, SIGNAL(finished()), this, SLOT(readInfo()));
 	mArchive.compressData(mTempPath);
+}
+
+int ViProject::sideCount()
+{
+	return mSideCount;
+}
+
+int ViProject::currentSide()
+{
+	return mCurrentSide;
+}
+
+void ViProject::setSideCount(int count)
+{
+	mSideCount = count;
+}
+
+bool ViProject::nextSide()
+{
+	if(mCurrentSide < mSideCount)
+	{
+		++mCurrentSide;
+		return true;
+	}
+	return false;
 }
 
 void ViProject::readInfo()

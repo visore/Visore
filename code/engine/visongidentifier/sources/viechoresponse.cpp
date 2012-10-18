@@ -1,13 +1,13 @@
-#include "viechonestresponse.h"
+#include "viechoresponse.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 
-ViEchoNestResponse::ViEchoNestResponse()
+ViEchoResponse::ViEchoResponse()
 {
 	reset();
 }
 
-void ViEchoNestResponse::reset()
+void ViEchoResponse::reset()
 {
 	mVersion = "";
 	mCode = "";
@@ -16,7 +16,7 @@ void ViEchoNestResponse::reset()
 	mSongs.clear();
 }
 
-void ViEchoNestResponse::analyze(QByteArray json)
+void ViEchoResponse::analyze(QByteArray json)
 {
 	QJsonDocument document = QJsonDocument::fromJson(json);
 	QVariantMap result = document.object().toVariantMap();
@@ -31,7 +31,7 @@ void ViEchoNestResponse::analyze(QByteArray json)
 	}
 }
 
-void ViEchoNestResponse::analyzeInfo(QVariantMap map)
+void ViEchoResponse::analyzeInfo(QVariantMap map)
 {
 	QVariantMap status = map["status"].toMap();
 	mVersion = status["version"].toString();
@@ -77,7 +77,7 @@ void ViEchoNestResponse::analyzeInfo(QVariantMap map)
 	}
 }
 
-void ViEchoNestResponse::analyzeImage(QVariantMap map, int songIndex)
+void ViEchoResponse::analyzeImage(QVariantMap map, int songIndex)
 {
 	QVariantList images = map["images"].toList();
 	for(int i = 0; i < images.size(); ++i)
@@ -87,27 +87,27 @@ void ViEchoNestResponse::analyzeImage(QVariantMap map, int songIndex)
 	}
 }
 
-QString ViEchoNestResponse::version()
+QString ViEchoResponse::version()
 {
 	return mVersion;
 }
 
-QString ViEchoNestResponse::code()
+QString ViEchoResponse::code()
 {
 	return mCode;
 }
 
-QString ViEchoNestResponse::message()
+QString ViEchoResponse::message()
 {
 	return mMessage;
 }
 
-int ViEchoNestResponse::numberOfSongs()
+int ViEchoResponse::numberOfSongs()
 {
 	return mSongs.size();
 }
 
-ViSongInfo& ViEchoNestResponse::songInfo(int index)
+ViSongInfo& ViEchoResponse::songInfo(int index)
 {
 	if(index < 0)
 	{
@@ -116,12 +116,12 @@ ViSongInfo& ViEchoNestResponse::songInfo(int index)
 	return mSongs[index];
 }
 
-QList<ViSongInfo> ViEchoNestResponse::songInfos()
+QList<ViSongInfo> ViEchoResponse::songInfos()
 {
 	return mSongs;
 }
 
-QString ViEchoNestResponse::toString()
+QString ViEchoResponse::toString()
 {
 	QString result = "";
 	result += "Version: " + mVersion;
@@ -134,7 +134,7 @@ QString ViEchoNestResponse::toString()
 	return result;
 }
 
-QString ViEchoNestResponse::toUrl(QString string)
+QString ViEchoResponse::toUrl(QString string)
 {
 	return string.replace(" ", "%20");
 }

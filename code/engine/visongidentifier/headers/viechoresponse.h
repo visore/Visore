@@ -1,15 +1,17 @@
-#ifndef VIECHONESTRESPONSE_H
-#define VIECHONESTRESPONSE_H
+#ifndef VIECHORESPONSE_H
+#define VIECHORESPONSE_H
 
 #include <QString>
 #include <QList>
 #include <QVariantMap>
 #include "visonginfo.h"
 
-class ViEchoNestResponse
+class ViEchoResponse
 {
+
 	public:
-		ViEchoNestResponse();
+
+		ViEchoResponse();
 		void reset();
 		void analyze(QByteArray json);
 		QString version();
@@ -22,15 +24,18 @@ class ViEchoNestResponse
 		static QString toUrl(QString string);
 
 	private:
+
 		void analyzeInfo(QVariantMap map);
 		void analyzeImage(QVariantMap map, int songIndex);
 
 	private:
+
 		QList<ViSongInfo> mSongs;
 		QString mVersion;
 		QString mCode;
 		QString mMessage;
 		qint16 mCurrentSong;
+
 };
 
 #endif

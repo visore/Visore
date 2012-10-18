@@ -26,6 +26,26 @@ ViAudioObject::~ViAudioObject()
 	}
 }
 
+ViAudioObjectPointer ViAudioObject::create(ViAudioObject *object)
+{
+	return ViAudioObjectPointer(object);
+}
+
+ViAudioObjectPointer ViAudioObject::create(bool autoDestruct)
+{
+	return ViAudioObjectPointer(new ViAudioObject(autoDestruct));
+}
+
+ViAudioObjectPointer ViAudioObject::create(ViBuffer *original, ViBuffer *corrected, bool autoDestruct)
+{
+	return ViAudioObjectPointer(new ViAudioObject(original, corrected, autoDestruct));
+}
+
+ViAudioObjectPointer ViAudioObject::createNull()
+{
+	return ViAudioObjectPointer(NULL);
+}
+
 void ViAudioObject::setSong(bool song)
 {
 	QMutexLocker locker(&mMutex);

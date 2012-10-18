@@ -6,10 +6,10 @@ ViProcessor::ViProcessor()
 	setAutoDelete(false); //Ensures that QThreadPool doesn't automatically delete object
 	mWindowSize = 0;
 	mIsEnabled = true;
-	mObject = NULL;
+	mObject = ViAudioObject::createNull();
 }
 
-void ViProcessor::setObject(ViAudioObject *object)
+void ViProcessor::setObject(ViAudioObjectPointer object)
 {
 	mObject = object;
 }
@@ -54,6 +54,7 @@ void ViProcessor::enable()
 {
 	mIsEnabledMutex.lock();
 	mIsEnabled = true;
+	blockSignals(false);
 	mIsEnabledMutex.unlock();
 }
 
@@ -61,6 +62,7 @@ void ViProcessor::disable()
 {
 	mIsEnabledMutex.lock();
 	mIsEnabled = false;
+	blockSignals(true);
 	mIsEnabledMutex.unlock();
 }
 

@@ -8,6 +8,8 @@
 #include "viprocessingchain.h"
 #include "visingleexecutor.h"
 
+#include "vienmfpidentifier.h"
+
 #include "vispectrumanalyzer.h"
 #include "vicorrelator.h"
 #include "viwaveformer.h"
@@ -109,11 +111,12 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		ViStreamInput *mStreamInput;
 		ViStreamOutput *mStreamOutput;
 
-		ViProjectManager mProjectManager;
 		ViProcessingChain mProcessingChain;
 		ViSingleExecutor mExecutor;
 
+		ViEnmfpIdentifier mSongIdentifier;
 		ViSongDetector mSongDetector;
+
 		ViSpectrumAnalyzer mSpectrumAnalyzer;
 		ViCorrelator mCorrelator;
 		ViEndDetector *mEndDetector;

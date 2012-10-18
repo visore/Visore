@@ -28,9 +28,6 @@ ViProcessingChain::~ViProcessingChain()
 {
 	qDeleteAll(mHandlers);
 	mHandlers.clear();
-
-	qDeleteAll(mAudioObjects);
-	mAudioObjects.clear();
 }
 
 void ViProcessingChain::setWindowSize(int windowSize)
@@ -60,17 +57,10 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 	}
 }
 
-void ViProcessingChain::setProject(ViProject *project, ViAudioFormat format, bool play)
+void ViProcessingChain::setProject(QString name, QString filePath, ViAudioFormat format, short recordSides)
 {
-	mProjectHandler->create(project, format);
-	if(play)
-	{
-		//mPlaybackHandler->enable();
-	}
-	else
-	{
-		//mPlaybackHandler->disable();
-	}
+	mInput->setFormat(format);
+	mProjectHandler->create(name, filePath, recordSides);
 }
 
 bool ViProcessingChain::attach(ViAudio::Mode mode, ViProcessor *processor)
@@ -84,12 +74,12 @@ bool ViProcessingChain::detach(ViProcessor *processor)
 	mMultiExecutor.detach(processor);
 }
 
-ViAudioObject* ViProcessingChain::recordingObject()
+ViAudioObjectPointer ViProcessingChain::recordingObject()
 {
 	return mSectionHandler->currentObject();
 }
 
-ViAudioObject* ViProcessingChain::playingObject()
+ViAudioObjectPointer ViProcessingChain::playingObject()
 {
 	return mPlaybackHandler->currentObject();
 }

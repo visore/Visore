@@ -11,7 +11,7 @@ class ViPlaybackHandler : public ViHandler
 	private slots:
 
 		void changeOutput(ViStreamOutput *output);
-		void update(ViAudioObject *object);
+		void update(ViAudioObjectPointer object);
 		void start();
 
 	public:
@@ -19,14 +19,14 @@ class ViPlaybackHandler : public ViHandler
 		ViPlaybackHandler(ViProcessingChain *chain);
 		~ViPlaybackHandler();
 
-		ViAudioObject* currentObject();
+		ViAudioObjectPointer currentObject();
 
 	private:
 
 		ViStreamOutput *mOutput;
 		ViAudioObjectQueue mObjects;
 		bool mWaitingForFormat;
-		ViAudioObject *mCurrentObject;
+		ViAudioObjectPointer mCurrentObject;
 
 };
 

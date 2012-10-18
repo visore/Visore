@@ -30,7 +30,7 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 
 		ViProcessor();
 
-		virtual void setObject(ViAudioObject *object);
+		virtual void setObject(ViAudioObjectPointer object);
 
 		virtual void setWindowSize(int windowSize);
 		virtual int windowSize();
@@ -49,7 +49,7 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 
 	protected:
 
-		ViAudioObject *mObject;
+		ViAudioObjectPointer mObject;
 
 		ViAudioFormat mFormat;
 		int mWindowSize;

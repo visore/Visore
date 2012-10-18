@@ -37,7 +37,6 @@ class ViBufferStream : public QObject, public ViId
 		int write(const ViBufferChunk &chunk, int length);
 		int write(const ViBufferChunk &chunk);
 
-		// TODO: If we insert data, should the read position change?
 		// TODO: Insert doesn't use QBuffer, very slow.
 		void insert(int position, const char *data, int length);
 		void insert(int position, const ViBufferChunk &chunk, int length);

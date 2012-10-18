@@ -1,21 +1,18 @@
 //
-//  Codegen.h
+//  echoprint-codegen
+//  Copyright 2011 The Echo Nest Corporation. All rights reserved.
 //
-//  Created by Brian on 02/16/2010
-//  Copyright 2010 The Echo Nest. All rights reserved.
-//
+
 
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
 // Entry point for generating codes from PCM data.
-#define VERSION 3.15
+#define ECHOPRINT_VERSION 4.12
 
-#include <memory>
 #include <string>
-
-#include "Common.h"
-using namespace std;
+#include <vector>
+#include <zlib.h> // Visore: Move hear from Codegen.cxx
 
 #ifdef _MSC_VER
     #ifdef CODEGEN_EXPORTS
@@ -30,16 +27,22 @@ using namespace std;
 #endif
 
 class Fingerprint;
-class CODEGEN_API Codegen
-{
-public:
-    Codegen(const float* pcm, uint numSamples, int start_offset);
+class SubbandAnalysis;
+struct FPCode;
 
-    string getCodeString(){return _CodeString;}
+class CODEGEN_API Codegen {
+public:
+    Codegen(const float* pcm, unsigned int numSamples, int start_offset);
+
+    std::string getCodeString(){return _CodeString;}
     int getNumCodes(){return _NumCodes;}
-    float getVersion() { return VERSION; }
+    static double getVersion() { return ECHOPRINT_VERSION; }
 private:
-    string _CodeString;
+    Fingerprint* computeFingerprint(SubbandAnalysis *pSubbandAnalysis, int start_offset);
+    std::string createCodeString(std::vector<FPCode> vCodes);
+
+    std::string compress(const std::string& s);
+    std::string _CodeString;
     int _NumCodes;
 };
 
