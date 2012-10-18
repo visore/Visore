@@ -10,20 +10,24 @@ class ViPointerData
 
 	public:
 
-		ViPointerData()
-		{
-		mData = NULL;
-		mCounter = NULL;
-		mLimiter = NULL;
-		mDeleter = NULL;
-		}
+		ViPointerData(T *data = NULL, ViFunctor *deleter = NULL, int counter = 1, int limiter = 0);
+		
+		void setData(T *data);
+		void setDeleter(ViFunctor *deleter);
+		void setCounter(int counter);
+		void setLimiter(int limiter);
+		
+		T* data();
+		ViFunctor* deleter();
+		ViAtomicInt& counter();
+		ViAtomicInt& limiter();
 
-	//private:
+	private:
 
-		T* mData;
-		ViAtomicInt *mCounter;
-		ViAtomicInt *mLimiter;
+		T *mData;
 		ViFunctor *mDeleter;
+		ViAtomicInt mCounter;
+		ViAtomicInt mLimiter;	
 
 };
 
@@ -59,6 +63,7 @@ class ViPointer
 
 	protected:
 
+		void copy(const ViPointer<T> &other);
 		void destruct();
 
 	private:

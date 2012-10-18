@@ -1,41 +1,80 @@
 #ifdef VIPOINTER_H
-#include "vilogger.h"
+
+template<class T>
+ViPointerData<T>::ViPointerData(T *data, ViFunctor *deleter, int counter, int limiter)
+{
+	mData = data;
+	mDeleter = deleter;
+	mCounter.setValue(counter);
+	mLimiter.setValue(limiter);
+}
+	
+template<class T>	
+void ViPointerData<T>::setData(T *data)
+{
+	mData = data;
+}
+
+template<class T>
+void ViPointerData<T>::setDeleter(ViFunctor *deleter)
+{
+	mDeleter = deleter;
+}
+
+template<class T>
+void ViPointerData<T>::setCounter(int counter)
+{
+	mCounter.setValue(counter);
+}
+
+template<class T>
+void ViPointerData<T>::setLimiter(int limiter)
+{
+	mLimiter.setValue(limiter);
+}
+
+template<class T>
+T* ViPointerData<T>::data()
+{
+	return mData;
+}
+
+template<class T>
+ViFunctor* ViPointerData<T>::deleter()
+{
+	return mDeleter;
+}
+
+template<class T>
+ViAtomicInt& ViPointerData<T>::counter()
+{
+	return mCounter;
+}
+
+template<class T>
+ViAtomicInt& ViPointerData<T>::limiter()
+{
+	return mLimiter;
+}
+
+
 template<class T>
 ViPointer<T>::ViPointer()
 {
 	mData = new ViPointerData<T>();
-	mData->mCounter = new ViAtomicInt(1);
-	mData->mLimiter = new ViAtomicInt(0);
-	/*mData = NULL;
-	mDeleter = NULL;
-	mCounter = new ViAtomicInt(1);
-	mLimiter = new ViAtomicInt(0);*/
 }
 
 template<class T>
 ViPointer<T>::ViPointer(T *pointer)
 {
 	mData = new ViPointerData<T>();
-	mData->mData = pointer;
-	mData->mCounter = new ViAtomicInt(1);
-	mData->mLimiter = new ViAtomicInt(0);
-	/*mData = pointer;
-	mDeleter = NULL;
-	mCounter = new ViAtomicInt(1);
-	mLimiter = new ViAtomicInt(0);*/
+	mData->setData(pointer);
 }
 
 template<class T>
 ViPointer<T>::ViPointer(const ViPointer<T> &other)
 {
-	/*mData = other.mData;
-	mDeleter = other.mDeleter;
-	mCounter = other.mCounter;
-	mLimiter = other.mLimiter;
-	mCounter->increase();*/
-	//mData = other.mData;
-	mData = other.mData;
-	mData->mCounter->increase();
+	copy(other);
 }
 
 template<class T>
@@ -45,40 +84,46 @@ ViPointer<T>::~ViPointer()
 }
 
 template<class T>
+void ViPointer<T>::copy(const ViPointer<T> &other)
+{
+	mData = other.mData;
+	mData->counter().increase();
+}
+
+template<class T>
 void ViPointer<T>::destruct()
 {
-	mData->mCounter->decrease();
-	if(referenceCount() == mData->mLimiter->value() )
+	mData->counter().decrease();
+	if(referenceCount() == mData->limiter().value() )
 	{
-		if(mData->mDeleter != NULL) mData->mDeleter->execute(mData->mData);
+		if(mData->deleter() != NULL) mData->deleter()->execute(mData->data());
 	}
 	else if(!isUsed())
 	{
-		delete mData->mCounter;
-		if(mData->mData != NULL)
+		if(mData->data() != NULL)
 		{
-			delete mData->mData;
-			mData->mData = NULL;
+			delete mData->data();
 		}
+		delete mData;
 	}
 }
 
 template<class T>
 void ViPointer<T>::setDeleter(ViFunctor *deleter)
 {
-	mData->mDeleter = deleter;
+	mData->setDeleter(deleter);
 }
 
 template<class T>
 void ViPointer<T>::setUnusedLimit(int limit)
 {
-	mData->mLimiter->setValue(limit);
+	mData->limiter().setValue(limit);
 }
 
 template<class T>
 int ViPointer<T>::referenceCount()
 {
-	return mData->mCounter->value();
+	return mData->counter().value();
 }
 
 template<class T>
@@ -90,72 +135,69 @@ bool ViPointer<T>::isUsed()
 template<class T>
 bool ViPointer<T>::isNull()
 {
-	return (mData->mData == NULL);
+	return (mData->data() == NULL);
 }
 
 template<class T>
 T* ViPointer<T>::data()
 {
-	return mData->mData;
+	return mData->data();
 }
 
 template<class T>
 T& ViPointer<T>::operator * ()
 {
-	return *mData->mData;
+	return *mData->data();
 }
 
 template<class T>
 T* ViPointer<T>::operator -> ()
 {
-	return mData->mData;
+	return mData->data();
 }
 
 template<class T>
 ViPointer<T>& ViPointer<T>::operator = (const ViPointer<T> &other)
 {
 	destruct();
-	/*ViPointer temp(other);
-	return temp; // Must be in 2 seperate lines*/
-	mData = other.mData;
-	mData->mCounter->increase();
+	copy(other);
 	return *this;
 }
 
 template<class T>
 bool ViPointer<T>::operator == (const ViPointer<T> &other)
 {
-	return mData->mData == other.mData->mData;
+	return mData->data() == other.mData->data();
 }
 
 template<class T>
 bool ViPointer<T>::operator == (const T &other)
 {
-	return mData->mData == &other;
+	return mData->data() == &other;
 }
 
 template<class T>
 bool ViPointer<T>::operator == (const T *other)
 {
-	return mData->mData == other;
+	return mData->data() == other;
 }
 
 template<class T>
 bool ViPointer<T>::operator != (const ViPointer<T> &other)
 {
-	return mData->mData != other.mData->mData;
+	return mData->data() != other.mData->data();
 }
 
 template<class T>
 bool ViPointer<T>::operator != (const T &other)
 {
-	return mData->mData != &other;
+	return mData->data() != &other;
 }
 
 template<class T>
 bool ViPointer<T>::operator != (const T *other)
 {
-	return mData->mData != other;
+	return mData->data() != other;
 }
 
 #endif

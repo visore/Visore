@@ -69,10 +69,7 @@ bool ViExecutor::detach(ViProcessor *processor)
 
 void ViExecutor::setObject(ViAudioObjectPointer object)
 {
-	//ViAudioObjectPointer t(object);
 	mObject = object;
-
-	//mObject = ViAudioObjectPointer(object);
 	if(mInputChunk == NULL)
 	{
 		mInputChunk = new ViRawChunk();
