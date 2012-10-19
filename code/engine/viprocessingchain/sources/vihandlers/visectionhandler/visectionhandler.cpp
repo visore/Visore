@@ -1,9 +1,15 @@
 #include "visectionhandler.h"
 #include "vifrequencyenddetector.h"
 
+#define IDLE_SIZE 5242880 // 5MB
+#define IDLE_TIME 1000 // 1 second
+
 ViSectionHandler::ViSectionHandler(ViProcessingChain *chain)
 	: ViHandler(chain)
 {
+	mIdleSize = IDLE_SIZE;
+	QObject::connect(&mIdleTimer, SIGNAL(timeout()), this, SLOT(checkSize()));
+
 	mEndDetector = NULL;
 	mSpectrumAnalyzer = NULL;
 	mCurrentSongObject = ViAudioObject::createNull();
@@ -29,70 +35,51 @@ ViSectionHandler::~ViSectionHandler()
 
 bool ViSectionHandler::isSongRunning()
 {
-	QMutexLocker locker(&mMutex);
 	return mIsSongRunning;
 }
 
 bool ViSectionHandler::wasSongRunning()
 {
-	QMutexLocker locker(&mMutex);
 	return mWasSongRunning;
+}
+
+void ViSectionHandler::setIdleSize(qint64 bytes)
+{
+	mIdleSize = bytes;
 }
 
 void ViSectionHandler::startRecord()
 {
-	QMutexLocker locker(&mMutex);
-	//mChain->startInput();
 	emit recordStarted();
 }
 
 void ViSectionHandler::endRecord()
 {
-	QMutexLocker locker(&mMutex);
 	emit recordEnded();
 }
 
 void ViSectionHandler::startSong()
 {
-	//QMutexLocker locker(&mMutex);
 	endInput();
 	startInput(true);
-	//startOutput();
-
 	mIsSongRunning = true;
 	mWasSongRunning = false;
-	/*mChain->endInput();
-	mChain->startInput();
-	if(!mWasSongRunning)
-	{
-		//mChain->startOutput();
-	}*/
 	emit songStarted();
 }
 
 void ViSectionHandler::endSong()
 {
-	QMutexLocker locker(&mMutex);
 	endInput();
 	startInput();
 	mAcceptFinish = true;
-	while(!executor()->isFinished())
-	{
-		finish();
-	}
-
-
-
+	while(!executor()->isFinished());
 	mIsSongRunning = false;
 	mWasSongRunning = true;
-	/*mChain->endInput();
-	mChain->startInput();*/
 	emit songEnded();
 }
 
 void ViSectionHandler::startInput(bool isSong)
 {
-	//QMutexLocker locker(&mMutex);
 	ViBuffer *inputBuffer = allocateBuffer();
 	ViBuffer *outputBuffer = allocateBuffer();
 
@@ -106,15 +93,12 @@ void ViSectionHandler::startInput(bool isSong)
 	else
 	{
 		mNoSongObjects.enqueue(object);
+		mIdleTimer.start(IDLE_TIME);
 	}
 
 	input()->setBuffer(inputBuffer);
-//LOG("**1: "+QString::number(object.referenceCount()));
 	executor()->setObject(object);
-//LOG("**2: "+QString::number(object.referenceCount()));
 	executor()->initialize();
-//LOG("**4: "+QString::number(object.referenceCount()));
-
 }
 
 void ViSectionHandler::endInput()
@@ -126,54 +110,9 @@ void ViSectionHandler::endInput()
 		mCurrentSongObject = ViAudioObject::createNull();
 	}
 */
+
+	mIdleTimer.stop();
 	mNoSongObjects.clear();
-
-
-
-	/*if(mInputBuffer != NULL)
-	{
-		mInputBuffers.enqueue(mInputBuffer);
-	}*/
-	/*if((!mPlayAutomatically || (!mWasSongRunning && !mIsSongRunning)) && mOutputBuffers.size() >= 1)
-	{
-		deallocateBuffer(mOutputBuffers.dequeue());
-	}*/
-}
-
-void ViSectionHandler::finish()
-{
-	/*if(mAcceptFinish)
-	{
-		deallocateBuffer(mInputBuffers.dequeue());
-		if(!mIsPlaying && mOutputBuffers.size() >= 1)
-		{
-			deallocateBuffer(mOutputBuffers.dequeue());
-		}
-		mAcceptFinish = false;
-	}*/
-}
-
-void ViSectionHandler::startOutput()
-{
-
-
-
-	/*if(!mIsPlaying && mPlayAutomatically && mOutputBuffers.size() >= 1)
-	{
-		QObject::connect(output(), SIGNAL(finished()), this, SLOT(endOutput()));
-		mIsPlaying = true;
-		output()->setBuffer(mOutputBuffers.first());
-		output()->start();
-	}*/
-}
-
-void ViSectionHandler::endOutput()
-{
-	/*QObject::disconnect(output(), SIGNAL(finished()), this, SLOT(endOutput()));
-	mIsPlaying = false;
-	//deallocateBuffer(mOutputBuffers.dequeue());
-	output()->start();
-	startOutput();*/
 }
 
 void ViSectionHandler::setDetector(ViProcessor *processor)
@@ -198,6 +137,15 @@ void ViSectionHandler::setDetector(ViProcessor *processor)
 	if(mSpectrumAnalyzer != NULL && mEndDetector != NULL)
 	{
 		QObject::connect(mSpectrumAnalyzer, SIGNAL(changed(ViRealSpectrum, qint64)), dynamic_cast<ViFrequencyEndDetector*>(mEndDetector), SLOT(addSpectrum(ViRealSpectrum)));
+	}
+}
+
+void ViSectionHandler::checkSize()
+{
+	if(mNoSongObjects.current()->originalBuffer()->size() >= mIdleSize)
+	{
+		endInput();
+		startInput();
 	}
 }
 

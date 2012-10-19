@@ -18,12 +18,6 @@ void ViAudioObjectQueue::enqueue(ViAudioObjectPointer object)
 	QObject::connect(object.data(), SIGNAL(finished()), this, SLOT(finish()), Qt::UniqueConnection);
 	mQueue.enqueue(object);
 	emit enqueued(object);
-
-cout<<"qqq: ";
-for(int i = 0; i < size(); ++i)
-{
-cout<<mQueue[i].referenceCount()<<"  ";
-}cout<<endl;
 }
 
 ViAudioObjectPointer ViAudioObjectQueue::dequeue()
