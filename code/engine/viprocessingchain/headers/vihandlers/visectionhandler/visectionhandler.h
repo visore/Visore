@@ -39,7 +39,6 @@ class ViSectionHandler : public ViHandler
 		ViSectionHandler(ViProcessingChain *chain);
 		~ViSectionHandler();
 
-		ViAudioObjectPointer currentObject();
 		bool isSongRunning();
 		bool wasSongRunning();
 		void setIdleSize(qint64 bytes);
@@ -67,7 +66,7 @@ class ViSectionHandler : public ViHandler
 		bool mPlayAutomatically;
 		bool mIsPlaying;
 
-		ViAudioObjectPointer mCurrentSongObject;
+		ViAudioObjectPointer y;
 		ViAudioObjectQueue mNoSongObjects;
 
 };

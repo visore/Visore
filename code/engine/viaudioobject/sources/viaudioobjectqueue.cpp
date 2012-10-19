@@ -1,5 +1,4 @@
 #include "viaudioobjectqueue.h"
-#include "vilogger.h"
 
 ViAudioObjectQueue::ViAudioObjectQueue()
 	: QObject()
@@ -39,7 +38,15 @@ ViAudioObjectPointer ViAudioObjectQueue::current()
 
 void ViAudioObjectQueue::finish()
 {
-	emit finished(ViAudioObject::create((ViAudioObject*) sender()));
+	ViAudioObject *object = (ViAudioObject*) sender();
+	for(int i = 0; i < size(); ++i)
+	{
+		if(object == mQueue[i].data())
+		{
+			emit finished(mQueue[i]);
+			break;
+		}
+	}
 }
 
 void ViAudioObjectQueue::remove(ViAudioObject *object)

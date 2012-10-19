@@ -15,11 +15,11 @@ ViProcessingChain::ViProcessingChain()
 	QObject::connect(&mMultiExecutor, SIGNAL(progressed(short)), this, SIGNAL(changed()));
 
 	//mUnderrunHandler = new ViUnderrunHandler(this);
-	//mProjectHandler = new ViProjectHandler(this);
+	mProjectHandler = new ViProjectHandler(this);
 	mSectionHandler = new ViSectionHandler(this);
 	//mPlaybackHandler = new ViPlaybackHandler(this);
 	//mHandlers.append(mUnderrunHandler);
-	//mHandlers.append(mProjectHandler);
+	mHandlers.append(mProjectHandler);
 	mHandlers.append(mSectionHandler);
 	//mHandlers.append(mPlaybackHandler);
 }
@@ -76,7 +76,7 @@ bool ViProcessingChain::detach(ViProcessor *processor)
 
 ViAudioObjectPointer ViProcessingChain::recordingObject()
 {
-	return mSectionHandler->currentObject();
+	return mAudioObjects.current();
 }
 
 ViAudioObjectPointer ViProcessingChain::playingObject()

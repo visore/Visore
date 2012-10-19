@@ -9,10 +9,9 @@ ViSectionHandler::ViSectionHandler(ViProcessingChain *chain)
 {
 	mIdleSize = IDLE_SIZE;
 	QObject::connect(&mIdleTimer, SIGNAL(timeout()), this, SLOT(checkSize()));
-
+y=ViAudioObject::createNull();
 	mEndDetector = NULL;
 	mSpectrumAnalyzer = NULL;
-	mCurrentSongObject = ViAudioObject::createNull();
 	mIsSongRunning = false;
 	mWasSongRunning = false;
 	QObject::connect(mChain, SIGNAL(attached(ViProcessor*)), this, SLOT(setDetector(ViProcessor*)));
@@ -87,8 +86,8 @@ void ViSectionHandler::startInput(bool isSong)
 	if(isSong)
 	{
 		object->setSong();
+y= object;
 		mChain->mAudioObjects.enqueue(object);
-		//mCurrentSongObject = object;
 	}
 	else
 	{
@@ -99,19 +98,19 @@ void ViSectionHandler::startInput(bool isSong)
 	input()->setBuffer(inputBuffer);
 	executor()->setObject(object);
 	executor()->initialize();
+
 }
 
 void ViSectionHandler::endInput()
 {
-	executor()->finalize();
-	/*if(!mCurrentSongObject.isNull())
-	{
-		mCurrentSongObject->setFinished();
-		mCurrentSongObject = ViAudioObject::createNull();
-	}
-*/
-
 	mIdleTimer.stop();
+	executor()->finalize();
+	if(!y.isNull())
+	{
+	
+		y->setFinished();
+	y= ViAudioObject::createNull();
+	}
 	mNoSongObjects.clear();
 }
 
@@ -173,9 +172,4 @@ void ViSectionHandler::deallocateBuffer(ViBuffer *buffer)
 {
 	delete buffer;
 	buffer = NULL;
-}
-
-ViAudioObjectPointer ViSectionHandler::currentObject()
-{
-	return mCurrentSongObject;
 }

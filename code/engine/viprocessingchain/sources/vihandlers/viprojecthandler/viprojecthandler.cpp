@@ -54,7 +54,7 @@ void ViProjectHandler::addAudioObject(ViAudioObjectPointer object)
 	mObject = object;
 	ViBuffer *buffer = object->correctedBuffer();
 	qreal songLength = ViAudioPosition::convertPosition(buffer->size(), ViAudioPosition::Samples, ViAudioPosition::Seconds, buffer->format());
-	if(/*songLength > MINIMUM_SONG_LENGTH*/true)
+	if(songLength > MINIMUM_SONG_LENGTH)
 	{
 		QObject::connect(mChain->mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
 		mChain->mFileOutput->setFormat(buffer->format());

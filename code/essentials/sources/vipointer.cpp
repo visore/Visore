@@ -94,9 +94,9 @@ template<class T>
 void ViPointer<T>::destruct()
 {
 	mData->counter().decrease();
-	if(referenceCount() == mData->limiter().value() )
+	if(referenceCount() == mData->limiter().value() && mData->deleter() != NULL)
 	{
-		if(mData->deleter() != NULL) mData->deleter()->execute(mData->data());
+		mData->deleter()->execute(mData->data());
 	}
 	else if(!isUsed())
 	{
