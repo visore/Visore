@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ViProjectCorrelationWidget</class>
+ <widget class="QWidget" name="ViProjectCorrelationWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>745</width>
+    <height>529</height>
+   </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string/>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="margin">
+    <number>10</number>
+   </property>
+   <item row="2" column="0" colspan="2">
+    <widget class="ViTableWidget" name="tableWidget"/>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="1">
+       <widget class="ViFileBrowser" name="fileBrowser" native="true">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Location:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="ViPushButton" name="addButton" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ViFileBrowser</class>
+   <extends>QWidget</extends>
+   <header>vifilebrowser.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ViPushButton</class>
+   <extends>QWidget</extends>
+   <header>vipushbutton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ViTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>vitablewidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

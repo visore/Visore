@@ -59,5 +59,9 @@
         <file>icons/normal/recordingproject.png</file>
         <file>icons/normal/browse.png</file>
         <file>icons/selected/browse.png</file>
+        <file>icons/normal/correlationproject.png</file>
+        <file>icons/normal/start.png</file>
+        <file>icons/normal/add.png</file>
+        <file>icons/normal/remove.png</file>
     </qresource>
 </RCC>

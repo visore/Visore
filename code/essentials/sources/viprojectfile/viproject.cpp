@@ -35,11 +35,24 @@ QString ViProject::filePath()
 	return mArchive.filePath();
 }
 
-void ViProject::load()
+QString ViProject::fileName(bool withExtension)
+{
+	QFileInfo file(filePath());
+	return file.fileName();
+}
+
+bool ViProject::load(bool minimal)
 {
 	createTempStructure();
 	QObject::connect(&mArchive, SIGNAL(finished()), this, SLOT(readInfo()));
-	mArchive.decompressData(mTempPath);
+	if(minimal)
+	{
+		return mArchive.decompressData(mTempPath, mArchive.fileList(".vml"));
+	}
+	else
+	{
+		return mArchive.decompressData(mTempPath);
+	}
 }
 
 void ViProject::save()
@@ -51,6 +64,12 @@ void ViProject::save()
 	}
 	QObject::connect(&mArchive, SIGNAL(finished()), this, SLOT(readInfo()));
 	mArchive.compressData(mTempPath);
+}
+
+qint64 ViProject::size()
+{
+	QFile file(filePath());
+	return file.size();
 }
 
 int ViProject::sideCount()

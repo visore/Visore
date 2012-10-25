@@ -36,7 +36,6 @@ void ViPushButton::setIcon(ViThemeImage image, ViThemeImage::State state)
 	if(state == ViThemeImage::Normal)
 	{
 		mNormalImage = image.image();
-		//setSize(mNormalImage.width() + 8, mNormalImage.height() + 8);
 	}
 	else if(state == ViThemeImage::Selected)
 	{
@@ -49,6 +48,41 @@ void ViPushButton::setIcon(ViThemeImage image, ViThemeImage::State state)
 	else if(state == ViThemeImage::Hovered)
 	{
 		mHoveredImage = image.image();
+	}
+	repaint();
+}
+
+void ViPushButton::setIcon(ViThemeImage image, ViThemeImage::State state, int width, int height)
+{
+	QImage scaledImage;
+	if(width > 0 && height > 0)
+	{
+		scaledImage = image.image().scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	}
+	else if(width > 0)
+	{
+		scaledImage = image.image().scaledToWidth(width, Qt::SmoothTransformation);
+	}
+	else if (height > 0)
+	{
+		scaledImage = image.image().scaledToHeight(height, Qt::SmoothTransformation);
+	}
+
+	if(state == ViThemeImage::Normal)
+	{
+		mNormalImage = scaledImage;
+	}
+	else if(state == ViThemeImage::Selected)
+	{
+		mSelectedImage = scaledImage;
+	}
+	else if(state == ViThemeImage::Disabled)
+	{
+		mDisbaledImage = scaledImage;
+	}
+	else if(state == ViThemeImage::Hovered)
+	{
+		mHoveredImage = scaledImage;
 	}
 	repaint();
 }

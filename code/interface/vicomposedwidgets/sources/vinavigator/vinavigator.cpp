@@ -2,6 +2,7 @@
 #include "ui_vinavigator.h"
 #include "vicontrolmenu.h"
 #include "viinputmenu.h"
+#include "viprojectmenu.h"
 #include "vioutputmenu.h"
 #include "vianalysismenu.h"
 
@@ -43,6 +44,7 @@ void ViNavigator::initialize()
 	mUi->menu->setRounding(0, 5);
 	mUi->menu->setTabOffset(5);
 
+	addMenu("Project", new ViProjectMenu(this));
 	addMenu("Input", new ViInputMenu(this));
 	addMenu("Control", new ViControlMenu(this));
 	addMenu("Output", new ViOutputMenu(this));

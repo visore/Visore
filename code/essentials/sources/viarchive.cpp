@@ -3,7 +3,6 @@
 #include "unzip.h"
 #include <QDir>
 #include <QFileInfo>
-#include "vilogger.h"
 
 ViArchiveThread::ViArchiveThread()
 	: QThread()
@@ -11,6 +10,7 @@ ViArchiveThread::ViArchiveThread()
 	mFilePath = "";
 	mCompression = 10;
 	mComment = "";
+	mDecompressAll = true;
 	mError = ViArchive::None;
 }
 
@@ -58,7 +58,24 @@ void ViArchiveThread::setInput(QFileInfoList files)
 
 void ViArchiveThread::setOutput(QString location)
 {
+	mDecompressAll = true;
 	mOutputLocation = location;
+}
+
+void ViArchiveThread::setOutput(QString location, QString file)
+{
+	mDecompressAll = false;
+	mOutputLocation = location;
+	mOutputFiles.clear();
+	mOutputFiles.append(file);
+}
+
+void ViArchiveThread::setOutput(QString location, QStringList files)
+{
+	mDecompressAll = false;
+	mOutputLocation = location;
+	mOutputFiles.clear();
+	mOutputFiles = files;
 }
 
 void ViArchiveThread::compressData()
@@ -136,20 +153,23 @@ void ViArchiveThread::compressData()
 
 void ViArchiveThread::decompressData()
 {
-	QDir dir(mOutputLocation);
-	if(!dir.exists())
-	{
-		dir.mkpath(dir.absolutePath());
-	}
+	QDir dir("");
+	dir.mkpath(dir.absolutePath());
 
 	UnZip unzip;
-
 	if(!convertUnzipError(unzip.openArchive(mFilePath)))
 	{
 		return;
 	}
 
-	convertUnzipError(unzip.extractAll(mOutputLocation));
+	if(mDecompressAll)
+	{
+		convertUnzipError(unzip.extractAll(mOutputLocation));
+	}
+	else
+	{
+		convertUnzipError(unzip.extractFiles(mOutputFiles, mOutputLocation));
+	}
 	unzip.closeArchive();
 }
 
@@ -286,6 +306,43 @@ ViArchive::Error ViArchive::error()
 	return mThread->error();
 }
 
+QStringList ViArchive::fileList(QString extension)
+{
+	UnZip unzip;
+	QStringList result;
+	if(unzip.openArchive(mThread->filePath()) == UnZip::Ok)
+	{
+		QStringList temp = unzip.fileList();
+		unzip.closeArchive();
+		if(extension != "")
+		{
+			for(int i = 0; i < temp.size(); ++i)
+			{
+				if(temp[i].endsWith(extension))
+				{
+					result.append(temp[i]);
+				}
+			}
+		}
+		else
+		{
+			return temp;
+		}
+	}
+	return result;
+}
+
+bool ViArchive::isValid()
+{
+	UnZip unzip;
+	if(unzip.openArchive(mThread->filePath()) == UnZip::Ok)
+	{
+		unzip.closeArchive();
+		return true;
+	}
+	return false;
+}
+
 void ViArchive::compressData(QFileInfoList filesAndDirs)
 {
 	mThread->setInput(filesAndDirs);
@@ -300,9 +357,38 @@ void ViArchive::compressData(QString directory)
 	compressData(filesAndDirs);
 }
 
-void ViArchive::decompressData(QString location)
+bool ViArchive::decompressData(QString location)
 {
-	mThread->setOutput(location);
-	mThread->setAction(ViArchiveThread::Decompress);
-	mThread->start();
+	if(isValid())
+	{
+		mThread->setOutput(location);
+		mThread->setAction(ViArchiveThread::Decompress);
+		mThread->start();
+		return true;
+	}
+	return false;
+}
+
+bool ViArchive::decompressData(QString location, QString file)
+{
+	if(isValid())
+	{
+		mThread->setOutput(location, file);
+		mThread->setAction(ViArchiveThread::Decompress);
+		mThread->start();
+		return true;
+	}
+	return false;
+}
+
+bool ViArchive::decompressData(QString location, QStringList files)
+{
+	if(isValid())
+	{
+		mThread->setOutput(location, files);
+		mThread->setAction(ViArchiveThread::Decompress);
+		mThread->start();
+		return true;
+	}
+	return false;
 }

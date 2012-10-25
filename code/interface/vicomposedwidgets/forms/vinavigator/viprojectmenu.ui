@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ViInputMenu</class>
- <widget class="QWidget" name="ViInputMenu">
+ <class>ViProjectMenu</class>
+ <widget class="QWidget" name="ViProjectMenu">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -40,7 +40,7 @@
     <widget class="ViPushButton" name="recordingButton" native="true"/>
    </item>
    <item row="1" column="1">
-    <widget class="ViPushButton" name="fileButton" native="true"/>
+    <widget class="ViPushButton" name="correlationButton" native="true"/>
    </item>
   </layout>
  </widget>

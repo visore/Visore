@@ -9,6 +9,7 @@ class ViTableWidget : public QTableWidget
 	public:
 
 		ViTableWidget(QWidget *parent = 0);
+		void adjustHeight();
 
 	protected:
 

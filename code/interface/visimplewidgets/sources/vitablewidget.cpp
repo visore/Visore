@@ -2,6 +2,7 @@
 #include "vithememanager.h"
 #include <QStyleOption>
 #include <QPainter>
+#include <QHeaderView>
 
 ViTableWidget::ViTableWidget(QWidget *parent)
 	: QTableWidget(parent)
@@ -22,6 +23,9 @@ ViTableWidget::ViTableWidget(QWidget *parent)
 			color: " + ViThemeManager::color(13).name() + ";\
 			border: 0px solid black;\
 		}\
+		QHeaderView{\
+			background-color: transparent;\
+		}\
 		\
 		QTableCornerButton::section{\
 			background: " + gradient1 + ";\
@@ -33,7 +37,22 @@ ViTableWidget::ViTableWidget(QWidget *parent)
 		}\
 	");
 
+	verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+	horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+	setSelectionMode(QAbstractItemView::SingleSelection);
+	setSelectionBehavior(QAbstractItemView::SelectRows);
 }
+
+void ViTableWidget::adjustHeight()
+{
+	int totalHeight = horizontalHeader()->height();
+	for(int i = 0; i < rowCount(); i++)
+	{
+		totalHeight += rowHeight(i);
+	}
+	resize(width(), totalHeight);
+}
+
 
 void ViTableWidget::paintEvent(QPaintEvent *event)
 {

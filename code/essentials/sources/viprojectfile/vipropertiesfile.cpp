@@ -91,11 +91,11 @@ QDomDocument ViPropertiesFile::toXml()
 
 void ViPropertiesFile::fromXml(QDomDocument document)
 {
-	mProjectName  = document.firstChildElement("ProjectName").text();
-	QDomElement created = document.firstChildElement("Created");
-	QDomElement createdVersion = created.firstChildElement("Version");
-	mCreatedVersion = ViVersion(createdVersion.firstChildElement("Major").text().toInt(), createdVersion.firstChildElement("Minor").text().toInt(), createdVersion.firstChildElement("Patch").text().toInt());
-	QDomElement edited = document.firstChildElement("Edited");
-	QDomElement editedVersion = edited.firstChildElement("Version");
-	mEditedVersion = ViVersion(editedVersion.firstChildElement("Major").text().toInt(), editedVersion.firstChildElement("Minor").text().toInt(), editedVersion.firstChildElement("Patch").text().toInt());
+	mProjectName  = document.elementsByTagName("ProjectName").item(0).toElement().text();
+	QDomElement created = document.elementsByTagName("Created").item(0).toElement();
+	QDomElement createdVersion = created.elementsByTagName("Version").item(0).toElement();
+	mCreatedVersion = ViVersion(createdVersion.elementsByTagName("Major").item(0).toElement().text().toInt(), createdVersion.elementsByTagName("Minor").item(0).toElement().text().toInt(), createdVersion.elementsByTagName("Patch").item(0).toElement().text().toInt());
+	QDomElement edited = document.elementsByTagName("Edited").item(0).toElement();
+	QDomElement editedVersion = edited.elementsByTagName("Version").item(0).toElement();
+	mEditedVersion = ViVersion(editedVersion.elementsByTagName("Major").item(0).toElement().text().toInt(), editedVersion.elementsByTagName("Minor").item(0).toElement().text().toInt(), editedVersion.elementsByTagName("Patch").item(0).toElement().text().toInt());
 }

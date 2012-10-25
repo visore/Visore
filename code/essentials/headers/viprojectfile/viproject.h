@@ -26,9 +26,11 @@ class ViProject : public QObject, public ViId
 
 		void setFilePath(QString filePath);
 		QString filePath();
+		QString fileName(bool withExtension = true);
 
-		void load();
+		bool load(bool minimal = false); // minimal - Only load the vml files
 		void save();
+		qint64 size();
 
 		int sideCount();
 		int currentSide();

@@ -2,7 +2,6 @@
 #define VIINPUTMENU_H
 
 #include "vimenu.h"
-#include "viprojectwidget.h"
 
 namespace Ui
 {
@@ -15,7 +14,6 @@ class ViInputMenu : public ViMenu
 
 	private slots:
 
-		void selectProject();
 		void selectRecording();
 		void selectFile();
 
@@ -27,10 +25,6 @@ class ViInputMenu : public ViMenu
 	private:
 
 		Ui::ViInputMenu *mUi;
-
-		ViProjectWidget mProjectWidget;
-
-		qint16 mProjectIndex;
 
 };
 

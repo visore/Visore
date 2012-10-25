@@ -16,6 +16,7 @@ class ViPushButton : public QPushButton
 
 		void setSize(int width, int height);
 		void setIcon(ViThemeImage image, ViThemeImage::State state);
+		void setIcon(ViThemeImage image, ViThemeImage::State state, int width, int height);
 		void setGlow(QColor color, ViGradientCreator::ViGradientType type = ViGradientCreator::Rectangle, int x = -1, int y = -1, int width = -1, int height = -1);
 		void setCornerRounding(qreal value);
 

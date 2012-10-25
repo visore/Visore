@@ -38,6 +38,27 @@ void ViFileBrowser::resizeEvent(QResizeEvent *event)
 	ViWidget::resizeEvent(event);
 }
 
+QString ViFileBrowser::listToString(QStringList fileNames)
+{
+	QString result = "";
+	if(!fileNames.isEmpty())
+	{
+		result += fileNames[0];
+		for(int i = 1; i < fileNames.size(); ++i)
+		{
+			result += ";" + fileNames[i];
+		}
+	}
+	return result;
+}
+
+QStringList ViFileBrowser::stringToList(QString fileNames)
+{
+	QStringList files = fileNames.split(";");
+	files.removeAll("");
+	return files;
+}
+
 void ViFileBrowser::showDialog()
 {
 	if(mLineEdit->text() != "")
@@ -49,10 +70,7 @@ void ViFileBrowser::showDialog()
 	{
 		fileNames = mDialog->selectedFiles();
 	}
-	if(fileNames.size() > 0)
-	{
-		mLineEdit->setText(fileNames[0]);
-	}
+	mLineEdit->setText(listToString(fileNames));
 }
 
 void ViFileBrowser::setMode(ViFileBrowser::Mode mode)
@@ -66,6 +84,11 @@ void ViFileBrowser::setMode(ViFileBrowser::Mode mode)
 	{
 		mDialog->setAcceptMode(QFileDialog::AcceptSave);
 		mDialog->setFileMode(QFileDialog::AnyFile);
+	}
+	else if(mode == ViFileBrowser::OpenFiles)
+	{
+		mDialog->setAcceptMode(QFileDialog::AcceptOpen);
+		mDialog->setFileMode(QFileDialog::ExistingFiles);
 	}
 	else if(mode == ViFileBrowser::OpenDirectory)
 	{
@@ -88,7 +111,17 @@ void ViFileBrowser::setDirectory(QString directory)
 
 QString ViFileBrowser::fileName()
 {
-	return mLineEdit->text();
+	QStringList result = fileNames();
+	if(result.isEmpty())
+	{
+		return "";
+	}
+	return result[0];
+}
+
+QStringList ViFileBrowser::fileNames()
+{
+	return stringToList(mLineEdit->text());
 }
 
 void ViFileBrowser::setFileName(QString fileName)
