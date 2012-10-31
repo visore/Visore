@@ -1,14 +1,14 @@
-#ifndef VIPROJECTFILE_H
-#define VIPROJECTFILE_H
+#ifndef VIPROJECTINFO_H
+#define VIPROJECTINFO_H
 
-#include <QDomDocument>
+#include "viinfoelement.h"
 
-class ViProjectFile
+class ViProjectInfo
 {
 
 	public:
 
-		ViProjectFile();
+		ViProjectInfo();
 
 		void setDirectory(QString directory);
 		QString name();
@@ -19,8 +19,8 @@ class ViProjectFile
 
 	protected:
 
-		virtual QDomDocument toXml() = 0;
-		virtual void fromXml(QDomDocument document) = 0;
+		virtual ViInfoElement toXml() = 0;
+		virtual bool fromXml(ViInfoElement &document) = 0;
 
 		void setName(QString name);
 		void setNull(bool null);

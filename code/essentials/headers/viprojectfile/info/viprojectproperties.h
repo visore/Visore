@@ -1,15 +1,15 @@
-#ifndef VIPROPERTIESFILE_H
-#define VIPROPERTIESFILE_H
+#ifndef VIPROJECTPROPERTIES_H
+#define VIPROJECTPROPERTIES_H
 
-#include "viprojectfile.h"
+#include "viprojectinfo.h"
 #include "vimanager.h"
 
-class ViPropertiesFile : public ViProjectFile
+class ViProjectProperties : public ViProjectInfo
 {
 
 	public:
 
-		ViPropertiesFile();
+		ViProjectProperties();
 		ViVersion createdVersion();
 		ViVersion editedVersion();
 		QString projectName();
@@ -17,8 +17,8 @@ class ViPropertiesFile : public ViProjectFile
 
 	protected:
 
-		QDomDocument toXml();
-		void fromXml(QDomDocument document);
+		ViInfoElement toXml();
+		bool fromXml(ViInfoElement &document);
 
 	private:
 

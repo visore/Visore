@@ -15,8 +15,8 @@ ViProject::ViProject(QString filePath, QString projectName)
 	setFilePath(filePath);
 	setProjectName(projectName);
 
-	mProjectFiles.append(&mProperties);
-	mProjectFiles.append(&mSongs);
+	mProjectInfos.append(&mProperties);
+	mProjectInfos.append(&mSongs);
 }
 
 ViProject::~ViProject()
@@ -58,9 +58,9 @@ bool ViProject::load(bool minimal)
 void ViProject::save()
 {
 	createTempStructure();
-	for(int i = 0; i < mProjectFiles.size(); ++i)
+	for(int i = 0; i < mProjectInfos.size(); ++i)
 	{
-		mProjectFiles[i]->save();
+		mProjectInfos[i]->save();
 	}
 	QObject::connect(&mArchive, SIGNAL(finished()), this, SLOT(readInfo()));
 	mArchive.compressData(mTempPath);
@@ -100,9 +100,9 @@ bool ViProject::nextSide()
 void ViProject::readInfo()
 {
 	QObject::disconnect(&mArchive, SIGNAL(finished()), this, SLOT(readInfo()));
-	for(int i = 0; i < mProjectFiles.size(); ++i)
+	for(int i = 0; i < mProjectInfos.size(); ++i)
 	{
-		mProjectFiles[i]->load();
+		mProjectInfos[i]->load();
 	}
 	emit finished();
 }
@@ -115,9 +115,9 @@ bool ViProject::createTempStructure()
 	mCorrectedPath = mDataPath + QDir::separator() + "corrected";
 	mAlbumArtPath = mDataPath + QDir::separator() + "albumart";
 
-	for(int i = 0; i < mProjectFiles.size(); ++i)
+	for(int i = 0; i < mProjectInfos.size(); ++i)
 	{
-		mProjectFiles[i]->setDirectory(mTempPath);
+		mProjectInfos[i]->setDirectory(mTempPath);
 	}
 	QDir originalDir(mOriginalPath);
 	QDir correctedDir(mCorrectedPath);

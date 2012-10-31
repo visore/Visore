@@ -34,8 +34,8 @@ class ViInfoElement : public ViInfoPrimitive
 		ViInfoElement child(int index);
 		ViInfoElement child(QString name);
 
-		void fromXml(QString xml);
-		QString toXml();
+		void fromString(QString xml);
+		QString toString();
 
 		void fromDom(QDomNode &dom);
 		QDomNode toDom();

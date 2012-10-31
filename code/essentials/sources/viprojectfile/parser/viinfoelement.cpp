@@ -129,7 +129,7 @@ ViInfoElement ViInfoElement::child(QString name)
 }
 
 
-void ViInfoElement::fromXml(QString xml)
+void ViInfoElement::fromString(QString xml)
 {
 	QDomDocument document("");
 	document.setContent(xml);
@@ -137,7 +137,7 @@ void ViInfoElement::fromXml(QString xml)
 	fromDom(node);
 }
 
-QString ViInfoElement::toXml()
+QString ViInfoElement::toString()
 {
 	QDomNode node = toDom();
 	if(node.isNull())

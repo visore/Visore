@@ -1,40 +1,37 @@
-#include "viprojectfile.h"
+#include "viprojectinfo.h"
 #include <QDir>
 
-ViProjectFile::ViProjectFile()
+ViProjectInfo::ViProjectInfo()
 {
 	mFilePath = "";
 	setNull(true);
 	setName("Project");
 }
 
-void ViProjectFile::setDirectory(QString directory)
+void ViProjectInfo::setDirectory(QString directory)
 {
 	mFilePath = directory + QDir::separator() + mName + ".vml";
 }
 
-QString ViProjectFile::name()
+QString ViProjectInfo::name()
 {
 	return mName;
 }
 
-bool ViProjectFile::isNull()
+bool ViProjectInfo::isNull()
 {
 	return mIsNull;
 }
 
-bool ViProjectFile::load()
+bool ViProjectInfo::load()
 {
 	bool success = false;
 	QFile file(mFilePath);
 	if(file.open(QIODevice::ReadOnly))
 	{
-		QDomDocument document;
-		if(document.setContent(file.readAll(), false))
-		{
-			fromXml(document);
-			success = true;
-		}
+		ViInfoElement document;
+		document.fromString(file.readAll());
+		success = fromXml(document);
 		file.close();
 	}
 	if(success)
@@ -48,13 +45,13 @@ bool ViProjectFile::load()
 	return success;
 }
 
-bool ViProjectFile::save()
+bool ViProjectInfo::save()
 {
 	bool success = false;
 	QFile file(mFilePath);
 	if(file.open(QIODevice::WriteOnly))
 	{
-		success = (file.write(toXml().toByteArray()) > 0);
+		success = (file.write(toXml().toString().toAscii()) > 0);
 		file.close();
 	}
 	if(success)
@@ -68,12 +65,12 @@ bool ViProjectFile::save()
 	return success;
 }
 
-void ViProjectFile::setName(QString name)
+void ViProjectInfo::setName(QString name)
 {
 	mName = name;
 }
 
-void ViProjectFile::setNull(bool null)
+void ViProjectInfo::setNull(bool null)
 {
 	mIsNull = null;
 }

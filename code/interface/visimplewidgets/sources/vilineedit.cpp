@@ -11,10 +11,14 @@ ViLineEdit::ViLineEdit(QWidget *parent)
 	mLayout.addWidget(mLineEdit);
 
 	setStyleSheet("\
-		QLineEdit:focus\
+		QLineEdit\
 		{\
 			border-radius: 3px;\
-			border: 1px solid " + ViThemeManager::color(13).name() + ";\
+			border: 2px solid " + ViThemeManager::color(1).name() + ";\
+		}\
+		QLineEdit:focus\
+		{\
+			border: 2px solid " + ViThemeManager::color(13).name() + ";\
 		}\
 	");
 }

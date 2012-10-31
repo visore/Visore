@@ -4,8 +4,8 @@
 #include "viid.h"
 #include "vimanager.h"
 #include "viarchive.h"
-#include "vipropertiesfile.h"
-#include "visongfile.h"
+#include "viprojectproperties.h"
+#include "viprojectsongs.h"
 
 class ViProject : public QObject, public ViId
 {
@@ -74,9 +74,9 @@ class ViProject : public QObject, public ViId
 
 		ViArchive mArchive;
 
-		QList<ViProjectFile*> mProjectFiles;
-		ViPropertiesFile mProperties;
-		ViSongFile mSongs;
+		QList<ViProjectInfo*> mProjectInfos;
+		ViProjectProperties mProperties;
+		ViProjectSongs mSongs;
 
 };
 

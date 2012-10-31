@@ -27,6 +27,16 @@ ViSongInfo::ViSongInfo(const ViSongInfo &other)
 	mImagePaths = QList<QString>(other.mImagePaths);
 }
 
+QString ViSongInfo::unknownArtist()
+{
+	return "Unknown Artist";
+}
+
+QString ViSongInfo::unknownTitle()
+{
+	return "Unknown Title";
+}
+
 QString ViSongInfo::message()
 {
 	return mMessage;
@@ -47,8 +57,12 @@ QString ViSongInfo::songId()
 	return mSongId;
 }
 
-QString ViSongInfo::songTitle()
+QString ViSongInfo::songTitle(bool returnUnknown)
 {
+	if(returnUnknown && mSongTitle == "")
+	{
+		return ViSongInfo::unknownTitle();
+	}
 	return mSongTitle;
 }
 
@@ -87,8 +101,12 @@ QString ViSongInfo::artistId()
 	return mArtistId;
 }
 
-QString ViSongInfo::artistName()
+QString ViSongInfo::artistName(bool returnUnknown)
 {
+	if(returnUnknown && mArtistName == "")
+	{
+		return ViSongInfo::unknownArtist();
+	}
 	return mArtistName;
 }
 

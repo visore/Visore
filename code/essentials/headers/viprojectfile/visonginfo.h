@@ -13,12 +13,15 @@ class ViSongInfo
 		ViSongInfo();
 		ViSongInfo(const ViSongInfo &other);
 
+		static QString unknownArtist();
+		static QString unknownTitle();
+
 		QString message();
 		qint16 score();
 		QString description();
 
 		QString songId();
-		QString songTitle();
+		QString songTitle(bool returnUnknown = false);
 		qint16 songHotness();
 		qint16 songDanceability();
 		qint16 songEnergy();
@@ -27,7 +30,7 @@ class ViSongInfo
 		double songLoudness();
 
 		QString artistId();
-		QString artistName();
+		QString artistName(bool returnUnknown = false);
 		qint16 artistHotness();
 		qint16 artistFamiliarity();
 
