@@ -7,6 +7,7 @@ ViCodingChain::ViCodingChain()
 {
 	mInput = NULL;
 	mOutput = NULL;
+	setOffset(0);
 	setMode(ViCodingChain::Unknown);
 }
 
@@ -138,6 +139,11 @@ void ViCodingChain::detectCoderFile()
 	mInputCoder = ViAudioManager::detect(mInputFilePath);
 }
 
+void ViCodingChain::setOffset(int offset)
+{
+	mOffset = offset;
+}
+
 void ViCodingChain::run()
 {
 	//////////////////////////////////////////////////////////////////////////////////////////////
@@ -251,6 +257,7 @@ void ViCodingChain::run()
 	mInput->initialize();
 	if(mError != ViCoder::NoError) return;
 
+	mOutput->setOffset(mOffset);
 	mOutput->initialize();
 	if(mError != ViCoder::NoError) return;
 	if(mMode != ViCodingChain::EncodeFile && mMode != ViCodingChain::EncodeData)

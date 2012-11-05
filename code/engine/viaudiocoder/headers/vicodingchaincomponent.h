@@ -247,6 +247,17 @@ class ViCodingChainOutput : public ViCodingChainComponent
 	public:
 
 		ViCodingChainOutput();
+		virtual void initialize();
+
+		// TODO: Currently samples are decoded/encoded and are only 'skipped' if they are written to the output.
+		// This should actually be done before decoding/encoding to save computational power.
+		// The current problem is that we need to read/write the header and the offset will skip the header.
+		void setOffset(int offset);
+
+	protected:
+
+		int mOffset;
+		int mCurrentOffset;
 
 };
 

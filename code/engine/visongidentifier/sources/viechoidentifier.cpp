@@ -1,8 +1,11 @@
 #include "viechoidentifier.h"
 #include "vimanager.h"
+#include "viaudioposition.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDir>
+
+#define OFFSET_SECONDS 3
 
 ViEchoCodeThread::ViEchoCodeThread(QObject *parent)
 	: QThread(parent)
@@ -84,7 +87,7 @@ bool ViEchoIdentifier::identify(ViBuffer *buffer)
 		{
 			setState(ViEchoIdentifier::Encoding);
 			mOutput.clear();
-			mCoder.encode(buffer, mOutput, encodingFormat());
+			mCoder.encode(buffer, mOutput, encodingFormat(), ViAudioPosition::convertPosition(OFFSET_SECONDS, ViAudioPosition::Seconds, ViAudioPosition::Bytes, encodingFormat()));
 			return true;
 		}
 	}

@@ -354,6 +354,18 @@ ViCodingChainOutput
 ViCodingChainOutput::ViCodingChainOutput()
 	: ViCodingChainComponent()
 {
+	mOffset = 0;
+	mCurrentOffset = 0;
+}
+
+void ViCodingChainOutput::initialize()
+{
+	mCurrentOffset = 0;
+}
+
+void ViCodingChainOutput::setOffset(int offset)
+{
+	mOffset = offset;
 }
 
 /**********************************************************
@@ -373,6 +385,7 @@ void ViCodingChainFileOutput::setFilePath(QString filePath)
 
 void ViCodingChainFileOutput::initialize()
 {
+	ViCodingChainOutput::initialize();
 	mData.clear();
 	if(mFilePath == "")
 	{
@@ -420,7 +433,19 @@ void ViCodingChainFileOutput::finalize()
 void ViCodingChainFileOutput::execute()
 {
 	ViSampleArray *array = mData.dequeue();
-	mTempFile.write(array->charData(), array->size());
+	if(mCurrentOffset < mOffset)
+	{
+		int offset = mOffset - mCurrentOffset;
+		if(offset <= array->size())
+		{
+			mTempFile.write(array->charData() + offset, array->size() - offset);
+		}
+		mCurrentOffset += array->size();
+	}
+	else
+	{
+		mTempFile.write(array->charData(), array->size());
+	}
 	delete array;
 }
 
@@ -452,6 +477,7 @@ void ViCodingChainDataOutput::setData(QByteArray &data)
 
 void ViCodingChainDataOutput::initialize()
 {
+	ViCodingChainOutput::initialize();
 	mData.clear();
 	if(mStream != NULL)
 	{
@@ -476,7 +502,19 @@ void ViCodingChainDataOutput::finalize()
 void ViCodingChainDataOutput::execute()
 {
 	ViSampleArray *array = mData.dequeue();
-	mStream->writeRawData(array->charData(), array->size());
+	if(mCurrentOffset < mOffset)
+	{
+		int offset = mOffset - mCurrentOffset;
+		if(offset <= array->size())
+		{
+			mStream->writeRawData(array->charData() + offset, array->size() - offset);
+		}
+		mCurrentOffset += array->size();
+	}
+	else
+	{
+		mStream->writeRawData(array->charData(), array->size());
+	}
 	delete array;
 }
 
@@ -502,6 +540,7 @@ void ViCodingChainBufferOutput::setBuffer(ViBuffer *buffer)
 
 void ViCodingChainBufferOutput::initialize()
 {
+	ViCodingChainOutput::initialize();
 	mStream = mBuffer->createWriteStream();
 }
 
@@ -515,6 +554,18 @@ void ViCodingChainBufferOutput::finalize()
 void ViCodingChainBufferOutput::execute()
 {
 	ViSampleArray *array = mData.dequeue();
-	mStream->write(array->charData(), array->size());
+	if(mCurrentOffset < mOffset)
+	{
+		int offset = mOffset - mCurrentOffset;
+		if(offset <= array->size())
+		{
+			mStream->write(array->charData() + offset, array->size() - offset);
+		}
+		mCurrentOffset += array->size();
+	}
+	else
+	{
+		mStream->write(array->charData(), array->size());
+	}
 	delete array;
 }

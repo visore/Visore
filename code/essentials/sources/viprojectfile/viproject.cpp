@@ -8,6 +8,7 @@ ViProject::ViProject(QString filePath, QString projectName)
 	mSideCount = 0;
 	mCurrentSide = 0;
 	mTempPath = "";
+	mInfoPath = "";
 	mDataPath = "";
 	mOriginalPath = "";
 	mCorrectedPath = "";
@@ -110,6 +111,7 @@ void ViProject::readInfo()
 bool ViProject::createTempStructure()
 {
 	mTempPath = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + id();
+	mInfoPath = mTempPath + QDir::separator() + "info";
 	mDataPath = mTempPath + QDir::separator() + "data";
 	mOriginalPath = mDataPath + QDir::separator() + "original";
 	mCorrectedPath = mDataPath + QDir::separator() + "corrected";
@@ -117,12 +119,13 @@ bool ViProject::createTempStructure()
 
 	for(int i = 0; i < mProjectInfos.size(); ++i)
 	{
-		mProjectInfos[i]->setDirectory(mTempPath);
+		mProjectInfos[i]->setDirectory(mInfoPath);
 	}
+	QDir infoDir(mInfoPath);
 	QDir originalDir(mOriginalPath);
 	QDir correctedDir(mCorrectedPath);
 	QDir albumArtDir(mAlbumArtPath);
-	return originalDir.mkpath(originalDir.absolutePath()) && correctedDir.mkpath(correctedDir.absolutePath()) && albumArtDir.mkpath(albumArtDir.absolutePath());
+	return infoDir.mkpath(infoDir.absolutePath()) && originalDir.mkpath(originalDir.absolutePath()) && correctedDir.mkpath(correctedDir.absolutePath()) && albumArtDir.mkpath(albumArtDir.absolutePath());
 }
 
 bool ViProject::removeTempStructure()
@@ -174,24 +177,18 @@ ViFileSongInfoList ViProject::songs()
 
 void ViProject::addSong(ViFileSongInfo info)
 {
-	QFileInfo fileInfo(info.originalFilePath());
-	QString fileName = fileInfo.completeBaseName();
-	info.setOriginalFilePath(fileName);
+	QFileInfo originalInfo(info.originalFilePath());
+	info.setOriginalFilePath(originalInfo.fileName());
 
-	if(fileName == "")
-	{
-		fileName = fileInfo.fileName();
-	}
-	fileInfo.setFile(info.correctedFilePath());
-	info.setCorrectedFilePath(fileInfo.completeBaseName());
+	QFileInfo correctedInfo(info.correctedFilePath());
+	info.setCorrectedFilePath(correctedInfo.fileName());
 
 	if(info.albumArtPath() != "")
 	{
 		QFile file(info.albumArtPath());
 		QFileInfo imageInfo(info.albumArtPath());
-		QString albumArt = mAlbumArtPath + QDir::separator() + fileName + "." + imageInfo.suffix();
-		file.copy(albumArt);
-		fileInfo.setFile(albumArt);
+		QString albumArt = originalInfo.baseName() + "." + imageInfo.suffix();
+		file.copy(mAlbumArtPath + QDir::separator() + albumArt);
 		info.setAlbumArtPath(albumArt);
 	}
 

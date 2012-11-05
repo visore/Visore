@@ -8,7 +8,7 @@ ViFrequencyEndDetector::ViFrequencyEndDetector()
 	: ViEndDetector()
 {
 	setThreshold(ViEndDetector::SongStart, ViRange(0.05, 0.4), ViRange(0.00015, 1.0), 1000);
-	setThreshold(ViEndDetector::SongEnd, ViRange(0.05, 0.4), ViRange(0.0, 0.00015), 2000);
+	setThreshold(ViEndDetector::SongEnd, ViRange(0.05, 0.4), ViRange(0.0, 0.00015), 1700);
 	setThreshold(ViEndDetector::RecordStart, ViRange(0.05, 0.2), ViRange(0.0001, 1.0), 500);
 	setThreshold(ViEndDetector::RecordEnd, ViRange(0.05, 0.3), ViRange(0.0, 0.00005), 7000);
 }

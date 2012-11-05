@@ -4,9 +4,9 @@
 //Interval (milliseconds) use to request info
 #define REQUEST_SAMPLES_1 10000
 #define REQUEST_SAMPLES_2 30000
-#define REQUEST_SAMPLES_3 90000
-#define REQUEST_SAMPLES_4 110000
-#define REQUEST_SAMPLES_5 130000
+#define REQUEST_SAMPLES_3 45000
+#define REQUEST_SAMPLES_4 90000
+#define REQUEST_SAMPLES_5 120000
 
 ViSongDetector::ViSongDetector()
 	: ViObserver()
@@ -20,13 +20,20 @@ ViSongDetector::~ViSongDetector()
 {
 	if(mIdentifier != NULL)
 	{
-		QObject::disconnect(mIdentifier, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
+		QObject::disconnect(mIdentifier, SIGNAL(songDetected(ViSongInfo)), this, SLOT(setSong(ViSongInfo)));
 	}
+}
+
+void ViSongDetector::setSong(ViSongInfo info)
+{
+	mSongInfo = info;
+	emit songDetected(mSongInfo);
 }
 
 void ViSongDetector::initialize()
 {
 	mRequestsSent = 0;
+	mSongInfo = ViSongInfo();
 }
 
 void ViSongDetector::finalize()
@@ -84,8 +91,13 @@ void ViSongDetector::setIdentifier(ViSongIdentifier *identifier)
 {
 	if(mIdentifier != NULL)
 	{
-		QObject::disconnect(mIdentifier, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
+		QObject::disconnect(mIdentifier, SIGNAL(songDetected(ViSongInfo)), this, SLOT(setSong(ViSongInfo)));
 	}
 	mIdentifier = identifier;
-	QObject::connect(mIdentifier, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
+	QObject::connect(mIdentifier, SIGNAL(songDetected(ViSongInfo)), this, SLOT(setSong(ViSongInfo)));
+}
+
+ViSongInfo& ViSongDetector::songInfo()
+{
+	return mSongInfo;
 }

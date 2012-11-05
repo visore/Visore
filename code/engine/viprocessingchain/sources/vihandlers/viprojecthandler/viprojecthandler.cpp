@@ -7,10 +7,12 @@ ViProjectHandler::ViProjectHandler(ViProcessingChain *chain)
 	: ViHandler(chain)
 {
 	mProject = NULL;
+	mSongDetector = NULL;
 	mObject = ViAudioObject::createNull();
 	QObject::connect(this, SIGNAL(statusChanged(QString)), mChain, SIGNAL(statusChanged(QString)));
 	QObject::connect(this, SIGNAL(progressStarted()), mChain, SIGNAL(progressStarted()));
 	QObject::connect(this, SIGNAL(progressFinished()), mChain, SIGNAL(progressFinished()));
+	QObject::connect(mChain, SIGNAL(attached(ViProcessor*)), this, SLOT(setDetector(ViProcessor*)));
 }
 
 ViProjectHandler::~ViProjectHandler()
@@ -49,6 +51,15 @@ void ViProjectHandler::create(QString name, QString filePath, short recordSides)
 	changeStatus("Please start the record");
 }
 
+void ViProjectHandler::setDetector(ViProcessor *processor)
+{
+	ViSongDetector *detector = dynamic_cast<ViSongDetector*>(processor);
+	if(detector != NULL)
+	{
+		mSongDetector = detector;
+	}
+}
+
 void ViProjectHandler::addAudioObject(ViAudioObjectPointer object)
 {
 	mObject = object;
@@ -57,6 +68,10 @@ void ViProjectHandler::addAudioObject(ViAudioObjectPointer object)
 	if(songLength > MINIMUM_SONG_LENGTH)
 	{
 		QObject::connect(mChain->mFileOutput, SIGNAL(finished()), this, SLOT(finishWriting()));
+		if(mSongDetector != NULL)
+		{
+			mChain->mFileOutput->setSongInfo(mSongDetector->songInfo());
+		}
 		mChain->mFileOutput->setFormat(buffer->format());
 		mChain->mFileOutput->setBuffer(buffer);
 		mChain->mFileOutput->setFile(mProject->originalPath(), mProject->nextOriginalSongNumber(), mChain->mFileOutput->format().codec()->extensions()[0]);

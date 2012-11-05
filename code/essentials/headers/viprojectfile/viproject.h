@@ -67,6 +67,7 @@ class ViProject : public QObject, public ViId
 		int mSideCount;
 		int mCurrentSide;
 		QString mTempPath;
+		QString mInfoPath;
 		QString mDataPath;
 		QString mOriginalPath;
 		QString mCorrectedPath;

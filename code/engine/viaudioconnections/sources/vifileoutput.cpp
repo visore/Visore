@@ -89,7 +89,7 @@ QString ViFileOutput::filePath()
 void ViFileOutput::start()
 {
 	LOG("Writing to file started.");
-	mCoder.encode(mBuffer, mFilePath, mFormat, mSongInfo);	
+	mCoder.encode(mBuffer, mFilePath, mFormat, 0, mSongInfo);	
 	setState(QAudio::ActiveState);
 }
 

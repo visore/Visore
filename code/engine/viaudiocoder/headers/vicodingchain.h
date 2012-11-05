@@ -51,6 +51,8 @@ class ViCodingChain : public QThread
 		void setInputFormat(ViAudioFormat format);
 		void setOutputFormat(ViAudioFormat format);
 
+		void setOffset(int offset);
+
 		void run();
 
 	protected:
@@ -92,6 +94,8 @@ class ViCodingChain : public QThread
 
 		ViCodingChainDecoder mDecoder;
 		ViCodingChainEncoder mEncoder;
+
+		int mOffset;
 
 };
 

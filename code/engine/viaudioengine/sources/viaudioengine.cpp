@@ -49,7 +49,6 @@ ViAudioEngine::ViAudioEngine()
 	mSongIdentifier.setKey("G1TZBE4IHJAYUSNCN");
 	mSongDetector.setIdentifier(&mSongIdentifier);
 	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
-	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), mFileOutput, SLOT(setSongInfo(ViSongInfo)));
 	mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
 
 	ViFrequencyEndDetector *endDetector = new ViFrequencyEndDetector();

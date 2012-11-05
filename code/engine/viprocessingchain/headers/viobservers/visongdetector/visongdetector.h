@@ -13,6 +13,10 @@ class ViSongDetector : public ViObserver
 
 		void songDetected(ViSongInfo info);
 
+	private slots:
+
+		void setSong(ViSongInfo info);
+
 	public:
 
 		ViSongDetector();
@@ -22,11 +26,13 @@ class ViSongDetector : public ViObserver
 		void finalize();
 		void execute();
 		void setIdentifier(ViSongIdentifier *identifier);
+		ViSongInfo& songInfo();
 
 	private:
 
 		ViSongIdentifier *mIdentifier;
 		qint8 mRequestsSent;
+		ViSongInfo mSongInfo;
 
 };
 

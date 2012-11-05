@@ -26,13 +26,13 @@ ViInfoElement ViProjectSongs::toXml()
 		ViInfoElement song("Song");
 		song.addAttribute("id", QString::number(i + 1));
 		song.addChild("Artist", mSongInfos[i].artistName(true));
-		song.addChild("Artist", mSongInfos[i].songTitle(true));
+		song.addChild("Title", mSongInfos[i].songTitle(true));
 		song.addChild("AlbumArt", mSongInfos[i].albumArtPath());
 
 		//File
 		ViInfoElement file("File");
-		song.addChild("Original", mSongInfos[i].correctedFilePath());
-		song.addChild("Corrected", mSongInfos[i].originalFilePath());
+		file.addChild("Original", mSongInfos[i].originalFilePath());
+		file.addChild("Corrected", mSongInfos[i].correctedFilePath());
 		song.addChild(file);
 
 		root.addChild(song);
@@ -43,5 +43,22 @@ ViInfoElement ViProjectSongs::toXml()
 
 bool ViProjectSongs::fromXml(ViInfoElement &document)
 {
-	
+	if(document.name() == name())
+	{
+		mSongInfos.clear();
+		ViInfoElementList children = document.children();
+		for(int i = 0; i < children.size(); ++i)
+		{
+			ViFileSongInfo info;
+			info.setArtistName(children[i].child("Artist").valueString());
+			info.setSongTitle(children[i].child("Title").valueString());
+			info.setAlbumArtPath(children[i].child("AlbumArt").valueString());
+			ViInfoElement file = children[i].child("File");
+			info.setOriginalFilePath(file.child("Original").valueString());
+			info.setCorrectedFilePath(file.child("Corrected").valueString());
+			mSongInfos.append(info);
+		}
+		return true;
+	}
+	return false;
 }

@@ -49,7 +49,7 @@ bool ViProjectInfo::save()
 {
 	bool success = false;
 	QFile file(mFilePath);
-	if(file.open(QIODevice::WriteOnly))
+	if(file.open(QIODevice::Truncate | QIODevice::WriteOnly))
 	{
 		success = (file.write(toXml().toString().toAscii()) > 0);
 		file.close();

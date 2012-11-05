@@ -4,6 +4,7 @@
 #include "vihandler.h"
 #include "viaudioobject.h"
 #include "viproject.h"
+#include "visongdetector.h"
 
 class ViProjectHandler : public ViHandler
 {
@@ -18,6 +19,7 @@ class ViProjectHandler : public ViHandler
 
 	private slots:
 
+		void setDetector(ViProcessor *processor);
 		void addAudioObject(ViAudioObjectPointer object);
 		void finishWriting();
 
@@ -41,6 +43,7 @@ class ViProjectHandler : public ViHandler
 
 		ViProject *mProject;
 		ViAudioObjectPointer mObject;
+		ViSongDetector *mSongDetector;
 
 };
 
