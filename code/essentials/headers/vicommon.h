@@ -1,12 +1,17 @@
 #ifndef VICOMMON_H
 #define VICOMMON_H
 
+#include <QString>
 #include <QtGlobal>
 #include <QStringList>
 #include <math.h>
+#include <typeinfo>
 
 #define ROUND(x) (x<0?ceil((x)-0.5):floor((x)+0.5))
 #define round(x) ROUND(x)
+
+#define CLASSNAME stripClassName(typeid(*this).name()) // call className() from within an object
+QString stripClassName(const char *text);
 
 typedef unsigned char qbyte8u;
 typedef unsigned short qbyte16u;

@@ -11,7 +11,7 @@ class ViCorrelator : public ViDualObserver
 
 	public:
 		
-		ViCorrelator();
+		ViCorrelator(QString name = "");
 		ViCorrelation& result();
 		
 	protected:

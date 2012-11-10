@@ -170,16 +170,6 @@ void ViLogger::append(ViLogEntry entry)
 	}
 }
 
-QString className(const char *text)
-{
-	QString name(text);
-	while(name.size() > 0 && name[0].isDigit())
-	{
-		name.remove(0, 1);
-	}
-	return name;
-}
-
 void log(const char *file, const QString className, const char *function, const int line, const QString message, QtMsgType type)
 {
 	QString fileName(file);

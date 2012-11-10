@@ -4,6 +4,7 @@
 #include "vifunctor.h"
 #include "vibuffer.h"
 #include "viaudioobjectpointer.h"
+#include "vielement.h"
 #include <QMutex>
 #include <QMutexLocker>
 
@@ -42,6 +43,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter
 		void setFinished(bool isFinished = true);
 		bool isFinished();
 
+		void addCorrelation(const ViElement &correlation);
+		ViElementList& correlations();
+
 	private:
 
 		ViAudioObject(bool autoDestruct); //autoDestruct determines if the buffers will be deleted automatically.
@@ -55,6 +59,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter
 		bool mIsSong;
 		ViBuffer *mOriginalBuffer;
 		ViBuffer *mCorrectedBuffer;
+		ViElementList mCorrelations;
 };
 
 #endif

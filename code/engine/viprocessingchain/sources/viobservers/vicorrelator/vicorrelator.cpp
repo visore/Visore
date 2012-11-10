@@ -1,7 +1,7 @@
 #include "vicorrelator.h"
 
-ViCorrelator::ViCorrelator()
-	: ViDualObserver()
+ViCorrelator::ViCorrelator(QString name)
+	: ViDualObserver(name)
 {
 	setAutoDelete(false); // Object is not automatically deleted by thread pool
 }

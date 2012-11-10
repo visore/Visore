@@ -12,6 +12,7 @@ class ViCrossCorrelator : public ViCorrelator
 		
 		ViCrossCorrelator();
 		~ViCrossCorrelator();
+		void exportResults(ViElement &element);
 		void setWindowSize(int windowSize);
 		void initialize();
 		void finalize();

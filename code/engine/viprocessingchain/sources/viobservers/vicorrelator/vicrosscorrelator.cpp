@@ -2,7 +2,7 @@
 #include <float.h>
 
 ViCrossCorrelator::ViCrossCorrelator()
-	: ViCorrelator()
+	: ViCorrelator(CLASSNAME)
 {
 	mRealData = NULL;
 	mFirstFourierData = NULL;
@@ -16,8 +16,17 @@ ViCrossCorrelator::~ViCrossCorrelator()
 	deallocateData();
 }
 
+void ViCrossCorrelator::exportResults(ViElement &element)
+{
+	ViProcessor::exportResults(element);
+	element.addChild("Maximum", mMaximumDifference);
+	element.addChild("Minimum", mMinimumDifference);
+	element.addChild("Average", mAverageDifference);
+}
+
 void ViCrossCorrelator::setWindowSize(int windowSize)
 {
+	ViProcessor::setWindowSize(windowSize);
 	mTransformer.setSize(mWindowSize);
 }
 
@@ -41,6 +50,10 @@ void ViCrossCorrelator::finalize()
 		(2 - qAbs(mMinimumDifference)) / 2,
 		(2 - qAbs(mAverageDifference)) / 2
 	));*/
+
+	ViElement element;
+	exportResults(element);
+	mObject->addCorrelation(element);
 }
 
 void ViCrossCorrelator::execute()

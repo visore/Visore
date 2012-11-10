@@ -2,7 +2,7 @@
 #include <float.h>
 
 ViSampleCorrelator::ViSampleCorrelator()
-	: ViCorrelator()
+	: ViCorrelator(CLASSNAME)
 {
 }
 
@@ -22,6 +22,10 @@ void ViSampleCorrelator::finalize()
 		(2 - qAbs(mMinimumDifference)) / 2,
 		(2 - qAbs(mAverageDifference)) / 2
 	));*/
+
+	ViElement element;
+	exportResults(element);
+	mObject->addCorrelation(element);
 }
 
 void ViSampleCorrelator::execute()

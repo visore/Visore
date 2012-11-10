@@ -130,3 +130,13 @@ bool ViAudioObject::isFinished()
 	QMutexLocker locker(&mMutex);
 	return mIsFinished;
 }
+
+void ViAudioObject::addCorrelation(const ViElement &correlation)
+{
+	mCorrelations.append(correlation);
+}
+
+ViElementList& ViAudioObject::correlations()
+{
+	return mCorrelations;
+}

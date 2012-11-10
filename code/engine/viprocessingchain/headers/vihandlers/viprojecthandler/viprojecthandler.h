@@ -19,7 +19,7 @@ class ViProjectHandler : public ViHandler
 
 	private slots:
 
-		void setDetector(ViProcessor *processor);
+		void addProcessor(ViProcessor *processor);
 		void addAudioObject(ViAudioObjectPointer object);
 		void finishWriting();
 
@@ -43,6 +43,7 @@ class ViProjectHandler : public ViHandler
 
 		ViProject *mProject;
 		ViAudioObjectPointer mObject;
+
 		ViSongDetector *mSongDetector;
 
 };

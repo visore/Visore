@@ -11,10 +11,12 @@
 #include "vienmfpidentifier.h"
 
 #include "vispectrumanalyzer.h"
-#include "vicorrelator.h"
 #include "viwaveformer.h"
 #include "vienddetector.h"
 #include "visongdetector.h"
+
+#include "vicrosscorrelator.h"
+#include "visamplecorrelator.h"
 
 class ViAudioEngine : public ViSingleton<ViAudioEngine>
 {
@@ -116,6 +118,9 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 
 		ViEnmfpIdentifier mSongIdentifier;
 		ViSongDetector mSongDetector;
+
+		ViCrossCorrelator mCrossCorrelator;
+		ViSampleCorrelator mSampleCorrelator;
 
 		ViSpectrumAnalyzer mSpectrumAnalyzer;
 		ViEndDetector *mEndDetector;

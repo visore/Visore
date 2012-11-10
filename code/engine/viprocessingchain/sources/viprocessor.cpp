@@ -1,8 +1,9 @@
 #include "viprocessor.h"
 
-ViProcessor::ViProcessor()
+ViProcessor::ViProcessor(QString name)
 	: QObject(), QRunnable(), ViId()
 {
+	mName = name;
 	setAutoDelete(false); //Ensures that QThreadPool doesn't automatically delete object
 	mWindowSize = 0;
 	mIsEnabled = true;
@@ -52,7 +53,7 @@ void ViProcessor::run()
 
 bool ViProcessor::importParameters(const ViElement &element)
 {
-	if(element.name() == QString(metaObject()->className()))
+	if(element.name() == name())
 	{
 		return true;
 	}
@@ -61,12 +62,12 @@ bool ViProcessor::importParameters(const ViElement &element)
 
 void ViProcessor::exportParameters(ViElement &element)
 {
-	element.setName(QString(metaObject()->className()));
+	element.setName(name(true));
 }
 
 bool ViProcessor::importResults(const ViElement &element)
 {
-	if(element.name() == QString(metaObject()->className()))
+	if(element.name() == name())
 	{
 		return true;
 	}
@@ -75,7 +76,7 @@ bool ViProcessor::importResults(const ViElement &element)
 
 void ViProcessor::exportResults(ViElement &element)
 {
-	element.setName(QString(metaObject()->className()));
+	element.setName(name(true));
 }
 
 void ViProcessor::enable()
@@ -104,8 +105,17 @@ bool ViProcessor::isDisabled()
 	return !mIsEnabled;
 }
 
-ViObserver::ViObserver()
-	: ViProcessor()
+QString ViProcessor::name(bool simple)
+{
+	if(simple && mName.startsWith("Vi"))
+	{
+		return mName.mid(2);
+	}
+	return mName;
+}
+
+ViObserver::ViObserver(QString name)
+	: ViProcessor(name)
 {
 	mData = NULL;
 }
@@ -115,8 +125,8 @@ void ViObserver::setData(const ViSampleChunk *data)
 	mData = data;
 }
 
-ViDualObserver::ViDualObserver()
-	: ViObserver()
+ViDualObserver::ViDualObserver(QString name)
+	: ViObserver(name)
 {
 	mData2 = NULL;
 }
@@ -127,8 +137,8 @@ void ViDualObserver::setData(const ViSampleChunk *inputData, const ViSampleChunk
 	mData2 = outputData;
 }
 
-ViModifier::ViModifier()
-	: ViProcessor()
+ViModifier::ViModifier(QString name)
+	: ViProcessor(name)
 {
 	mData = NULL;
 }

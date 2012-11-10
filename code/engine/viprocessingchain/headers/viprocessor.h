@@ -29,7 +29,7 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 
 	public:
 
-		ViProcessor();
+		ViProcessor(QString name);
 
 		virtual void setObject(ViAudioObjectPointer object);
 
@@ -54,6 +54,8 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 		bool isEnabled();
 		bool isDisabled();
 
+		QString name(bool simple = false);
+
 	protected:
 
 		ViAudioObjectPointer mObject;
@@ -64,6 +66,10 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 		bool mIsEnabled;
 		QMutex mIsEnabledMutex;
 
+	private:
+
+		QString mName;
+
 };
 
 class ViObserver : public ViProcessor
@@ -71,7 +77,7 @@ class ViObserver : public ViProcessor
 
 	public:
 
-		ViObserver();
+		ViObserver(QString name = "");
 		virtual void setData(const ViSampleChunk *data);
 
 	protected:
@@ -85,7 +91,7 @@ class ViDualObserver : public ViObserver
 
 	public:
 
-		ViDualObserver();
+		ViDualObserver(QString name = "");
 		virtual void setData(const ViSampleChunk *inputData, const ViSampleChunk *outputData);
 
 	protected:
@@ -99,7 +105,7 @@ class ViModifier : public ViProcessor
 
 	public:
 
-		ViModifier();
+		ViModifier(QString name = "");
 		virtual void setData(ViSampleChunk *data);
 
 	protected:

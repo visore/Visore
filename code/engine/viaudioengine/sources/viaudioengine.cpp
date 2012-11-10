@@ -66,6 +66,10 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SIGNAL(songEnded()), Qt::DirectConnection);
 
 	mProcessingChain.attach(ViAudio::AudioInput, mEndDetector);
+
+	//Correlators
+	mProcessingChain.attach(ViAudio::AudioInputOutput, &mCrossCorrelator);
+	mProcessingChain.attach(ViAudio::AudioInputOutput, &mSampleCorrelator);
 }
 
 ViAudioEngine::~ViAudioEngine()

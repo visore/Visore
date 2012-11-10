@@ -1,5 +1,6 @@
 #include "viprojecthandler.h"
 #include "viaudiocodec.h"
+#include "vitypechecker.h"
 
 #define MINIMUM_SONG_LENGTH 20
 
@@ -12,7 +13,7 @@ ViProjectHandler::ViProjectHandler(ViProcessingChain *chain)
 	QObject::connect(this, SIGNAL(statusChanged(QString)), mChain, SIGNAL(statusChanged(QString)));
 	QObject::connect(this, SIGNAL(progressStarted()), mChain, SIGNAL(progressStarted()));
 	QObject::connect(this, SIGNAL(progressFinished()), mChain, SIGNAL(progressFinished()));
-	QObject::connect(mChain, SIGNAL(attached(ViProcessor*)), this, SLOT(setDetector(ViProcessor*)));
+	QObject::connect(mChain, SIGNAL(attached(ViProcessor*)), this, SLOT(addProcessor(ViProcessor*)));
 }
 
 ViProjectHandler::~ViProjectHandler()
@@ -51,17 +52,18 @@ void ViProjectHandler::create(QString name, QString filePath, short recordSides)
 	changeStatus("Please start the record");
 }
 
-void ViProjectHandler::setDetector(ViProcessor *processor)
+void ViProjectHandler::addProcessor(ViProcessor *processor)
 {
-	ViSongDetector *detector = dynamic_cast<ViSongDetector*>(processor);
-	if(detector != NULL)
-	{
-		mSongDetector = detector;
-	}
+	ViTypeChecker<ViSongDetector>::assign(processor, mSongDetector);
 }
 
 void ViProjectHandler::addAudioObject(ViAudioObjectPointer object)
 {
+	ViElementList &l = object->correlations();
+	for(int i = 0; i < l.size(); ++i)
+	{
+		LOG(l[i].toXml());
+	}
 	mObject = object;
 	ViBuffer *buffer = object->correctedBuffer();
 	qreal songLength = ViAudioPosition::convertPosition(buffer->size(), ViAudioPosition::Samples, ViAudioPosition::Seconds, buffer->format());

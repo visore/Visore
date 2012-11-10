@@ -2,11 +2,10 @@
 #define VILOGGER_H
 
 #include <QtGlobal>
-#include <QString>
 #include <QList>
 #include <QSharedPointer>
 #include <iostream>
-#include <typeinfo>
+#include <vicommon.h>
 
 using namespace std;
 
@@ -63,10 +62,8 @@ class ViLogger
 	
 };
 
-QString className(const char *text);
-
-#define LOG1(message) log(__FILE__, className(typeid(*this).name()), Q_FUNC_INFO, __LINE__, message, QtDebugMsg)
-#define LOG2(message, type) log(__FILE__, className(typeid(*this).name()), Q_FUNC_INFO, __LINE__, message, type)
+#define LOG1(message) log(__FILE__, CLASSNAME, Q_FUNC_INFO, __LINE__, message, QtDebugMsg)
+#define LOG2(message, type) log(__FILE__, CLASSNAME, Q_FUNC_INFO, __LINE__, message, type)
 
 #define GET_ARGUMENT(arg1, arg2, arg3, ...) arg3
 #define LOG_CHOOSER(...) GET_ARGUMENT(__VA_ARGS__, LOG2, LOG1, )
