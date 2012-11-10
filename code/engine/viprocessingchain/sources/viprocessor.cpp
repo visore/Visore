@@ -50,6 +50,34 @@ void ViProcessor::run()
 	}
 }
 
+bool ViProcessor::importParameters(const ViElement &element)
+{
+	if(element.name() == QString(metaObject()->className()))
+	{
+		return true;
+	}
+	return false;
+}
+
+void ViProcessor::exportParameters(ViElement &element)
+{
+	element.setName(QString(metaObject()->className()));
+}
+
+bool ViProcessor::importResults(const ViElement &element)
+{
+	if(element.name() == QString(metaObject()->className()))
+	{
+		return true;
+	}
+	return false;
+}
+
+void ViProcessor::exportResults(ViElement &element)
+{
+	element.setName(QString(metaObject()->className()));
+}
+
 void ViProcessor::enable()
 {
 	mIsEnabledMutex.lock();

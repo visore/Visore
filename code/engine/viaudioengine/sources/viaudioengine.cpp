@@ -10,8 +10,8 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(progressed(short)), this, SIGNAL(spectrumProgressed(short)));
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
 
-	QObject::connect(&mCorrelator, SIGNAL(progressed(short)), this, SIGNAL(correlationProgressed(short)));
-	QObject::connect(&mCorrelator, SIGNAL(finished()), this, SIGNAL(correlationFinished()));
+	//QObject::connect(&mCorrelator, SIGNAL(progressed(short)), this, SIGNAL(correlationProgressed(short)));
+	//QObject::connect(&mCorrelator, SIGNAL(finished()), this, SIGNAL(correlationFinished()));
 
 	mFileInput = mConnection.fileInput();
 	mFileOutput = mConnection.fileOutput();
@@ -89,9 +89,9 @@ ViWaveForm& ViAudioEngine::wave(ViAudio::Mode mode)
 	}
 }
 
-ViCorrelationResult& ViAudioEngine::correlation()
+ViCorrelation& ViAudioEngine::correlation()
 {
-	mCorrelator.result();
+//	mCorrelator.result();
 }
 
 void ViAudioEngine::changeInput(ViAudio::Input input)

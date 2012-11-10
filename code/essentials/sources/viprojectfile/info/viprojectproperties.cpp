@@ -29,44 +29,44 @@ void ViProjectProperties::setProjectName(QString name)
 	mProjectName = name;
 }
 
-ViInfoElement ViProjectProperties::toXml()
+ViElement ViProjectProperties::toXml()
 {
 	mEditedVersion = ViManager::version();
-	ViInfoElement root(name());
+	ViElement root(name());
 
 	//Project name
-	root.addChild(ViInfoElement("ProjectName", mProjectName));
+	root.addChild(ViElement("ProjectName", mProjectName));
 
 	//Created
-	ViInfoElement createdVersion("Version");
-	createdVersion.addChild(ViInfoElement("Major", QString::number(mCreatedVersion.major())));
-	createdVersion.addChild(ViInfoElement("Minor", QString::number(mCreatedVersion.minor())));
-	createdVersion.addChild(ViInfoElement("Patch", QString::number(mCreatedVersion.patch())));
-	ViInfoElement created("Created");
+	ViElement createdVersion("Version");
+	createdVersion.addChild(ViElement("Major", QString::number(mCreatedVersion.major())));
+	createdVersion.addChild(ViElement("Minor", QString::number(mCreatedVersion.minor())));
+	createdVersion.addChild(ViElement("Patch", QString::number(mCreatedVersion.patch())));
+	ViElement created("Created");
 	created.addChild(createdVersion);
 	root.addChild(created);
 
 	//Edited
-	ViInfoElement editedVersion("Version");
-	editedVersion.addChild(ViInfoElement("Major", QString::number(mEditedVersion.major())));
-	editedVersion.addChild(ViInfoElement("Minor", QString::number(mEditedVersion.minor())));
-	editedVersion.addChild(ViInfoElement("Patch", QString::number(mEditedVersion.patch())));
-	ViInfoElement edited("Edited");
+	ViElement editedVersion("Version");
+	editedVersion.addChild(ViElement("Major", QString::number(mEditedVersion.major())));
+	editedVersion.addChild(ViElement("Minor", QString::number(mEditedVersion.minor())));
+	editedVersion.addChild(ViElement("Patch", QString::number(mEditedVersion.patch())));
+	ViElement edited("Edited");
 	edited.addChild(editedVersion);
 	root.addChild(edited);
 
 	return root;
 }
 
-bool ViProjectProperties::fromXml(ViInfoElement &document)
+bool ViProjectProperties::fromXml(ViElement &document)
 {
 	if(document.name() == name())
 	{
-		mProjectName = document.child("ProjectName").valueString();
-		ViInfoElement created = document.child("Created").child("Version");
-		mCreatedVersion = ViVersion(created.child("Major").valueInt(), created.child("Minor").valueInt(), created.child("Patch").valueInt());
-		ViInfoElement edited = document.child("Edited").child("Version");
-		mEditedVersion = ViVersion(edited.child("Major").valueInt(), edited.child("Minor").valueInt(), edited.child("Patch").valueInt());
+		mProjectName = document.child("ProjectName").toString();
+		ViElement created = document.child("Created").child("Version");
+		mCreatedVersion = ViVersion(created.child("Major").toInt(), created.child("Minor").toInt(), created.child("Patch").toInt());
+		ViElement edited = document.child("Edited").child("Version");
+		mEditedVersion = ViVersion(edited.child("Major").toInt(), edited.child("Minor").toInt(), edited.child("Patch").toInt());
 		return true;
 	}
 	return false;

@@ -1,7 +1,7 @@
 #ifndef VIPROJECTINFO_H
 #define VIPROJECTINFO_H
 
-#include "viinfoelement.h"
+#include "vielement.h"
 
 class ViProjectInfo
 {
@@ -19,8 +19,8 @@ class ViProjectInfo
 
 	protected:
 
-		virtual ViInfoElement toXml() = 0;
-		virtual bool fromXml(ViInfoElement &document) = 0;
+		virtual ViElement toXml() = 0;
+		virtual bool fromXml(ViElement &document) = 0;
 
 		void setName(QString name);
 		void setNull(bool null);

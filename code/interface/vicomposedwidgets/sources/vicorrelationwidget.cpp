@@ -50,16 +50,16 @@ void ViCorrelationWidget::recalculate()
 
 void ViCorrelationWidget::update()
 {
-	ViCorrelationResult &result = mEngine->correlation();
+	ViCorrelation &result = mEngine->correlation();
 
-	mUi->tableWidget->item(0, 1)->setText(QString::number(result.sampleCorrelation(ViCorrelationResult::Worst) * 100, 'f', 5) + "%");
+	/*mUi->tableWidget->item(0, 1)->setText(QString::number(result.sampleCorrelation(ViCorrelationResult::Worst) * 100, 'f', 5) + "%");
 	mUi->tableWidget->item(0, 2)->setText(QString::number(result.sampleCorrelation(ViCorrelationResult::Best) * 100, 'f', 5) + "%");
 	mUi->tableWidget->item(0, 3)->setText(QString::number(result.sampleCorrelation(ViCorrelationResult::Average) * 100, 'f', 5) + "%");
 
 	mUi->tableWidget->item(1, 1)->setText(QString::number(result.crossCorrelation(ViCorrelationResult::Worst) * 100, 'f', 5) + "%");
 	mUi->tableWidget->item(1, 2)->setText(QString::number(result.crossCorrelation(ViCorrelationResult::Best) * 100, 'f', 5) + "%");
 	mUi->tableWidget->item(1, 3)->setText(QString::number(result.crossCorrelation(ViCorrelationResult::Average) * 100, 'f', 5) + "%");
-
+*/
 	adjustTable();
 	//ViLoadingWidget::hide();
 }

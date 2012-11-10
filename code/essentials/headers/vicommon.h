@@ -2,6 +2,7 @@
 #define VICOMMON_H
 
 #include <QtGlobal>
+#include <QStringList>
 #include <math.h>
 
 #define ROUND(x) (x<0?ceil((x)-0.5):floor((x)+0.5))
@@ -24,5 +25,12 @@ typedef qbyte8 qbyte;
 
 typedef float qfloat;
 typedef double qdouble;
+
+typedef qint32 qint;
+
+typedef QList<bool> QBoolList;
+typedef QList<qint> QIntList;
+typedef QList<qfloat> QFloatList;
+typedef QList<qreal> QRealList;
 
 #endif

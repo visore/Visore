@@ -1,93 +1,103 @@
-#include "viinfoelement.h"
-#include "vilogger.h"
-ViInfoElement::ViInfoElement()
-	: ViInfoPrimitive()
+#include "vielement.h"
+
+ViElement::ViElement()
+	: ViValue()
 {
 }
 
-ViInfoElement::ViInfoElement(QString name)
-	: ViInfoPrimitive(name)
+ViElement::ViElement(QString name)
+	: ViValue(name)
 {
 }
 
-ViInfoElement::ViInfoElement(QString name, QVariant value)
-	: ViInfoPrimitive(name, value)
+ViElement::ViElement(QString name, QVariant value)
+	: ViValue(name, value)
 {
 }
 
-ViInfoElement::ViInfoElement(const ViInfoElement &other)
-	: ViInfoPrimitive(other)
+ViElement::ViElement(const ViElement &other)
+	: ViValue(other)
 {
 	mAttributes = other.mAttributes;
 	mChildren = other.mChildren;
 }
 
-ViInfoElement& ViInfoElement::addChild(ViInfoElement child)
+ViElement& ViElement::addChild(ViElement child)
 {
 	mChildren.append(child);
 	return mChildren.last();
 }
 
-ViInfoAttribute& ViInfoElement::addAttribute(ViInfoAttribute attribute)
+ViAttribute& ViElement::addAttribute(ViAttribute attribute)
 {
 	mAttributes.append(attribute);
 	mAttributes.last();
 }
 
-ViInfoElement& ViInfoElement::addChild(QString name)
+ViElement& ViElement::addChild(QString name)
 {
-	mChildren.append(ViInfoElement(name));
+	mChildren.append(ViElement(name));
 	return mChildren.last();
 }
 
-ViInfoAttribute& ViInfoElement::addAttribute(QString name)
+ViAttribute& ViElement::addAttribute(QString name)
 {
-	mAttributes.append(ViInfoAttribute(name));
+	mAttributes.append(ViAttribute(name));
 	return mAttributes.last();
 }
 
-ViInfoElement& ViInfoElement::addChild(QString name, QVariant value)
+ViElement& ViElement::addChild(QString name, QVariant value)
 {
-	mChildren.append(ViInfoElement(name, value));
+	mChildren.append(ViElement(name, value));
 	return mChildren.last();
 }
 
-ViInfoAttribute& ViInfoElement::addAttribute(QString name, QVariant value)
+ViAttribute& ViElement::addAttribute(QString name, QVariant value)
 {
-	mAttributes.append(ViInfoAttribute(name, value));
+	mAttributes.append(ViAttribute(name, value));
 	return mAttributes.last();
 }
 
-ViInfoAttributeList ViInfoElement::attributes()
+ViAttributeList ViElement::attributes()
 {
 	return mAttributes;
 }
 
-ViInfoElementList ViInfoElement::children()
+ViElementList ViElement::children()
 {
 	return mChildren;
 }
 
-int ViInfoElement::attributeCount()
+int ViElement::attributeCount()
 {
 	return mAttributes.size();
 }
 
-int ViInfoElement::childrenCount()
+int ViElement::childrenCount()
 {
 	return mChildren.size();
 }
 
-ViInfoAttribute ViInfoElement::attribute(int index)
+bool ViElement::hasAttributes()
+{
+	return !mAttributes.isEmpty();
+}
+
+bool ViElement::hasChildren()
+{
+	return !mChildren.isEmpty();
+}
+
+ViAttribute ViElement::attribute(int index)
 {
 	if(attributeCount() > index)
 	{
 		return mAttributes[index];
 	}
-	return ViInfoAttribute();
+	return ViAttribute();
 }
 
-ViInfoAttribute ViInfoElement::attribute(QString name)
+ViAttribute ViElement::attribute(QString name)
 {
 	for(int i = 0; i < attributeCount(); ++i)
 	{
@@ -96,19 +106,19 @@ ViInfoAttribute ViInfoElement::attribute(QString name)
 			return mAttributes[i];
 		}
 	}
-	return ViInfoAttribute();
+	return ViAttribute();
 }
 
-ViInfoElement ViInfoElement::child(int index)
+ViElement ViElement::child(int index)
 {
 	if(childrenCount() > index)
 	{
 		return mChildren[index];
 	}
-	return ViInfoElement();
+	return ViElement();
 }
 
-ViInfoElement ViInfoElement::child(QString name)
+ViElement ViElement::child(QString name)
 {
 	for(int i = 0; i < childrenCount(); ++i)
 	{
@@ -119,17 +129,17 @@ ViInfoElement ViInfoElement::child(QString name)
 	}
 	for(int i = 0; i < childrenCount(); ++i)
 	{
-		ViInfoElement child = mChildren[i].child(name);
+		ViElement child = mChildren[i].child(name);
 		if(!child.isNull())
 		{
 			return child;
 		}
 	}
-	return ViInfoElement();
+	return ViElement();
 }
 
 
-void ViInfoElement::fromString(QString xml)
+void ViElement::fromXml(QString xml)
 {
 	QDomDocument document("");
 	document.setContent(xml);
@@ -137,7 +147,7 @@ void ViInfoElement::fromString(QString xml)
 	fromDom(node);
 }
 
-QString ViInfoElement::toString()
+QString ViElement::toXml()
 {
 	QDomNode node = toDom();
 	if(node.isNull())
@@ -149,13 +159,13 @@ QString ViInfoElement::toString()
 	return document.toString();
 }
 
-void ViInfoElement::fromDom(QDomNode &dom)
+void ViElement::fromDom(QDomNode &dom)
 {
 	setName(dom.toElement().tagName());
 	QDomNamedNodeMap attributes = dom.attributes();
 	for(int i = 0; i < attributes.size(); ++i)
 	{
-		addAttribute(ViInfoAttribute(attributes.item(i).nodeName(), attributes.item(i).nodeValue()));
+		addAttribute(ViAttribute(attributes.item(i).nodeName(), attributes.item(i).nodeValue()));
 	}
 	QDomNodeList children = dom.childNodes();
 	if(children.size() > 0)
@@ -168,7 +178,7 @@ void ViInfoElement::fromDom(QDomNode &dom)
 			}
 			else
 			{
-				ViInfoElement child;
+				ViElement child;
 				QDomNode node = children.item(i);
 				child.fromDom(node);
 				addChild(child);
@@ -181,13 +191,13 @@ void ViInfoElement::fromDom(QDomNode &dom)
 	}
 }
 
-QDomNode ViInfoElement::toDom()
+QDomNode ViElement::toDom()
 {
 	QDomDocument document;
 	QDomElement node = document.createElement(name());
 	for(int i = 0; i < attributeCount(); ++i)
 	{
-		node.setAttribute(mAttributes[i].name(), mAttributes[i].valueString());
+		node.setAttribute(mAttributes[i].name(), mAttributes[i].toString());
 	}
 	if(childrenCount() > 0)
 	{
@@ -198,7 +208,7 @@ QDomNode ViInfoElement::toDom()
 	}
 	else
 	{
-		node.appendChild(document.createTextNode(valueString()));
+		node.appendChild(document.createTextNode(toString()));
 	}
 	return node;
 }

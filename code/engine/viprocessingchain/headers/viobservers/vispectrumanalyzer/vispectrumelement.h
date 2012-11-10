@@ -1,5 +1,5 @@
-#ifndef VIELEMENT_H
-#define VIELEMENT_H
+#ifndef VISPECTRUMELEMENT_H
+#define VISPECTRUMELEMENT_H
 
 #include <QMutex>
 #include <QVector>

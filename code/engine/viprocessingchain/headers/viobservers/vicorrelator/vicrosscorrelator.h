@@ -1,11 +1,11 @@
 #ifndef VICROSSCORRELATIONCORRELATOR_H
 #define VICROSSCORRELATIONCORRELATOR_H
 
-#include "vicorrelatorstrategy.h"
+#include "vicorrelator.h"
 #include "vifouriertransformer.h"
 #include <QThread>
 
-class ViCrossCorrelator : public ViCorrelatorStrategy
+class ViCrossCorrelator : public ViCorrelator
 {
 
 	public:

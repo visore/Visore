@@ -1,4 +1,4 @@
-#ifdef VIELEMENT_H
+#ifdef VISPECTRUMELEMENT_H
 
 template <typename T>
 ViSpectrumElementForm<T>::ViSpectrumElementForm()

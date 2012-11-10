@@ -10,6 +10,7 @@
 #include "vilogger.h"
 #include "vibuffer.h"
 #include "viaudioobject.h"
+#include "vielement.h"
 
 class ViProcessor : public QObject, public QRunnable, public ViId
 {
@@ -43,6 +44,12 @@ class ViProcessor : public QObject, public QRunnable, public ViId
 
 		virtual void execute() = 0;
 		virtual void run();
+
+		virtual bool importParameters(const ViElement &element);
+		virtual void exportParameters(ViElement &element);
+
+		virtual bool importResults(const ViElement &element);
+		virtual void exportResults(ViElement &element);
 
 		bool isEnabled();
 		bool isDisabled();

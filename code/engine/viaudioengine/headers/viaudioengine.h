@@ -96,7 +96,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		~ViAudioEngine();
 
 		ViWaveForm& wave(ViAudio::Mode mode);
-		ViCorrelationResult& correlation();
+		ViCorrelation& correlation();
 
 	protected:
 
@@ -118,7 +118,6 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		ViSongDetector mSongDetector;
 
 		ViSpectrumAnalyzer mSpectrumAnalyzer;
-		ViCorrelator mCorrelator;
 		ViEndDetector *mEndDetector;
 		ViWaveFormer mInputWaveFormer;
 		ViWaveFormer mOutputWaveFormer;

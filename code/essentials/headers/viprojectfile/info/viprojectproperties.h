@@ -17,8 +17,8 @@ class ViProjectProperties : public ViProjectInfo
 
 	protected:
 
-		ViInfoElement toXml();
-		bool fromXml(ViInfoElement &document);
+		ViElement toXml();
+		bool fromXml(ViElement &document);
 
 	private:
 

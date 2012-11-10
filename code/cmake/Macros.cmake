@@ -1,4 +1,4 @@
-MACRO(HEADER_DIRECTORIES return_list)
+MACRO(FILE_DIRECTORIES return_list)
 	FILE(GLOB_RECURSE header_list *.h)
 	FILE(GLOB_RECURSE source_list *.cpp)
 	SET(dir_list "")

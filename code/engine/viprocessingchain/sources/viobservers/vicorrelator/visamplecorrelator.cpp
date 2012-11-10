@@ -2,7 +2,7 @@
 #include <float.h>
 
 ViSampleCorrelator::ViSampleCorrelator()
-	: ViCorrelatorStrategy()
+	: ViCorrelator()
 {
 }
 
@@ -17,11 +17,11 @@ void ViSampleCorrelator::initialize()
 void ViSampleCorrelator::finalize()
 {
 	mAverageDifference /= mCounter;
-	mResult->setSampleCorrelation(ViCorrelationResultCombination(
+	/*mResult.setSampleCorrelation(ViCorrelationResultCombination(
 		(2 - qAbs(mMaximumDifference)) / 2,
 		(2 - qAbs(mMinimumDifference)) / 2,
 		(2 - qAbs(mAverageDifference)) / 2
-	));
+	));*/
 }
 
 void ViSampleCorrelator::execute()

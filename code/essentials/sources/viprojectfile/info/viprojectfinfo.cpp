@@ -29,8 +29,8 @@ bool ViProjectInfo::load()
 	QFile file(mFilePath);
 	if(file.open(QIODevice::ReadOnly))
 	{
-		ViInfoElement document;
-		document.fromString(file.readAll());
+		ViElement document;
+		document.fromXml(file.readAll());
 		success = fromXml(document);
 		file.close();
 	}
@@ -51,7 +51,7 @@ bool ViProjectInfo::save()
 	QFile file(mFilePath);
 	if(file.open(QIODevice::Truncate | QIODevice::WriteOnly))
 	{
-		success = (file.write(toXml().toString().toAscii()) > 0);
+		success = (file.write(toXml().toXml().toAscii()) > 0);
 		file.close();
 	}
 	if(success)

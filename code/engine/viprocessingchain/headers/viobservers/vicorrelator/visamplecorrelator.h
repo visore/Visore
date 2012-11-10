@@ -1,9 +1,9 @@
 #ifndef VISAMPLECORRELATOR_H
 #define VISAMPLECORRELATOR_H
 
-#include "vicorrelatorstrategy.h"
+#include "vicorrelator.h"
 
-class ViSampleCorrelator : public ViCorrelatorStrategy
+class ViSampleCorrelator : public ViCorrelator
 {
 
 	public:
