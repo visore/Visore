@@ -7,10 +7,10 @@
 #include "viaudioconnection.h"
 #include "vimultiexecutor.h"
 #include "viaudioobjectqueue.h"
+#include "viproject.h"
 
 class ViHandler;
 class ViUnderrunHandler;
-class ViProjectHandler;
 class ViSectionHandler;
 class ViPlaybackHandler;
 
@@ -20,7 +20,6 @@ class ViProcessingChain : public QObject
 
 	friend class ViHandler;
 	friend class ViUnderrunHandler;
-	friend class ViProjectHandler;
 	friend class ViSectionHandler;
 	friend class ViPlaybackHandler;
 
@@ -42,6 +41,10 @@ class ViProcessingChain : public QObject
 		void recordStarted();
 		void recordEnded();
 
+	private slots:
+
+		void updateProject(ViAudioObjectPointer object);
+
 	public:
 
 		ViProcessingChain();
@@ -49,7 +52,7 @@ class ViProcessingChain : public QObject
 
 		void setWindowSize(int windowSize);
 		void setTransmission(ViAudioTransmission *transmission);
-		void setProject(QString name, QString filePath, ViAudioFormat format, short recordSides);
+		void setProject(ViProject *project);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
 
@@ -72,11 +75,12 @@ class ViProcessingChain : public QObject
 
 		QList<ViHandler*> mHandlers;
 		ViUnderrunHandler *mUnderrunHandler;
-		ViProjectHandler *mProjectHandler;
 		ViSectionHandler *mSectionHandler;
 		ViPlaybackHandler *mPlaybackHandler;
 
 		ViAudioObjectQueue mAudioObjects;
+
+		ViProject *mProject;
 };
 
 #endif

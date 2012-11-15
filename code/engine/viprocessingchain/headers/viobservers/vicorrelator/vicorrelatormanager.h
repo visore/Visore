@@ -8,7 +8,7 @@ class ViCorrelatorManager
 
 	public:
 
-		
+
 		
 	private:
 		

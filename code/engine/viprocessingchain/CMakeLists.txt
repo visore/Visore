@@ -9,7 +9,7 @@ FILE(GLOB VI_PROCESSINGCHAIN_HEADERS ${HEADERS}/*.h ${HEADERS}/*/*.h ${HEADERS}/
 
 #Create library
 ADD_LIBRARY(viprocessingchain SHARED ${VI_PROCESSINGCHAIN_HEADERS} ${VI_PROCESSINGCHAIN_SOURCES})
-TARGET_LINK_LIBRARIES(viprocessingchain viaudioobject viaudioconnection vifouriertransformer visongidentifier)
+TARGET_LINK_LIBRARIES(viprocessingchain viaudioobject viaudioconnection vifouriertransformer visongidentifier viproject)
 
 #Install file
 INSTALL(TARGETS viprocessingchain DESTINATION engine)

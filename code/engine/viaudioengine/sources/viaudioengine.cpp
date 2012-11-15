@@ -68,8 +68,8 @@ ViAudioEngine::ViAudioEngine()
 	mProcessingChain.attach(ViAudio::AudioInput, mEndDetector);
 
 	//Correlators
-	mProcessingChain.attach(ViAudio::AudioInputOutput, &mCrossCorrelator);
-	mProcessingChain.attach(ViAudio::AudioInputOutput, &mSampleCorrelator);
+	//mProcessingChain.attach(ViAudio::AudioInputOutput, &mCrossCorrelator);
+	//mProcessingChain.attach(ViAudio::AudioInputOutput, &mSampleCorrelator);
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -181,6 +181,8 @@ void ViAudioEngine::calculateCorrelation()
 void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, bool play)
 {
 	changeInput(ViAudio::Line);
-	mProcessingChain.setProject(name, filePath, format, recordSides);
+	ViProject *project = new ViProject(name, filePath, recordSides);
+	project->setFormat(format);
+	mProcessingChain.setProject(project);
 	startRecording();
 }

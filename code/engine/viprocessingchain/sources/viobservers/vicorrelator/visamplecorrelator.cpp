@@ -6,6 +6,14 @@ ViSampleCorrelator::ViSampleCorrelator()
 {
 }
 
+void ViSampleCorrelator::exportResults(ViElement &element)
+{
+	ViProcessor::exportResults(element);
+	element.addChild("Maximum", mMaximumDifference);
+	element.addChild("Minimum", mMinimumDifference);
+	element.addChild("Average", mAverageDifference);
+}
+
 void ViSampleCorrelator::initialize()
 {
 	mMaximumDifference = -DBL_MAX;

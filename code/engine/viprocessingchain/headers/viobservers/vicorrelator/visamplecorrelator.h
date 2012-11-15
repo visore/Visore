@@ -9,6 +9,7 @@ class ViSampleCorrelator : public ViCorrelator
 	public:
 		
 		ViSampleCorrelator();
+		void exportResults(ViElement &element);
 		void initialize();
 		void finalize();
 		void execute();

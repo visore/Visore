@@ -42,7 +42,7 @@ void ViCrossCorrelator::initialize()
 }
 
 void ViCrossCorrelator::finalize()
-{
+{LOG(QString(metaObject()->className()));
 	deallocateData();
 	mAverageDifference /= mCounter;
 	/*mResult.setCrossCorrelation(ViCorrelationResultCombination(

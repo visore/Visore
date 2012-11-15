@@ -11,17 +11,17 @@ bool ViSingleExecutor::execute(ViAudioObject *object, ViProcessor *processor)
 	/*mProcessors.clear();
 	if(dynamic_cast<ViDualObserver*>(processor) != NULL)
 	{
-		if(inputBuffer == NULL || outputBuffer == NULL)
+		if(object->originalBuffer() == NULL || object->correctedBuffer() == NULL)
 		{
 			return false;
 		}
-		mReadStream2 = outputBuffer->createReadStream();
+		mReadStream2 = object->correctedBuffer()->createReadStream();
 		attach(ViAudio::AudioInputOutput, processor);
 		ViSingleExecutor::runIt = &ViSingleExecutor::runDualObserve;
 	}
 	else if(dynamic_cast<ViObserver*>(processor) != NULL)
 	{
-		if(inputBuffer == NULL)
+		if(object->originalBuffer() == NULL)
 		{
 			return false;
 		}
@@ -30,15 +30,15 @@ bool ViSingleExecutor::execute(ViAudioObject *object, ViProcessor *processor)
 	}
 	else if(dynamic_cast<ViModifier*>(processor) != NULL)
 	{
-		if(inputBuffer == NULL || outputBuffer == NULL)
+		if(object->originalBuffer() == NULL || outputBuffer == NULL)
 		{
 			return false;
 		}
 		attach(ViAudio::AudioOutput, processor);
 		ViSingleExecutor::runIt = &ViSingleExecutor::runModify;
 	}
-	setBuffer(ViAudio::AudioInput, inputBuffer);
-	setBuffer(ViAudio::AudioOutput, outputBuffer);
+	setBuffer(ViAudio::AudioInput, object->originalBuffer());
+	setBuffer(ViAudio::AudioOutput, object->correctedBuffer());
 	ViExecutor::execute();
 	return true;*/
 }

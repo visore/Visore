@@ -8,6 +8,8 @@
 class ViCrossCorrelator : public ViCorrelator
 {
 
+	Q_OBJECT
+
 	public:
 		
 		ViCrossCorrelator();

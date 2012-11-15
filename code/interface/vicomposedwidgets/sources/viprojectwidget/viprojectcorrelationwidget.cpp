@@ -76,8 +76,8 @@ void ViProjectCorrelationWidget::addProjects()
 		if(project.load(true))
 		{
 			loop.exec(); // Wait until the archive in the project was extracted
-			mUi->tableWidget->setItem(row + i, 0, new QTableWidgetItem(project.fileName()));
-			mUi->tableWidget->setItem(row + i, 1, new QTableWidgetItem(project.projectName()));
+			//mUi->tableWidget->setItem(row + i, 0, new QTableWidgetItem(project.fileName()));
+			//mUi->tableWidget->setItem(row + i, 1, new QTableWidgetItem(project.projectName()));
 			mUi->tableWidget->setItem(row + i, 2, new QTableWidgetItem(QString::number(project.size())));
 			ViRemoveWidget *remove = new ViRemoveWidget(row + i);
 			mButtons.append(remove);

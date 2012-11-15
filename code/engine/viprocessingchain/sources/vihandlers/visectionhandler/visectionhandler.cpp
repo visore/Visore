@@ -86,7 +86,7 @@ void ViSectionHandler::startInput(bool isSong)
 	if(isSong)
 	{
 		object->setSong();
-y= object;
+y = object;
 		mChain->mAudioObjects.enqueue(object);
 	}
 	else
@@ -114,6 +114,11 @@ void ViSectionHandler::endInput()
 	mNoSongObjects.clear();
 }
 
+void ViSectionHandler::setInfo(ViSongInfo info)
+{
+	mChain->recordingObject()->setSongInfo(info);
+}
+
 void ViSectionHandler::setDetector(ViProcessor *processor)
 {
 	ViSpectrumAnalyzer *analyzer = dynamic_cast<ViSpectrumAnalyzer*>(processor);
@@ -123,14 +128,22 @@ void ViSectionHandler::setDetector(ViProcessor *processor)
 	}
 	else
 	{
-		ViEndDetector *detector = dynamic_cast<ViEndDetector*>(processor);
+		ViSongDetector *detector = dynamic_cast<ViSongDetector*>(processor);
 		if(detector != NULL)
 		{
-			mEndDetector = detector;
-			QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), this, SLOT(startSong()));
-			QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SLOT(endSong()));
-			QObject::connect(mEndDetector, SIGNAL(recordStarted(ViAudioPosition)), this, SLOT(startRecord()));
-			QObject::connect(mEndDetector, SIGNAL(recordEnded(ViAudioPosition)), this, SLOT(endRecord()));
+			QObject::connect(detector, SIGNAL(songDetected(ViSongInfo)), this, SLOT(setInfo(ViSongInfo)));
+		}
+		else
+		{
+			ViEndDetector *detector = dynamic_cast<ViEndDetector*>(processor);
+			if(detector != NULL)
+			{
+				mEndDetector = detector;
+				QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), this, SLOT(startSong()));
+				QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SLOT(endSong()));
+				QObject::connect(mEndDetector, SIGNAL(recordStarted(ViAudioPosition)), this, SLOT(startRecord()));
+				QObject::connect(mEndDetector, SIGNAL(recordEnded(ViAudioPosition)), this, SLOT(endRecord()));
+			}
 		}
 	}
 	if(mSpectrumAnalyzer != NULL && mEndDetector != NULL)

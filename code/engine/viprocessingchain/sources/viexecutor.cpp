@@ -57,8 +57,7 @@ void ViExecutor::setNotify(bool notify)
 
 bool ViExecutor::attach(ViAudio::Mode mode, ViProcessor *processor)
 {
-	bool result = mProcessors.add(mode, processor);
-	return result;
+	return mProcessors.add(mode, processor);
 }
 
 bool ViExecutor::detach(ViProcessor *processor)
@@ -135,30 +134,18 @@ void ViExecutor::initialize()
 		mOutputConverter.setSize(mOutputFormat.sampleSize());
 	}
 
-	QList<ViProcessor*> processors = mProcessors.processors(ViProcessorList::All);
+	QList<ViProcessor*> processors = mProcessors.processors();
 	for(int i = 0; i < processors.size(); ++i)
 	{
 		processors[i]->setObject(mObject);
-	}
-
-	processors = mProcessors.processors();
-	for(int i = 0; i < processors.size(); ++i)
-	{
 		processors[i]->setWindowSize(mWindowSize);
 		processors[i]->setFormat(mInputFormat);
 		processors[i]->initialize();
-	}
-
-	if(mNotify)
-	{
-		for(int i = 0; i < processors.size(); ++i)
+		if(mNotify)
 		{
 			connect(processors[i]);
 		}
-	}
-	else
-	{
-		for(int i = 0; i < processors.size(); ++i)
+		else
 		{
 			disconnect(processors[i]);
 		}

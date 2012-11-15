@@ -5,6 +5,7 @@
 #include "vibuffer.h"
 #include "viaudioobjectpointer.h"
 #include "vielement.h"
+#include "visonginfo.h"
 #include <QMutex>
 #include <QMutexLocker>
 
@@ -22,23 +23,69 @@ class ViAudioObject : public QObject, public ViFunctorParameter
 
 	public:
 
+		/*******************************************************************************************************************
+
+			CONSTRUCTORS & DESTRUCTORS
+
+		*******************************************************************************************************************/
+
 		static ViAudioObjectPointer create(ViAudioObject *object);
 		static ViAudioObjectPointer create(bool autoDestruct = true);
 		static ViAudioObjectPointer create(ViBuffer *original, ViBuffer *corrected, bool autoDestruct = true);
 		static ViAudioObjectPointer createNull();
 		~ViAudioObject();
 		
-		void setSong(bool song = true); //If the buffers represent a song, or if they are just intermediate buffers
-		void setBuffers(ViBuffer *original, ViBuffer *corrected);
+		/*******************************************************************************************************************
+
+			BUFFERS
+
+		*******************************************************************************************************************/
+
+		ViBuffer* targetBuffer();
+		ViBuffer* originalBuffer();
+		ViBuffer* correctedBuffer();
+
+		void setTargetBuffer(ViBuffer *buffer);
 		void setOriginalBuffer(ViBuffer *buffer);
 		void setCorrectedBuffer(ViBuffer *buffer);
 
-		bool isSong();
 		void clearBuffers();
+		void clearTargetBuffer();
 		void clearOriginalBuffer();
 		void clearCorrectedBuffer();
-		ViBuffer* originalBuffer();
-		ViBuffer* correctedBuffer();
+
+		/*******************************************************************************************************************
+
+			FILES
+
+		*******************************************************************************************************************/
+
+		QString targetFile();
+		QString originalFile();
+		QString correctedFile();
+
+		void setTargetFile(QString path);
+		void setOriginalFile(QString path);
+		void setCorrectedFile(QString path);
+
+		/*******************************************************************************************************************
+
+			SONG INFO
+
+		*******************************************************************************************************************/
+
+		ViSongInfo songInfo();
+		void setSongInfo(ViSongInfo info);
+
+
+
+
+		void setSong(bool song = true); //If the buffers represent a song, or if they are just intermediate buffers
+		void setBuffers(ViBuffer *original, ViBuffer *corrected);
+
+		bool isSong();
+
+
 
 		void setFinished(bool isFinished = true);
 		bool isFinished();
@@ -53,12 +100,23 @@ class ViAudioObject : public QObject, public ViFunctorParameter
 
 	private:
 
+		ViBuffer *mTargetBuffer;
+		ViBuffer *mOriginalBuffer;
+		ViBuffer *mCorrectedBuffer;
+
+		QString mTargetFile;
+		QString mOriginalFile;
+		QString mCorrectedFile;
+
+		ViSongInfo mSongInfo;
+
+
+
 		QMutex mMutex;
 		bool mAutoDestruct;
 		bool mIsFinished;
 		bool mIsSong;
-		ViBuffer *mOriginalBuffer;
-		ViBuffer *mCorrectedBuffer;
+
 		ViElementList mCorrelations;
 };
 

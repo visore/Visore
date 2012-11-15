@@ -5,6 +5,7 @@
 #include "vienddetector.h"
 #include "vispectrumanalyzer.h"
 #include "viaudioobject.h"
+#include "visongdetector.h"
 #include <QMutexLocker>
 #include <QTimer>
 
@@ -33,6 +34,8 @@ class ViSectionHandler : public ViHandler
 		void setDetector(ViProcessor *processor);
 
 		void checkSize();
+
+		void setInfo(ViSongInfo info);
 
 	public:
 
