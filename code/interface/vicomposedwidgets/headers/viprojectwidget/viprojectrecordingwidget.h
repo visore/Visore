@@ -16,6 +16,7 @@ class ViProjectRecordingWidget : public ViWidget
 	private slots:
 
 		void start();
+		void changeType();
 
 	public:
 

@@ -51,7 +51,7 @@ void ViSongDetector::execute()
 	mIsEnabledMutex.unlock();
 	if(isEnabled && !mIdentifier->found())
 	{
-		qint64 bufferLength = ViAudioPosition::convertPosition(mObject->originalBuffer()->size(), ViAudioPosition::Bytes, ViAudioPosition::Milliseconds, mObject->originalBuffer()->format());
+		qint64 bufferLength = ViAudioPosition::convertPosition(mObject->outputBuffer()->size(), ViAudioPosition::Bytes, ViAudioPosition::Milliseconds, mObject->outputBuffer()->format());
 		if(	(mRequestsSent == 0 && bufferLength >= REQUEST_SAMPLES_1) ||
 			(mRequestsSent == 1 && bufferLength >= REQUEST_SAMPLES_2) ||
 			(mRequestsSent == 2 && bufferLength >= REQUEST_SAMPLES_3) ||
@@ -81,7 +81,7 @@ void ViSongDetector::execute()
 			
 			if(mIdentifier != NULL)
 			{
-				mIdentifier->identify(mObject->originalBuffer());
+				mIdentifier->identify(mObject->outputBuffer());
 			}
 		}
 	}

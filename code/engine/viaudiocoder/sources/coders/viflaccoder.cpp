@@ -64,18 +64,15 @@ bool ViFlacCoder::initializeEncode()
 	int outputSampleSize = mOutputFormat.sampleSize();
 	ViAudioFormat::SampleType sampleType = mInputFormat.sampleType();
 
-	if(sampleType == ViAudioFormat::SignedInt)
+	if(sampleType == ViAudioFormat::SignedInt && inputSampleSize == outputSampleSize)
 	{
-		if(inputSampleSize == outputSampleSize)
+		if(inputSampleSize == 8) encodePointer = &ViFlacCoder::encode8Normal;
+		else if(inputSampleSize == 16) encodePointer = &ViFlacCoder::encode16Normal;
+		else if(inputSampleSize == 32) encodePointer = &ViFlacCoder::encode32Normal;
+		else
 		{
-			if(inputSampleSize == 8) encodePointer = &ViFlacCoder::encode8Normal;
-			else if(inputSampleSize == 16) encodePointer = &ViFlacCoder::encode16Normal;
-			else if(inputSampleSize == 32) encodePointer = &ViFlacCoder::encode32Normal;
-			else
-			{
-				setError(ViCoder::OutputSampleSizeError);
-				return false;
-			}
+			setError(ViCoder::OutputSampleSizeError);
+			return false;
 		}
 	}
 	else

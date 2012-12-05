@@ -3,6 +3,7 @@
 
 class ViFunctorParameter
 {
+	virtual void dummy(){} // Needed for dynamic_cast
 };
 
 class ViFunctor

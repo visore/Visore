@@ -1,4 +1,5 @@
 #include "vielement.h"
+#include <QFile>
 
 ViElement::ViElement()
 	: ViValue()
@@ -211,4 +212,28 @@ QDomNode ViElement::toDom()
 		node.appendChild(document.createTextNode(toString()));
 	}
 	return node;
+}
+
+bool ViElement::saveToFile(QString fileName)
+{
+	QFile file(fileName);
+	if(!file.open(QIODevice::WriteOnly))
+	{
+		return false;
+	}
+	file.write(toXml().toAscii());
+	file.close();
+	return true;
+}
+
+bool ViElement::loadFromFile(QString fileName)
+{
+	QFile file(fileName);
+	if(!file.open(QIODevice::ReadOnly))
+	{
+		return false;
+	}
+	fromXml(file.readAll());
+	file.close();
+	return true;
 }

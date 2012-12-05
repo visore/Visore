@@ -3,11 +3,11 @@
 #include "viunderrunhandler.h"
 #include "visectionhandler.h"
 #include "viplaybackhandler.h"
+#include "viprojecthandler.h"
 
 ViProcessingChain::ViProcessingChain()
 	: QObject()
 {
-	mProject = NULL;
 	mInput = NULL;
 	mStreamOutput = NULL;
 	mFileOutput = NULL;
@@ -21,7 +21,8 @@ ViProcessingChain::ViProcessingChain()
 	mHandlers.append(mSectionHandler);
 	//mHandlers.append(mPlaybackHandler);
 
-	QObject::connect(&mAudioObjects, SIGNAL(finished(ViAudioObjectPointer)), this, SLOT(updateProject(ViAudioObjectPointer)));
+	mProjectHandler = new ViProjectHandler(this);
+	mHandlers.append(mProjectHandler);
 }
 
 ViProcessingChain::~ViProcessingChain()
@@ -57,17 +58,9 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 	}
 }
 
-void ViProcessingChain::setProject(ViProject *project)
+void ViProcessingChain::startProject(ViProject *project, ViAudio::Type type, bool existingProject)
 {
-	mProject = project;
-}
-
-void ViProcessingChain::updateProject(ViAudioObjectPointer object)
-{
-	if(mProject != NULL)
-	{
-		mProject->serialize(object);
-	}
+	mProjectHandler->startProject(project, type, existingProject);
 }
 
 bool ViProcessingChain::attach(ViAudio::Mode mode, ViProcessor *processor)
@@ -81,14 +74,14 @@ bool ViProcessingChain::detach(ViProcessor *processor)
 	mMultiExecutor.detach(processor);
 }
 
-ViAudioObjectPointer ViProcessingChain::recordingObject()
+ViAudioObjectPointer ViProcessingChain::audioObject()
 {
 	return mAudioObjects.current();
 }
 
-ViAudioObjectPointer ViProcessingChain::ViProcessingChain::playingObject()
+ViProcessor* ViProcessingChain::processor(QString type)
 {
-	return mPlaybackHandler->currentObject();
+	return mMultiExecutor.processor(type);
 }
 
 bool ViProcessingChain::isSongRunning()

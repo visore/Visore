@@ -44,6 +44,9 @@ class ViElement : public ViValue
 		void fromDom(QDomNode &dom);
 		QDomNode toDom();
 
+		bool saveToFile(QString fileName);
+		bool loadFromFile(QString fileName);
+
 	private:
 
 		ViAttributeList mAttributes;

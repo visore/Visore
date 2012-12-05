@@ -1,6 +1,12 @@
 #ifdef VITYPECHECKER_H
 
 template <typename T>
+bool ViTypeChecker<T>::check(QObject *object, QString type)
+{
+	return QString(object->metaObject()->className()) == type;
+}
+
+template <typename T>
 bool ViTypeChecker<T>::check(QObject *object)
 {
 	return dynamic_cast<T*>(object) != 0;

@@ -227,6 +227,7 @@ void ViCodingChainBufferInput::execute()
 void ViCodingChainBufferInput::finalize()
 {
 	mBuffer= NULL;
+	mStream = NULL;
 }
 
 /**********************************************************
@@ -549,6 +550,7 @@ void ViCodingChainBufferOutput::finalize()
 	mStream->insert(0, mHeader.data(), mHeader.size());
 	mHeader.clear();
 	mBuffer = NULL;
+	mStream = NULL;
 }
 
 void ViCodingChainBufferOutput::execute()

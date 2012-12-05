@@ -15,23 +15,36 @@ class ViArchive : public QObject
 	signals:
 
 		void finished();
+		void compressFinished();
+		void decompressFinished();
+
+	private slots:
+
+		void finish();
 
 	public:
 		
 		enum Error
 		{
-			None = 0,
-			ReadError = 1,
-			WriteError = 2,
-			SeekError = 3,
-			InternalError = 4,
-			HeaderError = 5,
-			OpenError = 6,
-			ArchiveError = 7,
-			CorruptedError = 8,
-			DeviceError = 9,
-			FileError = 10,
-			Unknown = 11
+			NoError,
+			ReadError,
+			WriteError,
+			SeekError,
+			InternalError,
+			HeaderError,
+			OpenError,
+			ArchiveError,
+			CorruptedError,
+			DeviceError,
+			FileError,
+			UnknownError
+		};
+
+		enum Action
+		{
+			Unknown,
+			Compress,
+			Decompress 
 		};
 
 		ViArchive(QString filePath = "", int compression = 10, QString comment = "");
@@ -42,6 +55,7 @@ class ViArchive : public QObject
 
 		QString filePath();
 		ViArchive::Error error();
+		QString errorString();
 		QStringList fileList(QString extension = "");
 		bool isValid();
 
@@ -54,6 +68,7 @@ class ViArchive : public QObject
 	private:
 
 		ViArchiveThread *mThread;
+		ViArchive::Action mAction;
 
 };
 
@@ -61,14 +76,8 @@ class ViArchiveThread : public QThread
 {
 	public:
 
-		enum Action
-		{
-			Compress = 0,
-			Decompress = 1
-		};
-
 		ViArchiveThread();
-		void setAction(ViArchiveThread::Action action);
+		void setAction(ViArchive::Action action);
 		void setFilePath(QString filePath);
 		void setCompression(int compression);
 		void setComment(QString comment);

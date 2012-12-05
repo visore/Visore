@@ -19,7 +19,7 @@ void ViUnderrunHandler::changeOutput(ViStreamOutput *output)
 
 void ViUnderrunHandler::handleUnderrun()
 {
-	ViAudioObjectPointer object = mChain->playingObject();
+	/*ViAudioObjectPointer object = mChain->playingObject();
 	if(!object.isNull())
 	{
 		if(object->isFinished())
@@ -34,7 +34,7 @@ void ViUnderrunHandler::handleUnderrun()
 			QObject::connect(&mChain->mMultiExecutor, SIGNAL(processingRateChanged(qreal)), this, SLOT(calculate(qreal)));
 			calculate(mChain->mMultiExecutor.processingRate());
 		}
-	}
+	}*/
 }
 
 void ViUnderrunHandler::calculate(qreal processingRate)

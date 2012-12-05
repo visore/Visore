@@ -1,4 +1,5 @@
 #include "viprocessorlist.h"
+#include "vitypechecker.h"
 
 ViProcessorList::ViProcessorList()
 	: QObject()
@@ -43,6 +44,39 @@ QList<ViProcessor*> ViProcessorList::processors(int type)
 		}
 	}
 	return result;
+}
+
+ViProcessor* ViProcessorList::processor(QString type)
+{
+	for(int i = 0; i < mInputObservers.size(); ++i)
+	{
+		if(ViTypeChecker<>::check(mInputObservers[i], type))
+		{
+			return mInputObservers[i];
+		}
+	}
+	for(int i = 0; i < mInputModifiers.size(); ++i)
+	{
+		if(ViTypeChecker<>::check(mInputModifiers[i], type))
+		{
+			return mInputModifiers[i];
+		}
+	}
+	for(int i = 0; i < mOutputObservers.size(); ++i)
+	{
+		if(ViTypeChecker<>::check(mOutputObservers[i], type))
+		{
+			return mOutputObservers[i];
+		}
+	}
+	for(int i = 0; i < mDualObservers.size(); ++i)
+	{
+		if(ViTypeChecker<>::check(mDualObservers[i], type))
+		{
+			return mDualObservers[i];
+		}
+	}
+	return NULL;
 }
 
 void ViProcessorList::observeInput(const ViSampleChunk *data)

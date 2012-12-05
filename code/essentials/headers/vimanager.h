@@ -39,6 +39,8 @@ class ViManager : public ViSingleton<ViManager>
 		static QString name();
 		static QUrl url();
 		static QString projectExtension();
+		static QString projectName();
+		static QString projectFilter();
 
 		//Paths
 		static QString tempPath();
@@ -72,6 +74,7 @@ class ViManager : public ViSingleton<ViManager>
 		QString mName;
 		QUrl mUrl;
 		QString mProjectExtension;
+		QString mProjectName;
 		QString mTempPath;
 		QString mProjectPath;
 

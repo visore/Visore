@@ -3,6 +3,7 @@
 
 #include "vichunk.h"
 #include "viid.h"
+#include "vipointer.h"
 #include <QBuffer>
 #include <QMutex>
 
@@ -14,7 +15,7 @@ class ViBuffer;
 Important: Don't make ViBufferStream a QObject, otherwise we can't create streams for different threads.
 */
 
-class ViBufferStream : public QObject, public ViId
+class ViBufferStream : public QObject, public ViId, public ViFunctorParameter
 {
 
 	Q_OBJECT
@@ -44,6 +45,7 @@ class ViBufferStream : public QObject, public ViId
 
 		int size();
 		void restart();
+		QIODevice::OpenMode mode();
 
 		int position();
 		bool setPosition(int position);
@@ -59,6 +61,7 @@ class ViBufferStream : public QObject, public ViId
 
 	private:
 
+		QIODevice::OpenMode mMode;
 		ViBuffer *mBuffer;
 		QBuffer *mDevice;
 		QMutex *mBufferMutex;
@@ -66,6 +69,6 @@ class ViBufferStream : public QObject, public ViId
 
 };
 
-typedef QSharedPointer<ViBufferStream> ViBufferStreamPointer;
+typedef ViPointer<ViBufferStream> ViBufferStreamPointer;
 
 #endif

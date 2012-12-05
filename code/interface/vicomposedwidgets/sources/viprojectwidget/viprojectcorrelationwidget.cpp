@@ -64,7 +64,7 @@ ViProjectCorrelationWidget::~ViProjectCorrelationWidget()
 
 void ViProjectCorrelationWidget::addProjects()
 {
-	QStringList projects = mUi->fileBrowser->fileNames();
+	/*QStringList projects = mUi->fileBrowser->fileNames();
 	int row = mUi->tableWidget->rowCount();
 	mUi->tableWidget->setRowCount(mUi->tableWidget->rowCount() + projects.size());
 	int invalidProjects = 0;
@@ -89,7 +89,7 @@ void ViProjectCorrelationWidget::addProjects()
 			++invalidProjects;
 		}
 	}
-	mUi->tableWidget->setRowCount(mUi->tableWidget->rowCount() - invalidProjects);
+	mUi->tableWidget->setRowCount(mUi->tableWidget->rowCount() - invalidProjects);*/
 }
 
 void ViProjectCorrelationWidget::remove(int row)

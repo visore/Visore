@@ -8,11 +8,12 @@
 #include "visonginfo.h"
 #include <QMutex>
 #include <QMutexLocker>
+#include "vilogger.h"
 
 class ViAudioObject;
 typedef ViPointer<ViAudioObject> ViAudioObjectPointer;
 
-class ViAudioObject : public QObject, public ViFunctorParameter
+class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 {
 
     Q_OBJECT
@@ -20,6 +21,16 @@ class ViAudioObject : public QObject, public ViFunctorParameter
 	signals:
 
 		void finished(); // emitted when all writing to buffers has finished
+
+	private slots:
+
+		/*******************************************************************************************************************
+
+			SLOTS
+
+		*******************************************************************************************************************/
+
+		void checkFinished();
 
 	public:
 
@@ -31,9 +42,27 @@ class ViAudioObject : public QObject, public ViFunctorParameter
 
 		static ViAudioObjectPointer create(ViAudioObject *object);
 		static ViAudioObjectPointer create(bool autoDestruct = true);
-		static ViAudioObjectPointer create(ViBuffer *original, ViBuffer *corrected, bool autoDestruct = true);
 		static ViAudioObjectPointer createNull();
 		~ViAudioObject();
+
+		/*******************************************************************************************************************
+
+			INPUT & OUTPUT
+
+		*******************************************************************************************************************/
+
+		enum Type
+		{
+			Unknown,
+			Target,
+			Corrupted,
+			Corrected,
+			Temporary,
+			Temp = Temporary
+		};
+		void setType(ViAudioObject::Type input, ViAudioObject::Type output);
+		void setInputType(ViAudioObject::Type type);
+		void setOutputType(ViAudioObject::Type type);
 		
 		/*******************************************************************************************************************
 
@@ -42,17 +71,22 @@ class ViAudioObject : public QObject, public ViFunctorParameter
 		*******************************************************************************************************************/
 
 		ViBuffer* targetBuffer();
-		ViBuffer* originalBuffer();
+		ViBuffer* corruptedBuffer();
 		ViBuffer* correctedBuffer();
+		ViBuffer* tempBuffer();
+
+		ViBuffer* inputBuffer(); // returns the buffer that will be used as input for the processing chain
+		ViBuffer* outputBuffer(); // returns the buffer that will be used as output for the processing chain
 
 		void setTargetBuffer(ViBuffer *buffer);
-		void setOriginalBuffer(ViBuffer *buffer);
+		void setCorruptedBuffer(ViBuffer *buffer);
 		void setCorrectedBuffer(ViBuffer *buffer);
 
 		void clearBuffers();
 		void clearTargetBuffer();
-		void clearOriginalBuffer();
+		void clearCorruptedBuffer();
 		void clearCorrectedBuffer();
+		void clearTempBuffer();
 
 		/*******************************************************************************************************************
 
@@ -61,11 +95,11 @@ class ViAudioObject : public QObject, public ViFunctorParameter
 		*******************************************************************************************************************/
 
 		QString targetFile();
-		QString originalFile();
+		QString corruptedFile();
 		QString correctedFile();
 
 		void setTargetFile(QString path);
-		void setOriginalFile(QString path);
+		void setCorruptedFile(QString path);
 		void setCorrectedFile(QString path);
 
 		/*******************************************************************************************************************
@@ -74,38 +108,38 @@ class ViAudioObject : public QObject, public ViFunctorParameter
 
 		*******************************************************************************************************************/
 
-		ViSongInfo songInfo();
+		ViSongInfo& songInfo();
 		void setSongInfo(ViSongInfo info);
 
 
 
 
 		void setSong(bool song = true); //If the buffers represent a song, or if they are just intermediate buffers
-		void setBuffers(ViBuffer *original, ViBuffer *corrected);
 
 		bool isSong();
 
-
-
-		void setFinished(bool isFinished = true);
 		bool isFinished();
+		bool isUsed(QIODevice::OpenMode mode = QIODevice::ReadWrite);
 
 		void addCorrelation(const ViElement &correlation);
 		ViElementList& correlations();
 
 	private:
 
-		ViAudioObject(bool autoDestruct); //autoDestruct determines if the buffers will be deleted automatically.
-		ViAudioObject(ViBuffer *original, ViBuffer *corrected, bool autoDestruct);
+		ViAudioObject(bool autoDestruct); // autoDestruct determines if the buffers will be deleted automatically.
 
 	private:
 
+		ViAudioObject::Type mInputType;
+		ViAudioObject::Type mOutputType;
+
 		ViBuffer *mTargetBuffer;
-		ViBuffer *mOriginalBuffer;
+		ViBuffer *mCorruptedBuffer;
 		ViBuffer *mCorrectedBuffer;
+		ViBuffer *mTempBuffer;
 
 		QString mTargetFile;
-		QString mOriginalFile;
+		QString mCorruptedFile;
 		QString mCorrectedFile;
 
 		ViSongInfo mSongInfo;

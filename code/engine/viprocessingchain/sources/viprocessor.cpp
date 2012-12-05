@@ -7,7 +7,7 @@ ViProcessor::ViProcessor(QString name)
 	setAutoDelete(false); //Ensures that QThreadPool doesn't automatically delete object
 	mWindowSize = 0;
 	mIsEnabled = true;
-	mObject = ViAudioObject::createNull();
+	mObject = NULL;
 }
 
 void ViProcessor::setObject(ViAudioObjectPointer object)

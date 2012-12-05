@@ -93,18 +93,22 @@ void ViPointer<T>::copy(const ViPointer<T> &other)
 template<class T>
 void ViPointer<T>::destruct()
 {
-	mData->counter().decrease();
-	if(referenceCount() == mData->limiter().value() && mData->deleter() != NULL)
+	if(mData != NULL)
 	{
-		mData->deleter()->execute(mData->data());
-	}
-	else if(!isUsed())
-	{
-		if(mData->data() != NULL)
+		mData->counter().decrease();
+		if(referenceCount() == mData->limiter().value() && mData->deleter() != NULL)
 		{
-			delete mData->data();
+			mData->deleter()->execute(mData->data());
 		}
-		delete mData;
+		else if(!isUsed())
+		{
+			if(mData->data() != NULL)
+			{
+				delete mData->data();
+			}
+			delete mData;
+			mData = NULL;
+		}
 	}
 }
 

@@ -8,6 +8,7 @@ ViAudioTransmission::ViAudioTransmission()
 
 ViAudioTransmission::~ViAudioTransmission()
 {
+	clear();
 }
 
 void ViAudioTransmission::setBuffer(ViBuffer *buffer)
@@ -19,6 +20,12 @@ void ViAudioTransmission::setBuffer(ViBuffer *buffer)
 ViBuffer* ViAudioTransmission::buffer()
 {
 	return mBuffer;
+}
+
+void ViAudioTransmission::clear()
+{
+	mBuffer = NULL;
+	mStream = NULL;
 }
 
 ViAudioFormat ViAudioTransmission::format()

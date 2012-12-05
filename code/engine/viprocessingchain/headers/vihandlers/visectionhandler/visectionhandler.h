@@ -52,9 +52,6 @@ class ViSectionHandler : public ViHandler
 		ViAudioOutput* output();
 		ViExecutor* executor();
 
-		ViBuffer* allocateBuffer();
-		void deallocateBuffer(ViBuffer *buffer);
-
 	private:
 
 		ViEndDetector *mEndDetector;
@@ -69,7 +66,6 @@ class ViSectionHandler : public ViHandler
 		bool mPlayAutomatically;
 		bool mIsPlaying;
 
-		ViAudioObjectPointer y;
 		ViAudioObjectQueue mNoSongObjects;
 
 };

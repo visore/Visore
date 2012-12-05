@@ -1,6 +1,5 @@
 #include "viproject.h"
 #include "viaudiocodec.h"
-
 #include "vilogger.h"
 
 #define RECORDING_NAME_LENGTH 2
@@ -14,44 +13,87 @@
 ViProject::ViProject(QString filePath)
 	: QObject(), ViId()
 {
-	setProjectName("");
 	setFilePath(filePath);
 
 	mSides = 0;
 	mCurrentSide = 1;
 	mCurrentTrack = 0;
 
+	setProjectName("");
+	mCreatedVersion = ViManager::version();
+	mEditedVersion = ViManager::version();
+
 	QObject::connect(&mEncoder, SIGNAL(finished()), this, SLOT(save()));
 
-	save();
+	createTempStructure();
 }
 
 ViProject::ViProject(QString projectName, QString filePath, int sides)
 	: QObject(), ViId()
 {
-	setProjectName(projectName);
 	setFilePath(filePath);
 	setSides(sides);
 
 	mCurrentSide = 1;
 	mCurrentTrack = 0;
 
-	save();
+	setProjectName(projectName);
+	mCreatedVersion = ViManager::version();
+	mEditedVersion = ViManager::version();
+
+	QObject::connect(&mEncoder, SIGNAL(finished()), this, SLOT(save()));
+
+	createTempStructure();
 }
 
 ViProject::~ViProject()
 {
 	removeTempStructure();
+	mObjects.clear();
 }
 
-void ViProject::serialize(ViAudioObjectPointer object)
+void ViProject::serialize(ViAudioObjectPointer object, ViAudio::Type type)
 {
-t= object;
+	QString path;
+	if(type == ViAudio::Target)
+	{
+		path = mPaths["data_target"];
+	}
+	else if(type == ViAudio::Corrupted)
+	{
+		path = mPaths["data_corrupted"];
+	}
+	else if(type == ViAudio::Corrected)
+	{
+		path = mPaths["data_corrected"];
+	}
+	
+	mObjects[mCurrentSide-1].append(object);
+	
 	++mCurrentTrack;
-	QString path = generateFileName(object->songInfo(), mPaths["data_original"]);
-	object->setOriginalFile(path);
-	mEncoder.encode(object->originalBuffer(), path, mFormat, 0, object->songInfo());
-LOG(path);
+	QString filePath = generateFileName(object->songInfo(), path, mFormat.codec()->extension());
+	if(type == ViAudio::Target)
+	{
+		object->setTargetFile(path);
+	}
+	else if(type == ViAudio::Corrupted)
+	{
+		object->setCorruptedFile(path);
+	}
+	else if(type == ViAudio::Corrected)
+	{
+		object->setCorrectedFile(path);
+	}
+
+	QFileInfo info(object->songInfo().imagePath());
+	QString albumArt = generateFileName(object->songInfo(), mPaths["data_albumart"], info.suffix());
+	QFile file(object->songInfo().imagePath());
+	if(file.exists())
+	{
+		file.copy(albumArt);
+	}
+	object->songInfo().changeImagePath(object->songInfo().imagePath(), albumArt);
+	mEncoder.encode(object->outputBuffer(), filePath, mFormat, 0, object->songInfo());
 }
 
 void ViProject::setFormat(ViAudioFormat format)
@@ -81,16 +123,6 @@ QString ViProject::filePath()
 	return mArchive.filePath();
 }
 
-void ViProject::setProjectName(QString name)
-{
-	//mProperties.setProjectName(name);
-}
-
-QString ViProject::projectName()
-{
-	//return mProperties.projectName();
-}
-
 /*******************************************************************************************************************
 
 	SIDES
@@ -101,6 +133,13 @@ void ViProject::setSides(int sides)
 {
 	mSides = sides;
 	nextSide();
+	mObjects.clear();
+	for(int i = 0; i < mSides; ++i)
+	{
+		mObjects.append(QList<ViAudioObjectPointer>());
+	}
+	removeSideStructure();
+	createSideStructure();
 }
 
 int ViProject::sides()
@@ -121,14 +160,42 @@ void ViProject::nextSide()
 
 /*******************************************************************************************************************
 
+	PROPERTIES
+
+*******************************************************************************************************************/
+
+void ViProject::setProjectName(QString name)
+{
+	mProjectName = name;
+}
+
+QString ViProject::projectName()
+{
+	return mProjectName;
+}
+
+ViVersion ViProject::createdVersion()
+{
+	return mCreatedVersion;
+}
+
+ViVersion ViProject::editedVersion()
+{
+	return mEditedVersion;
+}
+
+/*******************************************************************************************************************
+
 	LOAD & SAVE
 
 *******************************************************************************************************************/
 
 bool ViProject::load(bool minimal)
 {
-	createTempStructure();
-	QObject::connect(&mArchive, SIGNAL(finished()), this, SLOT(readInfo()));
+	LOG("Loading project.");
+
+	QObject::connect(&mArchive, SIGNAL(decompressFinished()), this, SLOT(loadAll()), Qt::UniqueConnection);
+
 	if(minimal)
 	{
 		return mArchive.decompressData(mPaths["root"], mArchive.fileList(".vml"));
@@ -137,13 +204,32 @@ bool ViProject::load(bool minimal)
 	{
 		return mArchive.decompressData(mPaths["root"]);
 	}
+
 }
 
 void ViProject::save()
 {
-	createTempStructure();
-	//QObject::connect(&mArchive, SIGNAL(finished()), this, SLOT(readInfo()));
+	LOG("Saving project.");
+	saveAll();
 	mArchive.compressData(mPaths["root"]);
+	clearObjects();
+}
+
+bool ViProject::loadAll()
+{
+	if(mArchive.error() != ViArchive::NoError)
+	{
+		LOG("Archive could not be fully extracted: " + mArchive.errorString());
+		return false;
+	}
+	removeSideStructure();
+	return loadProperties() & loadTracks();
+}
+
+void ViProject::saveAll()
+{
+	saveProperties();
+	saveTracks();
 }
 
 bool ViProject::createTempStructure()
@@ -153,20 +239,14 @@ bool ViProject::createTempStructure()
 
 	mPaths["info"] = mPaths["root"] + "info" + QDir::separator();
 	mPaths["info_general"] = mPaths["info"] + "general" + QDir::separator();
-	mPaths["info_songs"] = mPaths["info"] + "songs" + QDir::separator();
+	mPaths["info_tracks"] = mPaths["info"] + "tracks" + QDir::separator();
 	mPaths["info_correlations"] = mPaths["info"] + "correlations" + QDir::separator();
 	
 	mPaths["data"] = mPaths["root"] + "data" + QDir::separator();
 	mPaths["data_target"] = mPaths["data"] + "target" + QDir::separator();
-	mPaths["data_original"] = mPaths["data"] + "original" + QDir::separator();
+	mPaths["data_corrupted"] = mPaths["data"] + "corrupted" + QDir::separator();
 	mPaths["data_corrected"] = mPaths["data"] + "corrected" + QDir::separator();
 	mPaths["data_albumart"] = mPaths["data"] + "albumart" + QDir::separator();
-	for(int i = 1; i <= mSides; ++i)
-	{
-		mPaths["data_target_side" + QString::number(i)] = mPaths["data_target"] + "side" + QString::number(i) + QDir::separator();
-		mPaths["data_original_side" + QString::number(i)] = mPaths["data_original"] + "side" + QString::number(i) + QDir::separator();
-		mPaths["data_corrected_side" + QString::number(i)] = mPaths["data_corrected"] + "side" + QString::number(i) + QDir::separator();
-	}
 
 	//Create paths
 	bool success = true;
@@ -175,6 +255,11 @@ bool ViProject::createTempStructure()
 		QDir dir(iterator.value());
 		success &= dir.mkpath(dir.absolutePath());
 	}
+	success &= createSideStructure();
+
+	mFiles["properties"] = mPaths["info_general"] + "properties.vml";	
+	mFiles["tracks"] = mPaths["info_tracks"] + "tracks.vml";	
+
 	return success;
 }
 
@@ -184,7 +269,57 @@ bool ViProject::removeTempStructure()
 	return dir.removeRecursively();
 }
 
-QString ViProject::generateFileName(ViSongInfo info, QString folder)
+bool ViProject::createSideStructure()
+{
+	//Declare paths
+	QMap<QString,QString> sides;
+	for(int i = 1; i <= mSides; ++i)
+	{
+		sides["data_target_side" + QString::number(i)] = mPaths["data_target"] + "side" + QString::number(i) + QDir::separator();
+		sides["data_corrupted_side" + QString::number(i)] = mPaths["data_corrupted"] + "side" + QString::number(i) + QDir::separator();
+		sides["data_corrected_side" + QString::number(i)] = mPaths["data_corrected"] + "side" + QString::number(i) + QDir::separator();
+		sides["data_albumart_side" + QString::number(i)] = mPaths["data_albumart"] + "side" + QString::number(i) + QDir::separator();
+	}
+
+	//Create paths
+	bool success = true;
+	for(QMap<QString,QString>::iterator iterator = sides.begin(); iterator != sides.end(); ++iterator)
+	{
+		QDir dir(iterator.value());
+		success &= dir.mkpath(dir.absolutePath());
+		mPaths[iterator.key()] = iterator.value();
+	}	
+
+	return success;
+}
+
+bool ViProject::removeSideStructure()
+{
+	QStringList paths;
+	for(int i = 1; i <= mSides; ++i)
+	{
+		paths.append(mPaths["data_target_side" + QString::number(i)]);
+		paths.append(mPaths["data_corrupted_side" + QString::number(i)]);
+		paths.append(mPaths["data_corrected_side" + QString::number(i)]);
+		paths.append(mPaths["data_albumart_side" + QString::number(i)]);
+	}
+	QDir dir;
+	bool success = true;
+	for(int i = 0; i < paths.size(); ++i)
+	{
+		if(paths[i] != "")
+		{
+			dir = QDir(paths[i]);
+			if(dir.exists())
+			{
+				success &= dir.rmdir(dir.absolutePath());
+			}
+		}
+	}
+	return success;
+}
+
+QString ViProject::generateFileName(ViSongInfo info, QString folder, QString extension)
 {
 	// Create correct folder
 	if(folder != "" && !folder.endsWith(QDir::separator()))
@@ -221,7 +356,159 @@ QString ViProject::generateFileName(ViSongInfo info, QString folder)
 	}
 
 	// Create extension
-	folder += mFormat.codec()->extension(".");
+	if(extension != "")
+	{
+		folder += "." + extension;
+	}
 	
 	return folder;
+}
+
+QString ViProject::relativePath(QString path)
+{
+	return path.replace(mPaths["root"], "");
+}
+
+QString ViProject::absolutePath(QString path)
+{
+	if(path.startsWith(mPaths["root"]))
+	{
+		return path;
+	}
+	if(path.startsWith("/"))
+	{
+		path.remove(0, 1);
+	}
+	return mPaths["root"] + path;
+}
+
+void ViProject::clearObjects()
+{
+	for(int i = 0; i < mObjects.size(); ++i)
+	{
+		for(int j = 0; j < mObjects[i].size(); ++j)
+		{
+			if(!mObjects[i][j]->isUsed())
+			{
+				mObjects[i][j]->clearBuffers();
+			}
+		}
+	}
+}
+
+/*******************************************************************************************************************
+
+	SAVE & LOAD INFORMATION
+
+*******************************************************************************************************************/
+
+bool ViProject::saveProperties()
+{
+	ViElement root("Properties");
+	root.addChild("ProjectName", mProjectName);
+
+	ViElement created("Created");
+	ViElement createdVersion("Version");
+	createdVersion.addChild("Major", QString::number(mCreatedVersion.major()));
+	createdVersion.addChild("Minor", QString::number(mCreatedVersion.minor()));
+	createdVersion.addChild("Patch", QString::number(mCreatedVersion.patch()));
+	created.addChild(createdVersion);
+	root.addChild(created);
+
+	ViElement edited("Edited");
+	ViElement editedVersion("Version");
+	editedVersion.addChild("Major", QString::number(mEditedVersion.major()));
+	editedVersion.addChild("Minor", QString::number(mEditedVersion.minor()));
+	editedVersion.addChild("Patch", QString::number(mEditedVersion.patch()));
+	edited.addChild(editedVersion);
+	root.addChild(edited);
+
+	return root.saveToFile(mFiles["properties"]);
+}
+
+bool ViProject::saveTracks()
+{
+	ViElement root("Tracks");
+	bool save = true;
+
+	for(int j = 0; j < mObjects.size(); ++j)
+	{
+		ViElement side("Side");
+		side.addAttribute("id", (j + 1));
+		for(int i = 0; i < mObjects[j].size(); ++i)
+		{
+			ViElement track("Track");
+			track.addChild("Artist", mObjects[j][i]->songInfo().artistName());
+			track.addChild("Title", mObjects[j][i]->songInfo().songTitle());
+
+			ViElement data("Data");
+			data.addChild("AlbumArt", relativePath(mObjects[j][i]->songInfo().imagePath()));
+			data.addChild("Target", relativePath(mObjects[j][i]->targetFile()));
+			data.addChild("Corrupted", relativePath(mObjects[j][i]->corruptedFile()));
+			data.addChild("Corrected", relativePath(mObjects[j][i]->correctedFile()));
+			track.addChild(data);
+
+			side.addChild(track);
+		}
+		root.addChild(side);
+	}
+
+	return root.saveToFile(mFiles["tracks"]);
+}
+
+bool ViProject::saveCorrelations()
+{
+
+}
+
+bool ViProject::loadProperties()
+{
+	ViElement root;
+	if(!root.loadFromFile(mFiles["properties"]))
+	{
+		return false;
+	}
+
+	mProjectName = root.child("ProjectName").toString();
+	
+	ViElement created = root.child("Created");
+	mCreatedVersion = ViVersion(created.child("Major").toInt(), created.child("Minor").toInt(), created.child("Patch").toInt());
+
+	return true;
+}
+
+bool ViProject::loadTracks()
+{
+	ViElement root;
+	if(!root.loadFromFile(mFiles["tracks"]))
+	{
+		return false;
+	}
+
+	ViElementList sides = root.children();
+	setSides(sides.size());
+	for(int j = 0; j < sides.size(); ++j)
+	{
+		ViElementList tracks = sides[j].children();
+		for(int i = 0; i < tracks.size(); ++i)
+		{
+			ViAudioObjectPointer object = ViAudioObject::create();
+			ViSongInfo info;
+			info.setArtistName(tracks[i].child("Artist").toString());
+			info.setSongTitle(tracks[i].child("Title").toString());
+			ViElement data = tracks[i].child("Data");
+			object->setTargetFile(absolutePath(data.child("Target").toString()));
+			object->setCorruptedFile(absolutePath(data.child("Corrupted").toString()));
+			object->setCorrectedFile(absolutePath(data.child("Corrected").toString()));
+			info.setImagePath(absolutePath(data.child("AlbumArt").toString()));
+			object->setSongInfo(info);
+			mObjects[j].append(object);
+		}
+	}
+	return true;
+}
+
+bool ViProject::loadCorrelations()
+{
+
 }

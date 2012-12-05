@@ -30,6 +30,7 @@ class ViProcessorList : public QObject
 
 		void clear();
 		QList<ViProcessor*> processors(int type = ViProcessorList::All);
+		ViProcessor* processor(QString type);
 
 		void observeInput(const ViSampleChunk *data);
 		void manipulateInput(ViSampleChunk *data);

@@ -8,7 +8,7 @@
 
 typedef ViChunk<char> ViBufferChunk;
 
-class ViBuffer : public QObject, public ViId
+class ViBuffer : public QObject, public ViId, public ViFunctor
 {
 
     Q_OBJECT
@@ -18,6 +18,7 @@ class ViBuffer : public QObject, public ViId
 	signals:
 
 		void changed();
+		void streamsChanged();
 		void formatChanged(ViAudioFormat format);
 		void inserted(int position, int size);
 
@@ -37,6 +38,7 @@ class ViBuffer : public QObject, public ViId
 		ViBufferStreamPointer createReadStream();
 		ViBufferStreamPointer createWriteStream();
 		ViBufferStreamPointer createStream(QIODevice::OpenMode mode);
+		int streamCount(QIODevice::OpenMode mode = QIODevice::ReadWrite);
 		
 		int size();
 		void clear();
@@ -50,11 +52,18 @@ class ViBuffer : public QObject, public ViId
 		int insert(int start, const ViBufferChunk &data);
 		int insert(int start, const ViBufferChunk &data, int length);
 
+	protected:
+
+		void addStream(ViBufferStreamPointer stream);
+		void removeStream(ViBufferStream *stream);
+		void execute(ViFunctorParameter *data = NULL);
+
 	private:
 
 		QByteArray *mData;
 		ViAudioFormat mFormat;
 		QMutex mMutex;
+		QList<ViBufferStreamPointer> mStreams;
 
 };
 

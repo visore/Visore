@@ -7,16 +7,23 @@ namespace ViAudio
 {
 	enum Mode
 	{
-		AudioInput = 0,
-		AudioOutput = 1,
-		AudioInputOutput = 2
+		AudioInput,
+		AudioOutput,
+		AudioInputOutput
 	};
 
 	enum Input
 	{
-		Line = 0,
-		File = 1,
-		Project = 2
+		Line,
+		File,
+		Project
+	};
+
+	enum Type
+	{
+		Target,
+		Corrupted,
+		Corrected
 	};
 
 	using namespace QAudio;

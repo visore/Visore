@@ -22,7 +22,6 @@ void ViFlacCodec::initialize()
 	//Sample Types
 	addSampleSize(8, "8 bit");
 	addSampleSize(16, "16 bit");
-	addSampleSize(32, "32 bit");
 	setDefaultSampleSize(16);
 
 	//Sample Rates

@@ -38,8 +38,8 @@ ViAudioEngine::ViAudioEngine()
 	mStreamInput->setFormat(ViAudioFormat::defaultFormat());
 	mStreamInput->setDevice(QAudioDeviceInfo::defaultInputDevice());
 
-	mProcessingChain.attach(ViAudio::AudioInput, &mInputWaveFormer);
-	mProcessingChain.attach(ViAudio::AudioOutput, &mOutputWaveFormer);
+	//mProcessingChain.attach(ViAudio::AudioInput, &mInputWaveFormer);
+	//mProcessingChain.attach(ViAudio::AudioOutput, &mOutputWaveFormer);
 
 	//Spectrum analyzer
 	QObject::connect(&mSpectrumAnalyzer, SIGNAL(changed(ViRealSpectrum, qint64)), this, SIGNAL(spectrumChanged(ViRealSpectrum, qint64)), Qt::DirectConnection);
@@ -49,7 +49,7 @@ ViAudioEngine::ViAudioEngine()
 	mSongIdentifier.setKey("G1TZBE4IHJAYUSNCN");
 	mSongDetector.setIdentifier(&mSongIdentifier);
 	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
-	mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
+	//mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
 
 	ViFrequencyEndDetector *endDetector = new ViFrequencyEndDetector();
 	//QObject::connect(&mSpectrumAnalyzer, SIGNAL(changed(ViRealSpectrum, qint64)), endDetector, SLOT(addSpectrum(ViRealSpectrum)), Qt::DirectConnection);
@@ -178,11 +178,12 @@ void ViAudioEngine::calculateCorrelation()
 	}*/
 }
 
-void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, bool play)
+void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, ViAudio::Type type, bool existingProject)
 {
+	mStreamInput->setFormat(format);
 	changeInput(ViAudio::Line);
 	ViProject *project = new ViProject(name, filePath, recordSides);
 	project->setFormat(format);
-	mProcessingChain.setProject(project);
-	startRecording();
+	mProcessingChain.startProject(project, type, existingProject);
+	//startRecording();
 }

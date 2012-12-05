@@ -4,6 +4,7 @@
 ViBufferStream::ViBufferStream(QIODevice::OpenMode mode, ViBuffer *buffer, QByteArray *data, QMutex *mutex)
 	: QObject(), ViId()
 {
+	mMode = mode;
 	mBuffer = buffer;
 	mBufferMutex = mutex;
 	QObject::connect(mBuffer, SIGNAL(inserted(int, int)), this, SLOT(inserted(int, int)), Qt::DirectConnection);
@@ -103,6 +104,11 @@ int ViBufferStream::size()
 void ViBufferStream::restart()
 {
 	setPosition(0);
+}
+
+QIODevice::OpenMode ViBufferStream::mode()
+{
+	return mMode;
 }
 
 int ViBufferStream::position()

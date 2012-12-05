@@ -29,6 +29,7 @@ class ViAudioTransmission : public QObject
 
 		virtual void setBuffer(ViBuffer *buffer);
 		virtual ViBuffer* buffer();
+		virtual void clear();
 
 		virtual ViAudioFormat format();
 		virtual void setFormat(ViAudioFormat format);

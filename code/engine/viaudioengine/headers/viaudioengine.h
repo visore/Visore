@@ -49,7 +49,7 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		void calculateCorrelation();
 
 		//Project
-		void startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, bool play);
+		void startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, ViAudio::Type type, bool existingProject);
 
 	signals:
 

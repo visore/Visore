@@ -77,7 +77,7 @@ void ViExecutor::setObject(ViAudioObjectPointer object)
 	{
 		mInputSamples = new ViSampleChunk();
 	}
-	mReadStream = mObject->originalBuffer()->createReadStream();
+	mReadStream = mObject->inputBuffer()->createReadStream();
 	
 	if(mOutputChunk == NULL)
 	{
@@ -87,7 +87,7 @@ void ViExecutor::setObject(ViAudioObjectPointer object)
 	{
 		mOutputSamples = new ViSampleChunk();
 	}
-	mWriteStream = mObject->correctedBuffer()->createWriteStream();
+	mWriteStream = mObject->outputBuffer()->createWriteStream();
 }
 
 int ViExecutor::defaultWindowSize()
@@ -95,9 +95,14 @@ int ViExecutor::defaultWindowSize()
 	return DEFAULT_WINDOW_SIZE;
 }
 
+ViProcessor* ViExecutor::processor(QString type)
+{
+	return mProcessors.processor(type);
+}
+
 void ViExecutor::setFormat(ViAudioFormat format)
 {
-	QObject::disconnect(mObject->originalBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)));
+	QObject::disconnect(mObject->inputBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)));
 	initialize();
 }
 
@@ -118,11 +123,11 @@ void ViExecutor::initialize()
 	mWasInitialized = true;
 	if(mReadStream != NULL)
 	{
-		mInputFormat = mObject->originalBuffer()->format();
+		mInputFormat = mObject->inputBuffer()->format();
 		if(!mInputFormat.isValid())
 		{
 			mWasInitialized = false;
-			QObject::connect(mObject->originalBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)), Qt::UniqueConnection);
+			QObject::connect(mObject->inputBuffer(), SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setFormat(ViAudioFormat)), Qt::UniqueConnection);
 			return;
 		}
 		mInputConverter.setSize(mInputFormat.sampleSize());
@@ -130,7 +135,7 @@ void ViExecutor::initialize()
 	if(mWriteStream != NULL)
 	{
 		mOutputFormat = mInputFormat;
-		mObject->correctedBuffer()->setFormat(mOutputFormat);
+		mObject->outputBuffer()->setFormat(mOutputFormat);
 		mOutputConverter.setSize(mOutputFormat.sampleSize());
 	}
 
@@ -173,7 +178,7 @@ void ViExecutor::initialize()
 	mRateCounter = 0;
 	mTimer.start(1000);
 
-	QObject::connect(mObject->originalBuffer(), SIGNAL(changed()), this, SLOT(execute()), Qt::UniqueConnection);
+	QObject::connect(mObject->inputBuffer(), SIGNAL(changed()), this, SLOT(execute()), Qt::UniqueConnection);
 }
 
 void ViExecutor::finalize()
@@ -181,16 +186,28 @@ void ViExecutor::finalize()
 	if(mWasInitialized)
 	{
 		while(isRunning()); // TODO: busy waiting here?
+
 		if(!mReadStream.isNull() && !mObject.isNull())
 		{
-			QObject::disconnect(mObject->originalBuffer(), SIGNAL(changed()), this, SLOT(execute()));
+			QObject::disconnect(mObject->inputBuffer(), SIGNAL(changed()), this, SLOT(execute()));
 		}
+
 		QList<ViProcessor*> processors = mProcessors.processors();
 		for(int i = 0; i < processors.size(); ++i)
 		{
 			processors[i]->finalize();
+LOG("8888***1");
+			processors[i]->setObject(NULL);LOG("8888***2");
 		}
+LOG("8888***3: "+QString::number(mObject.referenceCount()));
+
+LOG("8888***4.5");
 		mObject = ViAudioObject::createNull(); // delete object
+LOG("8888***5");
+		// "Delete" the streams, so that the audio object will emit finished
+		mReadStream = NULL;LOG("8888***5.5");
+		mWriteStream = NULL;LOG("8888***5.6");
+
 		mWasInitialized = false;
 		mTimer.stop();
 	}

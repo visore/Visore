@@ -37,6 +37,7 @@ ViManager::ViManager()
 	mName = QString(NAME);
 	mUrl = QUrl(QString(HOMEPAGE).replace("http://", ""));
 	mProjectExtension = "vip";
+	mProjectName = "Visore Projects";
 
 	mSettings = new QSettings(mName, mName);
 
@@ -113,6 +114,16 @@ QUrl ViManager::url()
 QString ViManager::projectExtension()
 {
 	return instance()->mProjectExtension;
+}
+
+QString ViManager::projectName()
+{
+	return instance()->mProjectName;
+}
+
+QString ViManager::projectFilter()
+{
+	return projectName() + " (*." + projectExtension() + ")";
 }
 
 QString ViManager::tempPath()

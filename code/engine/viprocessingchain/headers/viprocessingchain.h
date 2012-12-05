@@ -13,6 +13,7 @@ class ViHandler;
 class ViUnderrunHandler;
 class ViSectionHandler;
 class ViPlaybackHandler;
+class ViProjectHandler;
 
 class ViProcessingChain : public QObject
 {
@@ -22,6 +23,7 @@ class ViProcessingChain : public QObject
 	friend class ViUnderrunHandler;
 	friend class ViSectionHandler;
 	friend class ViPlaybackHandler;
+	friend class ViProjectHandler;
 
 	signals:
 
@@ -41,10 +43,6 @@ class ViProcessingChain : public QObject
 		void recordStarted();
 		void recordEnded();
 
-	private slots:
-
-		void updateProject(ViAudioObjectPointer object);
-
 	public:
 
 		ViProcessingChain();
@@ -52,12 +50,13 @@ class ViProcessingChain : public QObject
 
 		void setWindowSize(int windowSize);
 		void setTransmission(ViAudioTransmission *transmission);
-		void setProject(ViProject *project);
+		void startProject(ViProject *project, ViAudio::Type type, bool existingProject);
 		bool attach(ViAudio::Mode mode, ViProcessor *processor);
 		bool detach(ViProcessor *processor);
 
-		ViAudioObjectPointer recordingObject();
-		ViAudioObjectPointer playingObject();
+		ViAudioObjectPointer audioObject();
+
+		ViProcessor* processor(QString type);
 
 	protected:
 
@@ -77,10 +76,11 @@ class ViProcessingChain : public QObject
 		ViUnderrunHandler *mUnderrunHandler;
 		ViSectionHandler *mSectionHandler;
 		ViPlaybackHandler *mPlaybackHandler;
+		ViProjectHandler *mProjectHandler;
+
 
 		ViAudioObjectQueue mAudioObjects;
 
-		ViProject *mProject;
 };
 
 #endif

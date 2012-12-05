@@ -87,6 +87,11 @@ ViAudioObjectPointer ViAudioObjectQueue::last()
 	return mQueue.last();
 }
 
+ViAudioObjectPointer ViAudioObjectQueue::operator [] (int index)
+{
+	return mQueue[index];
+}
+
 void ViAudioObjectQueue::execute(ViFunctorParameter *data)
 {
 	ViAudioObject *object = static_cast<ViAudioObject*>(data);

@@ -37,6 +37,8 @@ class ViAudioObjectQueue : public QObject, public ViFunctor
 		ViAudioObjectPointer first();
 		ViAudioObjectPointer last();
 
+		ViAudioObjectPointer operator [] (int index);
+
 	protected:
 
 		void execute(ViFunctorParameter *data = NULL);

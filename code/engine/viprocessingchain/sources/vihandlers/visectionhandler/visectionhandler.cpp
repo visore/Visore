@@ -9,7 +9,7 @@ ViSectionHandler::ViSectionHandler(ViProcessingChain *chain)
 {
 	mIdleSize = IDLE_SIZE;
 	QObject::connect(&mIdleTimer, SIGNAL(timeout()), this, SLOT(checkSize()));
-y=ViAudioObject::createNull();
+
 	mEndDetector = NULL;
 	mSpectrumAnalyzer = NULL;
 	mIsSongRunning = false;
@@ -55,6 +55,7 @@ void ViSectionHandler::startRecord()
 void ViSectionHandler::endRecord()
 {
 	emit recordEnded();
+	endInput();
 }
 
 void ViSectionHandler::startSong()
@@ -79,14 +80,11 @@ void ViSectionHandler::endSong()
 
 void ViSectionHandler::startInput(bool isSong)
 {
-	ViBuffer *inputBuffer = allocateBuffer();
-	ViBuffer *outputBuffer = allocateBuffer();
-
-	ViAudioObjectPointer object = ViAudioObject::create(inputBuffer, outputBuffer);
+	ViAudioObjectPointer object = ViAudioObject::create();
+	object->setType(ViAudioObject::Temp, ViAudioObject::Target);
 	if(isSong)
 	{
 		object->setSong();
-y = object;
 		mChain->mAudioObjects.enqueue(object);
 	}
 	else
@@ -95,28 +93,28 @@ y = object;
 		mIdleTimer.start(IDLE_TIME);
 	}
 
-	input()->setBuffer(inputBuffer);
+	input()->setBuffer(object->inputBuffer());
 	executor()->setObject(object);
 	executor()->initialize();
-
+	input()->start();
 }
 
 void ViSectionHandler::endInput()
 {
+	input()->stop();
+	input()->clear();
 	mIdleTimer.stop();
 	executor()->finalize();
-	if(!y.isNull())
-	{
-	
-		y->setFinished();
-	y= ViAudioObject::createNull();
-	}
+LOG("-----------------------------*: "+QString::number(mNoSongObjects.size()));
+if(mNoSongObjects.size() > 0) LOG("-----------------------------*++++: "+QString::number(mNoSongObjects[0].referenceCount()));
 	mNoSongObjects.clear();
+LOG("----------------------------- "+QString::number(mNoSongObjects.size()));
+	
 }
 
 void ViSectionHandler::setInfo(ViSongInfo info)
 {
-	mChain->recordingObject()->setSongInfo(info);
+	mChain->audioObject()->setSongInfo(info);
 }
 
 void ViSectionHandler::setDetector(ViProcessor *processor)
@@ -154,7 +152,7 @@ void ViSectionHandler::setDetector(ViProcessor *processor)
 
 void ViSectionHandler::checkSize()
 {
-	if(mNoSongObjects.current()->originalBuffer()->size() >= mIdleSize)
+	if(mNoSongObjects.current()->inputBuffer()->size() >= mIdleSize)
 	{
 		endInput();
 		startInput();
@@ -174,15 +172,4 @@ ViAudioOutput* ViSectionHandler::output()
 ViExecutor* ViSectionHandler::executor()
 {
 	return &mChain->mMultiExecutor;
-}
-
-ViBuffer* ViSectionHandler::allocateBuffer()
-{
-	return new ViBuffer();
-}
-
-void ViSectionHandler::deallocateBuffer(ViBuffer *buffer)
-{
-	delete buffer;
-	buffer = NULL;
 }

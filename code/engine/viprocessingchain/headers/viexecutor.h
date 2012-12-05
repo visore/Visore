@@ -42,6 +42,8 @@ class ViExecutor : public QThread
 
 		static int defaultWindowSize();
 
+		ViProcessor* processor(QString type);
+
 	protected:
 
 		void connect(ViProcessor *processor);
