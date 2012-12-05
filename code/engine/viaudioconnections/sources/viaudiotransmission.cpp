@@ -25,7 +25,7 @@ ViBuffer* ViAudioTransmission::buffer()
 void ViAudioTransmission::clear()
 {
 	mBuffer = NULL;
-	mStream = NULL;
+	mStream.setNull();
 }
 
 ViAudioFormat ViAudioTransmission::format()

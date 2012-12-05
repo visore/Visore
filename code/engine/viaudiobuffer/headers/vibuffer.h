@@ -18,7 +18,7 @@ class ViBuffer : public QObject, public ViId, public ViFunctor
 	signals:
 
 		void changed();
-		void streamsChanged();
+		void unused();
 		void formatChanged(ViAudioFormat format);
 		void inserted(int position, int size);
 
@@ -54,8 +54,6 @@ class ViBuffer : public QObject, public ViId, public ViFunctor
 
 	protected:
 
-		void addStream(ViBufferStreamPointer stream);
-		void removeStream(ViBufferStream *stream);
 		void execute(ViFunctorParameter *data = NULL);
 
 	private:
@@ -63,6 +61,9 @@ class ViBuffer : public QObject, public ViId, public ViFunctor
 		QByteArray *mData;
 		ViAudioFormat mFormat;
 		QMutex mMutex;
+		
+		int mWriteStreamCount;
+		int mReadStreamCount;
 		QList<ViBufferStreamPointer> mStreams;
 
 };

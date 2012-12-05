@@ -1,11 +1,15 @@
 #include "vibuffer.h"
 #include <QSharedPointer>
 #include "vilogger.h"
+
 ViBuffer::ViBuffer()
 	: QObject(), ViId()
 {
 	mData = NULL;
 	setData(new QByteArray());
+
+	mWriteStreamCount = 0;
+	mReadStreamCount = 0;
 }
 
 ViBuffer::~ViBuffer()
@@ -14,8 +18,7 @@ ViBuffer::~ViBuffer()
 	mData = NULL;
 	for(int i = 0; i < mStreams.size(); ++i)
 	{
-		//mStreams.removeFirst();
-		mStreams[i] = NULL;
+		mStreams[i].setDeleter(NULL);
 	}
 }
 
@@ -48,68 +51,59 @@ ViBufferStreamPointer ViBuffer::createWriteStream()
 ViBufferStreamPointer ViBuffer::createStream(QIODevice::OpenMode mode)
 {
 	QMutexLocker locker(&mMutex);
+	if(mode == QIODevice::ReadOnly)
+	{
+		++mReadStreamCount;
+	}
+	else if(mode == QIODevice::WriteOnly)
+	{
+		++mWriteStreamCount;
+	}
+	else
+	{
+		LOG("Only ReadOnly and WriteOnly streams allowed");
+		return ViBufferStreamPointer();
+	}
 	ViBufferStreamPointer pointer = ViBufferStreamPointer(new ViBufferStream(mode, this, mData, &mMutex));
 	pointer.setUnusedLimit(1);
 	pointer.setDeleter(this);
-	locker.unlock();
-	addStream(pointer);
+	mStreams.append(pointer);
 	return pointer;
 }
 
 int ViBuffer::streamCount(QIODevice::OpenMode mode)
 {
-	QMutexLocker locker(&mMutex);
-	if(mode == QIODevice::ReadWrite)
+	if(mode == QIODevice::ReadOnly)
 	{
-		return mStreams.size();
+		return mReadStreamCount;
 	}
-
-	int counter = 0;
-	for(int i = 0; i < mStreams.size(); ++i)
+	else if(mode == QIODevice::WriteOnly)
 	{
-		if(mStreams[i]->mode() == mode)
-		{
-			++counter;
-		}
+		return mWriteStreamCount;
 	}
-	return counter;
-}
-
-void ViBuffer::addStream(ViBufferStreamPointer stream)
-{
-	QMutexLocker locker(&mMutex);
-	mStreams.append(stream);
-	locker.unlock();
-	emit streamsChanged();
-}
-
-void ViBuffer::removeStream(ViBufferStream* stream)
-{
-	QMutexLocker locker(&mMutex);
-	for(int i = 0; i < mStreams.size(); ++i)
-	{
-		if(stream == mStreams[i].data())
-		{
-			mStreams[i] = NULL;
-			//mStreams.removeAt(i);LOG("removed!!!");
-			break;
-		}
-	}
-	locker.unlock();
-	emit streamsChanged();
+	return -1;
 }
 
 void ViBuffer::execute(ViFunctorParameter *data)
 {
 	QMutexLocker locker(&mMutex);
-LOG("pppo:" + id());
 	ViBufferStream *object = dynamic_cast<ViBufferStream*>(data);
 	if(object != NULL)
 	{
-		locker.unlock();
-		removeStream(object);
+		if(object->mode() == QIODevice::ReadOnly)
+		{
+			--mReadStreamCount;
+		}
+		else if(object->mode() == QIODevice::WriteOnly)
+		{
+			--mWriteStreamCount;
+			if(mWriteStreamCount == 1)
+			{LOG("unused....");
+				locker.unlock();
+				emit unused();
+			}
+		}
 	}
-LOG("-----------**--------- "+ QString::number(mStreams.size()));
 }
 
 int ViBuffer::size()

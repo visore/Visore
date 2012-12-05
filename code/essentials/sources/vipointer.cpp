@@ -143,6 +143,13 @@ bool ViPointer<T>::isNull()
 }
 
 template<class T>
+void ViPointer<T>::setNull()
+{
+	destruct();
+	mData = new ViPointerData<T>();
+}
+
+template<class T>
 T* ViPointer<T>::data()
 {
 	return mData->data();

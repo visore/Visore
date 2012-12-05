@@ -48,6 +48,7 @@ class ViPointer
 		int referenceCount();
 		bool isUsed();
 		bool isNull();
+		void setNull();
 
 		T* data();
 		T& operator * ();

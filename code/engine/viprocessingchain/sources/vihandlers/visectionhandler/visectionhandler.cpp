@@ -105,11 +105,7 @@ void ViSectionHandler::endInput()
 	input()->clear();
 	mIdleTimer.stop();
 	executor()->finalize();
-LOG("-----------------------------*: "+QString::number(mNoSongObjects.size()));
-if(mNoSongObjects.size() > 0) LOG("-----------------------------*++++: "+QString::number(mNoSongObjects[0].referenceCount()));
 	mNoSongObjects.clear();
-LOG("----------------------------- "+QString::number(mNoSongObjects.size()));
-	
 }
 
 void ViSectionHandler::setInfo(ViSongInfo info)

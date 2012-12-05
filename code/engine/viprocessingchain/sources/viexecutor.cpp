@@ -191,22 +191,18 @@ void ViExecutor::finalize()
 		{
 			QObject::disconnect(mObject->inputBuffer(), SIGNAL(changed()), this, SLOT(execute()));
 		}
-
 		QList<ViProcessor*> processors = mProcessors.processors();
 		for(int i = 0; i < processors.size(); ++i)
 		{
 			processors[i]->finalize();
-LOG("8888***1");
-			processors[i]->setObject(NULL);LOG("8888***2");
+			processors[i]->setObject(ViAudioObject::createNull());
 		}
-LOG("8888***3: "+QString::number(mObject.referenceCount()));
-
-LOG("8888***4.5");
-		mObject = ViAudioObject::createNull(); // delete object
-LOG("8888***5");
+		// delete object
+		mObject = ViAudioObject::createNull();
 		// "Delete" the streams, so that the audio object will emit finished
-		mReadStream = NULL;LOG("8888***5.5");
-		mWriteStream = NULL;LOG("8888***5.6");
+
+		mReadStream.setNull();
+		mWriteStream.setNull();
 
 		mWasInitialized = false;
 		mTimer.stop();

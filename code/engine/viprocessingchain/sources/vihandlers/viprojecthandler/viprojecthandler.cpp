@@ -18,9 +18,9 @@ void ViProjectHandler::updateProject(ViAudioObjectPointer object)
 {
 	if(mProject != NULL)
 	{
-	//	mProject->serialize(object, mProjectType);
+		mProject->serialize(object, mProjectType);
 	}
-	//LOG("***************+++*: "+QString::number(mChain->mAudioObjects.size()));
+	LOG("***************+++*: "+QString::number(mChain->mAudioObjects.size()));
 	for(int i = 0; i < mChain->mAudioObjects.size(); ++i)
 	{
 		LOG("***************+++*: "+QString::number(mChain->mAudioObjects[i].referenceCount()));
