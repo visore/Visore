@@ -24,8 +24,8 @@ class QwtIntervalSymbol;
   that is displayed for each interval. QwtPlotIntervalCurve might be used
   to disply error bars or the area between 2 curves.
 */
-class QWT_EXPORT QwtPlotIntervalCurve: 
-    public QwtPlotSeriesItem, public QwtSeriesStore<QwtIntervalSample>
+
+class QWT_EXPORT QwtPlotIntervalCurve: public QwtPlotSeriesItem<QwtIntervalSample>
 {
 public:
     /*!
@@ -34,6 +34,7 @@ public:
 
         \sa setStyle(), style()
     */
+
     enum CurveStyle
     {
         /*!
@@ -105,8 +106,7 @@ public:
         const QRectF &canvasRect, int from, int to ) const;
 
     virtual QRectF boundingRect() const;
-
-    virtual QwtGraphic legendIcon( int index, const QSizeF & ) const;
+    virtual void drawLegendIdentifier( QPainter *, const QRectF & ) const;
 
 protected:
 

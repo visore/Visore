@@ -1,5 +1,4 @@
 #include "vibuffer.h"
-#include <QSharedPointer>
 #include "vilogger.h"
 
 ViBuffer::ViBuffer()
@@ -97,8 +96,8 @@ void ViBuffer::execute(ViFunctorParameter *data)
 		else if(object->mode() == QIODevice::WriteOnly)
 		{
 			--mWriteStreamCount;
-			if(mWriteStreamCount == 1)
-			{LOG("unused....");
+			if(mWriteStreamCount == 0)
+			{
 				locker.unlock();
 				emit unused();
 			}

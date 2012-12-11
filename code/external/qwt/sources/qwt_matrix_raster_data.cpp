@@ -20,7 +20,7 @@ public:
     {
     }
 
-    inline double value(int row, int col) const
+    inline double value(size_t row, size_t col) const
     {
         return values.data()[ row * numColumns + col ];
     }
@@ -28,8 +28,8 @@ public:
     QwtMatrixRasterData::ResampleMode resampleMode;
 
     QVector<double> values;
-    int numColumns;
-    int numRows;
+    size_t numColumns;
+    size_t numRows;
 
     double dx;
     double dy;
@@ -54,7 +54,7 @@ QwtMatrixRasterData::~QwtMatrixRasterData()
    \param mode Resampling mode
    \sa resampleMode(), value()
 */
-void QwtMatrixRasterData::setResampleMode( ResampleMode mode )
+void QwtMatrixRasterData::setResampleMode(ResampleMode mode)
 {
     d_data->resampleMode = mode;
 }
@@ -105,10 +105,10 @@ void QwtMatrixRasterData::setInterval(
    \sa valueMatrix(), numColumns(), numRows(), setInterval()()
 */
 void QwtMatrixRasterData::setValueMatrix( 
-    const QVector<double> &values, int numColumns )
+    const QVector<double> &values, size_t numColumns )
 {
     d_data->values = values;
-    d_data->numColumns = qMax( numColumns, 0 );
+    d_data->numColumns = numColumns;
     update();
 }
 
@@ -122,29 +122,10 @@ const QVector<double> QwtMatrixRasterData::valueMatrix() const
 }
 
 /*!
-  \brief Change a single value in the matrix
-
-  \param row Row index
-  \param col Column index
-  \param value New value
-
-  \sa value(), setValueMatrix()
-*/
-void QwtMatrixRasterData::setValue( int row, int col, double value )
-{
-    if ( row >= 0 && row < d_data->numRows &&
-        col >= 0 && col < d_data->numColumns )
-    {
-        const int index = row * d_data->numColumns + col;
-        d_data->values.data()[ index ] = value;
-    }
-}
-
-/*!
    \return Number of columns of the value matrix
    \sa valueMatrix(), numRows(), setValueMatrix()
 */
-int QwtMatrixRasterData::numColumns() const
+size_t QwtMatrixRasterData::numColumns() const
 {
     return d_data->numColumns;
 }
@@ -153,7 +134,7 @@ int QwtMatrixRasterData::numColumns() const
    \return Number of rows of the value matrix
    \sa valueMatrix(), numColumns(), setValueMatrix()
 */
-int QwtMatrixRasterData::numRows() const
+size_t QwtMatrixRasterData::numRows() const
 {
     return d_data->numRows;
 }
@@ -217,12 +198,12 @@ double QwtMatrixRasterData::value( double x, double y ) const
 
             if ( col1 < 0 )
                 col1 = col2;
-            else if ( col2 >= static_cast<int>( d_data->numColumns ) )
+            else if ( col2 >= (int)d_data->numColumns )
                 col2 = col1;
 
             if ( row1 < 0 )
                 row1 = row2;
-            else if ( row2 >= static_cast<int>( d_data->numRows ) )
+            else if ( row2 >= (int)d_data->numRows )
                 row2 = row1;
 
             const double v11 = d_data->value( row1, col1 );
@@ -248,8 +229,8 @@ double QwtMatrixRasterData::value( double x, double y ) const
         case NearestNeighbour:
         default:
         {
-            int row = int( (y - yInterval.minValue() ) / d_data->dy );
-            int col = int( (x - xInterval.minValue() ) / d_data->dx );
+            uint row = uint( (y - yInterval.minValue() ) / d_data->dy );
+            uint col = uint( (x - xInterval.minValue() ) / d_data->dx );
 
             // In case of intervals, where the maximum is included
             // we get out of bound for row/col, when the value for the

@@ -282,32 +282,32 @@ bool QwtMagnifier::eventFilter( QObject *object, QEvent *event )
         {
             case QEvent::MouseButtonPress:
             {
-                widgetMousePressEvent( static_cast<QMouseEvent *>( event ) );
+                widgetMousePressEvent( ( QMouseEvent * )event );
                 break;
             }
             case QEvent::MouseMove:
             {
-                widgetMouseMoveEvent( static_cast<QMouseEvent *>( event ) );
+                widgetMouseMoveEvent( ( QMouseEvent * )event );
                 break;
             }
             case QEvent::MouseButtonRelease:
             {
-                widgetMouseReleaseEvent( static_cast<QMouseEvent *>( event ) );
+                widgetMouseReleaseEvent( ( QMouseEvent * )event );
                 break;
             }
             case QEvent::Wheel:
             {
-                widgetWheelEvent( static_cast<QWheelEvent *>( event ) );
+                widgetWheelEvent( ( QWheelEvent * )event );
                 break;
             }
             case QEvent::KeyPress:
             {
-                widgetKeyPressEvent( static_cast<QKeyEvent *>( event ) );
+                widgetKeyPressEvent( ( QKeyEvent * )event );
                 break;
             }
             case QEvent::KeyRelease:
             {
-                widgetKeyReleaseEvent( static_cast<QKeyEvent *>( event ) );
+                widgetKeyReleaseEvent( ( QKeyEvent * )event );
                 break;
             }
             default:;
@@ -410,7 +410,7 @@ void QwtMagnifier::widgetWheelEvent( QWheelEvent *wheelEvent )
             of 120 (== 15 * 8).
          */
         double f = qPow( d_data->wheelFactor, 
-            qAbs( wheelEvent->delta() / 120 ) );
+            qAbs( wheelEvent->delta() / 120.0 ) );
 
         if ( wheelEvent->delta() > 0 )
             f = 1 / f;

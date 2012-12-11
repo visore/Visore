@@ -604,16 +604,10 @@ QPointF QwtScaleDraw::pos() const
 */
 void QwtScaleDraw::setLength( double length )
 {
-#if 1
     if ( length >= 0 && length < 10 )
         length = 10;
-
-    // why should we accept negative lengths ???
     if ( length < 0 && length > -10 )
         length = -10;
-#else
-    length = qMax( length, 10 );
-#endif
 
     d_data->len = length;
     updateMap();

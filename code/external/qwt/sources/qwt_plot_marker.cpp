@@ -13,6 +13,8 @@
 #include "qwt_symbol.h"
 #include "qwt_text.h"
 #include "qwt_math.h"
+#include "qwt_legend.h"
+#include "qwt_legend_item.h"
 #include <qpainter.h>
 
 class QwtPlotMarker::PrivateData
@@ -48,16 +50,8 @@ public:
 };
 
 //! Sets alignment to Qt::AlignCenter, and style to QwtPlotMarker::NoLine
-QwtPlotMarker::QwtPlotMarker( const QString &title ):
-    QwtPlotItem( QwtText( title ) )
-{
-    d_data = new PrivateData;
-    setZ( 30.0 );
-}
-
-//! Sets alignment to Qt::AlignCenter, and style to QwtPlotMarker::NoLine
-QwtPlotMarker::QwtPlotMarker( const QwtText &title ):
-    QwtPlotItem( title )
+QwtPlotMarker::QwtPlotMarker():
+    QwtPlotItem( QwtText( "Marker" ) )
 {
     d_data = new PrivateData;
     setZ( 30.0 );
@@ -345,8 +339,6 @@ void QwtPlotMarker::setLineStyle( LineStyle style )
     if ( style != d_data->style )
     {
         d_data->style = style;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -371,11 +363,6 @@ void QwtPlotMarker::setSymbol( const QwtSymbol *symbol )
     {
         delete d_data->symbol;
         d_data->symbol = symbol;
-
-        if ( symbol )
-            setLegendIconSize( symbol->boundingRect().size() );
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -513,8 +500,6 @@ void QwtPlotMarker::setLinePen( const QPen &pen )
     if ( pen != d_data->pen )
     {
         d_data->pen = pen;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -534,59 +519,90 @@ QRectF QwtPlotMarker::boundingRect() const
 }
 
 /*!
-   \return Icon representing the marker on the legend
+   \brief Update the widget that represents the item on the legend
 
-   \param index Index of the legend entry 
-                ( usually there is only one )
-   \param size Icon size
+   \param legend Legend
+   \sa drawLegendIdentifier(), legendItem(), itemChanged(), QwtLegend()
 
-   \sa setLegendIconSize(), legendData()
+   \note In the default setting QwtPlotItem::Legend is disabled 
 */
-QwtGraphic QwtPlotMarker::legendIcon( int index,
-    const QSizeF &size ) const
+void QwtPlotMarker::updateLegend( QwtLegend *legend ) const
 {
-    Q_UNUSED( index );
+    if ( legend && testItemAttribute( QwtPlotItem::Legend )
+        && d_data->symbol && d_data->symbol->style() != QwtSymbol::NoSymbol )
+    {
+        QWidget *lgdItem = legend->find( this );
+        if ( lgdItem == NULL )
+        {
+            lgdItem = legendItem();
+            if ( lgdItem )
+                legend->insert( this, lgdItem );
+        }
 
-    if ( size.isEmpty() )
-        return QwtGraphic();
+        QwtLegendItem *l = qobject_cast<QwtLegendItem *>( lgdItem );
+        if ( l )
+            l->setIdentifierSize( d_data->symbol->boundingSize() );
+    }
 
-    QwtGraphic icon;
-    icon.setDefaultSize( size );
-    icon.setRenderHint( QwtGraphic::RenderPensUnscaled, true );
+    QwtPlotItem::updateLegend( legend );
+}
 
-    QPainter painter( &icon );
-    painter.setRenderHint( QPainter::Antialiasing,
-        testRenderHint( QwtPlotItem::RenderAntialiased ) );
+/*!
+  \brief Draw the identifier representing the marker on the legend
+
+  \param painter Painter
+  \param rect Bounding rectangle for the identifier
+
+  \sa updateLegend(), QwtPlotItem::Legend
+*/
+void QwtPlotMarker::drawLegendIdentifier(
+    QPainter *painter, const QRectF &rect ) const
+{
+    if ( rect.isEmpty() )
+        return;
+
+    painter->save();
+    painter->setClipRect( rect, Qt::IntersectClip );
 
     if ( d_data->style != QwtPlotMarker::NoLine )
     {
-        painter.setPen( d_data->pen );
+        painter->setPen( d_data->pen );
 
         if ( d_data->style == QwtPlotMarker::HLine ||
             d_data->style == QwtPlotMarker::Cross )
         {
-            const double y = 0.5 * size.height();
-
-            QwtPainter::drawLine( &painter, 
-                0.0, y, size.width(), y );
+            QwtPainter::drawLine( painter, rect.left(), rect.center().y(),
+                rect.right(), rect.center().y() );
         }
 
         if ( d_data->style == QwtPlotMarker::VLine ||
             d_data->style == QwtPlotMarker::Cross )
         {
-            const double x = 0.5 * size.width();
-
-            QwtPainter::drawLine( &painter, 
-                x, 0.0, x, size.height() );
+            QwtPainter::drawLine( painter, rect.center().x(), rect.top(),
+                rect.center().x(), rect.bottom() );
         }
     }
 
-    if ( d_data->symbol )
+    if ( d_data->symbol && d_data->symbol->style() != QwtSymbol::NoSymbol )
     {
-        const QRect r( 0.0, 0.0, size.width(), size.height() );
-        d_data->symbol->drawSymbol( &painter, r );
+        QSize symbolSize = d_data->symbol->boundingSize();
+        symbolSize -= QSize( 2, 2 );
+
+        // scale the symbol size down if it doesn't fit into rect.
+
+        double xRatio = 1.0;
+        if ( rect.width() < symbolSize.width() )
+            xRatio = rect.width() / symbolSize.width();
+        double yRatio = 1.0;
+        if ( rect.height() < symbolSize.height() )
+            yRatio = rect.height() / symbolSize.height();
+
+        const double ratio = qMin( xRatio, yRatio );
+
+        painter->scale( ratio, ratio );
+        d_data->symbol->drawSymbol( painter, rect.center() / ratio );
     }
 
-    return icon;
+    painter->restore();
 }
 

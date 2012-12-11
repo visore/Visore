@@ -54,6 +54,9 @@ public:
     explicit QwtPlotSpectrogram( const QString &title = QString::null );
     virtual ~QwtPlotSpectrogram();
 
+    void setRenderThreadCount( uint numThreads );
+    uint renderThreadCount() const;
+
     void setDisplayMode( DisplayMode, bool on = true );
     bool testDisplayMode( DisplayMode ) const;
 

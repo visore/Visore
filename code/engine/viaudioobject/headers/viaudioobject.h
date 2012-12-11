@@ -3,7 +3,6 @@
 
 #include "vifunctor.h"
 #include "vibuffer.h"
-#include "viaudioobjectpointer.h"
 #include "vielement.h"
 #include "visonginfo.h"
 #include <QMutex>
@@ -21,6 +20,16 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 	signals:
 
 		void finished(); // emitted when all writing to buffers has finished
+
+	private slots:
+
+		/*******************************************************************************************************************
+
+			SLOTS
+
+		*******************************************************************************************************************/
+
+		void checkFinished();
 
 	public:
 

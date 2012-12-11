@@ -52,8 +52,7 @@ class QwtCurveFitter;
 
   \sa QwtPointSeriesData, QwtSymbol, QwtScaleMap
 */
-class QWT_EXPORT QwtPlotCurve: 
-    public QwtPlotSeriesItem, public QwtSeriesStore<QPointF>
+class QWT_EXPORT QwtPlotCurve: public QwtPlotSeriesItem<QPointF>
 {
 public:
     /*!
@@ -135,7 +134,7 @@ public:
         Attributes how to represent the curve on the legend
 
         \sa setLegendAttribute(), testLegendAttribute(),
-            QwtPlotItem::legendData(), legendIcon()
+            drawLegendIdentifier()
      */
 
     enum LegendAttribute
@@ -169,7 +168,7 @@ public:
 
     /*!
         Attributes to modify the drawing algorithm.
-        The default setting enables ClipPolygons | FilterPoints
+        The default setting enables ClipPolygons
 
         \sa setPaintAttribute(), testPaintAttribute()
     */
@@ -183,28 +182,12 @@ public:
         ClipPolygons = 0x01,
 
         /*!
-          Tries to reduce the data that has to be painted, by sorting out
-          duplicates, or paintings outside the visible area. Might have a
-          notable impact on curves with many close points.
-          Only a couple of very basic filtering algos are implemented.
+          Paint the symbol to a QPixmap and paint the pixmap
+          instead rendering the symbol for each point. The flag has
+          no effect, when the curve is not painted to the canvas
+          ( f.e when exporting the plot to a PDF document ).
          */
-        FilterPoints = 0x02,
-
-        /*!
-          Minimize memory usage that is temporarily needed for the 
-          translated points, before they get painted.
-          This might slow down the performance of painting 
-         */
-        MinimizeMemory = 0x04,
-
-        /*!
-          Render the points to a temporary image and paint the image.
-          This is a very special optimization for Dots style, when
-          having a huge amount of points. 
-          With a reasonable number of points QPainter::drawPoints()
-          will be faster.
-         */
-        ImageBuffer = 0x08
+        CacheSymbols = 0x02
     };
 
     //! Paint attributes
@@ -246,13 +229,13 @@ public:
     void setBrush( const QBrush & );
     const QBrush &brush() const;
 
-    void setBaseline( double );
+    void setBaseline( double ref );
     double baseline() const;
 
     void setStyle( CurveStyle style );
     CurveStyle style() const;
 
-    void setSymbol( QwtSymbol * );
+    void setSymbol( const QwtSymbol *s );
     const QwtSymbol *symbol() const;
 
     void setCurveFitter( QwtCurveFitter * );
@@ -262,33 +245,34 @@ public:
         const QwtScaleMap &xMap, const QwtScaleMap &yMap,
         const QRectF &canvasRect, int from, int to ) const;
 
-    virtual QwtGraphic legendIcon( int index, const QSizeF & ) const;
+    virtual void updateLegend( QwtLegend * ) const;
+    virtual void drawLegendIdentifier( QPainter *, const QRectF & ) const;
 
 protected:
 
     void init();
 
-    virtual void drawCurve( QPainter *p, int style,
+    virtual void drawCurve( QPainter *, int style,
         const QwtScaleMap &xMap, const QwtScaleMap &yMap,
         const QRectF &canvasRect, int from, int to ) const;
 
-    virtual void drawSymbols( QPainter *p, const QwtSymbol &,
+    virtual void drawSymbols( QPainter *, const QwtSymbol &,
         const QwtScaleMap &xMap, const QwtScaleMap &yMap,
         const QRectF &canvasRect, int from, int to ) const;
 
-    void drawLines( QPainter *p,
+    void drawLines( QPainter *,
         const QwtScaleMap &xMap, const QwtScaleMap &yMap,
         const QRectF &canvasRect, int from, int to ) const;
 
-    void drawSticks( QPainter *p,
+    void drawSticks( QPainter *,
         const QwtScaleMap &xMap, const QwtScaleMap &yMap,
         const QRectF &canvasRect, int from, int to ) const;
 
-    void drawDots( QPainter *p,
+    void drawDots( QPainter *,
         const QwtScaleMap &xMap, const QwtScaleMap &yMap,
         const QRectF &canvasRect, int from, int to ) const;
 
-    void drawSteps( QPainter *p,
+    void drawSteps( QPainter *,
         const QwtScaleMap &xMap, const QwtScaleMap &yMap,
         const QRectF &canvasRect, int from, int to ) const;
 

@@ -12,8 +12,8 @@ ViAudioObjectQueue::~ViAudioObjectQueue()
 
 void ViAudioObjectQueue::enqueue(ViAudioObjectPointer object)
 {
-	object.setUnusedLimit(1);
-	object.setDeleter(this);
+	//object.setUnusedLimit(1);
+	//object.setDeleter(this);
 	QObject::connect(object.data(), SIGNAL(finished()), this, SLOT(finish()), Qt::UniqueConnection);
 	mQueue.enqueue(object);
 	emit enqueued(object);

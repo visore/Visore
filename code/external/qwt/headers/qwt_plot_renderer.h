@@ -55,11 +55,7 @@ public:
         DiscardLegend           = 0x04,
 
         //! Don't render the background of the canvas
-        DiscardCanvasBackground = 0x08,
-
-        //! Don't render the footer of the plot
-        DiscardFooter           = 0x10
-
+        DiscardCanvasBackground = 0x08
     };
 
     //! Disard flags
@@ -74,7 +70,10 @@ public:
         //! Use the default layout without margins and frames
         DefaultLayout   = 0x00,
 
-        //! Render all frames of the plot
+        /*! 
+          Render all frames of the plot
+          \note Not supported yet
+         */
         KeepFrames      = 0x01,
 
         /*!
@@ -106,7 +105,7 @@ public:
         const QSizeF &sizeMM, int resolution = 85 );
 
     void renderDocument( QwtPlot *,
-        const QString &title, const QString &fileName,
+        const QString &fileName, const QString &format,
         const QSizeF &sizeMM, int resolution = 85 );
 
 #ifndef QWT_NO_SVG
@@ -126,10 +125,10 @@ public:
     virtual void render( QwtPlot *,
         QPainter *, const QRectF &rect ) const;
 
-    virtual void renderTitle( const QwtPlot *,
-        QPainter *, const QRectF & ) const;
+    virtual void renderLegendItem( const QwtPlot *, 
+        QPainter *, const QWidget *, const QRectF & ) const;
 
-    virtual void renderFooter( const QwtPlot *,
+    virtual void renderTitle( const QwtPlot *,
         QPainter *, const QRectF & ) const;
 
     virtual void renderScale( const QwtPlot *, QPainter *,
@@ -143,14 +142,9 @@ public:
     virtual void renderLegend( 
         const QwtPlot *, QPainter *, const QRectF & ) const;
 
-    bool exportTo( QwtPlot *, const QString &documentName );
-
 protected:
     void buildCanvasMaps( const QwtPlot *,
         const QRectF &, QwtScaleMap maps[] ) const;
-
-    bool updateCanvasMargins( QwtPlot *,
-        const QRectF &, const QwtScaleMap maps[] ) const;
 
 private:
     class PrivateData;

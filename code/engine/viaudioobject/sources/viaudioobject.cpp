@@ -73,6 +73,20 @@ void ViAudioObject::setOutputType(ViAudioObject::Type type)
 
 /*******************************************************************************************************************
 
+	SLOTS
+
+*******************************************************************************************************************/
+
+void ViAudioObject::checkFinished()
+{
+	if(!isUsed(QIODevice::WriteOnly))
+	{
+		emit finished();
+	}
+}
+
+/*******************************************************************************************************************
+
 	BUFFERS
 
 *******************************************************************************************************************/
@@ -83,7 +97,7 @@ ViBuffer* ViAudioObject::targetBuffer()
 	if(mTargetBuffer == NULL)
 	{
 		mTargetBuffer = new ViBuffer();
-		QObject::connect(mTargetBuffer, SIGNAL(unused()), this, SIGNAL(finished()));
+		QObject::connect(mTargetBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 	}
 	return mTargetBuffer;
 }
@@ -94,7 +108,7 @@ ViBuffer* ViAudioObject::corruptedBuffer()
 	if(mCorruptedBuffer == NULL)
 	{
 		mCorruptedBuffer = new ViBuffer();
-		QObject::connect(mCorruptedBuffer, SIGNAL(unused()), this, SIGNAL(finished()));
+		QObject::connect(mCorruptedBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 	}
 	return mCorruptedBuffer;
 }
@@ -105,7 +119,7 @@ ViBuffer* ViAudioObject::correctedBuffer()
 	if(mCorrectedBuffer == NULL)
 	{
 		mCorrectedBuffer = new ViBuffer();
-		QObject::connect(mCorrectedBuffer, SIGNAL(unused()), this, SIGNAL(finished()));
+		QObject::connect(mCorrectedBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 	}
 	return mCorrectedBuffer;
 }
@@ -116,7 +130,7 @@ ViBuffer* ViAudioObject::tempBuffer()
 	if(mTempBuffer == NULL)
 	{
 		mTempBuffer = new ViBuffer();
-		QObject::connect(mTempBuffer, SIGNAL(unused()), this, SIGNAL(finished()));
+		QObject::connect(mTempBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 	}
 	return mTempBuffer;
 }
@@ -194,7 +208,7 @@ void ViAudioObject::clearTargetBuffer()
 	QMutexLocker locker(&mMutex);
 	if(mTargetBuffer != NULL)
 	{
-		QObject::disconnect(mTargetBuffer, SIGNAL(unused()), this, SIGNAL(finished()));
+		QObject::disconnect(mTargetBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 		delete mTargetBuffer;
 		mTargetBuffer = NULL;
 	}
@@ -205,7 +219,7 @@ void ViAudioObject::clearCorruptedBuffer()
 	QMutexLocker locker(&mMutex);
 	if(mCorruptedBuffer != NULL)
 	{
-		QObject::disconnect(mCorruptedBuffer, SIGNAL(unused()), this, SIGNAL(finished()));
+		QObject::disconnect(mCorruptedBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 		delete mCorruptedBuffer;
 		mCorruptedBuffer = NULL;
 	}
@@ -216,7 +230,7 @@ void ViAudioObject::clearCorrectedBuffer()
 	QMutexLocker locker(&mMutex);
 	if(mCorrectedBuffer != NULL)
 	{
-		QObject::disconnect(mCorrectedBuffer, SIGNAL(unused()), this, SIGNAL(finished()));
+		QObject::disconnect(mCorrectedBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 		delete mCorrectedBuffer;
 		mCorrectedBuffer = NULL;
 	}
@@ -227,7 +241,7 @@ void ViAudioObject::clearTempBuffer()
 	QMutexLocker locker(&mMutex);
 	if(mTempBuffer != NULL)
 	{
-		QObject::disconnect(mTempBuffer, SIGNAL(unused()), this, SIGNAL(finished()));
+		QObject::disconnect(mTempBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 		delete mTempBuffer;
 		mTempBuffer = NULL;
 	}

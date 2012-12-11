@@ -8,33 +8,8 @@
  *****************************************************************************/
 
 #include "qwt_analog_clock.h"
-#include "qwt_round_scale_draw.h"
 #include <qmath.h>
-
-class QwtAnalogClockScaleDraw: public QwtRoundScaleDraw
-{
-public:
-    QwtAnalogClockScaleDraw()
-    {
-        setSpacing( 8 );
-
-        enableComponent( QwtAbstractScaleDraw::Backbone, false );
-
-        setTickLength( QwtScaleDiv::MinorTick, 2 );
-        setTickLength( QwtScaleDiv::MediumTick, 4 );
-        setTickLength( QwtScaleDiv::MajorTick, 8 );
-
-        setPenWidth( 1 );
-    }
-
-    virtual QwtText label( double value ) const
-    {
-        if ( qFuzzyCompare( value + 1.0, 1.0 ) )
-            value = 60.0 * 60.0 * 12.0;
-
-        return QLocale().toString( qRound( value / ( 60.0 * 60.0 ) ) );
-    }
-};
+#include <qlocale.h>
 
 /*!
   Constructor
@@ -43,32 +18,22 @@ public:
 QwtAnalogClock::QwtAnalogClock( QWidget *parent ):
     QwtDial( parent )
 {
+    initClock();
+}
+
+void QwtAnalogClock::initClock()
+{
     setWrapping( true );
     setReadOnly( true );
 
     setOrigin( 270.0 );
-    setScaleDraw( new QwtAnalogClockScaleDraw() );
+    setRange( 0.0, 60.0 * 60.0 * 12.0 ); // seconds
+    setScale( -1, 5, 60.0 * 60.0 );
 
-    const int secondsPerHour = 60.0 * 60.0; 
-
-    QList<double> majorTicks;
-    QList<double> minorTicks;
-
-    for ( int i = 0; i < 12; i++ )
-    {
-        majorTicks += i * secondsPerHour;
-
-        for ( int j = 1; j < 5; j++ )
-            minorTicks += i * secondsPerHour + j * secondsPerHour / 5.0;
-    }
-
-    QwtScaleDiv scaleDiv;
-    scaleDiv.setInterval( 0.0, 12.0 * secondsPerHour );
-    scaleDiv.setTicks( QwtScaleDiv::MajorTick, majorTicks );
-    scaleDiv.setTicks( QwtScaleDiv::MinorTick, minorTicks );
-    setScale( scaleDiv );
-
-    setRange( 0.0, 12.0 * secondsPerHour ); // seconds
+    setScaleComponents( 
+        QwtAbstractScaleDraw::Ticks | QwtAbstractScaleDraw::Labels );
+    setScaleTicks( 1, 0, 8 );
+    scaleDraw()->setSpacing( 8 );
 
     QColor knobColor = palette().color( QPalette::Active, QPalette::Text );
     knobColor = knobColor.dark( 120 );
@@ -94,7 +59,7 @@ QwtAnalogClock::QwtAnalogClock( QWidget *parent ):
         hand->setWidth( width );
 
         d_hand[i] = NULL;
-        setHand( static_cast<Hand>( i ), hand );
+        setHand( ( Hand )i, hand );
     }
 }
 
@@ -123,7 +88,7 @@ void QwtAnalogClock::setNeedle( QwtDialNeedle * )
 */
 void QwtAnalogClock::setHand( Hand hand, QwtDialNeedle *needle )
 {
-    if ( hand >= 0 || hand < NHands )
+    if ( hand >= 0 && hand < NHands )
     {
         delete d_hand[hand];
         d_hand[hand] = needle;
@@ -180,6 +145,20 @@ void QwtAnalogClock::setTime( const QTime &time )
 }
 
 /*!
+  Find the scale label for a given value
+
+  \param value Value
+  \return Label
+*/
+QwtText QwtAnalogClock::scaleLabel( double value ) const
+{
+    if ( qFuzzyCompare( value + 1.0, 1.0 ) )
+        value = 60.0 * 60.0 * 12.0;
+
+    return QLocale().toString( qRound( value / ( 60.0 * 60.0 ) ) );
+}
+
+/*!
   \brief Draw the needle
 
   A clock has no single needle but three hands instead. drawNeedle
@@ -220,8 +199,7 @@ void QwtAnalogClock::drawNeedle( QPainter *painter, const QPointF &center,
 
             d -= origin();
 
-            drawHand( painter, static_cast<Hand>( hand ), 
-                center, radius, d, colorGroup );
+            drawHand( painter, ( Hand )hand, center, radius, d, colorGroup );
         }
     }
 }

@@ -26,8 +26,6 @@ public:
     int maxMajor;
     int maxMinor;
 
-    bool isValid;
-
     QwtScaleDiv scaleDiv;
     QwtScaleEngine *scaleEngine;
     QwtScaleWidget *scaleWidget;
@@ -55,20 +53,12 @@ void QwtPlot::initAxesData()
     d_axisData[xTop]->scaleWidget->setObjectName( "QwtPlotAxisXTop" );
     d_axisData[xBottom]->scaleWidget->setObjectName( "QwtPlotAxisXBottom" );
 
-#if 1
-    // better find the font sizes from the application font
     QFont fscl( fontInfo().family(), 10 );
     QFont fttl( fontInfo().family(), 12, QFont::Bold );
-#endif
 
     for ( axisId = 0; axisId < axisCnt; axisId++ )
     {
         AxisData &d = *d_axisData[axisId];
-
-        d.scaleEngine = new QwtLinearScaleEngine;
-
-        d.scaleWidget->setTransformation( 
-            d.scaleEngine->transformation() );
 
         d.scaleWidget->setFont( fscl );
         d.scaleWidget->setMargin( 2 );
@@ -86,8 +76,9 @@ void QwtPlot::initAxesData()
         d.maxMinor = 5;
         d.maxMajor = 8;
 
+        d.scaleEngine = new QwtLinearScaleEngine;
 
-        d.isValid = false;
+        d.scaleDiv.invalidate();
     }
 
     d_axisData[yLeft]->isEnabled = true;
@@ -147,10 +138,7 @@ void QwtPlot::setAxisScaleEngine( int axisId, QwtScaleEngine *scaleEngine )
         delete d.scaleEngine;
         d.scaleEngine = scaleEngine;
 
-        d_axisData[axisId]->scaleWidget->setTransformation( 
-            scaleEngine->transformation() );
-
-        d.isValid = false;
+        d.scaleDiv.invalidate();
 
         autoRefresh();
     }
@@ -246,7 +234,7 @@ int QwtPlot::axisMaxMinor( int axisId ) const
 /*!
   \brief Return the scale division of a specified axis
 
-  axisScaleDiv(axisId).lowerBound(), axisScaleDiv(axisId).upperBound()
+  axisScaleDiv(axisId)->lowerBound(), axisScaleDiv(axisId)->upperBound()
   are the current limits of the axis scale.
 
   \param axisId axis index
@@ -254,9 +242,31 @@ int QwtPlot::axisMaxMinor( int axisId ) const
 
   \sa QwtScaleDiv, setAxisScaleDiv()
 */
-const QwtScaleDiv &QwtPlot::axisScaleDiv( int axisId ) const
+const QwtScaleDiv *QwtPlot::axisScaleDiv( int axisId ) const
 {
-    return d_axisData[axisId]->scaleDiv;
+    if ( !axisValid( axisId ) )
+        return NULL;
+
+    return &d_axisData[axisId]->scaleDiv;
+}
+
+/*!
+  \brief Return the scale division of a specified axis
+
+  axisScaleDiv(axisId)->lowerBound(), axisScaleDiv(axisId)->upperBound()
+  are the current limits of the axis scale.
+
+  \param axisId axis index
+  \return Scale division
+
+  \sa QwtScaleDiv, setAxisScaleDiv()
+*/
+QwtScaleDiv *QwtPlot::axisScaleDiv( int axisId )
+{
+    if ( !axisValid( axisId ) )
+        return NULL;
+
+    return &d_axisData[axisId]->scaleDiv;
 }
 
 /*!
@@ -439,7 +449,7 @@ void QwtPlot::setAxisScale( int axisId, double min, double max, double stepSize 
         AxisData &d = *d_axisData[axisId];
 
         d.doAutoScale = false;
-        d.isValid = false;
+        d.scaleDiv.invalidate();
 
         d.minValue = min;
         d.maxValue = max;
@@ -463,7 +473,6 @@ void QwtPlot::setAxisScaleDiv( int axisId, const QwtScaleDiv &scaleDiv )
 
         d.doAutoScale = false;
         d.scaleDiv = scaleDiv;
-        d.isValid = true;
 
         autoRefresh();
     }
@@ -535,7 +544,7 @@ void QwtPlot::setAxisMaxMinor( int axisId, int maxMinor )
         if ( maxMinor != d.maxMinor )
         {
             d.maxMinor = maxMinor;
-            d.isValid = false;
+            d.scaleDiv.invalidate();
             autoRefresh();
         }
     }
@@ -558,7 +567,7 @@ void QwtPlot::setAxisMaxMajor( int axisId, int maxMajor )
         if ( maxMajor != d.maxMajor )
         {
             d.maxMajor = maxMajor;
-            d.isValid = false;
+            d.scaleDiv.invalidate();
             autoRefresh();
         }
     }
@@ -610,8 +619,12 @@ void QwtPlot::updateAxes()
         if ( axisAutoScale( item->xAxis() ) || axisAutoScale( item->yAxis() ) )
         {
             const QRectF rect = item->boundingRect();
-            intv[item->xAxis()] |= QwtInterval( rect.left(), rect.right() );
-            intv[item->yAxis()] |= QwtInterval( rect.top(), rect.bottom() );
+
+            if ( rect.width() >= 0.0 )
+                intv[item->xAxis()] |= QwtInterval( rect.left(), rect.right() );
+
+            if ( rect.height() >= 0.0 )
+                intv[item->yAxis()] |= QwtInterval( rect.top(), rect.bottom() );
         }
     }
 
@@ -627,7 +640,7 @@ void QwtPlot::updateAxes()
 
         if ( d.doAutoScale && intv[axisId].isValid() )
         {
-            d.isValid = false;
+            d.scaleDiv.invalidate();
 
             minValue = intv[axisId].minValue();
             maxValue = intv[axisId].maxValue();
@@ -635,16 +648,16 @@ void QwtPlot::updateAxes()
             d.scaleEngine->autoScale( d.maxMajor,
                 minValue, maxValue, stepSize );
         }
-        if ( !d.isValid )
+        if ( !d.scaleDiv.isValid() )
         {
             d.scaleDiv = d.scaleEngine->divideScale(
                 minValue, maxValue,
                 d.maxMajor, d.maxMinor, stepSize );
-            d.isValid = true;
         }
 
         QwtScaleWidget *scaleWidget = axisWidget( axisId );
-        scaleWidget->setScaleDiv( d.scaleDiv );
+        scaleWidget->setScaleDiv(
+            d.scaleEngine->transformation(), d.scaleDiv );
 
         int startDist, endDist;
         scaleWidget->getBorderDistHint( startDist, endDist );
@@ -654,11 +667,8 @@ void QwtPlot::updateAxes()
     for ( it = itmList.begin(); it != itmList.end(); ++it )
     {
         QwtPlotItem *item = *it;
-        if ( item->testItemInterest( QwtPlotItem::ScaleInterest ) )
-        {
-            item->updateScaleDiv( axisScaleDiv( item->xAxis() ),
-                axisScaleDiv( item->yAxis() ) );
-        }
+        item->updateScaleDiv( *axisScaleDiv( item->xAxis() ),
+            *axisScaleDiv( item->yAxis() ) );
     }
 }
 

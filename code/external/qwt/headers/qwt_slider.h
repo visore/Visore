@@ -11,6 +11,7 @@
 #define QWT_SLIDER_H
 
 #include "qwt_global.h"
+#include "qwt_abstract_scale.h"
 #include "qwt_abstract_slider.h"
 
 class QwtScaleDraw;
@@ -28,16 +29,12 @@ class QwtScaleDraw;
       of the inherited members.
 */
 
-class QWT_EXPORT QwtSlider: public QwtAbstractSlider
+class QWT_EXPORT QwtSlider : public QwtAbstractSlider, public QwtAbstractScale
 {
     Q_OBJECT
-
-    Q_ENUMS( ScalePosition )
+    Q_ENUMS( ScalePos )
     Q_ENUMS( BackgroundStyle )
-
-    Q_PROPERTY( Qt::Orientation orientation
-                READ orientation WRITE setOrientation )
-    Q_PROPERTY( ScalePosition scalePosition READ scalePosition
+    Q_PROPERTY( ScalePos scalePosition READ scalePosition
         WRITE setScalePosition )
     Q_PROPERTY( BackgroundStyles backgroundStyle 
         READ backgroundStyle WRITE setBackgroundStyle )
@@ -48,20 +45,30 @@ class QWT_EXPORT QwtSlider: public QwtAbstractSlider
 public:
 
     /*!
-      Scale position. 
+      Scale position. QwtSlider tries to enforce valid combinations of its
+      orientation and scale position:
 
-      \sa QwtSlider(), setOrientation()
+      - Qt::Horizonal combines with NoScale, TopScale and BottomScale
+      - Qt::Vertical combines with NoScale, LeftScale and RightScale
+
+      \sa QwtSlider()
      */
-    enum ScalePosition
+    enum ScalePos
     {
         //! The slider has no scale
         NoScale,
 
-        //! The scale is right of a vertical or below a horizontal slider
-        LeadingScale,
+        //! The scale is left of the slider
+        LeftScale,
 
-        //! The scale is left of a vertical or above a horizontal slider
-        TrailingScale
+        //! The scale is right of the slider
+        RightScale,
+
+        //! The scale is above of the slider
+        TopScale,
+
+        //! The scale is below of the slider
+        BottomScale
     };
 
     /*!
@@ -82,19 +89,19 @@ public:
 
     explicit QwtSlider( QWidget *parent,
         Qt::Orientation = Qt::Horizontal,
-        ScalePosition = NoScale, BackgroundStyles = Trough );
+        ScalePos = NoScale, BackgroundStyles = Trough );
 
     virtual ~QwtSlider();
 
-    void setOrientation( Qt::Orientation );
-    Qt::Orientation orientation() const;
-
-    void setScalePosition( ScalePosition );
-    ScalePosition scalePosition() const;
+    virtual void setOrientation( Qt::Orientation );
 
     void setBackgroundStyle( BackgroundStyles );
     BackgroundStyles backgroundStyle() const;
 
+    void setScalePosition( ScalePos s );
+    ScalePos scalePosition() const;
+
+    void setHandleSize( int width, int height );
     void setHandleSize( const QSize & );
     QSize handleSize() const;
 
@@ -110,35 +117,29 @@ public:
     void setScaleDraw( QwtScaleDraw * );
     const QwtScaleDraw *scaleDraw() const;
 
-    void setUpdateInterval( int );
-    int updateInterval() const;
-
 protected:
-    virtual double valueAt( const QPoint & );
-    virtual bool isScrollPosition( const QPoint & ) const;
+    virtual double getValue( const QPoint &p );
+    virtual void getScrollMode( const QPoint &p,
+        QwtAbstractSlider::ScrollMode &, int &direction ) const;
 
     virtual void drawSlider ( QPainter *, const QRect & ) const;
     virtual void drawHandle( QPainter *, const QRect &, int pos ) const;
 
-    virtual void mousePressEvent( QMouseEvent * );
-    virtual void mouseReleaseEvent( QMouseEvent * );
-    virtual void keyPressEvent( QKeyEvent * );
-    virtual void wheelEvent( QWheelEvent * );
     virtual void resizeEvent( QResizeEvent * );
     virtual void paintEvent ( QPaintEvent * );
     virtual void changeEvent( QEvent * );
-    virtual void timerEvent( QTimerEvent * );
 
+    virtual void valueChange();
     virtual void rangeChange();
     virtual void scaleChange();
 
-    QRect sliderRect() const;
-    QRect handleRect() const;
+    int transform( double v ) const;
 
-private:
     QwtScaleDraw *scaleDraw();
 
+private:
     void layoutSlider( bool );
+    void initSlider( Qt::Orientation, ScalePos, BackgroundStyles );
 
     class PrivateData;
     PrivateData *d_data;

@@ -11,7 +11,6 @@
 #define QWT_ABSTRACT_SCALE_H
 
 #include "qwt_global.h"
-#include <qwidget.h>
 
 class QwtScaleEngine;
 class QwtAbstractScaleDraw;
@@ -27,20 +26,15 @@ class QwtInterval;
   or calculated by a QwtScaleEngine.
 */
 
-class QWT_EXPORT QwtAbstractScale: public QWidget
+class QWT_EXPORT QwtAbstractScale
 {
-    Q_OBJECT
-
 public:
-    QwtAbstractScale( QWidget *parent = NULL );
+    QwtAbstractScale();
     virtual ~QwtAbstractScale();
 
     void setScale( double vmin, double vmax, double step = 0.0 );
     void setScale( const QwtInterval &, double step = 0.0 );
     void setScale( const QwtScaleDiv & );
-
-    double scaleStepSize() const;
-    const QwtScaleDiv& scaleDiv() const;
 
     void setAutoScale();
     bool autoScale() const;

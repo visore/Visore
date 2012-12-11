@@ -10,8 +10,8 @@ ViCorrelationWidget::ViCorrelationWidget(QWidget *parent)
 	mWasInitialized = false;
 
 	mUi->tableWidget->setRowCount(2);
-	mUi->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-	mUi->tableWidget->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+	mUi->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	mUi->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	
 	mUi->tableWidget->setItem(0, 0, new QTableWidgetItem("Sample correlator"));
 	mUi->tableWidget->setItem(0, 1, new QTableWidgetItem("-"));

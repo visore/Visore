@@ -69,8 +69,7 @@ public:
     explicit QwtAnalogClock( QWidget* parent = NULL );
     virtual ~QwtAnalogClock();
 
-    void setHand( Hand, QwtDialNeedle * );
-
+    virtual void setHand( Hand, QwtDialNeedle * );
     const QwtDialNeedle *hand( Hand ) const;
     QwtDialNeedle *hand( Hand );
 
@@ -79,6 +78,8 @@ public Q_SLOTS:
     void setTime( const QTime & = QTime::currentTime() );
 
 protected:
+    virtual QwtText scaleLabel( double ) const;
+
     virtual void drawNeedle( QPainter *, const QPointF &,
         double radius, double direction, QPalette::ColorGroup ) const;
 
@@ -86,8 +87,8 @@ protected:
         double radius, double direction, QPalette::ColorGroup ) const;
 
 private:
-    // use setHand instead
-    void setNeedle( QwtDialNeedle * );
+    virtual void setNeedle( QwtDialNeedle * );
+    void initClock();
 
     QwtDialNeedle *d_hand[NHands];
 };

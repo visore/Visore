@@ -23,6 +23,7 @@
 #define _USE_MATH_DEFINES 1
 #endif
 
+#include <qpoint.h>
 #include <qmath.h>
 #include "qwt_global.h"
 
@@ -160,37 +161,22 @@ inline double qwtSqr( double x )
     return x * x;
 }
 
-//! Approximation of arc tangent ( error below 0,005 radians )
-inline double qwtFastAtan( double x )
-{
-    if ( x < -1.0 )
-        return -M_PI_2 - x / ( x * x + 0.28 );
-
-    if ( x > 1.0 )
-        return M_PI_2 - x / ( x * x + 0.28 );
-
-    return x / ( 1.0 + x * x * 0.28 );
+//! Like qRound, but without converting the result to an int
+inline double qwtRoundF(double d)
+{ 
+    return ::floor( d + 0.5 );
 }
 
-//! Approximation of arc tangent ( error below 0,005 radians )
-inline double qwtFastAtan2( double y, double x )
-{
-    if ( x > 0 )
-        return qwtFastAtan( y / x );
+//! Like qFloor, but without converting the result to an int
+inline double qwtFloorF(double d)
+{ 
+    return ::floor( d );
+}
 
-    if ( x < 0 )
-    {
-        const double d = qwtFastAtan( y / x );
-        return ( y >= 0 ) ? d + M_PI : d - M_PI;
-    }
-
-    if ( y < 0.0 )
-        return -M_PI_2;
-
-    if ( y > 0.0 )
-        return M_PI_2;
-
-    return 0.0;
+//! Like qCeil, but without converting the result to an int
+inline double qwtCeilF(double d)
+{ 
+    return ::ceil( d );
 }
 
 #endif

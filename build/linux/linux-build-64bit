@@ -7,7 +7,7 @@ code_directory="$current_directory"/../../code
 build_directory="$current_directory"/../../../build
 install_directory="$current_directory"/../../../install/usr/local/visore
 
-export PATH=$PATH:"$code_directory"/external/bass/libraries/64bit:"$code_directory"/external/enmfp/libraries/64bit
+export PATH=$PATH:"$code_directory"/external/enmfp/libraries/64bit
 
 cmake=false;
 build=false;
@@ -64,9 +64,9 @@ if $gdb; then
 	cd $install_directory
 	cp ./*/*.so .
 	cp ./*/*/*.so .
-	cp /home/visore/Project/External/Qt5/qt5/qtbase/lib/*.so* .
-	cp /home/visore/Project/External/Qt5/qt5/qtmultimedia/lib/*.so* .
-	cp /home/visore/Project/External/Qt5/qt5/qtsvg/lib/*.so* .
+	cp /home/visore/Project/External/Qt5/qt5beta2/qtbase/lib/*.so* .
+	cp /home/visore/Project/External/Qt5/qt5beta2/qtmultimedia/lib/*.so* .
+	cp /home/visore/Project/External/Qt5/qt5beta2/qtsvg/lib/*.so* .
 	LD_LIBRARY_PATH=/home/visore/Project/Visore/GitHub/install/usr/local/visore
 	export LD_LIBRARY_PATH
 	ulimit -c unlimited

@@ -13,9 +13,8 @@
 #include "qwt_global.h"
 #include "qwt_interval.h"
 #include <qlist.h>
-#ifndef QT_NO_DEBUG_STREAM
-#include <qdebug.h>
-#endif
+
+class QwtInterval;
 
 /*!
   \brief A class representing a scale division
@@ -71,8 +70,8 @@ public:
     void setTicks( int type, const QList<double> & );
     const QList<double> &ticks( int type ) const;
 
-    bool isEmpty() const;
-    bool isIncreasing() const;
+    void invalidate();
+    bool isValid() const;
 
     void invert();
 
@@ -80,13 +79,11 @@ private:
     double d_lowerBound;
     double d_upperBound;
     QList<double> d_ticks[NTickTypes];
+
+    bool d_isValid;
 };
 
-Q_DECLARE_TYPEINFO( QwtScaleDiv, Q_MOVABLE_TYPE );
-
-#ifndef QT_NO_DEBUG_STREAM
-QWT_EXPORT QDebug operator<<( QDebug, const QwtScaleDiv & );
-#endif
+Q_DECLARE_TYPEINFO(QwtScaleDiv, Q_MOVABLE_TYPE);
 
 /*!
    Change the interval
@@ -132,5 +129,4 @@ inline double QwtScaleDiv::range() const
 {
     return d_upperBound - d_lowerBound;
 }
-
 #endif

@@ -1,7 +1,7 @@
 #include <vicodingchain.h>
 #include <viaudiomanager.h>
 #include <QFile>
-
+#include"vilogger.h"
 ViCodingChain::ViCodingChain()
 	: QThread()
 {
@@ -270,7 +270,7 @@ void ViCodingChain::run()
 		if(mError != ViCoder::NoError) return;
 	}
 	if(mMode != ViCodingChain::DecodeFile && mMode != ViCodingChain::DecodeData)
-	{
+	{LOG("jjj: "+QString::number(mError));
 		mEncoder.setCoder(mOutputCoder);
 		mOutputCoder->load();
 		if(mError != ViCoder::NoError) return;

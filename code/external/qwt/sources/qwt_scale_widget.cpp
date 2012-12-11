@@ -212,7 +212,6 @@ void QwtScaleWidget::setAlignment( QwtScaleDraw::Alignment alignment )
             policy.transpose();
 
         setSizePolicy( policy );
-
         setAttribute( Qt::WA_WState_OwnSizePolicy, false );
     }
 
@@ -306,35 +305,22 @@ void QwtScaleWidget::setLabelRotation( double rotation )
 
 /*!
   Set a scale draw
-
-  scaleDraw has to be created with new and will be deleted in
+  sd has to be created with new and will be deleted in
   ~QwtScaleWidget() or the next call of setScaleDraw().
-  scaleDraw will be initialized with the attributes of
-  the previous scaleDraw object.
 
   \param sd ScaleDraw object
   \sa scaleDraw()
 */
-void QwtScaleWidget::setScaleDraw( QwtScaleDraw *scaleDraw )
+void QwtScaleWidget::setScaleDraw( QwtScaleDraw *sd )
 {
-    if ( ( scaleDraw == NULL ) || ( scaleDraw == d_data->scaleDraw ) )
+    if ( sd == NULL || sd == d_data->scaleDraw )
         return;
 
-    const QwtScaleDraw* sd = d_data->scaleDraw;
-    if ( sd )
-    {
-        scaleDraw->setAlignment( sd->alignment() );
-        scaleDraw->setScaleDiv( sd->scaleDiv() );
-
-        QwtTransform *transform = NULL;
-        if ( sd->scaleMap().transformation() )
-            transform = sd->scaleMap().transformation()->copy();
-
-        scaleDraw->setTransformation( transform );
-    }
+    if ( d_data->scaleDraw )
+        sd->setAlignment( d_data->scaleDraw->alignment() );
 
     delete d_data->scaleDraw;
-    d_data->scaleDraw = scaleDraw;
+    d_data->scaleDraw = sd;
 
     layoutScale();
 }
@@ -811,25 +797,35 @@ void QwtScaleWidget::getMinBorderDist( int &start, int &end ) const
 
   The scale division determines where to set the tick marks.
 
+  \param transformation Transformation, needed to translate between
+                        scale and pixal values
   \param scaleDiv Scale Division
   \sa For more information about scale divisions, see QwtScaleDiv.
 */
-void QwtScaleWidget::setScaleDiv( const QwtScaleDiv &scaleDiv )
+void QwtScaleWidget::setScaleDiv(
+    QwtScaleTransformation *transformation,
+    const QwtScaleDiv &scaleDiv )
 {
     QwtScaleDraw *sd = d_data->scaleDraw;
-    if ( sd->scaleDiv() != scaleDiv )
+    if ( sd->scaleDiv() != scaleDiv ||
+        sd->scaleMap().transformation()->type() != transformation->type() )
     {
+        sd->setTransformation( transformation );
         sd->setScaleDiv( scaleDiv );
         layoutScale();
 
         Q_EMIT scaleDivChanged();
     }
-}
+    else
+    {
+        /*
+          The transformation doesn't anything different as the 
+          previous one. So we better throw it silently away instead of 
+          initiating heavy updates
+         */
 
-void QwtScaleWidget::setTransformation( QwtTransform *transformation )
-{
-    d_data->scaleDraw->setTransformation( transformation );
-    layoutScale();
+        delete transformation;
+    }
 }
 
 /*!

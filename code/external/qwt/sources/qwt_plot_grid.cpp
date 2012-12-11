@@ -44,8 +44,6 @@ QwtPlotGrid::QwtPlotGrid():
     QwtPlotItem( QwtText( "Grid" ) )
 {
     d_data = new PrivateData;
-
-    setItemInterest( QwtPlotItem::ScaleInterest, true );
     setZ( 10.0 );
 }
 
@@ -73,8 +71,6 @@ void QwtPlotGrid::enableX( bool tf )
     if ( d_data->xEnabled != tf )
     {
         d_data->xEnabled = tf;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -89,8 +85,6 @@ void QwtPlotGrid::enableY( bool tf )
     if ( d_data->yEnabled != tf )
     {
         d_data->yEnabled = tf;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -105,8 +99,6 @@ void QwtPlotGrid::enableXMin( bool tf )
     if ( d_data->xMinEnabled != tf )
     {
         d_data->xMinEnabled = tf;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -121,8 +113,6 @@ void QwtPlotGrid::enableYMin( bool tf )
     if ( d_data->yMinEnabled != tf )
     {
         d_data->yMinEnabled = tf;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -167,8 +157,6 @@ void QwtPlotGrid::setPen( const QPen &pen )
     {
         d_data->majPen = pen;
         d_data->minPen = pen;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -184,8 +172,6 @@ void QwtPlotGrid::setMajPen( const QPen &pen )
     if ( d_data->majPen != pen )
     {
         d_data->majPen = pen;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -201,8 +187,6 @@ void QwtPlotGrid::setMinPen( const QPen &pen )
     if ( d_data->minPen != pen )
     {
         d_data->minPen = pen;
-
-        legendChanged();
         itemChanged();
     }
 }

@@ -16,7 +16,6 @@ ViSectionHandler::ViSectionHandler(ViProcessingChain *chain)
 	mWasSongRunning = false;
 	QObject::connect(mChain, SIGNAL(attached(ViProcessor*)), this, SLOT(setDetector(ViProcessor*)));
 
-	mAcceptFinish = false;
 	mPlayAutomatically = true;
 	mIsPlaying = false;
 	QObject::connect(mChain, SIGNAL(inputChanged()), this, SLOT(startInput()));
@@ -56,6 +55,7 @@ void ViSectionHandler::endRecord()
 {
 	emit recordEnded();
 	endInput();
+	startInput();
 }
 
 void ViSectionHandler::startSong()
@@ -69,9 +69,8 @@ void ViSectionHandler::startSong()
 
 void ViSectionHandler::endSong()
 {
-	endInput();
+	endInput();LOG("kkk: "+QString::number(mChain->audioObject()->isUsed()));
 	startInput();
-	mAcceptFinish = true;
 	while(!executor()->isFinished());
 	mIsSongRunning = false;
 	mWasSongRunning = true;
@@ -79,7 +78,7 @@ void ViSectionHandler::endSong()
 }
 
 void ViSectionHandler::startInput(bool isSong)
-{
+{LOG("start1");
 	ViAudioObjectPointer object = ViAudioObject::create();
 	object->setType(ViAudioObject::Temp, ViAudioObject::Target);
 	if(isSong)
@@ -96,13 +95,11 @@ void ViSectionHandler::startInput(bool isSong)
 	input()->setBuffer(object->inputBuffer());
 	executor()->setObject(object);
 	executor()->initialize();
-	input()->start();
+LOG("start2");
 }
 
 void ViSectionHandler::endInput()
 {
-	input()->stop();
-	input()->clear();
 	mIdleTimer.stop();
 	executor()->finalize();
 	mNoSongObjects.clear();

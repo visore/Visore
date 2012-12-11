@@ -14,7 +14,7 @@
 #include "qwt_scale_div.h"
 #include "qwt_interval.h"
 
-class QwtTransform;
+class QwtScaleTransformation;
 
 /*!
   \brief Arithmetic including a tolerance
@@ -26,6 +26,9 @@ public:
     static double floorEps( double value, double intervalSize );
 
     static double divideEps( double interval, double steps );
+
+    static double ceil125( double x );
+    static double floor125( double x );
 };
 
 /*!
@@ -36,7 +39,9 @@ public:
 
   The layout of the scale can be varied with setAttribute().
 
-  Qwt offers implementations for logarithmic and linear scales. 
+  Qwt offers implementations for logarithmic (log10)
+  and linear scales. Contributions for other types of scale engines
+  (date/time, log2 ... ) are welcome.
 */
 
 class QWT_EXPORT QwtScaleEngine
@@ -75,11 +80,8 @@ public:
     //! Layout attributes
     typedef QFlags<Attribute> Attributes;
 
-    explicit QwtScaleEngine( uint base = 10 );
+    explicit QwtScaleEngine();
     virtual ~QwtScaleEngine();
-
-    void setBase( uint base );
-    uint base() const;
 
     void setAttribute( Attribute, bool on = true );
     bool testAttribute( Attribute ) const;
@@ -110,17 +112,17 @@ public:
 
       \param x1 First interval limit
       \param x2 Second interval limit
-      \param maxMajorSteps Maximum for the number of major steps
-      \param maxMinorSteps Maximum number of minor steps
+      \param maxMajSteps Maximum for the number of major steps
+      \param maxMinSteps Maximum number of minor steps
       \param stepSize Step size. If stepSize == 0.0, the scaleEngine
                    calculates one.
     */
     virtual QwtScaleDiv divideScale( double x1, double x2,
-        int maxMajorSteps, int maxMinorSteps,
+        int maxMajSteps, int maxMinSteps,
         double stepSize = 0.0 ) const = 0;
 
-    void setTransformation( QwtTransform * );
-    QwtTransform *transformation() const;
+    //! \return a transformation
+    virtual QwtScaleTransformation *transformation() const = 0;
 
 protected:
     bool contains( const QwtInterval &, double val ) const;
@@ -144,9 +146,6 @@ private:
 class QWT_EXPORT QwtLinearScaleEngine: public QwtScaleEngine
 {
 public:
-    QwtLinearScaleEngine( uint base = 10 );
-    virtual ~QwtLinearScaleEngine();
-
     virtual void autoScale( int maxSteps,
         double &x1, double &x2, double &stepSize ) const;
 
@@ -154,6 +153,7 @@ public:
         int numMajorSteps, int numMinorSteps,
                                      double stepSize = 0.0 ) const;
 
+    virtual QwtScaleTransformation *transformation() const;
 
 protected:
     QwtInterval align( const QwtInterval&, double stepSize ) const;
@@ -168,12 +168,11 @@ protected:
     void buildMinorTicks(
         const QList<double>& majorTicks,
         int maxMinMark, double step,
-        QList<double> &minorTicks, 
-        QList<double> &mediumTicks ) const;
+        QList<double> &, QList<double> & ) const;
 };
 
 /*!
-  \brief A scale engine for logarithmic scales
+  \brief A scale engine for logarithmic (base 10) scales
 
   The step size is measured in *decades*
   and the major step size will be adjusted to fit the pattern
@@ -183,12 +182,9 @@ protected:
   \warning the step size as well as the margins are measured in *decades*.
 */
 
-class QWT_EXPORT QwtLogScaleEngine: public QwtScaleEngine
+class QWT_EXPORT QwtLog10ScaleEngine: public QwtScaleEngine
 {
 public:
-    QwtLogScaleEngine( uint base = 10 );
-    virtual ~QwtLogScaleEngine();
-
     virtual void autoScale( int maxSteps,
         double &x1, double &x2, double &stepSize ) const;
 
@@ -196,7 +192,12 @@ public:
         int numMajorSteps, int numMinorSteps,
         double stepSize = 0.0 ) const;
 
+    virtual QwtScaleTransformation *transformation() const;
+
 protected:
+    QwtInterval log10( const QwtInterval& ) const;
+    QwtInterval pow10( const QwtInterval& ) const;
+
     QwtInterval align( const QwtInterval&, double stepSize ) const;
 
     void buildTicks(
@@ -206,11 +207,9 @@ protected:
     QList<double> buildMajorTicks(
         const QwtInterval &interval, double stepSize ) const;
 
-    void buildMinorTicks(
+    QList<double> buildMinorTicks(
         const QList<double>& majorTicks,
-        int maxMinMark, double step,
-        QList<double> &minorTicks, 
-        QList<double> &mediumTicks ) const;
+        int maxMinMark, double step ) const;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS( QwtScaleEngine::Attributes )

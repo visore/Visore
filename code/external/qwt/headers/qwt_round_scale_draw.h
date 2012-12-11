@@ -35,8 +35,8 @@ public:
     QwtRoundScaleDraw();
     virtual ~QwtRoundScaleDraw();
 
-    void setRadius( double radius );
-    double radius() const;
+    void setRadius( int radius );
+    int radius() const;
 
     void moveCenter( double x, double y );
     void moveCenter( const QPointF & );

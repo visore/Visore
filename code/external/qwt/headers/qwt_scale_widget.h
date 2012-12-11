@@ -19,7 +19,7 @@
 #include <qstring.h>
 
 class QPainter;
-class QwtTransform;
+class QwtScaleTransformation;
 class QwtScaleDiv;
 class QwtColorMap;
 
@@ -79,8 +79,7 @@ public:
     void setSpacing( int td );
     int spacing() const;
 
-    void setScaleDiv( const QwtScaleDiv &sd );
-    void setTransformation( QwtTransform * );
+    void setScaleDiv( QwtScaleTransformation *, const QwtScaleDiv &sd );
 
     void setScaleDraw( QwtScaleDraw * );
     const QwtScaleDraw *scaleDraw() const;

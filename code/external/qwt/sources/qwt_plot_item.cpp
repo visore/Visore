@@ -10,9 +10,9 @@
 #include "qwt_plot_item.h"
 #include "qwt_text.h"
 #include "qwt_plot.h"
-#include "qwt_legend_data.h"
+#include "qwt_legend.h"
+#include "qwt_legend_item.h"
 #include "qwt_scale_div.h"
-#include "qwt_graphic.h"
 #include <qpainter.h>
 
 class QwtPlotItem::PrivateData
@@ -22,12 +22,10 @@ public:
         plot( NULL ),
         isVisible( true ),
         attributes( 0 ),
-        interests( 0 ),
         renderHints( 0 ),
         z( 0.0 ),
         xAxis( QwtPlot::xBottom ),
-        yAxis( QwtPlot::yLeft ),
-        legendIconSize( 8, 8 )
+        yAxis( QwtPlot::yLeft )
     {
     }
 
@@ -35,7 +33,6 @@ public:
 
     bool isVisible;
     QwtPlotItem::ItemAttributes attributes;
-    QwtPlotItem::ItemInterests interests;
     QwtPlotItem::RenderHints renderHints;
     double z;
 
@@ -43,7 +40,6 @@ public:
     int yAxis;
 
     QwtText title;
-    QSize legendIconSize;
 };
 
 /*!
@@ -79,13 +75,28 @@ void QwtPlotItem::attach( QwtPlot *plot )
     if ( plot == d_data->plot )
         return;
 
+    // remove the item from the previous plot
+
     if ( d_data->plot )
+    {
+        if ( d_data->plot->legend() )
+            d_data->plot->legend()->remove( this );
+
         d_data->plot->attachItem( this, false );
+
+        if ( d_data->plot->autoReplot() )
+            d_data->plot->update();
+    }
 
     d_data->plot = plot;
 
     if ( d_data->plot )
+    {
+        // insert the item into the current plot
+
         d_data->plot->attachItem( this, true );
+        itemChanged();
+    }
 }
 
 /*!
@@ -179,11 +190,7 @@ void QwtPlotItem::setTitle( const QwtText &title )
     if ( d_data->title != title )
     {
         d_data->title = title;
-
-        legendChanged();
-#if 0
         itemChanged();
-#endif
     }
 }
 
@@ -202,19 +209,16 @@ const QwtText &QwtPlotItem::title() const
    \param attribute Attribute type
    \param on true/false
 
-   \sa testItemAttribute(), ItemInterest
+   \sa testItemAttribute(), ItemAttribute
 */
 void QwtPlotItem::setItemAttribute( ItemAttribute attribute, bool on )
 {
-    if ( d_data->attributes.testFlag( attribute ) != on )
+    if ( bool( d_data->attributes & attribute ) != on )
     {
         if ( on )
             d_data->attributes |= attribute;
         else
             d_data->attributes &= ~attribute;
-
-        if ( attribute == QwtPlotItem::Legend )
-            legendChanged();
 
         itemChanged();
     }
@@ -225,44 +229,11 @@ void QwtPlotItem::setItemAttribute( ItemAttribute attribute, bool on )
 
    \param attribute Attribute type
    \return true/false
-   \sa setItemAttribute(), ItemInterest
+   \sa setItemAttribute(), ItemAttribute
 */
 bool QwtPlotItem::testItemAttribute( ItemAttribute attribute ) const
 {
-    return d_data->attributes.testFlag( attribute );
-}
-
-/*!
-   Toggle an item interest
-
-   \param interest Interest type
-   \param on true/false
-
-   \sa testItemInterest(), ItemAttribute
-*/
-void QwtPlotItem::setItemInterest( ItemInterest interest, bool on )
-{
-    if ( d_data->interests.testFlag( interest ) != on )
-    {
-        if ( on )
-            d_data->interests |= interest;
-        else
-            d_data->interests &= ~interest;
-
-        itemChanged();
-    }
-}
-
-/*!
-   Test an item interest
-
-   \param interest Interest type
-   \return true/false
-   \sa setItemInterest(), ItemAttribute
-*/
-bool QwtPlotItem::testItemInterest( ItemInterest interest ) const
-{
-    return d_data->interests.testFlag( interest );
+    return ( d_data->attributes & attribute );
 }
 
 /*!
@@ -275,7 +246,7 @@ bool QwtPlotItem::testItemInterest( ItemInterest interest ) const
 */
 void QwtPlotItem::setRenderHint( RenderHint hint, bool on )
 {
-    if ( d_data->renderHints.testFlag( hint ) != on )
+    if ( ( ( d_data->renderHints & hint ) != 0 ) != on )
     {
         if ( on )
             d_data->renderHints |= hint;
@@ -295,78 +266,8 @@ void QwtPlotItem::setRenderHint( RenderHint hint, bool on )
 */
 bool QwtPlotItem::testRenderHint( RenderHint hint ) const
 {
-    return d_data->renderHints.testFlag( hint );
+    return ( d_data->renderHints & hint );
 }
-
-/*!
-   Set the size of the legend icon
-
-   The default setting is 8x8 pixels
-
-   \param size Size
-   \sa legendIconSize(), legendIcon()
-*/
-void QwtPlotItem::setLegendIconSize( const QSize &size )
-{
-    d_data->legendIconSize = size;
-}
-
-/*!
-   \return Legend icon size
-   \sa setLegendIconSize(), legendIcon()
-*/
-QSize QwtPlotItem::legendIconSize() const
-{
-    return d_data->legendIconSize;
-}
-
-/*!
-   \return Icon representing the item on the legend
-
-   The default implementation returns an invalid icon
-
-   \param index Index of the legend entry 
-                ( usually there is only one )
-   \param size Icon size
-
-   \sa setLegendIconSize(), legendData()
- */
-QwtGraphic QwtPlotItem::legendIcon( 
-    int index, const QSizeF &size ) const
-{
-    Q_UNUSED( index )
-    Q_UNUSED( size )
-
-    return QwtGraphic();
-}
-
-/*!
-   \brief Return a default icon from a brush
-
-   The default icon is a filled rectangle used
-   in several derived classes as legendIcon().
-
-   \param brush Fill brush
-   \param size Icon size
-
-   \return A filled rectangle
- */
-QwtGraphic QwtPlotItem::defaultIcon( 
-    const QBrush &brush, const QSizeF &size ) const
-{   
-    QwtGraphic icon;
-    if ( !size.isEmpty() )
-    {
-        icon.setDefaultSize( size );
-        
-        QRectF r( 0, 0, size.width(), size.height() );
-        
-        QPainter painter( &icon );
-        painter.fillRect( r, brush );
-    }   
-    
-    return icon;
-}   
 
 //! Show the item
 void QwtPlotItem::show()
@@ -408,22 +309,17 @@ bool QwtPlotItem::isVisible() const
    Update the legend and call QwtPlot::autoRefresh for the
    parent plot.
 
-   \sa QwtPlot::legendChanged(), QwtPlot::autoRefresh()
+   \sa updateLegend()
 */
 void QwtPlotItem::itemChanged()
 {
     if ( d_data->plot )
-        d_data->plot->autoRefresh();
-}
+    {
+        if ( d_data->plot->legend() )
+            updateLegend( d_data->plot->legend() );
 
-/*!
-   Update the legend of the parent plot.
-   \sa QwtPlot::updateLegend(), itemChanged()
-*/
-void QwtPlotItem::legendChanged()
-{
-    if ( testItemAttribute( QwtPlotItem::Legend ) && d_data->plot )
-        d_data->plot->updateLegend( this );
+        d_data->plot->autoRefresh();
+    }
 }
 
 /*!
@@ -431,10 +327,10 @@ void QwtPlotItem::legendChanged()
 
    The item will painted according to the coordinates its Axes.
 
-   \param xAxis X Axis
-   \param yAxis Y Axis
+   \param xAxis X Axis ( QwtPlot::xBottom or QwtPlot::xTop )
+   \param yAxis Y Axis ( QwtPlot::yLeft or QwtPlot::yRight )
 
-   \sa setXAxis(), setYAxis(), xAxis(), yAxis()
+   \sa setXAxis(), setYAxis(), xAxis(), yAxis(), QwtPlot::Axis
 */
 void QwtPlotItem::setAxes( int xAxis, int yAxis )
 {
@@ -452,8 +348,8 @@ void QwtPlotItem::setAxes( int xAxis, int yAxis )
 
    The item will painted according to the coordinates its Axes.
 
-   \param axis X Axis
-   \sa setAxes(), setYAxis(), xAxis()
+   \param axis X Axis ( QwtPlot::xBottom or QwtPlot::xTop )
+   \sa setAxes(), setYAxis(), xAxis(), QwtPlot::Axis
 */
 void QwtPlotItem::setXAxis( int axis )
 {
@@ -469,8 +365,8 @@ void QwtPlotItem::setXAxis( int axis )
 
    The item will painted according to the coordinates its Axes.
 
-   \param axis Y Axis
-   \sa setAxes(), setXAxis(), yAxis()
+   \param axis Y Axis ( QwtPlot::yLeft or QwtPlot::yRight )
+   \sa setAxes(), setXAxis(), yAxis(), QwtPlot::Axis
 */
 void QwtPlotItem::setYAxis( int axis )
 {
@@ -495,6 +391,7 @@ int QwtPlotItem::yAxis() const
 
 /*!
    \return An invalid bounding rect: QRectF(1.0, 1.0, -2.0, -2.0)
+   \note A width or height < 0.0 is ignored by the autoscaler
 */
 QRectF QwtPlotItem::boundingRect() const
 {
@@ -502,77 +399,95 @@ QRectF QwtPlotItem::boundingRect() const
 }
 
 /*!
-   \brief Calculate a hint for the canvas margin
+   \brief Allocate the widget that represents the item on the legend
 
-   When the QwtPlotItem::Margins flag is enabled the plot item
-   indicates, that it needs some margins at the borders of the canvas.
-   This is f.e. used by bar charts to reserve space for displaying
-   the bars.
+   The default implementation returns a QwtLegendItem(), but an item 
+   could be represented by any type of widget,
+   by overloading legendItem() and updateLegend().
 
-   The margins are in target device coordinates ( pixels on screen )
-
-   \param xMap Maps x-values into pixel coordinates.
-   \param yMap Maps y-values into pixel coordinates.
-   \param canvasRect Contents rect of the canvas in painter coordinates
-   \param left Returns the left margin
-   \param top Returns the top margin
-   \param right Returns the right margin
-   \param bottom Returns the bottom margin
-
-   \return The default implementation returns 0 for all margins
-
-   \sa QwtPlot::getCanvasMarginsHint(), QwtPlot::updateCanvasMargins()
- */
-void QwtPlotItem::getCanvasMarginHint( const QwtScaleMap &xMap, 
-    const QwtScaleMap &yMap, const QRectF &canvasRect,
-    double &left, double &top, double &right, double &bottom ) const
+   \return QwtLegendItem()
+   \sa updateLegend() QwtLegend()
+*/
+QWidget *QwtPlotItem::legendItem() const
 {
-    Q_UNUSED( xMap );
-    Q_UNUSED( yMap );
-    Q_UNUSED( canvasRect );
-
-    // use QMargins, when we don't need to support Qt < 4.6 anymore
-    left = top = right = bottom = 0.0;
+    QwtLegendItem *item = new QwtLegendItem;
+    if ( d_data->plot )
+    {
+        QObject::connect( item, SIGNAL( clicked() ),
+            d_data->plot, SLOT( legendItemClicked() ) );
+        QObject::connect( item, SIGNAL( checked( bool ) ),
+            d_data->plot, SLOT( legendItemChecked( bool ) ) );
+    }
+    return item;
 }
 
 /*!
-   \brief Return all information, that is needed to represent
-          the item on the legend
+   \brief Update the widget that represents the item on the legend
 
-   Most items are represented by one entry on the legend
-   showing an icon and a text, but f.e. QwtPlotMultiBarChart
-   displays one entry for each bar.
+   updateLegend() is called from itemChanged() to adopt the widget
+   representing the item on the legend to its new configuration.
 
-   QwtLegendData is basically a list of QVariants that makes it
-   possible to overload and reimplement legendData() to 
-   return almost any type of information, that is understood
-   by the receiver that acts as the legend.
+   The default implementation updates a QwtLegendItem(), 
+   but an item could be represented by any type of widget,
+   by overloading legendItem() and updateLegend().
 
-   The default implementation returns one entry with 
-   the title() of the item and the legendIcon().
+   \param legend Legend
 
-   \sa title(), legendIcon(), QwtLegend, QwtPlotLegendItem
- */
-QList<QwtLegendData> QwtPlotItem::legendData() const
+   \sa legendItem(), itemChanged(), QwtLegend()
+*/
+void QwtPlotItem::updateLegend( QwtLegend *legend ) const
 {
-    QwtLegendData data;
-            
-    QVariant titleValue;
-    qVariantSetValue( titleValue, title() );
-    data.setValue( QwtLegendData::TitleRole, titleValue );
-        
-    const QwtGraphic graphic = legendIcon( 0, legendIconSize() );
-    if ( !graphic.isNull() )
-    {   
-        QVariant iconValue;
-        qVariantSetValue( iconValue, graphic );
-        data.setValue( QwtLegendData::IconRole, iconValue );
-    }   
-        
-    QList<QwtLegendData> list;
-    list += data;
+    if ( legend == NULL )
+        return;
 
-    return list;
+    QWidget *lgdItem = legend->find( this );
+    if ( testItemAttribute( QwtPlotItem::Legend ) )
+    {
+        if ( lgdItem == NULL )
+        {
+            lgdItem = legendItem();
+            if ( lgdItem )
+                legend->insert( this, lgdItem );
+        }
+
+        QwtLegendItem *label = qobject_cast<QwtLegendItem *>( lgdItem );
+        if ( label )
+        {
+            // paint the identifier
+            const QSize sz = label->identifierSize();
+
+            QPixmap identifier( sz.width(), sz.height() );
+            identifier.fill( Qt::transparent );
+
+            QPainter painter( &identifier );
+            painter.setRenderHint( QPainter::Antialiasing,
+                testRenderHint( QwtPlotItem::RenderAntialiased ) );
+            drawLegendIdentifier( &painter,
+                QRect( 0, 0, sz.width(), sz.height() ) );
+            painter.end();
+
+            const bool doUpdate = label->updatesEnabled();
+            if ( doUpdate )
+                label->setUpdatesEnabled( false );
+
+            label->setText( title() );
+            label->setIdentifier( identifier );
+            label->setItemMode( legend->itemMode() );
+
+            if ( doUpdate )
+                label->setUpdatesEnabled( true );
+
+            label->update();
+        }
+    }
+    else
+    {
+        if ( lgdItem )
+        {
+            lgdItem->hide();
+            lgdItem->deleteLater();
+        }
+    }
 }
 
 /*!
@@ -583,13 +498,10 @@ QList<QwtLegendData> QwtPlotItem::legendData() const
    on the scale division (like QwtPlotGrid()) have to reimplement
    updateScaleDiv()
 
-   updateScaleDiv() is only called when the ScaleInterest interest
-   is enabled. The default implemention does nothing.
-
    \param xScaleDiv Scale division of the x-axis
    \param yScaleDiv Scale division of the y-axis
 
-   \sa QwtPlot::updateAxes(), ScaleInterest
+   \sa QwtPlot::updateAxes()
 */
 void QwtPlotItem::updateScaleDiv( const QwtScaleDiv &xScaleDiv,
     const QwtScaleDiv &yScaleDiv )
@@ -599,33 +511,10 @@ void QwtPlotItem::updateScaleDiv( const QwtScaleDiv &xScaleDiv,
 }
 
 /*!
-   \brief Update the item to changes of the legend info
-
-   Plot items that want to display a legend ( not those, that want to
-   be displayed on a legend ! ) will have to implement updateLegend().
-
-   updateLegend() is only called when the LegendInterest interest
-   is enabled. The default implemention does nothing.
-
-   \param item Plot item to be displayed on a legend
-   \param data Attributes how to display item on the legend
-
-   \note Plot items, that want to be displayed on a legend
-         need to enable the QwtPlotItem::Legend flag and to implement
-         legendData() and legendIcon()
- */
-void QwtPlotItem::updateLegend( const QwtPlotItem *item, 
-    const QList<QwtLegendData> &data )
-{
-    Q_UNUSED( item );
-    Q_UNUSED( data );
-}
-
-/*!
    \brief Calculate the bounding scale rect of 2 maps
 
-   \param xMap Maps x-values into pixel coordinates.
-   \param yMap Maps y-values into pixel coordinates.
+   \param xMap X map
+   \param yMap Y map
 
    \return Bounding scale rect of the scale maps, not normalized
 */
@@ -639,8 +528,8 @@ QRectF QwtPlotItem::scaleRect( const QwtScaleMap &xMap,
 /*!
    \brief Calculate the bounding paint rect of 2 maps
 
-   \param xMap Maps x-values into pixel coordinates.
-   \param yMap Maps y-values into pixel coordinates.
+   \param xMap X map
+   \param yMap Y map
 
    \return Bounding paint rect of the scale maps, not normalized
 */

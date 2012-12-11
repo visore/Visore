@@ -108,7 +108,7 @@ void QwtAbstractScaleDraw::setScaleDiv( const QwtScaleDiv &sd )
   \param transformation New scale transformation
 */
 void QwtAbstractScaleDraw::setTransformation(
-    QwtTransform *transformation )
+    QwtScaleTransformation *transformation )
 {
     d_data->map.setTransformation( transformation );
 }
@@ -184,7 +184,7 @@ void QwtAbstractScaleDraw::draw( QPainter *painter,
         {
             const double v = majorTicks[i];
             if ( d_data->scldiv.contains( v ) )
-                drawLabel( painter, majorTicks[i] );
+                drawLabel( painter, v );
         }
 
         painter->restore();
@@ -365,9 +365,6 @@ double QwtAbstractScaleDraw::maxTickLength() const
 */
 QwtText QwtAbstractScaleDraw::label( double value ) const
 {
-    if ( qFuzzyCompare( value + 1.0, 1.0 ) )
-        value = 0.0; 
-
     return QLocale().toString( value );
 }
 

@@ -39,7 +39,7 @@ ViAudioEngine* ViWidget::engine()
 
 void ViWidget::paintEvent(QPaintEvent *event)
 {
-//if(m!="")cout<<objectName().toAscii().data()<<endl;
+//if(m!="")cout<<objectName().toLatin1().data()<<endl;
 	/*if(mStyleSheet != "")
 	{
 		setStyleSheet("QWidget#" + objectName() + "{" + mStyleSheet + "}\n\n" + styleSheet());

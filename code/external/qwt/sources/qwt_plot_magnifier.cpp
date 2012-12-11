@@ -8,6 +8,7 @@
  *****************************************************************************/
 
 #include "qwt_plot.h"
+#include "qwt_plot_canvas.h"
 #include "qwt_scale_div.h"
 #include "qwt_plot_magnifier.h"
 #include <qevent.h>
@@ -28,7 +29,7 @@ public:
    Constructor
    \param canvas Plot canvas to be magnified
 */
-QwtPlotMagnifier::QwtPlotMagnifier( QWidget *canvas ):
+QwtPlotMagnifier::QwtPlotMagnifier( QwtPlotCanvas *canvas ):
     QwtMagnifier( canvas )
 {
     d_data = new PrivateData();
@@ -74,35 +75,35 @@ bool QwtPlotMagnifier::isAxisEnabled( int axis ) const
 }
 
 //! Return observed plot canvas
-QWidget *QwtPlotMagnifier::canvas()
+QwtPlotCanvas *QwtPlotMagnifier::canvas()
 {
-    return parentWidget();
+    return qobject_cast<QwtPlotCanvas *>( parent() );
 }
 
 //! Return Observed plot canvas
-const QWidget *QwtPlotMagnifier::canvas() const
+const QwtPlotCanvas *QwtPlotMagnifier::canvas() const
 {
-    return parentWidget();
+    return qobject_cast<const QwtPlotCanvas *>( parent() );
 }
 
 //! Return plot widget, containing the observed plot canvas
 QwtPlot *QwtPlotMagnifier::plot()
 {
-    QWidget *w = canvas();
+    QwtPlotCanvas *w = canvas();
     if ( w )
-        w = w->parentWidget();
+        return w->plot();
 
-    return qobject_cast<QwtPlot *>( w );
+    return NULL;
 }
 
 //! Return plot widget, containing the observed plot canvas
 const QwtPlot *QwtPlotMagnifier::plot() const
 {
-    const QWidget *w = canvas();
+    const QwtPlotCanvas *w = canvas();
     if ( w )
-        w = w->parentWidget();
+        return w->plot();
 
-    return qobject_cast<const QwtPlot *>( w );
+    return NULL;
 }
 
 /*!
@@ -111,27 +112,24 @@ const QwtPlot *QwtPlotMagnifier::plot() const
 */
 void QwtPlotMagnifier::rescale( double factor )
 {
-    QwtPlot* plt = plot();
-    if ( plt == NULL )
-        return;
-
     factor = qAbs( factor );
     if ( factor == 1.0 || factor == 0.0 )
         return;
 
     bool doReplot = false;
+    QwtPlot* plt = plot();
 
     const bool autoReplot = plt->autoReplot();
     plt->setAutoReplot( false );
 
     for ( int axisId = 0; axisId < QwtPlot::axisCnt; axisId++ )
     {
-        const QwtScaleDiv &scaleDiv = plt->axisScaleDiv( axisId );
-        if ( isAxisEnabled( axisId ) )
+        const QwtScaleDiv *scaleDiv = plt->axisScaleDiv( axisId );
+        if ( isAxisEnabled( axisId ) && scaleDiv->isValid() )
         {
             const double center =
-                scaleDiv.lowerBound() + scaleDiv.range() / 2;
-            const double width_2 = scaleDiv.range() / 2 * factor;
+                scaleDiv->lowerBound() + scaleDiv->range() / 2;
+            const double width_2 = scaleDiv->range() / 2 * factor;
 
             plt->setAxisScale( axisId, center - width_2, center + width_2 );
             doReplot = true;

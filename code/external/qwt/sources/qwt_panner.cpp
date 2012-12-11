@@ -9,7 +9,6 @@
 
 #include "qwt_panner.h"
 #include "qwt_picker.h"
-#include "qwt_painter.h"
 #include <qpainter.h>
 #include <qpixmap.h>
 #include <qevent.h>
@@ -253,7 +252,7 @@ void QwtPanner::paintEvent( QPaintEvent *pe )
     r.moveCenter( QPoint( r.center().x() + dx, r.center().y() + dy ) );
 
     QPixmap pm( size() );
-    QwtPainter::fillPixmap( parentWidget(), pm );
+    pm.fill( parentWidget(), 0, 0 );
 
     QPainter painter( &pm );
 
@@ -297,11 +296,7 @@ QBitmap QwtPanner::contentsMask() const
 */
 QPixmap QwtPanner::grab() const
 {
-#if QT_VERSION >= 0x050000
-    return parentWidget()->grab( parentWidget()->rect() );
-#else
     return QPixmap::grabWidget( parentWidget() );
-#endif
 }
 
 /*!
@@ -324,27 +319,27 @@ bool QwtPanner::eventFilter( QObject *object, QEvent *event )
     {
         case QEvent::MouseButtonPress:
         {
-            widgetMousePressEvent( static_cast<QMouseEvent *>( event ) );
+            widgetMousePressEvent( ( QMouseEvent * )event );
             break;
         }
         case QEvent::MouseMove:
         {
-            widgetMouseMoveEvent( static_cast<QMouseEvent *>( event ) );
+            widgetMouseMoveEvent( ( QMouseEvent * )event );
             break;
         }
         case QEvent::MouseButtonRelease:
         {
-            widgetMouseReleaseEvent( static_cast<QMouseEvent *>( event ) );
+            widgetMouseReleaseEvent( ( QMouseEvent * )event );
             break;
         }
         case QEvent::KeyPress:
         {
-            widgetKeyPressEvent( static_cast<QKeyEvent *>( event ) );
+            widgetKeyPressEvent( ( QKeyEvent * )event );
             break;
         }
         case QEvent::KeyRelease:
         {
-            widgetKeyReleaseEvent( static_cast<QKeyEvent *>( event ) );
+            widgetKeyReleaseEvent( ( QKeyEvent * )event );
             break;
         }
         case QEvent::Paint:

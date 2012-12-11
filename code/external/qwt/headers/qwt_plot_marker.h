@@ -64,9 +64,7 @@ public:
         Cross
     };
 
-    explicit QwtPlotMarker( const QString &title = QString::null );
-    explicit QwtPlotMarker( const QwtText &title );
-
+    explicit QwtPlotMarker();
     virtual ~QwtPlotMarker();
 
     virtual int rtti() const;
@@ -107,7 +105,8 @@ public:
 
     virtual QRectF boundingRect() const;
 
-    virtual QwtGraphic legendIcon( int index, const QSizeF & ) const;
+    virtual void updateLegend( QwtLegend * ) const;
+    virtual void drawLegendIdentifier( QPainter *, const QRectF & ) const;
 
 protected:
     virtual void drawLines( QPainter *, 

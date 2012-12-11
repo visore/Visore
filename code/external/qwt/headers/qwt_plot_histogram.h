@@ -32,12 +32,9 @@ class QPolygonF;
         terms "image histogram" and "color histogram" to avoid confusions.
         While "image histograms" can be displayed by a QwtPlotCurve there
         is no applicable plot item for a "color histogram" yet.
-
-  \sa QwtPlotBarChart, QwtPlotMultiBarChart
 */
 
-class QWT_EXPORT QwtPlotHistogram: 
-    public QwtPlotSeriesItem, public QwtSeriesStore<QwtIntervalSample>
+class QWT_EXPORT QwtPlotHistogram: public QwtPlotSeriesItem<QwtIntervalSample>
 {
 public:
     /*!
@@ -105,7 +102,7 @@ public:
 
     virtual QRectF boundingRect() const;
 
-    virtual QwtGraphic legendIcon( int index, const QSizeF & ) const;
+    virtual void drawLegendIdentifier( QPainter *, const QRectF & ) const;
 
 protected:
     virtual QwtColumnRect columnRect( const QwtIntervalSample &,

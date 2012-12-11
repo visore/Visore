@@ -221,7 +221,7 @@ bool ViElement::saveToFile(QString fileName)
 	{
 		return false;
 	}
-	file.write(toXml().toAscii());
+	file.write(toXml(). toLatin1());
 	file.close();
 	return true;
 }

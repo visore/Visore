@@ -105,14 +105,24 @@ bool QwtPlotDict::autoDelete() const
     return d_data->autoDelete;
 }
 
-void QwtPlotDict::insertItem( QwtPlotItem *item )
-{
-    d_data->itemList.insertItem( item );
-}
+/*!
+   Attach/Detach a plot item
 
-void QwtPlotDict::removeItem( QwtPlotItem *item )
+   Attached items will be deleted in the destructor,
+   if auto deletion is enabled (default). Manually detached
+   items are not deleted.
+
+   \param item Plot item to attach/detach
+   \ on If true attach, else detach the item
+
+   \sa setAutoDelete(), ~QwtPlotDict()
+*/
+void QwtPlotDict::attachItem( QwtPlotItem *item, bool on )
 {
-    d_data->itemList.removeItem( item );
+    if ( on )
+        d_data->itemList.insertItem( item );
+    else
+        d_data->itemList.removeItem( item );
 }
 
 /*!

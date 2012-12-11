@@ -16,15 +16,15 @@
 #include "qwt_scale_map.h"
 #include "qwt_interval.h"
 #include <qframe.h>
-#include <qlist.h>
 
 class QwtPlotLayout;
-class QwtAbstractLegend;
+class QwtLegend;
 class QwtScaleWidget;
 class QwtScaleEngine;
 class QwtScaleDiv;
 class QwtScaleDraw;
 class QwtTextLabel;
+class QwtPlotCanvas;
 
 /*!
   \brief A 2-D plotting widget
@@ -38,9 +38,6 @@ class QwtTextLabel;
   a y axis. The scales at the axes can be explicitely set (QwtScaleDiv), or
   are calculated from the plot items, using algorithms (QwtScaleEngine) which
   can be configured separately for each axis.
-
-  The simpleplot example is a good starting point to see how to set up a 
-  plot widget.
 
   \image html plot.png
 
@@ -100,6 +97,8 @@ public:
         Position of the legend, relative to the canvas.
 
         \sa insertLegend()
+        \note In case of ExternalLegend, the legend is not
+              handled by QwtPlotRenderer
      */
     enum LegendPosition
     {
@@ -109,11 +108,19 @@ public:
         //! The legend will be right from the QwtPlot::yRight axis.
         RightLegend,
 
-        //! The legend will be below the footer 
+        //! The legend will be below QwtPlot::xBottom axis.
         BottomLegend,
 
-        //! The legend will be above the title
-        TopLegend
+        //! The legend will be between QwtPlot::xTop axis and the title.
+        TopLegend,
+
+        /*!
+          External means that only the content of the legend
+          will be handled by QwtPlot, but not its geometry.
+          This type can be used to have a legend in an 
+          external window ( or on the canvas ).
+         */
+        ExternalLegend
     };
 
     explicit QwtPlot( QWidget * = NULL );
@@ -141,24 +148,16 @@ public:
     QwtTextLabel *titleLabel();
     const QwtTextLabel *titleLabel() const;
 
-    // Footer
-
-    void setFooter( const QString & );
-    void setFooter( const QwtText &t );
-    QwtText footer() const;
-
-    QwtTextLabel *footerLabel();
-    const QwtTextLabel *footerLabel() const;
-
     // Canvas
 
-    void setCanvas( QWidget * );
-
-    QWidget *canvas();
-    const QWidget *canvas() const;
+    QwtPlotCanvas *canvas();
+    const QwtPlotCanvas *canvas() const;
 
     void setCanvasBackground( const QBrush & );
     QBrush canvasBackground() const;
+
+    void setCanvasLineWidth( int w );
+    int canvasLineWidth() const;
 
     virtual QwtScaleMap canvasMap( int axisId ) const;
 
@@ -187,7 +186,8 @@ public:
     double axisStepSize( int axisId ) const;
     QwtInterval axisInterval( int axisId ) const;
 
-    const QwtScaleDiv &axisScaleDiv( int axisId ) const;
+    const QwtScaleDiv *axisScaleDiv( int axisId ) const;
+    QwtScaleDiv *axisScaleDiv( int axisId );
 
     const QwtScaleDraw *axisScaleDraw( int axisId ) const;
     QwtScaleDraw *axisScaleDraw( int axisId );
@@ -210,14 +210,11 @@ public:
 
     // Legend
 
-    void insertLegend( QwtAbstractLegend *, 
-        LegendPosition = QwtPlot::RightLegend, double ratio = -1.0 );
+    void insertLegend( QwtLegend *, LegendPosition = QwtPlot::RightLegend,
+        double ratio = -1.0 );
 
-    QwtAbstractLegend *legend();
-    const QwtAbstractLegend *legend() const;
-
-    void updateLegend();
-    void updateLegend( const QwtPlotItem * );
+    QwtLegend *legend();
+    const QwtLegend *legend() const;
 
     // Misc
 
@@ -228,54 +225,55 @@ public:
     virtual void drawCanvas( QPainter * );
 
     void updateAxes();
-    void updateCanvasMargins();
-
-    virtual void getCanvasMarginsHint( 
-        const QwtScaleMap maps[], const QRectF &canvasRect,
-        double &left, double &top, double &right, double &bottom) const;
 
     virtual bool event( QEvent * );
-    virtual bool eventFilter( QObject *, QEvent * );
 
     virtual void drawItems( QPainter *, const QRectF &,
         const QwtScaleMap maps[axisCnt] ) const;
 
 Q_SIGNALS:
     /*!
-      A signal indicating, that an item has been attached/detached
+      A signal which is emitted when the user has clicked on
+      a legend item, which is in QwtLegend::ClickableItem mode.
 
-      \param plotItem Plot item
-      \param on Attached/Detached
+      \param plotItem Corresponding plot item of the
+                 selected legend item
+
+      \note clicks are disabled as default
+      \sa QwtLegend::setItemMode(), QwtLegend::itemMode()
      */
-    void itemAttached( QwtPlotItem *plotItem, bool on );
+    void legendClicked( QwtPlotItem *plotItem );
 
     /*!
-      A signal with the attributes how to update 
-      the legend entries for a plot item.
+      A signal which is emitted when the user has clicked on
+      a legend item, which is in QwtLegend::CheckableItem mode
 
-      \param plotItem Plot item
-      \param data List of attributes for items on a legend
+      \param plotItem Corresponding plot item of the
+                 selected legend item
+      \param on True when the legen item is checked
+
+      \note clicks are disabled as default
+      \sa QwtLegend::setItemMode(), QwtLegend::itemMode()
      */
-    void legendDataChanged( const QwtPlotItem *plotItem, 
-        const QList<QwtLegendData> &data );
+
+    void legendChecked( QwtPlotItem *plotItem, bool on );
 
 public Q_SLOTS:
     virtual void replot();
     void autoRefresh();
 
+protected Q_SLOTS:
+    virtual void legendItemClicked();
+    virtual void legendItemChecked( bool );
+
 protected:
     static bool axisValid( int axisId );
 
+    virtual void updateTabOrder();
+
     virtual void resizeEvent( QResizeEvent *e );
 
-private Q_SLOTS:
-    void updateLegendItems( const QwtPlotItem *plotItem,
-        const QList<QwtLegendData> &data );
-
 private:
-    friend class QwtPlotItem;
-    void attachItem( QwtPlotItem *, bool );
-
     void initAxesData();
     void deleteAxesData();
     void updateScaleDiv();

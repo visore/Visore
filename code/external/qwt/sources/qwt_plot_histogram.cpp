@@ -9,13 +9,15 @@
 
 #include "qwt_plot_histogram.h"
 #include "qwt_plot.h"
+#include "qwt_legend.h"
+#include "qwt_legend_item.h"
 #include "qwt_painter.h"
 #include "qwt_column_symbol.h"
 #include "qwt_scale_map.h"
 #include <qstring.h>
 #include <qpainter.h>
 
-static inline bool qwtIsCombinable( const QwtInterval &d1,
+static inline bool isCombinable( const QwtInterval &d1,
     const QwtInterval &d2 )
 {
     if ( d1.isValid() && d2.isValid() )
@@ -62,7 +64,7 @@ public:
 */
 
 QwtPlotHistogram::QwtPlotHistogram( const QwtText &title ):
-    QwtPlotSeriesItem( title )
+    QwtPlotSeriesItem<QwtIntervalSample>( title )
 {
     init();
 }
@@ -72,7 +74,7 @@ QwtPlotHistogram::QwtPlotHistogram( const QwtText &title ):
   \param title Title of the histogram.
 */
 QwtPlotHistogram::QwtPlotHistogram( const QString &title ):
-    QwtPlotSeriesItem( title )
+    QwtPlotSeriesItem<QwtIntervalSample>( title )
 {
     init();
 }
@@ -87,7 +89,7 @@ QwtPlotHistogram::~QwtPlotHistogram()
 void QwtPlotHistogram::init()
 {
     d_data = new PrivateData();
-    setData( new QwtIntervalSeriesData() );
+    d_series = new QwtIntervalSeriesData();
 
     setItemAttribute( QwtPlotItem::AutoScale, true );
     setItemAttribute( QwtPlotItem::Legend, true );
@@ -106,8 +108,6 @@ void QwtPlotHistogram::setStyle( HistogramStyle style )
     if ( style != d_data->style )
     {
         d_data->style = style;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -132,8 +132,6 @@ void QwtPlotHistogram::setPen( const QPen &pen )
     if ( pen != d_data->pen )
     {
         d_data->pen = pen;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -158,8 +156,6 @@ void QwtPlotHistogram::setBrush( const QBrush &brush )
     if ( brush != d_data->brush )
     {
         d_data->brush = brush;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -193,8 +189,6 @@ void QwtPlotHistogram::setSymbol( const QwtColumnSymbol *symbol )
     {
         delete d_data->symbol;
         d_data->symbol = symbol;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -243,7 +237,7 @@ double QwtPlotHistogram::baseline() const
 */
 QRectF QwtPlotHistogram::boundingRect() const
 {
-    QRectF rect = data()->boundingRect();
+    QRectF rect = d_series->boundingRect();
     if ( !rect.isValid() )
         return rect;
 
@@ -281,7 +275,9 @@ int QwtPlotHistogram::rtti() const
 void QwtPlotHistogram::setSamples(
     const QVector<QwtIntervalSample> &samples )
 {
-    setData( new QwtIntervalSeriesData( samples ) );
+    delete d_series;
+    d_series = new QwtIntervalSeriesData( samples );
+    itemChanged();
 }
 
 /*!
@@ -353,7 +349,7 @@ void QwtPlotHistogram::drawOutline( QPainter *painter,
     QPolygonF polygon;
     for ( int i = from; i <= to; i++ )
     {
-        const QwtIntervalSample sample = this->sample( i );
+        const QwtIntervalSample sample = d_series->sample( i );
 
         if ( !sample.interval.isValid() )
         {
@@ -364,7 +360,7 @@ void QwtPlotHistogram::drawOutline( QPainter *painter,
 
         if ( previous.interval.isValid() )
         {
-            if ( !qwtIsCombinable( previous.interval, sample.interval ) )
+            if ( !isCombinable( previous.interval, sample.interval ) )
                 flushPolygon( painter, v0, polygon );
         }
 
@@ -429,11 +425,9 @@ void QwtPlotHistogram::drawColumns( QPainter *painter,
     painter->setPen( d_data->pen );
     painter->setBrush( d_data->brush );
 
-    const QwtSeriesData<QwtIntervalSample> *series = data();
-
     for ( int i = from; i <= to; i++ )
     {
-        const QwtIntervalSample sample = series->sample( i );
+        const QwtIntervalSample sample = d_series->sample( i );
         if ( !sample.interval.isNull() )
         {
             const QwtColumnRect rect = columnRect( sample, xMap, yMap );
@@ -463,11 +457,9 @@ void QwtPlotHistogram::drawLines( QPainter *painter,
     painter->setPen( d_data->pen );
     painter->setBrush( Qt::NoBrush );
 
-    const QwtSeriesData<QwtIntervalSample> *series = data();
-
     for ( int i = from; i <= to; i++ )
     {
-        const QwtIntervalSample sample = series->sample( i );
+        const QwtIntervalSample sample = d_series->sample( i );
         if ( !sample.interval.isNull() )
         {
             const QwtColumnRect rect = columnRect( sample, xMap, yMap );
@@ -637,17 +629,20 @@ void QwtPlotHistogram::drawColumn( QPainter *painter,
 }
 
 /*!
-   A plain rectangle without pen using the brush()
+  Draw a plain rectangle without pen using the brush() as identifier
 
-   \param index Index of the legend entry 
-                ( ignored as there is only one )
-   \param size Icon size
-    
-   \sa QwtPlotItem::setLegendIconSize(), QwtPlotItem::legendData()
+  \param painter Painter
+  \param rect Bounding rectangle for the identifier
 */
-QwtGraphic QwtPlotHistogram::legendIcon( int index,
-    const QSizeF &size ) const
+void QwtPlotHistogram::drawLegendIdentifier(
+    QPainter *painter, const QRectF &rect ) const
 {
-    Q_UNUSED( index );
-    return defaultIcon( d_data->brush, size );
+    const double dim = qMin( rect.width(), rect.height() );
+
+    QSizeF size( dim, dim );
+
+    QRectF r( 0, 0, size.width(), size.height() );
+    r.moveCenter( rect.center() );
+
+    painter->fillRect( r, d_data->brush );
 }

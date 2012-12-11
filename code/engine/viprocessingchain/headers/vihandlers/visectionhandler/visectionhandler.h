@@ -62,7 +62,6 @@ class ViSectionHandler : public ViHandler
 
 		bool mIsSongRunning;
 		bool mWasSongRunning;
-		bool mAcceptFinish;
 		bool mPlayAutomatically;
 		bool mIsPlaying;
 

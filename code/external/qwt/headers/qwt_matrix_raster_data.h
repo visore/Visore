@@ -51,14 +51,11 @@ public:
     ResampleMode resampleMode() const;
 
     virtual void setInterval( Qt::Axis, const QwtInterval & );
-
-    void setValueMatrix( const QVector<double> &values, int numColumns );
+    void setValueMatrix( const QVector<double> &values, size_t numColumns );
+    
     const QVector<double> valueMatrix() const;
-
-    void setValue( int row, int col, double value );
-
-    int numColumns() const;
-    int numRows() const;
+    size_t numColumns() const;
+    size_t numRows() const;
 
     virtual QRectF pixelHint( const QRectF & ) const;
 

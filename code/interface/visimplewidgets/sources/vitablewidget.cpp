@@ -37,8 +37,8 @@ ViTableWidget::ViTableWidget(QWidget *parent)
 		}\
 	");
 
-	verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-	horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+	verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	setSelectionMode(QAbstractItemView::SingleSelection);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 }

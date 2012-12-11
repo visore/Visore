@@ -17,7 +17,6 @@
 #include <qpen.h>
 #include <qfont.h>
 #include <qrect.h>
-#include <qpainterpath.h>
 
 class QWidget;
 class QMouseEvent;
@@ -216,7 +215,7 @@ public:
     QWidget *parentWidget();
     const QWidget *parentWidget() const;
 
-    virtual QPainterPath pickArea() const;
+    virtual QRect pickRect() const;
 
     virtual void drawRubberBand( QPainter * ) const;
     virtual void drawTracker( QPainter * ) const;

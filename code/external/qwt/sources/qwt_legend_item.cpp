@@ -7,12 +7,10 @@
  * modify it under the terms of the Qwt License, Version 1.0
  *****************************************************************************/
 
-#include "qwt_legend_label.h"
-#include "qwt_legend_data.h"
+#include "qwt_legend_item.h"
 #include "qwt_math.h"
 #include "qwt_painter.h"
 #include "qwt_symbol.h"
-#include "qwt_graphic.h"
 #include <qpainter.h>
 #include <qdrawutil.h>
 #include <qstyle.h>
@@ -24,7 +22,7 @@
 static const int ButtonFrame = 2;
 static const int Margin = 2;
 
-static QSize buttonShift( const QwtLegendLabel *w )
+static QSize buttonShift( const QwtLegendItem *w )
 {
     QStyleOption option;
     option.init( w );
@@ -36,63 +34,39 @@ static QSize buttonShift( const QwtLegendLabel *w )
     return QSize( ph, pv );
 }
 
-class QwtLegendLabel::PrivateData
+class QwtLegendItem::PrivateData
 {
 public:
     PrivateData():
-        itemMode( QwtLegendData::ReadOnly ),
+        itemMode( QwtLegend::ReadOnlyItem ),
         isDown( false ),
+        identifierSize( 8, 8 ),
         spacing( Margin )
     {
     }
 
-    QwtLegendData::Mode itemMode;
-    QwtLegendData legendData;
+    QwtLegend::LegendItemMode itemMode;
     bool isDown;
 
-    QPixmap icon;
+    QSize identifierSize;
+    QPixmap identifier;
 
     int spacing;
 };
 
-void QwtLegendLabel::setData( const QwtLegendData &legendData )
-{
-    d_data->legendData = legendData;
-
-    const bool doUpdate = updatesEnabled();
-    setUpdatesEnabled( false );
-
-    setText( legendData.title() );
-    setIcon( legendData.icon().toPixmap() );
-
-    if ( legendData.hasRole( QwtLegendData::ModeRole ) )
-        setItemMode( legendData.mode() );
-
-    if ( doUpdate )
-    {
-        setUpdatesEnabled( true );
-        update();
-    }
-}
-
-const QwtLegendData &QwtLegendLabel::data() const
-{
-    return d_data->legendData;
-}
-
 /*!
   \param parent Parent widget
 */
-QwtLegendLabel::QwtLegendLabel( QWidget *parent ):
+QwtLegendItem::QwtLegendItem( QWidget *parent ):
     QwtTextLabel( parent )
 {
     d_data = new PrivateData;
     setMargin( Margin );
-    setIndent( Margin );
+    setIndent( Margin + d_data->identifierSize.width() + 2 * d_data->spacing );
 }
 
 //! Destructor
-QwtLegendLabel::~QwtLegendLabel()
+QwtLegendItem::~QwtLegendItem()
 {
     delete d_data;
     d_data = NULL;
@@ -104,7 +78,7 @@ QwtLegendLabel::~QwtLegendLabel()
    \param text Text label
     \sa QwtTextLabel::text()
 */
-void QwtLegendLabel::setText( const QwtText &text )
+void QwtLegendItem::setText( const QwtText &text )
 {
     const int flags = Qt::AlignLeft | Qt::AlignVCenter
         | Qt::TextExpandTabs | Qt::TextWordWrap;
@@ -117,20 +91,19 @@ void QwtLegendLabel::setText( const QwtText &text )
 
 /*!
    Set the item mode
-   The default is QwtLegendData::ReadOnly
+   The default is QwtLegend::ReadOnlyItem
 
    \param mode Item mode
    \sa itemMode()
 */
-void QwtLegendLabel::setItemMode( QwtLegendData::Mode mode )
+void QwtLegendItem::setItemMode( QwtLegend::LegendItemMode mode )
 {
     if ( mode != d_data->itemMode )
     {
         d_data->itemMode = mode;
         d_data->isDown = false;
 
-        setFocusPolicy( ( mode != QwtLegendData::ReadOnly ) 
-            ? Qt::TabFocus : Qt::NoFocus );
+        setFocusPolicy( mode != QwtLegend::ReadOnlyItem ? Qt::TabFocus : Qt::NoFocus );
         setMargin( ButtonFrame + Margin );
 
         updateGeometry();
@@ -142,63 +115,84 @@ void QwtLegendLabel::setItemMode( QwtLegendData::Mode mode )
 
    \sa setItemMode()
 */
-QwtLegendData::Mode QwtLegendLabel::itemMode() const
+QwtLegend::LegendItemMode QwtLegendItem::itemMode() const
 {
     return d_data->itemMode;
 }
 
 /*!
-  Assign the icon
+  Assign the identifier
+  The identifier needs to be created according to the identifierWidth()
 
-  \param icon Pixmap representing a plot item
+  \param identifier Pixmap representing a plot item
 
-  \sa icon(), QwtPlotItem::legendIcon()
+  \sa identifier(), identifierWidth()
 */
-void QwtLegendLabel::setIcon( const QPixmap &icon )
+void QwtLegendItem::setIdentifier( const QPixmap &identifier )
 {
-    d_data->icon = icon;
-
-    int indent = margin() + d_data->spacing;
-    if ( icon.width() > 0 )
-        indent += icon.width() + d_data->spacing;
-
-    setIndent( indent );
+    d_data->identifier = identifier;
+    update();
 }
 
 /*!
-  \return Pixmap representing a plot item
-  \sa setIcon()
+  \return pixmap representing a plot item
+  \sa setIdentifier()
 */
-QPixmap QwtLegendLabel::icon() const
+QPixmap QwtLegendItem::identifier() const
 {
-    return d_data->icon;
+    return d_data->identifier;
+}
+
+/*!
+  Set the size for the identifier
+  Default is 8x8 pixels
+
+  \param size New size
+
+  \sa identifierSize()
+*/
+void QwtLegendItem::setIdentifierSize( const QSize &size )
+{
+    QSize sz = size.expandedTo( QSize( 0, 0 ) );
+    if ( sz != d_data->identifierSize )
+    {
+        d_data->identifierSize = sz;
+        setIndent( margin() + d_data->identifierSize.width()
+            + 2 * d_data->spacing );
+        updateGeometry();
+    }
+}
+/*!
+   Return the width of the identifier
+
+   \sa setIdentifierSize()
+*/
+QSize QwtLegendItem::identifierSize() const
+{
+    return d_data->identifierSize;
 }
 
 /*!
    Change the spacing
    \param spacing Spacing
-   \sa spacing(), QwtTextLabel::margin()
+   \sa spacing(), identifierWidth(), QwtTextLabel::margin()
 */
-void QwtLegendLabel::setSpacing( int spacing )
+void QwtLegendItem::setSpacing( int spacing )
 {
     spacing = qMax( spacing, 0 );
     if ( spacing != d_data->spacing )
     {
         d_data->spacing = spacing;
-
-        int indent = margin() + d_data->spacing;
-        if ( d_data->icon.width() > 0 )
-            indent += d_data->icon.width() + d_data->spacing;
-
-        setIndent( indent );
+        setIndent( margin() + d_data->identifierSize.width()
+            + 2 * d_data->spacing );
     }
 }
 
 /*!
    Return the spacing
-   \sa setSpacing(), QwtTextLabel::margin()
+   \sa setSpacing(), identifierWidth(), QwtTextLabel::margin()
 */
-int QwtLegendLabel::spacing() const
+int QwtLegendItem::spacing() const
 {
     return d_data->spacing;
 }
@@ -209,9 +203,9 @@ int QwtLegendLabel::spacing() const
     \param on check/uncheck
     \sa setItemMode()
 */
-void QwtLegendLabel::setChecked( bool on )
+void QwtLegendItem::setChecked( bool on )
 {
-    if ( d_data->itemMode == QwtLegendData::Checkable )
+    if ( d_data->itemMode == QwtLegend::CheckableItem )
     {
         const bool isBlocked = signalsBlocked();
         blockSignals( true );
@@ -223,13 +217,13 @@ void QwtLegendLabel::setChecked( bool on )
 }
 
 //! Return true, if the item is checked
-bool QwtLegendLabel::isChecked() const
+bool QwtLegendItem::isChecked() const
 {
-    return d_data->itemMode == QwtLegendData::Checkable && isDown();
+    return d_data->itemMode == QwtLegend::CheckableItem && isDown();
 }
 
 //! Set the item being down
-void QwtLegendLabel::setDown( bool down )
+void QwtLegendItem::setDown( bool down )
 {
     if ( down == d_data->isDown )
         return;
@@ -237,7 +231,7 @@ void QwtLegendLabel::setDown( bool down )
     d_data->isDown = down;
     update();
 
-    if ( d_data->itemMode == QwtLegendData::Clickable )
+    if ( d_data->itemMode == QwtLegend::ClickableItem )
     {
         if ( d_data->isDown )
             Q_EMIT pressed();
@@ -248,23 +242,23 @@ void QwtLegendLabel::setDown( bool down )
         }
     }
 
-    if ( d_data->itemMode == QwtLegendData::Checkable )
+    if ( d_data->itemMode == QwtLegend::CheckableItem )
         Q_EMIT checked( d_data->isDown );
 }
 
 //! Return true, if the item is down
-bool QwtLegendLabel::isDown() const
+bool QwtLegendItem::isDown() const
 {
     return d_data->isDown;
 }
 
 //! Return a size hint
-QSize QwtLegendLabel::sizeHint() const
+QSize QwtLegendItem::sizeHint() const
 {
     QSize sz = QwtTextLabel::sizeHint();
-    sz.setHeight( qMax( sz.height(), d_data->icon.height() + 4 ) );
+    sz.setHeight( qMax( sz.height(), d_data->identifier.height() + 4 ) );
 
-    if ( d_data->itemMode != QwtLegendData::ReadOnly )
+    if ( d_data->itemMode != QwtLegend::ReadOnlyItem )
     {
         sz += buttonShift( this );
         sz = sz.expandedTo( QApplication::globalStrut() );
@@ -274,7 +268,7 @@ QSize QwtLegendLabel::sizeHint() const
 }
 
 //! Paint event
-void QwtLegendLabel::paintEvent( QPaintEvent *e )
+void QwtLegendItem::paintEvent( QPaintEvent *e )
 {
     const QRect cr = contentsRect();
 
@@ -299,35 +293,35 @@ void QwtLegendLabel::paintEvent( QPaintEvent *e )
 
     drawContents( &painter );
 
-    if ( !d_data->icon.isNull() )
+    if ( !d_data->identifier.isNull() )
     {
-        QRect iconRect = cr;
-        iconRect.setX( iconRect.x() + margin() );
-        if ( d_data->itemMode != QwtLegendData::ReadOnly )
-            iconRect.setX( iconRect.x() + ButtonFrame );
+        QRect identRect = cr;
+        identRect.setX( identRect.x() + margin() );
+        if ( d_data->itemMode != QwtLegend::ReadOnlyItem )
+            identRect.setX( identRect.x() + ButtonFrame );
 
-        iconRect.setSize( d_data->icon.size() );
-        iconRect.moveCenter( QPoint( iconRect.center().x(), cr.center().y() ) );
+        identRect.setSize( d_data->identifier.size() );
+        identRect.moveCenter( QPoint( identRect.center().x(), cr.center().y() ) );
 
-        painter.drawPixmap( iconRect, d_data->icon );
+        painter.drawPixmap( identRect, d_data->identifier );
     }
 
     painter.restore();
 }
 
 //! Handle mouse press events
-void QwtLegendLabel::mousePressEvent( QMouseEvent *e )
+void QwtLegendItem::mousePressEvent( QMouseEvent *e )
 {
     if ( e->button() == Qt::LeftButton )
     {
         switch ( d_data->itemMode )
         {
-            case QwtLegendData::Clickable:
+            case QwtLegend::ClickableItem:
             {
                 setDown( true );
                 return;
             }
-            case QwtLegendData::Checkable:
+            case QwtLegend::CheckableItem:
             {
                 setDown( !isDown() );
                 return;
@@ -339,18 +333,18 @@ void QwtLegendLabel::mousePressEvent( QMouseEvent *e )
 }
 
 //! Handle mouse release events
-void QwtLegendLabel::mouseReleaseEvent( QMouseEvent *e )
+void QwtLegendItem::mouseReleaseEvent( QMouseEvent *e )
 {
     if ( e->button() == Qt::LeftButton )
     {
         switch ( d_data->itemMode )
         {
-            case QwtLegendData::Clickable:
+            case QwtLegend::ClickableItem:
             {
                 setDown( false );
                 return;
             }
-            case QwtLegendData::Checkable:
+            case QwtLegend::CheckableItem:
             {
                 return; // do nothing, but accept
             }
@@ -361,19 +355,19 @@ void QwtLegendLabel::mouseReleaseEvent( QMouseEvent *e )
 }
 
 //! Handle key press events
-void QwtLegendLabel::keyPressEvent( QKeyEvent *e )
+void QwtLegendItem::keyPressEvent( QKeyEvent *e )
 {
     if ( e->key() == Qt::Key_Space )
     {
         switch ( d_data->itemMode )
         {
-            case QwtLegendData::Clickable:
+            case QwtLegend::ClickableItem:
             {
                 if ( !e->isAutoRepeat() )
                     setDown( true );
                 return;
             }
-            case QwtLegendData::Checkable:
+            case QwtLegend::CheckableItem:
             {
                 if ( !e->isAutoRepeat() )
                     setDown( !isDown() );
@@ -387,19 +381,19 @@ void QwtLegendLabel::keyPressEvent( QKeyEvent *e )
 }
 
 //! Handle key release events
-void QwtLegendLabel::keyReleaseEvent( QKeyEvent *e )
+void QwtLegendItem::keyReleaseEvent( QKeyEvent *e )
 {
     if ( e->key() == Qt::Key_Space )
     {
         switch ( d_data->itemMode )
         {
-            case QwtLegendData::Clickable:
+            case QwtLegend::ClickableItem:
             {
                 if ( !e->isAutoRepeat() )
                     setDown( false );
                 return;
             }
-            case QwtLegendData::Checkable:
+            case QwtLegend::CheckableItem:
             {
                 return; // do nothing, but accept
             }

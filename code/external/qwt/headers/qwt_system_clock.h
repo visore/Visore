@@ -39,6 +39,8 @@ public:
     double restart();
     double elapsed() const;
 
+    static double precision();
+
 private:
     class PrivateData;
     PrivateData *d_data;

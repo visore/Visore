@@ -63,7 +63,7 @@ QwtRoundScaleDraw::~QwtRoundScaleDraw()
   \param radius New Radius
   \sa moveCenter()
 */
-void QwtRoundScaleDraw::setRadius( double radius )
+void QwtRoundScaleDraw::setRadius( int radius )
 {
     d_data->radius = radius;
 }
@@ -75,9 +75,9 @@ void QwtRoundScaleDraw::setRadius( double radius )
 
   \sa setRadius(), extent()
 */
-double QwtRoundScaleDraw::radius() const
+int QwtRoundScaleDraw::radius() const
 {
-    return d_data->radius;
+    return qCeil( d_data->radius );
 }
 
 /*!

@@ -20,11 +20,8 @@ void ViProjectHandler::updateProject(ViAudioObjectPointer object)
 	{
 		mProject->serialize(object, mProjectType);
 	}
-	LOG("***************+++*: "+QString::number(mChain->mAudioObjects.size()));
-	for(int i = 0; i < mChain->mAudioObjects.size(); ++i)
-	{
-		LOG("***************+++*: "+QString::number(mChain->mAudioObjects[i].referenceCount()));
-	}
+LOG("pol: "+QString::number(mChain->mAudioObjects.size()));
+//mChain->mAudioObjects.clear();
 }
 
 void ViProjectHandler::startProject(ViProject *project, ViAudio::Type type, bool existingProject)
@@ -49,6 +46,7 @@ void ViProjectHandler::startProject(ViProject *project, ViAudio::Type type, bool
 	{
 		LOG("****************");
 	}
+	mChain->mInput->start();
 }
 
 void ViProjectHandler::begin()

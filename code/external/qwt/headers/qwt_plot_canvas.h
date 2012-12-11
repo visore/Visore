@@ -12,7 +12,9 @@
 
 #include "qwt_global.h"
 #include <qframe.h>
+#include <qpen.h>
 #include <qpainterpath.h>
+#include <qbitmap.h>
 
 class QwtPlot;
 class QPixmap;
@@ -22,13 +24,11 @@ class QPixmap;
   
    Canvas is the widget where all plot items are displayed
 
-  \sa QwtPlot::setCanvas(), QwtPlotGLCanvas
+  \sa QwtPlot
 */
 class QWT_EXPORT QwtPlotCanvas : public QFrame
 {
     Q_OBJECT
-
-    Q_PROPERTY( double borderRadius READ borderRadius WRITE setBorderRadius )
 
 public:
 
@@ -125,7 +125,7 @@ public:
         ItemFocusIndicator
     };
 
-    explicit QwtPlotCanvas( QwtPlot * = NULL );
+    explicit QwtPlotCanvas( QwtPlot * );
     virtual ~QwtPlotCanvas();
 
     QwtPlot *plot();
@@ -137,18 +137,18 @@ public:
     void setBorderRadius( double );
     double borderRadius() const;
 
+    QPainterPath borderPath( const QRect &rect ) const;
+    QBitmap borderMask( const QSize & ) const;
+
     void setPaintAttribute( PaintAttribute, bool on = true );
     bool testPaintAttribute( PaintAttribute ) const;
 
     const QPixmap *backingStore() const;
     void invalidateBackingStore();
 
-    virtual bool event( QEvent * );
-
-    Q_INVOKABLE QPainterPath borderPath( const QRect & ) const;
-
-public Q_SLOTS:
     void replot();
+
+    virtual bool event( QEvent * );
 
 protected:
     virtual void paintEvent( QPaintEvent * );

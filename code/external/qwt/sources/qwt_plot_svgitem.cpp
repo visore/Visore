@@ -9,6 +9,8 @@
 
 #include "qwt_plot_svgitem.h"
 #include "qwt_scale_map.h"
+#include "qwt_legend.h"
+#include "qwt_legend_item.h"
 #include "qwt_painter.h"
 #include <qpainter.h>
 #include <qsvgrenderer.h>
@@ -63,7 +65,6 @@ QwtPlotSvgItem::~QwtPlotSvgItem()
 void QwtPlotSvgItem::init()
 {
     d_data = new PrivateData();
-    d_data->boundingRect = QwtPlotItem::boundingRect();
 
     setItemAttribute( QwtPlotItem::AutoScale, true );
     setItemAttribute( QwtPlotItem::Legend, false );
@@ -90,10 +91,7 @@ bool QwtPlotSvgItem::loadFile( const QRectF &rect,
 {
     d_data->boundingRect = rect;
     const bool ok = d_data->renderer.load( fileName );
-
-    legendChanged();
     itemChanged();
-
     return ok;
 }
 
@@ -110,10 +108,7 @@ bool QwtPlotSvgItem::loadData( const QRectF &rect,
 {
     d_data->boundingRect = rect;
     const bool ok = d_data->renderer.load( data );
-
-    legendChanged();
     itemChanged();
-
     return ok;
 }
 

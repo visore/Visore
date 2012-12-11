@@ -419,21 +419,21 @@ void ViFlacCoder::flacMetadataEncode(const FLAC__StreamEncoder *encoder, const F
 
 			if(coder->mSongInfo.songTitle() != "")
 			{
-				coder->m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "TITLE", coder->mSongInfo.songTitle().toAscii().data());
+				coder->m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "TITLE", coder->mSongInfo.songTitle().toLatin1().data());
 				coder->m_FLAC__metadata_object_vorbiscomment_append_comment(songInfo, entry, true);
 			}
 			if(coder->mSongInfo.artistName() != "")
 			{
-				coder->m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ARTIST", coder->mSongInfo.artistName().toAscii().data());
+				coder->m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ARTIST", coder->mSongInfo.artistName().toLatin1().data());
 				coder->m_FLAC__metadata_object_vorbiscomment_append_comment(songInfo, entry, true);
 			}
 			QString comment = "Created with " + ViManager::name() + " (" + ViManager::version().toString() + ") - " + ViManager::url().toString();
-			coder->m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "DESCRIPTION", comment.toAscii().data());
+			coder->m_FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "DESCRIPTION", comment.toLatin1().data());
 			coder->m_FLAC__metadata_object_vorbiscomment_append_comment(songInfo, entry, true);
 
-			if(coder->mSongInfo.imagePath() != "" && coder->m_FLAC__metadata_object_picture_set_mime_type(pictureInfo, coder->mSongInfo.imageMimeType().toAscii().data(), true))
+			if(coder->mSongInfo.imagePath() != "" && coder->m_FLAC__metadata_object_picture_set_mime_type(pictureInfo, coder->mSongInfo.imageMimeType().toLatin1().data(), true))
 			{
-				if(coder->m_FLAC__metadata_object_picture_set_description(pictureInfo, (FLAC__byte*) coder->mSongInfo.artistName().toAscii().data(), true))
+				if(coder->m_FLAC__metadata_object_picture_set_description(pictureInfo, (FLAC__byte*) coder->mSongInfo.artistName().toLatin1().data(), true))
 				{
 					QByteArray imageData = coder->mSongInfo.imageData();
 					coder->m_FLAC__metadata_object_picture_set_data(pictureInfo, (FLAC__byte*) imageData.data(), imageData.size(), true);

@@ -36,6 +36,9 @@ ViStreamInput::ViStreamInput()
 	mDevice = QAudioDeviceInfo::defaultInputDevice();
 	mAudioInput = NULL;
 	setState(QAudio::IdleState);
+timer = new QTimer(this);
+ connect(timer, SIGNAL(timeout()), this, SLOT(tu()));
+     
 }
 
 ViStreamInput::~ViStreamInput()
@@ -92,6 +95,7 @@ void ViStreamInput::start()
 		mAudioInput->start(&mBufferDevice);
 	}
 	setState(QAudio::ActiveState);
+timer->start(3000);
 }
 
 void ViStreamInput::stop()

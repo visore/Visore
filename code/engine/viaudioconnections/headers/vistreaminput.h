@@ -5,7 +5,7 @@
 #include <QAudioInput>
 #include <QAudioDeviceInfo>
 #include "viaudioinput.h"
-
+#include <QTimer>
 class ViStreamBuffer : public QBuffer
 {
 
@@ -27,6 +27,15 @@ class ViStreamBuffer : public QBuffer
 class ViStreamInput : public ViAudioInput
 {
     Q_OBJECT
+
+private slots:
+
+void tu()
+{
+	LOG("SI error: "+QString::number(mAudioInput->error()));
+	LOG("SI status: "+QString::number(mAudioInput->state()));
+	LOG("SI buffer: "+QString::number(mBuffer->size()));
+}
 
 	public:
 
@@ -56,6 +65,7 @@ class ViStreamInput : public ViAudioInput
 		qreal mMuteVolume;
 		bool mIsMute;
 		ViAudioFormat mFormat;
+QTimer *timer;
 
 };
 

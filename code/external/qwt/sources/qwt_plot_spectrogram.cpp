@@ -27,15 +27,14 @@ class QwtPlotSpectrogram::PrivateData
 {
 public:
     PrivateData():
-        data( NULL )
+        data( NULL ),
+        renderThreadCount( 1 )
     {
         colorMap = new QwtLinearColorMap();
         displayMode = ImageMode;
 
         conrecFlags = QwtRasterData::IgnoreAllVerticesOnLevel;
-#if 0
         conrecFlags |= QwtRasterData::IgnoreOutOfRange;
-#endif
     }
     ~PrivateData()
     {
@@ -46,6 +45,8 @@ public:
     QwtRasterData *data;
     QwtColorMap *colorMap;
     DisplayModes displayMode;
+
+    uint renderThreadCount;
 
     QList<double> contourLevels;
     QPen defaultContourPen;
@@ -106,7 +107,6 @@ void QwtPlotSpectrogram::setDisplayMode( DisplayMode mode, bool on )
             d_data->displayMode &= ~mode;
     }
 
-    legendChanged();
     itemChanged();
 }
 
@@ -119,6 +119,37 @@ void QwtPlotSpectrogram::setDisplayMode( DisplayMode mode, bool on )
 bool QwtPlotSpectrogram::testDisplayMode( DisplayMode mode ) const
 {
     return ( d_data->displayMode & mode );
+}
+
+/*!
+   Rendering an image from the raster data can often be done
+   parallel on a multicore system.
+
+   \param numThreads Number of threads to be used for rendering.
+                     If numThreads is set to 0, the system specific
+                     ideal thread count is used.
+
+   The default thread count is 1 ( = no additional threads )
+
+   \warning Rendering in multiple threads is only supported for Qt >= 4.4
+   \sa renderThreadCount(), renderImage(), renderTile()
+*/
+void QwtPlotSpectrogram::setRenderThreadCount( uint numThreads )
+{
+    d_data->renderThreadCount = numThreads;
+}
+
+/*!
+   \return Number of threads to be used for rendering.
+           If numThreads is set to 0, the system specific
+           ideal thread count is used.
+
+   \warning Rendering in multiple threads is only supported for Qt >= 4.4
+   \sa setRenderThreadCount(), renderImage(), renderTile()
+*/
+uint QwtPlotSpectrogram::renderThreadCount() const
+{
+    return d_data->renderThreadCount;
 }
 
 /*!
@@ -141,8 +172,6 @@ void QwtPlotSpectrogram::setColorMap( QwtColorMap *colorMap )
     }
 
     invalidateCache();
-
-    legendChanged();
     itemChanged();
 }
 
@@ -170,8 +199,6 @@ void QwtPlotSpectrogram::setDefaultContourPen( const QPen &pen )
     if ( pen != d_data->defaultContourPen )
     {
         d_data->defaultContourPen = pen;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -238,8 +265,6 @@ void QwtPlotSpectrogram::setConrecFlag(
    \param flag CONREC flag
    \return true, is enabled
 
-   The default setting enables QwtRasterData::IgnoreAllVerticesOnLevel
-
    \sa setConrecClag(), renderContourLines(),
        QwtRasterData::contourLines()
 */
@@ -262,8 +287,6 @@ void QwtPlotSpectrogram::setContourLevels( const QList<double> &levels )
 {
     d_data->contourLevels = levels;
     qSort( d_data->contourLevels );
-
-    legendChanged();
     itemChanged();
 }
 
@@ -398,7 +421,7 @@ QImage QwtPlotSpectrogram::renderImage(
     d_data->data->initRaster( area, image.size() );
 
 #if QT_VERSION >= 0x040400 && !defined(QT_NO_QFUTURE)
-    uint numThreads = renderThreadCount();
+    uint numThreads = d_data->renderThreadCount;
 
     if ( numThreads <= 0 )
         numThreads = QThread::idealThreadCount();
@@ -462,7 +485,7 @@ void QwtPlotSpectrogram::renderTile(
         {
             const double ty = yMap.invTransform( y );
 
-            QRgb *line = reinterpret_cast<QRgb *>( image->scanLine( y ) );
+            QRgb *line = ( QRgb * )image->scanLine( y );
             line += tile.left();
 
             for ( int x = tile.left(); x <= tile.right(); x++ )

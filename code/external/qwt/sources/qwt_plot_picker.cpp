@@ -9,6 +9,7 @@
 
 #include "qwt_plot_picker.h"
 #include "qwt_plot.h"
+#include "qwt_plot_canvas.h"
 #include "qwt_scale_div.h"
 #include "qwt_painter.h"
 #include "qwt_scale_map.h"
@@ -27,7 +28,7 @@
   \sa QwtPlot::autoReplot(), QwtPlot::replot(), scaleRect()
 */
 
-QwtPlotPicker::QwtPlotPicker( QWidget *canvas ):
+QwtPlotPicker::QwtPlotPicker( QwtPlotCanvas *canvas ):
     QwtPicker( canvas ),
     d_xAxis( -1 ),
     d_yAxis( -1 )
@@ -65,7 +66,7 @@ QwtPlotPicker::QwtPlotPicker( QWidget *canvas ):
 
   \sa QwtPlot::autoReplot(), QwtPlot::replot(), scaleRect()
 */
-QwtPlotPicker::QwtPlotPicker( int xAxis, int yAxis, QWidget *canvas ):
+QwtPlotPicker::QwtPlotPicker( int xAxis, int yAxis, QwtPlotCanvas *canvas ):
     QwtPicker( canvas ),
     d_xAxis( xAxis ),
     d_yAxis( yAxis )
@@ -88,7 +89,7 @@ QwtPlotPicker::QwtPlotPicker( int xAxis, int yAxis, QWidget *canvas ):
 */
 QwtPlotPicker::QwtPlotPicker( int xAxis, int yAxis,
         RubberBand rubberBand, DisplayMode trackerMode,
-        QWidget *canvas ):
+        QwtPlotCanvas *canvas ):
     QwtPicker( rubberBand, trackerMode, canvas ),
     d_xAxis( xAxis ),
     d_yAxis( yAxis )
@@ -101,35 +102,35 @@ QwtPlotPicker::~QwtPlotPicker()
 }
 
 //! Return observed plot canvas
-QWidget *QwtPlotPicker::canvas()
+QwtPlotCanvas *QwtPlotPicker::canvas()
 {
-    return parentWidget();
+    return qobject_cast<QwtPlotCanvas *>( parentWidget() );
 }
 
 //! Return Observed plot canvas
-const QWidget *QwtPlotPicker::canvas() const
+const QwtPlotCanvas *QwtPlotPicker::canvas() const
 {
-    return parentWidget();
+    return qobject_cast<const QwtPlotCanvas *>( parentWidget() );
 }
 
 //! Return plot widget, containing the observed plot canvas
 QwtPlot *QwtPlotPicker::plot()
 {
-    QWidget *w = canvas();
+    QwtPlotCanvas *w = canvas();
     if ( w )
-        w = w->parentWidget();
+        return w->plot();
 
-    return qobject_cast<QwtPlot *>( w );
+    return NULL;
 }
 
 //! Return plot widget, containing the observed plot canvas
 const QwtPlot *QwtPlotPicker::plot() const
 {
-    const QWidget *w = canvas();
+    const QwtPlotCanvas *w = canvas();
     if ( w )
-        w = w->parentWidget();
+        return w->plot();
 
-    return qobject_cast<const QwtPlot *>( w );
+    return NULL;
 }
 
 /*!
@@ -143,12 +144,15 @@ QRectF QwtPlotPicker::scaleRect() const
 
     if ( plot() )
     {
-        const QwtScaleDiv &xs = plot()->axisScaleDiv( xAxis() );
-        const QwtScaleDiv &ys = plot()->axisScaleDiv( yAxis() );
+        const QwtScaleDiv *xs = plot()->axisScaleDiv( xAxis() );
+        const QwtScaleDiv *ys = plot()->axisScaleDiv( yAxis() );
 
-        rect = QRectF( xs.lowerBound(), ys.lowerBound(),
-            xs.range(), ys.range() );
-        rect = rect.normalized();
+        if ( xs && ys )
+        {
+            rect = QRectF( xs->lowerBound(), ys->lowerBound(),
+                xs->range(), ys->range() );
+            rect = rect.normalized();
+        }
     }
 
     return rect;

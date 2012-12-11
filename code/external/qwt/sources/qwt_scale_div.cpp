@@ -15,7 +15,8 @@
 //! Construct an invalid QwtScaleDiv instance.
 QwtScaleDiv::QwtScaleDiv():
     d_lowerBound( 0.0 ),
-    d_upperBound( 0.0 )
+    d_upperBound( 0.0 ),
+    d_isValid( false )
 {
 }
 
@@ -28,7 +29,8 @@ QwtScaleDiv::QwtScaleDiv():
 QwtScaleDiv::QwtScaleDiv( const QwtInterval &interval,
         QList<double> ticks[NTickTypes] ):
     d_lowerBound( interval.minValue() ),
-    d_upperBound( interval.maxValue() )
+    d_upperBound( interval.maxValue() ),
+    d_isValid( true )
 {
     for ( int i = 0; i < NTickTypes; i++ )
         d_ticks[i] = ticks[i];
@@ -45,7 +47,8 @@ QwtScaleDiv::QwtScaleDiv(
         double lowerBound, double upperBound,
         QList<double> ticks[NTickTypes] ):
     d_lowerBound( lowerBound ),
-    d_upperBound( upperBound )
+    d_upperBound( upperBound ),
+    d_isValid( true )
 {
     for ( int i = 0; i < NTickTypes; i++ )
         d_ticks[i] = ticks[i];
@@ -67,7 +70,8 @@ void QwtScaleDiv::setInterval( const QwtInterval &interval )
 bool QwtScaleDiv::operator==( const QwtScaleDiv &other ) const
 {
     if ( d_lowerBound != other.d_lowerBound ||
-        d_upperBound != other.d_upperBound )
+        d_upperBound != other.d_upperBound ||
+        d_isValid != other.d_isValid )
     {
         return false;
     }
@@ -90,16 +94,22 @@ bool QwtScaleDiv::operator!=( const QwtScaleDiv &s ) const
     return ( !( *this == s ) );
 }
 
-//! Check if the scale division is empty( lowerBound() == upperBound() )
-bool QwtScaleDiv::isEmpty() const
+//! Invalidate the scale division
+void QwtScaleDiv::invalidate()
 {
-    return ( d_lowerBound == d_upperBound );
+    d_isValid = false;
+
+    // detach arrays
+    for ( int i = 0; i < NTickTypes; i++ )
+        d_ticks[i].clear();
+
+    d_lowerBound = d_upperBound = 0;
 }
 
-//! Check if the scale division is increasing( lowerBound() <= upperBound() )
-bool QwtScaleDiv::isIncreasing() const
+//! Check if the scale division is valid
+bool QwtScaleDiv::isValid() const
 {
-    return d_lowerBound <= d_upperBound;
+    return d_isValid;
 }
 
 /*!
@@ -110,6 +120,9 @@ bool QwtScaleDiv::isIncreasing() const
 */
 bool QwtScaleDiv::contains( double value ) const
 {
+    if ( !d_isValid )
+        return false;
+
     const double min = qMin( d_lowerBound, d_upperBound );
     const double max = qMax( d_lowerBound, d_upperBound );
 
@@ -128,8 +141,8 @@ void QwtScaleDiv::invert()
         const int size = ticks.count();
         const int size2 = size / 2;
 
-        for ( int j = 0; j < size2; j++ )
-            qSwap( ticks[j], ticks[size - 1 - j] );
+        for ( int i = 0; i < size2; i++ )
+            qSwap( ticks[i], ticks[size - 1 - i] );
     }
 }
 
@@ -158,18 +171,3 @@ const QList<double> &QwtScaleDiv::ticks( int type ) const
     static QList<double> noTicks;
     return noTicks;
 }
-
-#ifndef QT_NO_DEBUG_STREAM
-
-QDebug operator<<( QDebug debug, const QwtScaleDiv &scaleDiv )
-{
-    debug << scaleDiv.interval();
-    debug << "Major: " << scaleDiv.ticks( QwtScaleDiv::MajorTick );
-    debug << "Medium: " << scaleDiv.ticks( QwtScaleDiv::MediumTick );
-    debug << "Minor: " << scaleDiv.ticks( QwtScaleDiv::MinorTick );
-
-    return debug;
-}
-
-#endif
-

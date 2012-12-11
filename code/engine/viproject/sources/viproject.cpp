@@ -69,8 +69,8 @@ void ViProject::serialize(ViAudioObjectPointer object, ViAudio::Type type)
 	}
 	
 	mObjects[mCurrentSide-1].append(object);
-	
-	++mCurrentTrack;
+
+	++mCurrentTrack;	LOG("Project track: "+QString::number(mCurrentTrack));
 	QString filePath = generateFileName(object->songInfo(), path, mFormat.codec()->extension());
 	if(type == ViAudio::Target)
 	{

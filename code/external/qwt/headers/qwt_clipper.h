@@ -27,9 +27,6 @@ class QWT_EXPORT QwtClipper
 public:
     static QPolygon clipPolygon( const QRect &, 
         const QPolygon &, bool closePolygon = false );
-    static QPolygon clipPolygon( const QRectF &, 
-        const QPolygon &, bool closePolygon = false );
-
     static QPolygonF clipPolygonF( const QRectF &, 
         const QPolygonF &, bool closePolygon = false );
 

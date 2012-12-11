@@ -9,7 +9,7 @@
 
 #include "qwt_plot_seriesitem.h"
 
-class QwtPlotSeriesItem::PrivateData
+class QwtPlotAbstractSeriesItem::PrivateData
 {
 public:
     PrivateData():
@@ -24,25 +24,24 @@ public:
   Constructor
   \param title Title of the curve
 */
-QwtPlotSeriesItem::QwtPlotSeriesItem( const QwtText &title ):
+QwtPlotAbstractSeriesItem::QwtPlotAbstractSeriesItem( const QwtText &title ):
     QwtPlotItem( title )
 {
     d_data = new PrivateData();
-    setItemInterest( QwtPlotItem::ScaleInterest, true );
 }
 
 /*!
   Constructor
   \param title Title of the curve
 */
-QwtPlotSeriesItem::QwtPlotSeriesItem( const QString &title ):
+QwtPlotAbstractSeriesItem::QwtPlotAbstractSeriesItem( const QString &title ):
     QwtPlotItem( QwtText( title ) )
 {
     d_data = new PrivateData();
 }
 
 //! Destructor
-QwtPlotSeriesItem::~QwtPlotSeriesItem()
+QwtPlotAbstractSeriesItem::~QwtPlotAbstractSeriesItem()
 {
     delete d_data;
 }
@@ -56,13 +55,11 @@ QwtPlotSeriesItem::~QwtPlotSeriesItem()
 
   \sa orientation()
 */
-void QwtPlotSeriesItem::setOrientation( Qt::Orientation orientation )
+void QwtPlotAbstractSeriesItem::setOrientation( Qt::Orientation orientation )
 {
     if ( d_data->orientation != orientation )
     {
         d_data->orientation = orientation;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -71,7 +68,7 @@ void QwtPlotSeriesItem::setOrientation( Qt::Orientation orientation )
   \return Orientation of the plot item
   \sa setOrientation()
 */
-Qt::Orientation QwtPlotSeriesItem::orientation() const
+Qt::Orientation QwtPlotAbstractSeriesItem::orientation() const
 {
     return d_data->orientation;
 }
@@ -84,29 +81,10 @@ Qt::Orientation QwtPlotSeriesItem::orientation() const
   \param yMap Maps y-values into pixel coordinates.
   \param canvasRect Contents rect of the canvas
 */
-void QwtPlotSeriesItem::draw( QPainter *painter,
+void QwtPlotAbstractSeriesItem::draw( QPainter *painter,
         const QwtScaleMap &xMap, const QwtScaleMap &yMap,
         const QRectF &canvasRect ) const
 {
     drawSeries( painter, xMap, yMap, canvasRect, 0, -1 );
 }
 
-QRectF QwtPlotSeriesItem::boundingRect() const
-{
-    return dataRect();
-}
-
-void QwtPlotSeriesItem::updateScaleDiv(
-    const QwtScaleDiv &xScaleDiv, const QwtScaleDiv &yScaleDiv )
-{   
-    const QRectF rect = QRectF(
-        xScaleDiv.lowerBound(), yScaleDiv.lowerBound(),
-        xScaleDiv.range(), yScaleDiv.range() );
-        
-    setRectOfInterest( rect );
-}   
-
-void QwtPlotSeriesItem::dataChanged()
-{
-    itemChanged();
-}

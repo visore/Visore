@@ -513,7 +513,7 @@ bool ViAudioManager::testLibrary(ViAbstractCoder *coder)
 					}
 
 					//Check for libraries that end in version number. Eg: libflac.so.8
-//cout<<path.toAscii().data()<<" "<<fileName.toAscii().data()<<endl;
+//cout<<path.toLatin1().data()<<" "<<fileName.toLatin1().data()<<endl;
 					nameFilters.clear();
 					possibles.clear();
 

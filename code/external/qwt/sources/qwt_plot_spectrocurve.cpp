@@ -41,7 +41,7 @@ public:
   \param title Title of the curve
 */
 QwtPlotSpectroCurve::QwtPlotSpectroCurve( const QwtText &title ):
-    QwtPlotSeriesItem( title )
+    QwtPlotSeriesItem<QwtPoint3D>( title )
 {
     init();
 }
@@ -51,7 +51,7 @@ QwtPlotSpectroCurve::QwtPlotSpectroCurve( const QwtText &title ):
   \param title Title of the curve
 */
 QwtPlotSpectroCurve::QwtPlotSpectroCurve( const QString &title ):
-    QwtPlotSeriesItem( QwtText( title ) )
+    QwtPlotSeriesItem<QwtPoint3D>( QwtText( title ) )
 {
     init();
 }
@@ -71,7 +71,7 @@ void QwtPlotSpectroCurve::init()
     setItemAttribute( QwtPlotItem::AutoScale );
 
     d_data = new PrivateData;
-    setData( new QwtPoint3DSeriesData() );
+    d_series = new QwtPoint3DSeriesData();
 
     setZ( 20.0 );
 }
@@ -112,7 +112,9 @@ bool QwtPlotSpectroCurve::testPaintAttribute( PaintAttribute attribute ) const
 */
 void QwtPlotSpectroCurve::setSamples( const QVector<QwtPoint3D> &samples )
 {
-    setData( new QwtPoint3DSeriesData( samples ) );
+    delete d_series;
+    d_series = new QwtPoint3DSeriesData( samples );
+    itemChanged();
 }
 
 /*!
@@ -134,7 +136,6 @@ void QwtPlotSpectroCurve::setColorMap( QwtColorMap *colorMap )
         d_data->colorMap = colorMap;
     }
 
-    legendChanged();
     itemChanged();
 }
 
@@ -160,8 +161,6 @@ void QwtPlotSpectroCurve::setColorRange( const QwtInterval &interval )
     if ( interval != d_data->colorRange )
     {
         d_data->colorRange = interval;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -189,8 +188,6 @@ void QwtPlotSpectroCurve::setPenWidth(double penWidth)
     if ( d_data->penWidth != penWidth )
     {
         d_data->penWidth = penWidth;
-
-        legendChanged();
         itemChanged();
     }
 }
@@ -262,11 +259,9 @@ void QwtPlotSpectroCurve::drawDots( QPainter *painter,
     if ( format == QwtColorMap::Indexed )
         d_data->colorTable = d_data->colorMap->colorTable( d_data->colorRange );
 
-    const QwtSeriesData<QwtPoint3D> *series = data();
-
     for ( int i = from; i <= to; i++ )
     {
-        const QwtPoint3D sample = series->sample( i );
+        const QwtPoint3D sample = d_series->sample( i );
 
         double xi = xMap.transform( sample.x() );
         double yi = yMap.transform( sample.y() );
