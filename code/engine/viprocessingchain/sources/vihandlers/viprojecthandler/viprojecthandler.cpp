@@ -20,8 +20,7 @@ void ViProjectHandler::updateProject(ViAudioObjectPointer object)
 	{
 		mProject->serialize(object, mProjectType);
 	}
-LOG("pol: "+QString::number(mChain->mAudioObjects.size()));
-//mChain->mAudioObjects.clear();
+	mChain->mAudioObjects.clear();
 }
 
 void ViProjectHandler::startProject(ViProject *project, ViAudio::Type type, bool existingProject)
@@ -40,11 +39,6 @@ void ViProjectHandler::startProject(ViProject *project, ViAudio::Type type, bool
 		emit mChain->progressStarted();
 		mProject->save();
 		begin();
-	}
-	ViSongDetector *d;
-	if(ViTypeChecker<ViSongDetector>::assign(mChain->processor("ViSongDetector"), d))
-	{
-		LOG("****************");
 	}
 	mChain->mInput->start();
 }

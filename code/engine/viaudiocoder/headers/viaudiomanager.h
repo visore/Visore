@@ -56,6 +56,9 @@ class ViAudioManager
 		void add(const ViAudioManager::Mode mode, ViAbstractCoder *coder);
 		void add(const ViAudioManager::Mode mode, ViAudioCodec *codec);
 
+		void sortCodecs();
+		static bool compareCodecs(ViAudioCodec *first, ViAudioCodec *second);
+
 	private:
 
 		ViCoder::Error mError;

@@ -126,6 +126,8 @@ class ViProject : public QObject, public ViId
 		int mCurrentSide;
 		int mCurrentTrack;
 
+		bool mExistingProject;
+
 		QMap<QString,QString> mPaths;
 		QMap<QString,QString> mFiles;
 

@@ -27,6 +27,11 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	QObject::connect(mUi->pauseButton, SIGNAL(clicked(bool)), this, SLOT(pause(bool)));
 	QObject::connect(mUi->stopButton, SIGNAL(clicked(bool)), this, SLOT(stop(bool)));
 
+	QObject::connect(mUi->recordButton, SIGNAL(clicked(bool)), this, SIGNAL(clicked()));
+	QObject::connect(mUi->playButton, SIGNAL(clicked(bool)), this, SIGNAL(clicked()));
+	QObject::connect(mUi->pauseButton, SIGNAL(clicked(bool)), this, SIGNAL(clicked()));
+	QObject::connect(mUi->stopButton, SIGNAL(clicked(bool)), this, SIGNAL(clicked()));
+
 	mUi->recordButton->disable();
 	mUi->playButton->disable();
 	mUi->pauseButton->disable();

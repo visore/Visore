@@ -1,6 +1,7 @@
 #ifndef VIAUDIOOBJECT_H
 #define VIAUDIOOBJECT_H
 
+#include "viaudio.h"
 #include "vifunctor.h"
 #include "vibuffer.h"
 #include "vielement.h"
@@ -35,6 +36,24 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		/*******************************************************************************************************************
 
+			TYPE
+
+		*******************************************************************************************************************/
+
+		enum Type
+		{
+			None,
+			Unknown,
+			Target,
+			Corrupted,
+			Corrected,
+			Temporary,
+			Temp = Temporary,
+			All = Target | Corrupted | Corrected | Temporary
+		};
+
+		/*******************************************************************************************************************
+
 			CONSTRUCTORS & DESTRUCTORS
 
 		*******************************************************************************************************************/
@@ -46,22 +65,23 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		/*******************************************************************************************************************
 
+			AUTO DESTRUCT
+
+		*******************************************************************************************************************/
+
+		void setAutoDestruct(bool destruct);
+		void addDestructRule(ViAudio::Type type, bool destruct);
+
+
+		/*******************************************************************************************************************
+
 			INPUT & OUTPUT
 
 		*******************************************************************************************************************/
 
-		enum Type
-		{
-			Unknown,
-			Target,
-			Corrupted,
-			Corrected,
-			Temporary,
-			Temp = Temporary
-		};
-		void setType(ViAudioObject::Type input, ViAudioObject::Type output);
-		void setInputType(ViAudioObject::Type type);
-		void setOutputType(ViAudioObject::Type type);
+		void setType(ViAudio::Type input, ViAudio::Type output);
+		void setInputType(ViAudio::Type type);
+		void setOutputType(ViAudio::Type type);
 		
 		/*******************************************************************************************************************
 
@@ -81,7 +101,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void setCorruptedBuffer(ViBuffer *buffer);
 		void setCorrectedBuffer(ViBuffer *buffer);
 
-		void clearBuffers();
+		void clearBuffers(ViAudio::Type type = ViAudio::AllTypes);
 		void clearTargetBuffer();
 		void clearCorruptedBuffer();
 		void clearCorrectedBuffer();
@@ -93,13 +113,15 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		QString targetFile();
-		QString corruptedFile();
-		QString correctedFile();
+		QString filePath(ViAudio::Type type);
+		QString targetFilePath();
+		QString corruptedFilePath();
+		QString correctedFilePath();
 
-		void setTargetFile(QString path);
-		void setCorruptedFile(QString path);
-		void setCorrectedFile(QString path);
+		void setFilePath(ViAudio::Type type, QString path);
+		void setTargetFilePath(QString path);
+		void setCorruptedFilePath(QString path);
+		void setCorrectedFilePath(QString path);
 
 		/*******************************************************************************************************************
 
@@ -129,8 +151,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 	private:
 
-		ViAudioObject::Type mInputType;
-		ViAudioObject::Type mOutputType;
+		ViAudio::Type mInputType;
+		ViAudio::Type mOutputType;
+		ViAudio::Type mDestructType;
 
 		ViBuffer *mTargetBuffer;
 		ViBuffer *mCorruptedBuffer;
@@ -144,9 +167,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViSongInfo mSongInfo;
 
 
-
 		QMutex mMutex;
-		bool mAutoDestruct;
 		bool mIsFinished;
 		bool mIsSong;
 

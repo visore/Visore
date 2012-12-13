@@ -2,25 +2,30 @@
 #define VISTREAMINPUT_H
 
 #include <QBuffer>
+#include <QTimer>
 #include <QAudioInput>
 #include <QAudioDeviceInfo>
 #include "viaudioinput.h"
-#include <QTimer>
+
 class ViStreamBuffer : public QBuffer
 {
 
+	Q_OBJECT
+
+	private slots:
+
+		void addData(qint64 bytes);
+
 	public:
 
-		ViStreamBuffer();
-		void setBuffer(ViBuffer *buffer);
-		qint64 write(const char *data, qint64 maxSize);
-		qint64 write(const char *data);
-		qint64 write(const QByteArray &byteArray);
-		qint64 writeData(const char *data, qint64 length);
+		ViStreamBuffer(ViBuffer *audioBuffer);
+		~ViStreamBuffer();
+		void clear();
 
 	private:
 
-		ViBufferStreamPointer mStream;
+		QDataStream *mReadStream;
+		ViBufferStreamPointer mWriteStream;
 
 };
 
@@ -28,14 +33,9 @@ class ViStreamInput : public ViAudioInput
 {
     Q_OBJECT
 
-private slots:
+	private slots:
 
-void tu()
-{
-	LOG("SI error: "+QString::number(mAudioInput->error()));
-	LOG("SI status: "+QString::number(mAudioInput->state()));
-	LOG("SI buffer: "+QString::number(mBuffer->size()));
-}
+		void checkBuffer();
 
 	public:
 
@@ -55,17 +55,23 @@ void tu()
 		void setVolume(qreal volume);
 		void mute(bool value);
 
-	protected:
+	private:
+
+		void startChecking();
+		void stopChecking();
+
+	private:
 
 		QAudioDeviceInfo mDevice;
 		qreal mVolume;
 		QAudioInput *mAudioInput;
-		ViStreamBuffer mBufferDevice;
-		ViAudioPosition mOldPosition;
+		ViStreamBuffer *mBufferDevice;
 		qreal mMuteVolume;
 		bool mIsMute;
 		ViAudioFormat mFormat;
-QTimer *timer;
+
+		QTimer mTimer;
+		qint64 mPreviousSize;
 
 };
 

@@ -1,33 +1,32 @@
 #include "vistreaminput.h"
 
-ViStreamBuffer::ViStreamBuffer()
+ViStreamBuffer::ViStreamBuffer(ViBuffer *audioBuffer)
 	: QBuffer()
 {
+	mReadStream = new QDataStream(&buffer(), QIODevice::ReadOnly);
+	mWriteStream = audioBuffer->createWriteStream();
+	QObject::connect(this, SIGNAL(bytesWritten(qint64)), this, SLOT(addData(qint64)));
+	open(QIODevice::WriteOnly);
 }
 
-void ViStreamBuffer::setBuffer(ViBuffer *buffer)
+ViStreamBuffer::~ViStreamBuffer()
 {
-	mStream = buffer->createWriteStream();
+	delete mReadStream;
+	close();
+	clear();
 }
 
-qint64 ViStreamBuffer::write(const char *data, qint64 maxSize)
+void ViStreamBuffer::addData(qint64 bytes)
 {
-	return mStream->write((char*) data, maxSize);
+	char data[bytes];
+	mReadStream->readRawData(data, bytes);
+	mWriteStream->write(data, bytes);
+	buffer().remove(0, bytes);
 }
 
-qint64 ViStreamBuffer::write(const char *data)
+void ViStreamBuffer::clear()
 {
-	return mStream->write((char*) data, qstrlen(data));
-}
-
-qint64 ViStreamBuffer::write(const QByteArray &byteArray)
-{
-	return mStream->write((char*) byteArray.data(), byteArray.size());
-}
-
-qint64 ViStreamBuffer::writeData(const char *data, qint64 length)
-{
-	return mStream->write((char*) data, length);
+	buffer().clear();
 }
 
 ViStreamInput::ViStreamInput()
@@ -35,10 +34,9 @@ ViStreamInput::ViStreamInput()
 {
 	mDevice = QAudioDeviceInfo::defaultInputDevice();
 	mAudioInput = NULL;
+	mBufferDevice = NULL;
+	QObject::connect(&mTimer, SIGNAL(timeout()), this, SLOT(checkBuffer()));
 	setState(QAudio::IdleState);
-timer = new QTimer(this);
- connect(timer, SIGNAL(timeout()), this, SLOT(tu()));
-     
 }
 
 ViStreamInput::~ViStreamInput()
@@ -47,6 +45,31 @@ ViStreamInput::~ViStreamInput()
 	{
 		delete mAudioInput;
 	}
+	if(mBufferDevice != NULL)
+	{
+		delete mBufferDevice;
+	}
+}
+
+void ViStreamInput::checkBuffer()
+{
+	if(mPreviousSize == mBufferDevice->size())
+	{
+		stopChecking();
+		LOG("The audio input has stop feeding data to the buffer.", QtFatalMsg);
+	}
+	mPreviousSize = mBufferDevice->size();
+}
+
+void ViStreamInput::startChecking()
+{
+	mPreviousSize = 0;
+	mTimer.start(1000);
+}
+
+void ViStreamInput::stopChecking()
+{
+	mTimer.stop();
 }
 
 void ViStreamInput::setDevice(QAudioDeviceInfo device)
@@ -56,11 +79,17 @@ void ViStreamInput::setDevice(QAudioDeviceInfo device)
 
 void ViStreamInput::setBuffer(ViBuffer *buffer)
 {
+	bool startAgain = (state() == QAudio::ActiveState);
+	stop();
+	setState(QAudio::IdleState);
+
 	ViAudioInput::setBuffer(buffer);
 	mBuffer->setFormat(mFormat);
-	mBufferDevice.close();
-	mBufferDevice.setBuffer(mBuffer);
-	mBufferDevice.open(QIODevice::WriteOnly);
+
+	if(startAgain)
+	{
+		start();
+	}
 }
 
 ViAudioFormat ViStreamInput::format()
@@ -75,15 +104,14 @@ void ViStreamInput::setFormat(ViAudioFormat format)
 	{
 		mBuffer->setFormat(mFormat);
 	}
-	if(mAudioInput != NULL)
-	{
-		delete mAudioInput;
-	}
-	mAudioInput = new QAudioInput(mDevice, mFormat.toQAudioFormat(), this);
 }
 
 void ViStreamInput::start()
 {
+	if(mAudioInput == NULL)
+	{
+		mAudioInput = new QAudioInput(mDevice, mFormat.toQAudioFormat(), this);
+	}
 	if(mAudioInput->state() == QAudio::SuspendedState)
 	{
 		LOG("Recording resumed.");
@@ -92,24 +120,42 @@ void ViStreamInput::start()
 	else
 	{
 		LOG("Recording started.");
-		mAudioInput->start(&mBufferDevice);
+		if(mBufferDevice != NULL)
+		{
+			delete mBufferDevice;
+		}
+		mBufferDevice = new ViStreamBuffer(mBuffer);
+		if(mAudioInput != NULL)
+		{
+			delete mAudioInput;
+		}
+		mAudioInput = new QAudioInput(mDevice, mFormat.toQAudioFormat(), this);
+		mAudioInput->start(mBufferDevice);
 	}
+	startChecking();
 	setState(QAudio::ActiveState);
-timer->start(3000);
 }
 
 void ViStreamInput::stop()
 {
-	LOG("Recording stopped.");
-	mBufferDevice.seek(0);
-	mAudioInput->stop();
-	setState(QAudio::StoppedState);
+	if(mAudioInput != NULL && mBufferDevice != NULL && state() != QAudio::StoppedState)
+	{
+		stopChecking();
+		mAudioInput->stop();
+		delete mBufferDevice;
+		mBufferDevice = NULL;
+		delete mAudioInput;
+		mAudioInput = NULL;
+		setState(QAudio::StoppedState);
+		LOG("Recording stopped.");
+	}
 }
 
 void ViStreamInput::pause()
 {
 	LOG("Recording paused.");
 	mAudioInput->suspend();
+	stopChecking();
 	setState(QAudio::SuspendedState);
 }
 

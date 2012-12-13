@@ -13,7 +13,12 @@ class ViPlaybackWidget : public ViWidget
 {
 	Q_OBJECT
 
+	signals:
+
+		void clicked();
+
 	private slots:
+		
 		void record(bool checked);
 		void play(bool checked);
 		void pause(bool checked);

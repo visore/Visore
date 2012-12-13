@@ -37,7 +37,7 @@ ENDIF()
 
 #Setup Qt5
 SET(CMAKE_AUTOMOC ON)
-SET(QT5_DIR "/usr/local/Qt-5.0.0b2" CACHE PATH "Qt5 install location (containing the bin, include and lib directories - eg: /usr/local/Qt-5.0.0)")
+SET(QT5_DIR "/usr/local/Qt-5.0.0rc1/5.0.0-rc1/gcc_64" CACHE PATH "Qt5 install location (containing the bin, include and lib directories - eg: /usr/local/Qt-5.0.0)")
 SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT5_DIR})
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 

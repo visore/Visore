@@ -21,9 +21,13 @@ namespace ViAudio
 
 	enum Type
 	{
-		Target,
-		Corrupted,
-		Corrected
+		UnknownType,
+		TargetType,
+		CorruptedType,
+		CorrectedType,
+		TemporaryType,
+		TempType = TemporaryType,
+		AllTypes = TargetType | CorruptedType | CorrectedType | TemporaryType
 	};
 
 	using namespace QAudio;

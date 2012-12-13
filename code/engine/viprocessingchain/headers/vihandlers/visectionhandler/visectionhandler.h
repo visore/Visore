@@ -46,6 +46,8 @@ class ViSectionHandler : public ViHandler
 		bool wasSongRunning();
 		void setIdleSize(qint64 bytes);
 
+		void setBufferType(ViAudio::Type type);
+
 	private:
 
 		ViAudioInput* input();
@@ -53,6 +55,8 @@ class ViSectionHandler : public ViHandler
 		ViExecutor* executor();
 
 	private:
+
+		ViAudio::Type mBufferType;
 
 		ViEndDetector *mEndDetector;
 		ViSpectrumAnalyzer *mSpectrumAnalyzer;

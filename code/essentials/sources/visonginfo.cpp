@@ -263,6 +263,11 @@ void ViSongInfo::setImagePath(QString path)
 	changeImagePath(imagePath(), path);
 }
 
+bool ViSongInfo::hasImage()
+{
+	return imagePath() != "";
+}
+
 QString ViSongInfo::toString()
 {
 	QString result = "Song Info:";

@@ -6,7 +6,6 @@
 #include <QSharedPointer>
 #include <QDir>
 
-
 #include<iostream>
 using namespace std;
 #define DEFAUL_HEADER_SIZE 8192
@@ -513,7 +512,6 @@ bool ViAudioManager::testLibrary(ViAbstractCoder *coder)
 					}
 
 					//Check for libraries that end in version number. Eg: libflac.so.8
-//cout<<path.toLatin1().data()<<" "<<fileName.toLatin1().data()<<endl;
 					nameFilters.clear();
 					possibles.clear();
 
@@ -570,6 +568,7 @@ void ViAudioManager::add(const ViAudioManager::Mode mode,  ViAbstractCoder *code
 			}
 		}
 	}
+	sortCodecs();
 }
 
 void ViAudioManager::add(const ViAudioManager::Mode mode, ViAudioCodec *codec)
@@ -589,4 +588,16 @@ void ViAudioManager::add(const ViAudioManager::Mode mode, ViAudioCodec *codec)
 			mSupportedCodecs.append(codec);
 		}
 	}
+	sortCodecs();
+}
+
+void ViAudioManager::sortCodecs()
+{
+	qSort(mAvailableCodecs.begin(), mAvailableCodecs.end(), ViAudioManager::compareCodecs);
+	qSort(mSupportedCodecs.begin(), mSupportedCodecs.end(), ViAudioManager::compareCodecs);
+}
+
+bool ViAudioManager::compareCodecs(ViAudioCodec *first, ViAudioCodec *second)
+{
+	return first->abbreviation() < second->abbreviation();
 }

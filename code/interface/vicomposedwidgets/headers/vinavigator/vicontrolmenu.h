@@ -13,6 +13,10 @@ class ViControlMenu : public ViMenu
 {
 	Q_OBJECT
 
+	private slots:
+
+		void select();
+
 	public:
 
 		ViControlMenu(ViNavigator *navigator = 0);

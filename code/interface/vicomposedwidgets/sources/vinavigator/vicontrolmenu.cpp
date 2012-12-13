@@ -10,11 +10,15 @@ ViControlMenu::ViControlMenu(ViNavigator *navigator)
 	//Spectrum analysis widget
 	mMainIndex = addStackWidget(&mMainWidget);
 
-	//Set default view
-	setCurrentStackIndex(mMainIndex);
+	QObject::connect(mUi->playbackWidget, SIGNAL(clicked()), this, SLOT(select()));
 }
 
 ViControlMenu::~ViControlMenu()
 {
 	delete mUi;
+}
+
+void ViControlMenu::select()
+{
+	setCurrentStackIndex(mMainIndex);
 }

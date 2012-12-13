@@ -1,4 +1,5 @@
 #include "viaudioobject.h"
+#include <QSet>
 
 /*******************************************************************************************************************
 
@@ -9,12 +10,12 @@
 ViAudioObject::ViAudioObject(bool autoDestruct)
 	: QObject(), ViId()
 {
-	mAutoDestruct = autoDestruct;
+	setAutoDestruct(autoDestruct);
 	mIsFinished = false;
 	mIsSong = false;
 
-	mInputType = ViAudioObject::Unknown;
-	mOutputType = ViAudioObject::Unknown;
+	mInputType = ViAudio::UnknownType;
+	mOutputType = ViAudio::UnknownType;
 
 	mTargetBuffer = NULL;
 	mCorruptedBuffer = NULL;
@@ -28,10 +29,7 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 
 ViAudioObject::~ViAudioObject()
 {
-	if(mAutoDestruct)
-	{
-		clearBuffers();
-	}
+	clearBuffers(mDestructType);
 }
 
 ViAudioObjectPointer ViAudioObject::create(ViAudioObject *object)
@@ -51,22 +49,92 @@ ViAudioObjectPointer ViAudioObject::createNull()
 
 /*******************************************************************************************************************
 
+	AUTO DESTRUCT
+
+*******************************************************************************************************************/
+
+void ViAudioObject::setAutoDestruct(bool destruct)
+{
+	QMutexLocker locker(&mMutex);
+	if(destruct)
+	{
+		mDestructType = ViAudio::AllTypes;
+	}
+	else
+	{
+		mDestructType = ViAudio::UnknownType;
+	}
+}
+
+void ViAudioObject::addDestructRule(ViAudio::Type type, bool destruct)
+{
+	QMutexLocker locker(&mMutex);
+	QSet<ViAudio::Type> set;
+	QSet<ViAudio::Type> values;
+	values.insert(ViAudio::TargetType);
+	values.insert(ViAudio::CorruptedType);
+	values.insert(ViAudio::CorrectedType);
+	values.insert(ViAudio::TemporaryType);
+
+	//Old Values
+	foreach(const ViAudio::Type &value, values)
+	{
+		if(mDestructType & value)
+		{
+			set.insert(value);
+		}
+	}
+
+	//New Values
+	foreach(const ViAudio::Type &value, values)
+	{
+		if(type & value)
+		{
+			if(destruct)
+			{
+				set.insert(value);
+			}
+			else
+			{
+				set.remove(value);
+			}
+		}
+	}
+
+	if(set.isEmpty())
+	{
+		mDestructType = ViAudio::UnknownType;
+	}
+	else
+	{
+		QList<ViAudio::Type> list = set.toList();
+		ViAudio::Type temp = list[0];
+		for(int i = 1; i < list.size(); ++i)
+		{
+			temp |= list[i];
+		}
+		mDestructType = temp;
+	}
+}
+
+/*******************************************************************************************************************
+
 	INPUT & OUTPUT
 
 *******************************************************************************************************************/
 
-void ViAudioObject::setType(ViAudioObject::Type input, ViAudioObject::Type output)
+void ViAudioObject::setType(ViAudio::Type input, ViAudio::Type output)
 {
 	setInputType(input);
 	setOutputType(output);
 }
 
-void ViAudioObject::setInputType(ViAudioObject::Type type)
+void ViAudioObject::setInputType(ViAudio::Type type)
 {
 	mInputType = type;
 }
 
-void ViAudioObject::setOutputType(ViAudioObject::Type type)
+void ViAudioObject::setOutputType(ViAudio::Type type)
 {
 	mOutputType = type;
 }
@@ -137,19 +205,19 @@ ViBuffer* ViAudioObject::tempBuffer()
 
 ViBuffer* ViAudioObject::inputBuffer()
 {
-	if(mInputType == ViAudioObject::Target)
+	if(mInputType == ViAudio::TargetType)
 	{
 		return targetBuffer();
 	}
-	else if(mInputType == ViAudioObject::Corrupted)
+	else if(mInputType == ViAudio::CorruptedType)
 	{
 		return corruptedBuffer();
 	}
-	else if(mInputType == ViAudioObject::Corrected)
+	else if(mInputType == ViAudio::CorrectedType)
 	{
 		return correctedBuffer();
 	}
-	else if(mInputType == ViAudioObject::Temporary)
+	else if(mInputType == ViAudio::TemporaryType)
 	{
 		return tempBuffer();
 	}
@@ -158,19 +226,19 @@ ViBuffer* ViAudioObject::inputBuffer()
 
 ViBuffer* ViAudioObject::outputBuffer()
 {
-	if(mOutputType == ViAudioObject::Target)
+	if(mOutputType == ViAudio::TargetType)
 	{
 		return targetBuffer();
 	}
-	else if(mOutputType == ViAudioObject::Corrupted)
+	else if(mOutputType == ViAudio::CorruptedType)
 	{
 		return corruptedBuffer();
 	}
-	else if(mOutputType == ViAudioObject::Corrected)
+	else if(mOutputType == ViAudio::CorrectedType)
 	{
 		return correctedBuffer();
 	}
-	else if(mOutputType == ViAudioObject::Temporary)
+	else if(mOutputType == ViAudio::TemporaryType)
 	{
 		return tempBuffer();
 	}
@@ -195,12 +263,24 @@ void ViAudioObject::setCorrectedBuffer(ViBuffer *buffer)
 	mCorrectedBuffer = buffer;
 }
 
-void ViAudioObject::clearBuffers()
+void ViAudioObject::clearBuffers(ViAudio::Type type)
 {
-	clearTargetBuffer();
-	clearCorruptedBuffer();
-	clearCorrectedBuffer();
-	clearTempBuffer();
+	if(mDestructType & ViAudio::TargetType)
+	{
+		clearTargetBuffer();
+	}
+	if(mDestructType & ViAudio::CorruptedType)
+	{
+		clearCorruptedBuffer();
+	}
+	if(mDestructType & ViAudio::CorrectedType)
+	{
+		clearCorrectedBuffer();
+	}
+	if(mDestructType & ViAudio::TemporaryType)
+	{
+		clearTempBuffer();
+	}
 }
 
 void ViAudioObject::clearTargetBuffer()
@@ -253,32 +333,65 @@ void ViAudioObject::clearTempBuffer()
 
 *******************************************************************************************************************/
 
-QString ViAudioObject::targetFile()
+QString ViAudioObject::filePath(ViAudio::Type type)
+{
+	if(type == ViAudio::TargetType)
+	{
+		return targetFilePath();
+	}
+	else if(type == ViAudio::CorruptedType)
+	{
+		return corruptedFilePath();
+	}
+	else if(type == ViAudio::CorrectedType)
+	{
+		return correctedFilePath();
+	}
+	return "";
+}
+
+QString ViAudioObject::targetFilePath()
 {
 	return mTargetFile;
 }
 
-QString ViAudioObject::corruptedFile()
+QString ViAudioObject::corruptedFilePath()
 {
 	return mCorruptedFile;
 }
 
-QString ViAudioObject::correctedFile()
+QString ViAudioObject::correctedFilePath()
 {
 	return mCorrectedFile;
 }
 
-void ViAudioObject::setTargetFile(QString path)
+void ViAudioObject::setFilePath(ViAudio::Type type, QString path)
+{
+	if(type == ViAudio::TargetType)
+	{
+		setTargetFilePath(path);
+	}
+	else if(type == ViAudio::CorruptedType)
+	{
+		setCorruptedFilePath(path);
+	}
+	else if(type == ViAudio::CorrectedType)
+	{
+		setCorrectedFilePath(path);
+	}
+}
+
+void ViAudioObject::setTargetFilePath(QString path)
 {
 	mTargetFile = path;
 }
 
-void ViAudioObject::setCorruptedFile(QString path)
+void ViAudioObject::setCorruptedFilePath(QString path)
 {
 	mCorruptedFile = path;
 }
 
-void ViAudioObject::setCorrectedFile(QString path)
+void ViAudioObject::setCorrectedFilePath(QString path)
 {
 	mCorrectedFile = path;
 }

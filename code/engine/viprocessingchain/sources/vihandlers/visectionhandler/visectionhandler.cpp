@@ -7,6 +7,7 @@
 ViSectionHandler::ViSectionHandler(ViProcessingChain *chain)
 	: ViHandler(chain)
 {
+	mBufferType = ViAudio::TargetType;
 	mIdleSize = IDLE_SIZE;
 	QObject::connect(&mIdleTimer, SIGNAL(timeout()), this, SLOT(checkSize()));
 
@@ -46,6 +47,11 @@ void ViSectionHandler::setIdleSize(qint64 bytes)
 	mIdleSize = bytes;
 }
 
+void ViSectionHandler::setBufferType(ViAudio::Type type)
+{
+	mBufferType = type;
+}
+
 void ViSectionHandler::startRecord()
 {
 	emit recordStarted();
@@ -69,7 +75,7 @@ void ViSectionHandler::startSong()
 
 void ViSectionHandler::endSong()
 {
-	endInput();LOG("kkk: "+QString::number(mChain->audioObject()->isUsed()));
+	endInput();
 	startInput();
 	while(!executor()->isFinished());
 	mIsSongRunning = false;
@@ -78,9 +84,9 @@ void ViSectionHandler::endSong()
 }
 
 void ViSectionHandler::startInput(bool isSong)
-{LOG("start1");
+{
 	ViAudioObjectPointer object = ViAudioObject::create();
-	object->setType(ViAudioObject::Temp, ViAudioObject::Target);
+	object->setType(ViAudio::TemporaryType, mBufferType);
 	if(isSong)
 	{
 		object->setSong();
@@ -95,7 +101,6 @@ void ViSectionHandler::startInput(bool isSong)
 	input()->setBuffer(object->inputBuffer());
 	executor()->setObject(object);
 	executor()->initialize();
-LOG("start2");
 }
 
 void ViSectionHandler::endInput()

@@ -13,11 +13,12 @@
 ViProject::ViProject(QString filePath)
 	: QObject(), ViId()
 {
-	setFilePath(filePath);
-
-	mSides = 0;
-	mCurrentSide = 1;
+	mCurrentSide = 0;
 	mCurrentTrack = 0;
+	mExistingProject = false;
+
+	setFilePath(filePath);
+	setSides(1);
 
 	setProjectName("");
 	mCreatedVersion = ViManager::version();
@@ -31,11 +32,12 @@ ViProject::ViProject(QString filePath)
 ViProject::ViProject(QString projectName, QString filePath, int sides)
 	: QObject(), ViId()
 {
+	mCurrentSide = 0;
+	mCurrentTrack = 0;
+	mExistingProject = false;
+
 	setFilePath(filePath);
 	setSides(sides);
-
-	mCurrentSide = 1;
-	mCurrentTrack = 0;
 
 	setProjectName(projectName);
 	mCreatedVersion = ViManager::version();
@@ -54,45 +56,57 @@ ViProject::~ViProject()
 
 void ViProject::serialize(ViAudioObjectPointer object, ViAudio::Type type)
 {
-	QString path;
-	if(type == ViAudio::Target)
+	QString filePath;
+	if(type == ViAudio::TargetType)
 	{
-		path = mPaths["data_target"];
+		filePath = mPaths["data_target"];
 	}
-	else if(type == ViAudio::Corrupted)
+	else if(type == ViAudio::CorruptedType)
 	{
-		path = mPaths["data_corrupted"];
+		filePath = mPaths["data_corrupted"];
 	}
-	else if(type == ViAudio::Corrected)
+	else if(type == ViAudio::CorrectedType)
 	{
-		path = mPaths["data_corrected"];
+		filePath = mPaths["data_corrected"];
 	}
-	
-	mObjects[mCurrentSide-1].append(object);
+	filePath = generateFileName(object->songInfo(), filePath, mFormat.codec()->extension());
+	object->setFilePath(type, filePath);
 
-	++mCurrentTrack;	LOG("Project track: "+QString::number(mCurrentTrack));
-	QString filePath = generateFileName(object->songInfo(), path, mFormat.codec()->extension());
-	if(type == ViAudio::Target)
+	++mCurrentTrack;
+	if(mExistingProject)
 	{
-		object->setTargetFile(path);
+		if(type == ViAudio::TargetType)
+		{
+			mObjects[mCurrentSide-1][mCurrentTrack-1]->setTargetBuffer(object->outputBuffer());
+			object->addDestructRule(ViAudio::TargetType, false);
+		}
+		else if(type == ViAudio::CorruptedType)
+		{
+			mObjects[mCurrentSide-1][mCurrentTrack-1]->setCorruptedBuffer(object->outputBuffer());
+			object->addDestructRule(ViAudio::CorruptedType, false);
+		}
+		else if(type == ViAudio::CorrectedType)
+		{
+			mObjects[mCurrentSide-1][mCurrentTrack-1]->setCorrectedBuffer(object->outputBuffer());
+			object->addDestructRule(ViAudio::CorrectedType, false);
+		}
 	}
-	else if(type == ViAudio::Corrupted)
+	else
 	{
-		object->setCorruptedFile(path);
-	}
-	else if(type == ViAudio::Corrected)
-	{
-		object->setCorrectedFile(path);
+		mObjects[mCurrentSide-1].append(object);
 	}
 
-	QFileInfo info(object->songInfo().imagePath());
-	QString albumArt = generateFileName(object->songInfo(), mPaths["data_albumart"], info.suffix());
-	QFile file(object->songInfo().imagePath());
-	if(file.exists())
+	if(object->songInfo().hasImage())
 	{
-		file.copy(albumArt);
+		QFileInfo info(object->songInfo().imagePath());
+		QString albumArt = generateFileName(object->songInfo(), mPaths["data_albumart"], info.suffix());
+		QFile file(object->songInfo().imagePath());
+		if(file.exists())
+		{
+			file.copy(albumArt);
+		}
+		object->songInfo().changeImagePath(object->songInfo().imagePath(), albumArt);
 	}
-	object->songInfo().changeImagePath(object->songInfo().imagePath(), albumArt);
 	mEncoder.encode(object->outputBuffer(), filePath, mFormat, 0, object->songInfo());
 }
 
@@ -132,6 +146,7 @@ QString ViProject::filePath()
 void ViProject::setSides(int sides)
 {
 	mSides = sides;
+	mCurrentSide = 0;
 	nextSide();
 	mObjects.clear();
 	for(int i = 0; i < mSides; ++i)
@@ -204,7 +219,6 @@ bool ViProject::load(bool minimal)
 	{
 		return mArchive.decompressData(mPaths["root"]);
 	}
-
 }
 
 void ViProject::save()
@@ -223,6 +237,7 @@ bool ViProject::loadAll()
 		return false;
 	}
 	removeSideStructure();
+	mExistingProject = true;
 	return loadProperties() & loadTracks();
 }
 
@@ -443,9 +458,9 @@ bool ViProject::saveTracks()
 
 			ViElement data("Data");
 			data.addChild("AlbumArt", relativePath(mObjects[j][i]->songInfo().imagePath()));
-			data.addChild("Target", relativePath(mObjects[j][i]->targetFile()));
-			data.addChild("Corrupted", relativePath(mObjects[j][i]->corruptedFile()));
-			data.addChild("Corrected", relativePath(mObjects[j][i]->correctedFile()));
+			data.addChild("Target", relativePath(mObjects[j][i]->targetFilePath()));
+			data.addChild("Corrupted", relativePath(mObjects[j][i]->corruptedFilePath()));
+			data.addChild("Corrected", relativePath(mObjects[j][i]->correctedFilePath()));
 			track.addChild(data);
 
 			side.addChild(track);
@@ -497,9 +512,9 @@ bool ViProject::loadTracks()
 			info.setArtistName(tracks[i].child("Artist").toString());
 			info.setSongTitle(tracks[i].child("Title").toString());
 			ViElement data = tracks[i].child("Data");
-			object->setTargetFile(absolutePath(data.child("Target").toString()));
-			object->setCorruptedFile(absolutePath(data.child("Corrupted").toString()));
-			object->setCorrectedFile(absolutePath(data.child("Corrected").toString()));
+			object->setTargetFilePath(absolutePath(data.child("Target").toString()));
+			object->setCorruptedFilePath(absolutePath(data.child("Corrupted").toString()));
+			object->setCorrectedFilePath(absolutePath(data.child("Corrected").toString()));
 			info.setImagePath(absolutePath(data.child("AlbumArt").toString()));
 			object->setSongInfo(info);
 			mObjects[j].append(object);

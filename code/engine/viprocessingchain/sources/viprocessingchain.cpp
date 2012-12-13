@@ -60,6 +60,7 @@ void ViProcessingChain::setTransmission(ViAudioTransmission *transmission)
 
 void ViProcessingChain::startProject(ViProject *project, ViAudio::Type type, bool existingProject)
 {
+	mSectionHandler->setBufferType(type);
 	mProjectHandler->startProject(project, type, existingProject);
 }
 

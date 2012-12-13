@@ -60,6 +60,7 @@ class ViSongInfo
 		void addImagePath(QString path);
 		void changeImagePath(QString fromPath, QString toPath);
 		void setImagePath(QString path);
+		bool hasImage();
 
 		QString toString();
 		void clear();

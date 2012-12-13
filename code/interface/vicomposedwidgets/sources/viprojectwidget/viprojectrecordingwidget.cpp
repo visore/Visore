@@ -11,6 +11,7 @@ ViProjectRecordingWidget::ViProjectRecordingWidget(QWidget *parent)
 
 	mUi->existingBrowser->addFilter(ViManager::projectFilter());
 	mUi->existingBrowser->setMode(ViFileBrowser::OpenFile);
+	mUi->existingBrowser->setDirectory(ViManager::projectPath());
 	mUi->newBrowser->addFilter(ViManager::projectFilter());
 	mUi->newBrowser->setMode(ViFileBrowser::SaveFile);
 
@@ -33,10 +34,10 @@ ViProjectRecordingWidget::~ViProjectRecordingWidget()
 
 void ViProjectRecordingWidget::start()
 {
-	ViAudio::Type type = ViAudio::Target;
+	ViAudio::Type type = ViAudio::TargetType;
 	if(mUi->corruptedRadioButton->isChecked())
 	{
-		type = ViAudio::Corrupted;
+		type = ViAudio::CorruptedType;
 	}
 	engine()->startProject(mUi->nameLineEdit->text(), mUi->newBrowser->fileName(), mUi->formatWidget->format(), mUi->sidesSpinBox->value(), type, mUi->existingRadioButton->isChecked());
 }
