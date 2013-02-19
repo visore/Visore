@@ -41,12 +41,12 @@ void ViArchiveThread::setComment(QString comment)
 	mComment = comment;
 }
 
-QString ViArchiveThread::filePath()
+QString ViArchiveThread::filePath() const
 {
 	return mFilePath;
 }
 
-ViArchive::Error ViArchiveThread::error()
+ViArchive::Error ViArchiveThread::error() const
 {
 	return mError;
 }
@@ -269,6 +269,8 @@ ViArchive::ViArchive(QString filePath, int compression, QString comment)
 	mThread = new ViArchiveThread();
 	mAction = ViArchive::Unknown;
 	QObject::connect(mThread, SIGNAL(finished()), this, SLOT(finish()));
+	QObject::connect(this, SIGNAL(compressed()), this, SIGNAL(finished()), Qt::DirectConnection);
+	QObject::connect(this, SIGNAL(decompressed()), this, SIGNAL(finished()), Qt::DirectConnection);
 	setFilePath(filePath);
 	setCompression(compression);
 	setComment(comment);
@@ -283,14 +285,14 @@ void ViArchive::finish()
 {
 	if(mAction == ViArchive::Compress)
 	{
-		emit compressFinished();
+		mAction = ViArchive::Unknown;
+		emit compressed();
 	}
 	else if(mAction == ViArchive::Decompress)
 	{
-		emit decompressFinished();
+		mAction = ViArchive::Unknown;
+		emit decompressed();
 	}
-	emit finished();
-	mAction = ViArchive::Unknown;
 }
 
 void ViArchive::setFilePath(QString filePath)
@@ -308,17 +310,17 @@ void ViArchive::setComment(QString comment)
 	mThread->setComment(comment);
 }
 
-QString ViArchive::filePath()
+QString ViArchive::filePath() const
 {
 	return mThread->filePath();
 }
 
-ViArchive::Error ViArchive::error()
+ViArchive::Error ViArchive::error() const
 {
 	return mThread->error();
 }
 
-QString ViArchive::errorString()
+QString ViArchive::errorString() const
 {
 	ViArchive::Error theError = error();
 	if(theError == ViArchive::NoError)
@@ -372,7 +374,7 @@ QString ViArchive::errorString()
 	return "";
 }
 
-QStringList ViArchive::fileList(QString extension)
+QStringList ViArchive::fileList(QString extension) const
 {
 	UnZip unzip;
 	QStringList result;
@@ -398,7 +400,7 @@ QStringList ViArchive::fileList(QString extension)
 	return result;
 }
 
-bool ViArchive::isValid()
+bool ViArchive::isValid() const
 {
 	UnZip unzip;
 	if(unzip.openArchive(mThread->filePath()) == UnZip::Ok)

@@ -2,6 +2,7 @@
 #define VICOMMON_H
 
 #include <QString>
+#include <QQueue>
 #include <QtGlobal>
 #include <QStringList>
 #include <math.h>
@@ -37,5 +38,7 @@ typedef QList<bool> QBoolList;
 typedef QList<qint> QIntList;
 typedef QList<qfloat> QFloatList;
 typedef QList<qreal> QRealList;
+
+typedef QQueue<QString> QStringQueue;
 
 #endif

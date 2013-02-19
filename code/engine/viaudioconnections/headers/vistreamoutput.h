@@ -16,6 +16,10 @@ class ViStreamOutput : public ViAudioOutput
 		void lengthChanged(ViAudioPosition length);
 		void underrun();
 
+		void volumeChanged(int volume);
+		void muted();
+		void unmuted();
+
 	public slots:
 
 		bool setPosition(ViAudioPosition position); //returns negative number if position is invalid
@@ -44,7 +48,8 @@ class ViStreamOutput : public ViAudioOutput
 
 		qreal volume();
 		void setVolume(qreal volume);
-		void mute(bool value);
+		void mute(bool value = true);
+		void unmute();
 
 	protected:
 

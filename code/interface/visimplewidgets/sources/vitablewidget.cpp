@@ -7,20 +7,20 @@
 ViTableWidget::ViTableWidget(QWidget *parent)
 	: QTableWidget(parent)
 {
-	QString gradient1 = "qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + ViThemeManager::color(2).name() + ", stop: 0.5 " + ViThemeManager::color(3).name() + ", stop: 1 " + ViThemeManager::color(2).name() + ")";
+	QString gradient1 = "qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + ViThemeManager::color(ViThemeColors::ButtonNormalColor1).name() + ", stop: 0.5 " + ViThemeManager::color(ViThemeColors::ButtonNormalColor2).name() + ", stop: 1 " + ViThemeManager::color(ViThemeColors::ButtonNormalColor1).name() + ")";
 
-	QString gradient2 = "qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + ViThemeManager::color(13).name() + ", stop: 0.5 " + ViThemeManager::color(15).name() + ", stop: 1 " + ViThemeManager::color(13).name() + ")";
+	QString gradient2 = "qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + ViThemeManager::color(ViThemeColors::ButtonSelectedColor1).name() + ", stop: 0.5 " + ViThemeManager::color(ViThemeColors::ButtonSelectedColor2).name() + ", stop: 1 " + ViThemeManager::color(ViThemeColors::ButtonSelectedColor1).name() + ")";
 
 	setStyleSheet("\
 		QTableView{\
-			gridline-color: " + ViThemeManager::color(2).name() + ";\
-			color: " + ViThemeManager::color(5).name() + ";\
+			gridline-color: " + ViThemeManager::color(ViThemeColors::BorderColor2).name() + ";\
+			color: " + ViThemeManager::color(ViThemeColors::ButtonTextColor2).name() + ";\
 			background-color: transparent;\
 		}\
 		\
 		QHeaderView::section{\
 			background: " + gradient1 + ";\
-			color: " + ViThemeManager::color(13).name() + ";\
+			color: " + ViThemeManager::color(ViThemeColors::ButtonTextColor1).name() + ";\
 			border: 0px solid black;\
 		}\
 		QHeaderView{\

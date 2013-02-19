@@ -1,7 +1,8 @@
-#include "vimainwindow.h"
-#include "ui_vimainwindow.h"
-
-#include "vifilebrowser.h"
+#include <vimainwindow.h>
+#include <ui_vimainwindow.h>
+#include <vistackedwidget.h>
+#include <vimainmenu.h>
+#include <viloadingwidget.h>
 
 ViMainWindow* ViMainWindow::mWindow = NULL;
 
@@ -45,7 +46,7 @@ void ViMainWindow::show()
 
 void ViMainWindow::resizeEvent(QResizeEvent *event)
 {
-	ViLoadingWidget::instance().resize(event->size());
+	ViLoadingWidget::instance()->resize(event->size());
     event->accept();
 	ViManager::setWindowSize(event->size());
 }
@@ -70,7 +71,20 @@ void ViMainWindow::initialize()
 	mUi->setupUi(this);
 	mEngine = ViAudioEngine::instance();
 
-	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile.png", ViThemeImage::Normal, ViThemeManager::Background).path() + ") repeat-x;}");
+	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile").path() + ") repeat-x;}");
 
-	//ViLoadingWidget::stop();
+	mUi->stack->layout()->addWidget(ViStackedWidget::widget());
+
+	int index = ViStackedWidget::addWidget(new ViMainMenu());
+	ViStackedWidget::setCurrentIndex(index);
+	mUi->logoButton->addFunctionCall(SIGNAL(clicked()), ViFunctionCall(ViStackedWidget::instance().data(), "setCurrentIndex", index));
+
+	mUi->logoButton->setSize(64, 64);
+	mUi->logoButton->setIcon("logo", 64);
+	mUi->logoButton->disableBackground();
+	mUi->logoButton->setGlow(ViGradientCreator::Circle);
+
+	ViFont font = ViThemeManager::font(ViThemeFonts::MainFont);
+	font.setPointSize(24);
+	mUi->logoLabel->setFont(font);
 }

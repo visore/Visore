@@ -6,6 +6,10 @@ QImage ViGradientCreator::createGradient(ViGradientCreator::ViGradientType type,
 	{
 		return rectangleGradient(width, height, color);
 	}
+	else if(type == ViGradientCreator::BoldCircle)
+	{
+		return boldRadialGradient(width, height, color);
+	}
 	else if(type == ViGradientCreator::Circle)
 	{
 		return radialGradient(width, height, color);
@@ -86,6 +90,29 @@ QImage ViGradientCreator::rectangleGradient(int width, int height, QColor color)
 }
 
 QImage ViGradientCreator::radialGradient(int width, int height, QColor color)
+{
+	QImage::Format format = QImage::Format_ARGB32;
+    QImage buffer(qCeil(width), qCeil(height), format);
+	buffer.fill(qRgba(255, 255, 255, 0));
+
+	QPainter painter(&buffer);
+	painter.setPen(Qt::NoPen);
+	painter.setRenderHint(QPainter::Antialiasing, true);
+
+	QRadialGradient radialGradient(QPointF(width / 2, height /2), qMax(width, height) / 2);
+	QColor newColor = color;
+	newColor.setAlpha(150);
+	radialGradient.setColorAt(1, Qt::transparent);
+	radialGradient.setColorAt(0, newColor);
+
+	painter.setBrush(radialGradient);
+	painter.drawRect(0, 0, width, height);
+
+	painter.end();
+    return buffer;
+}
+
+QImage ViGradientCreator::boldRadialGradient(int width, int height, QColor color)
 {
 	QImage::Format format = QImage::Format_ARGB32;
     QImage buffer(qCeil(width), qCeil(height), format);

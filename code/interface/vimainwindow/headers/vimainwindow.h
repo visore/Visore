@@ -37,7 +37,7 @@ class ViMainWindow : public QMainWindow
 		static ViMainWindow *mWindow;
 
 		Ui::ViMainWindow *mUi;
-		ViAudioEngine *mEngine;
+		ViAudioEnginePointer mEngine;
 
 };
 

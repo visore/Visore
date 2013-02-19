@@ -25,11 +25,13 @@ class ViProject : public QObject, public ViId
 
 	signals:
 
+		void saved();
+		void loaded();
 		void finished();
 
 	public slots:
 
-		void serialize(ViAudioObjectPointer object, ViAudio::Type type);
+		void serialize(ViAudioObjectPointer object, ViAudioObject::Type type);
 		void setFormat(ViAudioFormat format);
 
 		/*******************************************************************************************************************
@@ -45,6 +47,7 @@ class ViProject : public QObject, public ViId
 
 		bool loadAll();
 		void saveAll();
+		void setFinished(bool finish = true);
 
 	public:
 
@@ -54,8 +57,9 @@ class ViProject : public QObject, public ViId
 
 		*******************************************************************************************************************/
 
-		ViProject(QString filePath);
+		ViProject(QString filePath = "");
 		ViProject(QString projectName, QString filePath, int sides);
+		ViProject(const ViProject &other);
 		~ViProject();
 
 		/*******************************************************************************************************************
@@ -64,10 +68,20 @@ class ViProject : public QObject, public ViId
 
 		*******************************************************************************************************************/
 
+		ViAudioObjectMatrix objectMatrix();
+		ViAudioObjectList objectList();
+		ViAudioObjectQueue objectQueue();
+		static QString generateTrackName(ViSongInfo info, int trackNumber = -1, int sideNumber = -1);
+
 		qint64 size();
 
 		void setFilePath(QString filePath);
-		QString filePath();
+		QString filePath() const;
+		QString fileName() const;
+
+		ViAudioFormat format();
+
+		bool isFinished();
 
 		/*******************************************************************************************************************
 
@@ -79,6 +93,7 @@ class ViProject : public QObject, public ViId
 		int sides();
 		int currentSide();
 		void nextSide();
+		bool isLastSide();
 
 		/*******************************************************************************************************************
 
@@ -127,6 +142,7 @@ class ViProject : public QObject, public ViId
 		int mCurrentTrack;
 
 		bool mExistingProject;
+		bool mFinished;
 
 		QMap<QString,QString> mPaths;
 		QMap<QString,QString> mFiles;
@@ -135,7 +151,7 @@ class ViProject : public QObject, public ViId
 		ViAudioFormat mFormat;
 		ViAudioCoder mEncoder;
 
-		QList<QList<ViAudioObjectPointer> > mObjects;
+		ViAudioObjectMatrix mObjects;
 
 		/*******************************************************************************************************************
 

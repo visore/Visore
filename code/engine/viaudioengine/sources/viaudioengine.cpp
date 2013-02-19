@@ -1,15 +1,7 @@
 #include "viaudioengine.h"
 
-#include "visampleenddetector.h"
-#include "vifrequencyenddetector.h"
-
-#include <tr1/functional>
-
 ViAudioEngine::ViAudioEngine()
 {
-	QObject::connect(&mSpectrumAnalyzer, SIGNAL(progressed(short)), this, SIGNAL(spectrumProgressed(short)));
-	QObject::connect(&mSpectrumAnalyzer, SIGNAL(finished()), this, SIGNAL(spectrumFinished()));
-
 	//QObject::connect(&mCorrelator, SIGNAL(progressed(short)), this, SIGNAL(correlationProgressed(short)));
 	//QObject::connect(&mCorrelator, SIGNAL(finished()), this, SIGNAL(correlationFinished()));
 
@@ -18,19 +10,9 @@ ViAudioEngine::ViAudioEngine()
 	mStreamInput = mConnection.streamInput();
 	mStreamOutput = mConnection.streamOutput();
 
-	QObject::connect(&mProcessingChain, SIGNAL(changed()), this, SIGNAL(chainChanged()));
-	QObject::connect(&mProcessingChain, SIGNAL(progressStarted()), this, SIGNAL(progressStarted()));
-	QObject::connect(&mProcessingChain, SIGNAL(progress(short)), this, SIGNAL(progress(short)));
-	QObject::connect(&mProcessingChain, SIGNAL(progressFinished()), this, SIGNAL(progressFinished()));
-	QObject::connect(&mProcessingChain, SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
-
-	mProcessingChain.setTransmission(mStreamOutput);
 	mStreamOutput->setDevice(QAudioDeviceInfo::defaultOutputDevice());
 	mStreamOutput->setFormat(ViAudioFormat::defaultFormat());
-	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)), Qt::DirectConnection);
-	QObject::connect(mStreamOutput, SIGNAL(lengthChanged(ViAudioPosition)), this, SIGNAL(lengthChanged(ViAudioPosition)), Qt::DirectConnection);
 
-	mProcessingChain.setTransmission(mFileOutput);
 	/*ViAudioFormat fileFormat = ViAudioFormat::defaultFormat();
 	fileFormat.setCodec(ViAudioManager::codec("WAVE"));
 	mFileOutput->setFormat(fileFormat);*/
@@ -38,77 +20,59 @@ ViAudioEngine::ViAudioEngine()
 	mStreamInput->setFormat(ViAudioFormat::defaultFormat());
 	mStreamInput->setDevice(QAudioDeviceInfo::defaultInputDevice());
 
-	//mProcessingChain.attach(ViAudio::AudioInput, &mInputWaveFormer);
-	//mProcessingChain.attach(ViAudio::AudioOutput, &mOutputWaveFormer);
-
-	//Spectrum analyzer
-	QObject::connect(&mSpectrumAnalyzer, SIGNAL(changed(ViRealSpectrum, qint64)), this, SIGNAL(spectrumChanged(ViRealSpectrum, qint64)), Qt::DirectConnection);
-	mProcessingChain.attach(ViAudio::AudioOutput, &mSpectrumAnalyzer);
-	
-	//Song detector
-	mSongIdentifier.setKey("G1TZBE4IHJAYUSNCN");
-	mSongDetector.setIdentifier(&mSongIdentifier);
-	QObject::connect(&mSongDetector, SIGNAL(songDetected(ViSongInfo)), this, SIGNAL(songDetected(ViSongInfo)));
-	//mProcessingChain.attach(ViAudio::AudioOutput, &mSongDetector);
-
-	ViFrequencyEndDetector *endDetector = new ViFrequencyEndDetector();
-	//QObject::connect(&mSpectrumAnalyzer, SIGNAL(changed(ViRealSpectrum, qint64)), endDetector, SLOT(addSpectrum(ViRealSpectrum)), Qt::DirectConnection);
-	mEndDetector = endDetector;
-	//QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), &mProcessingChain, SLOT(startInput()), Qt::DirectConnection);
-	//QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mProcessingChain, SLOT(endInput()), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), &mSongDetector, SLOT(enable()), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), &mSongDetector, SLOT(disable()), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), mFileOutput, SLOT(clearSongInfo()));
-	
-	QObject::connect(mEndDetector, SIGNAL(recordStarted(ViAudioPosition)), this, SIGNAL(recordStarted()), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(recordEnded(ViAudioPosition)), this, SIGNAL(recordEnded()), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(songStarted(ViAudioPosition)), this, SIGNAL(songStarted()), Qt::DirectConnection);
-	QObject::connect(mEndDetector, SIGNAL(songEnded(ViAudioPosition)), this, SIGNAL(songEnded()), Qt::DirectConnection);
-
-	mProcessingChain.attach(ViAudio::AudioInput, mEndDetector);
-
 	//Correlators
 	//mProcessingChain.attach(ViAudio::AudioInputOutput, &mCrossCorrelator);
 	//mProcessingChain.attach(ViAudio::AudioInputOutput, &mSampleCorrelator);
+
+
+	//Volume
+	QObject::connect(mStreamOutput, SIGNAL(volumeChanged(int)), this, SIGNAL(volumeChanged(int)));
+	QObject::connect(mStreamOutput, SIGNAL(muted()), this, SIGNAL(muted()));
+	QObject::connect(mStreamOutput, SIGNAL(unmuted()), this, SIGNAL(unmuted()));
+
+	//Position
+	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
+	QObject::connect(mStreamOutput, SIGNAL(lengthChanged(ViAudioPosition)), this, SIGNAL(lengthChanged(ViAudioPosition)));
+
+
+//******************************/
+/*
+ViCrossCorrelator c;
+qreal *a1 = new qreal[4];
+a1[0]=1;a1[1]=2;a1[2]=3;a1[3]=4;
+qreal *a2 = new qreal[4];
+a2[0]=4;a2[1]=1;a2[2]=2;a2[3]=3;
+//a2[0]=1;a2[1]=2;a2[2]=3;a2[3]=0;
+//a2[0]=3;a2[1]=2;a2[2]=1;a2[3]=0;
+cout<<"***********************************"<<endl;
+ViSampleChunk *d1 = new ViSampleChunk(a1, 4);
+ViSampleChunk *d2 = new ViSampleChunk(a2, 4);
+
+c.setWindowSize(4);
+c.setData(d1, d2);
+c.initialize();
+c.execute();
+c.finalize();
+
+*/
+
+
 }
 
 ViAudioEngine::~ViAudioEngine()
 {
-	if(mEndDetector != NULL)
-	{
-		delete mEndDetector;
-		mEndDetector = NULL;
-	}
-}
 
-ViWaveForm& ViAudioEngine::wave(ViAudio::Mode mode)
-{
-	if(mode == ViAudio::AudioInput)
-	{
-		return mInputWaveFormer.wave();
-	}
-	else if(mode == ViAudio::AudioOutput)
-	{
-		return mOutputWaveFormer.wave();
-	}
-}
-
-ViCorrelation& ViAudioEngine::correlation()
-{
-//	mCorrelator.result();
 }
 
 void ViAudioEngine::changeInput(ViAudio::Input input)
 {
 	if(input == ViAudio::File)
 	{
-		//mProcessingChain.detach(mEndDetector);
-		mProcessingChain.setTransmission(mFileInput);
+		//mProcessingChain.setTransmission(mFileInput);
 	}
 	else if(input == ViAudio::Line)
 	{
-		//mProcessingChain.attach(ViAudio::AudioInput, mEndDetector);
-		mProcessingChain.setTransmission(mStreamInput);
+		//mProcessingChain.setTransmission(mStreamInput);
 	}
 	emit inputChanged(input);
 }
@@ -169,8 +133,20 @@ void ViAudioEngine::calculateSpectrum(qint32 size, QString windowFunction)
 	}*/
 }
 
-void ViAudioEngine::calculateCorrelation()
+void ViAudioEngine::calculateCorrelation(ViAudioObjectPointer object)
 {
+	/*ViSingleExecutor *executor = singleExecutor();
+	executor->setMessage("Correlating tracks");
+	mCrossCorrelator.setWindowSize(4096);
+	executor->execute(object, &mCrossCorrelator, ViAudioObject::Target, ViAudioObject::Corrupted);
+*/
+
+	
+	QObject::connect(object.data(), SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
+	QObject::connect(object.data(), SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
+	object->align();
+
+
 	/*mExecutor.setWindowSize(ViExecutor::defaultWindowSize());
 	if(!mExecutor.execute(mProcessingChain.buffer(ViAudio::AudioInput), mProcessingChain.buffer(ViAudio::AudioOutput), &mCorrelator))
 	{
@@ -178,12 +154,67 @@ void ViAudioEngine::calculateCorrelation()
 	}*/
 }
 
-void ViAudioEngine::startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, ViAudio::Type type, bool existingProject)
+void ViAudioEngine::recordProject(ViProject *project, ViAudioObject::Type type, bool detectInfo)
 {
-	mStreamInput->setFormat(format);
-	changeInput(ViAudio::Line);
-	ViProject *project = new ViProject(name, filePath, recordSides);
-	project->setFormat(format);
-	mProcessingChain.startProject(project, type, existingProject);
-	//startRecording();
+	QObject::connect(&mRecorder, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)), Qt::UniqueConnection);
+	QObject::connect(&mRecorder, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)), Qt::UniqueConnection);
+	QObject::connect(&mRecorder, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::UniqueConnection);
+	mRecorder.record(project, type, detectInfo);
+}
+
+void ViAudioEngine::generateWaveForm(ViAudioObjectPointer object, ViAudioObject::Type type)
+{
+	QObject::connect(object.data(), SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
+	QObject::connect(object.data(), SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
+	QObject::connect(object.data(), SIGNAL(waved()), this, SIGNAL(progressFinished()));
+	QObject::connect(object.data(), SIGNAL(waved()), this, SLOT(disconnectObject()));
+	object->generateWaveForm(type);
+}
+
+void ViAudioEngine::align(ViProject &project)
+{
+	mObjectChain.clear();
+	mObjectChain.add(project);
+	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
+	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
+	mObjectChain.setFunction("align");
+	mObjectChain.execute();
+}
+
+void ViAudioEngine::align(ViAudioObjectPointer object)
+{
+	mObjectChain.clear();
+	mObjectChain.add(object);
+	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
+	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
+	mObjectChain.setFunction("align");
+	mObjectChain.execute();
+}
+
+void ViAudioEngine::disconnectObject()
+{
+	sender()->disconnect();
+}
+
+
+//Volume
+
+void ViAudioEngine::setVolume(int volume)
+{
+	mStreamOutput->setVolume(volume);
+}
+
+void ViAudioEngine::mute(bool value)
+{
+	mStreamOutput->mute(value);
+}
+
+void ViAudioEngine::unmute()
+{
+	mStreamOutput->unmute();
+}
+
+int ViAudioEngine::volume()
+{
+	return mStreamOutput->volume();
 }

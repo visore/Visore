@@ -16,6 +16,7 @@ ViProject::ViProject(QString filePath)
 	mCurrentSide = 0;
 	mCurrentTrack = 0;
 	mExistingProject = false;
+	mFinished = true;
 
 	setFilePath(filePath);
 	setSides(1);
@@ -35,6 +36,7 @@ ViProject::ViProject(QString projectName, QString filePath, int sides)
 	mCurrentSide = 0;
 	mCurrentTrack = 0;
 	mExistingProject = false;
+	mFinished = true;
 
 	setFilePath(filePath);
 	setSides(sides);
@@ -48,53 +50,63 @@ ViProject::ViProject(QString projectName, QString filePath, int sides)
 	createTempStructure();
 }
 
+ViProject::ViProject(const ViProject &other)
+{
+	mSides = other.mSides;
+	mCurrentSide = other.mCurrentSide;
+	mCurrentTrack = other.mCurrentTrack;
+	mExistingProject = other.mExistingProject;
+	mPaths = other.mPaths;
+	mFiles = other.mFiles;
+	mFormat = other.mFormat;
+	mObjects = other.mObjects;
+	mProjectName = other.mProjectName;
+	mCreatedVersion = other.mCreatedVersion;
+	mEditedVersion = other.mEditedVersion;
+
+	setFilePath(other.filePath());
+
+	QObject::connect(&mEncoder, SIGNAL(finished()), this, SLOT(save()));
+
+	createTempStructure();
+}
+
 ViProject::~ViProject()
 {
 	removeTempStructure();
 	mObjects.clear();
 }
 
-void ViProject::serialize(ViAudioObjectPointer object, ViAudio::Type type)
+void ViProject::serialize(ViAudioObjectPointer object, ViAudioObject::Type type)
 {
+	setFinished(false);
+
+	++mCurrentTrack;
 	QString filePath;
-	if(type == ViAudio::TargetType)
+	if(type == ViAudioObject::Target)
 	{
 		filePath = mPaths["data_target"];
 	}
-	else if(type == ViAudio::CorruptedType)
+	else if(type == ViAudioObject::Corrupted)
 	{
 		filePath = mPaths["data_corrupted"];
 	}
-	else if(type == ViAudio::CorrectedType)
+	else if(type == ViAudioObject::Corrected)
 	{
 		filePath = mPaths["data_corrected"];
 	}
 	filePath = generateFileName(object->songInfo(), filePath, mFormat.codec()->extension());
 	object->setFilePath(type, filePath);
 
-	++mCurrentTrack;
 	if(mExistingProject)
 	{
-		if(type == ViAudio::TargetType)
-		{
-			mObjects[mCurrentSide-1][mCurrentTrack-1]->setTargetBuffer(object->outputBuffer());
-			object->addDestructRule(ViAudio::TargetType, false);
-		}
-		else if(type == ViAudio::CorruptedType)
-		{
-			mObjects[mCurrentSide-1][mCurrentTrack-1]->setCorruptedBuffer(object->outputBuffer());
-			object->addDestructRule(ViAudio::CorruptedType, false);
-		}
-		else if(type == ViAudio::CorrectedType)
-		{
-			mObjects[mCurrentSide-1][mCurrentTrack-1]->setCorrectedBuffer(object->outputBuffer());
-			object->addDestructRule(ViAudio::CorrectedType, false);
-		}
+		mObjects[mCurrentSide-1][mCurrentTrack-1]->transferBuffer(object);
 	}
 	else
 	{
 		mObjects[mCurrentSide-1].append(object);
 	}
+	QObject::connect(object.data(), SIGNAL(encoded()), this, SLOT(save()), Qt::DirectConnection);
 
 	if(object->songInfo().hasImage())
 	{
@@ -107,7 +119,12 @@ void ViProject::serialize(ViAudioObjectPointer object, ViAudio::Type type)
 		}
 		object->songInfo().changeImagePath(object->songInfo().imagePath(), albumArt);
 	}
-	mEncoder.encode(object->outputBuffer(), filePath, mFormat, 0, object->songInfo());
+	//mEncoder.encode(object->outputBuffer(), filePath, mFormat, 0, object->songInfo());
+
+	if(!object->encode(mFormat, true))
+	{
+		LOG("The track could not be encoded.");
+	}
 }
 
 void ViProject::setFormat(ViAudioFormat format)
@@ -115,11 +132,44 @@ void ViProject::setFormat(ViAudioFormat format)
 	mFormat = format;
 }
 
+ViAudioFormat ViProject::format()
+{
+	return mFormat;
+}
+
+bool ViProject::isFinished()
+{
+	return mFinished;
+}
+
 /*******************************************************************************************************************
 
 	BASICS
 
 *******************************************************************************************************************/
+
+ViAudioObjectMatrix ViProject::objectMatrix()
+{
+	return mObjects;
+}
+
+ViAudioObjectList ViProject::objectList()
+{
+	return objectQueue();
+}
+
+ViAudioObjectQueue ViProject::objectQueue()
+{
+	ViAudioObjectQueue result;
+	for(int i = 0; i < mObjects.size(); ++i)
+	{
+		for(int j = 0; j < mObjects[i].size(); ++j)
+		{
+			result.enqueue(mObjects[i][j]);
+		}
+	}
+	return result;
+}
 
 qint64 ViProject::size()
 {
@@ -132,9 +182,15 @@ void ViProject::setFilePath(QString filePath)
 	mArchive.setFilePath(filePath);
 }
 
-QString ViProject::filePath()
+QString ViProject::filePath() const
 {
 	return mArchive.filePath();
+}
+
+QString ViProject::fileName() const
+{
+	QFileInfo info(filePath());
+	return info.fileName();
 }
 
 /*******************************************************************************************************************
@@ -173,6 +229,11 @@ void ViProject::nextSide()
 	++mCurrentSide;
 }
 
+bool ViProject::isLastSide()
+{
+	return mCurrentSide == mSides;
+}
+
 /*******************************************************************************************************************
 
 	PROPERTIES
@@ -208,8 +269,9 @@ ViVersion ViProject::editedVersion()
 bool ViProject::load(bool minimal)
 {
 	LOG("Loading project.");
+	setFinished(false);
 
-	QObject::connect(&mArchive, SIGNAL(decompressFinished()), this, SLOT(loadAll()), Qt::UniqueConnection);
+	QObject::connect(&mArchive, SIGNAL(decompressed()), this, SLOT(loadAll()), Qt::UniqueConnection);
 
 	if(minimal)
 	{
@@ -224,9 +286,13 @@ bool ViProject::load(bool minimal)
 void ViProject::save()
 {
 	LOG("Saving project.");
+	setFinished(false);
+
+	QObject::connect(&mArchive, SIGNAL(compressed()), this, SLOT(setFinished()), Qt::UniqueConnection);
+	QObject::connect(&mArchive, SIGNAL(compressed()), this, SIGNAL(saved()), Qt::UniqueConnection);
+
 	saveAll();
 	mArchive.compressData(mPaths["root"]);
-	clearObjects();
 }
 
 bool ViProject::loadAll()
@@ -238,13 +304,25 @@ bool ViProject::loadAll()
 	}
 	removeSideStructure();
 	mExistingProject = true;
-	return loadProperties() & loadTracks();
+	bool success = loadProperties() & loadTracks();
+	emit loaded();
+	setFinished(true);
+	return success;
 }
 
 void ViProject::saveAll()
 {
 	saveProperties();
 	saveTracks();
+}
+
+void ViProject::setFinished(bool finish)
+{
+	mFinished = finish;
+	if(mFinished)
+	{
+		emit finished();
+	}
 }
 
 bool ViProject::createTempStructure()
@@ -379,6 +457,37 @@ QString ViProject::generateFileName(ViSongInfo info, QString folder, QString ext
 	return folder;
 }
 
+QString ViProject::generateTrackName(ViSongInfo info, int trackNumber, int sideNumber)
+{
+	QString result = "";
+	if(sideNumber > 0)
+	{
+		result += "[Side " + QString::number(sideNumber) + "] ";
+	}
+	if(trackNumber > 0)
+	{
+		result += QString::number(trackNumber) + ". ";
+	}
+	if(info.artistName() == "")
+	{
+		result += "Unknown Artist";
+	}
+	else
+	{
+		result += info.artistName();
+	}
+	result += " - ";
+	if(info.songTitle() == "")
+	{
+		result += "Unknown Title";
+	}
+	else
+	{
+		result += info.songTitle();
+	}
+	return result;
+}
+
 QString ViProject::relativePath(QString path)
 {
 	return path.replace(mPaths["root"], "");
@@ -386,7 +495,7 @@ QString ViProject::relativePath(QString path)
 
 QString ViProject::absolutePath(QString path)
 {
-	if(path.startsWith(mPaths["root"]))
+	if(path == "" || path.startsWith(mPaths["root"]))
 	{
 		return path;
 	}
@@ -518,6 +627,7 @@ bool ViProject::loadTracks()
 			info.setImagePath(absolutePath(data.child("AlbumArt").toString()));
 			object->setSongInfo(info);
 			mObjects[j].append(object);
+			QObject::connect(object.data(), SIGNAL(encoded()), this, SLOT(save()), Qt::UniqueConnection);
 		}
 	}
 	return true;

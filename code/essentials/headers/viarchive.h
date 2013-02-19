@@ -15,8 +15,8 @@ class ViArchive : public QObject
 	signals:
 
 		void finished();
-		void compressFinished();
-		void decompressFinished();
+		void compressed();
+		void decompressed();
 
 	private slots:
 
@@ -53,11 +53,11 @@ class ViArchive : public QObject
 		void setCompression(int compression);
 		void setComment(QString comment);
 
-		QString filePath();
-		ViArchive::Error error();
-		QString errorString();
-		QStringList fileList(QString extension = "");
-		bool isValid();
+		QString filePath() const;
+		ViArchive::Error error() const;
+		QString errorString() const;
+		QStringList fileList(QString extension = "") const;
+		bool isValid() const;
 
 		void compressData(QFileInfoList filesAndDirs);
 		void compressData(QString directory);
@@ -82,8 +82,8 @@ class ViArchiveThread : public QThread
 		void setCompression(int compression);
 		void setComment(QString comment);
 
-		QString filePath();
-		ViArchive::Error error();
+		QString filePath() const;
+		ViArchive::Error error() const;
 
 		void setInput(QFileInfoList files);
 		void setOutput(QString location);

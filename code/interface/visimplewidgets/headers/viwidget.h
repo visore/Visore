@@ -2,24 +2,39 @@
 #define VIWIDGET_H
 
 #include <QWidget>
-#include "viaudioengine.h"
-#include "viid.h"
+#include <QSize>
+#include <viaudioengine.h>
+#include <viid.h>
+#include <vifunctioncall.h>
+#include <vithememanager.h>
 
 class ViWidget : public QWidget, public ViId
 {
+
+	Q_OBJECT
+
+	private slots:
+
+		bool executeFunction();
 
 	public:
 
 		ViWidget(QWidget *parent = 0);
 		virtual ~ViWidget(){}
-		ViAudioEngine* engine();
+		ViAudioEnginePointer engine();
 		virtual void refresh();
-		//virtual void setStyleSheet(QString styleSheet);
-		//virtual void addStyleSheet(QString styleSheet);
-		//virtual QString styleSheet();
+		virtual void setStyleSheet(QString styleSheet);
+		virtual void addStyleSheet(QString styleSheet);
+		virtual QString styleSheet();
+
+		virtual void setBorder(QColor color = Qt::gray, int thickness = 1, int roundness = 0);
+
+		virtual bool addFunctionCall(QString signal, ViFunctionCall functionCall);
 
 		virtual void setSize(int width, int height);
-		virtual void setBorder(QColor color = Qt::gray, int thickness = 1, int roundness = 0);
+		virtual void setSize(QSize size);
+		virtual void setWidth(int width);
+		virtual void setHeight(int height);
 
 	protected:
 
@@ -28,10 +43,10 @@ class ViWidget : public QWidget, public ViId
 	protected:
 
 		QWidget *mParent;
-		ViAudioEngine *mEngine;
+		ViAudioEnginePointer mEngine;
 		QString mStyleSheet;
 
-QString m;
+		ViFunctionCallSignalMap mFunctionCalls;
 
 };
 

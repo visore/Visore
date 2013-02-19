@@ -49,16 +49,16 @@ void ViTabButton::paintEvent(QPaintEvent *event)
 
 	if(mIsHover)
 	{
-		QImage glow = ViGradientCreator::createGradient(ViGradientCreator::Rectangle, TAB_WIDTH, TAB_WIDTH, ViThemeManager::color(14));
+		QImage glow = ViGradientCreator::createGradient(ViGradientCreator::Rectangle, TAB_WIDTH, TAB_WIDTH, ViThemeManager::color(ViThemeColors::MainColor1));
 		glow = glow.copy(0, 0, glow.width(), mAngle * 2);
 		painter.drawImage(QRect(0, mAngle, glow.width(), glow.height()), glow, glow.rect());
 	}
 
 	if(mIsSelected)
 	{
-		QColor color = ViThemeManager::color(14);
+		QColor color = ViThemeManager::color(ViThemeColors::MainColor1);
 		gradient.setColorAt(0, color);
-		color = ViThemeManager::color(2);
+		color = ViThemeManager::color(ViThemeColors::MainColor2);
 		gradient.setColorAt(0.6, color);
 		color.setAlpha(alpha);
 		gradient.setColorAt(0.7, color);
@@ -68,14 +68,14 @@ void ViTabButton::paintEvent(QPaintEvent *event)
 		QColor color;
 		if(mIsHover)
 		{
-			color = ViThemeManager::color(14);
+			color = ViThemeManager::color(ViThemeColors::MainColor1);
 		}
 		else
 		{
-			color = ViThemeManager::color(4);
+			color = ViThemeManager::color(ViThemeColors::TextColor1);
 		}
 		gradient.setColorAt(0, color);
-		color = ViThemeManager::color(1);
+		color = ViThemeManager::color(ViThemeColors::MainColor1);
 		gradient.setColorAt(0.6, color);
 		color.setAlpha(alpha);
 		gradient.setColorAt(1, color);

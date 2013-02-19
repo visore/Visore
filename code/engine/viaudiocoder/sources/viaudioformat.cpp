@@ -161,7 +161,7 @@ ViAudioFormat::ViAudioFormat(const QAudioFormat &other)
 	mCodec = NULL;
 }
 
-bool ViAudioFormat::isValid()
+bool ViAudioFormat::isValid(bool includingCodec)
 {
 	ViFormatMap sizes = supportedSampleSizes();
 	if(!sizes.contains(mSampleSize))
@@ -188,7 +188,16 @@ bool ViAudioFormat::isValid()
 	{
 		return false;
 	}
+	if(includingCodec && !hasCodec())
+	{
+		return false;
+	}
 	return true;
+}
+
+bool ViAudioFormat::hasCodec()
+{
+	return mCodec != NULL;
 }
 
 ViAudioFormat::SampleType ViAudioFormat::sampleType() const

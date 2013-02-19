@@ -534,6 +534,14 @@ ViCodingChainBufferOutput::~ViCodingChainBufferOutput()
 	mBuffer = NULL;
 }
 
+void ViCodingChainBufferOutput::changeFormat(ViAudioFormat format)
+{
+	if(mBuffer != NULL)
+	{
+		mBuffer->setFormat(format);
+	}
+}
+
 void ViCodingChainBufferOutput::setBuffer(ViBuffer *buffer)
 {
 	mBuffer = buffer;

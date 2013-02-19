@@ -3,11 +3,11 @@
 ViSlider::ViSlider(QWidget *parent)
 	: QSlider(parent)
 {
-	QString color1 = ViThemeManager::color(12).name();
-	QString color2 = ViThemeManager::color(13).name();
-	QString color3 = ViThemeManager::color(14).name();
-	QString color4 = ViThemeManager::color(3).name();
-	QString color5 = ViThemeManager::color(2).name();
+	QString color1 = ViThemeManager::color(ViThemeColors::MainColor3).name();
+	QString color2 = ViThemeManager::color(ViThemeColors::MainColor4).name();
+	QString color3 = ViThemeManager::color(ViThemeColors::MainColor5).name();
+	QString color4 = ViThemeManager::color(ViThemeColors::BorderColor1).name();
+	QString color5 = ViThemeManager::color(ViThemeColors::BorderColor2).name();
 
 	setStyleSheet("\
 		\

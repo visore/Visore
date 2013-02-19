@@ -111,6 +111,11 @@ int ViBuffer::size()
 	return mData->size();
 }
 
+bool ViBuffer::isEmpty()
+{
+	return size() == 0;
+}
+
 void ViBuffer::clear()
 {
 	QMutexLocker locker(&mMutex);
@@ -184,4 +189,19 @@ int ViBuffer::insert(int start, const ViBufferChunk &data, int length)
 	emit inserted(start, length);
 	emit changed();
 	return newLength;
+}
+
+bool ViBuffer::remove(int position, int length)
+{
+	QMutexLocker locker(&mMutex);
+	int oldLength = mData->size();
+	mData->remove(position, length);
+	int newLength = oldLength - mData->size();
+	locker.unlock();
+	if(newLength > 0)
+	{
+		emit removed(position, newLength);
+		return true;
+	}
+	return false;
 }

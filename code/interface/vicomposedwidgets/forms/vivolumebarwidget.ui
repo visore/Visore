@@ -30,7 +30,7 @@
     <widget class="ViVolumeBar" name="volumeBar" native="true"/>
    </item>
    <item>
-    <widget class="ViPushButton" name="muteButton" native="true">
+    <widget class="ViButton" name="muteButton" native="true">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -52,9 +52,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ViPushButton</class>
+   <class>ViButton</class>
    <extends>QWidget</extends>
-   <header>vipushbutton.h</header>
+   <header>vibutton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -6,7 +6,7 @@
 #include "vichunk.h"
 #include "viid.h"
 
-typedef ViChunk<char> ViBufferChunk;
+typedef ViRawChunk ViBufferChunk;
 
 class ViBuffer : public QObject, public ViId, public ViFunctor
 {
@@ -21,6 +21,7 @@ class ViBuffer : public QObject, public ViId, public ViFunctor
 		void unused();
 		void formatChanged(ViAudioFormat format);
 		void inserted(int position, int size);
+		void removed(int position, int length);
 
 	public slots:
 
@@ -42,6 +43,7 @@ class ViBuffer : public QObject, public ViId, public ViFunctor
 		
 		int size();
 		void clear();
+		bool isEmpty();
 
 		ViAudioFormat format();
 		ViAudioFormat& formatReference();
@@ -51,6 +53,8 @@ class ViBuffer : public QObject, public ViId, public ViFunctor
 		int insert(int start, const QByteArray &data, int length);
 		int insert(int start, const ViBufferChunk &data);
 		int insert(int start, const ViBufferChunk &data, int length);
+
+		bool remove(int position, int length);
 
 	protected:
 

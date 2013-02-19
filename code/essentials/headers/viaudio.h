@@ -19,17 +19,6 @@ namespace ViAudio
 		Project
 	};
 
-	enum Type
-	{
-		UnknownType,
-		TargetType,
-		CorruptedType,
-		CorrectedType,
-		TemporaryType,
-		TempType = TemporaryType,
-		AllTypes = TargetType | CorruptedType | CorrectedType | TemporaryType
-	};
-
 	using namespace QAudio;
 }
 

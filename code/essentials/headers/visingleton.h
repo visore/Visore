@@ -4,12 +4,12 @@
 #include <QSharedPointer>
 
 template<typename T>
-class ViSingleton : public QObject
+class ViSingleton
 {
 
 	public:
 
-		static T* instance();
+		static QSharedPointer<T> instance();
 
 	protected:
 

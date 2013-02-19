@@ -1,0 +1,20 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Initiate source files
+FILE(GLOB ACOUSTID_HEADERS ${HEADERS}/*.h)
+FILE(GLOB ACOUSTID_SOURCES ${SOURCES}/*.cpp)
+
+#Find dependencies: libchromaprint-dev
+FIND_PACKAGE(Chromaprint REQUIRED)
+
+#Create library
+ADD_LIBRARY(acoustid SHARED ${ACOUSTID_HEADERS} ${ACOUSTID_SOURCES} ${CHROMAPRINT_INCLUDE_DIR})
+QT5_USE_MODULES(acoustid Core)
+TARGET_LINK_LIBRARIES(acoustid ${CHROMAPRINT_LIBRARIES})
+SET_TARGET_PROPERTIES(acoustid PROPERTIES LINKER_LANGUAGE C)
+
+#Install file
+INSTALL(TARGETS acoustid DESTINATION external/acoustid)

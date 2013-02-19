@@ -25,6 +25,7 @@ class ViBufferStream : public QObject, public ViId, public ViFunctorParameter
 	private slots:
 
 		void inserted(int position, int size);
+		void removed(int position, int length);
 
 	public:
 
@@ -43,6 +44,8 @@ class ViBufferStream : public QObject, public ViId, public ViFunctorParameter
 		void insert(int position, const ViBufferChunk &chunk, int length);
 		void insert(int position, const ViBufferChunk &chunk);
 
+		void remove(int position, int length);
+
 		int size();
 		void restart();
 		QIODevice::OpenMode mode();
@@ -51,6 +54,7 @@ class ViBufferStream : public QObject, public ViId, public ViFunctorParameter
 		bool setPosition(int position);
 		bool isValidPosition(int position);
 		bool atEnd();
+		bool hasData();
 		
 		ViBuffer* buffer();
 

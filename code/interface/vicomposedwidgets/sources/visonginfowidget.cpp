@@ -14,19 +14,19 @@ ViSongInfoWidget::ViSongInfoWidget(QWidget *parent)
 	mUi = new Ui::ViSongInfoWidget();
 	mUi->setupUi(this);
 
-	setBorder(ViThemeManager::color(14), 5, 10);
+	setBorder(ViThemeManager::color(ViThemeColors::BorderColor1), 5, 10);
 
-	mUi->button->setIcon(ViThemeManager::image("", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Selected);
+	//mUi->button->setIcon(ViThemeManager::image("", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Selected);
 	mUi->button->setCheckable(false);
-	mUi->button->setGlow(ViThemeManager::color(14));
+	mUi->button->setGlow(ViThemeManager::color(ViThemeColors::ButtonGlowColor1));
 	mUi->button->setSize(20, 20);
 	QObject::connect(mUi->button, SIGNAL(clicked()), this, SLOT(switchInfo()));
 	mTimer = new QTimer(this);
 	QObject::connect(mTimer, SIGNAL(timeout()), this, SLOT(switchInfo()));
 	mTimer->start(INFO_CHANGE_TIMEOUT);
 
-	QObject::connect(mEngine, SIGNAL(songDetected(ViSongInfo)), this, SLOT(changeSongInfo(ViSongInfo)));
-	QObject::connect(mEngine, SIGNAL(songEnded()), this, SLOT(clearSongInfo()));
+	QObject::connect(engine().data(), SIGNAL(songDetected(ViSongInfo)), this, SLOT(changeSongInfo(ViSongInfo)));
+	QObject::connect(engine().data(), SIGNAL(songEnded()), this, SLOT(clearSongInfo()));
 }
 
 ViSongInfoWidget::~ViSongInfoWidget()

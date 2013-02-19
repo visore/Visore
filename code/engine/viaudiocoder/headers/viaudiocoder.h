@@ -40,6 +40,7 @@ class ViAudioCoder : public QObject
 		void convert(QString inputFilePath, QByteArray &output, ViAudioFormat outputFormat, int byteOffset = 0);
 		void convert(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat, int byteOffset = 0);
 		void convert(ViBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat, int byteOffset = 0);
+		void convert(ViBuffer *buffer, ViBuffer *output, ViAudioFormat outputFormat, int byteOffset = 0);
 
 		void decode(QString inputFilePath, ViBuffer *buffer, int byteOffset = 0);
 		void decode(QString inputFilePath, QByteArray &output, int byteOffset = 0);
@@ -47,6 +48,7 @@ class ViAudioCoder : public QObject
 
 		void encode(ViBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat, int byteOffset = 0, ViSongInfo info = ViSongInfo());
 		void encode(ViBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat, int byteOffset = 0, ViSongInfo info = ViSongInfo());
+		void encode(ViBuffer *buffer, ViBuffer *output, ViAudioFormat outputFormat, int byteOffset = 0, ViSongInfo info = ViSongInfo());
 		void encode(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat, int byteOffset = 0, ViSongInfo info = ViSongInfo());
 		void encode(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat, int byteOffset = 0, ViSongInfo info = ViSongInfo());
 

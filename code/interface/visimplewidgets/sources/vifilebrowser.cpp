@@ -13,22 +13,27 @@ ViFileBrowser::ViFileBrowser(QWidget *parent)
 	mLineEdit = new ViLineEdit(this);
 	mLayout.addWidget(mLineEdit);
 
-	mButton = new ViToolButton(mLineEdit);
+	mButton = new ViButton(mLineEdit);
 	int size = mLineEdit->height() * 0.8;
 	mButton->setSize(size, size);
-	mButton->setIcon(ViThemeManager::image("browse.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
-	mButton->setIcon(ViThemeManager::image("browse.png", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Hovered);
+	mButton->setIcon(ViThemeManager::icon("browse"), 20);
+	mButton->setHeight(25);
 	mButton->setCursor(Qt::ArrowCursor);
 	mButton->setToolTip("Browse");
+	mButton->disableBackground();
+	mButton->disableGlow();
 
 	QObject::connect(mButton, SIGNAL(clicked()), this, SLOT(showDialog()));
+	QObject::connect(mLineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkPath()));
+
+	setMode(ViFileBrowser::OpenFile);
 }
 
 ViFileBrowser::~ViFileBrowser()
 {
 	delete mDialog;
 	delete mButton;
-	delete mLineEdit;
+	//delete mLineEdit;
 }
 
 void ViFileBrowser::resizeEvent(QResizeEvent *event)
@@ -73,8 +78,55 @@ void ViFileBrowser::showDialog()
 	mLineEdit->setText(listToString(fileNames));
 }
 
+void ViFileBrowser::checkPath()
+{
+	if(mMode == ViFileBrowser::OpenFile)
+	{
+		QFile file(fileName());
+		if(file.exists())
+		{
+			emit selected();
+		}
+	}
+	else if(mMode == ViFileBrowser::SaveFile)
+	{
+		QDir dir(fileName());
+		if(dir.exists())
+		{
+			emit selected();
+		}
+	}
+	else if(mMode == ViFileBrowser::OpenFiles)
+	{
+		QStringList paths = fileNames();
+		QStringList newPaths;
+		for(int i = 0; i < paths.size(); ++i)
+		{
+			QFile file(paths[i]);
+			if(file.exists())
+			{
+				newPaths.append(paths[i]);
+			}
+		}
+		setFileNames(newPaths);
+		if(!newPaths.isEmpty())
+		{
+			emit selected();
+		}
+	}
+	else if(mMode == ViFileBrowser::OpenDirectory)
+	{
+		QDir dir(fileName());
+		if(dir.exists())
+		{
+			emit selected();
+		}
+	}
+}
+
 void ViFileBrowser::setMode(ViFileBrowser::Mode mode)
 {
+	mMode = mode;
 	if(mode == ViFileBrowser::OpenFile)
 	{
 		mDialog->setAcceptMode(QFileDialog::AcceptOpen);
@@ -127,4 +179,14 @@ QStringList ViFileBrowser::fileNames()
 void ViFileBrowser::setFileName(QString fileName)
 {
 	mLineEdit->setText(fileName);
+}
+
+void ViFileBrowser::setFileNames(QStringList fileNames)
+{
+	mLineEdit->setText(listToString(fileNames));
+}
+
+void ViFileBrowser::clear()
+{
+	mLineEdit->clear();
 }

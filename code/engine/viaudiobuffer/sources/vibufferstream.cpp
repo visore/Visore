@@ -7,7 +7,6 @@ ViBufferStream::ViBufferStream(QIODevice::OpenMode mode, ViBuffer *buffer, QByte
 	mMode = mode;
 	mBuffer = buffer;
 	mBufferMutex = mutex;
-	QObject::connect(mBuffer, SIGNAL(inserted(int, int)), this, SLOT(inserted(int, int)), Qt::DirectConnection);
 	
 	mDevice = new QBuffer(data); // We need to pass the array to the constructor, otherwise we get a deadlock, calling mBuffer->data()
 	mDevice->open(mode);
@@ -32,6 +31,26 @@ void ViBufferStream::inserted(int pos, int size)
 	}
 }
 
+void ViBufferStream::removed(int pos, int length)
+{
+	int current = position();
+	if(current >= pos || pos + length > current)
+	{
+		if(size() > pos)
+		{
+			setPosition(pos);
+		}
+		else if(size() > 0)
+		{
+			setPosition(pos - 1);
+		}
+		else
+		{
+			setPosition(-1);
+		}
+	}
+}
+
 int ViBufferStream::read(char *data, int length)
 {
 	QMutexLocker streamLocker(&mStreamMutex);
@@ -51,7 +70,7 @@ int ViBufferStream::read(ViBufferChunk &chunk, int length)
 
 int ViBufferStream::read(ViBufferChunk &chunk)
 {
-	return read(chunk, chunk.size());
+	return read(chunk.data(), chunk.size());
 }
 
 int ViBufferStream::write(const char *data, int length)
@@ -81,18 +100,34 @@ void ViBufferStream::insert(int position, const char *data, int length)
 {
 	QMutexLocker streamLocker(&mStreamMutex);
 	mBuffer->insert(position, data, length);
+	streamLocker.unlock();
+	inserted(position, length);
 }
 
 void ViBufferStream::insert(int position, const ViBufferChunk &chunk, int length)
 {
 	QMutexLocker streamLocker(&mStreamMutex);
 	mBuffer->insert(position, chunk, length);
+	streamLocker.unlock();
+	inserted(position, length);
 }
 
 void ViBufferStream::insert(int position, const ViBufferChunk &chunk)
 {
 	QMutexLocker streamLocker(&mStreamMutex);
 	mBuffer->insert(position, chunk);
+	streamLocker.unlock();
+	inserted(position, chunk.size());
+}
+
+void ViBufferStream::remove(int position, int length)
+{
+	QMutexLocker streamLocker(&mStreamMutex);
+	if(mBuffer->remove(position, length))
+	{
+		streamLocker.unlock();
+		removed(position, length);
+	}
 }
 
 int ViBufferStream::size()
@@ -133,6 +168,11 @@ bool ViBufferStream::atEnd()
 	QMutexLocker streamLocker(&mStreamMutex);
 	int position = mDevice->pos();
 	return position >= (mBuffer->size() - 1);
+}
+
+bool ViBufferStream::hasData()
+{
+	return !atEnd();
 }
 
 ViBuffer* ViBufferStream::buffer()

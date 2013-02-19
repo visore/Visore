@@ -17,8 +17,8 @@ ViSpectrumWidget::ViSpectrumWidget(QWidget *parent)
 	setSpacing(1);
 	setBars(256);
 
-	QObject::connect(engine(), SIGNAL(spectrumChanged(ViRealSpectrum, qint64)), this, SLOT(addSpectrum(ViRealSpectrum, qint64)), Qt::DirectConnection);
-	QObject::connect(engine(), SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(update(ViAudioPosition)), Qt::DirectConnection);
+	QObject::connect(engine().data(), SIGNAL(spectrumChanged(ViRealSpectrum, qint64)), this, SLOT(addSpectrum(ViRealSpectrum, qint64)), Qt::DirectConnection);
+	QObject::connect(engine().data(), SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(update(ViAudioPosition)), Qt::DirectConnection);
 }
 
 void ViSpectrumWidget::setBars(int bars)
@@ -115,13 +115,13 @@ void ViSpectrumWidget::resizeEvent(QResizeEvent *event)
 
 	mainGradient.setStart(0, mMainHeight);
 	mainGradient.setFinalStop(0, 0);
-	mainGradient.setColorAt(0, ViThemeManager::color(15));
-	mainGradient.setColorAt(1, ViThemeManager::color(11));
+	mainGradient.setColorAt(0, ViThemeManager::color(ViThemeColors::MainColor6));
+	mainGradient.setColorAt(1, ViThemeManager::color(ViThemeColors::MainColor1));
 
 	mirrorGradient.setStart(0, height() - mMainHeight);
 	mirrorGradient.setFinalStop(0, height());
-	mirrorGradient.setColorAt(0, ViThemeManager::color(15));
-	mirrorGradient.setColorAt(0.5, ViThemeManager::color(15));
+	mirrorGradient.setColorAt(0, ViThemeManager::color(ViThemeColors::MainColor6));
+	mirrorGradient.setColorAt(0.5, ViThemeManager::color(ViThemeColors::MainColor6));
 	mirrorGradient.setColorAt(1, Qt::transparent);
 
 	mMainBrush = QBrush(mainGradient);

@@ -5,22 +5,16 @@
 #include "visingleton.h"
 #include "vimanager.h"
 
-#include "viprocessingchain.h"
-#include "visingleexecutor.h"
+#include "viaudioobjectchain.h"
 
-#include "vienmfpidentifier.h"
+#include <viaudiorecorder.h>
 
-#include "vispectrumanalyzer.h"
-#include "viwaveformer.h"
-#include "vienddetector.h"
-#include "visongdetector.h"
-
-#include "vicrosscorrelator.h"
-#include "visamplecorrelator.h"
-
-class ViAudioEngine : public ViSingleton<ViAudioEngine>
+class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 {
+
     Q_OBJECT
+
+	friend class ViSingleton<ViAudioEngine>;
 
 	public slots:
 
@@ -46,16 +40,31 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		void calculateSpectrum(qint32 size, QString windowFunction);
 
 		//Correlation
-		void calculateCorrelation();
+		void calculateCorrelation(ViAudioObjectPointer object);
 
 		//Project
-		void startProject(QString name, QString filePath, ViAudioFormat format, short recordSides, ViAudio::Type type, bool existingProject);
+		void recordProject(ViProject *project, ViAudioObject::Type type, bool detectInfo);
+
+		//Volume
+		void setVolume(int volume);
+		void mute(bool value = true);
+		void unmute();
+
+		//Analyse
+		void generateWaveForm(ViAudioObjectPointer object, ViAudioObject::Type type = ViAudioObject::All);
+
+		//Align
+		void align(ViProject &project);
+		void align(ViAudioObjectPointer object);
+
+	private slots:
+
+		void disconnectObject();
 
 	signals:
 
 		//General
-		void progressStarted();
-		void progress(short progress);
+		void progressed(qreal progress);
 		void progressFinished();
 		void statusChanged(QString status);
 
@@ -73,12 +82,6 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		//Song detector
 		void songDetected(ViSongInfo info);
 
-		//Song start/end
-		void recordStarted();
-		void recordEnded();
-		void songStarted();
-		void songEnded();
-
 		//Spectrum
 		void spectrumChanged(ViRealSpectrum spectrum, qint64 milliseconds);
 		void spectrumProgressed(short percentage);
@@ -93,16 +96,20 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		void saveProjectStarted();
 		void projectFinished();
 
+		//Volume
+		void volumeChanged(int volume);
+		void muted();
+		void unmuted();
+
 	public:
 
 		~ViAudioEngine();
 
-		ViWaveForm& wave(ViAudio::Mode mode);
-		ViCorrelation& correlation();
+		//Volume
+		int volume();
 
 	protected:
 
-		friend class ViSingleton<ViAudioEngine>;
 		ViAudioEngine();
 
 	private:
@@ -113,20 +120,12 @@ class ViAudioEngine : public ViSingleton<ViAudioEngine>
 		ViStreamInput *mStreamInput;
 		ViStreamOutput *mStreamOutput;
 
-		ViProcessingChain mProcessingChain;
-		ViSingleExecutor mExecutor;
+		ViAudioObjectChain mObjectChain;
 
-		ViEnmfpIdentifier mSongIdentifier;
-		ViSongDetector mSongDetector;
-
-		ViCrossCorrelator mCrossCorrelator;
-		ViSampleCorrelator mSampleCorrelator;
-
-		ViSpectrumAnalyzer mSpectrumAnalyzer;
-		ViEndDetector *mEndDetector;
-		ViWaveFormer mInputWaveFormer;
-		ViWaveFormer mOutputWaveFormer;
+		ViAudioRecorder mRecorder;
 
 };
+
+typedef QSharedPointer<ViAudioEngine> ViAudioEnginePointer;
 
 #endif

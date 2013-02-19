@@ -3,18 +3,20 @@
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include "viwidget.h"
-#include "viwidget.h"
-#include "vithememanager.h"
+#include <viwidget.h>
+
 
 class ViWidgetToolbar : public ViWidget
 {
+
 	Q_OBJECT
 
 	signals:
+
 		void buttonClicked(qint8 buttonId);
 
 	public:
+
 		enum ViWidgetToolbarAlign
 		{
 			Top = 0,
@@ -22,8 +24,11 @@ class ViWidgetToolbar : public ViWidget
 			Right = 2,
 			Left = 3
 		};
+
+	public:
+
 		ViWidgetToolbar(Qt::Alignment align, QWidget *parent = 0);
-		~ViWidgetToolbar();
+		virtual ~ViWidgetToolbar();
 		void refresh();
 		void addWidget(QWidget *widget);
 		void show();
@@ -31,9 +36,11 @@ class ViWidgetToolbar : public ViWidget
 		void setVisible(bool visible);
 
 	private:
+
 		QBoxLayout *mLayout;
 		QWidget *mCentralWidget;
 		Qt::Alignment mAlign;
+
 };
 
 #endif

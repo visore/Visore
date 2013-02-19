@@ -70,8 +70,17 @@ class ViLogger
 
 #define LOG(...) LOG_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 
+#define STATICLOG1(class, message) log(__FILE__, class, Q_FUNC_INFO, __LINE__, message, QtDebugMsg)
+#define STATICLOG2(class, message, type) log(__FILE__, class, Q_FUNC_INFO, __LINE__, message, type)
+
+#define STATIC_GET_ARGUMENT(arg1, arg2, arg3, arg4, ...) arg4
+#define STATIC_LOG_CHOOSER(...) STATIC_GET_ARGUMENT(__VA_ARGS__, STATICLOG2, STATICLOG1, )
+
+#define STATICLOG(...) STATIC_LOG_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
+
 ViLogger * const LOGGER = ViLogger::instance();
 
+void log(const char *file, const char *function, const int line, const QString message, QtMsgType type);
 void log(const char *file, const QString className, const char *function, const int line, const QString message, QtMsgType type);
 
 #endif

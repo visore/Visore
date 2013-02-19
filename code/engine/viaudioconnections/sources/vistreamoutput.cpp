@@ -33,7 +33,7 @@ void ViStreamOutput::setBuffer(ViBuffer *buffer)
 	ViAudioOutput::setBuffer(buffer);
 	if(mBuffer != NULL)
 	{
-		QObject::connect(buffer, SIGNAL(changed()), this, SLOT(checkLength()));
+		//QObject::connect(mBuffer, SIGNAL(changed()), this, SLOT(checkLength()));
 	}
 }
 
@@ -48,6 +48,12 @@ ViAudioFormat ViStreamOutput::format()
 
 void ViStreamOutput::start()
 {
+	if(mBuffer == NULL)
+	{
+		LOG("Invalid buffer detected.");
+		emit finished();
+		return;
+	}
 	if(mAudioOutput != NULL && mAudioOutput->state() == QAudio::SuspendedState)
 	{
 		LOG("Playback resumed.");
@@ -66,6 +72,7 @@ void ViStreamOutput::start()
 		}
 		mAudioOutput = new QAudioOutput(mDevice, format().toQAudioFormat(), this);
 		mAudioOutput->setNotifyInterval(150);
+		setVolume(100);
 		mOldLength = 0;
 		QObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()), Qt::DirectConnection);
 		QObject::connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
@@ -153,7 +160,11 @@ void ViStreamOutput::checkUnderrun()
 
 qreal ViStreamOutput::volume()
 {
-	return mAudioOutput->volume();
+	if(mAudioOutput != NULL)
+	{
+		return mAudioOutput->volume();
+	}
+	return -1;
 }
 
 void ViStreamOutput::setVolume(qreal volumeValue)
@@ -166,19 +177,32 @@ void ViStreamOutput::setVolume(qreal volumeValue)
 	{
 		mAudioOutput->setVolume(volumeValue);
 	}
+	emit volumeChanged(volume());
 }
 
 void ViStreamOutput::mute(bool value)
 {
-	if(value)
+	if(!mIsMute && value)
 	{
 		mMuteVolume = volume();
 		setVolume(0);
 		mIsMute = true;
+		emit muted();
+		emit volumeChanged(volume());
 	}
-	else
+	else if(!value)
+	{
+		unmute();
+	}
+}
+
+void ViStreamOutput::unmute()
+{
+	if(mIsMute)
 	{
 		mIsMute = false;
 		setVolume(mMuteVolume);
+		emit unmuted();
+		emit volumeChanged(volume());
 	}
 }

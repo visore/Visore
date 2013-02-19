@@ -17,7 +17,7 @@ inline int GRAY(QRgb rgb)
 ViRatingItem::ViRatingItem(QWidget *parent, bool grayScale)
 	: ViWidget(parent)
 {
-	mImage.load(ViThemeManager::image("star.png", ViThemeImage::Normal, ViThemeManager::Icon).path());
+	//mImage.load(ViThemeManager::image("star.png", ViThemeImage::Normal, ViThemeManager::Icon).path());
 	if(grayScale)
 	{
 		int value;

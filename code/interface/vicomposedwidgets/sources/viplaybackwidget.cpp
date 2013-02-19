@@ -11,7 +11,7 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mIsPlaying = false;
 	mIsPausing = false;
 
-	mUi->recordButton->setIcon(ViThemeManager::image("record.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	/*mUi->recordButton->setIcon(ViThemeManager::image("record.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 	mUi->recordButton->setCheckable(true);
 
 	mUi->playButton->setIcon(ViThemeManager::image("play.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
@@ -20,7 +20,7 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mUi->pauseButton->setIcon(ViThemeManager::image("pause.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 	mUi->pauseButton->setCheckable(true);
 
-	mUi->stopButton->setIcon(ViThemeManager::image("stop.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
+	mUi->stopButton->setIcon(ViThemeManager::image("stop.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);*/
 
 	QObject::connect(mUi->recordButton, SIGNAL(clicked(bool)), this, SLOT(record(bool)));
 	QObject::connect(mUi->playButton, SIGNAL(clicked(bool)), this, SLOT(play(bool)));
@@ -37,7 +37,7 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mUi->pauseButton->disable();
 	mUi->stopButton->disable();
 
-	QObject::connect(mEngine, SIGNAL(inputChanged(ViAudio::Input)), this, SLOT(inputChanged(ViAudio::Input)));
+	QObject::connect(engine().data(), SIGNAL(inputChanged(ViAudio::Input)), this, SLOT(inputChanged(ViAudio::Input)));
 }
 
 ViPlaybackWidget::~ViPlaybackWidget()

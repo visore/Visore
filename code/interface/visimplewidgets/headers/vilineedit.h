@@ -8,6 +8,12 @@
 class ViLineEdit : public ViWidget
 {
 
+	Q_OBJECT
+
+	signals:
+
+		void textChanged(const QString &text);
+
 	public:
 
 		enum Direction
@@ -20,6 +26,12 @@ class ViLineEdit : public ViWidget
 		void pad(ViLineEdit::Direction direction, int width);
 		void setText(QString text);
 		QString text();
+		void clear();
+
+		virtual void setSize(int width, int height);
+		virtual void setSize(QSize size);
+		virtual void setWidth(int width);
+		virtual void setHeight(int height);
 
 	private:
 

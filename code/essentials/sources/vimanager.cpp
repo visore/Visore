@@ -41,6 +41,16 @@ ViManager::ViManager()
 
 	mSettings = new QSettings(mName, mName);
 
+	//Keys
+	if(mSettings->value("keys/enmfp").isNull())
+	{
+		mSettings->setValue("keys/enmfp", "G1TZBE4IHJAYUSNCN");
+	}
+	if(mSettings->value("keys/acoustid").isNull())
+	{
+		mSettings->setValue("keys/acoustid", "wuknDrDT");
+	}
+
 	//Paths
 	if(mSettings->value("paths/temp").isNull())
 	{
@@ -124,6 +134,16 @@ QString ViManager::projectName()
 QString ViManager::projectFilter()
 {
 	return projectName() + " (*." + projectExtension() + ")";
+}
+
+QString ViManager::enmfpKey()
+{
+	return ViManager::value("keys/enmfp").toString();
+}
+
+QString ViManager::acoustidKey()
+{
+	return ViManager::value("keys/acoustid").toString();
 }
 
 QString ViManager::tempPath()

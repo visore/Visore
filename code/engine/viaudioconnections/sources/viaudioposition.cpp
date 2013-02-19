@@ -6,6 +6,12 @@ ViAudioPosition::ViAudioPosition()
 	mFormat = ViAudioFormat();
 }
 
+ViAudioPosition::ViAudioPosition(const ViAudioPosition &other)
+{
+	mMicroseconds = other.mMicroseconds;
+	mFormat = other.mFormat;
+}
+
 ViAudioPosition::ViAudioPosition(const qreal value, const ViAudioPosition::Unit unit, const ViAudioFormat format)
 {
 	setPosition(value, unit, format);
@@ -72,6 +78,56 @@ void ViAudioPosition::setPosition(const qreal position, const ViAudioPosition::U
 qreal ViAudioPosition::position(const ViAudioPosition::Unit unit) const
 {
 	return ViAudioPosition::convertPosition(mMicroseconds, ViAudioPosition::Microseconds, unit, mFormat);
+}
+
+void ViAudioPosition::setMicroseconds(qreal value)
+{
+	setPosition(value, ViAudioPosition::Microseconds);
+}
+
+void ViAudioPosition::setMilliseconds(qreal value)
+{
+	setPosition(value, ViAudioPosition::Milliseconds);
+}
+
+void ViAudioPosition::setSeconds(qreal value)
+{
+	setPosition(value, ViAudioPosition::Seconds);
+}
+
+void ViAudioPosition::setSamples(qreal value)
+{
+	setPosition(value, ViAudioPosition::Samples);
+}
+
+void ViAudioPosition::setBytes(qreal value)
+{
+	setPosition(value, ViAudioPosition::Bytes);
+}
+
+qreal ViAudioPosition::microseconds()
+{
+	return position(ViAudioPosition::Microseconds);
+}
+
+qreal ViAudioPosition::milliseconds()
+{
+	return position(ViAudioPosition::Milliseconds);
+}
+
+qreal ViAudioPosition::seconds()
+{
+	return position(ViAudioPosition::Seconds);
+}
+
+qreal ViAudioPosition::samples()
+{
+	return position(ViAudioPosition::Samples);
+}
+
+qreal ViAudioPosition::bytes()
+{
+	return position(ViAudioPosition::Bytes);
 }
 
 ViAudioFormat ViAudioPosition::format() const

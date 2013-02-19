@@ -1,4 +1,4 @@
-#include "viwidgettoolbar.h"
+#include <viwidgettoolbar.h>
 
 ViWidgetToolbar::ViWidgetToolbar(Qt::Alignment align, QWidget *parent)
 	: ViWidget(parent)
@@ -14,17 +14,20 @@ ViWidgetToolbar::ViWidgetToolbar(Qt::Alignment align, QWidget *parent)
 		mLayout = new QVBoxLayout(mCentralWidget);
 	}
 
+	QColor color1 = ViThemeManager::color(ViThemeColors::BorderColor3);
+	QColor color2 = ViThemeManager::color(ViThemeColors::MainColor3);
+
 	setObjectName("toolbar");
 	setStyleSheet
 	("\
 		QWidget#toolbar{\
 			border-radius: 10px;\
 			border-style: solid;\
-			border-color: rgb(" + QString::number(ViThemeManager::color(1).red()) + ", " + QString::number(ViThemeManager::color(1).green()) + ", " + QString::number(ViThemeManager::color(1).blue()) + ");\
+			border-color: " + color1.name() + ";\
 			border-width: 3px;\
-			background: rgba(" + QString::number(ViThemeManager::color(1).red()) + ", " + QString::number(ViThemeManager::color(1).green()) + ", " + QString::number(ViThemeManager::color(1).blue()) + ", 175);\
+			background: rgba(" + QString::number(color1.red()) + ", " + QString::number(color1.green()) + ", " + QString::number(color1.blue()) + ", 175);\
 		}\
-		.QToolButton{\
+		ViButton{\
 			border-radius: 7px;\
 			border-style: solid;\
 			border-width: 2px;\
@@ -32,11 +35,11 @@ ViWidgetToolbar::ViWidgetToolbar(Qt::Alignment align, QWidget *parent)
 			padding: 5px;\
 			background: transparent;\
 		}\
-		.QToolButton:hover{\
-			border-color: rgb(" + QString::number(ViThemeManager::color(15).red()) + ", " + QString::number(ViThemeManager::color(15).green()) + ", " + QString::number(ViThemeManager::color(15).blue()) + ");\
+		ViButton:hover{\
+			border-color: " + color2.name() + ";\
 		}\
-		.QToolButton:pressed{\
-			background: rgba(" + QString::number(ViThemeManager::color(15).red()) + ", " + QString::number(ViThemeManager::color(15).green()) + ", " + QString::number(ViThemeManager::color(15).blue()) + ", 80);\
+		ViButton:pressed{\
+			background: rgba(" + QString::number(color2.red()) + ", " + QString::number(color2.green()) + ", " + QString::number(color2.blue()) + ", 80);\
 		}\
 	");
 	mLayout->setContentsMargins(5, 5, 5, 5);

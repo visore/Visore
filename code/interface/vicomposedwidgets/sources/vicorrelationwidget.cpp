@@ -1,6 +1,7 @@
 #include "vicorrelationwidget.h"
 #include "ui_vicorrelationwidget.h"
 #include "vimainwindow.h"
+#include <vicorrelation.h>
 
 ViCorrelationWidget::ViCorrelationWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -23,7 +24,7 @@ ViCorrelationWidget::ViCorrelationWidget(QWidget *parent)
 	mUi->tableWidget->setItem(1, 2, new QTableWidgetItem("-"));
 	mUi->tableWidget->setItem(1, 3, new QTableWidgetItem("-"));
 
-	QObject::connect(mEngine, SIGNAL(correlationFinished()), this, SLOT(update()));
+	QObject::connect(engine().data(), SIGNAL(correlationFinished()), this, SLOT(update()));
 	//QObject::connect(mEngine, SIGNAL(correlationProgressed(short)), ViMainWindow::instance(), SLOT(progress(short)));
 }
 
@@ -45,12 +46,12 @@ void ViCorrelationWidget::showEvent(QShowEvent *event)
 void ViCorrelationWidget::recalculate()
 {
 	//ViLoadingWidget::show(true, false, ViLoadingWidget::Text, "Correlating Signals");
-	mEngine->calculateCorrelation();
+	//mEngine->calculateCorrelation();
 }
 
 void ViCorrelationWidget::update()
 {
-	ViCorrelation &result = mEngine->correlation();
+	//ViCorrelation &result = mEngine->correlation();
 
 	/*mUi->tableWidget->item(0, 1)->setText(QString::number(result.sampleCorrelation(ViCorrelationResult::Worst) * 100, 'f', 5) + "%");
 	mUi->tableWidget->item(0, 2)->setText(QString::number(result.sampleCorrelation(ViCorrelationResult::Best) * 100, 'f', 5) + "%");

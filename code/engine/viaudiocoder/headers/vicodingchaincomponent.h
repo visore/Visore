@@ -320,6 +320,10 @@ class ViCodingChainBufferOutput : public ViCodingChainOutput
 
 	Q_OBJECT
 
+	public slots:
+
+		void changeFormat(ViAudioFormat format);
+
 	public:
 
 		ViCodingChainBufferOutput();

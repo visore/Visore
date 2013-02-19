@@ -1,6 +1,6 @@
 #ifdef VIPCMCONVERTER_H
 
-#include "visizeconverter.h"
+#include "vitypesizeconverter.h"
 
 #define PCM_8_MAX_VALUE 127u;
 #define PCM_8_MAX_AMPLITUDE 128u;
@@ -123,7 +123,7 @@ int ViPcmConverter<T>::pcmToReal8(char* buffer, T *result, int size)
 template <typename T>
 int ViPcmConverter<T>::pcmToReal16(char* buffer, T *result, int size)
 {
-	size = ViSizeConverter<qint16, char>::convert(size);
+	size = ViTypeSizeConverter<qint16, char>::convert(size);
 	qint16 *base = reinterpret_cast<qint16*>(buffer);
 	for(int i = 0; i < size; ++i)
 	{
@@ -147,7 +147,7 @@ int ViPcmConverter<T>::pcmToReal24(char* buffer, T *result, int size)
 template <typename T>
 int ViPcmConverter<T>::pcmToReal32(char* buffer, T *result, int size)
 {
-	size = ViSizeConverter<qint32, char>::convert(size);
+	size = ViTypeSizeConverter<qint32, char>::convert(size);
 	qint32 *base = reinterpret_cast<qint32*>(buffer);
 	for(int i = 0; i < size; ++i)
 	{
@@ -174,7 +174,7 @@ int ViPcmConverter<T>::realToPcm16(T* buffer, char* result, int size)
 	{
 		base[i] = ViPcmConverter<T>::realToPcm16(buffer[i]);
 	}
-	return ViSizeConverter<char, qint16>::convert(size);
+	return ViTypeSizeConverter<char, qint16>::convert(size);
 }
 
 template <typename T>
@@ -196,7 +196,7 @@ int ViPcmConverter<T>::realToPcm32(T* buffer, char* result, int size)
 	{
 		base[i] = ViPcmConverter<T>::realToPcm32(buffer[i]);
 	}
-	return ViSizeConverter<char, qint32>::convert(size);
+	return ViTypeSizeConverter<char, qint32>::convert(size);
 }
 
 

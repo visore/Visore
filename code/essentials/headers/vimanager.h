@@ -42,6 +42,10 @@ class ViManager : public ViSingleton<ViManager>
 		static QString projectName();
 		static QString projectFilter();
 
+		//Keys
+		static QString enmfpKey();
+		static QString acoustidKey();
+
 		//Paths
 		static QString tempPath();
 		static void setTempPath(QString path);
@@ -75,8 +79,10 @@ class ViManager : public ViSingleton<ViManager>
 		QUrl mUrl;
 		QString mProjectExtension;
 		QString mProjectName;
+
 		QString mTempPath;
 		QString mProjectPath;
+		QString mThemesPath;
 
 };
 

@@ -1,4 +1,4 @@
-#ifndef VIAUDIOOBJECTQUEUE_H
+/*#ifndef VIAUDIOOBJECTQUEUE_H
 #define VIAUDIOOBJECTQUEUE_H
 
 #include "viaudioobject.h"
@@ -49,4 +49,4 @@ class ViAudioObjectQueue : public QObject, public ViFunctor
 
 };
 
-#endif
+#endif*/

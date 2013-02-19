@@ -117,7 +117,7 @@ void ViStreamInput::start()
 		LOG("Recording resumed.");
 		mAudioInput->resume();
 	}
-	else
+	else if(state() != QAudio::ActiveState)
 	{
 		LOG("Recording started.");
 		if(mBufferDevice != NULL)

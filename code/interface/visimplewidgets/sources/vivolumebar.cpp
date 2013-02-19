@@ -23,20 +23,20 @@ void ViVolumeBar::paintEvent(QPaintEvent *event)
 	qint16 theWidth = width() - (PEN_WIDTH - 1);
 	qint16 theHeight = height() - (PEN_WIDTH - 1);
 
-	QPen pen(ViThemeManager::color(4));
+	QPen pen(ViThemeManager::color(ViThemeColors::BorderColor1));
 	pen.setWidth(PEN_WIDTH);
 
 	QLinearGradient linearGradient(QPoint(0, theHeight / 2), QPoint(theWidth, theHeight / 2));
 
 	if(mIsHover)
 	{
-		linearGradient.setColorAt(0, ViThemeManager::color(16));
-		linearGradient.setColorAt(1, ViThemeManager::color(14));
+		linearGradient.setColorAt(0, ViThemeManager::color(ViThemeColors::MainColor7));
+		linearGradient.setColorAt(1, ViThemeManager::color(ViThemeColors::MainColor5));
 	}
 	else
 	{
-		linearGradient.setColorAt(0, ViThemeManager::color(15));
-		linearGradient.setColorAt(1, ViThemeManager::color(13));
+		linearGradient.setColorAt(0, ViThemeManager::color(ViThemeColors::MainColor6));
+		linearGradient.setColorAt(1, ViThemeManager::color(ViThemeColors::MainColor4));
 	}
 
 	QBrush brush(linearGradient);

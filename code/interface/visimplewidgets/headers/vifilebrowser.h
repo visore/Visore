@@ -4,17 +4,22 @@
 #include <QStringList>
 #include <QGridLayout>
 #include <QFileDialog>
-#include "vitoolbutton.h"
-#include "vilineedit.h"
-#include "vithememanager.h"
+#include <vibutton.h>
+#include <vilineedit.h>
+#include <vithememanager.h>
 
 class ViFileBrowser : public ViWidget
 {
 	Q_OBJECT
 
+	signals:
+
+		void selected();
+
 	private slots:
 
 		void showDialog();
+		void checkPath();
 
 	public:
 
@@ -34,6 +39,8 @@ class ViFileBrowser : public ViWidget
 		QString fileName();
 		QStringList fileNames();
 		void setFileName(QString fileName);
+		void setFileNames(QStringList fileNames);
+		void clear();
 	
 	protected:
 
@@ -47,7 +54,8 @@ class ViFileBrowser : public ViWidget
 
 		QGridLayout mLayout;
 		ViLineEdit *mLineEdit;
-		ViToolButton *mButton;
+		ViButton *mButton;
+		ViFileBrowser::Mode mMode;
 
 };
 

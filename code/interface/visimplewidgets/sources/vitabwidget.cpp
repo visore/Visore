@@ -85,7 +85,7 @@ void ViTabWidget::addTab(QString title, QWidget *widget)
 
 void ViTabWidget::paintEvent(QPaintEvent *event)
 {
-	static qint16 alpha = 150;
+	/*static qint16 alpha = 150;
 	QLinearGradient gradient(width() / 2, 0, width() / 2, height());
 	QColor color = ViThemeManager::color(2);
 	color.setAlpha(alpha);
@@ -99,5 +99,5 @@ void ViTabWidget::paintEvent(QPaintEvent *event)
 	painter.setBrush(gradient);
 	painter.setPen(Qt::NoPen);
 	painter.drawRoundedRect(mUi->tabContainer->pos().x(), mUi->tabContainer->pos().y(), mUi->tabContainer->width(), mUi->tabContainer->height(), mMainAngle, mMainAngle);
-	painter.drawRect(mUi->tabContainer->pos().x(), mUi->tabContainer->pos().y(), mMainAngle, mMainAngle);
+	painter.drawRect(mUi->tabContainer->pos().x(), mUi->tabContainer->pos().y(), mMainAngle, mMainAngle);*/
 }

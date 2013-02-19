@@ -14,13 +14,17 @@ ViLineEdit::ViLineEdit(QWidget *parent)
 		QLineEdit\
 		{\
 			border-radius: 3px;\
-			border: 2px solid " + ViThemeManager::color(1).name() + ";\
+			border: 2px solid " + ViThemeManager::color(ViThemeColors::BorderColor3).name() + ";\
 		}\
 		QLineEdit:focus\
 		{\
-			border: 2px solid " + ViThemeManager::color(13).name() + ";\
+			border: 2px solid " + ViThemeManager::color(ViThemeColors::BorderColor1).name() + ";\
 		}\
 	");
+
+	setHeight(28);
+
+	QObject::connect(mLineEdit, SIGNAL(textChanged(const QString&)), this, SIGNAL(textChanged(const QString&)));
 }
 
 void ViLineEdit::pad(ViLineEdit::Direction direction, int width)
@@ -46,4 +50,34 @@ void ViLineEdit::setText(QString text)
 QString ViLineEdit::text()
 {
 	return mLineEdit->text();
+}
+
+void ViLineEdit::clear()
+{
+	mLineEdit->clear();
+}
+
+void ViLineEdit::setSize(int width, int height)
+{
+	setWidth(width);
+	setHeight(height);
+}
+
+void ViLineEdit::setSize(QSize size)
+{
+	setSize(size.width(), size.height());
+}
+
+void ViLineEdit::setWidth(int width)
+{
+	ViWidget::setWidth(width);
+	mLineEdit->setMinimumWidth(width);
+	mLineEdit->setMaximumWidth(width);
+}
+
+void ViLineEdit::setHeight(int height)
+{
+	ViWidget::setHeight(height);
+	mLineEdit->setMinimumHeight(height);
+	mLineEdit->setMaximumHeight(height);
 }

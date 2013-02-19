@@ -1,4 +1,4 @@
-#include "viaudioobjectqueue.h"
+/*#include "viaudioobjectqueue.h"
 
 ViAudioObjectQueue::ViAudioObjectQueue()
 	: QObject()
@@ -99,4 +99,4 @@ void ViAudioObjectQueue::execute(ViFunctorParameter *data)
 	{
 		remove(object);
 	}
-}
+}*/

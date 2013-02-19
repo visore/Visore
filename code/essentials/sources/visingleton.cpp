@@ -4,13 +4,13 @@ template<typename T>
 QSharedPointer<T> ViSingleton<T>::mInstance;
 
 template<typename T>
-T* ViSingleton<T>::instance()
+QSharedPointer<T> ViSingleton<T>::instance()
 {
 	if(mInstance.isNull())
 	{
 		mInstance = QSharedPointer<T>(new T());
 	}
-	return mInstance.data();
+	return mInstance;
 }
 
 #endif

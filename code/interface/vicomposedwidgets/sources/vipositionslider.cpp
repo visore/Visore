@@ -8,9 +8,9 @@ ViPositionSlider::ViPositionSlider(QWidget *parent)
 	mUi = new Ui::ViPositionSlider();
 	mUi->setupUi(this);
 	clear();
-	QObject::connect(engine(), SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(changedPosition(ViAudioPosition)));
-	QObject::connect(engine(), SIGNAL(lengthChanged(ViAudioPosition)), this, SLOT(changedLength(ViAudioPosition)));
-	QObject::connect(mUi->slider, SIGNAL(valueChanged(int)), engine(), SLOT(setPosition(int)));
+	QObject::connect(engine().data(), SIGNAL(positionChanged(ViAudioPosition)), this, SLOT(changedPosition(ViAudioPosition)));
+	QObject::connect(engine().data(), SIGNAL(lengthChanged(ViAudioPosition)), this, SLOT(changedLength(ViAudioPosition)));
+	QObject::connect(mUi->slider, SIGNAL(valueChanged(int)), engine().data(), SLOT(setPosition(int)));
 }
 
 ViPositionSlider::~ViPositionSlider()

@@ -7,9 +7,9 @@ ViProgressBar::ViProgressBar(QWidget *parent)
 	mUi = new Ui::ViProgressBar();
 	mUi->setupUi(this);
 
-	QString color1 = ViThemeManager::color(15).name();
-	QString color2 = ViThemeManager::color(12).name();
-	QString color3 = ViThemeManager::color(11).name();
+	QString color1 = ViThemeManager::color(ViThemeColors::MainColor6).name();
+	QString color2 = ViThemeManager::color(ViThemeColors::MainColor3).name();
+	QString color3 = ViThemeManager::color(ViThemeColors::BorderColor2).name();
 	setStyleSheet("\
 		QProgressBar\
 		{\

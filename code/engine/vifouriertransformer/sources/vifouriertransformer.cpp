@@ -109,7 +109,7 @@ void ViFourierTransformer::forwardTransform(const double input[], double output[
 		mCalculator->setData(input, output);
 	}
 	mCalculator->forward();
-	conjugate(output); //FFTReal somehow has a negative imaginary part
+	//conjugate(output); //FFTReal somehow has a negative imaginary part
 }
 
 void ViFourierTransformer::inverseTransform(const double input[], double output[])

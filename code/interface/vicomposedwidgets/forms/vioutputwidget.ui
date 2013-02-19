@@ -27,15 +27,15 @@
     <number>0</number>
    </property>
    <item row="0" column="0">
-    <widget class="ViPushButton" name="fileOutputButton" native="true"/>
+    <widget class="ViButton" name="fileOutputButton" native="true"/>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ViPushButton</class>
+   <class>ViButton</class>
    <extends>QWidget</extends>
-   <header>vipushbutton.h</header>
+   <header>vibutton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

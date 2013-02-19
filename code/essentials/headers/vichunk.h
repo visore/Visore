@@ -10,6 +10,7 @@ class ViChunk
 		ViChunk();
 		ViChunk(T *data, int size);
 		ViChunk(int size);
+		ViChunk(const ViChunk &other);
 		~ViChunk();
 
 		T* data() const;
@@ -20,12 +21,19 @@ class ViChunk
 		void setSize(int size);
 		void resize(int size);
 
+		void insert(T value, int repeatValue = 1); // Insert value repeatValue number of times at the front
+		void append(T value, int repeatValue = 1); // Append value repeatValue number of times at the end
+
+		void clear();
+
 		const T& at(int index) const;
 		T& at(int index);
 		const T& operator[](const int index) const;
 		T& operator[] (const int index);
 
-		static void copy(const ViChunk<T> *source, ViChunk<T> *destination);
+		void operator= (const ViChunk &other);
+
+		static void copy(const ViChunk<T> &source, ViChunk<T> &destination);
 
 	private:
 
