@@ -27,7 +27,7 @@ class ViCoverRetriever : public QObject
 
 	protected:
 
-		void processUrls(QStringQueue urls);
+		void processUrls(ViStringQueue urls);
 		virtual void retrieveUrls() = 0;
 
 	private:
@@ -43,7 +43,7 @@ class ViCoverRetriever : public QObject
 	private:
 
 		ViWebServicer mImageServicer;
-		QStringQueue mUrls;
+		ViStringQueue mUrls;
 
 };
 

@@ -70,9 +70,9 @@ qreal ViValue::toReal() const
 	return mValue.toReal();
 }
 
-QBoolList ViValue::toBoolList() const
+ViBoolList ViValue::toBoolList() const
 {
-	QList<bool> result;
+	ViBoolList result;
 	QList<QVariant> list = mValue.toList();
 	for(int i = 0; i < list.size(); ++i)
 	{
@@ -81,14 +81,14 @@ QBoolList ViValue::toBoolList() const
 	return result;
 }
 
-QStringList ViValue::toStringList() const
+ViStringList ViValue::toStringList() const
 {
 	return mValue.toStringList();
 }
 
-QIntList ViValue::toIntList() const
+ViIntegerList ViValue::toIntList() const
 {
-	QList<qint> result;
+	ViIntegerList result;
 	QList<QVariant> list = mValue.toList();
 	for(int i = 0; i < list.size(); ++i)
 	{
@@ -98,9 +98,9 @@ QIntList ViValue::toIntList() const
 }
 
 
-QRealList ViValue::toRealList() const
+ViRealList ViValue::toRealList() const
 {
-	QList<qreal> result;
+	ViRealList result;
 	QList<QVariant> list = mValue.toList();
 	for(int i = 0; i < list.size(); ++i)
 	{

@@ -90,7 +90,7 @@ void ViMusicBrainzCoverRetriever::processReply(bool success)
 			}
 		}
 
-		QStringQueue sortedUrls;
+		ViStringQueue sortedUrls;
 		while(!unsortedUrls.isEmpty())
 		{
 			int maximum = -1;
@@ -123,7 +123,7 @@ void ViMusicBrainzCoverRetriever::processReply(bool success)
 	}
 	else
 	{
-		processUrls(QStringQueue());
+		processUrls(ViStringQueue());
 	}
 }
 

@@ -25,10 +25,10 @@ class ViValue
 		bool toBool() const;
 		qint toInt() const;
 		qreal toReal() const;
-		QBoolList toBoolList() const;
-		QStringList toStringList() const;
-		QIntList toIntList() const;
-		QRealList toRealList() const;
+		ViBoolList toBoolList() const;
+		ViStringList toStringList() const;
+		ViIntegerList toIntList() const;
+		ViRealList toRealList() const;
 
 		bool isNull() const;
 

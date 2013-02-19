@@ -36,7 +36,7 @@ void ViCoverRetriever::testImage(bool success)
 	}
 }
 
-void ViCoverRetriever::processUrls(QStringQueue urls)
+void ViCoverRetriever::processUrls(ViStringQueue urls)
 {
 	mUrls = urls;
 	processNext(mUrls.dequeue());

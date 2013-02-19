@@ -34,11 +34,24 @@ typedef double qdouble;
 
 typedef qint32 qint;
 
-typedef QList<bool> QBoolList;
-typedef QList<qint> QIntList;
-typedef QList<qfloat> QFloatList;
-typedef QList<qreal> QRealList;
+typedef QList<bool> ViBoolList;
+typedef QList<qint> ViIntList;
+typedef QList<qint> ViIntegerList;
+typedef QList<qfloat> ViFloatList;
+typedef QList<qreal> ViRealList;
+typedef QStringList ViStringList;
 
-typedef QQueue<QString> QStringQueue;
+typedef QQueue<QString> ViStringQueue;
+
+namespace Vi
+{
+
+	enum Direction
+	{
+		Input,
+		Output
+	};
+
+}
 
 #endif
