@@ -33,6 +33,11 @@ do
 done
 
 if $cmake; then
+
+	#Remove clock skew warnings - Doesn't seem to work
+	#cd $current_directory
+	#find . -type f | xargs -n 5 touch
+
 	rm -r "$install_directory"
 	mkdir "$install_directory"
 	rm -r "$build_directory"

@@ -4,10 +4,11 @@
 #include <vineuralunit.h>
 #include <viactivationfunction.h>
 #include <visynapse.h>
+#include <QRunnable>
 
 class ViNeuronFactory;
 
-class ViNeuron : public ViNeuralUnit
+class ViNeuron : public ViNeuralUnit, public QRunnable
 {
 
 	friend class ViNeuronFactory;
@@ -15,7 +16,13 @@ class ViNeuron : public ViNeuralUnit
 	public:
 
 		ViNeuron(const ViNeuron &other);
-		~ViNeuron();
+		virtual ~ViNeuron();
+
+		virtual void run();
+
+		double value();
+
+		void setValue(double value);
 
 		ViActivationFunction* activationFunction() const;
 
@@ -47,6 +54,7 @@ class ViNeuron : public ViNeuralUnit
 		ViActivationFunction *mActivationFunction;
 		ViSynapseList mInputs;
 		ViSynapseList mOutputs;
+		double mValue;
 
 };
 

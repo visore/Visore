@@ -1,6 +1,14 @@
 #include <visynapse.h>
 #include <vineuron.h>
 
+ViSynapse::ViSynapse()
+	: ViNeuralUnit()
+{
+	mInput = NULL;
+	mOutput = NULL;
+	mWeight = 1;
+}
+
 ViSynapse::ViSynapse(ViNeuron *input, ViNeuron *output, double weight)
 	: ViNeuralUnit()
 {
@@ -30,6 +38,11 @@ ViNeuron* ViSynapse::output() const
 double ViSynapse::weight() const
 {
 	return mWeight;
+}
+
+double ViSynapse::value() const
+{
+	return mWeight * mInput->value();
 }
 		
 void ViSynapse::setInput(ViNeuron *neuron)

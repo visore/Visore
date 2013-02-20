@@ -1,7 +1,8 @@
 #include <vineurallayer.h>
+#include <QThreadPool>
 
 ViNeuralLayer::ViNeuralLayer(ViNeuronList neurons)
-	: ViNeuralUnit()
+	: ViNeuralUnit(), QRunnable()
 {
 	mNeurons = neurons;
 }
@@ -18,10 +19,21 @@ ViNeuralLayer::~ViNeuralLayer()
 	mNeurons.clear();
 }
 
+void ViNeuralLayer::run()
+{
+	QThreadPool *pool = QThreadPool::globalInstance();
+	for(int i = 0; i < mNeurons.size(); ++i)
+	{
+		pool->start(mNeurons[i]);
+	}
+	pool->waitForDone();
+}
+
 bool ViNeuralLayer::add(ViNeuron *neuron)
 {
 	if(contains(neuron))
 	{
+		LOG("The neuron was already added to the layer.", QtCriticalMsg);
 		return false;
 	}
 	mNeurons.append(neuron);
@@ -45,11 +57,34 @@ int ViNeuralLayer::size() const
 
 ViNeuron* ViNeuralLayer::at(int index) const
 {
-	if(mNeurons.size() >= index)
+	if(index >= mNeurons.size())
 	{
+		LOG("An invalid neuron was accessed.", QtCriticalMsg);
 		return NULL;
 	}
 	return mNeurons[index];
+}
+
+double ViNeuralLayer::value(int index)
+{
+	if(index >= mNeurons.size())
+	{
+		LOG("An invalid neuron was accessed.", QtCriticalMsg);
+		return 0;
+	}
+	return mNeurons[index]->value();
+}
+
+void ViNeuralLayer::setValue(int index, int value)
+{
+	if(index >= mNeurons.size())
+	{
+		LOG("An invalid neuron was accessed.", QtCriticalMsg);
+	}
+	else
+	{
+		mNeurons[index]->setValue(value);
+	}
 }
 
 ViNeuron* ViNeuralLayer::operator [] (const int index) const

@@ -2,6 +2,7 @@
 #define VINEURALUNIT_H
 
 #include <vicommon.h>
+#include <vilogger.h>
 #include <QList>
 
 class ViNeuralUnit

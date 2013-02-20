@@ -36,9 +36,10 @@ typedef qint32 qint;
 
 typedef QList<bool> ViBoolList;
 typedef QList<qint> ViIntList;
-typedef QList<qint> ViIntegerList;
+typedef ViIntList ViIntegerList;
 typedef QList<qfloat> ViFloatList;
 typedef QList<qreal> ViRealList;
+typedef ViRealList ViDoubleList;
 typedef QStringList ViStringList;
 
 typedef QQueue<QString> ViStringQueue;

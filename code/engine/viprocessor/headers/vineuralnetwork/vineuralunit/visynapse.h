@@ -17,7 +17,10 @@ class ViSynapse : public ViNeuralUnit
 
 		ViNeuron* input() const;
 		ViNeuron* output() const;
+
 		double weight() const;
+
+		double value() const; // Weighted value of the input neuron
 		
 		void setInput(ViNeuron *neuron);
 		void setOutput(ViNeuron *neuron);
@@ -27,7 +30,8 @@ class ViSynapse : public ViNeuralUnit
 
 	protected:
 
-		ViSynapse(ViNeuron *input = NULL, ViNeuron *output = NULL, double weight = 1);
+		ViSynapse();
+		ViSynapse(ViNeuron *input, ViNeuron *output, double weight = 1);
 
 	private:
 

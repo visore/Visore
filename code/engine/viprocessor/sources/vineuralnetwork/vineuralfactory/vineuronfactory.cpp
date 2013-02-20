@@ -2,6 +2,5 @@
 
 ViNeuron* ViNeuronFactory::create(ViActivationFunction *activationFunction)
 {
-	ViNeuron *neuron = new ViNeuron(activationFunction);
-	return neuron;
+	return new ViNeuron(activationFunction);
 }

@@ -1,15 +1,17 @@
 #include <vineuron.h>
 
 ViNeuron::ViNeuron(ViActivationFunction *activationFunction)
-	: ViNeuralUnit()
+	: ViNeuralUnit(), QRunnable()
 {
 	mActivationFunction = activationFunction;
+	mValue = 0;
 }
 
 ViNeuron::ViNeuron(const ViNeuron &other)
 	: ViNeuralUnit(other)
 {
 	mActivationFunction = other.mActivationFunction;
+	mValue = other.mValue;
 }
 
 ViNeuron::~ViNeuron()
@@ -19,6 +21,26 @@ ViNeuron::~ViNeuron()
 
 	qDeleteAll(mOutputs);
 	mOutputs.clear();
+}
+
+void ViNeuron::run()
+{
+	double sum = 0;
+	for(int i = 0; i < mInputs.size(); ++i)
+	{
+		sum += mInputs[i]->value();
+	}
+	mValue = mActivationFunction->calculate(sum);
+}
+
+double ViNeuron::value()
+{
+	return mValue;
+}
+
+void ViNeuron::setValue(double value)
+{
+	mValue = value;
 }
 
 ViActivationFunction* ViNeuron::activationFunction() const
@@ -47,6 +69,7 @@ bool ViNeuron::addInput(ViSynapse *synapse)
 {
 	if(containsInput(synapse))
 	{
+		LOG("The synapse was already conected to the input of the neuron.", QtCriticalMsg);
 		return false;
 	}
 	mInputs.append(synapse);
@@ -57,6 +80,7 @@ bool ViNeuron::addOutput(ViSynapse *synapse)
 {
 	if(containsOutput(synapse))
 	{
+		LOG("The synapse was already conected to the output of the neuron.", QtCriticalMsg);
 		return false;
 	}
 	mOutputs.append(synapse);
@@ -131,6 +155,10 @@ bool ViNeuron::operator == (const ViNeuron &other) const
 		return false;
 	}
 	if(mInputs.size() != other.mInputs.size() || mOutputs.size() != other.mOutputs.size())
+	{
+		return false;
+	}
+	if(mValue != other.mValue)
 	{
 		return false;
 	}
