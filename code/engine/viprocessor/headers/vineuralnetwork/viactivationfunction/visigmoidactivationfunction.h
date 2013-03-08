@@ -22,6 +22,9 @@ class ViSigmoidActivationFunction : public ViActivationFunction
 
 		void setShape(double shape);
 
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
+
 	protected:
 
 		void changeFunction();
@@ -31,7 +34,7 @@ class ViSigmoidActivationFunction : public ViActivationFunction
 		double changeShape(const double &input);
 		double changeCenterShape(const double &input);
 
-		double execute(double input);
+		double execute(const double &input, const int &inputCount);
 
 	private:
 

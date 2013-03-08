@@ -17,7 +17,7 @@ extern "C"
 
 ViThemePointer createTheme()
 {
-   return ViVulcanoTheme::instance();
+	return viPointerCast<ViTheme>(ViVulcanoTheme::instance());
 }
 
 #ifdef __cplusplus

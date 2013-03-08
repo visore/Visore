@@ -47,7 +47,8 @@ class ViNeuron : public ViNeuralUnit, public QRunnable
 		
 	protected:
 
-		ViNeuron(ViActivationFunction *activationFunction = NULL);
+		ViNeuron();
+		ViNeuron(ViActivationFunction *activationFunction);
 
 	private:
 

@@ -126,6 +126,6 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 
 };
 
-typedef QSharedPointer<ViAudioEngine> ViAudioEnginePointer;
+typedef ViPointer<ViAudioEngine> ViAudioEnginePointer;
 
 #endif

@@ -1,8 +1,15 @@
 #include <viactivationfunction.h>
 #include <viscaler.h>
+#include <vilogger.h>
 
 ViActivationFunction::ViActivationFunction(double functionMinimum, double functionMaximum)
 {
+	mName = CLASSNAME;
+	if(mName.startsWith("Vi"))
+	{
+		mName.remove(0, 2);
+	}
+
 	mFunctionMinimum = functionMinimum;
 	mFunctionMaximum = functionMaximum;
 	mMinimum = -1;
@@ -11,6 +18,16 @@ ViActivationFunction::ViActivationFunction(double functionMinimum, double functi
 
 ViActivationFunction::~ViActivationFunction()
 {
+}
+
+void ViActivationFunction::setName(QString name)
+{
+	mName = name;
+}
+
+QString ViActivationFunction::name()
+{
+	return mName;
 }
 
 void ViActivationFunction::setRange(double minimum, double maximum)
@@ -55,7 +72,42 @@ void ViActivationFunction::setFunctionMaximum(double maximum)
 	mFunctionMaximum = maximum;
 }
 
-double ViActivationFunction::calculate(double input)
+double ViActivationFunction::calculate(const double &input, const int &inputCount)
 {
-	return ViScaler::scale(execute(input), mFunctionMinimum, mFunctionMaximum, mMinimum, mMaximum);
+	return ViScaler::scale(execute(input, inputCount), mFunctionMinimum, mFunctionMaximum, mMinimum, mMaximum);
+}
+
+ViElement ViActivationFunction::exportData()
+{
+	ViElement element(mName);
+	element.addChild("Minimum", minimum());
+	element.addChild("Maximum", maximum());
+	return element;
+}
+
+bool ViActivationFunction::importData(ViElement element)
+{
+	if(element.name() != name())
+	{
+		return false;
+	}
+	ViElement minimum = element.child("Minimum");
+	if(minimum.isNull())
+	{
+		LOG("The minimum could not be imported", QtCriticalMsg);
+	}
+	else
+	{
+		setMinimum(minimum.toReal());
+	}
+	ViElement maximum = element.child("Maximum");
+	if(maximum.isNull())
+	{
+		LOG("The maximum could not be imported", QtCriticalMsg);
+	}
+	else
+	{
+		setMaximum(maximum.toReal());
+	}
+	return true;
 }

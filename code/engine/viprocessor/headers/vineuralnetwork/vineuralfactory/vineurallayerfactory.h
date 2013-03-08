@@ -9,7 +9,7 @@ class ViNeuralLayerFactory : public ViNeuralFactory
 
 	public:
 
-		static ViNeuralLayer* create(int neuronCount, ViActivationFunction *activationFunction = NULL, double bias = 0);
+		static ViNeuralLayer* create(int neuronCount, ViActivationFunction *activationFunction, double bias = 0);
 
 };
 

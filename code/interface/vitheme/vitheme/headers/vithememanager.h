@@ -6,10 +6,13 @@
 #include "vithemeicon.h"
 #include "vithemeanimation.h"
 #include "vithemefonts.h"
+#include <visingleton.h>
 #include <QLibrary>
 
-class ViThemeManager
+class ViThemeManager : public ViSingleton<ViThemeManager>
 {
+
+	friend class ViSingleton<ViThemeManager>;
 
 	public:
 
@@ -32,13 +35,11 @@ class ViThemeManager
 	protected:
 
 		ViThemeManager();
-		static ViThemeManager* instance();
 		
 	protected:
 
 		QLibrary mLibrary;
 		ViThemePointer mCurrentTheme;
-		static QSharedPointer<ViThemeManager> mInstance;
 
 };
 

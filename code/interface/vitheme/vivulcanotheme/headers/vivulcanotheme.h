@@ -6,7 +6,7 @@
 class ViVulcanoTheme : public ViTheme, public ViSingleton<ViVulcanoTheme>
 {
 
-	friend class ViSingleton;
+	friend class ViSingleton<ViVulcanoTheme>;
 
 	protected:
 

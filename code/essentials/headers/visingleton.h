@@ -1,7 +1,7 @@
-#ifndef VISINGELTON_H
-#define VISINGELTON_H
+#ifndef VISINGLETON_H
+#define VISINGLETON_H
 
-#include <QSharedPointer>
+#include <vipointer.h>
 
 template<typename T>
 class ViSingleton
@@ -9,14 +9,14 @@ class ViSingleton
 
 	public:
 
-		static QSharedPointer<T> instance();
+		static ViPointer<T> instance();
 
 	protected:
 
-		static QSharedPointer<T> mInstance;
+		static ViPointer<T> mInstance;
 
 };
 
-#include "visingleton.cpp"
+#include <visingleton.cpp>
 
 #endif

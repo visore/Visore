@@ -11,10 +11,11 @@ class ViNeuralNetworkFactory : public ViNeuralFactory
 
 		ViNeuralNetworkFactory();
 		ViNeuralNetworkFactory(const ViNeuralNetworkFactory &other);
+		~ViNeuralNetworkFactory();
 
 		void clear();
 
-		void setActivationFunction(ViActivationFunction *activationFunction = NULL);
+		void setActivationFunction(ViActivationFunction *activationFunction);
 
 		void addLayer(int neuronCount);
 		void addLayer(int neuronCount, double bias);
@@ -25,7 +26,7 @@ class ViNeuralNetworkFactory : public ViNeuralFactory
 
 	private:
 
-		ViActivationFunction* mDefaultActivationFunction;
+		ViActivationFunction *mDefaultActivationFunction;
 		QList<ViActivationFunction*> mActivationFunctions;
 		ViIntegerList mNeurons;
 		ViDoubleList mBiases;

@@ -14,9 +14,12 @@ class ViLinearActivationFunction : public ViActivationFunction
 
 		double setGradient(double gradient);
 
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
+
 	protected:
 
-		double execute(double input);
+		double execute(const double &input, const int &inputCount);
 
 	private:
 

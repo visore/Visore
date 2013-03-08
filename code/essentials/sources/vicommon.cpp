@@ -13,3 +13,15 @@ QString stripClassName(const char *text)
 	}
 	return name;
 }
+
+QString stripTemplateClassName(const char *text)
+{
+	QString name(text);
+	int startIndex = name.indexOf("[with T = ");
+	if(startIndex == -1)
+	{
+		return "";
+	}
+	startIndex += 10;
+	return name.mid(startIndex, name.indexOf("]") - startIndex);
+}

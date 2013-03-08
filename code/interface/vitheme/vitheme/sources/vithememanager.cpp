@@ -1,8 +1,6 @@
 #include "vithememanager.h"
 #include "vilogger.h"
 
-QSharedPointer<ViThemeManager> ViThemeManager::mInstance;
-
 ViThemeManager::ViThemeManager()
 {
 	bool error = false;
@@ -14,7 +12,7 @@ ViThemeManager::ViThemeManager()
 		if(createFunction)
 		{
 			mCurrentTheme = createFunction();
-			if(mCurrentTheme)
+			if(!mCurrentTheme.isNull())
 			{
 				LOG(mCurrentTheme->name() + " theme loaded.");
 			}
@@ -42,15 +40,6 @@ ViThemeManager::ViThemeManager()
 ViThemeManager::~ViThemeManager()
 {
 	//mLibrary.unload();
-}
-
-ViThemeManager* ViThemeManager::instance()
-{
-	if(mInstance.isNull())
-	{
-		mInstance = QSharedPointer<ViThemeManager>(new ViThemeManager());
-	}
-	return mInstance.data();
 }
 
 QColor ViThemeManager::color(ViThemeColors::Type type)

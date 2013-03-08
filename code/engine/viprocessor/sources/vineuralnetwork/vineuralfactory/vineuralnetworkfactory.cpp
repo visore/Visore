@@ -15,10 +15,22 @@ ViNeuralNetworkFactory::ViNeuralNetworkFactory(const ViNeuralNetworkFactory &oth
 	mBiases = other.mBiases;
 }
 
+ViNeuralNetworkFactory::~ViNeuralNetworkFactory()
+{
+	clear();
+}
+
 void ViNeuralNetworkFactory::clear()
 {
-	mDefaultActivationFunction = NULL;
+	if(mDefaultActivationFunction != NULL)
+	{
+		delete mDefaultActivationFunction;
+		mDefaultActivationFunction = NULL;
+	}
+
+	qDeleteAll(mActivationFunctions);
 	mActivationFunctions.clear();
+
 	mNeurons.clear();
 	mBiases.clear();
 }
@@ -56,6 +68,15 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 	
 	for(int i = 0; i < mNeurons.size(); ++i)
 	{
+		if(mActivationFunctions[i] == NULL)
+		{
+			LOG("No activation function was specified for layer " + QString::number(i + 1) + ". The default activation function will be used.", QtCriticalMsg);
+		}
+		if(mNeurons[i] <= 0)
+		{
+			LOG("Layer " + QString::number(i + 1) + " has an invalid amount (" + QString::number(mNeurons[i]) + ") of neurons. At least one neuron must be specified.", QtCriticalMsg);
+		}
+
 		if(i == 0 || i == mNeurons.size() - 1) // Don't allow biases on the input and output layer
 		{
 			network->add(ViNeuralLayerFactory::create(mNeurons[i], mActivationFunctions[i]));

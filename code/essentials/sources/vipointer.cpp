@@ -105,6 +105,7 @@ void ViPointer<T>::destruct()
 			if(mData->data() != NULL)
 			{
 				delete mData->data();
+				mData->setData(NULL);
 			}
 			delete mData;
 			mData = NULL;
@@ -209,6 +210,12 @@ template<class T>
 bool ViPointer<T>::operator != (const T *other)
 {
 	return mData->data() != other;
+}
+
+template<class T, class F>
+ViPointer<T> viPointerCast(ViPointer<F> pointer)
+{
+	return ViPointer<T>(static_cast<T*>(pointer.data()));
 }
 
 #endif

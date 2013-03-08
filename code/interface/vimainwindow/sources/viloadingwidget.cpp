@@ -117,7 +117,7 @@ void ViLoadingWidget::start()
 
 void ViLoadingWidget::start(bool animation, bool button, QString text, ViProgressBar::TextStyle textStyle, ViProgressBar::ProgressStyle progressStyle)
 {
-	QSharedPointer<ViLoadingWidget> instance = ViLoadingWidget::instance();
+	ViLoadingWidgetPointer instance = ViLoadingWidget::instance();
 
 	instance->mTime.start();
 	instance->mTimer.start(TIME_UPDATE_INTERVAL);
@@ -133,7 +133,7 @@ void ViLoadingWidget::start(bool animation, bool button, QString text, ViProgres
 
 void ViLoadingWidget::stop()
 {
-	QSharedPointer<ViLoadingWidget> instance = ViLoadingWidget::instance();
+	ViLoadingWidgetPointer instance = ViLoadingWidget::instance();
 	//STATICLOG(instance->metaObject()->className(), "The time to execute the process was " + ViTimeConverter::toOptimalString(instance->mTime.elapsed(), ViTimeConverter::Milliseconds));
 	instance->mTimer.stop();
 	instance->mUi->animationWidget->stop();

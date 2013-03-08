@@ -12,7 +12,9 @@
 #define round(x) ROUND(x)
 
 #define CLASSNAME stripClassName(typeid(*this).name()) // call className() from within an object
+#define TEMPLATE_CLASSNAME stripTemplateClassName(__PRETTY_FUNCTION__) // call className() from within an object
 QString stripClassName(const char *text);
+QString stripTemplateClassName(const char *text);
 
 typedef unsigned char qbyte8u;
 typedef unsigned short qbyte16u;

@@ -11,7 +11,8 @@ class ViFunctor
 
 	public:
 
-		virtual void execute (ViFunctorParameter *data = 0) = 0;
+		virtual void execute(ViFunctorParameter *data = 0) = 0;
+		virtual void execute(void *data = 0);
 		virtual void operator () (ViFunctorParameter *data = 0);
 
 };

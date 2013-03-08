@@ -30,6 +30,8 @@ class ViVersion
 class ViManager : public ViSingleton<ViManager>
 {
 
+	friend class ViSingleton<ViManager>;
+
 	public:
 
 		~ViManager();
@@ -66,7 +68,6 @@ class ViManager : public ViSingleton<ViManager>
 
 	protected:
 
-		friend class ViSingleton<ViManager>;
 		ViManager();
 		static void setValue(QString key, QVariant value);
 		static QVariant value(QString key);

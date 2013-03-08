@@ -70,8 +70,11 @@ class ViPointer
 	private:
 
 		ViPointerData<T> *mData;
-		
+
 };
+
+template<class T, class F>
+ViPointer<T> viPointerCast(ViPointer<F> pointer);
 
 //Template decleration and implementation should actually be in the same file
 #include "vipointer.cpp"

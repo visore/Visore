@@ -1,9 +1,17 @@
 #include <vineuron.h>
+#include <viaverageactivationfunction.h>
+
+ViNeuron::ViNeuron()
+	: ViNeuralUnit(), QRunnable()
+{
+	setActivationFunction(NULL);
+	mValue = 0;
+}
 
 ViNeuron::ViNeuron(ViActivationFunction *activationFunction)
 	: ViNeuralUnit(), QRunnable()
 {
-	mActivationFunction = activationFunction;
+	setActivationFunction(activationFunction);
 	mValue = 0;
 }
 
@@ -16,6 +24,12 @@ ViNeuron::ViNeuron(const ViNeuron &other)
 
 ViNeuron::~ViNeuron()
 {
+	if(mActivationFunction != NULL)
+	{
+		delete mActivationFunction;
+		mActivationFunction = NULL;
+	}
+
 	qDeleteAll(mInputs);
 	mInputs.clear();
 
@@ -50,7 +64,14 @@ ViActivationFunction* ViNeuron::activationFunction() const
 
 void ViNeuron::setActivationFunction(ViActivationFunction *activationFunction)
 {
-	mActivationFunction = activationFunction;
+	if(activationFunction == NULL)
+	{
+		activationFunction = new ViAverageActivationFunction(); // Default - will not change the value
+	}
+	else
+	{
+		mActivationFunction = activationFunction;
+	}
 }
 
 bool ViNeuron::add(Vi::Direction direction, ViSynapse *synapse)

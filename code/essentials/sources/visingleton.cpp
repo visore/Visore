@@ -1,14 +1,14 @@
-#ifdef VISINGELTON_H
+#ifdef VISINGLETON_H
 
-template<typename T>
-QSharedPointer<T> ViSingleton<T>::mInstance;
+template <class T>
+ViPointer<T> ViSingleton<T>::mInstance;
 
-template<typename T>
-QSharedPointer<T> ViSingleton<T>::instance()
+template <class T>
+ViPointer<T> ViSingleton<T>::instance()
 {
 	if(mInstance.isNull())
 	{
-		mInstance = QSharedPointer<T>(new T());
+		mInstance = ViPointer<T>(new T());
 	}
 	return mInstance;
 }

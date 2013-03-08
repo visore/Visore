@@ -16,7 +16,7 @@ void ViWaveFormer::execute()
 	ViSampleChunk &theSamples = samples();
 	for(int i = 0; i < theSamples.size(); ++i)
 	{
-	//	mForm->append(theSamples[i]);
+		mForm->append(theSamples[i]);
 	}
 }
 

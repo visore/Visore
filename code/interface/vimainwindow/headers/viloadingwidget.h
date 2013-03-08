@@ -15,6 +15,7 @@ namespace Ui
 
 class ViLoadingWidget : public ViWidget, public ViSingleton<ViLoadingWidget>
 {
+
 	Q_OBJECT
 
 	friend class ViSingleton<ViLoadingWidget>;
@@ -55,5 +56,7 @@ class ViLoadingWidget : public ViWidget, public ViSingleton<ViLoadingWidget>
 		QTimer mTimer;
 
 };
+
+typedef ViPointer<ViLoadingWidget> ViLoadingWidgetPointer;
 
 #endif

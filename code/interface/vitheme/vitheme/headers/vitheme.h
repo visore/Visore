@@ -12,6 +12,7 @@ class ViTheme
 	public:
 
 		virtual ~ViTheme();
+
 		QString name();
 		ViThemeColors* colors();
 		ViThemeFonts* fonts();
@@ -28,6 +29,6 @@ class ViTheme
 
 };
 
-typedef QSharedPointer<ViTheme> ViThemePointer;
+typedef ViPointer<ViTheme> ViThemePointer;
 
 #endif

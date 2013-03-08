@@ -1,4 +1,5 @@
 #include <visigmoidactivationfunction.h>
+#include <vilogger.h>
 #include <math.h>
 
 ViSigmoidActivationFunction::ViSigmoidActivationFunction(double shape)
@@ -80,7 +81,32 @@ double ViSigmoidActivationFunction::changeCenterShape(const double &input)
 	return mShape * (input - mCenter);
 }
 
-double ViSigmoidActivationFunction::execute(double input)
+double ViSigmoidActivationFunction::execute(const double &input, const int &inputCount)
 {
 	return 1 / (1 + exp(-(this->*function)(input)));
+}
+
+ViElement ViSigmoidActivationFunction::exportData()
+{
+	ViElement element = ViActivationFunction::exportData();
+	element.addChild("Shape", shape());
+	return element;
+}
+
+bool ViSigmoidActivationFunction::importData(ViElement element)
+{
+	if(ViActivationFunction::importData(element))
+	{
+		ViElement shape = element.child("Shape");
+		if(shape.isNull())
+		{
+			LOG("The shape could not be imported", QtCriticalMsg);
+		}
+		else
+		{
+			setShape(shape.toReal());
+		}
+		return true;
+	}
+	return false;
 }
