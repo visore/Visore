@@ -12,9 +12,10 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	mUi->setupUi(this);
 
 	QFont font;
-	font.setFamily("Bauhaus");
+	font.setFamily("Harabara");
 	font.setPointSize(16);
 	font.setBold(true);
+	font.setLetterSpacing(QFont::PercentageSpacing, 105);
 
 	QColor textColor = ViThemeManager::color(ViThemeColors::TextColor1);
 	int index;
@@ -49,15 +50,24 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	index = ViStackedWidget::addWidget(new ViProjectCorrelationWidget());
 	mUi->correlateProjectButton->addFunctionCall(SIGNAL(clicked()), ViStackedWidget::currentIndexCall(index));
 
-	mUi->creationHeading->setFont(font);
-	mUi->playbackHeading->setFont(font);
-	mUi->analysisHeading->setFont(font);
-	mUi->correctionHeading->setFont(font);
 
-	mUi->creationHeading->setStyleSheet("color: " + textColor.name());
-	mUi->playbackHeading->setStyleSheet("color: " + textColor.name());
-	mUi->analysisHeading->setStyleSheet("color: " + textColor.name());
-	mUi->correctionHeading->setStyleSheet("color: " + textColor.name());
+	QFont headingFont;
+	headingFont.setFamily("Harabara");
+	headingFont.setPointSize(24);
+	headingFont.setBold(true);
+	headingFont.setLetterSpacing(QFont::PercentageSpacing, 105);
+
+	QColor headingColor = ViThemeManager::color(ViThemeColors::MainColor6);
+
+	mUi->creationHeading->setFont(headingFont);
+	mUi->playbackHeading->setFont(headingFont);
+	mUi->analysisHeading->setFont(headingFont);
+	mUi->correctionHeading->setFont(headingFont);
+
+	mUi->creationHeading->setStyleSheet("color: " + headingColor.name());
+	mUi->playbackHeading->setStyleSheet("color: " + headingColor.name());
+	mUi->analysisHeading->setStyleSheet("color: " + headingColor.name());
+	mUi->correctionHeading->setStyleSheet("color: " + headingColor.name());
 
 	/*QColor lineColor = ViThemeManager::color(2);
 	mUi->line1->setStyleSheet("color: " + lineColor.name());

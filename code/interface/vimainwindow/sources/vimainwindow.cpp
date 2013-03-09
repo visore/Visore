@@ -85,6 +85,8 @@ void ViMainWindow::initialize()
 	mUi->logoButton->setGlow(ViGradientCreator::Circle);
 
 	ViFont font = ViThemeManager::font(ViThemeFonts::MainFont);
-	font.setPointSize(24);
+	font.setPointSize(30);
+	font.setLetterSpacing(QFont::PercentageSpacing, 105);
 	mUi->logoLabel->setFont(font);
+	mUi->logoLabel->setStyleSheet("color: " + ViThemeManager::color(ViThemeColors::MainColor6).name());
 }

@@ -14,7 +14,7 @@ ViFont ViThemeFonts::font(ViThemeFonts::Type type)
 
 void ViThemeFonts::addFont(QString fileName, QString fontName, ViThemeFonts::Type type)
 {
-	if(QFontDatabase::addApplicationFont(":/fonts/" + fileName + ".ttf") == -1)
+	if(QFontDatabase::addApplicationFont(":/fonts/" + fileName + "/" + fileName + ".ttf") == -1 && QFontDatabase::addApplicationFont(":/fonts/" + fileName + ".ttf") == -1)
 	{
 		LOG("The font \"" + fontName + "\" could not be added. If you are using Linux, make sure fontconfig is installed.", QtCriticalMsg);
 	}

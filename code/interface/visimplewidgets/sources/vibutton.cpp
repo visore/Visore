@@ -191,7 +191,7 @@ void ViButton::paintText(QPainter &painter)
 		painter.setPen(pen);
 		painter.setFont(mTextFont);
 		int offset = (width() * GLOW_OFFSET_PERCENTAGE * 1.5) + mIconWidth;
-		painter.drawText(QRect(offset, 0, width() - offset, height()), Qt::AlignVCenter | Qt::AlignLeft | Qt::TextWordWrap, mText);
+		painter.drawText(QRect(offset, 0, width() - offset - (GLOW_OFFSET_PERCENTAGE * width()), height()), Qt::AlignVCenter | Qt::AlignLeft | Qt::TextWordWrap, mText);
 	}
 }
 
