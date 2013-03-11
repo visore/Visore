@@ -13,6 +13,7 @@ class ViSigmoidActivationFunction : public ViActivationFunction
 	public:
 
 		ViSigmoidActivationFunction(double shape = 1);
+		ViSigmoidActivationFunction(const ViSigmoidActivationFunction &other);
 
 		void setRange(double minimum, double maximum);
 		void setMinimum(double minimum);
@@ -24,6 +25,8 @@ class ViSigmoidActivationFunction : public ViActivationFunction
 
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
+
+		ViActivationFunction* clone();
 
 	protected:
 
@@ -44,5 +47,7 @@ class ViSigmoidActivationFunction : public ViActivationFunction
 		double mCenter;
 
 };
+
+Q_DECLARE_METATYPE(ViSigmoidActivationFunction);
 
 #endif

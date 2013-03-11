@@ -3,9 +3,16 @@
 #include <math.h>
 
 ViSigmoidActivationFunction::ViSigmoidActivationFunction(double shape)
-	: ViActivationFunction(0, 1)
+	: ViActivationFunction(CLASSNAME, 0, 1)
 {
 	setShape(shape);
+}
+
+ViSigmoidActivationFunction::ViSigmoidActivationFunction(const ViSigmoidActivationFunction &other)
+	: ViActivationFunction(other)
+{
+	mShape = other.mShape;
+	setRange(other.minimum(), other.maximum());
 }
 
 void ViSigmoidActivationFunction::setRange(double minimum, double maximum)
@@ -84,6 +91,11 @@ double ViSigmoidActivationFunction::changeCenterShape(const double &input)
 double ViSigmoidActivationFunction::execute(const double &input, const int &inputCount)
 {
 	return 1 / (1 + exp(-(this->*function)(input)));
+}
+
+ViActivationFunction* ViSigmoidActivationFunction::clone()
+{
+	return new ViSigmoidActivationFunction(*this);
 }
 
 ViElement ViSigmoidActivationFunction::exportData()

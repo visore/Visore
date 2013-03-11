@@ -22,7 +22,7 @@ class ViStaticNeuron : public ViNeuron
 		
 	protected:
 
-		ViStaticNeuron(double value = 1);
+		ViStaticNeuron(ViNeuron::Type type, double value = 1);
 
 };
 

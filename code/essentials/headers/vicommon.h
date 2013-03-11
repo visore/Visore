@@ -13,8 +13,14 @@
 
 #define CLASSNAME stripClassName(typeid(*this).name()) // call className() from within an object
 #define TEMPLATE_CLASSNAME stripTemplateClassName(__PRETTY_FUNCTION__) // call className() from within an object
-QString stripClassName(const char *text);
-QString stripTemplateClassName(const char *text);
+inline QString stripClassName(const char *text);
+inline QString stripTemplateClassName(const char *text);
+
+template <typename ForwardIterator>
+inline void viDeleteAll(ForwardIterator begin, ForwardIterator end);
+
+template <typename Container>
+inline void viDeleteAll(Container &container);
 
 typedef unsigned char qbyte8u;
 typedef unsigned short qbyte16u;
@@ -56,5 +62,7 @@ namespace Vi
 	};
 
 }
+
+#include <vicommon.cpp>
 
 #endif

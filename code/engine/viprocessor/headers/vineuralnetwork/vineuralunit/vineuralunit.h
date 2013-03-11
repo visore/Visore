@@ -3,9 +3,10 @@
 
 #include <vicommon.h>
 #include <vilogger.h>
+#include <viserializer.h>
 #include <QList>
 
-class ViNeuralUnit
+class ViNeuralUnit : public ViSerializer
 {
 
 	public:

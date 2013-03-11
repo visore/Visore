@@ -1,6 +1,6 @@
-#include <vicommon.h>
+#ifdef VICOMMON_H
 
-QString stripClassName(const char *text)
+inline QString stripClassName(const char *text)
 {
 	QString name(text);
 	if(name.startsWith("P") && name[1].isDigit())
@@ -14,7 +14,7 @@ QString stripClassName(const char *text)
 	return name;
 }
 
-QString stripTemplateClassName(const char *text)
+inline QString stripTemplateClassName(const char *text)
 {
 	QString name(text);
 	int startIndex = name.indexOf("[with T = ");
@@ -25,3 +25,26 @@ QString stripTemplateClassName(const char *text)
 	startIndex += 10;
 	return name.mid(startIndex, name.indexOf("]") - startIndex);
 }
+
+template <typename ForwardIterator>
+inline void viDeleteAll(ForwardIterator begin, ForwardIterator end)
+{
+	while(begin != end)
+	{
+		if(*begin != NULL)
+		{
+			delete *begin;
+			*begin = NULL;
+		}
+		++begin;
+	}
+}
+
+template <typename Container>
+inline void viDeleteAll(Container &container)
+{
+    viDeleteAll(container.begin(), container.end());
+	container.clear();
+}
+
+#endif

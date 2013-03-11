@@ -6,13 +6,15 @@ ViNeuron::ViNeuron()
 {
 	setActivationFunction(NULL);
 	mValue = 0;
+	mType = ViNeuron::UnknownNeuron;
 }
 
-ViNeuron::ViNeuron(ViActivationFunction *activationFunction)
+ViNeuron::ViNeuron(ViNeuron::Type type, ViActivationFunction *activationFunction)
 	: ViNeuralUnit(), QRunnable()
 {
 	setActivationFunction(activationFunction);
 	mValue = 0;
+	mType = type;
 }
 
 ViNeuron::ViNeuron(const ViNeuron &other)
@@ -20,6 +22,7 @@ ViNeuron::ViNeuron(const ViNeuron &other)
 {
 	mActivationFunction = other.mActivationFunction;
 	mValue = other.mValue;
+	mType = other.mType;
 }
 
 ViNeuron::~ViNeuron()
@@ -30,11 +33,8 @@ ViNeuron::~ViNeuron()
 		mActivationFunction = NULL;
 	}
 
-	qDeleteAll(mInputs);
-	mInputs.clear();
-
-	qDeleteAll(mOutputs);
-	mOutputs.clear();
+	viDeleteAll(mInputs);
+	viDeleteAll(mOutputs);
 }
 
 void ViNeuron::run()
@@ -45,6 +45,16 @@ void ViNeuron::run()
 		sum += mInputs[i]->value();
 	}
 	mValue = mActivationFunction->calculate(sum);
+}
+
+ViNeuron::Type ViNeuron::type()
+{
+	return mType;
+}
+		
+void ViNeuron::setType(ViNeuron::Type type)
+{
+	mType = type;
 }
 
 double ViNeuron::value()
@@ -183,6 +193,10 @@ bool ViNeuron::operator == (const ViNeuron &other) const
 	{
 		return false;
 	}
+	if(mType == other.mType)
+	{
+		return false;
+	}
 
 	for(int i = 0; i < mInputs.size(); ++i)
 	{
@@ -201,4 +215,97 @@ bool ViNeuron::operator == (const ViNeuron &other) const
 	}
 
 	return true;
+}
+
+ViElement ViNeuron::exportData()
+{
+	ViElement element("Neuron");
+	element.addChild("id", id());
+
+	if(type() == ViNeuron::UnknownNeuron)
+	{
+		LOG("An unknown neuron (id: " + id() + ") was detected.", QtCriticalMsg);
+	}
+	element.addChild("type", typeToString(type()));
+
+	element.addChild(activationFunction()->exportData());
+	return element;
+}
+
+bool ViNeuron::importData(ViElement element)
+{
+	/*if(element.name() != "Neuron")
+	{
+		return false;
+	}
+
+	bool success = true;
+
+	ViElement id = element.child("id");
+	if(id.isNull())
+	{
+		success = false;
+	}
+	else
+	{
+		setId(id.toString());
+	}
+
+	ViElement activationFunction = element.child("ActivationFunction");
+	if(id.isNull())
+	{
+		success = false;
+		setActivationFunction(NULL);
+	}
+	else
+	{
+		mActivationFunction = ViActivationFunction::create(activationFunction.toString());
+		if(mActivationFunction == NULL)
+		{
+			LOG("Unable to create an activation function (" + activationFunction.toString() + ") from the input. The default activation function will be used.", QtCriticalMsg);
+			setActivationFunction(NULL);
+		}
+		else
+		{
+			mActivationFunction->importData(activationFunction);
+			//setActivationFunction(NULL);
+		}
+	}
+
+	return success;*/
+}
+
+QString ViNeuron::typeToString(ViNeuron::Type type)
+{
+	if(type == ViNeuron::InputNeuron)
+	{
+		return "Input";
+	}
+	else if(type == ViNeuron::OutputNeuron)
+	{
+		return "Output";
+	}
+	else if(type == ViNeuron::HiddenNeuron)
+	{
+		return "Hidden";
+	}
+	return "Unknown";
+}
+
+ViNeuron::Type ViNeuron::stringToType(QString type)
+{
+	type = type.trimmed().toLower();
+	if(type == "input")
+	{
+		return ViNeuron::InputNeuron;
+	}
+	else if(type == "output")
+	{
+		return ViNeuron::OutputNeuron;
+	}
+	else if(type == "hidden")
+	{
+		return ViNeuron::HiddenNeuron;
+	}
+	return ViNeuron::UnknownNeuron;
 }

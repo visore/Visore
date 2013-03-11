@@ -1,5 +1,7 @@
 #include "viaudioengine.h"
 
+#include "vineuralcorrector.h"
+
 ViAudioEngine::ViAudioEngine()
 {
 	//QObject::connect(&mCorrelator, SIGNAL(progressed(short)), this, SIGNAL(correlationProgressed(short)));
@@ -35,26 +37,8 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(mStreamOutput, SIGNAL(lengthChanged(ViAudioPosition)), this, SIGNAL(lengthChanged(ViAudioPosition)));
 
 
-//******************************/
-/*
-ViCrossCorrelator c;
-qreal *a1 = new qreal[4];
-a1[0]=1;a1[1]=2;a1[2]=3;a1[3]=4;
-qreal *a2 = new qreal[4];
-a2[0]=4;a2[1]=1;a2[2]=2;a2[3]=3;
-//a2[0]=1;a2[1]=2;a2[2]=3;a2[3]=0;
-//a2[0]=3;a2[1]=2;a2[2]=1;a2[3]=0;
-cout<<"***********************************"<<endl;
-ViSampleChunk *d1 = new ViSampleChunk(a1, 4);
-ViSampleChunk *d2 = new ViSampleChunk(a2, 4);
-
-c.setWindowSize(4);
-c.setData(d1, d2);
-c.initialize();
-c.execute();
-c.finalize();
-
-*/
+ViNeuralCorrector corr;
+corr.initialize();
 
 
 }

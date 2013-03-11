@@ -38,6 +38,9 @@ class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
 
 		ViNeuralLayer* operator [] (const int index) const;
 		bool operator == (const ViNeuralNetwork &other) const;
+
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
 		
 	protected:
 

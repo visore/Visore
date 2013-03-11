@@ -3,6 +3,8 @@
 
 #include <vineuralunit.h>
 
+#define DEFAULT_SYNAPSE_WEIGHT 0.5
+
 class ViNeuron;
 class ViSynapseFactory;
 
@@ -28,10 +30,13 @@ class ViSynapse : public ViNeuralUnit
 
 		bool operator == (const ViSynapse &other) const;
 
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
+
 	protected:
 
 		ViSynapse();
-		ViSynapse(ViNeuron *input, ViNeuron *output, double weight = 1);
+		ViSynapse(ViNeuron *input, ViNeuron *output, double weight = DEFAULT_SYNAPSE_WEIGHT);
 
 	private:
 

@@ -4,14 +4,26 @@
 #include <vineuralunit.h>
 #include <viactivationfunction.h>
 #include <visynapse.h>
+#include <viid.h>
 #include <QRunnable>
 
 class ViNeuronFactory;
 
-class ViNeuron : public ViNeuralUnit, public QRunnable
+class ViNeuron : public ViNeuralUnit, public QRunnable, public ViId
 {
 
 	friend class ViNeuronFactory;
+
+	public:
+
+		enum Type
+		{
+			UnknownNeuron,
+			InputNeuron,
+			OutputNeuron,
+			HiddenNeuron,
+			BiasNeuron
+		};
 
 	public:
 
@@ -19,6 +31,10 @@ class ViNeuron : public ViNeuralUnit, public QRunnable
 		virtual ~ViNeuron();
 
 		virtual void run();
+
+		ViNeuron::Type type();
+		
+		void setType(ViNeuron::Type type);
 
 		double value();
 
@@ -44,11 +60,17 @@ class ViNeuron : public ViNeuralUnit, public QRunnable
 		ViSynapse* outputAt(int index) const;
 
 		bool operator == (const ViNeuron &other) const;
+
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
+
+		static QString typeToString(ViNeuron::Type type);
+		static ViNeuron::Type stringToType(QString type);
 		
 	protected:
 
 		ViNeuron();
-		ViNeuron(ViActivationFunction *activationFunction);
+		ViNeuron(ViNeuron::Type type, ViActivationFunction *activationFunction = NULL);
 
 	private:
 
@@ -56,6 +78,7 @@ class ViNeuron : public ViNeuralUnit, public QRunnable
 		ViSynapseList mInputs;
 		ViSynapseList mOutputs;
 		double mValue;
+		ViNeuron::Type mType;
 
 };
 

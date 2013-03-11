@@ -59,14 +59,38 @@ ViAttribute& ViElement::addAttribute(QString name, QVariant value)
 	return mAttributes.last();
 }
 
-ViAttributeList ViElement::attributes()
+ViAttributeList ViElement::attributes(QString nameFilter)
 {
-	return mAttributes;
+	if(nameFilter == "")
+	{
+		return mAttributes;
+	}
+	ViAttributeList result;
+	for(int i = 0; i < mAttributes.size(); ++i)
+	{
+		if(mAttributes[i].name() == nameFilter)
+		{
+			result.append(mAttributes[i]);
+		}
+	}
+	return result;
 }
 
-ViElementList ViElement::children()
+ViElementList ViElement::children(QString nameFilter)
 {
-	return mChildren;
+	if(nameFilter == "")
+	{
+		return mChildren;
+	}
+	ViElementList result;
+	for(int i = 0; i < mChildren.size(); ++i)
+	{
+		if(mChildren[i].name() == nameFilter)
+		{
+			result.append(mChildren[i]);
+		}
+	}
+	return result;
 }
 
 int ViElement::attributeCount()

@@ -1,6 +1,6 @@
 #include <vistaticneuronfactory.h>
 
-ViStaticNeuron* ViStaticNeuronFactory::create(double value)
+ViStaticNeuron* ViStaticNeuronFactory::create(ViNeuron::Type type, double value)
 {
-	return new ViStaticNeuron(value);
+	return new ViStaticNeuron(type, value);
 }

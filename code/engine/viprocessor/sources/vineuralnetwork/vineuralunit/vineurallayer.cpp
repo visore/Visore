@@ -15,8 +15,7 @@ ViNeuralLayer::ViNeuralLayer(const ViNeuralLayer &other)
 
 ViNeuralLayer::~ViNeuralLayer()
 {
-	qDeleteAll(mNeurons);
-	mNeurons.clear();
+	viDeleteAll(mNeurons);
 }
 
 void ViNeuralLayer::run()
@@ -53,6 +52,26 @@ bool ViNeuralLayer::contains(ViNeuron *neuron) const
 int ViNeuralLayer::size() const
 {
 	return mNeurons.size();
+}
+
+int ViNeuralLayer::inputSize()
+{
+	int count = 0;
+	for(int i = 0; i < mNeurons.size(); ++i)
+	{
+		count += mNeurons[i]->inputSize();
+	}
+	return count;
+}
+
+int ViNeuralLayer::outputSize()
+{
+	int count = 0;
+	for(int i = 0; i < mNeurons.size(); ++i)
+	{
+		count += mNeurons[i]->outputSize();
+	}
+	return count;
 }
 
 ViNeuron* ViNeuralLayer::at(int index) const
@@ -107,5 +126,24 @@ bool ViNeuralLayer::operator == (const ViNeuralLayer &other) const
 		}
 	}
 
+	return true;
+}
+
+ViElement ViNeuralLayer::exportData()
+{
+	ViElement element("NeuronLayer");
+	for(int i = 0; i < mNeurons.size(); ++i)
+	{
+		element.addChild(mNeurons[i]->exportData());
+	}
+	return element;
+}
+
+bool ViNeuralLayer::importData(ViElement element)
+{
+	if(element.name() != "NeuronLayer")
+	{
+		return false;
+	}
 	return true;
 }

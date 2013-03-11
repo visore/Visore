@@ -24,6 +24,9 @@ class ViNeuralLayer : public ViNeuralUnit, public QRunnable
 
 		int size() const;
 
+		int inputSize();
+		int outputSize();
+
 		ViNeuron* at(int index) const;
 
 		double value(int index);
@@ -32,6 +35,9 @@ class ViNeuralLayer : public ViNeuralUnit, public QRunnable
 
 		ViNeuron* operator [] (const int index) const;
 		bool operator == (const ViNeuralLayer &other) const;
+
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
 		
 	protected:
 

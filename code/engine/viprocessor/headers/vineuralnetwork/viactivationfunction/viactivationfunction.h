@@ -8,7 +8,8 @@ class ViActivationFunction : public ViSerializer
 
 	public:
 
-		ViActivationFunction(double functionMinimum = 0, double functionMaximum = 1);
+		ViActivationFunction(QString name, double functionMinimum = 0, double functionMaximum = 1);
+		ViActivationFunction(const ViActivationFunction &other);
 		virtual ~ViActivationFunction();
 
 		void setName(QString name);
@@ -18,15 +19,19 @@ class ViActivationFunction : public ViSerializer
 		virtual void setMinimum(double minimum);
 		virtual void setMaximum(double maximum);
 
-		double minimum();
-		double maximum();
+		double minimum() const;
+		double maximum() const;
 
 		double calculate(const double &input, const int &inputCount = -1);
 
-	protected:
+		static ViActivationFunction* create(QString name);
 
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
+
+		virtual ViActivationFunction* clone() = 0;
+
+	protected:
 
 		virtual double execute(const double &input, const int &inputCount) = 0;
 

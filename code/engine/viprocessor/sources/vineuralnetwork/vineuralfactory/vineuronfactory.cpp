@@ -1,6 +1,6 @@
 #include <vineuronfactory.h>
 
-ViNeuron* ViNeuronFactory::create(ViActivationFunction *activationFunction)
+ViNeuron* ViNeuronFactory::create(ViNeuron::Type type, ViActivationFunction *activationFunction)
 {
-	return new ViNeuron(activationFunction);
+	return new ViNeuron(type, activationFunction->clone());
 }

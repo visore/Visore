@@ -24,8 +24,8 @@ class ViElement : public ViValue
 		ViElement& addChild(QString name, QVariant value);
 		ViAttribute& addAttribute(QString name, QVariant value);
 
-		ViAttributeList attributes();
-		ViElementList children();
+		ViAttributeList attributes(QString nameFilter = "");
+		ViElementList children(QString nameFilter = "");
 
 		int attributeCount();
 		int childrenCount();

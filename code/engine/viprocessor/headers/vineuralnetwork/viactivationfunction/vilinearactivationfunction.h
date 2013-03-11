@@ -9,6 +9,7 @@ class ViLinearActivationFunction : public ViActivationFunction
 	public:
 
 		ViLinearActivationFunction(double gradient = 0.5);
+		ViLinearActivationFunction(const ViLinearActivationFunction &other);
 
 		double gradient();
 
@@ -16,6 +17,8 @@ class ViLinearActivationFunction : public ViActivationFunction
 
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
+
+		ViActivationFunction* clone();
 
 	protected:
 
@@ -26,5 +29,7 @@ class ViLinearActivationFunction : public ViActivationFunction
 		double mGradient;
 
 };
+
+Q_DECLARE_METATYPE(ViLinearActivationFunction);
 
 #endif

@@ -28,9 +28,8 @@ void ViNeuralNetworkFactory::clear()
 		mDefaultActivationFunction = NULL;
 	}
 
-	qDeleteAll(mActivationFunctions);
-	mActivationFunctions.clear();
-
+	viDeleteAll(mActivationFunctions);
+	
 	mNeurons.clear();
 	mBiases.clear();
 }
@@ -42,12 +41,12 @@ void ViNeuralNetworkFactory::setActivationFunction(ViActivationFunction *activat
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount)
 {
-	addLayer(neuronCount, 0, mDefaultActivationFunction);
+	addLayer(neuronCount, 0, mDefaultActivationFunction->clone());
 }
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount, double bias)
 {
-	addLayer(neuronCount, bias, mDefaultActivationFunction);
+	addLayer(neuronCount, bias, mDefaultActivationFunction->clone());
 }
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount, ViActivationFunction *activationFunction)
@@ -77,13 +76,25 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 			LOG("Layer " + QString::number(i + 1) + " has an invalid amount (" + QString::number(mNeurons[i]) + ") of neurons. At least one neuron must be specified.", QtCriticalMsg);
 		}
 
-		if(i == 0 || i == mNeurons.size() - 1) // Don't allow biases on the input and output layer
+		if(i == 0)
 		{
-			network->add(ViNeuralLayerFactory::create(mNeurons[i], mActivationFunctions[i]));
+			if(mBiases[i] != 0)
+			{
+				LOG("No bias allowed in the input layer. The bias will be removed.", QtCriticalMsg);
+			}
+			network->add(ViNeuralLayerFactory::createInput(mNeurons[i]));
+		}
+		else if(i == mNeurons.size() - 1)
+		{
+			if(mBiases[i] != 0)
+			{
+				LOG("No bias allowed in the output layer. The bias will be removed.", QtCriticalMsg);
+			}
+			network->add(ViNeuralLayerFactory::createOutput(mNeurons[i], mActivationFunctions[i]));
 		}
 		else
 		{
-			network->add(ViNeuralLayerFactory::create(mNeurons[i], mActivationFunctions[i], mBiases[i]));
+			network->add(ViNeuralLayerFactory::createHidden(mNeurons[i], mActivationFunctions[i], mBiases[i]));
 		}
 	}
 

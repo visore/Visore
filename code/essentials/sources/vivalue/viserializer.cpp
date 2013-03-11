@@ -1,13 +1,13 @@
 #include <viserializer.h>
 #include <QTextStream>
 
-bool ViSerializer::exportData(QString filePath)
+bool ViSerializer::exportFile(QString filePath)
 {
 	QFile file(filePath);
-	return exportData(file);
+	return exportFile(file);
 }
 
-bool ViSerializer::exportData(QFile &file)
+bool ViSerializer::exportFile(QFile &file)
 {
 	bool openAgain = file.isOpen();
 	QIODevice::OpenMode openMode;
@@ -33,13 +33,13 @@ bool ViSerializer::exportData(QFile &file)
 	return success;
 }
 
-bool ViSerializer::importData(QString filePath)
+bool ViSerializer::importFile(QString filePath)
 {
 	QFile file(filePath);
-	return importData(file);
+	return importFile(file);
 }
 
-bool ViSerializer::importData(QFile &file)
+bool ViSerializer::importFile(QFile &file)
 {
 	bool openAgain = file.isOpen();
 	QIODevice::OpenMode openMode;

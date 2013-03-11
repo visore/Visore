@@ -2,9 +2,9 @@
 #include <viscaler.h>
 #include <vilogger.h>
 
-ViActivationFunction::ViActivationFunction(double functionMinimum, double functionMaximum)
+ViActivationFunction::ViActivationFunction(QString name, double functionMinimum, double functionMaximum)
 {
-	mName = CLASSNAME;
+	mName = name;
 	if(mName.startsWith("Vi"))
 	{
 		mName.remove(0, 2);
@@ -14,6 +14,15 @@ ViActivationFunction::ViActivationFunction(double functionMinimum, double functi
 	mFunctionMaximum = functionMaximum;
 	mMinimum = -1;
 	mMaximum = 1;
+}
+
+ViActivationFunction::ViActivationFunction(const ViActivationFunction &other)
+{
+	mFunctionMinimum = other.mFunctionMinimum;
+	mFunctionMaximum = other.mFunctionMaximum;
+	mMinimum = other.mMinimum;
+	mMaximum = other.mMaximum;
+	mName = other.mName;
 }
 
 ViActivationFunction::~ViActivationFunction()
@@ -46,12 +55,12 @@ void ViActivationFunction::setMaximum(double maximum)
 	mMaximum = maximum;
 }
 
-double ViActivationFunction::minimum()
+double ViActivationFunction::minimum() const
 {
 	return mMinimum;
 }
 
-double ViActivationFunction::maximum()
+double ViActivationFunction::maximum() const
 {
 	return mMaximum;
 }
@@ -77,9 +86,20 @@ double ViActivationFunction::calculate(const double &input, const int &inputCoun
 	return ViScaler::scale(execute(input, inputCount), mFunctionMinimum, mFunctionMaximum, mMinimum, mMaximum);
 }
 
+ViActivationFunction* ViActivationFunction::create(QString name)
+{
+	int type = QMetaType::type(name.toLatin1().data());
+	if(type == QMetaType::UnknownType)
+	{
+		return NULL;
+	}
+	return (ViActivationFunction*) QMetaType::create(type);
+}
+
 ViElement ViActivationFunction::exportData()
 {
-	ViElement element(mName);
+	ViElement element("ActivationFunction");
+	element.addChild("Name", name());
 	element.addChild("Minimum", minimum());
 	element.addChild("Maximum", maximum());
 	return element;
@@ -87,10 +107,21 @@ ViElement ViActivationFunction::exportData()
 
 bool ViActivationFunction::importData(ViElement element)
 {
-	if(element.name() != name())
+	if(element.name() != "ActivationFunction")
 	{
 		return false;
 	}
+
+	ViElement theName = element.child("name");
+	if(theName.isNull())
+	{
+		return false;
+	}
+	if(theName.toString() != name())
+	{
+		return false;
+	}
+
 	ViElement minimum = element.child("Minimum");
 	if(minimum.isNull())
 	{

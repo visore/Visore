@@ -1,7 +1,7 @@
 #include <vistaticneuron.h>
 
-ViStaticNeuron::ViStaticNeuron(double value)
-	: ViNeuron()
+ViStaticNeuron::ViStaticNeuron(ViNeuron::Type type, double value)
+	: ViNeuron(type)
 {
 	setValue(value);
 }

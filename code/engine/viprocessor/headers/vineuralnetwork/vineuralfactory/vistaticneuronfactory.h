@@ -9,7 +9,7 @@ class ViStaticNeuronFactory : public ViNeuralFactory
 
 	public:
 
-		static ViStaticNeuron* create(double value = 1);
+		static ViStaticNeuron* create(ViNeuron::Type type, double value = 1);
 
 };
 

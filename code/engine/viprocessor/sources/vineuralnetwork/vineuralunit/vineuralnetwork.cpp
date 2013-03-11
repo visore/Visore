@@ -14,8 +14,7 @@ ViNeuralNetwork::ViNeuralNetwork(const ViNeuralNetwork &other)
 
 ViNeuralNetwork::~ViNeuralNetwork()
 {
-	qDeleteAll(mLayers);
-	mLayers.clear();
+	viDeleteAll(mLayers);
 }
 
 void ViNeuralNetwork::run()
@@ -165,4 +164,39 @@ bool ViNeuralNetwork::operator == (const ViNeuralNetwork &other) const
 	}
 
 	return true;
+}
+
+ViElement ViNeuralNetwork::exportData()
+{
+	ViElement element("NeuralNetwork");
+	
+	ViElement neuronLayers("NeuronLayers");
+	neuronLayers.addAttribute("count", mLayers.size());
+	for(int i = 0; i < mLayers.size(); ++i)
+	{
+		neuronLayers.addChild(mLayers[i]->exportData());	
+	}
+	element.addChild(neuronLayers);
+
+	ViElement synapseLayers("SynapseLayers");
+	int synapseCount = 0;
+	for(int i = 0; i < mLayers.size() - 1; ++i)
+	{
+		ViElement synapseLayer("SynapseLayer");
+		int synapseCount = mLayers[i]->outputSize();
+		synapseLayer.addAttribute("count", synapseCount);
+		for(int j = 0; j < synapseCount; ++j)
+		{
+			synapseLayer.addChild(mLayers[i]->at(j)->exportData());
+		}
+		synapseLayers.addChild(synapseLayer);
+	}
+	element.addChild(synapseLayers);
+
+	return element;
+}
+
+bool ViNeuralNetwork::importData(ViElement element)
+{
+
 }
