@@ -1,5 +1,4 @@
 #include <vineuron.h>
-#include <viaverageactivationfunction.h>
 
 ViNeuron::ViNeuron()
 	: ViNeuralUnit(), QRunnable()
@@ -74,14 +73,7 @@ ViActivationFunction* ViNeuron::activationFunction() const
 
 void ViNeuron::setActivationFunction(ViActivationFunction *activationFunction)
 {
-	if(activationFunction == NULL)
-	{
-		activationFunction = new ViAverageActivationFunction(); // Default - will not change the value
-	}
-	else
-	{
-		mActivationFunction = activationFunction;
-	}
+	mActivationFunction = activationFunction;
 }
 
 bool ViNeuron::add(Vi::Direction direction, ViSynapse *synapse)
@@ -228,7 +220,10 @@ ViElement ViNeuron::exportData()
 	}
 	element.addChild("type", typeToString(type()));
 
-	element.addChild(activationFunction()->exportData());
+	if(activationFunction() != NULL)
+	{
+		element.addChild(activationFunction()->exportData());
+	}
 	return element;
 }
 
@@ -289,6 +284,10 @@ QString ViNeuron::typeToString(ViNeuron::Type type)
 	{
 		return "Hidden";
 	}
+	else if(type == ViNeuron::BiasNeuron)
+	{
+		return "Bias";
+	}
 	return "Unknown";
 }
 
@@ -306,6 +305,10 @@ ViNeuron::Type ViNeuron::stringToType(QString type)
 	else if(type == "hidden")
 	{
 		return ViNeuron::HiddenNeuron;
+	}
+	else if(type == "bias")
+	{
+		return ViNeuron::BiasNeuron;
 	}
 	return ViNeuron::UnknownNeuron;
 }

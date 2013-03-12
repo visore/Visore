@@ -22,8 +22,8 @@ void ViNeuralCorrector::initialize()
 	mFactory.addLayer(5);
 	mFactory.addLayer(3, 1);
 	mFactory.addLayer(1);
-	//ViNeuralNetwork *network = mFactory.create();
-	//network->exportFile(QString("/home/visore/NN.xml"));
+	ViNeuralNetwork *network = mFactory.create();
+	network->exportFile(QString("/home/visore/NN.xml"));
 }
 
 void ViNeuralCorrector::execute()

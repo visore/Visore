@@ -1,6 +1,7 @@
 #include <vineurallayerfactory.h>
 #include <vineuronfactory.h>
 #include <vistaticneuronfactory.h>
+#include <visynapsefactory.h>
 
 ViNeuralLayer* ViNeuralLayerFactory::create(int neuronCount, ViNeuron::Type type, ViActivationFunction *activationFunction, double bias)
 {
@@ -21,7 +22,12 @@ ViNeuralLayer* ViNeuralLayerFactory::create(int neuronCount, ViNeuron::Type type
 	}
 	if(bias != 0)
 	{
-		layer->add(ViStaticNeuronFactory::create(ViNeuron::BiasNeuron, bias));
+		ViStaticNeuron *biasNeuron = ViStaticNeuronFactory::create(ViNeuron::BiasNeuron, bias);
+		layer->setBias(biasNeuron);
+		for(int i = 0; i < layer->size(); ++i)
+		{
+			ViSynapseFactory::create(biasNeuron, layer->at(i));
+		}
 	}
 	return layer;
 }

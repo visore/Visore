@@ -29,6 +29,10 @@ class ViNeuralLayer : public ViNeuralUnit, public QRunnable
 
 		ViNeuron* at(int index) const;
 
+		ViNeuron* bias();
+
+		bool setBias(ViNeuron *bias);
+
 		double value(int index);
 
 		void setValue(int index, int value);
@@ -46,6 +50,7 @@ class ViNeuralLayer : public ViNeuralUnit, public QRunnable
 	private:
 
 		ViNeuronList mNeurons;
+		ViNeuron *mBias;
 
 };
 

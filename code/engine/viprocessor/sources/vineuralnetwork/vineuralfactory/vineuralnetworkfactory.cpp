@@ -1,15 +1,16 @@
 #include <vineuralnetworkfactory.h>
 #include <vineurallayerfactory.h>
 #include <visynapsefactory.h>
+#include <viaverageactivationfunction.h>
 
 ViNeuralNetworkFactory::ViNeuralNetworkFactory()
 {
-	mDefaultActivationFunction = NULL;
+	mGlobalActivationFunction = NULL;
 }
 
 ViNeuralNetworkFactory::ViNeuralNetworkFactory(const ViNeuralNetworkFactory &other)
 {
-	mDefaultActivationFunction = other.mDefaultActivationFunction;
+	mGlobalActivationFunction = other.mGlobalActivationFunction;
 	mActivationFunctions = other.mActivationFunctions;
 	mNeurons = other.mNeurons;
 	mBiases = other.mBiases;
@@ -22,10 +23,10 @@ ViNeuralNetworkFactory::~ViNeuralNetworkFactory()
 
 void ViNeuralNetworkFactory::clear()
 {
-	if(mDefaultActivationFunction != NULL)
+	if(mGlobalActivationFunction != NULL)
 	{
-		delete mDefaultActivationFunction;
-		mDefaultActivationFunction = NULL;
+		delete mGlobalActivationFunction;
+		mGlobalActivationFunction = NULL;
 	}
 
 	viDeleteAll(mActivationFunctions);
@@ -36,17 +37,17 @@ void ViNeuralNetworkFactory::clear()
 
 void ViNeuralNetworkFactory::setActivationFunction(ViActivationFunction *activationFunction)
 {
-	mDefaultActivationFunction = activationFunction;
+	mGlobalActivationFunction = activationFunction;
 }
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount)
 {
-	addLayer(neuronCount, 0, mDefaultActivationFunction->clone());
+	addLayer(neuronCount, 0, mGlobalActivationFunction->clone());
 }
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount, double bias)
 {
-	addLayer(neuronCount, bias, mDefaultActivationFunction->clone());
+	addLayer(neuronCount, bias, mGlobalActivationFunction->clone());
 }
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount, ViActivationFunction *activationFunction)
@@ -67,9 +68,13 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 	
 	for(int i = 0; i < mNeurons.size(); ++i)
 	{
-		if(mActivationFunctions[i] == NULL)
+		ViActivationFunction *activationFunction = mActivationFunctions[i];
+		bool deleteFunction = false;
+		if(activationFunction == NULL)
 		{
-			LOG("No activation function was specified for layer " + QString::number(i + 1) + ". The default activation function will be used.", QtCriticalMsg);
+			deleteFunction = true;
+			activationFunction = defaultActivationFunction();
+			LOG("No activation function was specified for layer " + QString::number(i + 1) + ". The default activation function (" + activationFunction->name() + ") will be used.", QtCriticalMsg);
 		}
 		if(mNeurons[i] <= 0)
 		{
@@ -90,19 +95,23 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 			{
 				LOG("No bias allowed in the output layer. The bias will be removed.", QtCriticalMsg);
 			}
-			network->add(ViNeuralLayerFactory::createOutput(mNeurons[i], mActivationFunctions[i]));
+			network->add(ViNeuralLayerFactory::createOutput(mNeurons[i], activationFunction));
 		}
 		else
 		{
-			network->add(ViNeuralLayerFactory::createHidden(mNeurons[i], mActivationFunctions[i], mBiases[i]));
+			network->add(ViNeuralLayerFactory::createHidden(mNeurons[i], activationFunction, mBiases[i]));
+		}
+		if(deleteFunction)
+		{
+			delete activationFunction;
 		}
 	}
 
 	for(int i = 0; i < network->size() - 1; ++i)
 	{
-		for(int j = 0; j < network[i].size() - 1; ++j)
+		for(int j = 0; j < network->at(i)->size(); ++j)
 		{
-			for(int k = 0; k < network[i + 1].size() - 1; ++k)
+			for(int k = 0; k < network->at(i + 1)->size(); ++k)
 			{
 				ViSynapseFactory::create(network->at(i)->at(j), network->at(i + 1)->at(k));
 			}
@@ -110,4 +119,9 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 	}
 
 	return network;
+}
+
+ViActivationFunction* ViNeuralNetworkFactory::defaultActivationFunction()
+{
+	return new ViAverageActivationFunction();
 }

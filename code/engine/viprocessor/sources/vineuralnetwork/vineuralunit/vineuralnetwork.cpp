@@ -55,7 +55,7 @@ int ViNeuralNetwork::size() const
 
 ViNeuralLayer* ViNeuralNetwork::at(int index) const
 {
-	if(mLayers.size() >= index)
+	if(index >= mLayers.size())
 	{
 		LOG("An invalid layer was accessed.", QtCriticalMsg);
 		return NULL;
@@ -180,14 +180,16 @@ ViElement ViNeuralNetwork::exportData()
 
 	ViElement synapseLayers("SynapseLayers");
 	int synapseCount = 0;
-	for(int i = 0; i < mLayers.size() - 1; ++i)
+	for(int i = 1; i < mLayers.size(); ++i)
 	{
 		ViElement synapseLayer("SynapseLayer");
-		int synapseCount = mLayers[i]->outputSize();
-		synapseLayer.addAttribute("count", synapseCount);
-		for(int j = 0; j < synapseCount; ++j)
+		synapseLayer.addAttribute("count", mLayers[i]->inputSize());
+		for(int j = 0; j < mLayers[i]->size(); ++j)
 		{
-			synapseLayer.addChild(mLayers[i]->at(j)->exportData());
+			for(int k = 0; k < mLayers[i]->at(j)->inputSize(); ++k)
+			{
+				synapseLayer.addChild(mLayers[i]->at(j)->inputAt(k)->exportData());
+			}
 		}
 		synapseLayers.addChild(synapseLayer);
 	}

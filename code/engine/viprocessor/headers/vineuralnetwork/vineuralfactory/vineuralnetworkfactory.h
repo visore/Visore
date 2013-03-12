@@ -24,9 +24,13 @@ class ViNeuralNetworkFactory : public ViNeuralFactory
 
 		ViNeuralNetwork* create();
 
+	protected:
+
+		ViActivationFunction* defaultActivationFunction();
+
 	private:
 
-		ViActivationFunction *mDefaultActivationFunction;
+		ViActivationFunction *mGlobalActivationFunction;
 		QList<ViActivationFunction*> mActivationFunctions;
 		ViIntegerList mNeurons;
 		ViDoubleList mBiases;

@@ -5,17 +5,24 @@ ViNeuralLayer::ViNeuralLayer(ViNeuronList neurons)
 	: ViNeuralUnit(), QRunnable()
 {
 	mNeurons = neurons;
+	mBias = NULL;
 }
 
 ViNeuralLayer::ViNeuralLayer(const ViNeuralLayer &other)
 	: ViNeuralUnit(other)
 {
 	mNeurons = other.mNeurons;
+	mBias = other.mBias;
 }
 
 ViNeuralLayer::~ViNeuralLayer()
 {
 	viDeleteAll(mNeurons);
+	if(mBias != NULL)
+	{
+		delete mBias;
+		mBias = NULL;
+	}
 }
 
 void ViNeuralLayer::run()
@@ -35,7 +42,15 @@ bool ViNeuralLayer::add(ViNeuron *neuron)
 		LOG("The neuron was already added to the layer.", QtCriticalMsg);
 		return false;
 	}
-	mNeurons.append(neuron);
+	if(neuron->type() == ViNeuron::BiasNeuron)
+	{
+		LOG("The added neuron is a bias. The bias will be set, but not added to the neuron list.", QtCriticalMsg);
+		setBias(neuron);
+	}
+	else
+	{
+		mNeurons.append(neuron);
+	}
 	return true;
 }
 
@@ -84,6 +99,26 @@ ViNeuron* ViNeuralLayer::at(int index) const
 	return mNeurons[index];
 }
 
+ViNeuron* ViNeuralLayer::bias()
+{
+	return mBias;
+}
+
+bool ViNeuralLayer::setBias(ViNeuron *bias)
+{
+	if(bias->type() != ViNeuron::BiasNeuron)
+	{
+		LOG("The neuron is not a bias.");
+		return false;
+	}
+	if(mBias != NULL)
+	{
+		delete mBias;
+	}
+	mBias = bias;
+	return true;
+}
+
 double ViNeuralLayer::value(int index)
 {
 	if(index >= mNeurons.size())
@@ -117,6 +152,10 @@ bool ViNeuralLayer::operator == (const ViNeuralLayer &other) const
 	{
 		return false;
 	}
+	if(*mBias != *other.mBias)
+	{
+		return false;
+	}
 
 	for(int i = 0; i < mNeurons.size(); ++i)
 	{
@@ -135,6 +174,10 @@ ViElement ViNeuralLayer::exportData()
 	for(int i = 0; i < mNeurons.size(); ++i)
 	{
 		element.addChild(mNeurons[i]->exportData());
+	}
+	if(mBias != NULL)
+	{
+		element.addChild(mBias->exportData());
 	}
 	return element;
 }
