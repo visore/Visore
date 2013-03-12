@@ -24,10 +24,8 @@ class ViNeuralNetworkFactory : public ViNeuralFactory
 
 		ViNeuralNetwork* create();
 
-	protected:
-
-		ViActivationFunction* defaultActivationFunction();
-
+		ViNeuralNetwork* create(ViElement element);
+		
 	private:
 
 		ViActivationFunction *mGlobalActivationFunction;

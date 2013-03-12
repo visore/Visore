@@ -1,4 +1,5 @@
 #include <vineuron.h>
+#include <vineurallayer.h>
 
 ViNeuron::ViNeuron()
 	: ViNeuralUnit(), QRunnable()
@@ -212,31 +213,37 @@ bool ViNeuron::operator == (const ViNeuron &other) const
 ViElement ViNeuron::exportData()
 {
 	ViElement element("Neuron");
-	element.addChild("id", id());
+	element.addChild("Id", id());
 
 	if(type() == ViNeuron::UnknownNeuron)
 	{
 		LOG("An unknown neuron (id: " + id() + ") was detected.", QtCriticalMsg);
 	}
-	element.addChild("type", typeToString(type()));
+	element.addChild("Type", typeToString(type()));
 
 	if(activationFunction() != NULL)
 	{
 		element.addChild(activationFunction()->exportData());
 	}
+
+	if(type() == ViNeuron::BiasNeuron)
+	{
+		element.addChild("Value", value());
+	}
+
 	return element;
 }
 
 bool ViNeuron::importData(ViElement element)
 {
-	/*if(element.name() != "Neuron")
+	if(element.name() != "Neuron")
 	{
 		return false;
 	}
 
 	bool success = true;
 
-	ViElement id = element.child("id");
+	ViElement id = element.child("Id");
 	if(id.isNull())
 	{
 		success = false;
@@ -246,28 +253,55 @@ bool ViNeuron::importData(ViElement element)
 		setId(id.toString());
 	}
 
-	ViElement activationFunction = element.child("ActivationFunction");
-	if(id.isNull())
+	ViElement theType = element.child("Type");
+	if(theType.isNull())
 	{
 		success = false;
-		setActivationFunction(NULL);
 	}
 	else
 	{
-		mActivationFunction = ViActivationFunction::create(activationFunction.toString());
-		if(mActivationFunction == NULL)
+		setType(stringToType(theType.toString()));
+	}
+
+	if(type() == ViNeuron::HiddenNeuron || type() == ViNeuron::OutputNeuron)
+	{
+		if(id.isNull())
 		{
-			LOG("Unable to create an activation function (" + activationFunction.toString() + ") from the input. The default activation function will be used.", QtCriticalMsg);
+			success = false;
 			setActivationFunction(NULL);
 		}
 		else
 		{
-			mActivationFunction->importData(activationFunction);
-			//setActivationFunction(NULL);
+			setActivationFunction(ViActivationFunction::create(element));
+		}
+		if(mActivationFunction == NULL)
+		{
+			setActivationFunction(ViActivationFunction::defaultActivationFunction());
+			LOG("Unable to create the required activation function from the import data. The default activation function (" + mActivationFunction->name() + ") will be used.", QtCriticalMsg);
+		}
+		else
+		{
+			if(!mActivationFunction->importData(element))
+			{
+				success = false;
+			}
+		}
+	}
+	else if(type() == ViNeuron::BiasNeuron)
+	{
+		ViElement value = element.child("value");
+		if(value.isNull())
+		{
+			success = false;
+			setActivationFunction(NULL);
+		}
+		else
+		{
+			setValue(value.toReal());
 		}
 	}
 
-	return success;*/
+	return success;
 }
 
 QString ViNeuron::typeToString(ViNeuron::Type type)

@@ -18,8 +18,8 @@ ViValue::ViValue(const QString name, const QVariant value)
 
 ViValue::ViValue(const ViValue &other)
 {
-	mName = other.mName;
-	mValue = other.mValue;
+	setName(other.mName);
+	setValue(other.mValue);
 }
 
 QString ViValue::name() const

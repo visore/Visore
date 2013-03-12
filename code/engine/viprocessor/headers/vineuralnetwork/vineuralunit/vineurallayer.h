@@ -28,6 +28,7 @@ class ViNeuralLayer : public ViNeuralUnit, public QRunnable
 		int outputSize();
 
 		ViNeuron* at(int index) const;
+		ViNeuron* neuron(const QString id) const;
 
 		ViNeuron* bias();
 
@@ -38,6 +39,7 @@ class ViNeuralLayer : public ViNeuralUnit, public QRunnable
 		void setValue(int index, int value);
 
 		ViNeuron* operator [] (const int index) const;
+		ViNeuron* operator [] (const QString id) const;
 		bool operator == (const ViNeuralLayer &other) const;
 
 		virtual ViElement exportData();

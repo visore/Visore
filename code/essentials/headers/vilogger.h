@@ -14,6 +14,7 @@ class ViLogEntry
 
 	public:
 
+		ViLogEntry(QString fileName, QString functionName, int lineNumber, QString message, QtMsgType type);
 		ViLogEntry(QString fileName, QString className, QString functionName, int lineNumber, QString message, QtMsgType type);
 		QString fileName();
 		QString className();
@@ -71,8 +72,8 @@ class ViLogger
 #define LOG(...) LOG_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 
 #define STATICLOG1(message) log(__FILE__, Q_FUNC_INFO, __LINE__, message, QtDebugMsg)
-#define STATICLOG2(class, message) log(__FILE__, class, Q_FUNC_INFO, __LINE__, message, QtDebugMsg)
-#define STATICLOG3(class, message, type) log(__FILE__, class, Q_FUNC_INFO, __LINE__, message, type)
+#define STATICLOG2(message, type) log(__FILE__, Q_FUNC_INFO, __LINE__, message, type)
+#define STATICLOG3(message, type, class) log(__FILE__, class, Q_FUNC_INFO, __LINE__, message, type)
 
 #define STATIC_GET_ARGUMENT(arg1, arg2, arg3, arg4, ...) arg4
 #define STATIC_LOG_CHOOSER(...) STATIC_GET_ARGUMENT(__VA_ARGS__, STATICLOG3, STATICLOG2, STATICLOG1, )

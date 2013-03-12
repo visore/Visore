@@ -83,7 +83,7 @@ bool ViSynapse::importData(ViElement element)
 	ViElement weight = element.child("Weight");
 	if(weight.isNull())
 	{
-		LOG("The weight for the synapse could not be retrieved. Setting the default weight (" + QString::number(DEFAULT_SYNAPSE_WEIGHT) + ").");
+		LOG("The weight for the synapse could not be retrieved. Setting the default weight of " + QString::number(DEFAULT_SYNAPSE_WEIGHT) + ".");
 		setWeight(DEFAULT_SYNAPSE_WEIGHT);
 	}
 	else

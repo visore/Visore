@@ -26,6 +26,7 @@ class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
 		int size() const;
 
 		ViNeuralLayer* at(int index) const;
+		ViNeuron* neuron(const QString id) const;
 
 		void setInput(int index, double value);
 		void setInputs(ViDoubleList values);

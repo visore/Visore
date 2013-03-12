@@ -4,6 +4,8 @@
 #include <vimainmenu.h>
 #include <viloadingwidget.h>
 
+#include <vineuralnetworkwidget.h>
+
 ViMainWindow* ViMainWindow::mWindow = NULL;
 
 ViMainWindow::ViMainWindow()
@@ -75,9 +77,12 @@ void ViMainWindow::initialize()
 
 	mUi->stack->layout()->addWidget(ViStackedWidget::widget());
 
-	int index = ViStackedWidget::addWidget(new ViMainMenu());
+	/*int index = ViStackedWidget::addWidget(new ViMainMenu());
 	ViStackedWidget::setCurrentIndex(index);
-	mUi->logoButton->addFunctionCall(SIGNAL(clicked()), ViFunctionCall(ViStackedWidget::instance().data(), "setCurrentIndex", index));
+	mUi->logoButton->addFunctionCall(SIGNAL(clicked()), ViFunctionCall(ViStackedWidget::instance().data(), "setCurrentIndex", index));*/
+
+	int index = ViStackedWidget::addWidget(new ViNeuralNetworkWidget());
+	ViStackedWidget::setCurrentIndex(index);
 
 	mUi->logoButton->setSize(64, 64);
 	mUi->logoButton->setIcon("logo", 64);

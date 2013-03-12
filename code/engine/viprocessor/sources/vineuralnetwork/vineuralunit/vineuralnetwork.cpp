@@ -63,6 +63,20 @@ ViNeuralLayer* ViNeuralNetwork::at(int index) const
 	return mLayers[index];
 }
 
+ViNeuron* ViNeuralNetwork::neuron(const QString id) const
+{
+	ViNeuron *neuron = NULL;
+	for(int i = 0; i < mLayers.size(); ++i)
+	{
+		neuron = mLayers[i]->neuron(id);
+		if(neuron != NULL)
+		{
+			break;
+		}
+	}
+	return neuron;
+}
+
 void ViNeuralNetwork::setInput(int index, double value)
 {
 	if(mLayers.isEmpty())
@@ -179,7 +193,7 @@ ViElement ViNeuralNetwork::exportData()
 	element.addChild(neuronLayers);
 
 	ViElement synapseLayers("SynapseLayers");
-	int synapseCount = 0;
+	synapseLayers.addAttribute("count", mLayers.size() - 1);
 	for(int i = 1; i < mLayers.size(); ++i)
 	{
 		ViElement synapseLayer("SynapseLayer");
@@ -200,5 +214,9 @@ ViElement ViNeuralNetwork::exportData()
 
 bool ViNeuralNetwork::importData(ViElement element)
 {
-
+	if(element.name() != "NeuralNetwork")
+	{
+		return false;
+	}
+	return true;
 }

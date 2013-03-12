@@ -6,6 +6,16 @@
 // 2: Heavy logging
 #define LOGGER_TYPE 1
 
+ViLogEntry::ViLogEntry(QString fileName, QString functionName, int lineNumber, QString message, QtMsgType type)
+{
+	mFileName = fileName;
+	mClassName = "";
+	mFunctionName = functionName;
+	mMessage = message;
+	mLineNumber = lineNumber;
+	mType = type;
+}
+
 ViLogEntry::ViLogEntry(QString fileName, QString className, QString functionName, int lineNumber, QString message, QtMsgType type)
 {
 	mFileName = fileName;
@@ -174,7 +184,7 @@ void log(const char *file, const char *function, const int line, const QString m
 {
 	QString fileName(file);
 	fileName = fileName.mid(fileName.lastIndexOf(QDir::separator()) + 1);
-	//LOGGER->append(ViLogEntry(fileName, className, QString(function), line, message, type));
+	LOGGER->append(ViLogEntry(fileName, QString(function), line, message, type));
 }
 
 void log(const char *file, const QString className, const char *function, const int line, const QString message, QtMsgType type)

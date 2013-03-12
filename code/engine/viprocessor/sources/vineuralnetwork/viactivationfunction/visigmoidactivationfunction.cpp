@@ -6,6 +6,9 @@ ViSigmoidActivationFunction::ViSigmoidActivationFunction(double shape)
 	: ViActivationFunction(CLASSNAME, 0, 1)
 {
 	setShape(shape);
+
+LOG(CLASSNAME + "*: " + QString::number(QMetaType::type(CLASSNAME.toLatin1().data())));
+LOG(CLASSNAME + "**: " + QString::number(QMetaType::type(CLASSNAME.toLatin1().data())));
 }
 
 ViSigmoidActivationFunction::ViSigmoidActivationFunction(const ViSigmoidActivationFunction &other)

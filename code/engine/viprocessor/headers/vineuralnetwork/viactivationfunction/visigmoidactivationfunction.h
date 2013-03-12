@@ -10,10 +10,14 @@
 class ViSigmoidActivationFunction : public ViActivationFunction
 {
 
+	Q_OBJECT
+
 	public:
 
-		ViSigmoidActivationFunction(double shape = 1);
+		ViSigmoidActivationFunction():ViActivationFunction(CLASSNAME, 0, 1){}
+		ViSigmoidActivationFunction(double shape );
 		ViSigmoidActivationFunction(const ViSigmoidActivationFunction &other);
+		~ViSigmoidActivationFunction(){}
 
 		void setRange(double minimum, double maximum);
 		void setMinimum(double minimum);

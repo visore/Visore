@@ -1,6 +1,7 @@
 #include <vineuralnetworkfactory.h>
 #include <vineurallayerfactory.h>
 #include <visynapsefactory.h>
+#include <vistaticneuronfactory.h>
 #include <viaverageactivationfunction.h>
 
 ViNeuralNetworkFactory::ViNeuralNetworkFactory()
@@ -73,7 +74,7 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 		if(activationFunction == NULL)
 		{
 			deleteFunction = true;
-			activationFunction = defaultActivationFunction();
+			activationFunction = ViActivationFunction::defaultActivationFunction();
 			LOG("No activation function was specified for layer " + QString::number(i + 1) + ". The default activation function (" + activationFunction->name() + ") will be used.", QtCriticalMsg);
 		}
 		if(mNeurons[i] <= 0)
@@ -121,7 +122,71 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 	return network;
 }
 
-ViActivationFunction* ViNeuralNetworkFactory::defaultActivationFunction()
+ViNeuralNetwork* ViNeuralNetworkFactory::create(ViElement element)
 {
-	return new ViAverageActivationFunction();
+	ViNeuralNetwork *network = new ViNeuralNetwork();
+	bool success = true;
+	if(network->importData(element))
+	{
+		bool error = false;
+
+		//Create neuron layers
+		ViElement neuronLayerElement = element.child("NeuronLayers");
+		if(neuronLayerElement.isNull())
+		{LOG("x1: "+neuronLayerElement.name());
+			success = false;
+		}
+		ViElementList neuronLayerElements = neuronLayerElement.children("NeuronLayer");
+		if(neuronLayerElements.size() < 2)
+		{LOG("x2");
+			LOG("The neural network doesn't have enough layers.", QtCriticalMsg);
+			success = false;
+		}
+		for(int i = 0; i < neuronLayerElements.size(); ++i)
+		{
+			error = false;
+			ViNeuralLayer *layer = ViNeuralLayerFactory::create(neuronLayerElements[i], error);
+			if(error || layer == NULL)
+			{LOG("x3: "+QString::number(error));
+				success = false;
+			}
+			else
+			{
+				network->add(layer);
+			}
+		}
+		
+		//Create synapse layers
+		ViElement synapseLayerElement = element.child("SynapseLayers");
+		if(synapseLayerElement.isNull())
+		{LOG("x4");
+			success = false;
+		}
+		ViElementList synapseLayerElements = synapseLayerElement.children("SynapseLayer");
+		if(neuronLayerElements.size() == 0)
+		{LOG("x5");
+			LOG("The neural network doesn't have any synapses.", QtCriticalMsg);
+			success = false;
+		}
+		for(int i = 0; i < synapseLayerElements.size(); ++i)
+		{
+			error = false;
+			ViSynapseFactory::create(synapseLayerElements[i], network, error);
+			if(error)
+			{LOG("x6");
+				success = false;
+			}
+		}
+	}
+	else
+	{
+		success = false;
+	}
+
+	if(!success)
+	{
+		LOG("The neural network could not be fully imported and may not behave as expected.", QtCriticalMsg);
+	}
+
+	return network;
 }

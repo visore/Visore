@@ -1,4 +1,5 @@
 #include <viactivationfunction.h>
+#include <viaverageactivationfunction.h>
 #include <viscaler.h>
 #include <vilogger.h>
 
@@ -86,9 +87,31 @@ double ViActivationFunction::calculate(const double &input, const int &inputCoun
 	return ViScaler::scale(execute(input, inputCount), mFunctionMinimum, mFunctionMaximum, mMinimum, mMaximum);
 }
 
+ViActivationFunction* ViActivationFunction::create(ViElement element)
+{
+	if(element.name() != "Name")
+	{
+		if(element.child("Name").isNull())
+		{
+			if(element.child("activationFunction").child("Name").isNull())
+			{
+				return NULL;
+			}
+			return create(element.child("activationFunction").child("Name").toString()); 
+		}
+		return create(element.child("Name").toString()); 
+	}
+	return create(element.toString());
+}
+
 ViActivationFunction* ViActivationFunction::create(QString name)
 {
 	int type = QMetaType::type(name.toLatin1().data());
+	if(type == QMetaType::UnknownType)
+	{STATICLOG("www: "+QString::number(type));
+		type = QMetaType::type(QString("Vi" + name).toLatin1().data());
+STATICLOG("www2: "+QString::number(type));
+	}
 	if(type == QMetaType::UnknownType)
 	{
 		return NULL;
@@ -109,7 +132,11 @@ bool ViActivationFunction::importData(ViElement element)
 {
 	if(element.name() != "ActivationFunction")
 	{
-		return false;
+		element = element.child("ActivationFunction");
+		if(element.name() != "ActivationFunction")
+		{
+			return false;
+		}
 	}
 
 	ViElement theName = element.child("name");
@@ -141,4 +168,9 @@ bool ViActivationFunction::importData(ViElement element)
 		setMaximum(maximum.toReal());
 	}
 	return true;
+}
+
+ViActivationFunction* ViActivationFunction::defaultActivationFunction()
+{
+	return new ViAverageActivationFunction();
 }

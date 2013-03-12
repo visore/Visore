@@ -99,6 +99,18 @@ ViNeuron* ViNeuralLayer::at(int index) const
 	return mNeurons[index];
 }
 
+ViNeuron* ViNeuralLayer::neuron(const QString id) const
+{
+	for(int i = 0; i < mNeurons.size(); ++i)
+	{
+		if(mNeurons[i]->id() == id)
+		{
+			return mNeurons[i];
+		}
+	}
+	return NULL;
+}
+
 ViNeuron* ViNeuralLayer::bias()
 {
 	return mBias;
@@ -146,6 +158,11 @@ ViNeuron* ViNeuralLayer::operator [] (const int index) const
 	return at(index);
 }
 
+ViNeuron* ViNeuralLayer::operator [] (const QString id) const
+{
+	return neuron(id);
+}
+
 bool ViNeuralLayer::operator == (const ViNeuralLayer &other) const
 {
 	if(mNeurons.size() != other.mNeurons.size())
@@ -171,6 +188,7 @@ bool ViNeuralLayer::operator == (const ViNeuralLayer &other) const
 ViElement ViNeuralLayer::exportData()
 {
 	ViElement element("NeuronLayer");
+	element.addAttribute("count", mNeurons.size());
 	for(int i = 0; i < mNeurons.size(); ++i)
 	{
 		element.addChild(mNeurons[i]->exportData());

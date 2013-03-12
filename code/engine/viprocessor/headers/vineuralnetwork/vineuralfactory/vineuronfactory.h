@@ -9,7 +9,8 @@ class ViNeuronFactory : public ViNeuralFactory
 
 	public:
 
-		static ViNeuron* create(ViNeuron::Type type, ViActivationFunction *activationFunction);
+		static ViNeuron* create(const ViElement &element, bool &error = STATIC_BOOLEAN_FALSE);
+		static ViNeuron* create(ViNeuron::Type type, ViActivationFunction *activationFunction = NULL);
 
 };
 
