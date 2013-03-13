@@ -1,43 +1,61 @@
 #include <vineuronwidget.h>
 #include <QPainter>
 
-ViNeuronWidget::ViNeuronWidget(ViWidget *parent)
+#define DEFAULT_RADIUS 20
+
+ViNeuronWidget::ViNeuronWidget(ViNeuron *neuron, ViWidget *parent)
 	: ViWidget(parent)
 {
-	setX(0);
-	setY(0);
-	mRadius = 0;
+	setPosition(0, 0);
+	setRadius(DEFAULT_RADIUS);
+	setNeuron(neuron);
 	initailizeColors();
 }
 
-ViNeuronWidget::ViNeuronWidget(int x, int y, ViWidget *parent)
+ViNeuronWidget::ViNeuronWidget(int x, int y, ViNeuron *neuron, ViWidget *parent)
 	: ViWidget(parent)
 {
-	setX(x);
-	setY(y);
-	mRadius = 0;
+	setPosition(x, y);
+	setRadius(DEFAULT_RADIUS);
+	setNeuron(neuron);
 	initailizeColors();
 }
 
-ViNeuronWidget::ViNeuronWidget(int x, int y, int radius, ViWidget *parent)
+ViNeuronWidget::ViNeuronWidget(int x, int y, int radius, ViNeuron *neuron, ViWidget *parent)
 	: ViWidget(parent)
 {
-	setX(x);
-	setY(y);
-	mRadius = radius;
+	setPosition(x, y);
+	setRadius(radius);
+	setNeuron(neuron);
 	initailizeColors();
 }
-		
+
+void ViNeuronWidget::setNeuron(ViNeuron *neuron)
+{
+	mNeuron = neuron;
+}
+
+ViNeuron* ViNeuronWidget::neuron()
+{
+	return mNeuron;
+}
+
 void ViNeuronWidget::setPosition(int x, int y)
 {
-	setX(x);
-	setY(y);
+	move(x, y);
+}
+
+void ViNeuronWidget::move(int x, int y)
+{
+	mX = x;
+	mY = y;
+	ViWidget::move(mX, mY);
+	repaint();
 }
 
 void ViNeuronWidget::setX(int x)
 {
-	mX = x;
-	move(mX, mY);
+	move(x, mY);
 }
 
 int ViNeuronWidget::x()
@@ -47,8 +65,7 @@ int ViNeuronWidget::x()
 
 void ViNeuronWidget::setY(int y)
 {
-	mY = y;
-	move(mX, mY);
+	move(mX, y);
 }
 
 int ViNeuronWidget::y()
@@ -66,11 +83,22 @@ int ViNeuronWidget::radius()
 	return mRadius;
 }
 
+QPoint ViNeuronWidget::center()
+{
+	return QPoint(mX + mRadius, mY + mRadius);
+}
+
 void ViNeuronWidget::initailizeColors()
 {
-	mBorderColor = ViThemeManager::color(ViThemeColors::BorderColor1);
+	mBorderColor = ViThemeManager::color(ViThemeColors::BorderColor2);
 	mOuterColor = ViThemeManager::color(ViThemeColors::MainColor5);
 	mInnerColor = ViThemeManager::color(ViThemeColors::MainColor7);
+}
+
+void ViNeuronWidget::repaint()
+{
+	ViWidget::repaint();
+	emit repainted();
 }
 
 void ViNeuronWidget::paintEvent(QPaintEvent *event)

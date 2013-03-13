@@ -131,6 +131,11 @@ bool ViNeuralLayer::setBias(ViNeuron *bias)
 	return true;
 }
 
+bool ViNeuralLayer::hasBias()
+{
+	return mBias != NULL;
+}
+
 double ViNeuralLayer::value(int index)
 {
 	if(index >= mNeurons.size())

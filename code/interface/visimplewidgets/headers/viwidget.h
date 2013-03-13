@@ -7,6 +7,7 @@
 #include <viid.h>
 #include <vifunctioncall.h>
 #include <vithememanager.h>
+#include <vicommon.h>
 
 class ViWidget : public QWidget, public ViId
 {

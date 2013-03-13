@@ -2,17 +2,33 @@
 #define VINEURONWIDGET_H
 
 #include <viwidget.h>
+#include <vineuron.h>
+#include <QPoint>
 
 class ViNeuronWidget : public ViWidget
 {
 
+	Q_OBJECT
+
+	signals:
+
+		void repainted();
+
+	public slots:
+
+		void repaint();
+
 	public:
 
-		ViNeuronWidget(ViWidget *parent = NULL);
-		ViNeuronWidget(int x, int y, ViWidget *parent = NULL);
-		ViNeuronWidget(int x, int y, int radius, ViWidget *parent = NULL);
+		ViNeuronWidget(ViNeuron *neuron, ViWidget *parent = NULL);
+		ViNeuronWidget(int x, int y, ViNeuron *neuron, ViWidget *parent = NULL);
+		ViNeuronWidget(int x, int y, int radius, ViNeuron *neuron, ViWidget *parent = NULL);
 		
+		void setNeuron(ViNeuron *neuron);
+		ViNeuron* neuron();
+
 		void setPosition(int x, int y);
+		void move(int x, int y);
 
 		void setX(int x);
 		int x();
@@ -20,20 +36,26 @@ class ViNeuronWidget : public ViWidget
 		void setY(int y);
 		int y();
 
+		QPoint center();
+
 		void setRadius(int radius);
 		int radius();
 
 	protected:
 
-		void initailizeColors();
+		virtual void initailizeColors();
 
 		void paintEvent(QPaintEvent *event);
 
 	private:
 
+		ViNeuron *mNeuron;
+
 		int mX;
 		int mY;
 		int mRadius;
+
+	protected:
 
 		QColor mBorderColor;
 		QColor mOuterColor;
