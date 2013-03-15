@@ -91,7 +91,11 @@ int ViNeuralLayer::outputSize()
 
 ViNeuron* ViNeuralLayer::at(int index) const
 {
-	if(index >= mNeurons.size())
+	if(hasBias() && index == mNeurons.size())
+	{
+		return mBias;
+	}
+	else if(index >= mNeurons.size())
 	{
 		LOG("An invalid neuron was accessed.", QtCriticalMsg);
 		return NULL;

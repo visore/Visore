@@ -10,6 +10,13 @@ ViNeuralNetworkWidget::ViNeuralNetworkWidget(ViWidget *parent)
 {
 	mNeuralNetwork = NULL;
 	mNeuronSize = DEFAULT_NEURON_RADIUS;
+
+	ViNeuralNetworkFactory mFactory;
+	mFactory.setActivationFunction(new ViSigmoidActivationFunction());
+	mFactory.addLayer(5);
+	mFactory.addLayer(3, 1);
+	mFactory.addLayer(1);
+	setNeuralNetwork( mFactory.create());
 }
 
 ViNeuralNetworkWidget::~ViNeuralNetworkWidget()

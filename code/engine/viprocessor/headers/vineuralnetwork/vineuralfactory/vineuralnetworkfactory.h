@@ -3,6 +3,7 @@
 
 #include <vineuralfactory.h>
 #include <vineuralnetwork.h>
+#include <viweightinitializer.h>
 
 class ViNeuralNetworkFactory : public ViNeuralFactory
 {
@@ -15,7 +16,9 @@ class ViNeuralNetworkFactory : public ViNeuralFactory
 
 		void clear();
 
-		void setActivationFunction(ViActivationFunction *activationFunction);
+		void setActivationFunction(ViActivationFunction *activationFunction); // Takes ownership of activationFunction
+
+		void setWeightInitializer(ViWeightInitializer *weightInitializer); // Takes ownership of weightInitializer
 
 		void addLayer(int neuronCount);
 		void addLayer(int neuronCount, double bias);
@@ -29,6 +32,7 @@ class ViNeuralNetworkFactory : public ViNeuralFactory
 	private:
 
 		ViActivationFunction *mGlobalActivationFunction;
+		ViWeightInitializer *mWeightInitializer;
 		QList<ViActivationFunction*> mActivationFunctions;
 		ViIntegerList mNeurons;
 		ViDoubleList mBiases;

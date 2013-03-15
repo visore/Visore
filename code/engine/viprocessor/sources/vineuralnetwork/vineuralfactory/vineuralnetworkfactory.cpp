@@ -2,11 +2,11 @@
 #include <vineurallayerfactory.h>
 #include <visynapsefactory.h>
 #include <vistaticneuronfactory.h>
-#include <viaverageactivationfunction.h>
 
 ViNeuralNetworkFactory::ViNeuralNetworkFactory()
 {
 	mGlobalActivationFunction = NULL;
+	mWeightInitializer = NULL;
 }
 
 ViNeuralNetworkFactory::ViNeuralNetworkFactory(const ViNeuralNetworkFactory &other)
@@ -30,6 +30,12 @@ void ViNeuralNetworkFactory::clear()
 		mGlobalActivationFunction = NULL;
 	}
 
+	if(mWeightInitializer != NULL)
+	{
+		delete mWeightInitializer;
+		mWeightInitializer = NULL;
+	}
+
 	viDeleteAll(mActivationFunctions);
 	
 	mNeurons.clear();
@@ -38,7 +44,20 @@ void ViNeuralNetworkFactory::clear()
 
 void ViNeuralNetworkFactory::setActivationFunction(ViActivationFunction *activationFunction)
 {
+	if(mGlobalActivationFunction != NULL)
+	{
+		delete mGlobalActivationFunction;
+	}
 	mGlobalActivationFunction = activationFunction;
+}
+
+void ViNeuralNetworkFactory::setWeightInitializer(ViWeightInitializer *weightInitializer)
+{
+	if(mWeightInitializer != NULL)
+	{
+		delete mWeightInitializer;
+	}
+	mWeightInitializer = weightInitializer;
 }
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount)
@@ -118,6 +137,12 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 			}
 		}
 	}
+
+	if(mWeightInitializer == NULL)
+	{
+		setWeightInitializer(ViWeightInitializer::defaultInitializer());
+	}
+	mWeightInitializer->initialize(network);
 
 	return network;
 }

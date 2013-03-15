@@ -1,5 +1,6 @@
 #include <vineuralcorrector.h>
 #include <visigmoidactivationfunction.h>
+#include <virandomweightinitializer.h>
 
 ViNeuralCorrector::ViNeuralCorrector()
 	: ViProcessor()
@@ -19,6 +20,7 @@ ViNeuralCorrector::~ViNeuralCorrector()
 void ViNeuralCorrector::initialize()
 {
 	/*mFactory.setActivationFunction(new ViSigmoidActivationFunction());
+	mFactory.setWeight(new ViRandomWeightInitializer());
 	mFactory.addLayer(5);
 	mFactory.addLayer(3, 1);
 	mFactory.addLayer(1);
