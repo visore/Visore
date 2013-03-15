@@ -41,6 +41,7 @@ class ViSynapseWidget : public ViWidget
 
 		int mThickness;
 		QColor mColor;
+		QColor mTextColor;
 
 		int mFromX;
 		int mFromY;

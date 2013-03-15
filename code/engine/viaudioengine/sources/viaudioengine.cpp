@@ -36,9 +36,9 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
 	QObject::connect(mStreamOutput, SIGNAL(lengthChanged(ViAudioPosition)), this, SIGNAL(lengthChanged(ViAudioPosition)));
 
-
+/*
 ViNeuralCorrector corr;
-corr.initialize();
+corr.initialize();*/
 
 
 }

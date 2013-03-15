@@ -3,6 +3,10 @@
 #include <viscaler.h>
 #include <vilogger.h>
 
+#include <viaverageactivationfunction.h>
+#include <vilinearactivationfunction.h>
+#include <visigmoidactivationfunction.h>
+
 ViActivationFunction::ViActivationFunction(QString name, double functionMinimum, double functionMaximum)
 {
 	mName = name;
@@ -106,17 +110,30 @@ ViActivationFunction* ViActivationFunction::create(ViElement element)
 
 ViActivationFunction* ViActivationFunction::create(QString name)
 {
-	int type = QMetaType::type(name.toLatin1().data());
+	/*int type = QMetaType::type(name.toLatin1().data());
 	if(type == QMetaType::UnknownType)
-	{STATICLOG("www: "+QString::number(type));
+	{
 		type = QMetaType::type(QString("Vi" + name).toLatin1().data());
-STATICLOG("www2: "+QString::number(type));
 	}
 	if(type == QMetaType::UnknownType)
 	{
 		return NULL;
 	}
-	return (ViActivationFunction*) QMetaType::create(type);
+	return (ViActivationFunction*) QMetaType::create(type);*/
+	
+	if(name == "AverageActivationFunction")
+	{
+		return new ViAverageActivationFunction();
+	}
+	else if(name == "LinearActivationFunction")
+	{
+		return new ViLinearActivationFunction();
+	}
+	else if(name == "SigmoidActivationFunction")
+	{
+		return new ViSigmoidActivationFunction();
+	}
+	return NULL;
 }
 
 ViElement ViActivationFunction::exportData()

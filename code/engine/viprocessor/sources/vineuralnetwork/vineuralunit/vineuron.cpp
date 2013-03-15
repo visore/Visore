@@ -93,7 +93,6 @@ bool ViNeuron::addInput(ViSynapse *synapse)
 {
 	if(containsInput(synapse))
 	{
-		LOG("The synapse was already conected to the input of the neuron.", QtCriticalMsg);
 		return false;
 	}
 	mInputs.append(synapse);
@@ -104,7 +103,6 @@ bool ViNeuron::addOutput(ViSynapse *synapse)
 {
 	if(containsOutput(synapse))
 	{
-		LOG("The synapse was already conected to the output of the neuron.", QtCriticalMsg);
 		return false;
 	}
 	mOutputs.append(synapse);

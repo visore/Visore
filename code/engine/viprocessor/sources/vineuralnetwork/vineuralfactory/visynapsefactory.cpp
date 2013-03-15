@@ -11,7 +11,7 @@ ViSynapse* ViSynapseFactory::create(ViElement element, ViNeuralNetwork *network,
 		if(input == NULL)
 		{
 			success = false;
-			STATICLOG("The input neuron is not in the neural network.", QtCriticalMsg, "ViSynapseFactory");
+			STATICLOG("The input neuron (" + element.child("InputNeuron").toString() + ") is not in the neural network.", QtCriticalMsg, "ViSynapseFactory");
 		}
 		else
 		{
@@ -19,7 +19,7 @@ ViSynapse* ViSynapseFactory::create(ViElement element, ViNeuralNetwork *network,
 			if(output == NULL)
 			{
 				success = false;
-				STATICLOG("The output neuron is not in the neural network.", QtCriticalMsg, "ViSynapseFactory");
+				STATICLOG("The output neuron (" + element.child("OutputNeuron").toString() + ") is not in the neural network.", QtCriticalMsg, "ViSynapseFactory");
 			}
 			else
 			{
@@ -54,7 +54,5 @@ QList<ViSynapse*> ViSynapseFactory::create(ViElementList elements, ViNeuralNetwo
 ViSynapse* ViSynapseFactory::create(ViNeuron *input, ViNeuron *output, double weight)
 {
 	ViSynapse *synapse = new ViSynapse(input, output, weight);
-	input->addOutput(synapse);
-	output->addInput(synapse);
 	return synapse;
 }

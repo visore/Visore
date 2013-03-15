@@ -133,12 +133,12 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create(ViElement element)
 		//Create neuron layers
 		ViElement neuronLayerElement = element.child("NeuronLayers");
 		if(neuronLayerElement.isNull())
-		{LOG("x1: "+neuronLayerElement.name());
+		{
 			success = false;
 		}
 		ViElementList neuronLayerElements = neuronLayerElement.children("NeuronLayer");
 		if(neuronLayerElements.size() < 2)
-		{LOG("x2");
+		{
 			LOG("The neural network doesn't have enough layers.", QtCriticalMsg);
 			success = false;
 		}
@@ -147,7 +147,7 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create(ViElement element)
 			error = false;
 			ViNeuralLayer *layer = ViNeuralLayerFactory::create(neuronLayerElements[i], error);
 			if(error || layer == NULL)
-			{LOG("x3: "+QString::number(error));
+			{
 				success = false;
 			}
 			else
@@ -159,21 +159,21 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create(ViElement element)
 		//Create synapse layers
 		ViElement synapseLayerElement = element.child("SynapseLayers");
 		if(synapseLayerElement.isNull())
-		{LOG("x4");
+		{
 			success = false;
 		}
 		ViElementList synapseLayerElements = synapseLayerElement.children("SynapseLayer");
 		if(neuronLayerElements.size() == 0)
-		{LOG("x5");
+		{
 			LOG("The neural network doesn't have any synapses.", QtCriticalMsg);
 			success = false;
 		}
 		for(int i = 0; i < synapseLayerElements.size(); ++i)
 		{
 			error = false;
-			ViSynapseFactory::create(synapseLayerElements[i], network, error);
+			ViSynapseFactory::create(synapseLayerElements[i].children("Synapse"), network, error);
 			if(error)
-			{LOG("x6");
+			{
 				success = false;
 			}
 		}

@@ -4,24 +4,24 @@
 ViSynapse::ViSynapse()
 	: ViNeuralUnit()
 {
-	mInput = NULL;
-	mOutput = NULL;
+	setInput(NULL);
+	setOutput(NULL);
 	mWeight = 1;
 }
 
 ViSynapse::ViSynapse(ViNeuron *input, ViNeuron *output, double weight)
 	: ViNeuralUnit()
 {
-	mInput = input;
-	mOutput = output;
+	setInput(input);
+	setOutput(output);
 	mWeight = weight;
 }
 
 ViSynapse::ViSynapse(const ViSynapse &other)
 	: ViNeuralUnit(other)
 {
-	mInput = other.mInput;
-	mOutput = other.mOutput;
+	setInput(other.mInput);
+	setOutput(other.mOutput);
 	mWeight = other.mWeight;
 }
 
@@ -48,11 +48,19 @@ double ViSynapse::value() const
 void ViSynapse::setInput(ViNeuron *neuron)
 {
 	mInput = neuron;
+	if(mInput != NULL)
+	{
+		mInput->addOutput(this);
+	}
 }
 
 void ViSynapse::setOutput(ViNeuron *neuron)
 {
 	mOutput = neuron;
+	if(mOutput != NULL)
+	{
+		mOutput->addInput(this);
+	}
 }
 
 void ViSynapse::setWeight(double weight)

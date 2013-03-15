@@ -100,6 +100,7 @@ int ViSynapseWidget::thickness()
 void ViSynapseWidget::initailizeColors()
 {
 	mColor = ViThemeManager::color(ViThemeColors::BorderColor2);
+	mTextColor = ViThemeManager::color(ViThemeColors::TextColor1);
 }
 
 void ViSynapseWidget::repaint()
@@ -114,10 +115,8 @@ void ViSynapseWidget::repaint()
 		mToX = mOutputWidget->x() - minX;
 		mToY = mOutputWidget->y() - minY;
 
-		move(minX + mInputWidget->radius(), minY + mInputWidget->radius());
-		setSize(qMax(mThickness, qAbs(mInputWidget->x() - mOutputWidget->x())), qMax(mThickness, qAbs(mInputWidget->y() - mOutputWidget->y())));
-		//move(minX + mInputWidget->radius(), minY + mInputWidget->radius() - WEIGHT_WIDTH);
-		//setSize(qMax(mThickness, qAbs(mInputWidget->x() - mOutputWidget->x())), qMax(mThickness, qAbs(mInputWidget->y() - mOutputWidget->y())) + (2 * WEIGHT_WIDTH));
+		move(minX + mInputWidget->radius(), minY + mInputWidget->radius() - WEIGHT_WIDTH);
+		setSize(qMax(mThickness, qAbs(mInputWidget->x() - mOutputWidget->x())), qMax(mThickness, qAbs(mInputWidget->y() - mOutputWidget->y())) + (WEIGHT_WIDTH * 2));
 	}
 	
 	ViWidget::repaint();
@@ -139,16 +138,16 @@ void ViSynapseWidget::paintEvent(QPaintEvent *event)
 	painter.setPen(pen);
 	painter.setBrush(mColor);
 
-	painter.drawLine(mFromX, mFromY, mToX, mToY);
+	painter.drawLine(mFromX, mFromY + WEIGHT_WIDTH, mToX, mToY + WEIGHT_WIDTH);
 
-	int weightX = (qAbs(mFromX - mToX) * WEIGHT_OFFSET_PERCENTAGE);
-	int weightY = mFromY - ((mFromY - mToY + (WEIGHT_WIDTH/2)) * WEIGHT_OFFSET_PERCENTAGE);
+	int weightX = (qAbs(mFromX - mToX) * WEIGHT_OFFSET_PERCENTAGE) - (WEIGHT_WIDTH / 2);
+	int weightY = mFromY - ((mFromY - mToY) * WEIGHT_OFFSET_PERCENTAGE) + (WEIGHT_WIDTH / 2);
+	
 	painter.drawEllipse(weightX, weightY, WEIGHT_WIDTH, WEIGHT_WIDTH);
 
-	/*painter.drawLine(mFromX, mFromY + WEIGHT_WIDTH, mToX, mToY + WEIGHT_WIDTH);
-
-	int weightX = (qAbs(mFromX - mToX) * WEIGHT_OFFSET_PERCENTAGE);
-	int weightY = mFromY+ WEIGHT_WIDTH - ((mFromY - mToY + WEIGHT_WIDTH) * WEIGHT_OFFSET_PERCENTAGE);
-	painter.drawEllipse(weightX, weightY, WEIGHT_WIDTH, WEIGHT_WIDTH);*/
-
+	painter.setPen(mTextColor);
+	QFont font;
+	font.setPointSize(5);
+	painter.setFont(font);
+	painter.drawText(weightX, weightY, WEIGHT_WIDTH, WEIGHT_WIDTH, Qt::AlignHCenter | Qt::AlignVCenter, QString::number(mSynapse->weight(), 'f', 2));
 }

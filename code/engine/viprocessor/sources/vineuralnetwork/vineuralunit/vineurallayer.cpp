@@ -108,6 +108,10 @@ ViNeuron* ViNeuralLayer::neuron(const QString id) const
 			return mNeurons[i];
 		}
 	}
+	if(hasBias() && mBias->id() == id)
+	{
+		return mBias;
+	}
 	return NULL;
 }
 
@@ -131,7 +135,7 @@ bool ViNeuralLayer::setBias(ViNeuron *bias)
 	return true;
 }
 
-bool ViNeuralLayer::hasBias()
+bool ViNeuralLayer::hasBias() const
 {
 	return mBias != NULL;
 }

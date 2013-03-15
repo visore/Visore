@@ -32,7 +32,7 @@ class ViNeuralLayer : public ViNeuralUnit, public QRunnable
 
 		ViNeuron* bias();
 		bool setBias(ViNeuron *bias);
-		bool hasBias();
+		bool hasBias() const;
 
 		double value(int index);
 
