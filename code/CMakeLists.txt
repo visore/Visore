@@ -3,6 +3,7 @@ PROJECT(Visore)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 CMAKE_POLICY(SET CMP0012 NEW) #Ensures that TRUE can be used as a boolean
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fpermissive") # -fpermissive for Echonest that includes Boost
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x") # Add C++11 support
 
 #Setup directory paths
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})

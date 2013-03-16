@@ -2,6 +2,7 @@
 #define VIWEIGHTINITIALIZER_H
 
 #include <vineuralnetwork.h>
+#include <viserializer.h>
 
 /*
 	http://www.elen.ucl.ac.be/Proceedings/esann/esannpdf/es2001-6.pdf
@@ -12,7 +13,7 @@
 	Bruges (Belgium), 25-27 April 2001, D-Facto public., ISBN 2-930307-01-3, pp. 119-124
 */
 
-class ViWeightInitializer
+class ViWeightInitializer : public ViSerializer
 {
 
 	public:
@@ -75,6 +76,9 @@ class ViWeightInitializer
 		void initialize(ViNeuralNetwork *network);
 
 		static ViWeightInitializer* defaultInitializer();
+
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
 
 	protected:
 

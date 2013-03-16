@@ -2,13 +2,13 @@
 #include <vilogger.h>
 
 ViLinearActivationFunction::ViLinearActivationFunction(double gradient)
-	: ViActivationFunction(CLASSNAME, -1, 1)
+	: ViActivationFunctionType(-1, 1)
 {
 	setGradient(gradient);
 }
 
 ViLinearActivationFunction::ViLinearActivationFunction(const ViLinearActivationFunction &other)
-	: ViActivationFunction(other)
+	: ViActivationFunctionType(other)
 {
 	mGradient = other.mGradient;
 }
@@ -18,7 +18,7 @@ double ViLinearActivationFunction::execute(const double &input, const int &input
 	return mGradient * input;
 }
 
-ViActivationFunction* ViLinearActivationFunction::clone()
+ViLinearActivationFunction* ViLinearActivationFunction::clone()
 {
 	return new ViLinearActivationFunction(*this);
 }
@@ -47,14 +47,14 @@ double ViLinearActivationFunction::setGradient(double gradient)
 
 ViElement ViLinearActivationFunction::exportData()
 {
-	ViElement element = ViActivationFunction::exportData();
+	ViElement element = ViActivationFunctionType::exportData();
 	element.addChild("Gradient", gradient());
 	return element;
 }
 
 bool ViLinearActivationFunction::importData(ViElement element)
 {
-	if(ViActivationFunction::importData(element))
+	if(ViActivationFunctionType::importData(element))
 	{
 		ViElement gradient = element.child("Gradient");
 		if(gradient.isNull())

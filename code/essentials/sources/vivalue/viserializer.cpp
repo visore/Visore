@@ -1,6 +1,16 @@
 #include <viserializer.h>
 #include <QTextStream>
 
+QString ViSerializer::name(bool removePrefix)
+{
+	QString result = CLASSNAME;
+	if(removePrefix && result.startsWith("Vi"))
+	{
+		result.remove(0, 2);
+	}
+	return result;
+}
+
 bool ViSerializer::exportFile(QString filePath)
 {
 	QFile file(filePath);

@@ -3,16 +3,13 @@
 #include <math.h>
 
 ViSigmoidActivationFunction::ViSigmoidActivationFunction(double shape)
-	: ViActivationFunction(CLASSNAME, 0, 1)
+	: ViActivationFunctionType(0, 1)
 {
 	setShape(shape);
-
-LOG(CLASSNAME + "*: " + QString::number(QMetaType::type(CLASSNAME.toLatin1().data())));
-LOG(CLASSNAME + "**: " + QString::number(QMetaType::type(CLASSNAME.toLatin1().data())));
 }
 
 ViSigmoidActivationFunction::ViSigmoidActivationFunction(const ViSigmoidActivationFunction &other)
-	: ViActivationFunction(other)
+	: ViActivationFunctionType(other)
 {
 	mShape = other.mShape;
 	setRange(other.minimum(), other.maximum());
@@ -20,19 +17,19 @@ ViSigmoidActivationFunction::ViSigmoidActivationFunction(const ViSigmoidActivati
 
 void ViSigmoidActivationFunction::setRange(double minimum, double maximum)
 {
-	ViActivationFunction::setRange(minimum, maximum);
+	ViActivationFunctionType::setRange(minimum, maximum);
 	changeFunction();
 }
 
 void ViSigmoidActivationFunction::setMinimum(double minimum)
 {
-	ViActivationFunction::setMinimum(minimum);
+	ViActivationFunctionType::setMinimum(minimum);
 	changeFunction();
 }
 
 void ViSigmoidActivationFunction::setMaximum(double maximum)
 {
-	ViActivationFunction::setMaximum(maximum);
+	ViActivationFunctionType::setMaximum(maximum);
 	changeFunction();
 }
 
@@ -96,21 +93,21 @@ double ViSigmoidActivationFunction::execute(const double &input, const int &inpu
 	return 1 / (1 + exp(-(this->*function)(input)));
 }
 
-ViActivationFunction* ViSigmoidActivationFunction::clone()
+ViSigmoidActivationFunction* ViSigmoidActivationFunction::clone()
 {
 	return new ViSigmoidActivationFunction(*this);
 }
 
 ViElement ViSigmoidActivationFunction::exportData()
 {
-	ViElement element = ViActivationFunction::exportData();
+	ViElement element = ViActivationFunctionType::exportData();
 	element.addChild("Shape", shape());
 	return element;
 }
 
 bool ViSigmoidActivationFunction::importData(ViElement element)
 {
-	if(ViActivationFunction::importData(element))
+	if(ViActivationFunctionType::importData(element))
 	{
 		ViElement shape = element.child("Shape");
 		if(shape.isNull())

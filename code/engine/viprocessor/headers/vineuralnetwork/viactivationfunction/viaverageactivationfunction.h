@@ -1,9 +1,9 @@
 #ifndef VIAVERAGEACTIVATIONFUNCTION_H
 #define VIAVERAGEACTIVATIONFUNCTION_H
 
-#include <viactivationfunction.h>
+#include <viactivationfunctiontype.h>
 
-class ViAverageActivationFunction : public ViActivationFunction
+class ViAverageActivationFunction : public ViActivationFunctionType<ViAverageActivationFunction>
 {
 
 	public:
@@ -14,7 +14,7 @@ class ViAverageActivationFunction : public ViActivationFunction
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
 
-		ViActivationFunction* clone();
+		ViAverageActivationFunction* clone();
 
 	protected:
 

@@ -23,6 +23,9 @@ class ViRandomWeightInitializer : public ViWeightInitializer
 		qreal lowerLimit();
 		qreal upperLimit();
 
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
+
 	protected:
 
 		virtual void initialize(ViSynapse *synapse);

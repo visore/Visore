@@ -129,6 +129,22 @@ ViWeightInitializer* ViWeightInitializer::defaultInitializer()
 	return new ViRandomWeightInitializer();
 }
 
+ViElement ViWeightInitializer::exportData()
+{
+	ViElement element("WeightInitializer");
+	element.addChild("Name", name());
+	return element;
+}
+
+bool ViWeightInitializer::importData(ViElement element)
+{
+	if(element.name() == "WeightInitializer" && element.child("Name").toString() == name())
+	{
+		return true;
+	}
+	return false;
+}
+
 int ViWeightInitializer::layerPosition(ViNeuralNetwork *network, int layerPosition, ViNeuron *neuron)
 {
 	ViNeuralLayer *layer = network->at(layerPosition);

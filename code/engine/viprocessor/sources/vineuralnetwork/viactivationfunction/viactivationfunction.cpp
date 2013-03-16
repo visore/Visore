@@ -1,20 +1,9 @@
 #include <viactivationfunction.h>
-#include <viaverageactivationfunction.h>
 #include <viscaler.h>
 #include <vilogger.h>
 
-#include <viaverageactivationfunction.h>
-#include <vilinearactivationfunction.h>
-#include <visigmoidactivationfunction.h>
-
-ViActivationFunction::ViActivationFunction(QString name, double functionMinimum, double functionMaximum)
+ViActivationFunction::ViActivationFunction(double functionMinimum, double functionMaximum)
 {
-	mName = name;
-	if(mName.startsWith("Vi"))
-	{
-		mName.remove(0, 2);
-	}
-
 	mFunctionMinimum = functionMinimum;
 	mFunctionMaximum = functionMaximum;
 	mMinimum = -1;
@@ -27,21 +16,10 @@ ViActivationFunction::ViActivationFunction(const ViActivationFunction &other)
 	mFunctionMaximum = other.mFunctionMaximum;
 	mMinimum = other.mMinimum;
 	mMaximum = other.mMaximum;
-	mName = other.mName;
 }
 
 ViActivationFunction::~ViActivationFunction()
 {
-}
-
-void ViActivationFunction::setName(QString name)
-{
-	mName = name;
-}
-
-QString ViActivationFunction::name()
-{
-	return mName;
 }
 
 void ViActivationFunction::setRange(double minimum, double maximum)
@@ -110,7 +88,7 @@ ViActivationFunction* ViActivationFunction::create(ViElement element)
 
 ViActivationFunction* ViActivationFunction::create(QString name)
 {
-	/*int type = QMetaType::type(name.toLatin1().data());
+	int type = QMetaType::type(name.toLatin1().data());
 	if(type == QMetaType::UnknownType)
 	{
 		type = QMetaType::type(QString("Vi" + name).toLatin1().data());
@@ -119,21 +97,7 @@ ViActivationFunction* ViActivationFunction::create(QString name)
 	{
 		return NULL;
 	}
-	return (ViActivationFunction*) QMetaType::create(type);*/
-	
-	if(name == "AverageActivationFunction")
-	{
-		return new ViAverageActivationFunction();
-	}
-	else if(name == "LinearActivationFunction")
-	{
-		return new ViLinearActivationFunction();
-	}
-	else if(name == "SigmoidActivationFunction")
-	{
-		return new ViSigmoidActivationFunction();
-	}
-	return NULL;
+	return (ViActivationFunction*) QMetaType::create(type);
 }
 
 ViElement ViActivationFunction::exportData()
@@ -189,5 +153,5 @@ bool ViActivationFunction::importData(ViElement element)
 
 ViActivationFunction* ViActivationFunction::defaultActivationFunction()
 {
-	return new ViAverageActivationFunction();
+	return create("ViAverageActivationFunction");
 }

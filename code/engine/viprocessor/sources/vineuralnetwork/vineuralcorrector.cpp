@@ -19,8 +19,8 @@ ViNeuralCorrector::~ViNeuralCorrector()
 
 void ViNeuralCorrector::initialize()
 {
-	/*mFactory.setActivationFunction(new ViSigmoidActivationFunction());
-	mFactory.setWeight(new ViRandomWeightInitializer());
+	mFactory.setActivationFunction(new ViSigmoidActivationFunction());
+	//mFactory.setWeight(new ViRandomWeightInitializer());
 	mFactory.addLayer(5);
 	mFactory.addLayer(3, 1);
 	mFactory.addLayer(1);
@@ -28,7 +28,7 @@ void ViNeuralCorrector::initialize()
 	network->exportFile(QString("/home/visore/NN.xml"));
 
 	ViNeuralNetworkFactory f;
-	ViNeuralNetwork *c = mFactory.create(network->exportData());*/
+	ViNeuralNetwork *c = mFactory.create(network->exportData());
 }
 
 void ViNeuralCorrector::execute()

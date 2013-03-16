@@ -1,21 +1,18 @@
 #ifndef VISIGMOIDACTIVATIONFUNCTION_H
 #define VISIGMOIDACTIVATIONFUNCTION_H
 
-#include <viactivationfunction.h>
+#include <viactivationfunctiontype.h>
 
 /*
 	http://brange.me/2012/06/27/the-sigmoid-or-activation-function-and-their-uses/
 */
 
-class ViSigmoidActivationFunction : public ViActivationFunction
+class ViSigmoidActivationFunction : public ViActivationFunctionType<ViSigmoidActivationFunction>
 {
-
-	Q_OBJECT
 
 	public:
 
-		ViSigmoidActivationFunction():ViActivationFunction(CLASSNAME, 0, 1){}
-		ViSigmoidActivationFunction(double shape );
+		ViSigmoidActivationFunction(double shape = 1);
 		ViSigmoidActivationFunction(const ViSigmoidActivationFunction &other);
 		~ViSigmoidActivationFunction(){}
 
@@ -30,7 +27,9 @@ class ViSigmoidActivationFunction : public ViActivationFunction
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
 
-		ViActivationFunction* clone();
+		ViSigmoidActivationFunction* clone();
+
+		static ViSigmoidActivationFunction* create(){return new ViSigmoidActivationFunction();}
 
 	protected:
 
@@ -51,7 +50,5 @@ class ViSigmoidActivationFunction : public ViActivationFunction
 		double mCenter;
 
 };
-
-Q_DECLARE_METATYPE(ViSigmoidActivationFunction);
 
 #endif

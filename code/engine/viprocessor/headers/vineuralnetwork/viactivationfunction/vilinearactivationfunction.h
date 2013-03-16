@@ -1,9 +1,9 @@
 #ifndef VILINEARACTIVATIONFUNCTION_H
 #define VILINEARACTIVATIONFUNCTION_H
 
-#include <viactivationfunction.h>
+#include <viactivationfunctiontype.h>
 
-class ViLinearActivationFunction : public ViActivationFunction
+class ViLinearActivationFunction : public ViActivationFunctionType<ViLinearActivationFunction>
 {
 
 	public:
@@ -18,7 +18,7 @@ class ViLinearActivationFunction : public ViActivationFunction
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
 
-		ViActivationFunction* clone();
+		ViLinearActivationFunction* clone();
 
 	protected:
 

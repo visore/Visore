@@ -12,6 +12,8 @@ class ViSerializer
 		virtual ViElement exportData() = 0;
 		virtual bool importData(ViElement element) = 0;
 
+		virtual QString name(bool removePrefix = true);
+
 		virtual bool exportFile(QString filePath);
 		virtual bool exportFile(QFile &file);
 

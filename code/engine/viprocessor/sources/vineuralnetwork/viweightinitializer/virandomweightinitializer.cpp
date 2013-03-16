@@ -40,6 +40,41 @@ qreal ViRandomWeightInitializer::upperLimit()
 	return mUpperLimit;
 }
 
+ViElement ViRandomWeightInitializer::exportData()
+{
+	ViElement element = ViWeightInitializer::exportData();
+	element.addChild("LowerLimit", lowerLimit());
+	element.addChild("UpperLimit", upperLimit());
+	return element;
+}
+
+bool ViRandomWeightInitializer::importData(ViElement element)
+{
+	if(ViWeightInitializer::importData(element))
+	{
+		ViElement limit = element.child("LowerLimit");
+		if(limit.isNull())
+		{
+			LOG("Could not retrieve the lower limit.", QtCriticalMsg);
+		}
+		else
+		{
+			setLowerLimit(limit.toReal());
+		}
+		limit = element.child("UpperLimit");
+		if(limit.isNull())
+		{
+			LOG("Could not retrieve the upper limit.", QtCriticalMsg);
+		}
+		else
+		{
+			setUpperLimit(limit.toReal());
+		}
+		return true;
+	}
+	return false;
+}
+
 void ViRandomWeightInitializer::initialize(ViSynapse *synapse)
 {
 	synapse->setWeight(ViRandomGenerator::generate(mLowerLimit, mUpperLimit));

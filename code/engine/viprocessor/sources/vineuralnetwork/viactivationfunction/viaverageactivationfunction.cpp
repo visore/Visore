@@ -1,12 +1,12 @@
 #include <viaverageactivationfunction.h>
 
 ViAverageActivationFunction::ViAverageActivationFunction()
-	: ViActivationFunction(CLASSNAME, -1, 1)
+	: ViActivationFunctionType(-1, 1)
 {
 }
 
 ViAverageActivationFunction::ViAverageActivationFunction(const ViAverageActivationFunction &other)
-	: ViActivationFunction(other)
+	: ViActivationFunctionType(other)
 {
 }
 
@@ -15,17 +15,17 @@ double ViAverageActivationFunction::execute(const double &input, const int &inpu
 	return input / inputCount;
 }
 
-ViActivationFunction* ViAverageActivationFunction::clone()
+ViAverageActivationFunction* ViAverageActivationFunction::clone()
 {
 	return new ViAverageActivationFunction(*this);
 }
 
 ViElement ViAverageActivationFunction::exportData()
 {
-	return ViActivationFunction::exportData();
+	return ViActivationFunctionType::exportData();
 }
 
 bool ViAverageActivationFunction::importData(ViElement element)
 {
-	return ViActivationFunction::importData(element);
+	return ViActivationFunctionType::importData(element);
 }

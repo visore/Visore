@@ -3,19 +3,18 @@
 
 #include <viserializer.h>
 
-class ViActivationFunction : public QObject, public ViSerializer
-{
+/*
+	Note: Subclasses must inheit from ViActivationFunctionType
+*/
 
-	Q_OBJECT
+class ViActivationFunction : public ViSerializer
+{
 
 	public:
 
-		ViActivationFunction(QString name, double functionMinimum = 0, double functionMaximum = 1);
+		ViActivationFunction(double functionMinimum = 0, double functionMaximum = 1);
 		ViActivationFunction(const ViActivationFunction &other);
 		virtual ~ViActivationFunction();
-
-		void setName(QString name);
-		QString name();
 
 		virtual void setRange(double minimum, double maximum);
 		virtual void setMinimum(double minimum);
@@ -50,7 +49,6 @@ class ViActivationFunction : public QObject, public ViSerializer
 		double mFunctionMaximum;
 		double mMinimum;
 		double mMaximum;
-		QString mName;
 
 };
 
