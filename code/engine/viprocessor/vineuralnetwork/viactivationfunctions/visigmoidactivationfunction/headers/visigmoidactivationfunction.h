@@ -1,13 +1,13 @@
 #ifndef VISIGMOIDACTIVATIONFUNCTION_H
 #define VISIGMOIDACTIVATIONFUNCTION_H
 
-#include <viactivationfunctiontype.h>
+#include <viactivationfunction.h>
 
 /*
 	http://brange.me/2012/06/27/the-sigmoid-or-activation-function-and-their-uses/
 */
 
-class ViSigmoidActivationFunction : public ViActivationFunctionType<ViSigmoidActivationFunction>
+class ViSigmoidActivationFunction : public ViActivationFunction//public ViActivationFunctionType<ViSigmoidActivationFunction>
 {
 
 	public:

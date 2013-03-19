@@ -1,6 +1,7 @@
 #include <vineuralcorrector.h>
-#include <visigmoidactivationfunction.h>
-#include <virandomweightinitializer.h>
+
+#include <viactivationfunctionmanager.h>
+//#include <virandomweightinitializer.h>
 
 ViNeuralCorrector::ViNeuralCorrector()
 	: ViProcessor()
@@ -19,16 +20,16 @@ ViNeuralCorrector::~ViNeuralCorrector()
 
 void ViNeuralCorrector::initialize()
 {
-	mFactory.setActivationFunction(new ViSigmoidActivationFunction());
+	mFactory.setActivationFunction(ViActivationFunctionManager::create("ViSigmoidActivationFunction"));
 	//mFactory.setWeight(new ViRandomWeightInitializer());
-	mFactory.addLayer(5);
+	/*mFactory.addLayer(5);
 	mFactory.addLayer(3, 1);
 	mFactory.addLayer(1);
 	ViNeuralNetwork *network = mFactory.create();
 	network->exportFile(QString("/home/visore/NN.xml"));
 
 	ViNeuralNetworkFactory f;
-	ViNeuralNetwork *c = mFactory.create(network->exportData());
+	ViNeuralNetwork *c = mFactory.create(network->exportData());*/
 }
 
 void ViNeuralCorrector::execute()

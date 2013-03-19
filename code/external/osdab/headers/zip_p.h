@@ -75,7 +75,7 @@ public:
 
 	unsigned char* uBuffer;
 
-    const crc_t* crcTable;
+    const z_crc_t* crcTable;
 
 	QString comment;
 	QString password;

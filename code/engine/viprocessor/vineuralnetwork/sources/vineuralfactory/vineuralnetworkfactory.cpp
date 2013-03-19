@@ -2,6 +2,7 @@
 #include <vineurallayerfactory.h>
 #include <visynapsefactory.h>
 #include <vistaticneuronfactory.h>
+#include <viactivationfunctionmanager.h>
 
 ViNeuralNetworkFactory::ViNeuralNetworkFactory()
 {
@@ -93,7 +94,7 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 		if(activationFunction == NULL)
 		{
 			deleteFunction = true;
-			activationFunction = ViActivationFunction::defaultActivationFunction();
+			activationFunction = ViActivationFunctionManager::createDefault();
 			LOG("No activation function was specified for layer " + QString::number(i + 1) + ". The default activation function (" + activationFunction->name() + ") will be used.", QtCriticalMsg);
 		}
 		if(mNeurons[i] <= 0)

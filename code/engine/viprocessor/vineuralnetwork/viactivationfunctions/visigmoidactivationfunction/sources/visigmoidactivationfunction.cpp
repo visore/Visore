@@ -3,13 +3,13 @@
 #include <math.h>
 
 ViSigmoidActivationFunction::ViSigmoidActivationFunction(double shape)
-	: ViActivationFunctionType(0, 1)
+	: ViActivationFunction(0, 1)
 {
 	setShape(shape);
 }
 
 ViSigmoidActivationFunction::ViSigmoidActivationFunction(const ViSigmoidActivationFunction &other)
-	: ViActivationFunctionType(other)
+	: ViActivationFunction(other)
 {
 	mShape = other.mShape;
 	setRange(other.minimum(), other.maximum());
@@ -17,19 +17,19 @@ ViSigmoidActivationFunction::ViSigmoidActivationFunction(const ViSigmoidActivati
 
 void ViSigmoidActivationFunction::setRange(double minimum, double maximum)
 {
-	ViActivationFunctionType::setRange(minimum, maximum);
+	ViActivationFunction::setRange(minimum, maximum);
 	changeFunction();
 }
 
 void ViSigmoidActivationFunction::setMinimum(double minimum)
 {
-	ViActivationFunctionType::setMinimum(minimum);
+	ViActivationFunction::setMinimum(minimum);
 	changeFunction();
 }
 
 void ViSigmoidActivationFunction::setMaximum(double maximum)
 {
-	ViActivationFunctionType::setMaximum(maximum);
+	ViActivationFunction::setMaximum(maximum);
 	changeFunction();
 }
 
@@ -100,14 +100,14 @@ ViSigmoidActivationFunction* ViSigmoidActivationFunction::clone()
 
 ViElement ViSigmoidActivationFunction::exportData()
 {
-	ViElement element = ViActivationFunctionType::exportData();
+	ViElement element = ViActivationFunction::exportData();
 	element.addChild("Shape", shape());
 	return element;
 }
 
 bool ViSigmoidActivationFunction::importData(ViElement element)
 {
-	if(ViActivationFunctionType::importData(element))
+	if(ViActivationFunction::importData(element))
 	{
 		ViElement shape = element.child("Shape");
 		if(shape.isNull())
@@ -122,3 +122,17 @@ bool ViSigmoidActivationFunction::importData(ViElement element)
 	}
 	return false;
 }
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+ViActivationFunction* create()
+{
+	return new ViSigmoidActivationFunction();
+}
+
+#ifdef __cplusplus
+}
+#endif

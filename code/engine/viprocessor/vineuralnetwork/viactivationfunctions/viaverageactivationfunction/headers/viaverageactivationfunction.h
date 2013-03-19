@@ -1,9 +1,9 @@
 #ifndef VIAVERAGEACTIVATIONFUNCTION_H
 #define VIAVERAGEACTIVATIONFUNCTION_H
 
-#include <viactivationfunctiontype.h>
+#include <viactivationfunction.h>
 
-class ViAverageActivationFunction : public ViActivationFunctionType<ViAverageActivationFunction>
+class ViAverageActivationFunction : public ViActivationFunction
 {
 
 	public:
@@ -21,7 +21,5 @@ class ViAverageActivationFunction : public ViActivationFunctionType<ViAverageAct
 		double execute(const double &input, const int &inputCount);
 
 };
-
-Q_DECLARE_METATYPE(ViAverageActivationFunction);
 
 #endif

@@ -1,5 +1,6 @@
 #include <vineuron.h>
 #include <vineurallayer.h>
+#include <viactivationfunctionmanager.h>
 
 ViNeuron::ViNeuron()
 	: ViNeuralUnit(), QRunnable()
@@ -270,11 +271,11 @@ bool ViNeuron::importData(ViElement element)
 		}
 		else
 		{
-			setActivationFunction(ViActivationFunction::create(element));
+			setActivationFunction(ViActivationFunctionManager::create(element));
 		}
 		if(mActivationFunction == NULL)
 		{
-			setActivationFunction(ViActivationFunction::defaultActivationFunction());
+			setActivationFunction(ViActivationFunctionManager::createDefault());
 			LOG("Unable to create the required activation function from the import data. The default activation function (" + mActivationFunction->name() + ") will be used.", QtCriticalMsg);
 		}
 		else

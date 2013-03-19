@@ -25,15 +25,10 @@ class ViActivationFunction : public ViSerializer
 
 		double calculate(const double &input, const int &inputCount = -1);
 
-		static ViActivationFunction* create(ViElement element);
-		static ViActivationFunction* create(QString name);
-
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
 
 		virtual ViActivationFunction* clone() = 0;
-
-		static ViActivationFunction* defaultActivationFunction();
 
 	protected:
 

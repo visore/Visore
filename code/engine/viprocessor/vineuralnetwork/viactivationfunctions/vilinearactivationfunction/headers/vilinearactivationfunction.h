@@ -1,9 +1,9 @@
 #ifndef VILINEARACTIVATIONFUNCTION_H
 #define VILINEARACTIVATIONFUNCTION_H
 
-#include <viactivationfunctiontype.h>
+#include <viactivationfunction.h>
 
-class ViLinearActivationFunction : public ViActivationFunctionType<ViLinearActivationFunction>
+class ViLinearActivationFunction : public ViActivationFunction
 {
 
 	public:
@@ -29,7 +29,5 @@ class ViLinearActivationFunction : public ViActivationFunctionType<ViLinearActiv
 		double mGradient;
 
 };
-
-Q_DECLARE_METATYPE(ViLinearActivationFunction);
 
 #endif
