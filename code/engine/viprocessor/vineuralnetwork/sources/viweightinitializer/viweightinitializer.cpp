@@ -1,5 +1,4 @@
 #include <viweightinitializer.h>
-#include <virandomweightinitializer.h>
 
 ViWeightInitializer::ViWeightInitializer()
 {
@@ -12,6 +11,19 @@ ViWeightInitializer::ViWeightInitializer()
 	mCurrentOutputLayerNeuron = -1;
 	mCurrentInputActivationFunction = NULL;
 	mCurrentOutputActivationFunction = NULL;
+}
+
+ViWeightInitializer::ViWeightInitializer(const ViWeightInitializer &other)
+{
+	mCurrentSynapse = other.mCurrentSynapse;
+	mCurrentInputNeuron = other.mCurrentInputNeuron;
+	mCurrentOutputNeuron = other.mCurrentOutputNeuron;
+	mCurrentInputLayer = other.mCurrentInputLayer;
+	mCurrentOutputLayer = other.mCurrentOutputLayer;
+	mCurrentInputLayerNeuron = other.mCurrentInputLayerNeuron;
+	mCurrentOutputLayerNeuron = other.mCurrentOutputLayerNeuron;
+	mCurrentInputActivationFunction = other.mCurrentInputActivationFunction;
+	mCurrentOutputActivationFunction = other.mCurrentOutputActivationFunction;
 }
 
 ViWeightInitializer::~ViWeightInitializer()
@@ -122,11 +134,6 @@ void ViWeightInitializer::initialize(ViNeuralNetwork *network, ViNeuralLayer *in
 		mCurrentOutputLayerNeuron = layerPosition(network, mCurrentOutputLayer, outputNeuron);
 		initialize(synapse);
 	}
-}
-
-ViWeightInitializer* ViWeightInitializer::defaultInitializer()
-{
-	return new ViRandomWeightInitializer();
 }
 
 ViElement ViWeightInitializer::exportData()

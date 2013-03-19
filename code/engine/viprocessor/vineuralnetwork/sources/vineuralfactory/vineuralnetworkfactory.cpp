@@ -3,6 +3,7 @@
 #include <visynapsefactory.h>
 #include <vistaticneuronfactory.h>
 #include <viactivationfunctionmanager.h>
+#include <viweightinitializermanager.h>
 
 ViNeuralNetworkFactory::ViNeuralNetworkFactory()
 {
@@ -141,7 +142,7 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 
 	if(mWeightInitializer == NULL)
 	{
-		setWeightInitializer(ViWeightInitializer::defaultInitializer());
+		setWeightInitializer(ViWeightInitializerManager::createDefault());
 	}
 	mWeightInitializer->initialize(network);
 

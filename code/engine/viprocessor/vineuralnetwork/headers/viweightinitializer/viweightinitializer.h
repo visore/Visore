@@ -19,6 +19,7 @@ class ViWeightInitializer : public ViSerializer
 	public:
 
 		ViWeightInitializer();
+		ViWeightInitializer(const ViWeightInitializer &other);
 		virtual ~ViWeightInitializer();
 
 		/*
@@ -75,10 +76,10 @@ class ViWeightInitializer : public ViSerializer
 
 		void initialize(ViNeuralNetwork *network);
 
-		static ViWeightInitializer* defaultInitializer();
-
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
+
+		virtual ViWeightInitializer* clone() = 0;
 
 	protected:
 

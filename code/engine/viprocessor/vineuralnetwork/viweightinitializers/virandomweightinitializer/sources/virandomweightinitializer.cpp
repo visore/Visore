@@ -10,6 +10,13 @@ ViRandomWeightInitializer::ViRandomWeightInitializer()
 	setLimits(DEFAULT_LOWER_LIMIT, DEFAULT_UPPER_LIMIT);
 }
 
+ViRandomWeightInitializer::ViRandomWeightInitializer(const ViRandomWeightInitializer &other)
+	: ViWeightInitializer(other)
+{
+	mLowerLimit = other.mLowerLimit;
+	mUpperLimit = other.mUpperLimit;
+}
+
 ViRandomWeightInitializer::~ViRandomWeightInitializer()
 {
 }
@@ -75,7 +82,26 @@ bool ViRandomWeightInitializer::importData(ViElement element)
 	return false;
 }
 
+ViWeightInitializer* ViRandomWeightInitializer::clone()
+{
+	return new ViRandomWeightInitializer(*this);
+}
+
 void ViRandomWeightInitializer::initialize(ViSynapse *synapse)
 {
 	synapse->setWeight(ViRandomGenerator::generate(mLowerLimit, mUpperLimit));
 }
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+ViWeightInitializer* create()
+{
+	return new ViRandomWeightInitializer();
+}
+
+#ifdef __cplusplus
+}
+#endif

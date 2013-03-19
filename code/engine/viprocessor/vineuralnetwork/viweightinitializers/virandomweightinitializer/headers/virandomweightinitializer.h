@@ -14,6 +14,7 @@ class ViRandomWeightInitializer : public ViWeightInitializer
 	public:
 
 		ViRandomWeightInitializer();
+		ViRandomWeightInitializer(const ViRandomWeightInitializer &other);
 		virtual ~ViRandomWeightInitializer();
 
 		void setLimits(qreal lowerLimit, qreal upperLimit);
@@ -25,6 +26,8 @@ class ViRandomWeightInitializer : public ViWeightInitializer
 
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
+
+		virtual ViWeightInitializer* clone();
 
 	protected:
 
