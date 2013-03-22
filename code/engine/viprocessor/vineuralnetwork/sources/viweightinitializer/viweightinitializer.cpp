@@ -9,8 +9,12 @@ ViWeightInitializer::ViWeightInitializer()
 	mCurrentOutputLayer = -1;
 	mCurrentInputLayerNeuron = -1;
 	mCurrentOutputLayerNeuron = -1;
+	mCurrentInputLayerNeuronCount = -1;
+	mCurrentOutputLayerNeuronCount = -1;
+	mCurrentNeuronCount = -1;
 	mCurrentInputActivationFunction = NULL;
 	mCurrentOutputActivationFunction = NULL;
+	mCurrentLearningRate = -1;
 }
 
 ViWeightInitializer::ViWeightInitializer(const ViWeightInitializer &other)
@@ -22,8 +26,12 @@ ViWeightInitializer::ViWeightInitializer(const ViWeightInitializer &other)
 	mCurrentOutputLayer = other.mCurrentOutputLayer;
 	mCurrentInputLayerNeuron = other.mCurrentInputLayerNeuron;
 	mCurrentOutputLayerNeuron = other.mCurrentOutputLayerNeuron;
+	mCurrentInputLayerNeuronCount = other.mCurrentInputLayerNeuronCount;
+	mCurrentOutputLayerNeuronCount = other.mCurrentOutputLayerNeuronCount;
+	mCurrentNeuronCount = other.mCurrentNeuronCount;
 	mCurrentInputActivationFunction = other.mCurrentInputActivationFunction;
 	mCurrentOutputActivationFunction = other.mCurrentOutputActivationFunction;
+	mCurrentLearningRate = other.mCurrentLearningRate;
 }
 
 ViWeightInitializer::~ViWeightInitializer()
@@ -65,6 +73,21 @@ const int& ViWeightInitializer::currentOutputLayerNeuron() const
 	return mCurrentOutputLayerNeuron;
 }
 
+const int& ViWeightInitializer::currentInputLayerNeuronCount() const
+{
+	return mCurrentInputLayerNeuronCount;
+}
+
+const int& ViWeightInitializer::currentOutputLayerNeuronCount() const
+{
+	return mCurrentOutputLayerNeuronCount;
+}
+
+const int& ViWeightInitializer::currentNeuronCount() const
+{
+	return mCurrentNeuronCount;
+}
+
 const ViActivationFunction* ViWeightInitializer::currentInputActivationFunction() const
 {
 	return mCurrentInputActivationFunction;
@@ -75,8 +98,16 @@ const ViActivationFunction* ViWeightInitializer::currentOutputActivationFunction
 	return mCurrentOutputActivationFunction;
 }
 
+const qreal& ViWeightInitializer::currentLearningRate() const
+{
+	return mCurrentLearningRate;
+}
+
 void ViWeightInitializer::initialize(ViNeuralNetwork *network)
 {
+	mCurrentLearningRate = network->learningRate();
+	mCurrentNeuronCount = network->neuronCount();
+
 	ViNeuralLayer *inputLayer, *outputLayer;
 	for(mCurrentSynapse = 0,
 		mCurrentInputNeuron = 0,
@@ -89,10 +120,13 @@ void ViWeightInitializer::initialize(ViNeuralNetwork *network)
 	{
 		inputLayer = network->at(mCurrentInputLayer);
 		outputLayer = network->at(mCurrentOutputLayer);
+
+		mCurrentInputLayerNeuronCount = inputLayer->size();
+		mCurrentOutputLayerNeuronCount = outputLayer->size();
 		
 		//For normal synapses
 		for(mCurrentInputLayerNeuron = 0;
-				mCurrentInputLayerNeuron < inputLayer->size();
+				mCurrentInputLayerNeuron < mCurrentInputLayerNeuronCount;
 					++mCurrentInputLayerNeuron,
 					++mCurrentInputNeuron)
 		{

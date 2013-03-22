@@ -3,6 +3,7 @@
 
 #include <vineuron.h>
 #include <vineurallayer.h>
+#include <vierrorfunction.h>
 #include <QRunnable>
 
 class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
@@ -36,6 +37,13 @@ class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
 
 		int inputCount();
 		int outputCount();
+		int neuronCount();
+
+		void setLearningRate(qreal learningRate);
+		qreal learningRate();	
+
+		void setErrorFunction(ViErrorFunction *function);
+		ViErrorFunction* errorFunction();
 
 		ViNeuralLayer* operator [] (const int index) const;
 		bool operator == (const ViNeuralNetwork &other) const;
@@ -50,7 +58,9 @@ class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
 	private:
 
 		ViNeuralLayerList mLayers;
-
+		qreal mLearningRate;
+		ViErrorFunction *mErrorFunction;
+		
 };
 
 #endif

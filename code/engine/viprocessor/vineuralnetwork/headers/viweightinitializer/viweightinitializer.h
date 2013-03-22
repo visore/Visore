@@ -65,6 +65,21 @@ class ViWeightInitializer : public ViSerializer
 		const int& currentOutputLayerNeuron() const;
 
 		/*
+			Returns the number of neurons in the layer that serves as input to the current synapse.
+		*/
+		const int& currentInputLayerNeuronCount() const;
+
+		/*
+			Returns the number of neurons in the layer that serves as output to the current synapse.
+		*/
+		const int& currentOutputLayerNeuronCount() const;
+
+		/*
+			Returns the number of neurons in the network.
+		*/
+		const int& currentNeuronCount() const;
+
+		/*
 			Returns the activation function for the neuron that serves as input to the current synapse.
 		*/
 		const ViActivationFunction* currentInputActivationFunction() const;
@@ -73,6 +88,11 @@ class ViWeightInitializer : public ViSerializer
 			Returns the activation function for the neuron that serves as output to the current synapse.
 		*/
 		const ViActivationFunction* currentOutputActivationFunction() const;
+
+		/*
+			Returns the current Learning rate of the network;
+		*/
+		const qreal& currentLearningRate() const;
 
 		void initialize(ViNeuralNetwork *network);
 
@@ -101,8 +121,12 @@ class ViWeightInitializer : public ViSerializer
 		int mCurrentOutputLayer;
 		int mCurrentInputLayerNeuron;
 		int mCurrentOutputLayerNeuron;
+		int mCurrentInputLayerNeuronCount;
+		int mCurrentOutputLayerNeuronCount;
+		int mCurrentNeuronCount;
 		ViActivationFunction *mCurrentInputActivationFunction;
 		ViActivationFunction *mCurrentOutputActivationFunction;
+		qreal mCurrentLearningRate;
 
 };
 

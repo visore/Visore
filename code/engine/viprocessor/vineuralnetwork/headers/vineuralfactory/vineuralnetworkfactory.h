@@ -20,6 +20,8 @@ class ViNeuralNetworkFactory : public ViNeuralFactory
 
 		void setWeightInitializer(ViWeightInitializer *weightInitializer); // Takes ownership of weightInitializer
 
+		void setErrorFunction(ViErrorFunction *errorFunction); // Takes ownership of errorFunction
+
 		void addLayer(int neuronCount);
 		void addLayer(int neuronCount, double bias);
 		void addLayer(int neuronCount, ViActivationFunction *activationFunction);
@@ -33,6 +35,7 @@ class ViNeuralNetworkFactory : public ViNeuralFactory
 
 		ViActivationFunction *mGlobalActivationFunction;
 		ViWeightInitializer *mWeightInitializer;
+		ViErrorFunction *mErrorFunction;
 		QList<ViActivationFunction*> mActivationFunctions;
 		ViIntegerList mNeurons;
 		ViDoubleList mBiases;

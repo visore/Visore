@@ -50,6 +50,14 @@ typedef QList<qreal> ViRealList;
 typedef ViRealList ViDoubleList;
 typedef QStringList ViStringList;
 
+typedef QList<ViBoolList> ViBoolMatrix;
+typedef QList<ViIntList> ViIntMatrix;
+typedef ViIntMatrix ViIntegerMatrix;
+typedef QList<ViFloatList> ViFloatMatrix;
+typedef QList<ViRealList> ViRealMatrix;
+typedef ViRealMatrix ViDoubleMatrix;
+typedef ViStringList ViStringMatrix;
+
 typedef QQueue<QString> ViStringQueue;
 
 namespace Vi
