@@ -71,6 +71,11 @@ double ViActivationFunction::calculate(const double &input, const int &inputCoun
 	return ViScaler::scale(execute(input, inputCount), mFunctionMinimum, mFunctionMaximum, mMinimum, mMaximum);
 }
 
+double ViActivationFunction::calculateDerivative(const double &output)
+{
+	return executeDerivative(ViScaler::scale(output, mMinimum, mMaximum, mFunctionMinimum, mFunctionMaximum));
+}
+
 ViElement ViActivationFunction::exportData()
 {
 	ViElement element("ActivationFunction");

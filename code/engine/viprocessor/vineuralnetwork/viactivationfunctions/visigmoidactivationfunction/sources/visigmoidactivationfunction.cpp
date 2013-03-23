@@ -1,6 +1,6 @@
 #include <visigmoidactivationfunction.h>
 #include <vilogger.h>
-#include <math.h>
+#include <qmath.h>
 
 ViSigmoidActivationFunction::ViSigmoidActivationFunction(double shape)
 	: ViActivationFunction(0, 1)
@@ -52,19 +52,23 @@ void ViSigmoidActivationFunction::changeFunction()
 		if(mShape != 1)
 		{
 			function = &ViSigmoidActivationFunction::changeCenterShape;
+			derivativeFunction = &ViSigmoidActivationFunction::changeDerivativeCenterShape;
 		}
 		else
 		{
 			function = &ViSigmoidActivationFunction::changeCenter;
+			derivativeFunction = &ViSigmoidActivationFunction::changeDerivativeCenter;
 		}
 	}
 	else if(mShape != 1)
 	{
 		function = &ViSigmoidActivationFunction::changeShape;
+		derivativeFunction = &ViSigmoidActivationFunction::changeDerivativeCenterShape;
 	}
 	else
 	{
 		function = &ViSigmoidActivationFunction::changeNormal;
+		derivativeFunction = &ViSigmoidActivationFunction::changeDerivativeNormal;
 	}
 }
 
@@ -88,9 +92,31 @@ double ViSigmoidActivationFunction::changeCenterShape(const double &input)
 	return mShape * (input - mCenter);
 }
 
+double ViSigmoidActivationFunction::changeDerivativeNormal(const double &output)
+{
+	// Simplefied version of changeDerivativeCenterShape
+	// http://inst.eecs.berkeley.edu/~cs182/sp06/notes/backprop.pdf
+	return output * (1 - output);
+}
+
+double ViSigmoidActivationFunction::changeDerivativeCenter(const double &output)
+{
+	return (qExp(-(this->*function)(output))) / qPow(1 + qExp(-(this->*function)(output)), 2);
+}
+
+double ViSigmoidActivationFunction::changeDerivativeCenterShape(const double &output)
+{
+	return (mShape * qExp(-(this->*function)(output))) / qPow(1 + qExp(-(this->*function)(output)), 2);
+}
+
 double ViSigmoidActivationFunction::execute(const double &input, const int &inputCount)
 {
-	return 1 / (1 + exp(-(this->*function)(input)));
+	return 1 / (1 + qExp(-(this->*function)(input)));
+}
+
+double ViSigmoidActivationFunction::executeDerivative(const double &output)
+{
+	return (this->*derivativeFunction)(output);
 }
 
 ViSigmoidActivationFunction* ViSigmoidActivationFunction::clone()

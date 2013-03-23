@@ -29,8 +29,6 @@ class ViSigmoidActivationFunction : public ViActivationFunction//public ViActiva
 
 		ViSigmoidActivationFunction* clone();
 
-		static ViSigmoidActivationFunction* create(){return new ViSigmoidActivationFunction();}
-
 	protected:
 
 		void changeFunction();
@@ -40,11 +38,17 @@ class ViSigmoidActivationFunction : public ViActivationFunction//public ViActiva
 		double changeShape(const double &input);
 		double changeCenterShape(const double &input);
 
+		double changeDerivativeNormal(const double &output);
+		double changeDerivativeCenter(const double &output);
+		double changeDerivativeCenterShape(const double &output);
+
 		double execute(const double &input, const int &inputCount);
+		double executeDerivative(const double &output);
 
 	private:
 
 		double (ViSigmoidActivationFunction::*function)(const double &input);
+		double (ViSigmoidActivationFunction::*derivativeFunction)(const double &output);
 
 		double mShape;
 		double mCenter;

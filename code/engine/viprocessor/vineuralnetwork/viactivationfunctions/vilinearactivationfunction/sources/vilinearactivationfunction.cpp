@@ -18,6 +18,11 @@ double ViLinearActivationFunction::execute(const double &input, const int &input
 	return mGradient * input;
 }
 
+double ViLinearActivationFunction::executeDerivative(const double &output)
+{
+	return mGradient;
+}
+
 ViLinearActivationFunction* ViLinearActivationFunction::clone()
 {
 	return new ViLinearActivationFunction(*this);

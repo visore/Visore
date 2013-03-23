@@ -23,6 +23,7 @@ class ViLinearActivationFunction : public ViActivationFunction
 	protected:
 
 		double execute(const double &input, const int &inputCount);
+		double executeDerivative(const double &output);
 
 	private:
 

@@ -65,7 +65,7 @@ ViActivationFunction* ViActivationFunctionManager::create(ViElement element)
 
 ViActivationFunction* ViActivationFunctionManager::createDefault()
 {
-	return create("AverageActivationFunction");
+	return create("SigmoidActivationFunction");
 }
 
 ViActivationFunction* ViActivationFunctionManager::createFunction(QString name)

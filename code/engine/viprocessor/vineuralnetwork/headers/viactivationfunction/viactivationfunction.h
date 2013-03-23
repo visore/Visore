@@ -5,6 +5,7 @@
 
 /*
 	Note: Subclasses must inheit from ViActivationFunctionType
+	http://www.derivative-calculator.net
 */
 
 class ViActivationFunction : public ViSerializer
@@ -24,6 +25,7 @@ class ViActivationFunction : public ViSerializer
 		double maximum() const;
 
 		double calculate(const double &input, const int &inputCount = -1);
+		double calculateDerivative(const double &output);
 
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
@@ -33,6 +35,7 @@ class ViActivationFunction : public ViSerializer
 	protected:
 
 		virtual double execute(const double &input, const int &inputCount) = 0;
+		virtual double executeDerivative(const double &output) = 0;
 
 		void setFunctionRange(double minimum, double maximum);
 		void setFunctionMinimum(double minimum);
