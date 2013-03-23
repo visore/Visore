@@ -13,7 +13,7 @@ ViLinearActivationFunction::ViLinearActivationFunction(const ViLinearActivationF
 	mGradient = other.mGradient;
 }
 
-double ViLinearActivationFunction::execute(const double &input, const int &inputCount)
+double ViLinearActivationFunction::execute(const double &input)
 {
 	return mGradient * input;
 }

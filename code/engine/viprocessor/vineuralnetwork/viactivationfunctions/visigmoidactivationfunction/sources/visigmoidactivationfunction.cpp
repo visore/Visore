@@ -109,7 +109,7 @@ double ViSigmoidActivationFunction::changeDerivativeCenterShape(const double &ou
 	return (mShape * qExp(-(this->*function)(output))) / qPow(1 + qExp(-(this->*function)(output)), 2);
 }
 
-double ViSigmoidActivationFunction::execute(const double &input, const int &inputCount)
+double ViSigmoidActivationFunction::execute(const double &input)
 {
 	return 1 / (1 + qExp(-(this->*function)(input)));
 }

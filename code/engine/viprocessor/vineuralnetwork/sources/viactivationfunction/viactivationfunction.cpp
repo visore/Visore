@@ -66,9 +66,9 @@ void ViActivationFunction::setFunctionMaximum(double maximum)
 	mFunctionMaximum = maximum;
 }
 
-double ViActivationFunction::calculate(const double &input, const int &inputCount)
+double ViActivationFunction::calculate(const double &input)
 {
-	return ViScaler::scale(execute(input, inputCount), mFunctionMinimum, mFunctionMaximum, mMinimum, mMaximum);
+	return ViScaler::scale(execute(input), mFunctionMinimum, mFunctionMaximum, mMinimum, mMaximum);
 }
 
 double ViActivationFunction::calculateDerivative(const double &output)

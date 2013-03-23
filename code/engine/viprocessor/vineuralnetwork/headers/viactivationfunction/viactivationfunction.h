@@ -24,7 +24,7 @@ class ViActivationFunction : public ViSerializer
 		double minimum() const;
 		double maximum() const;
 
-		double calculate(const double &input, const int &inputCount = -1);
+		double calculate(const double &input);
 		double calculateDerivative(const double &output);
 
 		virtual ViElement exportData();
@@ -34,7 +34,7 @@ class ViActivationFunction : public ViSerializer
 
 	protected:
 
-		virtual double execute(const double &input, const int &inputCount) = 0;
+		virtual double execute(const double &input) = 0;
 		virtual double executeDerivative(const double &output) = 0;
 
 		void setFunctionRange(double minimum, double maximum);

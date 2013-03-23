@@ -42,7 +42,7 @@ class ViSigmoidActivationFunction : public ViActivationFunction//public ViActiva
 		double changeDerivativeCenter(const double &output);
 		double changeDerivativeCenterShape(const double &output);
 
-		double execute(const double &input, const int &inputCount);
+		double execute(const double &input);
 		double executeDerivative(const double &output);
 
 	private:
