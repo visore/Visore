@@ -87,7 +87,7 @@ ViWeightInitializer* ViRandomWeightInitializer::clone()
 	return new ViRandomWeightInitializer(*this);
 }
 
-void ViRandomWeightInitializer::initialize(ViSynapse *synapse)
+void ViRandomWeightInitializer::initializeWeight(ViSynapse *synapse)
 {
 	synapse->setWeight(ViRandomGenerator::generate(mLowerLimit, mUpperLimit));
 }

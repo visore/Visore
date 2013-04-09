@@ -3,14 +3,10 @@
 #include <visynapsefactory.h>
 #include <vistaticneuronfactory.h>
 #include <viactivationfunctionmanager.h>
-#include <viweightinitializermanager.h>
-#include <vierrorfunctionmanager.h>
 
 ViNeuralNetworkFactory::ViNeuralNetworkFactory()
 {
 	mGlobalActivationFunction = NULL;
-	mWeightInitializer = NULL;
-	mErrorFunction = NULL;
 }
 
 ViNeuralNetworkFactory::ViNeuralNetworkFactory(const ViNeuralNetworkFactory &other)
@@ -20,7 +16,6 @@ ViNeuralNetworkFactory::ViNeuralNetworkFactory(const ViNeuralNetworkFactory &oth
 	{
 		mActivationFunctions.append(other.mActivationFunctions[i]->clone());
 	}
-	mErrorFunction = other.mErrorFunction->clone();
 	mNeurons = other.mNeurons;
 	mBiases = other.mBiases;
 }
@@ -38,18 +33,6 @@ void ViNeuralNetworkFactory::clear()
 		mGlobalActivationFunction = NULL;
 	}
 
-	if(mWeightInitializer != NULL)
-	{
-		delete mWeightInitializer;
-		mWeightInitializer = NULL;
-	}
-
-	if(mErrorFunction != NULL)
-	{
-		delete mErrorFunction;
-		mErrorFunction = NULL;
-	}
-
 	viDeleteAll(mActivationFunctions);
 	
 	mNeurons.clear();
@@ -63,24 +46,6 @@ void ViNeuralNetworkFactory::setActivationFunction(ViActivationFunction *activat
 		delete mGlobalActivationFunction;
 	}
 	mGlobalActivationFunction = activationFunction;
-}
-
-void ViNeuralNetworkFactory::setWeightInitializer(ViWeightInitializer *weightInitializer)
-{
-	if(mWeightInitializer != NULL)
-	{
-		delete mWeightInitializer;
-	}
-	mWeightInitializer = weightInitializer;
-}
-
-void ViNeuralNetworkFactory::setErrorFunction(ViErrorFunction *errorFunction)
-{
-	if(mErrorFunction != NULL)
-	{
-		delete mErrorFunction;
-	}
-	mErrorFunction = errorFunction;
 }
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount)
@@ -160,18 +125,6 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 			}
 		}
 	}
-
-	if(mWeightInitializer == NULL)
-	{
-		setWeightInitializer(ViWeightInitializerManager::createDefault());
-	}
-	mWeightInitializer->initialize(network);
-
-	if(mErrorFunction == NULL)
-	{
-		setErrorFunction(ViErrorFunctionManager::createDefault());
-	}
-	network->setErrorFunction(mErrorFunction->clone());
 
 	return network;
 }

@@ -1,30 +1,21 @@
 #include <vineuralnetwork.h>
-#include <vierrorfunctionmanager.h>
-
-#define DEFAULT_LEARNING_RATE 0.1
 
 ViNeuralNetwork::ViNeuralNetwork(ViNeuralLayerList layers)
 	: ViNeuralUnit(), QRunnable()
 {
 	mLayers = layers;
-	setLearningRate(DEFAULT_LEARNING_RATE);
-	setErrorFunction(NULL);
 }
 
 ViNeuralNetwork::ViNeuralNetwork(const ViNeuralNetwork &other)
 	: ViNeuralUnit(other)
 {
 	mLayers = other.mLayers;
-	mLearningRate = other.mLearningRate;
-	mErrorFunction = other.mErrorFunction->clone();
 }
 
 ViNeuralNetwork::~ViNeuralNetwork()
 {
+	clear();
 	viDeleteAll(mLayers);
-
-	delete mErrorFunction;
-	mErrorFunction = NULL;
 }
 
 void ViNeuralNetwork::run()
@@ -33,8 +24,6 @@ void ViNeuralNetwork::run()
 	{
 		mLayers[i]->run();
 	}
-	//calculate error
-	//back propagate
 }
 
 bool ViNeuralNetwork::add(ViNeuralLayer *layer)
@@ -177,26 +166,6 @@ int ViNeuralNetwork::neuronCount()
 	return count;
 }
 
-void ViNeuralNetwork::setLearningRate(qreal learningRate)
-{
-	mLearningRate = learningRate;
-}
-
-qreal ViNeuralNetwork::learningRate()
-{
-	return mLearningRate;
-}
-
-void ViNeuralNetwork::setErrorFunction(ViErrorFunction *function)
-{
-	mErrorFunction = function;
-}
-
-ViErrorFunction* ViNeuralNetwork::errorFunction()
-{
-	return mErrorFunction;
-}
-
 ViNeuralLayer* ViNeuralNetwork::operator [] (const int index) const
 {
 	return at(index);
@@ -223,17 +192,6 @@ bool ViNeuralNetwork::operator == (const ViNeuralNetwork &other) const
 ViElement ViNeuralNetwork::exportData()
 {
 	ViElement element("NeuralNetwork");
-
-	element.addChild("LearningRate", learningRate());
-
-	if(errorFunction() == NULL)
-	{
-		element.addChild(errorFunction()->exportData());
-	}
-	else
-	{
-		LOG("There is no error function to export.", QtCriticalMsg);
-	}
 	
 	ViElement neuronLayers("NeuronLayers");
 	neuronLayers.addAttribute("count", mLayers.size());
@@ -266,12 +224,6 @@ ViElement ViNeuralNetwork::exportData()
 bool ViNeuralNetwork::importData(ViElement element)
 {
 	if(element.name() != "NeuralNetwork")
-	{
-		return false;
-	}
-	setLearningRate(element.child("LearningRate").toReal());
-	setErrorFunction(ViErrorFunctionManager::create(element));
-	if(errorFunction() == NULL)
 	{
 		return false;
 	}

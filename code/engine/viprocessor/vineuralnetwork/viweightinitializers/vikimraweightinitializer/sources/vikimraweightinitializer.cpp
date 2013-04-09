@@ -60,7 +60,7 @@ ViWeightInitializer* ViKimRaWeightInitializer::clone()
 	return new ViKimRaWeightInitializer(*this);
 }
 
-void ViKimRaWeightInitializer::initialize(ViSynapse *synapse)
+void ViKimRaWeightInitializer::initializeWeight(ViSynapse *synapse)
 {
 	qreal lowerLimit = qSqrt(currentLearningRate() / currentNeuronCount());
 	synapse->setWeight(ViRandomGenerator::generate(lowerLimit, mUpperLimit));

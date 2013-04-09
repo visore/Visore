@@ -16,6 +16,5 @@ qreal ViSumOfSquaredErrorFunction::calculate(const ViRealMatrix &realValues, con
 			error += qPow(realValues[i][j] - targetValues[i][j], 2);
 		}
 	}
-	error /= 2;
 	return error;
 }

@@ -28,7 +28,7 @@ class ViKimRaWeightInitializer : public ViWeightInitializer
 
 	protected:
 
-		virtual void initialize(ViSynapse *synapse);
+		virtual void initializeWeight(ViSynapse *synapse);
 
 	private:
 

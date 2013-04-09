@@ -37,8 +37,10 @@ class ViNeuron : public ViNeuralUnit, public QRunnable, public ViId
 		void setType(ViNeuron::Type type);
 
 		double value();
-
 		void setValue(double value);
+
+		double error();
+		void setError(double error);
 
 		ViActivationFunction* activationFunction() const;
 
@@ -78,6 +80,7 @@ class ViNeuron : public ViNeuralUnit, public QRunnable, public ViId
 		ViSynapseList mInputs;
 		ViSynapseList mOutputs;
 		double mValue;
+		double mError;
 		ViNeuron::Type mType;
 
 };

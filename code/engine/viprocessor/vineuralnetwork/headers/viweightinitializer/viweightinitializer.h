@@ -94,7 +94,7 @@ class ViWeightInitializer : public ViSerializer
 		*/
 		const qreal& currentLearningRate() const;
 
-		void initialize(ViNeuralNetwork *network);
+		void initialize(ViNeuralNetwork *network, qreal learningRate = 1);
 
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
@@ -103,7 +103,7 @@ class ViWeightInitializer : public ViSerializer
 
 	protected:
 
-		virtual void initialize(ViSynapse *synapse) = 0;
+		virtual void initializeWeight(ViSynapse *synapse) = 0;
 
 	private:
 

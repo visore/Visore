@@ -7,6 +7,7 @@ ViNeuron::ViNeuron()
 {
 	setActivationFunction(NULL);
 	mValue = 0;
+	mError = 0;
 	mType = ViNeuron::UnknownNeuron;
 }
 
@@ -15,6 +16,7 @@ ViNeuron::ViNeuron(ViNeuron::Type type, ViActivationFunction *activationFunction
 {
 	setActivationFunction(activationFunction);
 	mValue = 0;
+	mError = 0;
 	mType = type;
 }
 
@@ -23,6 +25,7 @@ ViNeuron::ViNeuron(const ViNeuron &other)
 {
 	mActivationFunction = other.mActivationFunction;
 	mValue = other.mValue;
+	mError = other.mError;
 	mType = other.mType;
 }
 
@@ -66,6 +69,16 @@ double ViNeuron::value()
 void ViNeuron::setValue(double value)
 {
 	mValue = value;
+}
+
+double ViNeuron::error()
+{
+	return mError;
+}
+
+void ViNeuron::setError(double error)
+{
+	mError = error;
 }
 
 ViActivationFunction* ViNeuron::activationFunction() const

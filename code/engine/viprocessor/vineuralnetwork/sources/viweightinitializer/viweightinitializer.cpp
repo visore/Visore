@@ -14,7 +14,7 @@ ViWeightInitializer::ViWeightInitializer()
 	mCurrentNeuronCount = -1;
 	mCurrentInputActivationFunction = NULL;
 	mCurrentOutputActivationFunction = NULL;
-	mCurrentLearningRate = -1;
+	mCurrentLearningRate = 1;
 }
 
 ViWeightInitializer::ViWeightInitializer(const ViWeightInitializer &other)
@@ -103,9 +103,9 @@ const qreal& ViWeightInitializer::currentLearningRate() const
 	return mCurrentLearningRate;
 }
 
-void ViWeightInitializer::initialize(ViNeuralNetwork *network)
+void ViWeightInitializer::initialize(ViNeuralNetwork *network, qreal learningRate)
 {
-	mCurrentLearningRate = network->learningRate();
+	mCurrentLearningRate = learningRate;
 	mCurrentNeuronCount = network->neuronCount();
 
 	ViNeuralLayer *inputLayer, *outputLayer;
@@ -166,7 +166,7 @@ void ViWeightInitializer::initialize(ViNeuralNetwork *network, ViNeuralLayer *in
 		mCurrentOutputActivationFunction = outputNeuron->activationFunction();
 		mCurrentOutputNeuron = networkPosition(network, outputNeuron);
 		mCurrentOutputLayerNeuron = layerPosition(network, mCurrentOutputLayer, outputNeuron);
-		initialize(synapse);
+		initializeWeight(synapse);
 	}
 }
 
