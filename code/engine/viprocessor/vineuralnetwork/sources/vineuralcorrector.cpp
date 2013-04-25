@@ -24,22 +24,27 @@ ViNeuralCorrector::~ViNeuralCorrector()
 
 void ViNeuralCorrector::initialize()
 {
-	mFactory.setActivationFunction(ViActivationFunctionManager::create("ViSigmoidActivationFunction"));
-	mFactory.addLayer(2);
+	/*mFactory.setActivationFunction(ViActivationFunctionManager::create("ViSigmoidActivationFunction"));
+	mFactory.addLayer(3);
 	mFactory.addLayer(2);
 	mFactory.addLayer(1);
 	ViNeuralNetwork *network = mFactory.create();
-	network->setInputs({0.35, 0.9});
+	network->setInputs({1,0,1});
 
-ViSigmoidActivationFunction ff;
-cout<<"ppppppppppp: "<< ff.calculate(0.755)<<endl;
+
 
 	ViTrainer *trainer = ViTrainerManager::createDefault();
 	//ViWeightInitializer *weightInitializer = ViWeightInitializerManager::createDefault();
 	ViFixedWeightInitializer *weightInitializer = (ViFixedWeightInitializer*) ViWeightInitializerManager::create("Fixed");
 
-	weightInitializer->setValues({0.1, 0.4, 0.8, 0.6, 0.3, 0.9});
+	weightInitializer->setValues({0.2,-0.3,0.4,0.1,-0.5,0.2,-0.3,-0.2,-0.4,0.2,0.1});
 	weightInitializer->initialize(network, trainer->learningRate());
+
+network->run();
+
+cout<<"hidden 1: "<<network->at(1)->at(0)->value()<<endl;
+cout<<"hidden 2: "<<network->at(1)->at(1)->value()<<endl;
+cout<<"output: "<<network->at(2)->at(0)->value()<<endl;
 
 	int c = 0;
 	for(int i = 0; i < network->size()-1; ++i)
@@ -64,7 +69,7 @@ cout<<"ppppppppppp: "<< ff.calculate(0.755)<<endl;
 				cout << "w" << ++c << ": " << network->at(i)->at(j)->outputAt(k)->weight() << endl;
 			}
 		}
-	}
+	}*/
 }
 
 void ViNeuralCorrector::execute()

@@ -15,27 +15,28 @@ class ViErrorFunction : public ViSerializer
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
 
-		virtual void setRealValue(qreal realValue);
-		virtual void setRealValues(ViRealList realValues);
-		virtual void setRealValues(ViRealMatrix realValues);
+		virtual qreal add(const qreal &realValue, const qreal &targetValue);
+		virtual qreal add(const ViDoubleList &realValues, const ViDoubleList &targetValues);
 
-		virtual void setTargetValue(qreal targetValue);
-		virtual void setTargetValues(ViRealList targetValues);
-		virtual void setTargetValues(ViRealMatrix targetValues);
-
+		virtual void clear();
 		virtual qreal error();
-		
-		virtual qreal calculate();
 
-		virtual qreal calculate(const ViRealMatrix &realValues, const ViRealMatrix &targetValues) = 0;
+		virtual QString name();
 
 		virtual ViErrorFunction* clone() = 0;
 
+	protected:
+
+		int count();
+
+		virtual void clearValues() = 0;
+		virtual qreal calculate(const qreal &realValue, const qreal &targetValue) = 0;
+		virtual qreal calculate(const ViDoubleList &realValues, const ViDoubleList &targetValues) = 0;
+
 	private:
 
-		ViRealMatrix mRealValues;
-		ViRealMatrix mTargetValues;
 		qreal mError;
+		int mCount;
 
 };
 

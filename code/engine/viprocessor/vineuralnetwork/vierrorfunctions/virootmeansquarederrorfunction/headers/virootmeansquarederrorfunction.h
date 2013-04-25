@@ -18,7 +18,15 @@ class ViRootMeanSquaredErrorFunction : public ViErrorFunction
 
 		ViErrorFunction* clone();
 
-		qreal calculate(const ViRealMatrix &realValues, const ViRealMatrix &targetValues);
+	protected:
+
+		void clearValues();
+		qreal calculate(const qreal &realValue, const qreal &targetValue);
+		qreal calculate(const ViDoubleList &realValues, const ViDoubleList &targetValues);
+
+	private:
+
+		qreal mSum;
 
 };
 

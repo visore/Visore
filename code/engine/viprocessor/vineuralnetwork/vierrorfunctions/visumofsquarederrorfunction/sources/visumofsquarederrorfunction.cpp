@@ -6,15 +6,22 @@ ViErrorFunction* ViSumOfSquaredErrorFunction::clone()
 	return new ViSumOfSquaredErrorFunction(*this);
 }
 
-qreal ViSumOfSquaredErrorFunction::calculate(const ViRealMatrix &realValues, const ViRealMatrix &targetValues)
+void ViSumOfSquaredErrorFunction::clearValues()
 {
-	qreal error = 0;
+	mSum = 0;
+}
+
+qreal ViSumOfSquaredErrorFunction::calculate(const qreal &realValue, const qreal &targetValue)
+{
+	mSum += qPow(realValue - targetValue, 2);
+	return mSum;
+}
+
+qreal ViSumOfSquaredErrorFunction::calculate(const ViDoubleList &realValues, const ViDoubleList &targetValues)
+{
 	for(int i = 0; i < realValues.size(); ++i)
 	{
-		for(int j = 0; j < realValues[i].size(); ++j)
-		{
-			error += qPow(realValues[i][j] - targetValues[i][j], 2);
-		}
+		mSum += qPow(realValues[i] - targetValues[i], 2);
 	}
-	return error;
+	return mSum;
 }

@@ -6,16 +6,22 @@ ViErrorFunction* ViRootMeanSquaredErrorFunction::clone()
 	return new ViRootMeanSquaredErrorFunction(*this);
 }
 
-qreal ViRootMeanSquaredErrorFunction::calculate(const ViRealMatrix &realValues, const ViRealMatrix &targetValues)
+void ViRootMeanSquaredErrorFunction::clearValues()
 {
-	qreal error = 0;
+	mSum = 0;
+}
+
+qreal ViRootMeanSquaredErrorFunction::calculate(const qreal &realValue, const qreal &targetValue)
+{
+	mSum += qPow(realValue - targetValue, 2);
+	return qSqrt(mSum / count());
+}
+
+qreal ViRootMeanSquaredErrorFunction::calculate(const ViDoubleList &realValues, const ViDoubleList &targetValues)
+{
 	for(int i = 0; i < realValues.size(); ++i)
 	{
-		for(int j = 0; j < realValues[i].size(); ++j)
-		{
-			error += qPow(realValues[i][j] - targetValues[i][j], 2);
-		}
+		mSum += qPow(realValues[i] - targetValues[i], 2);
 	}
-	error /= realValues.size();
-	return qSqrt(error);
+	return qSqrt(mSum / count());
 }

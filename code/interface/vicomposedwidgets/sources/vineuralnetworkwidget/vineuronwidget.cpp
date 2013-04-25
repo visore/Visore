@@ -93,6 +93,7 @@ void ViNeuronWidget::initailizeColors()
 	mBorderColor = ViThemeManager::color(ViThemeColors::BorderColor2);
 	mOuterColor = ViThemeManager::color(ViThemeColors::MainColor5);
 	mInnerColor = ViThemeManager::color(ViThemeColors::MainColor7);
+	mTextColor = ViThemeManager::color(ViThemeColors::TextColor1);
 }
 
 void ViNeuronWidget::repaint()
@@ -120,4 +121,6 @@ void ViNeuronWidget::paintEvent(QPaintEvent *event)
 	setMinimumSize(size, size);
 	size -= borderWidth * 2;
 	painter.drawEllipse(borderWidth, borderWidth, size, size);
+
+	painter.drawText(borderWidth, borderWidth, size, size, Qt::AlignHCenter | Qt::AlignVCenter, QString::number(mNeuron->value(), 'f', 3));
 }

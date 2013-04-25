@@ -101,10 +101,10 @@ void ViNeuralNetwork::setInputs(ViDoubleList values)
 		if(inputSize < values.size())
 		{
 			LOG("Trying to set more input values than input neurons in the neural network.", QtCriticalMsg);
-			for(int i = 0; i < inputSize; ++i)
-			{
-				layer->setValue(i, values[i]);
-			}
+		}
+		for(int i = 0; i < inputSize; ++i)
+		{
+			layer->setValue(i, values[i]);
 		}
 	}
 }

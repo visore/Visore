@@ -15,17 +15,6 @@ ViBackpropagationTrainer::~ViBackpropagationTrainer()
 {
 }
 
-void ViBackpropagationTrainer::setErrorFunction(ViErrorFunction *function)
-{
-	if(function->name() != "SumOfSquaredErrorFunction")
-	{
-		LOG("Backpropagation requires the SumOfSquaredErrorFunction. The error function will be set as required.");
-		delete function;
-		function = ViErrorFunctionManager::create("SumOfSquaredErrorFunction");
-	}
-	ViTrainer::setErrorFunction(function);
-}
-
 ViTrainer* ViBackpropagationTrainer::clone()
 {
 	return new ViBackpropagationTrainer(*this);
@@ -59,7 +48,6 @@ void ViBackpropagationTrainer::trainNetwork()
 			adaptWeights(currentNeuron);
 		}
 	}
-
 }
 
 void ViBackpropagationTrainer::calculateError(ViNeuron *neuron, const qreal &targetValue)

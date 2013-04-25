@@ -7,19 +7,21 @@
 ViTrainer::ViTrainer()
 {
 	mNetwork = NULL;
-	mErrorFunction = NULL;
 	clear();
 }
 
 ViTrainer::ViTrainer(const ViTrainer &other)
 {
 	mNetwork = other.mNetwork;
-
 	mLearningRate = other.mLearningRate;
 	mIterationLimit = other.mIterationLimit;
 	mErrorLimit = other.mErrorLimit;
 	mCurrentIteration = other.mCurrentIteration;
 	mCurrentError = other.mCurrentError;
+	for(int i = 0; i < other.mErrorFunctions.size(); ++i)
+	{
+		addErrorFunction(other.mErrorFunctions[i]->clone());
+	}
 }
 
 ViTrainer::~ViTrainer()
@@ -34,12 +36,7 @@ void ViTrainer::clear()
 	setErrorLimit(0);
 	mCurrentIteration = -1;
 	mCurrentError = 1;
-
-	if(mErrorFunction != NULL)
-	{
-		delete mErrorFunction;
-		mErrorFunction = NULL;
-	}
+	viDeleteAll(mErrorFunctions);
 }
 
 ViNeuralNetwork* ViTrainer::network()
@@ -92,29 +89,42 @@ qreal ViTrainer::learningRate()
 	return mLearningRate;
 }
 
-void ViTrainer::setErrorFunction(ViErrorFunction *function)
+void ViTrainer::addErrorFunction(ViErrorFunction *function)
 {
-	if(mErrorFunction != NULL)
+	if(function != NULL)
 	{
-		delete mErrorFunction;
+		mErrorFunctions.append(function);
 	}
-	mErrorFunction = function;
-}
-
-ViErrorFunction* ViTrainer::errorFunction()
-{
-	return mErrorFunction;
 }
 
 void ViTrainer::calculateError()
 {
-	//mErrorFunction->setRealValue(mNetwork->outputs());
-	//Set target value here
-	//mCurrentError = mErrorFunction->calculate();
+	QString message = "";
+	qreal error;
+
+	mCurrentError = 0;
+	for(int i = 0; i < mNetwork->outputCount(); ++i)
+	{
+		//mCurrentError += qAbs(mNetwork->output(i)->value() - TARGET VALUES);
+	}
+	mCurrentError /= mNetwork->outputCount();
+	message += "Current error: " + QString::number(mCurrentError);
+
+	for(int i = 0; i < mErrorFunctions.size(); ++i)
+	{
+		/*error = mErrorFunctions[i]->add(mNetwork->outputs(), TARGET VALUES);*/
+		message += "\n\t\t" + mErrorFunctions[i]->name() + ": " + QString::number(error);
+	}
+
+	LOG(message);
 }
 
 void ViTrainer::train()
 {
+	for(int i = 0; i < mErrorFunctions.size(); ++i)
+	{
+		mErrorFunctions[i]->clear();
+	}
 	if(mIterationLimit < 0)
 	{
 		mCurrentIteration = 0;
@@ -174,14 +184,12 @@ ViElement ViTrainer::exportData()
 	element.addChild("ErrorLimit", errorLimit());
 	element.addChild("LearningRate", learningRate());
 
-	if(errorFunction() == NULL)
+	ViElement errorFunctions("ErrorFunctions");
+	for(int i = 0; i < mErrorFunctions.size(); ++i)
 	{
-		element.addChild(errorFunction()->exportData());
+		errorFunctions.addChild(mErrorFunctions[i]->exportData());
 	}
-	else
-	{
-		LOG("There is no error function to export.", QtCriticalMsg);
-	}
+	element.addChild(errorFunctions);
 
 	return element;
 }
@@ -237,11 +245,7 @@ bool ViTrainer::importData(ViElement element)
 		setLearningRate(limit.toReal());
 	}
 
-	setErrorFunction(ViErrorFunctionManager::create(element));
-	if(errorFunction() == NULL)
-	{
-		return false;
-	}
+	addErrorFunction(ViErrorFunctionManager::create(element));
 
 	return true;
 }

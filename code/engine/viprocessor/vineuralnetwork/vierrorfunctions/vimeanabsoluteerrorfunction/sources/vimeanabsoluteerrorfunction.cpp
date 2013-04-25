@@ -6,16 +6,22 @@ ViErrorFunction* ViMeanAbsoluteErrorFunction::clone()
 	return new ViMeanAbsoluteErrorFunction(*this);
 }
 
-qreal ViMeanAbsoluteErrorFunction::calculate(const ViRealMatrix &realValues, const ViRealMatrix &targetValues)
+void ViMeanAbsoluteErrorFunction::clearValues()
 {
-	qreal error = 0;
+	mSum = 0;
+}
+
+qreal ViMeanAbsoluteErrorFunction::calculate(const qreal &realValue, const qreal &targetValue)
+{
+	mSum += qAbs(realValue - targetValue);
+	return mSum / count();
+}
+
+qreal ViMeanAbsoluteErrorFunction::calculate(const ViDoubleList &realValues, const ViDoubleList &targetValues)
+{
 	for(int i = 0; i < realValues.size(); ++i)
 	{
-		for(int j = 0; j < realValues[i].size(); ++j)
-		{
-			error += qAbs(realValues[i][j] - targetValues[i][j]);
-		}
+		mSum += qAbs(realValues[i] - targetValues[i]);
 	}
-	error /= realValues.size();
-	return error;
+	return mSum / count();
 }

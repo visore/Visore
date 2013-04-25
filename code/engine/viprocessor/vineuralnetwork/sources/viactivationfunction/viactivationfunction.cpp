@@ -68,12 +68,14 @@ void ViActivationFunction::setFunctionMaximum(double maximum)
 
 double ViActivationFunction::calculate(const double &input)
 {
-	return ViScaler::scale(execute(input), mFunctionMinimum, mFunctionMaximum, mMinimum, mMaximum);
+	//return ViScaler::scale(execute(input), mFunctionMinimum, mFunctionMaximum, mMinimum, mMaximum);
+	return execute(input);
 }
 
 double ViActivationFunction::calculateDerivative(const double &output)
 {
-	return executeDerivative(ViScaler::scale(output, mMinimum, mMaximum, mFunctionMinimum, mFunctionMaximum));
+	//return executeDerivative(ViScaler::scale(output, mMinimum, mMaximum, mFunctionMinimum, mFunctionMaximum));
+	return executeDerivative(output);
 }
 
 ViElement ViActivationFunction::exportData()

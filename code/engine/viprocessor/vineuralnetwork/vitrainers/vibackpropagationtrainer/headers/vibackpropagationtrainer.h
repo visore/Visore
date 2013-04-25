@@ -17,8 +17,6 @@ class ViBackpropagationTrainer : public ViTrainer
 		ViBackpropagationTrainer(const ViBackpropagationTrainer &other);
 		~ViBackpropagationTrainer();
 
-		void setErrorFunction(ViErrorFunction *function);
-
 		ViTrainer* clone();
 
 	protected:

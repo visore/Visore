@@ -3,97 +3,89 @@
 
 ViErrorFunction::ViErrorFunction()
 {
-	mError = 0;
+	clear();
 }
 
 ViErrorFunction::ViErrorFunction(const ViErrorFunction &other)
 {
 	mError = other.mError;
-	mRealValues = other.mRealValues;
-	mTargetValues = other.mTargetValues;
+	mCount = other.mCount;
 }
 
 ViErrorFunction::~ViErrorFunction()
 {
-
 }
 
 ViElement ViErrorFunction::exportData()
 {
-	ViElement element("ErrorFunction");
-	element.addChild("Name", name());
+	ViElement element(name(), error());
 	return element;
 }
 
 bool ViErrorFunction::importData(ViElement element)
 {
-	return element.name() == "ErrorFunction" && element.child("Name").toString() == name();
+	return element.name() == name();
 }
 
-void ViErrorFunction::setRealValue(qreal realValue)
+qreal ViErrorFunction::add(const qreal &realValue, const qreal &targetValue)
 {
-	setRealValues({realValue});
+	++mCount;
+	mError = calculate(realValue, targetValue);
+	return mError;
 }
 
-void ViErrorFunction::setRealValues(ViRealList realValues)
+qreal ViErrorFunction::add(const ViDoubleList &realValues, const ViDoubleList &targetValues)
 {
-	ViRealMatrix matrix = {realValues};
-	setRealValues(matrix);
+	++mCount;
+	if(realValues.size() != targetValues.size())
+	{
+		LOG("The amount of real and target values doesn't correspond. The values will be adapted.");
+		int difference = realValues.size() - targetValues.size();
+		if(difference < 0)
+		{
+			difference = qAbs(difference);
+			ViDoubleList newList = targetValues;
+			for(int i = 0; i < difference; ++i)
+			{
+				newList.removeLast();
+			}
+			mError = calculate(realValues, newList);
+		}
+		else
+		{
+			ViDoubleList newList = realValues;
+			for(int i = 0; i < difference; ++i)
+			{
+				newList.removeLast();
+			}
+			mError = calculate(newList, targetValues);
+		}
+	}
+	else
+	{
+		mError = calculate(realValues, targetValues);
+	}
+	return mError;
 }
 
-void ViErrorFunction::setRealValues(ViRealMatrix realValues)
+void ViErrorFunction::clear()
 {
-	mRealValues = realValues;
-}
-
-void ViErrorFunction::setTargetValue(qreal targetValue)
-{
-	setTargetValues({targetValue});
-}
-
-void ViErrorFunction::setTargetValues(ViRealList targetValues)
-{
-	ViRealMatrix matrix = {targetValues};
-	setTargetValues(matrix);
-}
-
-void ViErrorFunction::setTargetValues(ViRealMatrix targetValues)
-{
-	mTargetValues = targetValues;
+	mError = 0;
+	mCount = 0;
+	clearValues();
 }
 
 qreal ViErrorFunction::error()
 {
 	return mError;
 }
-		
-qreal ViErrorFunction::calculate()
-{
-	bool error = false;
-	if(mRealValues.size() == mTargetValues.size())
-	{
-		for(int i = 0; i < mRealValues.size(); ++i)
-		{
-			if(mRealValues[i].size() != mTargetValues[i].size())
-			{
-				error = true;
-				break;
-			}
-		}
-	}
-	else
-	{
-		error = true;
-	}
 
-	if(error)
-	{
-		mError = 0;
-		LOG("The error could not be calculated, since the real and target value matrices don't have the same size.", QtCriticalMsg);
-	}
-	else
-	{
-		mError = calculate(mRealValues, mTargetValues);
-	}
-	return mError;
+int ViErrorFunction::count()
+{
+	return mCount;
+}
+
+QString ViErrorFunction::name()
+{
+	return ViSerializer::name().replace("Function", "");
 }

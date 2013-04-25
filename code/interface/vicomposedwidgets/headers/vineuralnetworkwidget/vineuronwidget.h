@@ -60,6 +60,7 @@ class ViNeuronWidget : public ViWidget
 		QColor mBorderColor;
 		QColor mOuterColor;
 		QColor mInnerColor;
+		QColor mTextColor;
 
 };
 
