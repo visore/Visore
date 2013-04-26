@@ -4,6 +4,7 @@
 #include <viprojectrecordingwidget.h>
 #include <viprojectcorrelationwidget.h>
 #include <viwaveanalysiswidget.h>
+#include <viprojectcorrectionwidget.h>
 
 ViMainMenu::ViMainMenu(QWidget *parent)
 	: ViWidget(parent)
@@ -50,6 +51,11 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	index = ViStackedWidget::addWidget(new ViProjectCorrelationWidget());
 	mUi->correlateProjectButton->addFunctionCall(SIGNAL(clicked()), ViStackedWidget::currentIndexCall(index));
 
+	mUi->correctProjectButton->setIcon(ViThemeManager::icon("correctionproject"), 80);
+	mUi->correctProjectButton->setText("Correct Project", textColor, font);
+	mUi->correctProjectButton->setSize(250, 100);
+	index = ViStackedWidget::addWidget(new ViProjectCorrectionWidget());
+	mUi->correctProjectButton->addFunctionCall(SIGNAL(clicked()), ViStackedWidget::currentIndexCall(index));
 
 	QFont headingFont;
 	headingFont.setFamily("Harabara");

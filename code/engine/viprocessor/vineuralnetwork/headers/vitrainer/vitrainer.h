@@ -19,6 +19,9 @@ class ViTrainer : public ViSerializer
 		ViNeuralNetwork* network();
 		void setNetwork(ViNeuralNetwork *network);
 
+		const ViRealList& targetValues();
+		void setTargetValues(ViRealList values);
+
 		int iterationLimit();
 		void setIterationLimit(int limit);
 
@@ -48,6 +51,7 @@ class ViTrainer : public ViSerializer
 
 	protected:
 
+		void checkTargetValues();
 		void calculateError();
 		virtual void trainNetwork() = 0;
 		
@@ -55,6 +59,8 @@ class ViTrainer : public ViSerializer
 
 		ViNeuralNetwork *mNetwork;
 		QList<ViErrorFunction*> mErrorFunctions;
+
+		ViRealList mTargetValues;
 
 		qreal mLearningRate;
 

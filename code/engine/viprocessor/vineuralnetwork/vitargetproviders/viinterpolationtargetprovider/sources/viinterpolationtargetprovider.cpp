@@ -8,21 +8,19 @@ ViInterpolationTargetProvider::ViInterpolationTargetProvider()
 ViInterpolationTargetProvider::ViInterpolationTargetProvider(const ViInterpolationTargetProvider &other)
 	: ViTargetProvider(other)
 {
-	mChunk = other.mChunk;
 }
 
 ViInterpolationTargetProvider::~ViInterpolationTargetProvider()
 {
 }
 
-void ViInterpolationTargetProvider::setData(ViSampleChunk chunk)
+qreal ViInterpolationTargetProvider::calculate(int index)
 {
-	mChunk = chunk;
-}
-
-qreal ViInterpolationTargetProvider::calculate()
-{
-
+	if(index < 0)
+	{
+		index = data().size() / 2;
+	}
+	return (data()[0] + data()[data().size()-1]) / 2;
 }
 
 ViElement ViInterpolationTargetProvider::exportData()

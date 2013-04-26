@@ -17,6 +17,8 @@ class ViWaveForm;
 class ViWaveFormer;
 class ViMetadataer;
 class ViAudioObject;
+class ViModifyProcessor;
+
 typedef ViPointer<ViAudioObject> ViAudioObjectPointer;
 typedef QList<QList<ViAudioObjectPointer> > ViAudioObjectMatrix;
 typedef QList<ViAudioObjectPointer> ViAudioObjectList;
@@ -70,6 +72,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void aligned();
 
 		void waved();
+
+		void corrected();
 
 		void infoed(bool success);
 
@@ -127,6 +131,16 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		void initializeWaveForm();
 		void generateNextWaveForm();
+
+		/*******************************************************************************************************************
+
+			CORRECTION
+
+		*******************************************************************************************************************/
+
+		void startCorrection();
+		void endCorrection();
+		void endCorrectionEncoding();
 
 		/*******************************************************************************************************************
 
@@ -280,6 +294,14 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		/*******************************************************************************************************************
 
+			CORRECTION
+
+		*******************************************************************************************************************/
+
+		Q_INVOKABLE bool correct();
+
+		/*******************************************************************************************************************
+
 			SONG INFO
 
 		*******************************************************************************************************************/
@@ -392,6 +414,14 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViWaveFormer *mWaveFormer;
 		QQueue<ViAudioObject::Type> mWaveInstructions;
 		QMap<ViAudioObject::Type, ViWaveForm*> mWaveForms;
+
+		/*******************************************************************************************************************
+
+			CORRECTION
+
+		*******************************************************************************************************************/
+
+		ViModifyProcessor *mCorrector;
 
 		/*******************************************************************************************************************
 

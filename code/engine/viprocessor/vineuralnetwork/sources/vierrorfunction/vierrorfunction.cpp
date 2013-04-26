@@ -72,7 +72,6 @@ void ViErrorFunction::clear()
 {
 	mError = 0;
 	mCount = 0;
-	clearValues();
 }
 
 qreal ViErrorFunction::error()
@@ -83,9 +82,4 @@ qreal ViErrorFunction::error()
 int ViErrorFunction::count()
 {
 	return mCount;
-}
-
-QString ViErrorFunction::name()
-{
-	return ViSerializer::name().replace("Function", "");
 }

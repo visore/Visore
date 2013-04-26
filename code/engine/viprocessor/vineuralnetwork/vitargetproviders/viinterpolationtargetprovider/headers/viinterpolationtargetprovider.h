@@ -2,7 +2,6 @@
 #define VIINTERPOLATIONTARGETPROVIDER_H
 
 #include <vitargetprovider.h>
-#include <vichunk.h>
 
 class ViInterpolationTargetProvider : public ViTargetProvider
 {
@@ -13,18 +12,12 @@ class ViInterpolationTargetProvider : public ViTargetProvider
 		ViInterpolationTargetProvider(const ViInterpolationTargetProvider &other);
 		virtual ~ViInterpolationTargetProvider();
 
-		virtual void setData(ViSampleChunk chunk);
-
-		virtual qreal calculate();
+		virtual qreal calculate(int index = -1);
 
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
 
 		virtual ViInterpolationTargetProvider* clone();
-
-	private:
-
-		ViSampleChunk mChunk;
 
 };
 

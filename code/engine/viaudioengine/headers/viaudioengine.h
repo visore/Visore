@@ -42,6 +42,10 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		//Correlation
 		void calculateCorrelation(ViAudioObjectPointer object);
 
+		//Correction
+		void correct(ViProject &project);
+		void correct(ViAudioObjectPointer object);
+
 		//Project
 		void recordProject(ViProject *project, ViAudioObject::Type type, bool detectInfo);
 

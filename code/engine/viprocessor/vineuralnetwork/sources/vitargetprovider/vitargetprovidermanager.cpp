@@ -65,7 +65,7 @@ ViTargetProvider* ViTargetProviderManager::create(ViElement element)
 
 ViTargetProvider* ViTargetProviderManager::createDefault()
 {
-	//return create("RandomWeightInitializer");
+	return create("InterpolationTargetProvider");
 }
 
 ViTargetProvider* ViTargetProviderManager::createProvider(QString name)

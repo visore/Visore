@@ -23,5 +23,6 @@
         <file>zoomin/zoomin_normal.png</file>
         <file>zoomout/zoomout_normal.png</file>
         <file>logo/logo_normal.png</file>
+        <file>correctionproject/correctionproject_normal.png</file>
     </qresource>
 </RCC>

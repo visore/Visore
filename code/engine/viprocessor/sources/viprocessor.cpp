@@ -95,12 +95,7 @@ void ViProcessor::startProgressless()
 	}
 }
 
-void ViProcessor::process(ViAudioObjectPointer audioObject)
-{
-	process(audioObject, audioObject->inputType());
-}
-
-void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type)
+bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudioObject::Type type)
 {
 	emit started();
 	if(mProgressEnabled)
@@ -114,22 +109,36 @@ void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type 
 
 	mObject = audioObject;
 	mType = type;
-	mChunk.resize(mChunkSize);
 
+	mChunk.resize(mChunkSize);
 	if(mType != ViAudioObject::Undefined && mObject->hasBuffer(mType))
 	{
 		mReadStream = mObject->buffer(mType)->createReadStream();
 		int sampleSize = mObject->buffer(mType)->format().sampleSize();
 		mConverter.setSize(sampleSize);
 		mSamples.resize(mChunkSize / (sampleSize / 8));
-		initialize();
-		mThread.start();
+		return true;
 	}
 	else
 	{
 		LOG("Unable to create the read stream.", QtCriticalMsg);
 		setProgress(100);
 		emit finished();
+		return false;
+	}
+}
+
+void ViProcessor::process(ViAudioObjectPointer audioObject)
+{
+	process(audioObject, audioObject->inputType());
+}
+
+void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type)
+{
+	if(initializeProcess(audioObject, type))
+	{
+		initialize();
+		mThread.start();
 	}
 }
 
@@ -338,24 +347,26 @@ void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::T
 
 void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2)
 {
-	ViProcessor::process(audioObject, type1);
-	mType2 = type2;
-	mChunk2.resize(chunkSize());
+	if(initializeProcess(audioObject, type1))
+	{
+		mType2 = type2;
+		mChunk2.resize(chunkSize());
 
-	if(mType2 != ViAudioObject::Undefined && object()->hasBuffer(mType2))
-	{
-		mReadStream2 = object()->buffer(mType2)->createReadStream();
-		int sampleSize = object()->buffer(mType2)->format().sampleSize();
-		mConverter2.setSize(sampleSize);
-		mSamples2.resize(chunkSize() / (sampleSize / 8));
-		initialize();
-		thread().start();
-	}
-	else
-	{
-		LOG("Unable to create the second read stream.", QtCriticalMsg);
-		setProgress(100);
-		emit finished();
+		if(mType2 != ViAudioObject::Undefined && object()->hasBuffer(mType2))
+		{
+			mReadStream2 = object()->buffer(mType2)->createReadStream();
+			int sampleSize = object()->buffer(mType2)->format().sampleSize();
+			mConverter2.setSize(sampleSize);
+			mSamples2.resize(chunkSize() / (sampleSize / 8));
+			initialize();
+			thread().start();
+		}
+		else
+		{
+			LOG("Unable to create the second read stream.", QtCriticalMsg);
+			setProgress(100);
+			emit finished();
+		}
 	}
 }
 
@@ -385,9 +396,10 @@ ViAudioFormat ViDualProcessor::format2()
 	return object()->format(mType2);
 }
 
-ViModifyProcessor::ViModifyProcessor()
+ViModifyProcessor::ViModifyProcessor(bool autoWrite)
 	: ViProcessor()
 {
+	mAutoWrite = autoWrite;
 	mType2 = ViAudioObject::Undefined;
 }
 
@@ -403,7 +415,10 @@ void ViModifyProcessor::startProgress()
 	{
 		processedSize += read1().size();
 		execute();
-		write();
+		if(mAutoWrite)
+		{
+			write();
+		}
 		setProgress((processedSize * 99.0) / totalSize);
 	}
 	if(willExit() || !isMultiShot())
@@ -426,7 +441,10 @@ void ViModifyProcessor::startProgressless()
 	{
 		read1();
 		execute();
-		write();
+		if(mAutoWrite)
+		{
+			write();
+		}
 	}
 	if(willExit() || !isMultiShot())
 	{
@@ -454,22 +472,23 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject:
 
 void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2)
 {
-	ViProcessor::process(audioObject, type1);
-	mType2 = type2;
-	mChunk2.resize(chunkSize());
-
-	if(mType2 != ViAudioObject::Undefined)
+	if(initializeProcess(audioObject, type1))
 	{
-		mWriteStream = object()->buffer(mType2)->createWriteStream();
-		mConverter2.setSize(object()->buffer(mType2)->format().sampleSize());
-		initialize();
-		thread().start();
-	}
-	else
-	{
-		LOG("Unable to create the write stream.", QtCriticalMsg);
-		setProgress(100);
-		emit finished();
+		mType2 = type2;
+		mChunk2.resize(chunkSize());
+		if(mType2 != ViAudioObject::Undefined)
+		{
+			mWriteStream = object()->buffer(mType2)->createWriteStream();
+			mConverter2.setSize(object()->buffer(mType2)->format().sampleSize());
+			initialize();
+			thread().start();
+		}
+		else
+		{
+			LOG("Unable to create the write stream.", QtCriticalMsg);
+			setProgress(100);
+			emit finished();
+		}
 	}
 }
 
@@ -485,5 +504,10 @@ ViAudioFormat ViModifyProcessor::format2()
 
 void ViModifyProcessor::write()
 {
-	mWriteStream->write(mChunk2.data(), mConverter2.realToPcm(samples1().data(), mChunk2.data(), samples1().size()));
+	write(samples1());
+}
+
+void ViModifyProcessor::write(ViSampleChunk& samples)
+{
+	mWriteStream->write(mChunk2.data(), mConverter2.realToPcm(samples.data(), mChunk2.data(), samples.size()));
 }

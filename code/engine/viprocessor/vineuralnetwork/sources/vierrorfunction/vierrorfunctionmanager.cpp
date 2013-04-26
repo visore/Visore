@@ -28,6 +28,11 @@ ViErrorFunction* ViErrorFunctionManager::create(QString name)
 	ViErrorFunction *initializer = NULL;
 
 	initializer = createFunction(newName);
+	if(initializer == NULL && newName.endsWith("error"))
+	{
+		newName.append("function");
+		initializer = createFunction(newName);
+	}
 	if(initializer == NULL && !newName.endsWith("errorfunction"))
 	{
 		newName.append("errorfunction");
@@ -40,7 +45,7 @@ ViErrorFunction* ViErrorFunctionManager::create(QString name)
 	}
 	if(initializer == NULL)
 	{
-		STATICLOG("The specified error function (" + name + ") could not be found.", QtCriticalMsg);
+		STATICLOG("The specified error function (" + newName + ") could not be found.", QtCriticalMsg);
 	}
 	
 	return initializer;

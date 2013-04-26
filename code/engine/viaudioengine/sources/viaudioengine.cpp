@@ -36,11 +36,6 @@ ViAudioEngine::ViAudioEngine()
 	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
 	QObject::connect(mStreamOutput, SIGNAL(lengthChanged(ViAudioPosition)), this, SIGNAL(lengthChanged(ViAudioPosition)));
 
-
-ViNeuralCorrector corr;
-corr.initialize();
-
-
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -136,6 +131,26 @@ void ViAudioEngine::calculateCorrelation(ViAudioObjectPointer object)
 	{
 		emit correlationFinished();
 	}*/
+}
+
+void ViAudioEngine::correct(ViProject &project)
+{
+	mObjectChain.clear();
+	mObjectChain.add(project);
+	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
+	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
+	mObjectChain.setFunction("correct");
+	mObjectChain.execute();
+}
+
+void ViAudioEngine::correct(ViAudioObjectPointer object)
+{
+	mObjectChain.clear();
+	mObjectChain.add(object);
+	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
+	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
+	mObjectChain.setFunction("correct");
+	mObjectChain.execute();
 }
 
 void ViAudioEngine::recordProject(ViProject *project, ViAudioObject::Type type, bool detectInfo)

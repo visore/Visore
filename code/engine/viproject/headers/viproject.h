@@ -107,6 +107,14 @@ class ViProject : public QObject, public ViId
 		ViVersion createdVersion();
 		ViVersion editedVersion();
 
+		/*******************************************************************************************************************
+
+			STATIC FUNCTIONS
+
+		*******************************************************************************************************************/
+
+		static QString convertTrackPath(QString path, ViAudioObject::Type from, ViAudioObject::Type to);
+
 	protected:
 
 		bool createTempStructure();

@@ -4,6 +4,7 @@
 #include <vifouriercrossaligner.h>
 #include <viacoustididentifier.h>
 #include <vienmfpidentifier.h>
+#include <vineuralcorrector.h>
 #include <QSet>
 
 /*******************************************************************************************************************
@@ -35,6 +36,7 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	mAligner = NULL;
 	mWaveFormer = NULL;
 	mMetadataer = NULL;
+	mCorrector = NULL;
 
 	mProgressRatio = 0;
 	mProgressParts = 0;
@@ -70,6 +72,12 @@ ViAudioObject::~ViAudioObject()
 	{
 		delete mMetadataer;
 		mMetadataer = NULL;
+	}
+
+	if(mCorrector != NULL)
+	{
+		delete mCorrector;
+		mCorrector = NULL;
 	}
 }
 
@@ -709,7 +717,7 @@ void ViAudioObject::progress(qreal progress)
 		mProgress += pro;
 	}
 	if(mProgress >= 100)
-	{LOG("xxxxxxxx");
+	{
 		mProgress = 0;
 		mProgressRatio = 0;
 		mProgressParts = 0;
@@ -1206,6 +1214,95 @@ ViWaveForm* ViAudioObject::waveForm(ViAudioObject::Type type)
 {
 	QMutexLocker locker(&mMutex);
 	return mWaveForms.value(type, NULL);
+}
+
+/*******************************************************************************************************************
+
+	CORRECTION
+
+*******************************************************************************************************************/
+
+bool ViAudioObject::correct()
+{
+	QMutexLocker locker(&mMutex);
+	
+	locker.unlock();
+	if(!hasResource(ViAudioObject::Corrupted))
+	{
+		locker.relock();
+		LOG("No corrupted signal is available for correction");
+		progress(100);
+		locker.unlock();
+		emit corrected();
+		return false;
+	}
+
+	locker.relock();
+	if(mCorrector != NULL)
+	{
+		delete mCorrector;
+	}
+	mCorrector = new ViNeuralCorrector();
+	QObject::connect(mCorrector, SIGNAL(finished()), this, SLOT(endCorrection()), Qt::QueuedConnection);
+	QObject::connect(mCorrector, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+
+	setProgress(1, 0.05);
+	locker.unlock();
+
+	if(hasBuffer(ViAudioObject::Corrupted))
+	{
+		locker.relock();
+		progress(100);
+		locker.unlock();
+		startCorrection();
+	}
+	else
+	{
+		locker.relock();
+		QObject::connect(this, SIGNAL(decoded()), this, SLOT(startCorrection()));
+		locker.unlock();
+		decode(ViAudioObject::Corrupted);
+	}
+	
+	return true;
+}
+
+void ViAudioObject::startCorrection()
+{
+	QMutexLocker locker(&mMutex);
+	QObject::disconnect(this, SIGNAL(decoded()), this, SLOT(startCorrection()));
+	setProgress(1, 0.90);
+	locker.unlock();
+	emit statused("Correcting track");
+
+	setCorrectedFilePath("/home/visore/corrected.flac");
+	buffer(ViAudioObject::Corrected)->setFormat(corruptedFormat());
+
+	mCorrector->process(thisPointer, ViAudioObject::Corrupted, ViAudioObject::Corrected);
+}
+
+void ViAudioObject::endCorrection()
+{
+	QMutexLocker locker(&mMutex);
+	QObject::disconnect(mCorrector, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+	QObject::disconnect(mCorrector, SIGNAL(finished()), this, SLOT(endCorrection()));
+	locker.unlock();
+	LOG("Track corrected");
+	emit corrected();
+
+	setProgress(1, 0.05);
+	QObject::connect(this, SIGNAL(encoded()), this, SLOT(endCorrectionEncoding()));
+	encode(ViAudioObject::Corrected);
+}
+
+void ViAudioObject::endCorrectionEncoding()
+{
+	QMutexLocker locker(&mMutex);
+	QObject::disconnect(this, SIGNAL(encoded()), this, SLOT(endCorrectionEncoding()));
+	locker.unlock();
+	delete mCorrector;
+	mCorrector = NULL;
+	progress(100);
 }
 
 /*******************************************************************************************************************

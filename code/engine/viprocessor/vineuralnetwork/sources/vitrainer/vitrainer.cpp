@@ -49,6 +49,27 @@ void ViTrainer::setNetwork(ViNeuralNetwork *network)
 	mNetwork = network;
 }
 
+const ViRealList& ViTrainer::targetValues()
+{
+	return mTargetValues;
+}
+
+void ViTrainer::setTargetValues(ViRealList values)
+{
+	mTargetValues = values;
+}
+
+void ViTrainer::checkTargetValues()
+{
+	if(mNetwork != NULL)
+	{
+		if(mTargetValues.size() != mNetwork->outputCount())
+		{
+			LOG("The number of target values does not correspond with the number of neural network outputs.", QtCriticalMsg);
+		}
+	}
+}
+
 int ViTrainer::iterationLimit()
 {
 	return mIterationLimit;
@@ -99,28 +120,29 @@ void ViTrainer::addErrorFunction(ViErrorFunction *function)
 
 void ViTrainer::calculateError()
 {
-	QString message = "";
+	//QString message = "";
 	qreal error;
-
 	mCurrentError = 0;
 	for(int i = 0; i < mNetwork->outputCount(); ++i)
 	{
-		//mCurrentError += qAbs(mNetwork->output(i)->value() - TARGET VALUES);
+		mCurrentError += qAbs(mNetwork->output(i) - mTargetValues[i]);
 	}
 	mCurrentError /= mNetwork->outputCount();
-	message += "Current error: " + QString::number(mCurrentError);
+	//message += "Current error: " + QString::number(mCurrentError);
 
 	for(int i = 0; i < mErrorFunctions.size(); ++i)
 	{
-		/*error = mErrorFunctions[i]->add(mNetwork->outputs(), TARGET VALUES);*/
-		message += "\n\t\t" + mErrorFunctions[i]->name() + ": " + QString::number(error);
+		error = mErrorFunctions[i]->add(mNetwork->outputs(), mTargetValues);
+		//message += "\n\t\t" + mErrorFunctions[i]->name() + ": " + QString::number(error);
 	}
 
-	LOG(message);
+	//LOG(message);
 }
 
 void ViTrainer::train()
 {
+	checkTargetValues();
+
 	for(int i = 0; i < mErrorFunctions.size(); ++i)
 	{
 		mErrorFunctions[i]->clear();

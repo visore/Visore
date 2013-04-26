@@ -22,7 +22,7 @@ ViTrainer* ViBackpropagationTrainer::clone()
 
 void ViBackpropagationTrainer::trainNetwork()
 {
-	ViRealList targetValues = {0.5};//****************
+	const ViRealList &targets = targetValues();
 	ViNeuralNetwork *currentNetwork = network();
 
 	ViNeuralLayer *currentLayer;
@@ -33,7 +33,7 @@ void ViBackpropagationTrainer::trainNetwork()
 	for(int i = 0; i < currentLayer->size(); ++i)
 	{
 		currentNeuron = currentLayer->at(i);
-		calculateError(currentNeuron, targetValues.at(i));
+		calculateError(currentNeuron, targets.at(i));
 		adaptWeights(currentNeuron);
 	}
 

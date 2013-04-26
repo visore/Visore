@@ -58,6 +58,8 @@ class ViProcessor : public ViNotifier
 		virtual void execute() = 0;
 		virtual void finalize();
 
+		bool initializeProcess(ViAudioObjectPointer audioObject, ViAudioObject::Type type);
+
 		ViProcessorThread& thread();
 		ViAudioObjectPointer object();
 		ViBufferStreamPointer readStream();
@@ -144,7 +146,7 @@ class ViModifyProcessor : public ViProcessor
 
 	public:
 
-		ViModifyProcessor();
+		ViModifyProcessor(bool autoWrite = true);
 		virtual ~ViModifyProcessor();
 		void process(ViAudioObjectPointer audioObject);
 		void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1);
@@ -155,9 +157,11 @@ class ViModifyProcessor : public ViProcessor
 		ViAudioObject::Type type2();
 		ViAudioFormat format2();
 		void write();
+		void write(ViSampleChunk& samples);
 
 	private:
 
+		bool mAutoWrite;
 		ViAudioObject::Type mType2;
 		ViBufferStreamPointer mWriteStream;
 		ViRawChunk mChunk2;

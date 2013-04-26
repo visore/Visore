@@ -21,15 +21,12 @@ class ViErrorFunction : public ViSerializer
 		virtual void clear();
 		virtual qreal error();
 
-		virtual QString name();
-
 		virtual ViErrorFunction* clone() = 0;
 
 	protected:
 
 		int count();
 
-		virtual void clearValues() = 0;
 		virtual qreal calculate(const qreal &realValue, const qreal &targetValue) = 0;
 		virtual qreal calculate(const ViDoubleList &realValues, const ViDoubleList &targetValues) = 0;
 

@@ -6,8 +6,9 @@ ViErrorFunction* ViRootMeanSquaredErrorFunction::clone()
 	return new ViRootMeanSquaredErrorFunction(*this);
 }
 
-void ViRootMeanSquaredErrorFunction::clearValues()
+void ViRootMeanSquaredErrorFunction::clear()
 {
+	ViErrorFunction::clear();
 	mSum = 0;
 }
 
@@ -25,3 +26,17 @@ qreal ViRootMeanSquaredErrorFunction::calculate(const ViDoubleList &realValues, 
 	}
 	return qSqrt(mSum / count());
 }
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+ViErrorFunction* create()
+{
+	return new ViRootMeanSquaredErrorFunction();
+}
+
+#ifdef __cplusplus
+}
+#endif

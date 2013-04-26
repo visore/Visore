@@ -6,8 +6,9 @@ ViErrorFunction* ViMeanSquaredErrorFunction::clone()
 	return new ViMeanSquaredErrorFunction(*this);
 }
 
-void ViMeanSquaredErrorFunction::clearValues()
+void ViMeanSquaredErrorFunction::clear()
 {
+	ViErrorFunction::clear();
 	mSum = 0;
 }
 
@@ -25,3 +26,17 @@ qreal ViMeanSquaredErrorFunction::calculate(const ViDoubleList &realValues, cons
 	}
 	return mSum / count();
 }
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+ViErrorFunction* create()
+{
+	return new ViMeanSquaredErrorFunction();
+}
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,16 +1,20 @@
 #include <vineuralcorrector.h>
+#include <viscaler.h>
+#include <qmath.h>
 
 #include <viactivationfunctionmanager.h>
+#include <vierrorfunctionmanager.h>
 #include <viweightinitializermanager.h>
-#include <vitrainermanager.h>
 
-#include <vifixedweightinitializer.h>
-#include <visigmoidactivationfunction.h>
+#define INPUT_SAMPLES 4
+#define TRAINER_SAMPLES 3 //Needs to be odd
 
 ViNeuralCorrector::ViNeuralCorrector()
-	: ViProcessor()
+	: ViModifyProcessor(false) //Make sure that the processor is not automatically writing the sample again
 {
 	mNetwork = NULL;
+	mTrainer = NULL;
+	mProvider = NULL;
 }
 
 ViNeuralCorrector::~ViNeuralCorrector()
@@ -20,64 +24,123 @@ ViNeuralCorrector::~ViNeuralCorrector()
 		delete mNetwork;
 		mNetwork = NULL;
 	}
+	if(mTrainer != NULL)
+	{
+		delete mTrainer;
+		mTrainer = NULL;
+	}
+	if(mProvider != NULL)
+	{
+		delete mProvider;
+		mProvider = NULL;
+	}
 }
 
 void ViNeuralCorrector::initialize()
 {
-	/*mFactory.setActivationFunction(ViActivationFunctionManager::create("ViSigmoidActivationFunction"));
-	mFactory.addLayer(3);
-	mFactory.addLayer(2);
-	mFactory.addLayer(1);
-	ViNeuralNetwork *network = mFactory.create();
-	network->setInputs({1,0,1});
-
-
-
-	ViTrainer *trainer = ViTrainerManager::createDefault();
-	//ViWeightInitializer *weightInitializer = ViWeightInitializerManager::createDefault();
-	ViFixedWeightInitializer *weightInitializer = (ViFixedWeightInitializer*) ViWeightInitializerManager::create("Fixed");
-
-	weightInitializer->setValues({0.2,-0.3,0.4,0.1,-0.5,0.2,-0.3,-0.2,-0.4,0.2,0.1});
-	weightInitializer->initialize(network, trainer->learningRate());
-
-network->run();
-
-cout<<"hidden 1: "<<network->at(1)->at(0)->value()<<endl;
-cout<<"hidden 2: "<<network->at(1)->at(1)->value()<<endl;
-cout<<"output: "<<network->at(2)->at(0)->value()<<endl;
-
-	int c = 0;
-	for(int i = 0; i < network->size()-1; ++i)
+	if(mNetwork != NULL)
 	{
-		for(int j = 0; j < network->at(i)->size(); ++j)
-		{
-			for(int k = 0; k < network->at(i)->at(j)->outputSize(); ++k)
-			{
-				cout << "w" << ++c << ": " << network->at(i)->at(j)->outputAt(k)->weight() << endl;
-			}
-		}
+		delete mNetwork;
+	}
+	if(mTrainer != NULL)
+	{
+		delete mTrainer;
+	}
+	if(mProvider != NULL)
+	{
+		delete mProvider;
 	}
 
-	trainer->trainSingle(network);
-	c = 0;
-	for(int i = 0; i < network->size()-1; ++i)
-	{
-		for(int j = 0; j < network->at(i)->size(); ++j)
-		{
-			for(int k = 0; k < network->at(i)->at(j)->outputSize(); ++k)
-			{
-				cout << "w" << ++c << ": " << network->at(i)->at(j)->outputAt(k)->weight() << endl;
-			}
-		}
-	}*/
+	mFactory.setActivationFunction(ViActivationFunctionManager::create("SigmoidActivationFunction"));
+	mFactory.addLayer(INPUT_SAMPLES + 1);
+	mFactory.addLayer(2);
+	mFactory.addLayer(1);
+	mNetwork = mFactory.create();
+
+	mTrainer = ViTrainerManager::createDefault();
+	mTrainer->setNetwork(mNetwork);
+	mTrainer->addErrorFunction(ViErrorFunctionManager::create("RootMeanSquaredError"));
+
+	mProvider = ViTargetProviderManager::createDefault();
+
+	ViWeightInitializer *weightInitializer = ViWeightInitializerManager::create("Random");
+	weightInitializer->initialize(mNetwork, mTrainer->learningRate());
+	delete weightInitializer;
+
+	mReadBuffer.clear();
+	mFirstWrite = true;
 }
 
 void ViNeuralCorrector::execute()
 {
+	ViSampleChunk &newSamples = samples();
+	for(int i = 0; i < newSamples.size(); ++i)
+	{
+		mReadBuffer.append(ViScaler::scale(newSamples[i], -1, 1, 0, 1));
+	}
 
+	//Ensures that the first window of samples is written immediatly, since they can't be corrected
+	if(mFirstWrite && mReadBuffer.size() >= INPUT_SAMPLES)
+	{
+		mFirstWrite = false;
+		for(int i = 0; i < INPUT_SAMPLES; ++i)
+		{
+			mWriteBuffer.append(ViScaler::scale(mReadBuffer[i], 0, 1, -1, 1));
+		}
+		write(mWriteBuffer);
+		mWriteBuffer.clear();
+	}
+
+	static int halfTargetSamples = qCeil(TRAINER_SAMPLES / 2.0);
+	while(mReadBuffer.size() >= (INPUT_SAMPLES + halfTargetSamples + 1))
+	{
+		for(int i = 0; i < INPUT_SAMPLES; ++i)
+		{
+			mNetwork->setInput(i, mReadBuffer[i]);
+		}
+		mNetwork->setInput(INPUT_SAMPLES, mNetwork->output());
+
+		ViSampleChunk targetBuffer(TRAINER_SAMPLES);
+		qint64 targetOffset = INPUT_SAMPLES - halfTargetSamples + 1;
+		for(int i = 0; i < TRAINER_SAMPLES; ++i)
+		{
+			targetBuffer[i] = mReadBuffer[targetOffset + i];
+		}
+
+		mProvider->setData(targetBuffer);
+		mTrainer->setTargetValues({mProvider->calculate()});
+		mTrainer->trainSingle();
+
+		mWriteBuffer.append(ViScaler::scale(mNetwork->output(), 0, 1, -1, 1));
+		if(mWriteBuffer.size() == INPUT_SAMPLES)
+		{
+			write(mWriteBuffer);
+			mWriteBuffer.clear();
+		}
+
+		mReadBuffer.removeFirst();
+	}
 }
 
 void ViNeuralCorrector::finalize()
 {
+	//Write the remaining couple of samples
+	write(mWriteBuffer);
+	mWriteBuffer.clear();
 
+	if(mNetwork != NULL)
+	{
+		delete mNetwork;
+		mNetwork = NULL;
+	}
+	if(mTrainer != NULL)
+	{
+		delete mTrainer;
+		mTrainer = NULL;
+	}
+	if(mProvider != NULL)
+	{
+		delete mProvider;
+		mProvider = NULL;
+	}
 }

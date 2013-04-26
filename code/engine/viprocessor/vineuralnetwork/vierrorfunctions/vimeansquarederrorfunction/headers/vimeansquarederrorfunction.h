@@ -16,11 +16,11 @@ class ViMeanSquaredErrorFunction : public ViErrorFunction
 
 	public:
 
+		void clear();
 		ViErrorFunction* clone();
 
 	protected:
 
-		void clearValues();
 		qreal calculate(const qreal &realValue, const qreal &targetValue);
 		qreal calculate(const ViDoubleList &realValues, const ViDoubleList &targetValues);
 

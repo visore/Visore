@@ -3,8 +3,10 @@
 
 #include <viprocessor.h>
 #include <vineuralnetworkfactory.h>
+#include <vitrainermanager.h>
+#include <vitargetprovidermanager.h>
 
-class ViNeuralCorrector : public ViProcessor
+class ViNeuralCorrector : public ViModifyProcessor
 {
 
 	public:
@@ -20,6 +22,12 @@ class ViNeuralCorrector : public ViProcessor
 
 		ViNeuralNetworkFactory mFactory;
 		ViNeuralNetwork *mNetwork;
+		ViTrainer *mTrainer;
+		ViTargetProvider *mProvider;
+
+		ViRealList mReadBuffer;
+		ViSampleChunk mWriteBuffer;
+		bool mFirstWrite;
 
 };
 

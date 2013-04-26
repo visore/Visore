@@ -6,8 +6,9 @@ ViErrorFunction* ViMeanAbsoluteErrorFunction::clone()
 	return new ViMeanAbsoluteErrorFunction(*this);
 }
 
-void ViMeanAbsoluteErrorFunction::clearValues()
+void ViMeanAbsoluteErrorFunction::clear()
 {
+	ViErrorFunction::clear();
 	mSum = 0;
 }
 
@@ -25,3 +26,17 @@ qreal ViMeanAbsoluteErrorFunction::calculate(const ViDoubleList &realValues, con
 	}
 	return mSum / count();
 }
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+ViErrorFunction* create()
+{
+	return new ViMeanAbsoluteErrorFunction();
+}
+
+#ifdef __cplusplus
+}
+#endif
