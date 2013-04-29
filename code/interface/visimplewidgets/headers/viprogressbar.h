@@ -39,6 +39,8 @@ class ViProgressBar : public ViWidget
 		void setTextStyle(ViProgressBar::TextStyle style);
 		
 		Qt::Alignment alignment();
+
+		QString text();
 		int value();
 
 	private:

@@ -31,6 +31,8 @@ class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
 		void setInput(int index, double value);
 		void setInputs(ViDoubleList values);
 
+		double input(int index = 0);
+
 		double output(int index = 0);
 		ViDoubleList outputs();
 

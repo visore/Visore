@@ -109,6 +109,16 @@ void ViNeuralNetwork::setInputs(ViDoubleList values)
 	}
 }
 
+double ViNeuralNetwork::input(int index)
+{
+	if(mLayers.isEmpty())
+	{
+		LOG("The neural network has no input layer.", QtCriticalMsg);
+		return 0;
+	}
+	return mLayers[0]->value(index);
+}
+
 double ViNeuralNetwork::output(int index)
 {
 	if(mLayers.isEmpty())

@@ -7,6 +7,7 @@
 #include <visingleton.h>
 #include <QTime>
 #include <QTimer>
+#include <QPair>
 
 namespace Ui
 {
@@ -54,6 +55,7 @@ class ViLoadingWidget : public ViWidget, public ViSingleton<ViLoadingWidget>
 		bool mHasAnimation;
 		QTime mTime;
 		QTimer mTimer;
+		QList<QPair<QString, qint64> > mProcesses;
 
 };
 

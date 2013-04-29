@@ -128,7 +128,15 @@ void ViLogEntry::printMedium()
         case QtFatalMsg:
 			cout << "\033[1;31mFatal Error: ";
 	}
-	cout << "\033[1;34m" << mClassName. toLatin1().data() << "\033[1;37m " << mMessage. toLatin1().data() << " \033[0m" << endl;
+	if(mClassName == "")
+	{
+		cout << "\033[1;37m";
+	}
+	else
+	{
+		cout << "\033[1;34m" << mClassName.toLatin1().data() << "\033[1;37m ";
+	}
+	cout << mMessage. toLatin1().data() << " \033[0m" << endl;
 }
 
 void ViLogEntry::printLong()
@@ -147,7 +155,15 @@ void ViLogEntry::printLong()
         case QtFatalMsg:
 			cout << "\033[1;31mFatal Error: ";
 	}
-	cout << "\033[1;34m" << mClassName. toLatin1().data() << "\033[1;30m (" << mFileName. toLatin1().data() << ":" << mLineNumber << ")\033[1;37m " << mMessage. toLatin1().data() << " \033[0m" << endl;
+	if(mClassName == "")
+	{
+		cout << "\033[1;30m";
+	}
+	else
+	{
+		cout << "\033[1;34m" << mClassName.toLatin1().data() << "\033[1;30m ";
+	}
+	cout << mFileName. toLatin1().data() << ":" << mLineNumber << ")\033[1;37m " << mMessage. toLatin1().data() << " \033[0m" << endl;
 }
 
 QSharedPointer<ViLogger> ViLogger::mInstance;

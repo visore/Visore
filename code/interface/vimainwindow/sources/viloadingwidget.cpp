@@ -102,6 +102,10 @@ void ViLoadingWidget::setProgressStyle(ViProgressBar::ProgressStyle style)
 
 void ViLoadingWidget::setText(QString text)
 {
+	if(mUi->progressBar->text() != "")
+	{
+		mProcesses.append(QPair<QString, qint64>(mUi->progressBar->text(), mTime.elapsed()));
+	}
 	mUi->progressBar->setTextStyle(ViProgressBar::Text);
 	mUi->progressBar->setText(text);
 	if(!isVisible())
@@ -119,25 +123,37 @@ void ViLoadingWidget::start(bool animation, bool button, QString text, ViProgres
 {
 	ViLoadingWidgetPointer instance = ViLoadingWidget::instance();
 
+	instance->mProcesses.clear();
+
 	instance->mTime.start();
 	instance->mTimer.start(TIME_UPDATE_INTERVAL);
 	instance->show();
 	instance->showAnimation(animation);
 	instance->showButton(button);
-	instance->setText(text);
+	instance->mUi->progressBar->setText(text); //Important to not call ViLoadingWidget::setText, since this will reset mProcesses
 	instance->setTextStyle(textStyle);
 	instance->setProgressStyle(progressStyle);
-
 	instance->enableRemainingTime(true);
 }
 
 void ViLoadingWidget::stop()
 {
 	ViLoadingWidgetPointer instance = ViLoadingWidget::instance();
-	//STATICLOG(instance->metaObject()->className(), "The time to execute the process was " + ViTimeConverter::toOptimalString(instance->mTime.elapsed(), ViTimeConverter::Milliseconds));
 	instance->mTimer.stop();
 	instance->mUi->animationWidget->stop();
 	instance->hide();
+
+	if(instance->mProcesses.size() > 0)
+	{
+		QString message = "Processes finished (Ellapsed time: " + ViTimeConverter::toOptimalString(instance->mTime.elapsed(), ViTimeConverter::Milliseconds) + ")";
+		for(int i = 0; i < instance->mProcesses.size(); ++i)
+		{
+			message += "\n\t" + instance->mProcesses[i].first + " (Ellapsed time: " + ViTimeConverter::toOptimalString(instance->mTime.elapsed(), ViTimeConverter::Milliseconds) + ")";
+		}
+		STATICLOG(message);
+		instance->mUi->progressBar->setText("");
+		instance->mProcesses.clear();
+	}
 }
 
 qint64 ViLoadingWidget::remainingTime(qint64 elapsed, qreal percentage)

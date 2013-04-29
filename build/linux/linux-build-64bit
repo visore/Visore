@@ -69,6 +69,8 @@ if $gdb; then
 	cd $install_directory
 	cp ./*/*.so .
 	cp ./*/*/*.so .
+	cp ./*/*/*/*.so .
+	cp ./*/*/*/*/*.so .
 	cp /home/visore/Project/External/Qt5/qt5beta2/qtbase/lib/*.so* .
 	cp /home/visore/Project/External/Qt5/qt5beta2/qtmultimedia/lib/*.so* .
 	cp /home/visore/Project/External/Qt5/qt5beta2/qtsvg/lib/*.so* .

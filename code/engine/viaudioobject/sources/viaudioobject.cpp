@@ -1276,6 +1276,9 @@ void ViAudioObject::startCorrection()
 	emit statused("Correcting track");
 
 	setCorrectedFilePath("/home/visore/corrected.flac");
+	/*ViAudioFormat m = corruptedFormat();
+	m.setChannelCount(1);
+	buffer(ViAudioObject::Corrected)->setFormat(m);*/
 	buffer(ViAudioObject::Corrected)->setFormat(corruptedFormat());
 
 	mCorrector->process(thisPointer, ViAudioObject::Corrupted, ViAudioObject::Corrected);

@@ -28,6 +28,7 @@ ViProgressBar::ViProgressBar(QWidget *parent)
 		}\
 	");
 	setProgressStyle(ViProgressBar::Finite);
+	setText("");
 }
 
 ViProgressBar::~ViProgressBar()
@@ -73,11 +74,7 @@ Qt::Alignment ViProgressBar::alignment()
 {
 	return mUi->progressBar->alignment();
 }
-		
-int ViProgressBar::value()
-{
-	return mUi->progressBar->value();
-}
+	
 
 void ViProgressBar::setTextStyle(ViProgressBar::TextStyle style)
 {
@@ -93,4 +90,14 @@ void ViProgressBar::setTextStyle(ViProgressBar::TextStyle style)
 	{
 		mUi->progressBar->setFormat("%p%");
 	}
+}
+
+QString ViProgressBar::text()
+{
+	return mText;
+}
+
+int ViProgressBar::value()
+{
+	return mUi->progressBar->value();
 }

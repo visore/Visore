@@ -27,14 +27,6 @@ ViNeuralLayer::~ViNeuralLayer()
 
 void ViNeuralLayer::run()
 {
-	/*
-	Thread safety needed before using the pool/threads
-	QThreadPool *pool = QThreadPool::globalInstance();
-	for(int i = 0; i < mNeurons.size(); ++i)
-	{
-		pool->start(mNeurons[i]);
-	}
-	pool->waitForDone();*/
 	for(int i = 0; i < mNeurons.size(); ++i)
 	{
 		mNeurons[i]->run();

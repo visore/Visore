@@ -6,6 +6,32 @@
 #include <vitrainermanager.h>
 #include <vitargetprovidermanager.h>
 
+class ViNeuralCorrectorThread : public QThread
+{
+
+	public:
+
+		ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTrainer *trainer, ViTargetProvider *provider);
+		~ViNeuralCorrectorThread();
+
+		void setData(ViSampleChunk *data);
+
+		ViNeuralNetwork* network();
+
+		void run();
+
+	private:
+
+		ViNeuralNetwork *mNetwork;
+		ViTrainer *mTrainer;
+		ViTargetProvider *mProvider;
+
+		ViSampleChunk *mData;
+		ViSampleChunk mTargetData;
+		int mTargetOffset;
+
+};
+
 class ViNeuralCorrector : public ViModifyProcessor
 {
 
@@ -14,18 +40,27 @@ class ViNeuralCorrector : public ViModifyProcessor
 		ViNeuralCorrector();
 		~ViNeuralCorrector();
 
+		//If enabled, every channel will be processed with its own NN
+		void enableSeparateChannels(bool enable = true);
+		void disableSeparateChannels(bool disable = true);
+
 		void initialize();
 		void execute();
 		void finalize();
 
 	private:
 
-		ViNeuralNetworkFactory mFactory;
-		ViNeuralNetwork *mNetwork;
-		ViTrainer *mTrainer;
-		ViTargetProvider *mProvider;
+		void executeWithChannels();
+		void executeWithoutChannels();
 
-		ViRealList mReadBuffer;
+	private:
+
+		bool mSeparateChannels;
+
+		ViNeuralNetworkFactory mFactory;
+		QList<ViNeuralCorrectorThread*> mThreads;
+
+		QVector<qreal> mReadBuffer;
 		ViSampleChunk mWriteBuffer;
 		bool mFirstWrite;
 
