@@ -7,11 +7,13 @@ class ViChunk
 
 	public:
 
-		ViChunk();
-		ViChunk(T *data, int size);
-		ViChunk(int size);
+		ViChunk(bool autoDelete = true);
+		ViChunk(T *data, int size, bool autoDelete = true);
+		ViChunk(int size, bool autoDelete = true);
 		ViChunk(const ViChunk &other);
 		~ViChunk();
+
+		void setAutoDelete(bool autoDelete);
 
 		T* data() const;
 		const T* constData() const;
@@ -37,6 +39,7 @@ class ViChunk
 
 	private:
 
+		bool mAutoDelete;
 		T *mData;
 		int mSize;
 

@@ -2,13 +2,14 @@
 #define VIACTIVATIONFUNCTION_H
 
 #include <viserializer.h>
+#include <vilibrary.h>
 
 /*
 	Note: Subclasses must inheit from ViActivationFunctionType
 	http://www.derivative-calculator.net
 */
 
-class ViActivationFunction : public ViSerializer
+class ViActivationFunction : public ViLibrary, public ViSerializer
 {
 
 	public:

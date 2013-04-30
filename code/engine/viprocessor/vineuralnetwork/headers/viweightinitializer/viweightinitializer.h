@@ -3,6 +3,7 @@
 
 #include <vineuralnetwork.h>
 #include <viserializer.h>
+#include <vilibrary.h>
 
 /*
 	http://www.elen.ucl.ac.be/Proceedings/esann/esannpdf/es2001-6.pdf
@@ -13,7 +14,7 @@
 	Bruges (Belgium), 25-27 April 2001, D-Facto public., ISBN 2-930307-01-3, pp. 119-124
 */
 
-class ViWeightInitializer : public ViSerializer
+class ViWeightInitializer : public ViLibrary, public ViSerializer
 {
 
 	public:

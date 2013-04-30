@@ -1,24 +1,27 @@
 #ifdef VICHUNK_H
 #include <vilogger.h>
 template<typename T>
-ViChunk<T>::ViChunk()
+ViChunk<T>::ViChunk(bool autoDelete)
 {
 	mData = 0;
 	mSize = 0;
+	mAutoDelete = autoDelete;
 }
 
 template<typename T>
-ViChunk<T>::ViChunk(T *data, int size)
+ViChunk<T>::ViChunk(T *data, int size, bool autoDelete)
 {
 	mData = data;
 	mSize = size;
+	mAutoDelete = autoDelete;
 }
 
 template<typename T>
-ViChunk<T>::ViChunk(int size)
+ViChunk<T>::ViChunk(int size, bool autoDelete)
 {
 	mData = 0;
 	mSize = 0;
+	mAutoDelete = autoDelete;
 	resize(size);
 }
 
@@ -27,6 +30,7 @@ ViChunk<T>::ViChunk(const ViChunk &other)
 {
 	mData = 0;
 	mSize = 0;
+	mAutoDelete = other.mAutoDelete;
 	resize(other.mSize);
 	copy(other, *this);
 }
@@ -34,11 +38,17 @@ ViChunk<T>::ViChunk(const ViChunk &other)
 template<typename T>
 ViChunk<T>::~ViChunk()
 {
-	if(mData != 0)
+	if(mAutoDelete && mData != 0)
 	{
 		delete [] mData;
 		mData = 0;
 	}
+}
+
+template<typename T>
+void ViChunk<T>::setAutoDelete(bool autoDelete)
+{
+	mAutoDelete = autoDelete;
 }
 
 template<typename T>

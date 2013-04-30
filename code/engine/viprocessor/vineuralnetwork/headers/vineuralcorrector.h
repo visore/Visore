@@ -50,6 +50,7 @@ class ViNeuralCorrector : public ViModifyProcessor
 
 	private:
 
+		void (ViNeuralCorrector::*executePointer)();
 		void executeWithChannels();
 		void executeWithoutChannels();
 
@@ -63,6 +64,11 @@ class ViNeuralCorrector : public ViModifyProcessor
 		QVector<qreal> mReadBuffer;
 		ViSampleChunk mWriteBuffer;
 		bool mFirstWrite;
+
+		int mChannels;
+		int mHalfTargetSamples;
+		int mMinimumSamples;
+		int mWriteSamples;
 
 };
 

@@ -2,10 +2,11 @@
 #define VITRAINER_H
 
 #include <viserializer.h>
+#include <vilibrary.h>
 #include <vineuralnetwork.h>
 #include <vierrorfunction.h>
 
-class ViTrainer : public ViSerializer
+class ViTrainer : public ViLibrary, public ViSerializer
 {
 
 	public:

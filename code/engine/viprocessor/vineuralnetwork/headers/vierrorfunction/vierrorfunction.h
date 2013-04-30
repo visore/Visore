@@ -2,8 +2,9 @@
 #define VIERRORFUNCTION_H
 
 #include <viserializer.h>
+#include <vilibrary.h>
 
-class ViErrorFunction : public ViSerializer
+class ViErrorFunction : public ViLibrary, public ViSerializer
 {
 
 	public:

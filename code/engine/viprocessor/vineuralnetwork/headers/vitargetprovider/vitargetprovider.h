@@ -2,9 +2,10 @@
 #define VITARGETPROVIDER_H
 
 #include <viserializer.h>
+#include <vilibrary.h>
 #include <vichunk.h>
 
-class ViTargetProvider : public ViSerializer
+class ViTargetProvider : public ViLibrary, public ViSerializer
 {
 
 	public:
