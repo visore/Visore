@@ -16,15 +16,25 @@ class ViInterpolator : public ViLibrary
 
 		virtual void clear();
 
-		virtual void setData(ViSampleChunk *data); // Takes ownership
+		// Takes ownership
+		virtual void setData(ViSampleChunk *left, ViSampleChunk *right);
+		virtual void setLeftData(ViSampleChunk *data);
+		virtual void setRightData(ViSampleChunk *data);
 
 		virtual qreal calculate() = 0;
+		virtual ViSampleChunk calculate(int samples) = 0; //Number of samples to interpolate
 
 		virtual ViInterpolator* clone() = 0;
 
-	private:
+	protected:
 
-		ViSampleChunk *mData;
+		void clearLeft();
+		void clearRight();
+
+	protected:
+
+		ViSampleChunk *mLeftData;
+		ViSampleChunk *mRightData;
 
 };
 

@@ -28,6 +28,16 @@ class ViChunk
 
 		void clear();
 
+		const T& first() const;
+		const T& first(int offset) const;
+		T& first();
+		T& first(int offset);
+
+		const T& last() const;
+		const T& last(int offset) const;
+		T& last();
+		T& last(int offset);
+
 		const T& at(int index) const;
 		T& at(int index);
 		const T& operator[](const int index) const;

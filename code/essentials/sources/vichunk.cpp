@@ -151,6 +151,54 @@ void ViChunk<T>::clear()
 }
 
 template<typename T>
+const T& ViChunk<T>::first() const
+{
+	return mData[0];
+}
+
+template<typename T>
+const T& ViChunk<T>::first(int offset) const
+{
+	return mData[offset];
+}
+
+template<typename T>
+T& ViChunk<T>::first()
+{
+	return mData[0];
+}
+
+template<typename T>
+T& ViChunk<T>::first(int offset)
+{
+	return mData[offset];
+}
+
+template<typename T>
+const T& ViChunk<T>::last() const
+{
+	return mData[mSize - 1];
+}
+
+template<typename T>
+const T& ViChunk<T>::last(int offset) const
+{
+	return mData[mSize - 1 - offset];
+}
+
+template<typename T>
+T& ViChunk<T>::last()
+{
+	return mData[mSize - 1];
+}
+
+template<typename T>
+T& ViChunk<T>::last(int offset)
+{
+	return mData[mSize - 1 - offset];
+}
+
+template<typename T>
 const T& ViChunk<T>::at(int index) const
 {
 	return mData[index];

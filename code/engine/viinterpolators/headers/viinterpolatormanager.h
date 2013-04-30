@@ -1,15 +1,17 @@
 #ifndef ViInterpolatorMANAGER_H
 #define ViInterpolatorMANAGER_H
-/*
-#include <vilibrarymanager.h>
 
-class ViInterpolatorManager : public ViLibraryManager2<ViInterpolatorManager>
+#include <vilibrarymanager.h>
+#include <viinterpolator.h>
+
+class ViInterpolatorManager : public ViLibraryManager<ViInterpolatorManager, ViInterpolator>
 {
 
 	protected:
 
 		QString libraryPath();
+		QString defaultLibrary();
 
-};*/
+};
 
 #endif
