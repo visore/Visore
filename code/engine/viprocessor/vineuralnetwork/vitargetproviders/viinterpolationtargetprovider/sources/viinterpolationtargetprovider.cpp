@@ -3,24 +3,44 @@
 ViInterpolationTargetProvider::ViInterpolationTargetProvider()
 	: ViTargetProvider()
 {
+	mInterpolator = NULL;
 }
 
 ViInterpolationTargetProvider::ViInterpolationTargetProvider(const ViInterpolationTargetProvider &other)
 	: ViTargetProvider(other)
 {
+	if(other.mInterpolator == NULL)
+	{
+		mInterpolator = NULL;	
+	}
+	else
+	{
+		mInterpolator = other.mInterpolator->clone();
+	}
 }
 
 ViInterpolationTargetProvider::~ViInterpolationTargetProvider()
 {
+	if(mInterpolator != NULL)
+	{
+		delete mInterpolator;
+		mInterpolator = NULL;
+	}
 }
 
-qreal ViInterpolationTargetProvider::calculate(int index)
+void ViInterpolationTargetProvider::setInterpolator(ViInterpolator *interpolator)
 {
-	if(index < 0)
+	if(mInterpolator != NULL)
 	{
-		index = data().size() / 2;
+		delete mInterpolator;
 	}
-	return (data()[0] + data()[data().size()-1]) / 2;
+	mInterpolator = interpolator;
+}
+
+qreal ViInterpolationTargetProvider::calculate()
+{
+	mInterpolator->setData(mLeftData, mRightData);
+	return mInterpolator->calculate();
 }
 
 ViElement ViInterpolationTargetProvider::exportData()

@@ -2,35 +2,34 @@
 
 ViTargetProvider::ViTargetProvider()
 {
+	mLeftData = NULL;
+	mRightData = NULL;
 }
 
 ViTargetProvider::ViTargetProvider(const ViTargetProvider &other)
 {
-	mData = other.mData;
+	mLeftData = other.mLeftData;
+	mRightData = other.mRightData;
 }
 
 ViTargetProvider::~ViTargetProvider()
 {
 }
 
-void ViTargetProvider::setData(ViSampleChunk chunk)
+void ViTargetProvider::setData(ViSampleChunk *left, ViSampleChunk *right)
 {
-	mData = chunk;
+	setLeftData(left);
+	setRightData(right);
 }
 
-const ViSampleChunk& ViTargetProvider::data()
+void ViTargetProvider::setLeftData(ViSampleChunk *data)
 {
-	return mData;
+	mLeftData = data;
 }
 
-ViRealList ViTargetProvider::calculate(ViRealList indexes)
+void ViTargetProvider::setRightData(ViSampleChunk *data)
 {
-	ViRealList results;
-	for(int i = 0; i < indexes.size(); ++i)
-	{
-		results.append(calculate(indexes[i]));
-	}
-	return results;
+	mRightData = data;
 }
 
 ViElement ViTargetProvider::exportData()

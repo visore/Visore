@@ -6,13 +6,35 @@ ViInterpolator::ViInterpolator()
 	mLeftData = NULL;
 	mRightData = NULL;
 	mRatio = 0;
+	mDeleteLeft = false;
+	mDeleteRight = false;
 }
 
 ViInterpolator::ViInterpolator(const ViInterpolator &other)
 	: ViLibrary(other)
 {
-	mLeftData = new ViSampleChunk(other.mLeftData);
-	mRightData = new ViSampleChunk(other.mRightData);
+	if(other.mDeleteLeft)
+	{
+		mDeleteLeft = true;
+		mLeftData = new ViSampleChunk(other.mLeftData);
+	}
+	else
+	{
+		mDeleteLeft = false;
+		mLeftData = other.mLeftData;
+	}
+
+	if(other.mDeleteRight)
+	{
+		mDeleteRight = true;
+		mRightData = new ViSampleChunk(other.mRightData);
+	}
+	else
+	{
+		mDeleteRight = false;
+		mRightData = other.mRightData;
+	}
+	
 	mRatio = other.mRatio;
 }
 
@@ -29,19 +51,21 @@ void ViInterpolator::clear()
 
 void ViInterpolator::clearLeft()
 {
-	if(mLeftData != NULL)
+	if(mDeleteLeft && mLeftData != NULL)
 	{
 		delete mLeftData;
 		mLeftData = NULL;
+		mDeleteLeft = false;
 	}
 }
 
 void ViInterpolator::clearRight()
 {
-	if(mRightData != NULL)
+	if(mDeleteRight && mRightData != NULL)
 	{
 		delete mRightData;
 		mRightData = NULL;
+		mDeleteRight = false;
 	}
 }
 
@@ -63,24 +87,6 @@ void ViInterpolator::setRightData(ViSampleChunk *data)
 	mRightData = data;
 }
 
-void ViInterpolator::setData(ViSampleChunk &left, ViSampleChunk &right)
-{
-	setLeftData(left);
-	setRightData(right);
-}
-
-void ViInterpolator::setLeftData(ViSampleChunk &data)
-{
-	clearLeft();
-	mLeftData = new ViSampleChunk(data);
-}
-
-void ViInterpolator::setRightData(ViSampleChunk &data)
-{
-	clearRight();
-	mRightData = new ViSampleChunk(data);
-}
-
 void ViInterpolator::setData(qreal left, qreal right)
 {
 	setLeftData(left);
@@ -92,6 +98,7 @@ void ViInterpolator::setLeftData(qreal data)
 	clearLeft();
 	mLeftData = new ViSampleChunk(1);
 	(*mLeftData)[0] = data;
+	mDeleteLeft = true;
 }
 
 void ViInterpolator::setRightData(qreal data)
@@ -99,6 +106,7 @@ void ViInterpolator::setRightData(qreal data)
 	clearRight();
 	mRightData = new ViSampleChunk(1);
 	(*mRightData)[0] = data;
+	mDeleteRight = true;
 }
 
 void ViInterpolator::setRatioSamples(const int &samples)

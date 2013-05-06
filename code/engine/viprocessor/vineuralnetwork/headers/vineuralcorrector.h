@@ -15,6 +15,7 @@ class ViNeuralCorrectorThread : public QThread
 		~ViNeuralCorrectorThread();
 
 		void setData(ViSampleChunk *data);
+		void setOffsets(int data, int targetLeft, int targetRight);
 
 		ViNeuralNetwork* network();
 
@@ -27,8 +28,12 @@ class ViNeuralCorrectorThread : public QThread
 		ViTargetProvider *mProvider;
 
 		ViSampleChunk *mData;
-		ViSampleChunk mTargetData;
-		int mTargetOffset;
+		ViSampleChunk mLeftTargetData;
+		ViSampleChunk mRightTargetData;
+
+		int mDataOffset;
+		int mTargetLeftOffset;
+		int mTargetRightOffset;
 
 };
 
@@ -66,9 +71,13 @@ class ViNeuralCorrector : public ViModifyProcessor
 		bool mFirstWrite;
 
 		int mChannels;
-		int mHalfTargetSamples;
 		int mMinimumSamples;
+		int mLeftSamples;
 		int mWriteSamples;
+
+		int mDataOffset;
+		int mTargetLeftOffset;
+		int mTargetRightOffset;
 
 };
 

@@ -14,20 +14,21 @@ class ViTargetProvider : public ViLibrary, public ViSerializer
 		ViTargetProvider(const ViTargetProvider &other);
 		virtual ~ViTargetProvider();
 
-		virtual void setData(ViSampleChunk chunk);
-		virtual const ViSampleChunk& data();
+		virtual void setData(ViSampleChunk *left, ViSampleChunk *right);
+		virtual void setLeftData(ViSampleChunk *data);
+		virtual void setRightData(ViSampleChunk *data);
 
-		virtual qreal calculate(int index = -1) = 0;
-		virtual ViRealList calculate(ViRealList indexes);
+		virtual qreal calculate() = 0;
 
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
 
 		virtual ViTargetProvider* clone() = 0;
 
-	private:
+	protected:
 
-		ViSampleChunk mData;
+		ViSampleChunk *mLeftData;
+		ViSampleChunk *mRightData;
 
 };
 

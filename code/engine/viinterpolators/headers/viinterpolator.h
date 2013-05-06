@@ -16,14 +16,9 @@ class ViInterpolator : public ViLibrary
 
 		virtual void clear();
 
-		// Takes ownership
 		virtual void setData(ViSampleChunk *left, ViSampleChunk *right);
 		virtual void setLeftData(ViSampleChunk *data);
 		virtual void setRightData(ViSampleChunk *data);
-
-		virtual void setData(ViSampleChunk &left, ViSampleChunk &right);
-		virtual void setLeftData(ViSampleChunk &data);
-		virtual void setRightData(ViSampleChunk &data);
 
 		virtual void setData(qreal left, qreal right);
 		virtual void setLeftData(qreal data);
@@ -46,7 +41,12 @@ class ViInterpolator : public ViLibrary
 
 		ViSampleChunk *mLeftData;
 		ViSampleChunk *mRightData;
+
+	public:
+
 		qreal mRatio;
+		bool mDeleteLeft;
+		bool mDeleteRight;
 
 };
 

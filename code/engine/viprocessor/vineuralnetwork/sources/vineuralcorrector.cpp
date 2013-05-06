@@ -6,9 +6,12 @@
 #include <viactivationfunctionmanager.h>
 #include <vierrorfunctionmanager.h>
 #include <viweightinitializermanager.h>
+#include <viinterpolatormanager.h>
+#include <viinterpolationtargetprovider.h>
 
-#define INPUT_SAMPLES 32
-#define TRAINER_SAMPLES 3 //Needs to be odd
+#define INPUT_SAMPLES 128
+#define TRAINER_LEFT_SAMPLES 2
+#define TRAINER_RIGHT_SAMPLES 2
 
 ViNeuralCorrectorThread::ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTrainer *trainer, ViTargetProvider *provider)
 	: QThread()
@@ -18,8 +21,13 @@ ViNeuralCorrectorThread::ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTra
 	mProvider = provider;
 
 	mData = NULL;
-	mTargetData.resize(TRAINER_SAMPLES);
-	mTargetOffset = INPUT_SAMPLES - qCeil(TRAINER_SAMPLES / 2.0) + 1;
+
+	mDataOffset = 0;
+	mTargetLeftOffset = 0;
+	mTargetRightOffset = 0;
+
+	mLeftTargetData.resize(TRAINER_LEFT_SAMPLES);
+	mRightTargetData.resize(TRAINER_RIGHT_SAMPLES);
 }
 
 ViNeuralCorrectorThread::~ViNeuralCorrectorThread()
@@ -37,6 +45,13 @@ void ViNeuralCorrectorThread::setData(ViSampleChunk *data)
 	mData = data;
 }
 
+void ViNeuralCorrectorThread::setOffsets(int data, int targetLeft, int targetRight)
+{
+	mDataOffset = data;
+	mTargetLeftOffset = targetLeft;
+	mTargetRightOffset = targetRight;
+}
+
 ViNeuralNetwork* ViNeuralCorrectorThread::network()
 {
 	return ViNeuralCorrectorThread::mNetwork;
@@ -46,16 +61,21 @@ void ViNeuralCorrectorThread::run()
 {
 	for(int i = 0; i < INPUT_SAMPLES; ++i)
 	{
-		mNetwork->setInput(i, mData->at(i));
+		mNetwork->setInput(i, mData->at(i + mDataOffset));
 	}
 	mNetwork->setInput(INPUT_SAMPLES, mNetwork->output());
 
-	for(int i = 0; i < TRAINER_SAMPLES; ++i)
+	for(int i = 0; i < TRAINER_LEFT_SAMPLES; ++i)
 	{
-		mTargetData[i] = mData->at(mTargetOffset + i);
+		mLeftTargetData[i] = mData->at(mTargetLeftOffset + i);
 	}
 
-	mProvider->setData(mTargetData);
+	for(int i = 0; i < TRAINER_RIGHT_SAMPLES; ++i)
+	{
+		mRightTargetData[i] = mData->at(mTargetRightOffset + i);
+	}
+
+	mProvider->setData(&mLeftTargetData, &mRightTargetData);
 	mTrainer->setTargetValues({mProvider->calculate()});
 	for(int i = 0; i < 1; ++i)
 	{
@@ -67,10 +87,13 @@ ViNeuralCorrector::ViNeuralCorrector()
 	: ViModifyProcessor(false) //Make sure that the processor is not automatically writing the sample again
 {
 	mChannels = 1;
-	mHalfTargetSamples = qCeil(TRAINER_SAMPLES / 2.0);
 	mMinimumSamples = 0;
+	mLeftSamples = 0;
 	mWriteSamples = 0;
-	mSeparateChannels = false;
+	mDataOffset = 0;
+	mTargetLeftOffset = 0;
+	mTargetRightOffset = 0;
+	mSeparateChannels = true;
 }
 
 ViNeuralCorrector::~ViNeuralCorrector()
@@ -103,10 +126,29 @@ void ViNeuralCorrector::initialize()
 		executePointer = &ViNeuralCorrector::executeWithoutChannels;
 	}
 
+	mReadBuffer.clear();
+	mFirstWrite = true;
+
+	if(TRAINER_LEFT_SAMPLES > INPUT_SAMPLES)
+	{
+		mDataOffset = TRAINER_LEFT_SAMPLES - INPUT_SAMPLES;
+		mLeftSamples = TRAINER_LEFT_SAMPLES;
+		mTargetLeftOffset = 0;
+	}
+	else
+	{
+		mDataOffset = 0;
+		mLeftSamples = INPUT_SAMPLES;
+		mTargetLeftOffset = INPUT_SAMPLES - TRAINER_LEFT_SAMPLES;
+	}
+	mTargetRightOffset = mLeftSamples + 1;
+	mMinimumSamples = (mLeftSamples + 1 + TRAINER_RIGHT_SAMPLES) * mChannels;
+	mWriteSamples = qFloor(sampleCount() / qreal(mChannels)) * mChannels;
+
 	mFactory.setActivationFunction(ViActivationFunctionManager::create("SigmoidActivationFunction"));
 	mFactory.addLayer(INPUT_SAMPLES + 1);
-	mFactory.addLayer(16);
-	mFactory.addLayer(8);
+	mFactory.addLayer(64);
+	mFactory.addLayer(32);
 	mFactory.addLayer(1);
 
 	ViWeightInitializer *weightInitializer = ViWeightInitializerManager::create("RandomWeightInitializer");
@@ -123,16 +165,18 @@ void ViNeuralCorrector::initialize()
 		trainer->addErrorFunction(ViErrorFunctionManager::create("RootMeanSquaredError"));
 		trainer->setNetwork(network);
 
-		mThreads.append(new ViNeuralCorrectorThread(network, trainer, ViTargetProviderManager::createDefault()));
+		ViInterpolationTargetProvider *provider = (ViInterpolationTargetProvider*) ViTargetProviderManager::create("InterpolationTargetProvider");
+		ViInterpolator *interpolator = ViInterpolatorManager::create("CubicInterpolator");
+
+		provider->setInterpolator(interpolator);
+
+
+		ViNeuralCorrectorThread *thread = new ViNeuralCorrectorThread(network, trainer, provider);
+		thread->setOffsets(mDataOffset, mTargetLeftOffset, mTargetRightOffset);
+		mThreads.append(thread);
 	}
 
 	delete weightInitializer;
-
-	mReadBuffer.clear();
-	mFirstWrite = true;
-
-	mMinimumSamples = (INPUT_SAMPLES + mHalfTargetSamples) * mChannels;
-	mWriteSamples = qFloor(sampleCount() / qreal(mChannels)) * mChannels;
 }
 
 void ViNeuralCorrector::executeWithChannels()
@@ -144,10 +188,10 @@ void ViNeuralCorrector::executeWithChannels()
 	}
 
 	//Ensures that the first window of samples is written immediatly, since they can't be corrected
-	if(mFirstWrite && mReadBuffer.size() >= INPUT_SAMPLES * mChannels)
+	if(mFirstWrite && mReadBuffer.size() >= mLeftSamples * mChannels)
 	{
 		mFirstWrite = false;
-		for(int i = 0; i < INPUT_SAMPLES * mChannels; ++i)
+		for(int i = 0; i < mLeftSamples * mChannels; ++i)
 		{
 			mWriteBuffer.append(ViScaler::scale(mReadBuffer[i], 0, 1, -1, 1));
 		}
@@ -161,20 +205,25 @@ void ViNeuralCorrector::executeWithChannels()
 		QList<ViSampleChunk> channels = ViSampleChanneler<qreal>::split(subSamples.data(), subSamples.size(), mChannels);
 
 		mReadBuffer.remove(0, mChannels);
+
 		for(int c = 0; c < mChannels; ++c)
 		{
 			mThreads[c]->setData(&channels[c]);
+			mThreads[c]->run();
+			mWriteBuffer.append(ViScaler::scale(mThreads[c]->network()->output(), 0, 1, -1, 1));
+		}
+
+		/*for(int c = 0; c < mChannels; ++c)
+		{
+			mThreads[c]->setData(&channels[c]);
 			mThreads[c]->start();
-			//mThreads[c]->run();
 		}
 		for(int c = 0; c < mChannels; ++c)
 		{
 			while(mThreads[c]->isRunning());
-			/*{
-				mThreads[c]->wait(1000);
-			}*/
 			mWriteBuffer.append(ViScaler::scale(mThreads[c]->network()->output(), 0, 1, -1, 1));
-		}
+		}*/
+
 
 		if(mWriteBuffer.size() == mWriteSamples)
 		{
@@ -193,10 +242,10 @@ void ViNeuralCorrector::executeWithoutChannels()
 	}
 
 	//Ensures that the first window of samples is written immediatly, since they can't be corrected
-	if(mFirstWrite && mReadBuffer.size() >= INPUT_SAMPLES)
+	if(mFirstWrite && mReadBuffer.size() >= mLeftSamples)
 	{
 		mFirstWrite = false;
-		for(int i = 0; i < INPUT_SAMPLES; ++i)
+		for(int i = 0; i < mLeftSamples; ++i)
 		{
 			mWriteBuffer.append(ViScaler::scale(mReadBuffer[i], 0, 1, 1, -1));
 		}
@@ -204,9 +253,9 @@ void ViNeuralCorrector::executeWithoutChannels()
 		mWriteBuffer.clear();
 	}
 
-	while(mReadBuffer.size() >= (INPUT_SAMPLES + mHalfTargetSamples + 1))
+	while(mReadBuffer.size() >= mMinimumSamples)
 	{
-		ViSampleChunk wrapper(mReadBuffer.data(), mReadBuffer.size(), false);
+		ViSampleChunk wrapper(mReadBuffer.data(), mMinimumSamples, false);
 		mThreads[0]->setData(&wrapper);
 		mThreads[0]->run();
 		mWriteBuffer.append(ViScaler::scale(mThreads[0]->network()->output(), 0, 1, -1, 1));
