@@ -110,12 +110,11 @@ int ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::load(QString directory, QStrin
 			}
 		}
 	}
-	QList<QFunctionPointer> pointers;
 	typedef ViLibrary* (*FunctionPointer)();
 	for(int i = 0; i < mLibraryFiles.size(); ++i)
 	{
 		QFunctionPointer pointer = mLibraryFiles[i]->resolve(functionName.toLatin1().data());
-		if(pointer != 0)
+		if(pointer != NULL)
 		{
 			mLibraries.append(((FunctionPointer) pointer)());
 		}

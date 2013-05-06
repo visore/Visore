@@ -7,7 +7,7 @@
 class ViInterpolatorManager : public ViLibraryManager<ViInterpolatorManager, ViInterpolator>
 {
 
-	protected:
+	public:
 
 		QString libraryPath();
 		QString defaultLibrary();

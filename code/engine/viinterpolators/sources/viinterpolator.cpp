@@ -5,6 +5,7 @@ ViInterpolator::ViInterpolator()
 {
 	mLeftData = NULL;
 	mRightData = NULL;
+	mRatio = 0;
 }
 
 ViInterpolator::ViInterpolator(const ViInterpolator &other)
@@ -12,6 +13,7 @@ ViInterpolator::ViInterpolator(const ViInterpolator &other)
 {
 	mLeftData = new ViSampleChunk(other.mLeftData);
 	mRightData = new ViSampleChunk(other.mRightData);
+	mRatio = other.mRatio;
 }
 
 ViInterpolator::~ViInterpolator()
@@ -59,4 +61,52 @@ void ViInterpolator::setRightData(ViSampleChunk *data)
 {
 	clearRight();
 	mRightData = data;
+}
+
+void ViInterpolator::setData(ViSampleChunk &left, ViSampleChunk &right)
+{
+	setLeftData(left);
+	setRightData(right);
+}
+
+void ViInterpolator::setLeftData(ViSampleChunk &data)
+{
+	clearLeft();
+	mLeftData = new ViSampleChunk(data);
+}
+
+void ViInterpolator::setRightData(ViSampleChunk &data)
+{
+	clearRight();
+	mRightData = new ViSampleChunk(data);
+}
+
+void ViInterpolator::setData(qreal left, qreal right)
+{
+	setLeftData(left);
+	setRightData(right);
+}
+
+void ViInterpolator::setLeftData(qreal data)
+{
+	clearLeft();
+	mLeftData = new ViSampleChunk(1);
+	(*mLeftData)[0] = data;
+}
+
+void ViInterpolator::setRightData(qreal data)
+{
+	clearRight();
+	mRightData = new ViSampleChunk(1);
+	(*mRightData)[0] = data;
+}
+
+void ViInterpolator::setRatioSamples(const int &samples)
+{
+	mRatio = 1.0 / (samples + 1);
+}
+
+qreal ViInterpolator::ratio(const int &index) const
+{
+	return mRatio * (index + 1);
 }

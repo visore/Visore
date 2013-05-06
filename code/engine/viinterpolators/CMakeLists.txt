@@ -11,6 +11,8 @@ ADD_DEFINITIONS(-DINTERPOLATORS_PATH="${VI_INTERPOLATORS_INSTALL_PATH}")
 
 #Add sub libraries
 ADD_SUBDIRECTORY(${ROOT}/vilinearinterpolator)
+ADD_SUBDIRECTORY(${ROOT}/vicosineinterpolator)
+ADD_SUBDIRECTORY(${ROOT}/vicubicinterpolator)
 
 #Initiate source files
 FILE(GLOB VI_INTERPOLATOR_SOURCES ${SOURCES}/*.cpp)

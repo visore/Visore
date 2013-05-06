@@ -1,5 +1,5 @@
-#ifndef VILINEARINTERPOLATOR_H
-#define VILINEARINTERPOLATOR_H
+#ifndef VICUBICINTERPOLATOR_H
+#define VICUBICINTERPOLATOR_H
 
 #include <viinterpolator.h>
 
@@ -7,7 +7,7 @@
 	http://paulbourke.net/miscellaneous/interpolation/
 */
 
-class ViLinearInterpolator : public ViInterpolator
+class ViCubicInterpolator : public ViInterpolator
 {
 
 	public:
@@ -15,7 +15,7 @@ class ViLinearInterpolator : public ViInterpolator
 		qreal calculate();
 		ViSampleChunk calculate(int samples);
 
-		ViLinearInterpolator* clone();
+		ViCubicInterpolator* clone();
 
 };
 

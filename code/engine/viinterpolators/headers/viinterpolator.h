@@ -21,6 +21,14 @@ class ViInterpolator : public ViLibrary
 		virtual void setLeftData(ViSampleChunk *data);
 		virtual void setRightData(ViSampleChunk *data);
 
+		virtual void setData(ViSampleChunk &left, ViSampleChunk &right);
+		virtual void setLeftData(ViSampleChunk &data);
+		virtual void setRightData(ViSampleChunk &data);
+
+		virtual void setData(qreal left, qreal right);
+		virtual void setLeftData(qreal data);
+		virtual void setRightData(qreal data);
+
 		virtual qreal calculate() = 0;
 		virtual ViSampleChunk calculate(int samples) = 0; //Number of samples to interpolate
 
@@ -31,10 +39,14 @@ class ViInterpolator : public ViLibrary
 		void clearLeft();
 		void clearRight();
 
+		void setRatioSamples(const int &samples);
+		qreal ratio(const int &index) const;
+
 	protected:
 
 		ViSampleChunk *mLeftData;
 		ViSampleChunk *mRightData;
+		qreal mRatio;
 
 };
 
