@@ -1,4 +1,5 @@
 #include <vistackedwidget.h>
+#include <viscrollarea.h>
 
 ViStackedWidget::ViStackedWidget()
 {
@@ -10,9 +11,18 @@ ViStackedWidget::~ViStackedWidget()
 	delete mWidget;
 }
 
-int ViStackedWidget::addWidget(ViWidget *widget)
+int ViStackedWidget::addWidget(ViWidget *widget, bool scroll)
 {
-	return ViStackedWidget::widget()->addWidget(widget);
+	if(scroll)
+	{
+		ViScrollArea *scroll = new ViScrollArea(ViStackedWidget::widget());
+		scroll->setWidget(widget);
+		return ViStackedWidget::widget()->addWidget(scroll);
+	}
+	else
+	{
+		return ViStackedWidget::widget()->addWidget(widget);
+	}
 }
 
 QStackedWidget* ViStackedWidget::widget()

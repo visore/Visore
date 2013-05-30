@@ -4,8 +4,10 @@
 #include <QString>
 #include <vicommon.h>
 
-class ViLibrary
+class ViLibrary : public QObject
 {
+
+	Q_OBJECT
 
 	public:
 
@@ -13,7 +15,7 @@ class ViLibrary
 		ViLibrary(const ViLibrary &other);
 		virtual ~ViLibrary();
 
-		virtual QString name();
+		virtual QString name(QString replace = "", bool spaced = false);
 
 		virtual ViLibrary* clone() = 0;
 

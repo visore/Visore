@@ -74,8 +74,9 @@ void ViMainWindow::initialize()
 	setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile").path() + ") repeat-x;}");
 
 	mUi->stack->layout()->addWidget(ViStackedWidget::widget());
+	mUi->stack->setStyleSheet(".QWidget{background:transparent;border:0px;}");
 
-	int index = ViStackedWidget::addWidget(new ViMainMenu());
+	int index = ViStackedWidget::addWidget(new ViMainMenu(), false);
 	ViStackedWidget::setCurrentIndex(index);
 	mUi->logoButton->addFunctionCall(SIGNAL(clicked()), ViFunctionCall(ViStackedWidget::instance().data(), "setCurrentIndex", index));
 

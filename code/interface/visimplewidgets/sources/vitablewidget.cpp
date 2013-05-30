@@ -3,6 +3,56 @@
 #include <QStyleOption>
 #include <QPainter>
 #include <QHeaderView>
+#include <QHBoxLayout>
+
+ViTableRow::ViTableRow()
+{
+	mCount = 0;
+}
+
+void ViTableRow::add(int value)
+{
+	add(QString::number(value));
+}
+
+void ViTableRow::add(double value, int decimalPlaces)
+{
+	add(QString::number(value, 'f', decimalPlaces));
+}
+		
+void ViTableRow::add(QString text)
+{
+	mStrings[mCount] = text;
+	++mCount;
+}
+
+void ViTableRow::add(QWidget *widget)
+{
+	mWidgets[mCount] = widget;
+	++mCount;
+}
+
+int ViTableRow::count()
+{
+	return mCount;
+}
+
+void ViTableRow::addToTable(ViTableWidget *table)
+{
+	int row = table->rowCount();
+	table->setRowCount(row + 1);
+	for(int i = 0; i < mCount; ++i)
+	{
+		if(mWidgets.contains(i))
+		{
+			table->setItem(row, i, mWidgets[i]); 
+		}
+		else if(mStrings.contains(i))
+		{
+			table->setItem(row, i, mStrings[i]); 
+		}
+	}
+}
 
 ViTableWidget::ViTableWidget(QWidget *parent)
 	: QTableWidget(parent)
@@ -53,6 +103,72 @@ void ViTableWidget::adjustHeight()
 	resize(width(), totalHeight);
 }
 
+void ViTableWidget::addRow(ViTableRow *row)
+{
+	row->addToTable(this);
+}
+
+void ViTableWidget::addRow(QString text)
+{
+	ViTableRow row;
+	row.add(text);
+	addRow(&row);
+}
+
+void ViTableWidget::setItem(int row, int column, QString text)
+{
+	setItem(row, column, new QTableWidgetItem(text));
+}
+
+void ViTableWidget::setItem(int row, int column, QWidget *widget, Qt::Alignment alignment)
+{
+	QWidget *container = new QWidget();
+	QHBoxLayout *layout = new QHBoxLayout(this);
+	layout->addWidget(widget, 0, alignment);
+	layout->setContentsMargins(0, 0, 0, 0);
+	container->setLayout(layout);
+	setCellWidget(row, column, container);
+}
+
+void ViTableWidget::setItem(int row, int column, QTableWidgetItem *item)
+{
+	QTableWidget::setItem(row, column, item);
+}
+
+int ViTableWidget::widgetRow(QWidget *widget)
+{
+	for(int row = 0; row < rowCount(); ++row)
+	{
+		for(int column = 0; column < columnCount(); ++column)
+		{
+			if(widget == cellWidget(row, column))
+			{
+				return row;
+			}
+		}
+	}
+	return -1;
+}
+
+void ViTableWidget::removeRow(int row)
+{
+	QTableWidget::removeRow(row);
+}
+
+void ViTableWidget::removeRow(QWidget *widget)
+{
+	removeRow(widgetRow(widget));
+}
+
+void ViTableWidget::removeSelectedRows()
+{
+	QModelIndexList selection = selectedIndexes();
+	while(!selection.isEmpty())
+	{
+		removeRow(selection[0].row());
+		selection = selectedIndexes();
+	}
+}
 
 void ViTableWidget::paintEvent(QPaintEvent *event)
 {

@@ -6,8 +6,8 @@ ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
 {
 	mUi = new Ui::ViProjectCorrectionWidget();
 	mUi->setupUi(this);
-
-	QObject::connect(mUi->projectLoader, SIGNAL(started()), this, SLOT(correct()));
+//setStyleSheet("background:transparent;");
+	//QObject::connect(mUi->projectLoader, SIGNAL(started()), this, SLOT(correct()));
 }
 
 ViProjectCorrectionWidget::~ViProjectCorrectionWidget()

@@ -19,9 +19,6 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <property name="styleSheet">
-   <string/>
-  </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>10</number>
@@ -35,10 +32,7 @@
    <property name="bottomMargin">
     <number>10</number>
    </property>
-   <item row="0" column="0" colspan="2">
-    <widget class="ViProjectLoader" name="projectLoader" native="true"/>
-   </item>
-   <item row="1" column="0" colspan="2">
+   <item row="2" column="0" colspan="2">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -51,6 +45,12 @@
      </property>
     </spacer>
    </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="ViProjectLoader" name="projectLoader" native="true"/>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="ViNeuralSelectorWidget" name="neuralSelector" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -58,6 +58,12 @@
    <class>ViProjectLoader</class>
    <extends>QWidget</extends>
    <header>viprojectloader.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ViNeuralSelectorWidget</class>
+   <extends>QWidget</extends>
+   <header>vineuralselectorwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

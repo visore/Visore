@@ -16,7 +16,7 @@ class ViStackedWidget : public QObject, public ViSingleton<ViStackedWidget>
 
 		~ViStackedWidget();
 
-		static int addWidget(ViWidget *widget);
+		static int addWidget(ViWidget *widget, bool scroll = true);
 		static QStackedWidget* widget();
 		static void setCurrentWidget(ViWidget *widget);
 		static void setCurrentIndex(int index);

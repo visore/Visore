@@ -94,6 +94,35 @@ LIBRARY_TYPE* ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::createLibrary(QStrin
 }
 
 template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
+QList<LIBRARY_TYPE*> ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::libraries(QString functionName)
+{
+	ViLibraryManagerPointer manager = ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::instance();
+	if(!manager->mWasLoaded)
+	{
+		manager->mWasLoaded = true;
+		manager->load(manager->libraryPath(), functionName);
+	}
+	QList<LIBRARY_TYPE*> result;
+	for(int i = 0; i < manager->mLibraries.size(); ++i)
+	{
+		result.append((LIBRARY_TYPE*) manager->mLibraries[i]);
+	}
+	return result;
+}
+
+template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
+QStringList ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::names(QString functionName)
+{
+	QList<LIBRARY_TYPE*> list = ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::libraries(functionName);
+	QStringList result;
+	for(int i = 0; i < list.size(); ++i)
+	{
+		result.append(list[i]->name());
+	}
+	return result;
+}
+
+template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
 int ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::load(QString directory, QString functionName)
 {
 	int loadCount = 0;

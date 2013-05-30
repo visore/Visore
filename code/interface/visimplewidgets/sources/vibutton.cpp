@@ -167,6 +167,12 @@ void ViButton::paintIcon(QPainter &painter)
 	{
 		image = mIcon.image(ViThemeIcon::Normal, mIconSize);
 	}
+
+	if(image.isNull())
+	{
+		return;
+	}
+
 	mIconWidth = image.width();
 	mIconHeight = image.height();
 

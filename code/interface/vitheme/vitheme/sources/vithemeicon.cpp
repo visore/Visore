@@ -27,11 +27,12 @@ QIcon ViThemeIcon::icon(ViThemeIcon::Mode mode, int size)
 
 QImage ViThemeIcon::image(ViThemeIcon::Mode mode, int size)
 {
-	if(size < 0)
+	QImage image = transform(mode);
+	if(!image.isNull() && size >= 0)
 	{
-		return transform(mode);
+		image = image.scaledToWidth(size, Qt::SmoothTransformation);
 	}
-	return transform(mode).scaledToWidth(size, Qt::SmoothTransformation);
+	return image;
 }
 
 QPixmap ViThemeIcon::pixmap(ViThemeIcon::Mode mode, int size)
@@ -87,12 +88,16 @@ void ViThemeIcon::set(const ViThemeIcon::Mode &mode, const QString &path)
 
 QImage ViThemeIcon::transform(ViThemeIcon::Mode mode)
 {
-	QImage image = QImage(path());
+	QImage image;
+	if(path() != "")
+	{
+		image = QImage(path());
+	}
 	if(mode == ViThemeIcon::Normal)
 	{
 		return image;
 	}
-	if(path(mode) == "")
+	else if(path(mode) == "")
 	{
 		if(mode == ViThemeIcon::Selected && path(ViThemeIcon::Hovered) != "")
 		{
