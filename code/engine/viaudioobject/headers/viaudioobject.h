@@ -298,7 +298,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		Q_INVOKABLE bool correct();
+		Q_INVOKABLE bool correct(ViModifyProcessor *corrector); //Takes ownership
 
 		/*******************************************************************************************************************
 

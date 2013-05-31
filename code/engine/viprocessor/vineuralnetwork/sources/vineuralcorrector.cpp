@@ -3,13 +3,6 @@
 #include <viscaler.h>
 #include <qmath.h>
 
-#include <viactivationfunctionmanager.h>
-#include <vierrorfunctionmanager.h>
-#include <viweightinitializermanager.h>
-#include <viinterpolatormanager.h>
-#include <viinterpolationtargetprovider.h>
-
-#define INPUT_SAMPLES 128
 #define TRAINER_LEFT_SAMPLES 2
 #define TRAINER_RIGHT_SAMPLES 2
 
@@ -59,11 +52,12 @@ ViNeuralNetwork* ViNeuralCorrectorThread::network()
 
 void ViNeuralCorrectorThread::run()
 {
-	for(int i = 0; i < INPUT_SAMPLES; ++i)
+	int inputs = mNetwork->inputCount();
+	for(int i = 0; i < inputs; ++i)
 	{
 		mNetwork->setInput(i, mData->at(i + mDataOffset));
 	}
-	mNetwork->setInput(INPUT_SAMPLES, mNetwork->output());
+	mNetwork->setInput(inputs, mNetwork->output());
 
 	for(int i = 0; i < TRAINER_LEFT_SAMPLES; ++i)
 	{
@@ -86,6 +80,27 @@ void ViNeuralCorrectorThread::run()
 ViNeuralCorrector::ViNeuralCorrector()
 	: ViModifyProcessor(false) //Make sure that the processor is not automatically writing the sample again
 {
+	mNetwork = NULL;
+	mTrainer = NULL;
+	mProvider = NULL;
+
+	mChannels = 1;
+	mMinimumSamples = 0;
+	mLeftSamples = 0;
+	mWriteSamples = 0;
+	mDataOffset = 0;
+	mTargetLeftOffset = 0;
+	mTargetRightOffset = 0;
+	mSeparateChannels = true;
+}
+
+ViNeuralCorrector::ViNeuralCorrector(ViNeuralNetwork *network, ViTrainer *trainer, ViTargetProvider *provider)
+	: ViModifyProcessor(false) //Make sure that the processor is not automatically writing the sample again
+{
+	mNetwork = network;
+	mTrainer = trainer;
+	mProvider = provider;
+
 	mChannels = 1;
 	mMinimumSamples = 0;
 	mLeftSamples = 0;
@@ -99,6 +114,21 @@ ViNeuralCorrector::ViNeuralCorrector()
 ViNeuralCorrector::~ViNeuralCorrector()
 {
 	viDeleteAll(mThreads);
+	if(mNetwork != NULL)
+	{
+		delete mNetwork;
+		mNetwork = NULL;
+	}
+	if(mTrainer != NULL)
+	{
+		delete mTrainer;
+		mTrainer = NULL;
+	}
+	if(mProvider != NULL)
+	{
+		delete mProvider;
+		mProvider = NULL;
+	}
 }
 
 void ViNeuralCorrector::enableSeparateChannels(bool enable)
@@ -113,6 +143,22 @@ void ViNeuralCorrector::disableSeparateChannels(bool disable)
 
 void ViNeuralCorrector::initialize()
 {
+	if(mNetwork == NULL)
+	{
+		LOG("No neural network was specified.", QtCriticalMsg);
+		return;
+	}
+	if(mTrainer == NULL)
+	{
+		LOG("No trainer was specified.", QtCriticalMsg);
+		return;
+	}
+	if(mProvider == NULL)
+	{
+		LOG("No target provider was specified.", QtCriticalMsg);
+		return;
+	}
+
 	viDeleteAll(mThreads);
 
 	int mChannels = 1;
@@ -129,54 +175,30 @@ void ViNeuralCorrector::initialize()
 	mReadBuffer.clear();
 	mFirstWrite = true;
 
-	if(TRAINER_LEFT_SAMPLES > INPUT_SAMPLES)
+	int inputSamples = mNetwork->inputCount();
+	if(TRAINER_LEFT_SAMPLES > inputSamples)
 	{
-		mDataOffset = TRAINER_LEFT_SAMPLES - INPUT_SAMPLES;
+		mDataOffset = TRAINER_LEFT_SAMPLES - inputSamples;
 		mLeftSamples = TRAINER_LEFT_SAMPLES;
 		mTargetLeftOffset = 0;
 	}
 	else
 	{
 		mDataOffset = 0;
-		mLeftSamples = INPUT_SAMPLES;
-		mTargetLeftOffset = INPUT_SAMPLES - TRAINER_LEFT_SAMPLES;
+		mLeftSamples = inputSamples;
+		mTargetLeftOffset = inputSamples - TRAINER_LEFT_SAMPLES;
 	}
 	mTargetRightOffset = mLeftSamples + 1;
 	mMinimumSamples = (mLeftSamples + 1 + TRAINER_RIGHT_SAMPLES) * mChannels;
 	mWriteSamples = qFloor(sampleCount() / qreal(mChannels)) * mChannels;
-
-	mFactory.setActivationFunction(ViActivationFunctionManager::create("SigmoidActivationFunction"));
-	mFactory.addLayer(INPUT_SAMPLES + 1);
-	mFactory.addLayer(64);
-	mFactory.addLayer(32);
-	mFactory.addLayer(1);
-
-	ViWeightInitializer *weightInitializer = ViWeightInitializerManager::create("RandomWeightInitializer");
-	ViNeuralNetwork *network;
-	ViTrainer *trainer;
-
+	
 	for(int i = 0; i < mChannels; ++i)
 	{
-		trainer = ViTrainerManager::createDefault();
-
-		network = mFactory.create();
-		weightInitializer->initialize(network, trainer->learningRate());
-
-		trainer->addErrorFunction(ViErrorFunctionManager::create("RootMeanSquaredError"));
-		trainer->setNetwork(network);
-
-		ViInterpolationTargetProvider *provider = (ViInterpolationTargetProvider*) ViTargetProviderManager::create("InterpolationTargetProvider");
-		ViInterpolator *interpolator = ViInterpolatorManager::create("CubicInterpolator");
-
-		provider->setInterpolator(interpolator);
-
-
-		ViNeuralCorrectorThread *thread = new ViNeuralCorrectorThread(network, trainer, provider);
+		mTrainer->setNetwork(mNetwork);
+		ViNeuralCorrectorThread *thread = new ViNeuralCorrectorThread(mNetwork->clone(), mTrainer->clone(), mProvider->clone());
 		thread->setOffsets(mDataOffset, mTargetLeftOffset, mTargetRightOffset);
 		mThreads.append(thread);
 	}
-
-	delete weightInitializer;
 }
 
 void ViNeuralCorrector::executeWithChannels()

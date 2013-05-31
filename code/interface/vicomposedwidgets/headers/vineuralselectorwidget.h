@@ -15,8 +15,15 @@ class ViNeuralSelectorWidget : public ViWidget
 
 	private slots:
 
+		void process();
+
 		void addHiddenLayer();
+		void removeHiddenLayer();
+
 		void addErrorFunction();
+		void removeErrorFunction();
+
+		void toggleTargetProvider();
 
 	public:
 

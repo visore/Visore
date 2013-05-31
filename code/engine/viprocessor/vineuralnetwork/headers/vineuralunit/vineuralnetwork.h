@@ -40,6 +40,8 @@ class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
 		int outputCount();
 		int neuronCount();
 
+		ViNeuralNetwork* clone();
+
 		ViNeuralLayer* operator [] (const int index) const;
 		bool operator == (const ViNeuralNetwork &other) const;
 

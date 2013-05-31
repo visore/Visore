@@ -43,6 +43,7 @@ class ViNeuralCorrector : public ViModifyProcessor
 	public:
 
 		ViNeuralCorrector();
+		ViNeuralCorrector(ViNeuralNetwork *network, ViTrainer *trainer, ViTargetProvider *provider); //Takes ownership
 		~ViNeuralCorrector();
 
 		//If enabled, every channel will be processed with its own NN
@@ -60,6 +61,10 @@ class ViNeuralCorrector : public ViModifyProcessor
 		void executeWithoutChannels();
 
 	private:
+
+		ViNeuralNetwork *mNetwork;
+		ViTrainer *mTrainer;
+		ViTargetProvider *mProvider;
 
 		bool mSeparateChannels;
 

@@ -7,5 +7,5 @@ QString ViInterpolatorManager::libraryPath()
 
 QString ViInterpolatorManager::defaultLibrary()
 {
-	return "LinearInterpolator";
+	return "CubicInterpolator";
 }

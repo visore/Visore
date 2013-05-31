@@ -176,6 +176,11 @@ int ViNeuralNetwork::neuronCount()
 	return count;
 }
 
+ViNeuralNetwork* ViNeuralNetwork::clone()
+{
+	return new ViNeuralNetwork(*this);
+}
+
 ViNeuralLayer* ViNeuralNetwork::operator [] (const int index) const
 {
 	return at(index);

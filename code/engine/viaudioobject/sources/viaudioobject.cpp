@@ -4,7 +4,6 @@
 #include <vifouriercrossaligner.h>
 #include <viacoustididentifier.h>
 #include <vienmfpidentifier.h>
-#include <vineuralcorrector.h>
 #include <QSet>
 
 /*******************************************************************************************************************
@@ -1222,7 +1221,7 @@ ViWaveForm* ViAudioObject::waveForm(ViAudioObject::Type type)
 
 *******************************************************************************************************************/
 
-bool ViAudioObject::correct()
+bool ViAudioObject::correct(ViModifyProcessor *corrector)
 {
 	QMutexLocker locker(&mMutex);
 	
@@ -1242,7 +1241,7 @@ bool ViAudioObject::correct()
 	{
 		delete mCorrector;
 	}
-	mCorrector = new ViNeuralCorrector();
+	mCorrector = corrector;
 	QObject::connect(mCorrector, SIGNAL(finished()), this, SLOT(endCorrection()), Qt::QueuedConnection);
 	QObject::connect(mCorrector, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 
