@@ -66,7 +66,7 @@ bool ViWidget::addFunctionCall(QString signal, ViFunctionCall functionCall)
 		LOG("The widget doesn't have a signal \"" + QString(newSignal) + "\"");
 		return false;
 	}
-	mFunctionCalls[newSignal.replace("()", "")] = functionCall;
+	mFunctionCalls[newSignal.replace("()", "")] = ViFunctionCall(functionCall);
 	QObject::connect(this, signal.toLatin1().data(), this, SLOT(executeFunction()));
 	return true;
 }

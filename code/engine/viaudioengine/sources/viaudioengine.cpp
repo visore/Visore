@@ -139,7 +139,7 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 	mObjectChain.add(objects);
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-	mObjectChain.setFunction(ViFunctionCall("correct", Q_ARG(ViModifyProcessor*, corrector)));
+	mObjectChain.setFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)));
 	mObjectChain.execute();
 }
 

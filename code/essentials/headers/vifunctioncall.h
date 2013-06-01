@@ -7,7 +7,6 @@
 #include <QVariant>
 #include <QGenericArgument>
 #include <QGenericReturnArgument>
-#include <QGenericArgument>
 
 class ViFunctionCall
 {
@@ -23,8 +22,7 @@ class ViFunctionCall
 		ViFunctionCall(QString functionName, double parameter);
 		ViFunctionCall(QString functionName, QString parameter);
 		ViFunctionCall(QString functionName, QVariant parameter);
-		ViFunctionCall(QString functionName, QGenericArgument parameter);
-		ViFunctionCall(QString functionName, QList<QGenericArgument> parameters);
+		ViFunctionCall(QString functionName, QList<QVariant> parameters);
 
 		ViFunctionCall(QObject *object, QString functionName);
 		ViFunctionCall(QObject *object, QString functionName, bool parameter);
@@ -32,8 +30,7 @@ class ViFunctionCall
 		ViFunctionCall(QObject *object, QString functionName, double parameter);
 		ViFunctionCall(QObject *object, QString functionName, QString parameter);
 		ViFunctionCall(QObject *object, QString functionName, QVariant parameter);
-		ViFunctionCall(QObject *object, QString functionName, QGenericArgument parameter);
-		ViFunctionCall(QObject *object, QString functionName, QList<QGenericArgument> parameters);
+		ViFunctionCall(QObject *object, QString functionName, QList<QVariant> parameters);
 
 		ViFunctionCall(const ViFunctionCall &other);
 
@@ -47,7 +44,6 @@ class ViFunctionCall
 		void addParameter(double parameter);
 		void addParameter(QString parameter);
 		void addParameter(QVariant parameter);
-		void addParameter(QGenericArgument parameter);
 
 		bool execute(QGenericReturnArgument returnValue = QGenericReturnArgument());
 	
@@ -55,7 +51,7 @@ class ViFunctionCall
 
 		QObject *mObject;
 		QString mFunctionName;
-		QList<QGenericArgument> mParameters;
+		QList<QVariant> mParameters;
 
 };
 

@@ -56,14 +56,7 @@ ViFunctionCall::ViFunctionCall(QString functionName, QVariant parameter)
 	addParameter(parameter);
 }
 
-ViFunctionCall::ViFunctionCall(QString functionName, QGenericArgument parameter)
-{
-	mObject = NULL;
-	mFunctionName = functionName;
-	addParameter(parameter);
-}
-
-ViFunctionCall::ViFunctionCall(QString functionName, QList<QGenericArgument> parameters)
+ViFunctionCall::ViFunctionCall(QString functionName, QList<QVariant> parameters)
 {
 	mObject = NULL;
 	mFunctionName = functionName;
@@ -111,14 +104,7 @@ ViFunctionCall::ViFunctionCall(QObject *object, QString functionName, QVariant p
 	addParameter(parameter);
 }
 
-ViFunctionCall::ViFunctionCall(QObject *object, QString functionName, QGenericArgument parameter)
-{
-	mObject = object;
-	mFunctionName = functionName;
-	addParameter(parameter);
-}
-
-ViFunctionCall::ViFunctionCall(QObject *object, QString functionName, QList<QGenericArgument> parameters)
+ViFunctionCall::ViFunctionCall(QObject *object, QString functionName, QList<QVariant> parameters)
 {
 	mObject = object;
 	mFunctionName = functionName;
@@ -129,12 +115,7 @@ ViFunctionCall::ViFunctionCall(const ViFunctionCall &other)
 {
 	mObject = other.mObject;
 	mFunctionName = other.mFunctionName;
-	
-	//Since QGenericArgument has no copy constructor
-	for(int i = 0; i < other.mParameters.size(); ++i)
-	{
-		addParameter(QGenericArgument(other.mParameters[i].name(), other.mParameters[i].data()));
-	}
+	mParameters = other.mParameters;
 }
 
 ViFunctionCall::~ViFunctionCall()
@@ -153,30 +134,25 @@ void ViFunctionCall::setFunction(QString functionName)
 
 void ViFunctionCall::addParameter(bool parameter)
 {
-	addParameter(Q_ARG(bool, parameter));
+	addParameter(QVariant::fromValue(parameter));
 }
 
 void ViFunctionCall::addParameter(int parameter)
 {
-	addParameter(Q_ARG(int, parameter));
+	addParameter(QVariant::fromValue(parameter));
 }
 
 void ViFunctionCall::addParameter(double parameter)
 {
-	addParameter(Q_ARG(double, parameter));
+	addParameter(QVariant::fromValue(parameter));
 }
 
 void ViFunctionCall::addParameter(QString parameter)
 {
-	addParameter(Q_ARG(QString, parameter));
+	addParameter(QVariant::fromValue(parameter));
 }
 
 void ViFunctionCall::addParameter(QVariant parameter)
-{
-	addParameter(Q_ARG(QVariant, parameter));
-}
-
-void ViFunctionCall::addParameter(QGenericArgument parameter)
 {
 	if(mParameters.size() == FUNCTION_CALL_MAX_PARAMETERS)
 	{
@@ -188,13 +164,19 @@ void ViFunctionCall::addParameter(QGenericArgument parameter)
 	}
 }
 
+
 bool ViFunctionCall::execute(QGenericReturnArgument returnValue)
 {
 	if(mObject == NULL)
 	{
 		return false;
 	}
-	QList<QGenericArgument> arguments = mParameters;
+	QList<QGenericArgument> arguments;
+	for(int i = 0; i < mParameters.size(); ++i)
+	{
+		//Q_ARG(mParameters[i].type(), mParameters[i]);
+		arguments.append(QGenericArgument(mParameters[i].typeName(), mParameters[i].constData()));
+	}
 	for(int i = 0; i < FUNCTION_CALL_MAX_PARAMETERS - mParameters.size(); ++i)
 	{
 		arguments.append(QGenericArgument());
