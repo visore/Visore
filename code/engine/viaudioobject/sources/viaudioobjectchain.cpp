@@ -44,6 +44,11 @@ void ViAudioObjectChain::add(ViAudioObjectPointer object)
 	mObjects.append(object);
 }
 
+void ViAudioObjectChain::add(ViAudioObjectQueue objects)
+{
+	mObjects.append(objects);
+}
+
 void ViAudioObjectChain::add(ViProject &project)
 {
 	mObjects.append(project.objectQueue());
@@ -64,9 +69,7 @@ void ViAudioObjectChain::setFunction(QString function)
 	function = function.replace("(", "");
 	function = function.replace(")", "");
 	function = function.replace(" ", "");
-	ViFunctionCall call;
-	call.setFunction(function);
-	setFunction(call);
+	setFunction(ViFunctionCall(function));
 }
 
 void ViAudioObjectChain::execute()

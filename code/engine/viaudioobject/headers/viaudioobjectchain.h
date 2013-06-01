@@ -26,6 +26,7 @@ class ViAudioObjectChain : public QObject
 		ViAudioObjectChain(ViProject &project);
 
 		void add(ViAudioObjectPointer object);
+		void add(ViAudioObjectQueue objects);
 		void add(ViProject &project);
 
 		void clear();

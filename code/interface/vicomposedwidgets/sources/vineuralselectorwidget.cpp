@@ -15,14 +15,6 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 {
 	mUi = new Ui::ViNeuralSelectorWidget();
 	mUi->setupUi(this);
-
-	//Font
-	QFont font;
-	font.setFamily("Harabara");
-	font.setPointSize(16);
-	font.setBold(true);
-	font.setLetterSpacing(QFont::PercentageSpacing, 105);
-	QColor color = ViThemeManager::color(ViThemeColors::TextColor1);
 	
 	//Hidden layers
 	QObject::connect(mUi->biasCheckBox, SIGNAL(toggled(bool)), mUi->biasValueSpinBox, SLOT(setVisible(bool)));
@@ -54,10 +46,8 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 	QObject::connect(mUi->errorFunctionAdd, SIGNAL(clicked()), this, SLOT(addErrorFunction()));
 	QObject::connect(mUi->errorFunctionRemove, SIGNAL(clicked()), this, SLOT(removeErrorFunction()));
 	mUi->errorFunctionAdd->setSize(40, 40);
-	mUi->errorFunctionAdd->setText("", color, font);
 	mUi->errorFunctionAdd->setIcon(ViThemeManager::icon("add"), 30);
 	mUi->errorFunctionRemove->setSize(40, 40);
-	mUi->errorFunctionRemove->setText("", color, font);
 	mUi->errorFunctionRemove->setIcon(ViThemeManager::icon("remove"), 30);
 	QList<ViErrorFunction*> errorFunctions = ViErrorFunctionManager::libraries();
 	for(int i = 0; i < errorFunctions.size(); ++i)
@@ -87,12 +77,6 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 		mUi->interpolatorComboBox->addItem(interpolators[i]->name("Interpolator", true), interpolators[i]->name());
 	}
 	mUi->interpolatorComboBox->setCurrentIndex(mUi->interpolatorComboBox->findText(ViInterpolatorManager::createDefault()->name("Interpolator", true), Qt::MatchExactly));
-
-	//Button
-	QObject::connect(mUi->processButton, SIGNAL(clicked()), this, SLOT(process()));
-	mUi->processButton->setIcon(ViThemeManager::icon("startprocess"), 40);
-	mUi->processButton->setText("Process", color, font);
-	mUi->processButton->setSize(140, 60);
 }
 
 ViNeuralSelectorWidget::~ViNeuralSelectorWidget()
@@ -110,7 +94,7 @@ ViNeuralSelectorWidget::~ViNeuralSelectorWidget()
 	}
 }
 
-void ViNeuralSelectorWidget::process()
+ViNeuralCorrector* ViNeuralSelectorWidget::corrector()
 {
 	ViNeuralNetworkFactory factory;
 
@@ -159,7 +143,12 @@ void ViNeuralSelectorWidget::process()
 		((ViInterpolationTargetProvider*) provider)->setInterpolator(ViInterpolatorManager::create(mUi->interpolatorComboBox->itemData(mUi->interpolatorComboBox->currentIndex()).toString()));
 	}
 
-	//engine()->correct(mUi->projectLoader->currentObject(), new ViNeuralNetworkCorrector(network, trinaer, provider));
+	ViNeuralCorrector *corrector = new ViNeuralCorrector(network, trainer, provider);
+	
+	//Seperate channels
+	corrector->enableSeparateChannels(mUi->channelsCheckBox->isChecked());
+
+	return corrector;
 }
 
 void ViNeuralSelectorWidget::addHiddenLayer()

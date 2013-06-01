@@ -7,23 +7,17 @@ ViProjectLoader::ViProjectLoader(QWidget *parent)
 {
 	mUi = new Ui::ViProjectLoader();
 	mUi->setupUi(this);
-	
-	setContentsMargins(0, 0, 0, 0);
-	mProject = NULL;
 
-	mUi->fileBrowser->setMode(ViFileBrowser::OpenFile);
 	mUi->fileBrowser->setDirectory(ViManager::projectPath());
 	mUi->fileBrowser->addFilter(ViManager::projectFilter());
 
-	mUi->button->setSize(150, 64);
-	mUi->button->setIcon(ViThemeManager::icon("startprocess"), 36);
-	mUi->button->setText("Process");
-
-	QObject::connect(mUi->fileBrowser, SIGNAL(selected()), this, SLOT(loadProject()));
+	QObject::connect(mUi->fileBrowser, SIGNAL(selected()), this, SLOT(loadProjects()));
+	QObject::connect(mUi->modeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeMode(int)));
 	QObject::connect(mUi->tracksComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(analyseTrack(int)));
-	QObject::connect(mUi->button, SIGNAL(clicked()), this, SLOT(checkStart()));
 
 	clear();
+
+	mUi->modeComboBox->setCurrentIndex(2);
 }
 
 ViProjectLoader::~ViProjectLoader()
@@ -32,29 +26,47 @@ ViProjectLoader::~ViProjectLoader()
 	clear();
 }
 
-ViProject* ViProjectLoader::project()
+ViProjectQueue ViProjectLoader::projects()
 {
-	return mProject;
+	return mProjects;
 }
 
-ViAudioObjectPointer ViProjectLoader::currentObject()
+ViProject* ViProjectLoader::project()
 {
-	return mObject;
+	if(mProjects.isEmpty())
+	{
+		return NULL;
+	}
+	return mProjects[0];
+}
+
+ViAudioObjectQueue ViProjectLoader::objects()
+{
+	return mObjects;
+}
+
+ViAudioObjectPointer ViProjectLoader::object()
+{
+	if(mObjects.isEmpty())
+	{
+		return ViAudioObject::createNull();
+	}
+	else if(mSelectedObject >= 0)
+	{
+		return mObjects[mSelectedObject];
+	}
+	return mObjects[0];
 }
 
 void ViProjectLoader::clear()
 {
+	mSelectedObject = -1;
+
 	mUi->tracksComboBox->clear();
 	mUi->fileBrowser->clear();
-	mObject.setNull();
-	mObjects.clear();
 
-	if(mProject != NULL)
-	{
-		emit projectChanged();
-		delete mProject;
-		mProject = NULL;
-	}
+	viDeleteAll(mProjects);
+	mObjects.clear();
 
 	mUi->tracksLabel->hide();
 	mUi->tracksComboBox->hide();
@@ -62,32 +74,48 @@ void ViProjectLoader::clear()
 	mUi->targetCheckBox->hide();
 	mUi->corruptedCheckBox->hide();
 	mUi->correctedCheckBox->hide();
-	mUi->button->hide();
 }
 
-void ViProjectLoader::loadProject()
+void ViProjectLoader::loadProjects()
 {
-	ViLoadingWidget::start(true, false, "Loading project", ViProgressBar::Text, ViProgressBar::Infinite);
-	if(mProject != NULL)
+	mObjects.clear();
+	mProjectCount = 0;
+	mSelectedObject = -1;
+
+	QString message = "Loading project";
+	if(mMode == ViProjectLoader::MultipleProjects)
+	{
+		message += "s";
+	}
+	ViLoadingWidget::start(true, false, message, ViProgressBar::Text, ViProgressBar::Infinite);
+
+	QStringList projects = mUi->fileBrowser->fileNames();
+	for(int i = 0; i < projects.size(); ++i)
+	{
+		++mProjectCount;
+		ViProject *project = new ViProject(projects[i]);
+		QObject::connect(project, SIGNAL(loaded()), this, SLOT(loadTracks()), Qt::UniqueConnection);
+		if(!project->load())
+		{
+			--mProjectCount;
+			LOG("The project (" + projects[i] + ") could not be loaded.");
+		}
+	}
+	if(projects.size() > 0)
 	{
 		emit projectChanged();
-		delete mProject;
-	}
-	mUi->tracksComboBox->clear();
-	mProject = new ViProject(mUi->fileBrowser->fileName());
-	QObject::connect(mProject, SIGNAL(loaded()), this, SLOT(loadTracks()), Qt::UniqueConnection);
-	if(!mProject->load())
-	{
-		LOG("Project (" + mUi->fileBrowser->fileName() + ") could not be loaded.");
 	}
 }
 
 void ViProjectLoader::loadTracks()
 {
-	emit opened();
-	mObjects.clear();
-	mObject.setNull();
-	ViAudioObjectMatrix matrix = mProject->objectMatrix();
+	ViProject *project = (ViProject*) sender();
+	QObject::disconnect(project, SIGNAL(loaded()), this, SLOT(loadTracks()));
+	mProjects.enqueue(project);
+
+	mUi->tracksComboBox->clear();
+
+	ViAudioObjectMatrix matrix = project->objectMatrix();
 	ViAudioObject::Type resources;
 	for(int i = 0; i < matrix.size(); ++i)
 	{
@@ -96,7 +124,7 @@ void ViProjectLoader::loadTracks()
 			resources = matrix[i][j]->availableResources();
 			if(resources != ViAudioObject::Undefined)
 			{
-				mObjects.append(matrix[i][j]);
+				mObjects.enqueue(matrix[i][j]);
 				mUi->tracksComboBox->addItem(ViProject::generateTrackName(matrix[i][j]->songInfo(), j+1, i+1));
 			}
 			else
@@ -105,20 +133,27 @@ void ViProjectLoader::loadTracks()
 			}
 		}
 	}
-	if(!mObjects.isEmpty())
+
+	if(mMode == ViProjectLoader::SingleTrack && !mObjects.isEmpty())
 	{
 		mUi->tracksLabel->show();
 		mUi->tracksComboBox->show();
 	}
-	ViLoadingWidget::stop();
+
+	--mProjectCount;
+	if(mProjectCount == 0)
+	{
+		ViLoadingWidget::stop();
+		emit finished();
+	}
 }
 
 void ViProjectLoader::analyseTrack(int index)
 {
 	if(index >= 0)
 	{
-		mObject = mObjects[index];
-		ViAudioObject::Type resources = mObject->availableResources();
+		mSelectedObject = index;
+		ViAudioObject::Type resources = mObjects[index]->availableResources();
 		mUi->processLabel->show();
 
 		if(resources & ViAudioObject::Target)
@@ -149,17 +184,26 @@ void ViProjectLoader::analyseTrack(int index)
 			mUi->correctedCheckBox->hide();
 		}
 
-		mUi->button->show();
-		emit trackChanged(mObject);
+		emit trackChanged();
 	}
 }
 
-void ViProjectLoader::checkStart()
+void ViProjectLoader::changeMode(int mode)
 {
-	if(processTypes() != ViAudioObject::Undefined)
+	mMode = (ViProjectLoader::Mode) mode;
+
+	if(mMode == ViProjectLoader::MultipleProjects)
 	{
-		emit started();
+		mUi->fileLabel->setText("Files:");
+		mUi->fileBrowser->setMode(ViFileBrowser::OpenFiles);
 	}
+	else
+	{
+		mUi->fileLabel->setText("Files:");
+		mUi->fileBrowser->setMode(ViFileBrowser::OpenFile);
+	}
+
+	clear();
 }
 
 ViAudioObject::Type ViProjectLoader::processTypes()
@@ -182,4 +226,11 @@ ViAudioObject::Type ViProjectLoader::processTypes()
 		return ViAudioObject::Undefined;
 	}
 	return (ViAudioObject::Type) result;
+}
+
+void ViProjectLoader::setMode(ViProjectLoader::Mode mode)
+{
+	changeMode(mode);
+	mUi->modeLabel->hide();
+	mUi->modeComboBox->hide();
 }

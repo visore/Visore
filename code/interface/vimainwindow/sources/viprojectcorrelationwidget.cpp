@@ -46,7 +46,7 @@ ViProjectCorrelationWidget::ViProjectCorrelationWidget(QWidget *parent)
 	mUi = new Ui::ViProjectCorrelationWidget();
 	mUi->setupUi(this);
 
-	QObject::connect(mUi->projectLoader, SIGNAL(started()), this, SLOT(correlateTracks()));
+	//QObject::connect(mUi->projectLoader, SIGNAL(started()), this, SLOT(correlateTracks()));
 
 	mUi->tableWidget->setColumnCount(4);
 	mUi->tableWidget->setHorizontalHeaderItem(0, new QTableWidgetItem("File Name"));
@@ -103,5 +103,5 @@ void ViProjectCorrelationWidget::remove(int row)
 void ViProjectCorrelationWidget::correlateTracks()
 {
 	//engine()->calculateCorrelation(mUi->projectLoader->currentObject());
-	engine()->align(*mUi->projectLoader->project());
+	//engine()->align(*mUi->projectLoader->project());
 }

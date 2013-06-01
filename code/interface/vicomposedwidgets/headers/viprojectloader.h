@@ -13,35 +13,53 @@ class ViProjectLoader : public ViWidget
 
 	Q_OBJECT
 
+	public:
+
+		enum Mode
+		{
+			MultipleProjects,
+			SingleProject,
+			SingleTrack
+		};
+
 	signals:
 
-		void opened();
-		void trackChanged(ViAudioObjectPointer object);
-		void started();
+		void trackChanged();
 		void projectChanged();
+		void finished();
 
 	private slots:
 
-		void loadProject();
+		void loadProjects();
 		void loadTracks();
 		void analyseTrack(int index);
-		void checkStart();
+		void changeMode(int mode);
 
 	public:
 
 		ViProjectLoader(QWidget *parent = 0);
 		~ViProjectLoader();
+
+		ViProjectQueue projects();
 		ViProject* project();
-		ViAudioObjectPointer currentObject();
+		ViAudioObjectQueue objects();
+		ViAudioObjectPointer object();
+
 		void clear();
 		ViAudioObject::Type processTypes();
+
+		void setMode(ViProjectLoader::Mode mode);
 
 	private:
 
 		Ui::ViProjectLoader *mUi;
-		ViProject *mProject;
-		ViAudioObjectList mObjects;
-		ViAudioObjectPointer mObject;
+
+		ViProjectQueue mProjects;
+		ViAudioObjectQueue mObjects;
+		int mSelectedObject;
+
+		ViProjectLoader::Mode mMode;
+		int mProjectCount;
 
 };
 

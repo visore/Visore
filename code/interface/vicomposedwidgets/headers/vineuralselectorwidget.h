@@ -2,6 +2,7 @@
 #define VINEURALSELECTORWIDGET_H
 
 #include <viwidget.h>
+#include <vineuralcorrector.h>
 
 namespace Ui
 {
@@ -15,8 +16,6 @@ class ViNeuralSelectorWidget : public ViWidget
 
 	private slots:
 
-		void process();
-
 		void addHiddenLayer();
 		void removeHiddenLayer();
 
@@ -29,6 +28,8 @@ class ViNeuralSelectorWidget : public ViWidget
 
 		ViNeuralSelectorWidget(QWidget *parent = 0);
 		~ViNeuralSelectorWidget();
+
+		ViNeuralCorrector* corrector();
 
 	private:
 

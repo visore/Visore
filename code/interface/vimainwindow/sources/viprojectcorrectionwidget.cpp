@@ -6,8 +6,26 @@ ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
 {
 	mUi = new Ui::ViProjectCorrectionWidget();
 	mUi->setupUi(this);
-//setStyleSheet("background:transparent;");
-	//QObject::connect(mUi->projectLoader, SIGNAL(started()), this, SLOT(correct()));
+
+	//Font
+	QFont font;
+	font.setFamily("Harabara");
+	font.setPointSize(16);
+	font.setBold(true);
+	font.setLetterSpacing(QFont::PercentageSpacing, 105);
+	QColor color = ViThemeManager::color(ViThemeColors::TextColor1);
+
+	//Button1
+	QObject::connect(mUi->button1, SIGNAL(clicked()), this, SLOT(correct()));
+	mUi->button1->setIcon(ViThemeManager::icon("startprocess"), 40);
+	mUi->button1->setText("Process", color, font);
+	mUi->button1->setSize(140, 60);
+
+	//Button2
+	QObject::connect(mUi->button2, SIGNAL(clicked()), this, SLOT(correct()));
+	mUi->button2->setIcon(ViThemeManager::icon("startprocess"), 40);
+	mUi->button2->setText("Process", color, font);
+	mUi->button2->setSize(140, 60);
 }
 
 ViProjectCorrectionWidget::~ViProjectCorrectionWidget()
@@ -17,9 +35,5 @@ ViProjectCorrectionWidget::~ViProjectCorrectionWidget()
 
 void ViProjectCorrectionWidget::correct()
 {
-	ViProject *project = mUi->projectLoader->project();
-	if(project != NULL)
-	{
-		engine()->correct(*project);
-	}
+	engine()->correct(mUi->projectLoader->objects(), mUi->neuralSelector->corrector());
 }

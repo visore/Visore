@@ -36,16 +36,11 @@ void ViStackedWidget::setCurrentWidget(ViWidget *widget)
 }
 
 void ViStackedWidget::setCurrentIndex(int index)
-{
+{STATICLOG("+++: "+QString::number(index));
 	ViStackedWidget::widget()->setCurrentIndex(index);
 }
 
-void ViStackedWidget::setCurrentIndex(QVariant index)
-{
-	ViStackedWidget::setCurrentIndex(index.toInt());
-}
-
 ViFunctionCall ViStackedWidget::currentIndexCall(int index)
-{
+{STATICLOG("++----+: "+QString::number(index));
 	return ViFunctionCall(ViStackedWidget::instance().data(), "setCurrentIndex", index);
 }

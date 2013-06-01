@@ -8,6 +8,11 @@
 #include "viaudiocoder.h"
 #include <QMap>
 
+class ViProject;
+
+typedef QQueue<ViProject*> ViProjectQueue;
+typedef QList<ViProject*> ViProjectList;
+
 class ViProject : public QObject, public ViId
 {
 

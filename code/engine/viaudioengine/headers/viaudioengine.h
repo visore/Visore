@@ -43,8 +43,7 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		void calculateCorrelation(ViAudioObjectPointer object);
 
 		//Correction
-		void correct(ViProject &project, ViModifyProcessor *corrector);
-		void correct(ViAudioObjectPointer object, ViModifyProcessor *corrector);
+		void correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector);
 
 		//Project
 		void recordProject(ViProject *project, ViAudioObject::Type type, bool detectInfo);

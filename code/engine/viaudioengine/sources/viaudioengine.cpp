@@ -133,33 +133,13 @@ void ViAudioEngine::calculateCorrelation(ViAudioObjectPointer object)
 	}*/
 }
 
-void ViAudioEngine::correct(ViProject &project, ViModifyProcessor *corrector)
+void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector)
 {
 	mObjectChain.clear();
-	mObjectChain.add(project);
+	mObjectChain.add(objects);
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-	
-	ViFunctionCall call;
-	call.setFunction("correct");
-	call.addParameter(QVariant::fromValue(corrector));
-	mObjectChain.setFunction(call);
-
-	mObjectChain.execute();
-}
-
-void ViAudioEngine::correct(ViAudioObjectPointer object, ViModifyProcessor *corrector)
-{
-	mObjectChain.clear();
-	mObjectChain.add(object);
-	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
-	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-
-	ViFunctionCall call;
-	call.setFunction("correct");
-	call.addParameter(QVariant::fromValue(corrector));
-	mObjectChain.setFunction(call);
-
+	mObjectChain.setFunction(ViFunctionCall("correct", Q_ARG(ViModifyProcessor*, corrector)));
 	mObjectChain.execute();
 }
 

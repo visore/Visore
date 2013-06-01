@@ -7,7 +7,9 @@ ViWaveAnalysisWidget::ViWaveAnalysisWidget(QWidget *parent)
 	mUi = new Ui::ViWaveAnalysisWidget();
 	mUi->setupUi(this);
 
-	QObject::connect(mUi->projectLoader, SIGNAL(started()), this, SLOT(generateWave()));
+	mUi->projectLoader->setMode(ViProjectLoader::SingleTrack);
+
+	QObject::connect(mUi->projectLoader, SIGNAL(trackChanged()), this, SLOT(generateWave()));
 	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), this, SLOT(clear()), Qt::DirectConnection);
 
 	mUi->targetContainer->hide();
@@ -28,7 +30,7 @@ void ViWaveAnalysisWidget::generateWave()
 	mUi->corruptedWaveForm->clear();
 	mUi->correctedWaveForm->clear();
 	QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(drawWave()));
-	engine()->generateWaveForm(mUi->projectLoader->currentObject(), mUi->projectLoader->processTypes());
+	engine()->generateWaveForm(mUi->projectLoader->object(), mUi->projectLoader->processTypes());
 }
 
 void ViWaveAnalysisWidget::drawWave()
@@ -38,11 +40,13 @@ void ViWaveAnalysisWidget::drawWave()
 	ViAudioObject::Type types = mUi->projectLoader->processTypes();
 	ViWaveForm *form;
 
-	form = mUi->projectLoader->currentObject()->waveForm(ViAudioObject::Target);
+	ViAudioObjectPointer object = mUi->projectLoader->object();
+
+	form = object->waveForm(ViAudioObject::Target);
 	if(form != NULL && !form->isEmpty() && (ViAudioObject::Target & types))
 	{
 		mUi->targetContainer->show();
-		mUi->targetWaveForm->setWaveForm(form, mUi->projectLoader->currentObject()->targetFormat());
+		mUi->targetWaveForm->setWaveForm(form, object->targetFormat());
 		mUi->expander->hide();
 		mWaveGroup.addWidget(mUi->targetWaveForm);
 	}
@@ -52,11 +56,11 @@ void ViWaveAnalysisWidget::drawWave()
 		mWaveGroup.removeWidget(mUi->targetWaveForm);
 	}
 
-	form = mUi->projectLoader->currentObject()->waveForm(ViAudioObject::Corrupted);
+	form = object->waveForm(ViAudioObject::Corrupted);
 	if(form != NULL && !form->isEmpty() && (ViAudioObject::Corrupted & types))
 	{
 		mUi->corruptedContainer->show();
-		mUi->corruptedWaveForm->setWaveForm(form, mUi->projectLoader->currentObject()->corruptedFormat());
+		mUi->corruptedWaveForm->setWaveForm(form, object->corruptedFormat());
 		mUi->expander->hide();
 		mWaveGroup.addWidget(mUi->corruptedWaveForm);
 	}
@@ -66,11 +70,11 @@ void ViWaveAnalysisWidget::drawWave()
 		mWaveGroup.removeWidget(mUi->corruptedWaveForm);
 	}
 
-	form = mUi->projectLoader->currentObject()->waveForm(ViAudioObject::Corrected);
+	form = object->waveForm(ViAudioObject::Corrected);
 	if(form != NULL && !form->isEmpty() && (ViAudioObject::Corrected & types))
 	{
 		mUi->correctedContainer->show();
-		mUi->correctedWaveForm->setWaveForm(form, mUi->projectLoader->currentObject()->correctedFormat());
+		mUi->correctedWaveForm->setWaveForm(form, object->correctedFormat());
 		mUi->expander->hide();
 		mWaveGroup.addWidget(mUi->correctedWaveForm);
 	}
