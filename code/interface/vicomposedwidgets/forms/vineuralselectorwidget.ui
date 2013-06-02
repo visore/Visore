@@ -334,13 +334,30 @@
       <item row="0" column="1">
        <widget class="QSpinBox" name="inputSpinBox">
         <property name="minimum">
-         <number>2</number>
+         <number>1</number>
         </property>
         <property name="maximum">
-         <number>1024</number>
+         <number>2048</number>
         </property>
         <property name="value">
          <number>32</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Histroy neurons:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="historySpinBox">
+        <property name="maximum">
+         <number>2048</number>
+        </property>
+        <property name="value">
+         <number>1</number>
         </property>
        </widget>
       </item>

@@ -7,11 +7,13 @@
 ViNeuralNetworkFactory::ViNeuralNetworkFactory()
 {
 	mGlobalActivationFunction = NULL;
+	mHistoryCount = 0;
 }
 
 ViNeuralNetworkFactory::ViNeuralNetworkFactory(const ViNeuralNetworkFactory &other)
 {
 	mGlobalActivationFunction = other.mGlobalActivationFunction->clone();
+	mHistoryCount = other.mHistoryCount;
 	for(int i = 0; i < other.mActivationFunctions.size(); ++i)
 	{
 		mActivationFunctions.append(other.mActivationFunctions[i]->clone());
@@ -33,6 +35,8 @@ void ViNeuralNetworkFactory::clear()
 		mGlobalActivationFunction = NULL;
 	}
 
+	mHistoryCount = 0;
+
 	viDeleteAll(mActivationFunctions);
 	
 	mNeurons.clear();
@@ -46,6 +50,11 @@ void ViNeuralNetworkFactory::setActivationFunction(ViActivationFunction *activat
 		delete mGlobalActivationFunction;
 	}
 	mGlobalActivationFunction = activationFunction;
+}
+
+void ViNeuralNetworkFactory::setHistory(int neuronCount)
+{
+	mHistoryCount = neuronCount;
 }
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount)
@@ -73,6 +82,7 @@ void ViNeuralNetworkFactory::addLayer(int neuronCount, double bias, ViActivation
 ViNeuralNetwork* ViNeuralNetworkFactory::create()
 {
 	ViNeuralNetwork *network = new ViNeuralNetwork();
+	network->setHistory(mHistoryCount);
 	
 	for(int i = 0; i < mNeurons.size(); ++i)
 	{
@@ -95,7 +105,7 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 			{
 				LOG("No bias allowed in the input layer. The bias will be removed.", QtCriticalMsg);
 			}
-			network->add(ViNeuralLayerFactory::createInput(mNeurons[i]));
+			network->add(ViNeuralLayerFactory::createInput(mNeurons[i] + mHistoryCount));
 		}
 		else if(i == mNeurons.size() - 1)
 		{

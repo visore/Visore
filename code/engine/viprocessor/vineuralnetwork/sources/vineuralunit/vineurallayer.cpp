@@ -95,7 +95,7 @@ ViNeuron* ViNeuralLayer::at(int index) const
 	}
 	else if(index >= mNeurons.size())
 	{
-		LOG("An invalid neuron was accessed.", QtCriticalMsg);
+		LOG("An invalid neuron was accessed (index: " + QString::number(index) + ", size: " + QString::number(mNeurons.size()) + ").", QtCriticalMsg);
 		return NULL;
 	}
 	return mNeurons[index];
@@ -146,7 +146,7 @@ double ViNeuralLayer::value(int index)
 {
 	if(index >= mNeurons.size())
 	{
-		LOG("An invalid neuron was accessed.", QtCriticalMsg);
+		LOG("An invalid neuron was accessed (index: " + QString::number(index) + ", size: " + QString::number(mNeurons.size()) + ").", QtCriticalMsg);
 		return 0;
 	}
 	return mNeurons[index]->value();
@@ -156,7 +156,7 @@ void ViNeuralLayer::setValue(int index, int value)
 {
 	if(index >= mNeurons.size())
 	{
-		LOG("An invalid neuron was accessed.", QtCriticalMsg);
+		LOG("An invalid neuron was accessed (index: " + QString::number(index) + ", size: " + QString::number(mNeurons.size()) + ").", QtCriticalMsg);
 	}
 	else
 	{

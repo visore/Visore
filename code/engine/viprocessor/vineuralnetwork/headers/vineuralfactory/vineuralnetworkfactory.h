@@ -17,6 +17,8 @@ class ViNeuralNetworkFactory : public ViNeuralFactory
 
 		void setActivationFunction(ViActivationFunction *activationFunction); // Takes ownership of activationFunction
 
+		void setHistory(int neuronCount); // Sets how many history samples should be used
+
 		void addLayer(int neuronCount);
 		void addLayer(int neuronCount, double bias);
 		void addLayer(int neuronCount, ViActivationFunction *activationFunction);
@@ -32,6 +34,7 @@ class ViNeuralNetworkFactory : public ViNeuralFactory
 		QList<ViActivationFunction*> mActivationFunctions;
 		ViIntegerList mNeurons;
 		ViDoubleList mBiases;
+		int mHistoryCount;
 
 };
 

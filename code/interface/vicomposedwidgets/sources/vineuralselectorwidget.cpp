@@ -25,6 +25,7 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 	mUi->hiddenLayerAdd->setIcon(ViThemeManager::icon("add"), 30);
 	mUi->hiddenLayerRemove->setSize(40, 40);
 	mUi->hiddenLayerRemove->setIcon(ViThemeManager::icon("remove"), 30);
+	addHiddenLayer(mUi->hiddenLayerList->count(), 1);
 
 	//Weights
 	QList<ViWeightInitializer*> weightInitializers = ViWeightInitializerManager::libraries();
@@ -102,6 +103,7 @@ ViNeuralCorrector* ViNeuralSelectorWidget::corrector()
 	factory.setActivationFunction(ViActivationFunctionManager::create(mUi->activationFunctionComboBox->itemData(mUi->activationFunctionComboBox->currentIndex()).toString()));
 
 	//Neurons
+	factory.setHistory(mUi->historySpinBox->value());
 	factory.addLayer(mUi->inputSpinBox->value());
 	QListWidgetItem *item;
 	QPair<int, double> value;
@@ -153,17 +155,28 @@ ViNeuralCorrector* ViNeuralSelectorWidget::corrector()
 
 void ViNeuralSelectorWidget::addHiddenLayer()
 {
-	QString text = "Hidden Layer " + QString::number(mUi->hiddenLayerList->count() + 1) + " (" + QString::number(mUi->hiddenNeuronsSpinBox->value()) + " neurons, ";
-	QPair<int, double> value;
-	value.first = mUi->hiddenNeuronsSpinBox->value();
 	if(mUi->biasCheckBox->isChecked())
 	{
-		value.second = mUi->biasValueSpinBox->value();
-		text += "bias of " + QString::number(mUi->biasValueSpinBox->value(), 'f', 5);
+		addHiddenLayer(mUi->hiddenNeuronsSpinBox->value(), mUi->biasValueSpinBox->value());
 	}
 	else
 	{
-		value.second = 0;
+		addHiddenLayer(mUi->hiddenNeuronsSpinBox->value());
+	}
+}
+
+void ViNeuralSelectorWidget::addHiddenLayer(int neurons, double bias)
+{
+	QString text = "Hidden Layer " + QString::number(mUi->hiddenLayerList->count() + 1) + " (" + QString::number(neurons) + " neurons, ";
+	QPair<int, double> value;
+	value.first = neurons;
+	value.second = bias;
+	if(bias)
+	{
+		text += "bias of " + QString::number(bias, 'f', 5);
+	}
+	else
+	{
 		text += "no bias";
 	}
 	text += ")";

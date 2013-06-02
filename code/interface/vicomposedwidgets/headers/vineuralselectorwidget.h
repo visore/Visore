@@ -17,6 +17,7 @@ class ViNeuralSelectorWidget : public ViWidget
 	private slots:
 
 		void addHiddenLayer();
+		void addHiddenLayer(int neurons, double bias = 0);
 		void removeHiddenLayer();
 
 		void addErrorFunction();

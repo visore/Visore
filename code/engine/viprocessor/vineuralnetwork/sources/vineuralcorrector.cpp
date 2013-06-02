@@ -52,12 +52,11 @@ ViNeuralNetwork* ViNeuralCorrectorThread::network()
 
 void ViNeuralCorrectorThread::run()
 {
-	int inputs = mNetwork->inputCount();
+	int inputs = mNetwork->inputCount(false);
 	for(int i = 0; i < inputs; ++i)
 	{
 		mNetwork->setInput(i, mData->at(i + mDataOffset));
 	}
-	mNetwork->setInput(inputs, mNetwork->output());
 
 	for(int i = 0; i < TRAINER_LEFT_SAMPLES; ++i)
 	{
@@ -175,7 +174,7 @@ void ViNeuralCorrector::initialize()
 	mReadBuffer.clear();
 	mFirstWrite = true;
 
-	int inputSamples = mNetwork->inputCount();
+	int inputSamples = mNetwork->inputCount(false);
 	if(TRAINER_LEFT_SAMPLES > inputSamples)
 	{
 		mDataOffset = TRAINER_LEFT_SAMPLES - inputSamples;

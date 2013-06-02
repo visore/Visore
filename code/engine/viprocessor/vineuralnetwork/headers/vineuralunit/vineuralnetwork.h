@@ -28,6 +28,9 @@ class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
 		ViNeuralLayer* at(int index) const;
 		ViNeuron* neuron(const QString id) const;
 
+		void setHistory(int neuronCount);
+		int history();
+
 		void setInput(int index, double value);
 		void setInputs(ViDoubleList values);
 
@@ -36,7 +39,7 @@ class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
 		double output(int index = 0);
 		ViDoubleList outputs();
 
-		int inputCount();
+		int inputCount(bool includeHistory = true);
 		int outputCount();
 		int neuronCount();
 
@@ -55,6 +58,7 @@ class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
 	private:
 
 		ViNeuralLayerList mLayers;
+		ViRealQueue mHistory;
 		
 };
 

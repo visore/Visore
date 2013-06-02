@@ -20,7 +20,20 @@ ViNeuralNetwork::~ViNeuralNetwork()
 
 void ViNeuralNetwork::run()
 {
-	for(int i = 1; i < mLayers.size(); ++i) // Don't run the first/input layer
+	//Set the histroy values
+	for(int i = 0; i < outputCount(); ++i)
+	{
+		mHistory.dequeue();
+		mHistory.enqueue(output(i));
+	}
+	int offset = inputCount(false);
+	for(int i = 0; i < mHistory.size(); ++i)
+	{
+		setInput(i + offset, mHistory[i]);
+	}
+
+	//Don't run the first/input layer
+	for(int i = 1; i < mLayers.size(); ++i)
 	{
 		mLayers[i]->run();
 	}
@@ -40,6 +53,7 @@ bool ViNeuralNetwork::add(ViNeuralLayer *layer)
 void ViNeuralNetwork::clear()
 {
 	mLayers.clear();
+	mHistory.clear();
 }
 
 bool ViNeuralNetwork::contains(ViNeuralLayer *layer) const
@@ -74,6 +88,20 @@ ViNeuron* ViNeuralNetwork::neuron(const QString id) const
 		}
 	}
 	return neuron;
+}
+
+void ViNeuralNetwork::setHistory(int neuronCount)
+{
+	mHistory.clear();
+	for(int i = 0; i < neuronCount; ++i)
+	{
+		mHistory.enqueue(0);
+	}
+}
+
+int ViNeuralNetwork::history()
+{
+	return mHistory.size();
 }
 
 void ViNeuralNetwork::setInput(int index, double value)
@@ -148,13 +176,20 @@ ViDoubleList ViNeuralNetwork::outputs()
 	return outputs;
 }
 
-int ViNeuralNetwork::inputCount()
+int ViNeuralNetwork::inputCount(bool includeHistory)
 {
 	if(mLayers.isEmpty())
 	{
 		return 0;
 	}
-	return mLayers[0]->size();
+	else if(includeHistory)
+	{
+		return mLayers[0]->size();
+	}
+	else
+	{
+		return mLayers[0]->size() - mHistory.size();
+	}
 }
 
 int ViNeuralNetwork::outputCount()
