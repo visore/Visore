@@ -119,7 +119,6 @@ void ViProject::serialize(ViAudioObjectPointer object, ViAudioObject::Type type)
 		}
 		object->songInfo().changeImagePath(object->songInfo().imagePath(), albumArt);
 	}
-	//mEncoder.encode(object->outputBuffer(), filePath, mFormat, 0, object->songInfo());
 
 	if(!object->encode(mFormat, true))
 	{
@@ -262,17 +261,6 @@ ViVersion ViProject::editedVersion()
 
 /*******************************************************************************************************************
 
-	STATIC FUNCTIONS
-
-*******************************************************************************************************************/
-
-QString ViProject::convertTrackPath(QString path, ViAudioObject::Type from, ViAudioObject::Type to)
-{
-
-}
-
-/*******************************************************************************************************************
-
 	LOAD & SAVE
 
 *******************************************************************************************************************/
@@ -301,9 +289,10 @@ void ViProject::save()
 
 	QObject::connect(&mArchive, SIGNAL(compressed()), this, SLOT(setFinished()), Qt::UniqueConnection);
 	QObject::connect(&mArchive, SIGNAL(compressed()), this, SIGNAL(saved()), Qt::UniqueConnection);
-
-	saveAll();
-	mArchive.compressData(mPaths["root"]);
+LOG("p1");
+	copyTracksToProject();LOG("p2");
+	saveAll();LOG("p3");
+	mArchive.compressData(mPaths["root"]);LOG("p4");
 }
 
 bool ViProject::loadAll()
@@ -497,6 +486,51 @@ QString ViProject::generateTrackName(ViSongInfo info, int trackNumber, int sideN
 		result += info.songTitle();
 	}
 	return result;
+}
+
+void ViProject::copyTracksToProject()
+{
+	ViAudioObjectPointer object;
+	QString oldPath, newPath, directory;
+	QList<ViAudioObject::Type> types = {ViAudioObject::Target, ViAudioObject::Corrupted, ViAudioObject::Corrected};
+	for(int i = 0; i < mObjects.size(); ++i)
+	{
+		for(int j = 0; j < mObjects[i].size(); ++j)
+		{
+			object = mObjects[i][j];
+			for(int k = 0; k < types.size(); ++k)
+			{
+				oldPath = object->filePath(types[k]);
+				directory = typeDirectory(types[k]);
+LOG("xxxx: "+QString::number(object->hasFile(types[k])) + " "+oldPath);
+				if(object->hasFile(types[k]) && !oldPath.startsWith(directory))
+				{
+					newPath = generateFileName(object->songInfo(), directory, object->format(types[k]).codec()->extension());
+LOG(oldPath);
+LOG(newPath);
+					QFile::rename(oldPath, newPath);
+					object->setFilePath(types[k], newPath);
+				}
+			}
+		}
+	}
+}
+
+QString ViProject::typeDirectory(ViAudioObject::Type type)
+{
+	if(type == ViAudioObject::Target)
+	{
+		return mPaths["data_target"];
+	}
+	else if(type == ViAudioObject::Corrupted)
+	{
+		return mPaths["data_corrupted"];
+	}
+	else if(type == ViAudioObject::Corrected)
+	{
+		return mPaths["data_corrected"];
+	}
+	return "";
 }
 
 QString ViProject::relativePath(QString path)

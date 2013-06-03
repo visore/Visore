@@ -5,6 +5,7 @@
 #include <vineuralnetworkfactory.h>
 #include <vitrainermanager.h>
 #include <vitargetprovidermanager.h>
+#include <QWaitCondition>
 
 class ViNeuralCorrectorThread : public QThread
 {
@@ -14,12 +15,16 @@ class ViNeuralCorrectorThread : public QThread
 		ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTrainer *trainer, ViTargetProvider *provider);
 		~ViNeuralCorrectorThread();
 
-		void setData(ViSampleChunk *data);
+		bool setData(ViSampleChunk *data);
 		void setOffsets(int data, int targetLeft, int targetRight);
 
 		ViNeuralNetwork* network();
 
 		void run();
+
+		bool output(double &value);
+
+void setStop(){QMutexLocker locker(&mMutex);mStop=true;}
 
 	private:
 
@@ -27,13 +32,23 @@ class ViNeuralCorrectorThread : public QThread
 		ViTrainer *mTrainer;
 		ViTargetProvider *mProvider;
 
-		ViSampleChunk *mData;
+		QQueue<ViSampleChunk*> mData;
 		ViSampleChunk mLeftTargetData;
 		ViSampleChunk mRightTargetData;
 
+		QQueue<int> mOutputs;
+
+		bool mStop;
 		int mDataOffset;
 		int mTargetLeftOffset;
 		int mTargetRightOffset;
+
+		QMutex mMutex;
+
+		QMutex mOutputMutex;
+
+		QMutex mWaitMutex;
+		QWaitCondition mWaitCondition;
 
 };
 
@@ -83,6 +98,8 @@ class ViNeuralCorrector : public ViModifyProcessor
 		int mDataOffset;
 		int mTargetLeftOffset;
 		int mTargetRightOffset;
+
+		int mCurrentWriteChannel;
 
 };
 

@@ -23,7 +23,10 @@ ViNeuron::ViNeuron(ViNeuron::Type type, ViActivationFunction *activationFunction
 ViNeuron::ViNeuron(const ViNeuron &other)
 	: ViNeuralUnit(other)
 {
-	mActivationFunction = other.mActivationFunction;
+	if(other.mActivationFunction != NULL)
+	{
+		mActivationFunction = other.mActivationFunction->clone();
+	}
 	mValue = other.mValue;
 	mError = other.mError;
 	mType = other.mType;

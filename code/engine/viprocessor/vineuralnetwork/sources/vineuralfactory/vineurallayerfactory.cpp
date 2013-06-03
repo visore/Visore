@@ -69,7 +69,7 @@ ViNeuralLayer* ViNeuralLayerFactory::create(ViElement element, bool &error)
 		}
 
 		if(!success)
-		{STATICLOG("ttttttt");
+		{
 			error = true;
 		}
 	}

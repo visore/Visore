@@ -111,13 +111,16 @@ ViNeuralCorrector* ViNeuralSelectorWidget::corrector()
 	{
 		item = mUi->hiddenLayerList->item(i);
 		value = item->data(Qt::UserRole).value<QPair<int, double> >();
-		if(value.second == 0)
+		if(value.first > 0)
 		{
-			factory.addLayer(value.first);
-		}
-		else
-		{
-			factory.addLayer(value.first, value.second);
+			if(value.second == 0)
+			{
+				factory.addLayer(value.first);
+			}
+			else
+			{
+				factory.addLayer(value.first, value.second);
+			}
 		}
 	}
 	factory.addLayer(1);

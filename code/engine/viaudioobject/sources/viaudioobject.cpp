@@ -4,6 +4,8 @@
 #include <vifouriercrossaligner.h>
 #include <viacoustididentifier.h>
 #include <vienmfpidentifier.h>
+#include <vimanager.h>
+#include <viaudiocodec.h>
 #include <QSet>
 
 /*******************************************************************************************************************
@@ -409,11 +411,24 @@ bool ViAudioObject::encode(ViAudioObject::Type type, bool clearWhenFinished)
 		locker.unlock();
 		thePath = filePath(mCodingInstructions[counter]);
 		theBuffer = buffer(mCodingInstructions[counter], true);
-		locker.relock();
-		if(thePath == "" || theBuffer == NULL)
+		if(theBuffer == NULL)
 		{
 			++invalid;
 		}
+		else if(thePath == "")
+		{
+			QString extension = "";
+			if(mOutputFormat.isValid())
+			{
+				extension = mOutputFormat.codec()->extension(".");
+			}
+			else if(format(mCodingInstructions[counter]).isValid())
+			{
+				extension = format(mCodingInstructions[counter]).codec()->extension(".");
+			}
+			thePath = ViManager::tempPath() + id() + extension;
+		}
+		locker.relock();
 		++counter;
 	}
 	if(mCodingInstructions.isEmpty() || invalid == counter)
@@ -424,7 +439,6 @@ bool ViAudioObject::encode(ViAudioObject::Type type, bool clearWhenFinished)
 		emit encoded();
 		return false;
 	}
-
 	if(mCoder != NULL)
 	{
 		delete mCoder;
@@ -1273,13 +1287,7 @@ void ViAudioObject::startCorrection()
 	setProgress(1, 0.90);
 	locker.unlock();
 	emit statused("Correcting track");
-
-	setCorrectedFilePath("/home/visore/corrected.flac");
-	/*ViAudioFormat m = corruptedFormat();
-	m.setChannelCount(1);
-	buffer(ViAudioObject::Corrected)->setFormat(m);*/
-	buffer(ViAudioObject::Corrected)->setFormat(corruptedFormat());
-
+	setOutputFormat(corruptedFormat());
 	mCorrector->process(thisPointer, ViAudioObject::Corrupted, ViAudioObject::Corrected);
 }
 
@@ -1291,7 +1299,6 @@ void ViAudioObject::endCorrection()
 	locker.unlock();
 	LOG("Track corrected");
 	emit corrected();
-
 	setProgress(1, 0.05);
 	QObject::connect(this, SIGNAL(encoded()), this, SLOT(endCorrectionEncoding()));
 	encode(ViAudioObject::Corrected);

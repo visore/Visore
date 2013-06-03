@@ -3,9 +3,9 @@
 #include <qmath.h>
 
 template <typename T>
-QList<ViChunk<T> > ViSampleChanneler<T>::split(const T *input, const int &samples, const int &channels)
+QList<ViChunk<T>*> ViSampleChanneler<T>::split(const T *input, const int &samples, const int &channels)
 {
-	QList<ViChunk<T> > result;
+	QList<ViChunk<T>*> result;
 
 	int samplesPerChannel = qFloor(samples / ((qfloat) channels));
 	int realSamples;
@@ -19,13 +19,13 @@ QList<ViChunk<T> > ViSampleChanneler<T>::split(const T *input, const int &sample
 		{
 			realSamples = samplesPerChannel;
 		}
-		result.append(ViChunk<T>(new T[realSamples], realSamples));
+		result.append(new ViChunk<T>(new T[realSamples], realSamples));
 	}
 
 	int counter;
 	for(int i = 0; i < result.size(); ++i)
 	{
-		T *data = result[i].data();
+		T *data = result[i]->data();
 		counter = 0;
 		for(int j = i; j < samples; j += channels)
 		{
@@ -38,7 +38,7 @@ QList<ViChunk<T> > ViSampleChanneler<T>::split(const T *input, const int &sample
 }
 
 template <typename T>
-QList<ViChunk<T> > ViSampleChanneler<T>::split(const T *input, const int &samples, const ViAudioFormat &format)
+QList<ViChunk<T>*> ViSampleChanneler<T>::split(const T *input, const int &samples, const ViAudioFormat &format)
 {
 	return ViSampleChanneler::split(input, samples, format.channels());
 }

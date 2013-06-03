@@ -11,8 +11,14 @@ ViNeuralLayer::ViNeuralLayer(ViNeuronList neurons)
 ViNeuralLayer::ViNeuralLayer(const ViNeuralLayer &other)
 	: ViNeuralUnit(other)
 {
-	mNeurons = other.mNeurons;
-	mBias = other.mBias;
+	for(int i = 0; i < other.mNeurons.size(); ++i)
+	{
+		add(new ViNeuron(*other.mNeurons[i]));
+	}
+	if(other.mBias != NULL)
+	{
+		mBias = new ViNeuron(*other.mBias);
+	}
 }
 
 ViNeuralLayer::~ViNeuralLayer()

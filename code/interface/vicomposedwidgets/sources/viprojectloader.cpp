@@ -99,6 +99,7 @@ void ViProjectLoader::loadProjects()
 		{
 			--mProjectCount;
 			LOG("The project (" + projects[i] + ") could not be loaded.");
+			ViLoadingWidget::stop();
 		}
 	}
 	if(projects.size() > 0)

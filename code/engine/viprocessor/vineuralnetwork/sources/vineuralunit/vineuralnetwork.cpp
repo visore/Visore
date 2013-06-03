@@ -9,7 +9,11 @@ ViNeuralNetwork::ViNeuralNetwork(ViNeuralLayerList layers)
 ViNeuralNetwork::ViNeuralNetwork(const ViNeuralNetwork &other)
 	: ViNeuralUnit(other)
 {
-	mLayers = other.mLayers;
+	for(int i = 0; i < other.mLayers.size(); ++i)
+	{
+		add(new ViNeuralLayer(*other.mLayers[i]));
+	}
+	mHistory = other.mHistory;
 }
 
 ViNeuralNetwork::~ViNeuralNetwork()
@@ -20,23 +24,37 @@ ViNeuralNetwork::~ViNeuralNetwork()
 
 void ViNeuralNetwork::run()
 {
-	//Set the histroy values
-	for(int i = 0; i < outputCount(); ++i)
+LOG("e1");
+if(mHistory.size() > 0)
 	{
-		mHistory.dequeue();
-		mHistory.enqueue(output(i));
-	}
-	int offset = inputCount(false);
-	for(int i = 0; i < mHistory.size(); ++i)
+		for(int i = 0; i < 1; ++i)
+		{
+			mHistory.dequeue();
+			mHistory.enqueue(0);
+		}
+}
+LOG("e3");
+
+	/*//Set the histroy values
+	if(history() > 0)
 	{
-		setInput(i + offset, mHistory[i]);
+		for(int i = 0; i < outputCount(); ++i)
+		{
+			mHistory.dequeue();
+			mHistory.enqueue(output(i));
+		}
+		int offset = inputCount(false);
+		for(int i = 0; i < mHistory.size(); ++i)
+		{
+			setInput(i + offset, mHistory[i]);
+		}
 	}
 
 	//Don't run the first/input layer
 	for(int i = 1; i < mLayers.size(); ++i)
 	{
 		mLayers[i]->run();
-	}
+	}*/
 }
 
 bool ViNeuralNetwork::add(ViNeuralLayer *layer)

@@ -76,6 +76,7 @@ class ViProject : public QObject, public ViId
 		ViAudioObjectMatrix objectMatrix();
 		ViAudioObjectList objectList();
 		ViAudioObjectQueue objectQueue();
+
 		static QString generateTrackName(ViSongInfo info, int trackNumber = -1, int sideNumber = -1);
 
 		qint64 size();
@@ -112,14 +113,6 @@ class ViProject : public QObject, public ViId
 		ViVersion createdVersion();
 		ViVersion editedVersion();
 
-		/*******************************************************************************************************************
-
-			STATIC FUNCTIONS
-
-		*******************************************************************************************************************/
-
-		static QString convertTrackPath(QString path, ViAudioObject::Type from, ViAudioObject::Type to);
-
 	protected:
 
 		bool createTempStructure();
@@ -128,6 +121,8 @@ class ViProject : public QObject, public ViId
 		bool removeSideStructure();
 
 		QString generateFileName(ViSongInfo info, QString folder, QString extension);
+		void copyTracksToProject();
+		QString typeDirectory(ViAudioObject::Type type);
 
 		QString relativePath(QString path);
 		QString absolutePath(QString path);

@@ -71,14 +71,12 @@ if $gdb; then
 	cp ./*/*/*.so .
 	cp ./*/*/*/*.so .
 	cp ./*/*/*/*/*.so .
-	cp /home/visore/Project/External/Qt5/qt5beta2/qtbase/lib/*.so* .
-	cp /home/visore/Project/External/Qt5/qt5beta2/qtmultimedia/lib/*.so* .
-	cp /home/visore/Project/External/Qt5/qt5beta2/qtsvg/lib/*.so* .
-	LD_LIBRARY_PATH=/home/visore/Project/Visore/GitHub/install/usr/local/visore
+	cp /opt/Qt5.0.2/5.0.2/gcc_64/lib/*.so* .
+	cp /lib/x86_64-linux-gnu/libthread_db.so* .
+	LD_LIBRARY_PATH=/home/visore/Project/Visore/install/usr/local/visore
 	export LD_LIBRARY_PATH
 	ulimit -c unlimited
-	./visore
-	gdb visore core
+	gdb visore
 elif $run; then
 	cd $install_directory
 	./launcher
