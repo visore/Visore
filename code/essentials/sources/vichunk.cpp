@@ -1,5 +1,8 @@
 #ifdef VICHUNK_H
-#include <vilogger.h>
+
+#include <qmath.h>
+#include <string.h> //memcpy
+
 template<typename T>
 ViChunk<T>::ViChunk(bool autoDelete)
 {
@@ -93,9 +96,15 @@ void ViChunk<T>::resize(int size)
 	{
 		if(mData != 0)
 		{
+			T *temp = new T[size];
+			memcpy(mData, temp, sizeof(T) * qMin(size, mSize));
 			delete [] mData;
+			mData = temp;
 		}
-		mData = new T[size];
+		else
+		{
+			mData = new T[size];
+		}
 		mSize = size;
 	}
 }
@@ -232,7 +241,7 @@ void ViChunk<T>::operator= (const ViChunk &other)
 template<typename T>
 void ViChunk<T>::copy(const ViChunk<T> &source, ViChunk<T> &destination)
 {
-	memcpy(destination.mData, source.mData, sizeof(T) * source.mSize);
+	memcpy(destination.mData, source.mData, sizeof(T) * qMin(source.mSize, destination.mSize));
 	destination.mSize = source.mSize;
 }
 

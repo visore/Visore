@@ -10,6 +10,12 @@
 class ViNeuralCorrectorThread : public QThread
 {
 
+	Q_OBJECT
+
+	signals:
+
+		void outputAvailable();
+
 	public:
 
 		ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTrainer *trainer, ViTargetProvider *provider);
@@ -18,13 +24,15 @@ class ViNeuralCorrectorThread : public QThread
 		bool setData(ViSampleChunk *data);
 		void setOffsets(int data, int targetLeft, int targetRight);
 
+		void setOutputSize(int size);
+		ViSampleChunk* output();
+		bool hasOutput();
+
 		ViNeuralNetwork* network();
 
 		void run();
 
-		bool output(double &value);
-
-void setStop(){QMutexLocker locker(&mMutex);mStop=true;}
+		void stop();
 
 	private:
 
@@ -36,7 +44,11 @@ void setStop(){QMutexLocker locker(&mMutex);mStop=true;}
 		ViSampleChunk mLeftTargetData;
 		ViSampleChunk mRightTargetData;
 
-		QQueue<int> mOutputs;
+		int mOutputSize;
+		int mOutputSample;
+		ViSampleChunk *mOutput;
+		QQueue<ViSampleChunk*> mOutputs;
+		QMutex mOutputMutex;
 
 		bool mStop;
 		int mDataOffset;
@@ -45,8 +57,6 @@ void setStop(){QMutexLocker locker(&mMutex);mStop=true;}
 
 		QMutex mMutex;
 
-		QMutex mOutputMutex;
-
 		QMutex mWaitMutex;
 		QWaitCondition mWaitCondition;
 
@@ -54,6 +64,12 @@ void setStop(){QMutexLocker locker(&mMutex);mStop=true;}
 
 class ViNeuralCorrector : public ViModifyProcessor
 {
+
+	Q_OBJECT
+
+	private slots:
+
+		bool writeOutput();
 
 	public:
 

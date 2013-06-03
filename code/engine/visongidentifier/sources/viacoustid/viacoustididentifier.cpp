@@ -2,6 +2,7 @@
 #include <viaudioposition.h>
 #include <vipcmconverter.h>
 #include <vimanager.h>
+#include <vilogger.h>
 
 #define CHUNK_SIZE 4096
 

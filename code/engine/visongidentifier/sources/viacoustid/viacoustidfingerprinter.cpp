@@ -1,6 +1,7 @@
 #include <viacoustidfingerprinter.h>
 #include <vipcmconverter.h>
 #include <fingerprintcalculator.h>
+#include <vilogger.h>
 
 #define CHUNK_SIZE 4096
 

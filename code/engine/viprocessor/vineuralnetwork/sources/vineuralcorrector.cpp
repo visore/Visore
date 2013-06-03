@@ -23,6 +23,10 @@ ViNeuralCorrectorThread::ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTra
 	mTargetLeftOffset = 0;
 	mTargetRightOffset = 0;
 
+	mOutputSize = 0;
+	mOutputSample = 0;
+	mOutput = NULL;
+
 	mLeftTargetData.resize(TRAINER_LEFT_SAMPLES);
 	mRightTargetData.resize(TRAINER_RIGHT_SAMPLES);
 }
@@ -56,6 +60,33 @@ void ViNeuralCorrectorThread::setOffsets(int data, int targetLeft, int targetRig
 	mDataOffset = data;
 	mTargetLeftOffset = targetLeft;
 	mTargetRightOffset = targetRight;
+}
+
+void ViNeuralCorrectorThread::setOutputSize(int size)
+{
+	QMutexLocker locker(&mOutputMutex);
+	mOutputSize = size;
+	if(mOutput != NULL)
+	{
+		delete mOutput;
+	}
+	mOutput = new ViSampleChunk(mOutputSize);
+}
+
+ViSampleChunk* ViNeuralCorrectorThread::output()
+{
+	QMutexLocker locker(&mOutputMutex);
+	if(mOutputs.isEmpty())
+	{
+		return NULL;
+	}
+	return mOutputs.dequeue();
+}
+
+bool ViNeuralCorrectorThread::hasOutput()
+{
+	QMutexLocker locker(&mOutputMutex);
+	return !mOutputs.isEmpty();
 }
 
 ViNeuralNetwork* ViNeuralCorrectorThread::network()
@@ -101,9 +132,19 @@ void ViNeuralCorrectorThread::run()
 			delete data;
 
 			mOutputMutex.lock();
-			mOutputs.enqueue(mNetwork->output());
+			if(mOutputSample == mOutputSize - 1)
+			{
+				mOutputs.append(mOutput);
+				mOutputMutex.unlock();
+				emit outputAvailable();
+				mOutputMutex.lock();
+				mOutput = new ViSampleChunk(mOutputSize);
+				mOutputSample = 0;
+			}
+			mOutput->at(mOutputSample) = ViScaler::scale(mNetwork->output(), 0, 1, -1, 1);
+			++mOutputSample;
 			mOutputMutex.unlock();
-
+			
 			if(mData.size() < MIN_THREAD_CHUNKS)
 			{
 				mWaitCondition.wakeAll();
@@ -117,6 +158,11 @@ void ViNeuralCorrectorThread::run()
 		mMutex.lock();
 		if(mStop)
 		{
+			mOutputMutex.lock();
+			mOutput->resize(mOutputSample + 1);
+			mOutputs.append(mOutput);
+			mOutputMutex.unlock();
+			emit outputAvailable();
 			break;
 		}
 		mMutex.unlock();
@@ -126,15 +172,10 @@ void ViNeuralCorrectorThread::run()
 	mMutex.unlock();
 }
 
-bool ViNeuralCorrectorThread::output(double &value)
+void ViNeuralCorrectorThread::stop()
 {
-	QMutexLocker locker(&mOutputMutex);
-	if(mOutputs.isEmpty())
-	{
-		return false;
-	}
-	value = mOutputs.dequeue();
-	return true;
+	QMutexLocker locker(&mMutex);
+	mStop = true;
 }
 
 ViNeuralCorrector::ViNeuralCorrector()
@@ -201,6 +242,27 @@ void ViNeuralCorrector::disableSeparateChannels(bool disable)
 	mSeparateChannels = !disable;
 }
 
+bool ViNeuralCorrector::writeOutput()
+{
+	for(int c = 0; c < mChannels; ++c)
+	{
+		if(!mThreads[c]->hasOutput())
+		{
+			return false;
+		}
+	}
+	QList<ViSampleChunk*> channels;
+	for(int c = 0; c < mChannels; ++c)
+	{
+		channels.append(mThreads[c]->output());
+	}
+	ViSampleChunk *merged = ViSampleChanneler<qreal>::merge(channels);
+	viDeleteAll(channels);
+	write(*merged);
+	delete merged;
+	return true;
+}
+
 void ViNeuralCorrector::initialize()
 {
 	if(mNetwork == NULL)
@@ -257,12 +319,15 @@ void ViNeuralCorrector::initialize()
 	{
 		ViNeuralCorrectorThread *thread = new ViNeuralCorrectorThread(mNetwork->clone(), mTrainer->clone(), mProvider->clone());
 		thread->setOffsets(mDataOffset, mTargetLeftOffset, mTargetRightOffset);
+		thread->setOutputSize(mWriteSamples);
+		QObject::connect(thread, SIGNAL(outputAvailable()), this, SLOT(writeOutput()));
 		mThreads.append(thread);
 	}
 
-for(int c = 0; c < mChannels; ++c)
-		{mThreads[c]->start();}
-
+	for(int c = 0; c < mChannels; ++c)
+	{
+		mThreads[c]->start();
+	}
 }
 
 void ViNeuralCorrector::executeWithChannels()
@@ -306,22 +371,16 @@ void ViNeuralCorrector::executeWithChannels()
 			mThreads[c]->setData(channels[c]);
 		}
 
-/*
-double value;
-		for(int c = mCurrentWriteChannel; c < mChannels; ++c)
+		/*double value;
+		while(mThreads[mCurrentWriteChannel]->output(value))
 		{
-			if(mThreads[c]->output(value))
+			mWriteBuffer.append(value);
+			++mCurrentWriteChannel;
+			if(mCurrentWriteChannel == mChannels)
 			{
-				mWriteBuffer.append(value);
-				++mCurrentWriteChannel;
-				if(mCurrentWriteChannel == mChannels)
-				{
-					mCurrentWriteChannel = 0;
-				}
+				mCurrentWriteChannel = 0;
 			}
 		}
-
-
 		if(mWriteBuffer.size() == mWriteSamples)
 		{
 			write(mWriteBuffer);
@@ -385,30 +444,33 @@ void ViNeuralCorrector::execute()
 }
 
 void ViNeuralCorrector::finalize()
-{LOG("r1");
+{
 	for(int c = 0; c < mChannels; ++c)
-		{
-			mThreads[c]->setStop();
-		}LOG("r2");
-	for(int c = 0; c < mChannels; ++c)
-		{
-			while(mThreads[c]->isRunning());
-		}
-LOG("r3");
-/*
-for(int c = 0; c < mChannels; ++c)
-		{
-if(mThreads[c]->outputs.isEmpty())break;
-			mWriteBuffer.append(ViScaler::scale(mThreads[c]->outputs.dequeue(), 0, 1, -1, 1));
-		}
-write(mWriteBuffer);
-			mWriteBuffer.clear();*/
+	{
+		mThreads[c]->stop();
+	}
 
+	for(int c = 0; c < mChannels; ++c)
+	{
+		while(mThreads[c]->isRunning());
+	}
 
 	//Write the remaining couple of samples
+	while(writeOutput());
+
+
+	/*double value;
+	while(mThreads[mCurrentWriteChannel]->output(value))
+	{
+		mWriteBuffer.append(value);
+		++mCurrentWriteChannel;
+		if(mCurrentWriteChannel == mChannels)
+		{
+			mCurrentWriteChannel = 0;
+		}
+	}
 	write(mWriteBuffer);
-	mWriteBuffer.clear();
-LOG("r4: "+QString::number(mThreads[0]->isRunning())+" "+QString::number(mThreads[1]->isRunning()));
+	mWriteBuffer.clear();*/
+
 	viDeleteAll(mThreads);
-LOG("r5");
 }

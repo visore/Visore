@@ -44,31 +44,33 @@ QList<ViChunk<T>*> ViSampleChanneler<T>::split(const T *input, const int &sample
 }
 
 template <typename T>
-ViChunk<T> ViSampleChanneler<T>::merge(QList<ViChunk<T> > channels)
+ViChunk<T>* ViSampleChanneler<T>::merge(QList<ViChunk<T>*> channels)
 {
-/*	int totalSamples = 0;
+	int totalSamples = 0;
 	int channelCount = channels.size();
 	for(int i = 0; i < channelCount; ++i)
 	{
-		totalSamples += channels[i].size();
+		totalSamples += channels[i]->size();
 	}
 	T *data = new T[totalSamples];
+	ViChunk<T> *channel;
+	T *channelData;
 	for(int i = 0; i < channelCount; ++i)
 	{
-		ViChunk<T> &channel = channels[i];
-		T *channelData = channel.data();
-		for(int j = 0; j < channel.size(); ++j)
+		channel = channels[i];
+		channelData = channel->data();
+		for(int j = 0; j < channel->size(); ++j)
 		{
 			data[j * channelCount] = channelData[j];
 		}
 	}
-	return ViChunk<T>(data, totalSamples);*/
+	return new ViChunk<T>(data, totalSamples);
 }
 
-template <typename T>
-ViChunk<T> ViSampleChanneler<T>::merge(QList<QList<T>  >channels)
+/*template <typename T>
+ViChunk<T>* ViSampleChanneler<T>::merge(QList<QList<T> > &channels)
 {
 
-}
+}*/
 
 #endif
