@@ -15,6 +15,7 @@ ViNeuralCorrectorThread::ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTra
 	mNetwork = network;
 	mTrainer = trainer;
 	mProvider = provider;
+	mTrainer->setNetwork(mNetwork);
 
 	mStop = false;
 
@@ -254,7 +255,6 @@ void ViNeuralCorrector::initialize()
 	
 	for(int i = 0; i < mChannels; ++i)
 	{
-		mTrainer->setNetwork(mNetwork);
 		ViNeuralCorrectorThread *thread = new ViNeuralCorrectorThread(mNetwork->clone(), mTrainer->clone(), mProvider->clone());
 		thread->setOffsets(mDataOffset, mTargetLeftOffset, mTargetRightOffset);
 		mThreads.append(thread);

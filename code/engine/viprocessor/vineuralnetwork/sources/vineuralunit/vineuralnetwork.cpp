@@ -24,18 +24,7 @@ ViNeuralNetwork::~ViNeuralNetwork()
 
 void ViNeuralNetwork::run()
 {
-LOG("e1");
-if(mHistory.size() > 0)
-	{
-		for(int i = 0; i < 1; ++i)
-		{
-			mHistory.dequeue();
-			mHistory.enqueue(0);
-		}
-}
-LOG("e3");
-
-	/*//Set the histroy values
+	//Set the histroy values
 	if(history() > 0)
 	{
 		for(int i = 0; i < outputCount(); ++i)
@@ -54,7 +43,7 @@ LOG("e3");
 	for(int i = 1; i < mLayers.size(); ++i)
 	{
 		mLayers[i]->run();
-	}*/
+	}
 }
 
 bool ViNeuralNetwork::add(ViNeuralLayer *layer)
