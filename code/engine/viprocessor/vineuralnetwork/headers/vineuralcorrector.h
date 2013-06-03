@@ -103,7 +103,6 @@ class ViNeuralCorrector : public ViModifyProcessor
 		QList<ViNeuralCorrectorThread*> mThreads;
 
 		QVector<qreal> mReadBuffer;
-		ViSampleChunk mWriteBuffer;
 		bool mFirstWrite;
 
 		int mChannels;

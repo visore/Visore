@@ -341,13 +341,13 @@ void ViNeuralCorrector::executeWithChannels()
 	//Ensures that the first window of samples is written immediatly, since they can't be corrected
 	if(mFirstWrite && mReadBuffer.size() >= mLeftSamples * mChannels)
 	{
+		ViSampleChunk buffer;
 		mFirstWrite = false;
 		for(int i = 0; i < mLeftSamples * mChannels; ++i)
 		{
-			mWriteBuffer.append(ViScaler::scale(mReadBuffer[i], 0, 1, -1, 1));
+			buffer.append(ViScaler::scale(mReadBuffer[i], 0, 1, -1, 1));
 		}
-		write(mWriteBuffer);
-		mWriteBuffer.clear();
+		write(buffer);
 	}
 
 	bool pause = false;
@@ -355,50 +355,12 @@ void ViNeuralCorrector::executeWithChannels()
 	{
 		QVector<qreal> subSamples = mReadBuffer.mid(0, mMinimumSamples);
 		QList<ViSampleChunk*> channels = ViSampleChanneler<qreal>::split(subSamples.data(), subSamples.size(), mChannels);
-
 		mReadBuffer.remove(0, mChannels);
-
-	/*	for(int c = 0; c < mChannels; ++c)
-		{
-			mThreads[c]->setData(&channels[c]);
-			mThreads[c]->run();
-			mWriteBuffer.append(ViScaler::scale(mThreads[c]->network()->output(), 0, 1, -1, 1));
-		}*/
 
 		for(int c = 0; c < mChannels; ++c)
 		{
-			//while(!mThreads[c]->cont()) ;
 			mThreads[c]->setData(channels[c]);
 		}
-
-		/*double value;
-		while(mThreads[mCurrentWriteChannel]->output(value))
-		{
-			mWriteBuffer.append(value);
-			++mCurrentWriteChannel;
-			if(mCurrentWriteChannel == mChannels)
-			{
-				mCurrentWriteChannel = 0;
-			}
-		}
-		if(mWriteBuffer.size() == mWriteSamples)
-		{
-			write(mWriteBuffer);
-			mWriteBuffer.clear();
-		}*/
-
-		//pool->waitForDone();
-		/*for(int c = 0; c < mChannels; ++c)
-		{
-			mWriteBuffer.append(ViScaler::scale(mThreads[c]->network()->output(), 0, 1, -1, 1));
-		}
-
-
-		if(mWriteBuffer.size() == mWriteSamples)
-		{
-			write(mWriteBuffer);
-			mWriteBuffer.clear();
-		}*/
 	}
 }
 
@@ -413,13 +375,13 @@ void ViNeuralCorrector::executeWithoutChannels()
 	//Ensures that the first window of samples is written immediatly, since they can't be corrected
 	if(mFirstWrite && mReadBuffer.size() >= mLeftSamples)
 	{
+		ViSampleChunk buffer;
 		mFirstWrite = false;
 		for(int i = 0; i < mLeftSamples; ++i)
 		{
-			mWriteBuffer.append(ViScaler::scale(mReadBuffer[i], 0, 1, 1, -1));
+			buffer.append(ViScaler::scale(mReadBuffer[i], 0, 1, 1, -1));
 		}
-		write(mWriteBuffer);
-		mWriteBuffer.clear();
+		write(buffer);
 	}
 
 	while(mReadBuffer.size() >= mMinimumSamples)
@@ -427,13 +389,6 @@ void ViNeuralCorrector::executeWithoutChannels()
 		ViSampleChunk wrapper(mReadBuffer.data(), mMinimumSamples, false);
 		mThreads[0]->setData(&wrapper);
 		mThreads[0]->run();
-		mWriteBuffer.append(ViScaler::scale(mThreads[0]->network()->output(), 0, 1, -1, 1));
-
-		if(mWriteBuffer.size() == mWriteSamples)
-		{
-			write(mWriteBuffer);
-			mWriteBuffer.clear();
-		}
 		mReadBuffer.pop_front();
 	}
 }
@@ -457,20 +412,6 @@ void ViNeuralCorrector::finalize()
 
 	//Write the remaining couple of samples
 	while(writeOutput());
-
-
-	/*double value;
-	while(mThreads[mCurrentWriteChannel]->output(value))
-	{
-		mWriteBuffer.append(value);
-		++mCurrentWriteChannel;
-		if(mCurrentWriteChannel == mChannels)
-		{
-			mCurrentWriteChannel = 0;
-		}
-	}
-	write(mWriteBuffer);
-	mWriteBuffer.clear();*/
 
 	viDeleteAll(mThreads);
 }
