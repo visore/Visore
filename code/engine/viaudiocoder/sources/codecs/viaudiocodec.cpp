@@ -215,3 +215,13 @@ ViFormatMap ViAudioCodec::supportedChannels()
 {
 	return mChannels;
 }
+
+QString ViAudioCodec::toString()
+{
+	QString result = abbreviation() + " - " + shortName() + " (";
+	if(mCompression == ViAudio::UnknownCompression) result += "Unknown";
+	else if(mCompression == ViAudio::LossyCompression) result += "Lossy";
+	else if(mCompression == ViAudio::LosslessCompression) result += "Lossless";
+	result += " Compression)";
+	return result;
+}

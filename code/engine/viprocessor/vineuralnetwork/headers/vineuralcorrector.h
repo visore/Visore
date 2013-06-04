@@ -21,14 +21,12 @@ class ViNeuralCorrectorThread : public QThread
 		ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTrainer *trainer, ViTargetProvider *provider);
 		~ViNeuralCorrectorThread();
 
-		bool setData(ViSampleChunk *data);
+		bool addData(ViSampleChunk *data);
 		void setOffsets(int data, int targetLeft, int targetRight);
 
 		void setOutputSize(int size);
 		ViSampleChunk* output();
 		bool hasOutput();
-
-		ViNeuralNetwork* network();
 
 		void run();
 

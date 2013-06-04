@@ -1,5 +1,6 @@
 #include <vicodingchain.h>
 #include <viaudiomanager.h>
+#include <vilogger.h>
 #include <QFile>
 
 ViCodingChain::ViCodingChain()
@@ -122,11 +123,19 @@ void ViCodingChain::setOutputBuffer(ViBuffer *buffer)
 void ViCodingChain::setInputFormat(ViAudioFormat format)
 {
 	mInputFormat = format;
+	if(mInputFormat.sampleSize() <= 0)
+	{
+		LOG("The input format\'s sample size is not valid.", QtCriticalMsg);
+	}
 }
 
 void ViCodingChain::setOutputFormat(ViAudioFormat format)
 {
 	mOutputFormat = format;
+	if(mOutputFormat.sampleSize() <= 0)
+	{
+		LOG("The output format\'s sample size is not valid.", QtCriticalMsg);
+	}
 }
 
 void ViCodingChain::detectCoderData()

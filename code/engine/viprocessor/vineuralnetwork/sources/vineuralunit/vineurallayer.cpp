@@ -93,6 +93,22 @@ int ViNeuralLayer::outputSize()
 	return count;
 }
 
+int ViNeuralLayer::position(ViNeuron *neuron)
+{
+	for(int i = 0; i < mNeurons.size(); ++i)
+	{
+		if(mNeurons[i] == neuron)
+		{
+			return i;
+		}
+	}
+	if(neuron == mBias)
+	{
+		return mNeurons.size();
+	}
+	return -1;
+}
+
 ViNeuron* ViNeuralLayer::at(int index) const
 {
 	if(hasBias() && index == mNeurons.size())
@@ -158,7 +174,7 @@ double ViNeuralLayer::value(int index)
 	return mNeurons[index]->value();
 }
 
-void ViNeuralLayer::setValue(int index, int value)
+void ViNeuralLayer::setValue(int index, double value)
 {
 	if(index >= mNeurons.size())
 	{

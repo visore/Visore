@@ -56,6 +56,8 @@ class ViAudioBitrate
 		int minimum() const;
 		int maximum() const;
 
+		QString toString();
+
 	private:
 
 		ViAudioBitrate::Mode mMode;
@@ -155,6 +157,8 @@ class ViAudioFormat
 		static ViFormatMap supportedBitrateModes();
 		static ViFormatMap supportedQualities();
 		static ViFormatMap supportedChannels();
+
+		QString toString();
 
 	private:
 

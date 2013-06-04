@@ -103,6 +103,21 @@ int ViAudioBitrate::maximum() const
 	return mMaximum;
 }
 
+QString ViAudioBitrate::toString()
+{
+	QString result = "";
+
+	if(mMode == ViAudioBitrate::Unknown) result += "Unknown";
+	else if(mMode == ViAudioBitrate::Constant) result += "Constant";
+	else if(mMode == ViAudioBitrate::Variable) result += "Variable";
+	else if(mMode == ViAudioBitrate::Average) result += "Average";
+	result += " Bitrate ";
+
+	result += "(normal: " + QString::number(mNormal) + ", minimum: " + QString::number(mMinimum) + ", maximum: " + QString::number(mMaximum) + ")";
+
+	return result;
+}
+
 ViAudioFormat::ViAudioFormat()
 {
 	mSampleType = ViAudioFormat::Unknown;
@@ -594,4 +609,47 @@ ViFormatMap ViAudioFormat::supportedChannels()
 		map.setDefault(2);
 	}
 	return map;
+}
+
+QString ViAudioFormat::toString()
+{
+	QString result = "";
+
+	result += "Sample Type: ";
+	if(mSampleType == ViAudioFormat::SignedInt) result += "Signed Integer";
+	else if(mSampleType == ViAudioFormat::SignedInt) result += "Signed Integer";
+	else if(mSampleType == ViAudioFormat::UnSignedInt) result += "Unsigned Integer";
+	else if(mSampleType == ViAudioFormat::Float) result += "Float";
+	else if(mSampleType == ViAudioFormat::Real) result += "Real";
+	result += "\n";
+
+	result += "Sample Size: " + QString::number(mSampleSize) + "\n";
+
+	result += "Sample Rate: " + QString::number(mSampleRate) + "\n";
+
+	result += "Channel Count: " + QString::number(mChannelCount) + "\n";
+
+	result += "Byte Order: ";
+	if(mByteOrder == ViAudioFormat::BigEndian) result += "Big Endian";
+	else if(mByteOrder == ViAudioFormat::LittleEndian) result += "Little Endian";
+	result += "\n";
+
+	result += "Codec: " + mCodec->toString() + "\n";
+
+	result += "Bitrate: " + mBitrate.toString() + "\n";
+
+	result += "Quality: ";
+	if(mQuality == ViAudioFormat::InsaneHigh) result += "Insane High";
+	else if(mQuality == ViAudioFormat::ExtremeHigh) result += "Extreme High";
+	else if(mQuality == ViAudioFormat::VeryHigh) result += "Very High";
+	else if(mQuality == ViAudioFormat::High) result += "High";
+	else if(mQuality == ViAudioFormat::AboveAverage) result += "Above Average";
+	else if(mQuality == ViAudioFormat::Average) result += "Average";
+	else if(mQuality == ViAudioFormat::BelowAverage) result += "Below Average";
+	else if(mQuality == ViAudioFormat::Low) result += "Low";
+	else if(mQuality == ViAudioFormat::VeryLow) result += "Very Low";
+	else if(mQuality == ViAudioFormat::ExtremeLow) result += "Extreme Low";
+	result += "\n";
+
+	return result;
 }

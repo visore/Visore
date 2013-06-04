@@ -33,6 +33,7 @@ ViNeuralCorrectorThread::ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTra
 
 ViNeuralCorrectorThread::~ViNeuralCorrectorThread()
 {
+	mWaitMutex.unlock();
 	delete mNetwork;
 	mNetwork = NULL;
 	delete mTrainer;
@@ -40,9 +41,15 @@ ViNeuralCorrectorThread::~ViNeuralCorrectorThread()
 	delete mProvider;
 	mProvider = NULL;
 	viDeleteAll(mData);
+	viDeleteAll(mOutputs);
+	if(mOutput != NULL)
+	{
+		delete mOutput;
+		mOutput = NULL;
+	}
 }
 
-bool ViNeuralCorrectorThread::setData(ViSampleChunk *data)
+bool ViNeuralCorrectorThread::addData(ViSampleChunk *data)
 {
 	QMutexLocker locker(&mMutex);
 	if(mData.size() > MAX_THREAD_CHUNKS)
@@ -87,11 +94,6 @@ bool ViNeuralCorrectorThread::hasOutput()
 {
 	QMutexLocker locker(&mOutputMutex);
 	return !mOutputs.isEmpty();
-}
-
-ViNeuralNetwork* ViNeuralCorrectorThread::network()
-{
-	return ViNeuralCorrectorThread::mNetwork;
 }
 
 void ViNeuralCorrectorThread::run()
@@ -161,6 +163,7 @@ void ViNeuralCorrectorThread::run()
 			mOutputMutex.lock();
 			mOutput->resize(mOutputSample + 1);
 			mOutputs.append(mOutput);
+			mOutput = NULL;
 			mOutputMutex.unlock();
 			emit outputAvailable();
 			break;
@@ -319,7 +322,7 @@ void ViNeuralCorrector::initialize()
 	{
 		ViNeuralCorrectorThread *thread = new ViNeuralCorrectorThread(mNetwork->clone(), mTrainer->clone(), mProvider->clone());
 		thread->setOffsets(mDataOffset, mTargetLeftOffset, mTargetRightOffset);
-		thread->setOutputSize(mWriteSamples);
+		thread->setOutputSize(mWriteSamples / mChannels);
 		QObject::connect(thread, SIGNAL(outputAvailable()), this, SLOT(writeOutput()));
 		mThreads.append(thread);
 	}
@@ -359,7 +362,7 @@ void ViNeuralCorrector::executeWithChannels()
 
 		for(int c = 0; c < mChannels; ++c)
 		{
-			mThreads[c]->setData(channels[c]);
+			mThreads[c]->addData(channels[c]);
 		}
 	}
 }
@@ -387,7 +390,7 @@ void ViNeuralCorrector::executeWithoutChannels()
 	while(mReadBuffer.size() >= mMinimumSamples)
 	{
 		ViSampleChunk wrapper(mReadBuffer.data(), mMinimumSamples, false);
-		mThreads[0]->setData(&wrapper);
+		mThreads[0]->addData(&wrapper);
 		mThreads[0]->run();
 		mReadBuffer.pop_front();
 	}

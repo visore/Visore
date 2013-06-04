@@ -44,6 +44,8 @@ class ViAudioCodec
 		ViFormatMap supportedQualities();
 		ViFormatMap supportedChannels();
 
+		QString toString();
+
 	protected:
 
 		ViAudioCodec();

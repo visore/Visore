@@ -418,15 +418,23 @@ bool ViAudioObject::encode(ViAudioObject::Type type, bool clearWhenFinished)
 		else if(thePath == "")
 		{
 			QString extension = "";
-			if(mOutputFormat.isValid())
-			{
-				extension = mOutputFormat.codec()->extension(".");
-			}
-			else if(format(mCodingInstructions[counter]).isValid())
+			
+			if(format(mCodingInstructions[counter]).isValid())
 			{
 				extension = format(mCodingInstructions[counter]).codec()->extension(".");
 			}
+			else if(mOutputFormat.isValid())
+			{
+				extension = mOutputFormat.codec()->extension(".");
+				buffer(mCodingInstructions[counter])->setFormat(mOutputFormat);
+			}
+			else
+			{
+				LOG("The audio format for the encoder is invalid", QtCriticalMsg);
+			}
+
 			thePath = ViManager::tempPath() + id() + extension;
+			setFilePath(mCodingInstructions[counter], thePath);
 		}
 		locker.relock();
 		++counter;
@@ -538,7 +546,6 @@ void ViAudioObject::encodeNext()
 		
 		QString thePath = filePath(type);
 		ViBuffer *theBuffer = buffer(type, true);
-
 		locker.relock();
 		if(theBuffer != NULL && thePath != "" && mCoder != NULL)
 		{
@@ -1287,7 +1294,7 @@ void ViAudioObject::startCorrection()
 	setProgress(1, 0.90);
 	locker.unlock();
 	emit statused("Correcting track");
-	setOutputFormat(corruptedFormat());
+	correctedBuffer()->setFormat(corruptedFormat());
 	mCorrector->process(thisPointer, ViAudioObject::Corrupted, ViAudioObject::Corrected);
 }
 
@@ -1301,6 +1308,7 @@ void ViAudioObject::endCorrection()
 	emit corrected();
 	setProgress(1, 0.05);
 	QObject::connect(this, SIGNAL(encoded()), this, SLOT(endCorrectionEncoding()));
+LOG("eee: " + QString::number(correctedBuffer()->size()));
 	encode(ViAudioObject::Corrected);
 }
 

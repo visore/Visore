@@ -54,7 +54,7 @@ ViManager::ViManager()
 	//Paths
 	if(mSettings->value("paths/temp").isNull())
 	{
-		mSettings->setValue("paths/temp", QDir::tempPath() + QDir::separator() + "visore");
+		mSettings->setValue("paths/temp", QDir::tempPath() + QDir::separator() + "visore" + QDir::separator());
 	}
 	QDir dir(mSettings->value("paths/temp").toString());
 	if(!dir.exists())
@@ -64,7 +64,7 @@ ViManager::ViManager()
 
 	if(mSettings->value("paths/project").isNull())
 	{
-		mSettings->setValue("paths/project", QDir::homePath() + QDir::separator() + "Visore Projects");
+		mSettings->setValue("paths/project", QDir::homePath() + QDir::separator() + "Visore Projects" + QDir::separator());
 	}
 
 	//Main window

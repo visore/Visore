@@ -1,4 +1,5 @@
 #include <vineuralnetwork.h>
+#include <visynapsefactory.h>
 
 ViNeuralNetwork::ViNeuralNetwork(ViNeuralLayerList layers)
 	: ViNeuralUnit(), QRunnable()
@@ -13,6 +14,29 @@ ViNeuralNetwork::ViNeuralNetwork(const ViNeuralNetwork &other)
 	{
 		add(new ViNeuralLayer(*other.mLayers[i]));
 	}
+
+	ViNeuralLayer *currentLayer, *nextLayer;
+	ViNeuron *currentNeuron;
+	ViSynapse *currentSynapse;
+	int position1, position2;
+	for(int i = 0; i < other.mLayers.size() - 1; ++i)
+	{
+		currentLayer = other.mLayers[i];
+		nextLayer = other.mLayers[i + 1];
+		int neurons = currentLayer->size() + currentLayer->hasBias();
+		for(int j = 0; j < neurons; ++j)
+		{
+			currentNeuron = currentLayer->at(j);
+			for(int k = 0; k < currentNeuron->outputSize(); ++k)
+			{
+				currentSynapse = currentNeuron->outputAt(k);
+				position1 = currentLayer->position(currentSynapse->input());
+				position2 = nextLayer->position(currentSynapse->output());
+				ViSynapseFactory::create(at(i)->at(position1), at(i + 1)->at(position2), currentSynapse->weight());
+			}
+		}
+	}
+
 	mHistory = other.mHistory;
 }
 

@@ -289,10 +289,10 @@ void ViProject::save()
 
 	QObject::connect(&mArchive, SIGNAL(compressed()), this, SLOT(setFinished()), Qt::UniqueConnection);
 	QObject::connect(&mArchive, SIGNAL(compressed()), this, SIGNAL(saved()), Qt::UniqueConnection);
-LOG("p1");
-	copyTracksToProject();LOG("p2");
-	saveAll();LOG("p3");
-	mArchive.compressData(mPaths["root"]);LOG("p4");
+
+	copyTracksToProject();
+	saveAll();
+	mArchive.compressData(mPaths["root"]);
 }
 
 bool ViProject::loadAll()
@@ -328,7 +328,7 @@ void ViProject::setFinished(bool finish)
 bool ViProject::createTempStructure()
 {
 	//Declare paths
-	mPaths["root"] = ViManager::tempPath() + QDir::separator() + "projects" + QDir::separator() + id() + QDir::separator();
+	mPaths["root"] = ViManager::tempPath() + "projects" + QDir::separator() + id() + QDir::separator();
 
 	mPaths["info"] = mPaths["root"] + "info" + QDir::separator();
 	mPaths["info_general"] = mPaths["info"] + "general" + QDir::separator();
@@ -502,12 +502,9 @@ void ViProject::copyTracksToProject()
 			{
 				oldPath = object->filePath(types[k]);
 				directory = typeDirectory(types[k]);
-LOG("xxxx: "+QString::number(object->hasFile(types[k])) + " "+oldPath);
 				if(object->hasFile(types[k]) && !oldPath.startsWith(directory))
 				{
 					newPath = generateFileName(object->songInfo(), directory, object->format(types[k]).codec()->extension());
-LOG(oldPath);
-LOG(newPath);
 					QFile::rename(oldPath, newPath);
 					object->setFilePath(types[k], newPath);
 				}

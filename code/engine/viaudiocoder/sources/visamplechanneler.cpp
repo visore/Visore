@@ -61,7 +61,7 @@ ViChunk<T>* ViSampleChanneler<T>::merge(QList<ViChunk<T>*> channels)
 		channelData = channel->data();
 		for(int j = 0; j < channel->size(); ++j)
 		{
-			data[j * channelCount] = channelData[j];
+			data[(j * channelCount) + i] = channelData[j];
 		}
 	}
 	return new ViChunk<T>(data, totalSamples);

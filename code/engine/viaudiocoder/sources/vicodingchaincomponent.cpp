@@ -394,7 +394,7 @@ void ViCodingChainFileOutput::initialize()
 		return;
 	}
 	QFileInfo info(mFilePath);
-	QString folder = ViManager::tempPath() + QDir::separator() + "coder";
+	QString folder = ViManager::tempPath() + "coder";
 	QDir dir(folder);
 	if(!dir.exists())
 	{

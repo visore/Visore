@@ -2,6 +2,7 @@
 
 #include <qmath.h>
 #include <string.h> //memcpy
+#include <algorithm> //fill
 
 template<typename T>
 ViChunk<T>::ViChunk(bool autoDelete)
@@ -115,14 +116,14 @@ void ViChunk<T>::insert(T value, int repeatValue)
 	if(mData == 0)
 	{
 		resize(repeatValue);
-		fill(mData, mData + repeatValue, value);
+		std::fill(mData, mData + repeatValue, value);
 	}
 	else
 	{
 		T *temp = new T[mSize];
 		memcpy(temp, mData, sizeof(T) * mSize);
 		resize(mSize + repeatValue);
-		fill(mData, mData + repeatValue, value);
+		std::fill(mData, mData + repeatValue, value);
 		memcpy(mData + repeatValue, temp, sizeof(T) * repeatValue);
 		delete [] temp;
 	}
@@ -134,7 +135,7 @@ void ViChunk<T>::append(T value, int repeatValue)
 	if(mData == 0)
 	{
 		resize(repeatValue);
-		fill(mData, mData + repeatValue, value);
+		std::fill(mData, mData + repeatValue, value);
 	}
 	else
 	{
@@ -143,7 +144,7 @@ void ViChunk<T>::append(T value, int repeatValue)
 		memcpy(temp, mData, sizeof(T) * oldSize);
 		resize(mSize + repeatValue);
 		memcpy(mData, temp, sizeof(T) * oldSize);
-		fill(mData + oldSize, mData + oldSize + repeatValue, value);
+		std::fill(mData + oldSize, mData + oldSize + repeatValue, value);
 		delete [] temp;
 	}
 }

@@ -27,6 +27,7 @@ class ViNeuralLayer : public ViNeuralUnit, public QRunnable
 		int inputSize();
 		int outputSize();
 
+		int position(ViNeuron *neuron);
 		ViNeuron* at(int index) const;
 		ViNeuron* neuron(const QString id) const;
 
@@ -36,7 +37,7 @@ class ViNeuralLayer : public ViNeuralUnit, public QRunnable
 
 		double value(int index);
 
-		void setValue(int index, int value);
+		void setValue(int index, double value);
 
 		ViNeuron* operator [] (const int index) const;
 		ViNeuron* operator [] (const QString id) const;
