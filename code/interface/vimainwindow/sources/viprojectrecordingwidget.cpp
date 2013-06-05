@@ -19,7 +19,7 @@ ViProjectRecordingWidget::ViProjectRecordingWidget(QWidget *parent)
 
 	QString date = QDate::currentDate().toString("dd-MM-yyyy");
 	mUi->nameLineEdit->setText("Visore Project (" + date + ")");
-	mUi->newBrowser->setFileName(ViManager::projectPath() + QDir::separator() + "Visore Project (" + date + ")." + ViManager::projectExtension());
+	mUi->newBrowser->setFileName(ViManager::projectPath() + "Visore Project (" + date + ")." + ViManager::projectExtension());
 
 	mUi->startButton->setSize(64, 64);
 	mUi->startButton->setIcon(ViThemeManager::icon("startprocess"), 36);
@@ -44,8 +44,6 @@ void ViProjectRecordingWidget::load()
 	mProject = new ViProject();
 	mProject->setProjectName(mUi->nameLineEdit->text());
 	mProject->setFilePath(mUi->newBrowser->fileName());
-	mProject->setFormat(mUi->formatWidget->format());
-	mProject->setSides(mUi->sidesSpinBox->value());
 
 	if(mUi->existingRadioButton->isChecked())
 	{
@@ -66,7 +64,7 @@ void ViProjectRecordingWidget::start()
 	{
 		type = ViAudioObject::Corrupted;
 	}
-	engine()->recordProject(mProject, type, mUi->songInfoBox->isChecked());
+	engine()->recordProject(mProject, type, mUi->formatWidget->format(), mUi->sidesSpinBox->value(), mUi->songInfoBox->isChecked());
 }
 
 void ViProjectRecordingWidget::changeType()

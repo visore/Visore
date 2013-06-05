@@ -35,6 +35,8 @@ class ViSongInfo
 		qint16 artistFamiliarity();
 
 		QString imagePath(int index = 0);
+		QString imageExtension(int index = 0);
+		QString imageExtension(QString prefix, int index = 0);
 		QString imageMimeType(int index = 0);
 		QImage image(int index = 0);
 		QByteArray imageData(int index = 0);

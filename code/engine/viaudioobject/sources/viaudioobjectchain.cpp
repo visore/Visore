@@ -73,7 +73,7 @@ void ViAudioObjectChain::add(ViAudioObjectQueue objects)
 
 void ViAudioObjectChain::add(ViProject &project)
 {
-	mObjects.append(project.objectQueue());
+	mObjects.append(project.objects());
 }
 
 void ViAudioObjectChain::clear()

@@ -43,6 +43,9 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	mProgressParts = 1;
 	mProgress = 0;
 
+	mSideNumber = 0;
+	mTrackNumber = 0;
+
 	setAligner(new ViFourierCrossAligner());
 
 	QObject::connect(this, SIGNAL(encoded()), this, SIGNAL(finished()));
@@ -435,12 +438,16 @@ bool ViAudioObject::encode(ViAudioObject::Type type, bool clearWhenFinished)
 	for(int i = 0; i < mCodingInstructions.size(); ++i)
 	{
 		locker.unlock();
-		if(!hasBuffer(mCodingInstructions[i]) || !hasFile(mCodingInstructions[i]))
+		if(!hasBuffer(mCodingInstructions[i]))
 		{
 			locker.relock();
 			mCodingInstructions.removeAt(i);
 			--i;
 			locker.unlock();
+		}
+		else if(!hasFile(mCodingInstructions[i]))
+		{
+			setFilePath(mCodingInstructions[i], temporaryFilePath(mCodingInstructions[i]));
 		}
 		locker.relock();
 	}
@@ -1070,6 +1077,78 @@ bool ViAudioObject::hasFile(ViAudioObject::Type type)
 	return filePath(type) != "";
 }
 
+QString ViAudioObject::fileName(bool track, bool side)
+{
+	QString result = "";
+
+	if(side)
+	{
+		result += "[Side ";
+		if(mSideNumber < 10)
+		{
+			result += "0";
+		}
+		result += QString::number(mSideNumber) + "] ";
+	}
+
+	if(track)
+	{
+		if(mTrackNumber < 10)
+		{
+			result += "0";
+		}
+		result += QString::number(mTrackNumber) + ". ";
+	}
+
+	if(mSongInfo.artistName() == "")
+	{
+		result += "Unknown Artist";
+	}
+	else
+	{
+		result += mSongInfo.artistName();
+	}
+	result += " - ";
+
+	if(mSongInfo.songTitle() == "")
+	{
+		result += "Unknown Title";
+	}
+	else
+	{
+		result += mSongInfo.songTitle();
+	}
+
+	return result;
+}
+
+QString ViAudioObject::temporaryFilePath(ViAudioObject::Type type)
+{
+	QString result = ViManager::tempPath() + id();
+	if(type == ViAudioObject::Target)
+	{
+		result += "_target";
+	}
+	else if(type == ViAudioObject::Corrupted)
+	{
+		result += "_corrupted";
+	}
+	else if(type == ViAudioObject::Corrected)
+	{
+		result += "_corrected";
+	}
+	ViAudioCodec *codec = format(type).codec();
+	if(codec == NULL)
+	{
+		result += ".data";
+	}
+	else
+	{
+		result += codec->extension(".");
+	}
+	return result;
+}
+
 /*******************************************************************************************************************
 
 	WAVEFORM
@@ -1323,6 +1402,34 @@ bool ViAudioObject::isDetectingSongInfo()
 	QMutexLocker locker(&mMutex);
 	return mIsDetectingInfo;
 }
+
+void ViAudioObject::setSideNumber(int side)
+{
+	QMutexLocker locker(&mMutex);
+	mSideNumber = side;
+}
+
+int ViAudioObject::sideNumber()
+{
+	QMutexLocker locker(&mMutex);
+	return mSideNumber;
+}
+
+void ViAudioObject::setTrackNumber(int track)
+{
+	QMutexLocker locker(&mMutex);
+	mTrackNumber = track;
+}
+
+int ViAudioObject::trackNumber()
+{
+	QMutexLocker locker(&mMutex);
+	return mTrackNumber;
+}
+
+
+
+
 
 
 

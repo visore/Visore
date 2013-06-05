@@ -129,6 +129,16 @@ QString ViSongInfo::imagePath(int index)
 	return "";
 }
 
+QString ViSongInfo::imageExtension(int index)
+{
+	return QString(QImageReader::imageFormat(mImagePaths[index])).toLower();
+}
+
+QString ViSongInfo::imageExtension(QString prefix, int index)
+{
+	return prefix + imageExtension(index);
+}
+
 QString ViSongInfo::imageMimeType(int index)
 {
 	if(index < mImagePaths.size())

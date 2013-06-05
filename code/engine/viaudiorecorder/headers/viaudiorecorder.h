@@ -26,8 +26,7 @@ class ViAudioRecorder : public ViNotifier
 		ViAudioRecorder();
 		~ViAudioRecorder();
 
-		bool record(ViProject *project, ViAudioObject::Type type, bool detectInfo);
-		bool record(ViProject *project, ViAudioObject::Type type, bool detectInfo, ViAudioFormat format);
+		bool record(ViProject *project, ViAudioObject::Type type, ViAudioFormat format, int sides, bool detectInfo);
 
 	protected:
 
@@ -47,6 +46,9 @@ class ViAudioRecorder : public ViNotifier
 		QTimer mIdleTimer;
 
 		bool mDetectInfo;
+		int mCurrentTrack;
+		int mCurrentSide;
+		int mSides;
 
 };
 

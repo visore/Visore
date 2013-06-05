@@ -274,6 +274,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		bool hasFile(ViAudioObject::Type type);
 
+		QString fileName(bool track = true, bool side = false);
+		QString temporaryFilePath(ViAudioObject::Type type);
+
 		/*******************************************************************************************************************
 
 			FORMATS
@@ -317,6 +320,25 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void setSongInfo(ViSongInfo info);
 		void detectSongInfo();
 		bool isDetectingSongInfo();
+
+		void setSideNumber(int side);
+		int sideNumber();
+
+		void setTrackNumber(int track);
+		int trackNumber();
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -440,6 +462,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViMetadata mMetadata;
 		ViSongInfo mSongInfo;
 		bool mIsDetectingInfo;
+		int mSideNumber;
+		int mTrackNumber;
 
 };
 

@@ -9,6 +9,10 @@ ViAudioRecorder::ViAudioRecorder()
 	mProject = NULL;
 	mType = ViAudioObject::Undefined;
 
+	mCurrentTrack = 0;
+	mCurrentSide = 0;
+	mSides = 0;
+
 	mIdleTimer.setInterval(IDLE_TIME);
 	QObject::connect(&mIdleTimer, SIGNAL(timeout()), this, SLOT(checkSize()));
 
@@ -24,19 +28,16 @@ ViAudioRecorder::~ViAudioRecorder()
 	mProject = NULL;
 }
 
-bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, bool detectInfo)
-{
-	return record(project, type, detectInfo, project->format());
-}
-
-bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, bool detectInfo, ViAudioFormat format)
+bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, ViAudioFormat format, int sides, bool detectInfo)
 {
 	emit started();
-	setProgress(-1);
+	setProgress(0);
+	mQueue.clear();
+
 	mProject = project;
 	mType = type;
 	mInput.setFormat(format);
-	mQueue.clear();
+	mSides = sides;
 	mDetectInfo = detectInfo;
 
 	mProject->save();
@@ -46,6 +47,8 @@ bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, bool 
 		emit statused("Waiting for record to start");
 		return true;
 	}
+	setProgress(100);
+	emit finished();
 	return false;
 }
 
@@ -60,6 +63,9 @@ void ViAudioRecorder::nextObject(bool startTimer)
 	mSegmentDetector.process(newObject, mType); // Important: The preious statment will create a buffer and set the format. Must be done before this is executed
 	mInput.start();
 	mObject = newObject;
+
+	mObject->setSideNumber(mCurrentSide);
+	mObject->setTrackNumber(mCurrentTrack);
 
 	if(startTimer)
 	{
@@ -77,6 +83,7 @@ void ViAudioRecorder::finish()
 
 void ViAudioRecorder::startSong()
 {
+	++mCurrentTrack;
 	nextObject(false);
 	emit statused("Processing track");
 }
@@ -100,13 +107,14 @@ void ViAudioRecorder::endSong()
 
 void ViAudioRecorder::startRecord()
 {
+	++mCurrentSide;
 	nextObject();
 	emit statused("Waiting for track to start");
 }
 
 void ViAudioRecorder::endRecord()
 {
-	if(mProject->isLastSide())
+	if(mCurrentSide == mSides)
 	{
 		mIdleTimer.stop();
 		mInput.stop();
@@ -122,7 +130,6 @@ void ViAudioRecorder::endRecord()
 	}
 	else
 	{
-		mProject->nextSide();
 		nextObject();
 		emit statused("Please turn over the record");
 	}
@@ -134,7 +141,8 @@ void ViAudioRecorder::serialize()
 	QObject::disconnect(object.data(), SIGNAL(infoed(bool)), this, SLOT(serialize()));
 	if(mProject != NULL && object->length(ViAudioPosition::Seconds) > LENGTH_CUTOFF)
 	{
-		mProject->serialize(object, mType);
+		mProject->add(object);
+		object->encode();
 	}
 }
 

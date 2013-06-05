@@ -118,22 +118,19 @@ void ViProjectLoader::loadTracks()
 
 	mUi->tracksComboBox->clear();
 
-	ViAudioObjectMatrix matrix = project->objectMatrix();
+	ViAudioObjectQueue objects = project->objects();
 	ViAudioObject::Type resources;
-	for(int i = 0; i < matrix.size(); ++i)
+	for(int i = 0; i < objects.size(); ++i)
 	{
-		for(int j = 0; j < matrix[i].size(); ++j)
+		resources = objects[i]->availableResources();
+		if(resources != ViAudioObject::Undefined)
 		{
-			resources = matrix[i][j]->availableResources();
-			if(resources != ViAudioObject::Undefined)
-			{
-				mObjects.enqueue(matrix[i][j]);
-				mUi->tracksComboBox->addItem(ViProject::generateTrackName(matrix[i][j]->songInfo(), j+1, i+1));
-			}
-			else
-			{
-				LOG("Track (side " + QString::number(i+1) + ", track " + QString::number(j+1) + ") does not have any data and will be removed from the list.");
-			}
+			mObjects.enqueue(objects[i]);
+			mUi->tracksComboBox->addItem(objects[i]->fileName(true, true));
+		}
+		else
+		{
+			LOG("Track (side " + QString::number(objects[i]->sideNumber()) + ", track " + QString::number(objects[i]->trackNumber()) + ") does not have any data and will be removed from the list.");
 		}
 	}
 

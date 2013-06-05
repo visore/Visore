@@ -46,7 +46,7 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		void correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector);
 
 		//Project
-		void recordProject(ViProject *project, ViAudioObject::Type type, bool detectInfo);
+		void recordProject(ViProject *project, ViAudioObject::Type type, ViAudioFormat format, int sides, bool detectInfo);
 
 		//Volume
 		void setVolume(int volume);

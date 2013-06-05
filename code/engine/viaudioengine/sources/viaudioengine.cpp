@@ -139,19 +139,19 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 	mObjectChain.add(objects);
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-	mObjectChain.addFunction(ViFunctionCall("decode"), 0.05);
-	mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.85);
-	mObjectChain.addFunction(ViFunctionCall("align"), 0.05);
-	mObjectChain.addFunction(ViFunctionCall("encode"), 0.05);
+	mObjectChain.addFunction(ViFunctionCall("decode"), 0.01);
+	mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.97);
+	mObjectChain.addFunction(ViFunctionCall("align"), 0.01);
+	mObjectChain.addFunction(ViFunctionCall("encode"), 0.01);
 	mObjectChain.execute();
 }
 
-void ViAudioEngine::recordProject(ViProject *project, ViAudioObject::Type type, bool detectInfo)
+void ViAudioEngine::recordProject(ViProject *project, ViAudioObject::Type type, ViAudioFormat format, int sides, bool detectInfo)
 {
 	QObject::connect(&mRecorder, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)), Qt::UniqueConnection);
 	QObject::connect(&mRecorder, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)), Qt::UniqueConnection);
 	QObject::connect(&mRecorder, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::UniqueConnection);
-	mRecorder.record(project, type, detectInfo);
+	mRecorder.record(project, type, format, sides, detectInfo);
 }
 
 void ViAudioEngine::generateWaveForm(ViAudioObjectPointer object, ViAudioObject::Type type)
