@@ -18,6 +18,7 @@ class ViAudioObjectChain : public QObject
 	private slots:
 
 		void progress(qreal percentage);
+		void progressNext();
 		void executeNext();
 
 	public:
@@ -31,8 +32,8 @@ class ViAudioObjectChain : public QObject
 
 		void clear();
 
-		void setFunction(ViFunctionCall function);
-		void setFunction(QString function);
+		void addFunction(ViFunctionCall function, qreal weight = -1);
+		void addFunction(QString function, qreal weight = -1);
 
 		void execute();
 
@@ -43,7 +44,11 @@ class ViAudioObjectChain : public QObject
 		int mObjectCount;
 		qreal mProgress;
 		
-		ViFunctionCall mFunction;
+		int mCurrentFunctionIndex;
+		QQueue<ViFunctionCall> mFunctions;
+		QQueue<qreal> mWeights;
+		ViFunctionCall mCurrentFunction;
+		qreal mCurrentWeight;
 
 };
 

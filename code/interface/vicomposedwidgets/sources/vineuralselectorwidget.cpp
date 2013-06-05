@@ -15,6 +15,14 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 {
 	mUi = new Ui::ViNeuralSelectorWidget();
 	mUi->setupUi(this);
+
+	//Mode
+	mUi->modeComboBox->addItem("Custom Correction");
+	mUi->modeComboBox->addItem("Quick Correction");
+	mUi->modeComboBox->addItem("Medium Correction");
+	mUi->modeComboBox->addItem("Advanced Correction");
+	mUi->modeComboBox->addItem("Extreme Correction");
+	QObject::connect(mUi->modeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSettings(int)));
 	
 	//Hidden layers
 	QObject::connect(mUi->biasCheckBox, SIGNAL(toggled(bool)), mUi->biasValueSpinBox, SLOT(setVisible(bool)));
@@ -25,7 +33,6 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 	mUi->hiddenLayerAdd->setIcon(ViThemeManager::icon("add"), 30);
 	mUi->hiddenLayerRemove->setSize(40, 40);
 	mUi->hiddenLayerRemove->setIcon(ViThemeManager::icon("remove"), 30);
-	addHiddenLayer(mUi->hiddenLayerList->count(), 1);
 
 	//Weights
 	QList<ViWeightInitializer*> weightInitializers = ViWeightInitializerManager::libraries();
@@ -33,7 +40,6 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 	{
 		mUi->weightInitializerComboBox->addItem(weightInitializers[i]->name("WeightInitializer", true), weightInitializers[i]->name());
 	}
-	mUi->weightInitializerComboBox->setCurrentIndex(mUi->weightInitializerComboBox->findText(ViWeightInitializerManager::createDefault()->name("WeightInitializer", true), Qt::MatchExactly));
 
 	//Activation function
 	QList<ViActivationFunction*> activationFunctions = ViActivationFunctionManager::libraries();
@@ -41,7 +47,6 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 	{
 		mUi->activationFunctionComboBox->addItem(activationFunctions[i]->name("ActivationFunction", true), activationFunctions[i]->name());
 	}
-	mUi->activationFunctionComboBox->setCurrentIndex(mUi->activationFunctionComboBox->findText(ViActivationFunctionManager::createDefault()->name("ActivationFunction", true), Qt::MatchExactly));
 
 	//Error functions
 	QObject::connect(mUi->errorFunctionAdd, SIGNAL(clicked()), this, SLOT(addErrorFunction()));
@@ -62,7 +67,6 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 	{
 		mUi->trainerComboBox->addItem(trainers[i]->name("Trainer", true), trainers[i]->name());
 	}
-	mUi->trainerComboBox->setCurrentIndex(mUi->trainerComboBox->findText(ViTrainerManager::createDefault()->name("Trainer", true), Qt::MatchExactly));
 
 	//Target providers
 	QObject::connect(mUi->targetProviderComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(toggleTargetProvider()));
@@ -71,13 +75,13 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 	{
 		mUi->targetProviderComboBox->addItem(targetProviders[i]->name("TargetProvider", true), targetProviders[i]->name());
 	}
-	mUi->targetProviderComboBox->setCurrentIndex(mUi->targetProviderComboBox->findText(ViTargetProviderManager::createDefault()->name("TargetProvider", true), Qt::MatchExactly));
 	QList<ViInterpolator*> interpolators = ViInterpolatorManager::libraries();
 	for(int i = 0; i < interpolators.size(); ++i)
 	{
 		mUi->interpolatorComboBox->addItem(interpolators[i]->name("Interpolator", true), interpolators[i]->name());
 	}
-	mUi->interpolatorComboBox->setCurrentIndex(mUi->interpolatorComboBox->findText(ViInterpolatorManager::createDefault()->name("Interpolator", true), Qt::MatchExactly));
+
+	changeSettings(0);
 }
 
 ViNeuralSelectorWidget::~ViNeuralSelectorWidget()
@@ -234,5 +238,112 @@ void ViNeuralSelectorWidget::toggleTargetProvider()
 	{
 		mUi->interpolatorLabel->hide();
 		mUi->interpolatorComboBox->hide();
+	}
+}
+
+void ViNeuralSelectorWidget::changeSettings(int index)
+{
+	if(index == 0)
+	{
+		mUi->inputsGroupBox->show();
+		mUi->hiddenLayersGroupBox->show();
+		mUi->weightsGroupBox->show();
+		mUi->activationFunctionGroupBox->show();
+		mUi->errorFunctionsGroupBox->show();
+		mUi->trainerGroupBox->show();
+		mUi->targetGroupBox->show();
+		mUi->channelsGroupBox->show();
+	}
+	else
+	{
+		mUi->inputsGroupBox->hide();
+		mUi->hiddenLayersGroupBox->hide();
+		mUi->weightsGroupBox->hide();
+		mUi->activationFunctionGroupBox->hide();
+		mUi->errorFunctionsGroupBox->hide();
+		mUi->trainerGroupBox->hide();
+		mUi->targetGroupBox->hide();
+		mUi->channelsGroupBox->hide();
+	}
+
+	int weightIndex = mUi->weightInitializerComboBox->findText(ViWeightInitializerManager::createDefault()->name("WeightInitializer", true), Qt::MatchExactly);
+	int activationIndex = mUi->activationFunctionComboBox->findText(ViActivationFunctionManager::createDefault()->name("ActivationFunction", true), Qt::MatchExactly);
+	int trainerIndex = mUi->trainerComboBox->findText(ViTrainerManager::createDefault()->name("Trainer", true), Qt::MatchExactly);
+	int targetIndex = mUi->targetProviderComboBox->findText(ViTargetProviderManager::createDefault()->name("TargetProvider", true), Qt::MatchExactly);
+	int interpolatorIndex = mUi->interpolatorComboBox->findText(ViInterpolatorManager::createDefault()->name("Interpolator", true), Qt::MatchExactly);
+
+	if(index == 0)
+	{
+		mUi->inputSpinBox->setValue(32);
+		mUi->historySpinBox->setValue(8);
+		mUi->hiddenNeuronsSpinBox->setValue(16);
+		mUi->biasCheckBox->setChecked(true);
+		mUi->biasValueSpinBox->setValue(1);
+		mUi->hiddenLayerList->clear();
+		addHiddenLayer(mUi->hiddenNeuronsSpinBox->value(), mUi->biasCheckBox->isChecked() * mUi->biasValueSpinBox->value());
+		mUi->weightInitializerComboBox->setCurrentIndex(weightIndex);
+		mUi->activationFunctionComboBox->setCurrentIndex(activationIndex);
+		mUi->errorFunctionList->clear();
+		mUi->trainerComboBox->setCurrentIndex(trainerIndex);
+		mUi->targetProviderComboBox->setCurrentIndex(targetIndex);
+		mUi->interpolatorComboBox->setCurrentIndex(interpolatorIndex);
+		mUi->channelsCheckBox->setChecked(true);
+	}
+	else if(index == 1)
+	{
+		mUi->inputSpinBox->setValue(1);
+		mUi->historySpinBox->setValue(0);
+		mUi->hiddenLayerList->clear();
+		mUi->weightInitializerComboBox->setCurrentIndex(weightIndex);
+		mUi->activationFunctionComboBox->setCurrentIndex(activationIndex);
+		mUi->errorFunctionList->clear();
+		mUi->trainerComboBox->setCurrentIndex(trainerIndex);
+		mUi->targetProviderComboBox->setCurrentIndex(targetIndex);
+		mUi->interpolatorComboBox->setCurrentIndex(interpolatorIndex);
+		mUi->channelsCheckBox->setChecked(true);
+	}
+	else if(index == 2)
+	{
+		mUi->inputSpinBox->setValue(32);
+		mUi->historySpinBox->setValue(4);
+		mUi->hiddenLayerList->clear();
+		addHiddenLayer(16, 1);
+		mUi->weightInitializerComboBox->setCurrentIndex(weightIndex);
+		mUi->activationFunctionComboBox->setCurrentIndex(activationIndex);
+		mUi->errorFunctionList->clear();
+		mUi->trainerComboBox->setCurrentIndex(trainerIndex);
+		mUi->targetProviderComboBox->setCurrentIndex(targetIndex);
+		mUi->interpolatorComboBox->setCurrentIndex(interpolatorIndex);
+		mUi->channelsCheckBox->setChecked(true);
+	}
+	else if(index == 3)
+	{
+		mUi->inputSpinBox->setValue(128);
+		mUi->historySpinBox->setValue(32);
+		mUi->hiddenLayerList->clear();
+		addHiddenLayer(32, 1);
+		addHiddenLayer(16, 1);
+		mUi->weightInitializerComboBox->setCurrentIndex(weightIndex);
+		mUi->activationFunctionComboBox->setCurrentIndex(activationIndex);
+		mUi->errorFunctionList->clear();
+		mUi->trainerComboBox->setCurrentIndex(trainerIndex);
+		mUi->targetProviderComboBox->setCurrentIndex(targetIndex);
+		mUi->interpolatorComboBox->setCurrentIndex(interpolatorIndex);
+		mUi->channelsCheckBox->setChecked(true);
+	}
+	else if(index == 4)
+	{
+		mUi->inputSpinBox->setValue(256);
+		mUi->historySpinBox->setValue(64);
+		mUi->hiddenLayerList->clear();
+		addHiddenLayer(64, 1);
+		addHiddenLayer(32, 1);
+		mUi->weightInitializerComboBox->setCurrentIndex(weightIndex);
+		mUi->activationFunctionComboBox->setCurrentIndex(activationIndex);
+		mUi->errorFunctionList->clear();
+		mUi->trainerComboBox->setCurrentIndex(trainerIndex);
+		mUi->targetProviderComboBox->setCurrentIndex(targetIndex);
+		mUi->interpolatorComboBox->setCurrentIndex(interpolatorIndex);
+		mUi->channelsCheckBox->setChecked(true);
 	}
 }

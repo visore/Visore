@@ -25,6 +25,8 @@ class ViNeuralSelectorWidget : public ViWidget
 
 		void toggleTargetProvider();
 
+		void changeSettings(int index);
+
 	public:
 
 		ViNeuralSelectorWidget(QWidget *parent = 0);

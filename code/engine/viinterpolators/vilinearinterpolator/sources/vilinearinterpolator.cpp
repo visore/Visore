@@ -1,5 +1,10 @@
 #include <vilinearinterpolator.h>
 
+ViLinearInterpolator::ViLinearInterpolator()
+	: ViInterpolator(1, 1)
+{
+}
+
 qreal ViLinearInterpolator::calculate()
 {
 	return (mLeftData->last() + mRightData->first()) / 2.0;

@@ -38,6 +38,9 @@ class ViNeuralCorrectorThread : public QThread
 		ViTrainer *mTrainer;
 		ViTargetProvider *mProvider;
 
+		int mProviderLeftSamples;
+		int mProviderRightSamples;
+
 		QQueue<ViSampleChunk*> mData;
 		ViSampleChunk mLeftTargetData;
 		ViSampleChunk mRightTargetData;
@@ -94,6 +97,9 @@ class ViNeuralCorrector : public ViModifyProcessor
 		ViNeuralNetwork *mNetwork;
 		ViTrainer *mTrainer;
 		ViTargetProvider *mProvider;
+
+		int mProviderLeftSamples;
+		int mProviderRightSamples;
 
 		bool mSeparateChannels;
 

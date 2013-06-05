@@ -23,7 +23,7 @@ ViNeuralNetwork::ViNeuralNetwork(const ViNeuralNetwork &other)
 	{
 		currentLayer = other.mLayers[i];
 		nextLayer = other.mLayers[i + 1];
-		int neurons = currentLayer->size() + currentLayer->hasBias();
+		int neurons = currentLayer->size();
 		for(int j = 0; j < neurons; ++j)
 		{
 			currentNeuron = currentLayer->at(j);
@@ -32,7 +32,20 @@ ViNeuralNetwork::ViNeuralNetwork(const ViNeuralNetwork &other)
 				currentSynapse = currentNeuron->outputAt(k);
 				position1 = currentLayer->position(currentSynapse->input());
 				position2 = nextLayer->position(currentSynapse->output());
-				ViSynapseFactory::create(at(i)->at(position1), at(i + 1)->at(position2), currentSynapse->weight());
+				ViSynapseFactory::create(at(i)->at(position1), at(i + 1)->at(position2), currentSynapse->weight());	
+			}
+
+			if(currentLayer->hasBias())
+			{
+				for(int k = 0; k < currentNeuron->inputSize(); ++k)
+				{
+					currentSynapse = currentNeuron->inputAt(k);
+					if(currentSynapse->input() == currentLayer->bias())
+					{
+						ViSynapseFactory::create(at(i)->bias(), currentNeuron, currentSynapse->weight());
+						break;
+					}
+				}
 			}
 		}
 	}

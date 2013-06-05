@@ -1,6 +1,6 @@
 #include <viinterpolator.h>
 
-ViInterpolator::ViInterpolator()
+ViInterpolator::ViInterpolator(int leftSamples, int rightSamples)
 	: ViLibrary()
 {
 	mLeftData = NULL;
@@ -8,6 +8,8 @@ ViInterpolator::ViInterpolator()
 	mRatio = 0;
 	mDeleteLeft = false;
 	mDeleteRight = false;
+	setLeftSamples(leftSamples);
+	setRightSamples(rightSamples);
 }
 
 ViInterpolator::ViInterpolator(const ViInterpolator &other)
@@ -36,11 +38,34 @@ ViInterpolator::ViInterpolator(const ViInterpolator &other)
 	}
 	
 	mRatio = other.mRatio;
+
+	mLeftSamples = other.mLeftSamples;
+	mRightSamples = other.mRightSamples;
 }
 
 ViInterpolator::~ViInterpolator()
 {
 	clear();
+}
+
+int ViInterpolator::leftSamples()
+{
+	return mLeftSamples;
+}
+
+int ViInterpolator::rightSamples()
+{
+	return mRightSamples;
+}
+
+void ViInterpolator::setLeftSamples(int samples)
+{
+	mLeftSamples = samples;
+}
+
+void ViInterpolator::setRightSamples(int samples)
+{
+	mRightSamples = samples;
 }
 
 void ViInterpolator::clear()

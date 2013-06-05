@@ -32,12 +32,25 @@
    <property name="bottomMargin">
     <number>10</number>
    </property>
-   <item row="1" column="1" colspan="2">
-    <widget class="ViButton" name="button1" native="true">
+   <item row="3" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="0" colspan="3">
+    <widget class="ViNeuralSelectorWidget" name="neuralSelector" native="true">
      <property name="minimumSize">
       <size>
-       <width>10</width>
-       <height>10</height>
+       <width>0</width>
+       <height>0</height>
       </size>
      </property>
     </widget>
@@ -55,16 +68,6 @@
      </property>
     </spacer>
    </item>
-   <item row="3" column="1" colspan="2">
-    <widget class="ViButton" name="button2" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>10</width>
-       <height>10</height>
-      </size>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="0" colspan="3">
     <widget class="ViProjectLoader" name="projectLoader" native="true">
      <property name="minimumSize">
@@ -75,25 +78,35 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="3">
-    <widget class="ViNeuralSelectorWidget" name="neuralSelector" native="true">
+   <item row="3" column="1" colspan="2">
+    <widget class="ViButton" name="button2" native="true">
      <property name="minimumSize">
       <size>
-       <width>0</width>
-       <height>0</height>
+       <width>10</width>
+       <height>10</height>
       </size>
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
-    <spacer name="horizontalSpacer">
+   <item row="1" column="1" colspan="2">
+    <widget class="ViButton" name="button1" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>10</width>
+       <height>10</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="3">
+    <spacer name="verticalSpacer">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
-       <height>20</height>
+       <width>20</width>
+       <height>40</height>
       </size>
      </property>
     </spacer>

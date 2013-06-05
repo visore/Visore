@@ -61,7 +61,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 	signals:
 
-		void finished(); // emitted when all writing to buffers has finished
+		void finished();
 
 		void progressed(qreal percentage);
 		void statused(QString status);
@@ -91,19 +91,20 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		/*******************************************************************************************************************
 
+			LOGGING
+
+		*******************************************************************************************************************/
+
+		void log(QString message, QtMsgType type = QtDebugMsg);
+		void logStatus(QString message, QtMsgType type = QtDebugMsg); //Logs and emits status
+
+		/*******************************************************************************************************************
+
 			PROGRESS
 
 		*******************************************************************************************************************/
 
 		void progress(qreal progress);
-
-		/*******************************************************************************************************************
-
-			SLOTS
-
-		*******************************************************************************************************************/
-
-		void checkFinished();
 
 		/*******************************************************************************************************************
 
@@ -120,7 +121,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		void initializeAlign();
 		void alignNext();
 
 		/*******************************************************************************************************************
@@ -138,9 +138,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		void startCorrection();
-		void endCorrection();
-		void endCorrectionEncoding();
+		void endCorrect();
 
 		/*******************************************************************************************************************
 
@@ -188,10 +186,15 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		bool encode(ViAudioFormat format, bool clearWhenFinished = false);
-		bool encode(ViAudioObject::Type type, ViAudioFormat format, bool clearWhenFinished = false);
-		bool encode(ViAudioObject::Type type = ViAudioObject::Undefined, bool clearWhenFinished = false);
-		bool decode(ViAudioObject::Type type);
+		void setEncoder(ViAudioCoder *coder); //Takes ownership
+		bool hasEncoder();
+		Q_INVOKABLE bool encode(ViAudioFormat format, bool clearWhenFinished = false);
+		Q_INVOKABLE bool encode(ViAudioObject::Type type, ViAudioFormat format, bool clearWhenFinished = false);
+		Q_INVOKABLE bool encode(ViAudioObject::Type type = ViAudioObject::All, bool clearWhenFinished = false);
+		
+		void setDecoder(ViAudioCoder *coder); //Takes ownership
+		bool hasDecoder();
+		Q_INVOKABLE bool decode(ViAudioObject::Type type = ViAudioObject::All);
 
 		/*******************************************************************************************************************
 
@@ -199,7 +202,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		Q_INVOKABLE bool align();
+		void setAligner(ViAligner *aligner); //Takes ownership
+		bool hasAligner();
+		Q_INVOKABLE bool align(ViAligner *aligner = NULL); //Takes ownership
 
 		/*******************************************************************************************************************
 
@@ -298,7 +303,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		Q_INVOKABLE bool correct(ViModifyProcessor *corrector); //Takes ownership
+		void setCorrector(ViModifyProcessor *corrector); //Takes ownership
+		bool hasCorrector();
+		Q_INVOKABLE bool correct(ViModifyProcessor *corrector = NULL); //Takes ownership
 
 		/*******************************************************************************************************************
 
@@ -339,7 +346,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		void setProgress(qreal parts, qreal ratio);
 		void setProgress(qreal parts);
 
 	private:
@@ -371,7 +377,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		qreal mProgressRatio;
 		qreal mProgressParts;
 		qreal mProgress;
 
@@ -389,7 +394,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		ViAudioCoder *mCoder;
+		ViAudioCoder *mEncoder;
+		ViAudioCoder *mDecoder;
+
 		QQueue<ViAudioObject::Type> mCodingInstructions;
 		bool mClearEncodedBuffer;
 		ViAudioObject::Type mPreviousEncodedType;

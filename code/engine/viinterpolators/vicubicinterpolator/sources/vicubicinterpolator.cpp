@@ -1,5 +1,10 @@
 #include <vicubicinterpolator.h>
 
+ViCubicInterpolator::ViCubicInterpolator()
+	: ViInterpolator(2, 2)
+{
+}
+
 qreal ViCubicInterpolator::calculate()
 {
 	static qreal theRatio = 0.5;

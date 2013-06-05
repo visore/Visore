@@ -1,19 +1,43 @@
 #include <vitargetprovider.h>
 
-ViTargetProvider::ViTargetProvider()
+ViTargetProvider::ViTargetProvider(int leftSamples, int rightSamples)
 {
 	mLeftData = NULL;
 	mRightData = NULL;
+	setLeftSamples(leftSamples);
+	setRightSamples(rightSamples);
 }
 
 ViTargetProvider::ViTargetProvider(const ViTargetProvider &other)
 {
 	mLeftData = other.mLeftData;
 	mRightData = other.mRightData;
+	mLeftSamples = other.mLeftSamples;
+	mRightSamples = other.mRightSamples;
 }
 
 ViTargetProvider::~ViTargetProvider()
 {
+}
+
+int ViTargetProvider::leftSamples()
+{
+	return mLeftSamples;
+}
+
+int ViTargetProvider::rightSamples()
+{
+	return mRightSamples;
+}
+
+void ViTargetProvider::setLeftSamples(int samples)
+{
+	mLeftSamples = samples;
+}
+
+void ViTargetProvider::setRightSamples(int samples)
+{
+	mRightSamples = samples;
 }
 
 void ViTargetProvider::setData(ViSampleChunk *left, ViSampleChunk *right)

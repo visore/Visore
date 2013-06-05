@@ -1,5 +1,10 @@
 #include <vicosineinterpolator.h>
 
+ViCosineInterpolator::ViCosineInterpolator()
+	: ViInterpolator(1, 1)
+{
+}
+
 qreal ViCosineInterpolator::calculate()
 {
 	static qreal currentRatio = (1 - qCos(M_PI / 2)) / 2;

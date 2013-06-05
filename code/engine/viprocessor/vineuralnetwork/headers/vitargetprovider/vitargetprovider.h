@@ -10,9 +10,14 @@ class ViTargetProvider : public ViLibrary, public ViSerializer
 
 	public:
 
-		ViTargetProvider();
+		ViTargetProvider(int leftSamples = 0, int rightSamples = 0);
 		ViTargetProvider(const ViTargetProvider &other);
 		virtual ~ViTargetProvider();
+
+		virtual int leftSamples();
+		virtual int rightSamples();
+		virtual void setLeftSamples(int samples);
+		virtual void setRightSamples(int samples);
 
 		virtual void setData(ViSampleChunk *left, ViSampleChunk *right);
 		virtual void setLeftData(ViSampleChunk *data);
@@ -29,6 +34,9 @@ class ViTargetProvider : public ViLibrary, public ViSerializer
 
 		ViSampleChunk *mLeftData;
 		ViSampleChunk *mRightData;
+
+		int mLeftSamples;
+		int mRightSamples;
 
 };
 

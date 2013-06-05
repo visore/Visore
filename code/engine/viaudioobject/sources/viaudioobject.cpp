@@ -33,15 +33,22 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	mCorruptedFile = "";
 	mCorrectedFile = "";
 
-	mCoder = NULL;
+	mEncoder = NULL;
+	mDecoder = NULL;
 	mAligner = NULL;
 	mWaveFormer = NULL;
 	mMetadataer = NULL;
 	mCorrector = NULL;
 
-	mProgressRatio = 0;
-	mProgressParts = 0;
+	mProgressParts = 1;
 	mProgress = 0;
+
+	setAligner(new ViFourierCrossAligner());
+
+	QObject::connect(this, SIGNAL(encoded()), this, SIGNAL(finished()));
+	QObject::connect(this, SIGNAL(decoded()), this, SIGNAL(finished()));
+	QObject::connect(this, SIGNAL(aligned()), this, SIGNAL(finished()));
+	QObject::connect(this, SIGNAL(corrected()), this, SIGNAL(finished()));
 }
 
 ViAudioObject::~ViAudioObject()
@@ -51,10 +58,15 @@ ViAudioObject::~ViAudioObject()
 	qDeleteAll(mWaveForms);
 	mWaveForms.clear();
 
-	if(mCoder != NULL)
+	if(mEncoder != NULL)
 	{
-		delete mCoder;
-		mCoder = NULL;
+		delete mEncoder;
+		mEncoder = NULL;
+	}
+	if(mDecoder != NULL)
+	{
+		delete mDecoder;
+		mDecoder = NULL;
 	}
 
 	if(mAligner != NULL)
@@ -369,6 +381,22 @@ ViAudioFormat ViAudioObject::outputFormat()
 
 *******************************************************************************************************************/
 
+void ViAudioObject::setEncoder(ViAudioCoder *coder)
+{
+	if(mEncoder != NULL)
+	{
+		delete mEncoder;
+	}
+	mEncoder = coder;
+	QObject::connect(mEncoder, SIGNAL(finished()), this, SLOT(encodeNext()));
+	QObject::connect(mEncoder, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+}
+
+bool ViAudioObject::hasEncoder()
+{
+	return mEncoder != NULL;
+}
+
 bool ViAudioObject::encode(ViAudioFormat format, bool clearWhenFinished)
 {
 	setOutputFormat(format);
@@ -402,44 +430,21 @@ bool ViAudioObject::encode(ViAudioObject::Type type, bool clearWhenFinished)
 	}
 	mCodingInstructions = decomposeTypes(type);
 
-	int counter = 0;
-	int invalid = 0;
 	QString thePath = "";
 	ViBuffer *theBuffer = NULL;
-	while(counter < mCodingInstructions.size())
+	for(int i = 0; i < mCodingInstructions.size(); ++i)
 	{
 		locker.unlock();
-		thePath = filePath(mCodingInstructions[counter]);
-		theBuffer = buffer(mCodingInstructions[counter], true);
-		if(theBuffer == NULL)
+		if(!hasBuffer(mCodingInstructions[i]) || !hasFile(mCodingInstructions[i]))
 		{
-			++invalid;
-		}
-		else if(thePath == "")
-		{
-			QString extension = "";
-			
-			if(format(mCodingInstructions[counter]).isValid())
-			{
-				extension = format(mCodingInstructions[counter]).codec()->extension(".");
-			}
-			else if(mOutputFormat.isValid())
-			{
-				extension = mOutputFormat.codec()->extension(".");
-				buffer(mCodingInstructions[counter])->setFormat(mOutputFormat);
-			}
-			else
-			{
-				LOG("The audio format for the encoder is invalid", QtCriticalMsg);
-			}
-
-			thePath = ViManager::tempPath() + id() + extension;
-			setFilePath(mCodingInstructions[counter], thePath);
+			locker.relock();
+			mCodingInstructions.removeAt(i);
+			--i;
+			locker.unlock();
 		}
 		locker.relock();
-		++counter;
 	}
-	if(mCodingInstructions.isEmpty() || invalid == counter)
+	if(mCodingInstructions.isEmpty())
 	{
 		mCodingInstructions.clear();
 		locker.unlock();
@@ -447,18 +452,68 @@ bool ViAudioObject::encode(ViAudioObject::Type type, bool clearWhenFinished)
 		emit encoded();
 		return false;
 	}
-	if(mCoder != NULL)
-	{
-		delete mCoder;
-	}
-	mCoder = new ViAudioCoder();
-	QObject::connect(mCoder, SIGNAL(finished()), this, SLOT(encodeNext()));
-	QObject::connect(mCoder, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+
+	setEncoder(new ViAudioCoder());
+	
 	setProgress(mCodingInstructions.size());
 	locker.unlock();
-	emit statused("Encoding track");
+	logStatus("Encoding track.");
 	encodeNext();
 	return true;
+}
+
+void ViAudioObject::encodeNext()
+{
+	QMutexLocker locker(&mMutex);
+	if(mClearEncodedBuffer)
+	{
+		locker.unlock();
+		clearBuffer(mPreviousEncodedType);
+		locker.relock();
+		mPreviousEncodedType = ViAudioObject::Undefined;
+	}
+
+	if(mCodingInstructions.isEmpty())
+	{
+		log("Buffers encoded.");
+		delete mEncoder;
+		mEncoder = NULL;
+		locker.unlock();
+		emit encoded();
+	}
+	else
+	{
+		ViAudioObject::Type type = mCodingInstructions.dequeue();
+		locker.unlock();
+		
+		QString thePath = filePath(type);
+		ViBuffer *theBuffer = buffer(type, true);
+		locker.relock();
+		if(mOutputFormat.isValid(true))
+		{
+			mEncoder->encode(theBuffer, thePath, mOutputFormat, 0, mSongInfo);
+		}
+		else
+		{
+			mEncoder->encode(theBuffer, thePath, theBuffer->format(), 0, mSongInfo);
+		}
+	}
+}
+
+void ViAudioObject::setDecoder(ViAudioCoder *coder)
+{
+	if(mDecoder != NULL)
+	{
+		delete mDecoder;
+	}
+	mDecoder = coder;
+	QObject::connect(mDecoder, SIGNAL(finished()), this, SLOT(decodeNext()));
+	QObject::connect(mDecoder, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+}
+
+bool ViAudioObject::hasDecoder()
+{
+	return mDecoder != NULL;
 }
 
 bool ViAudioObject::decode(ViAudioObject::Type type)
@@ -470,22 +525,22 @@ bool ViAudioObject::decode(ViAudioObject::Type type)
 	QMutexLocker locker(&mMutex);
 	mCodingInstructions = decomposeTypes(type);
 
-	int counter = 0;
-	int invalid = 0;
-	QString thePath = "";
-	while(counter < mCodingInstructions.size())
+	for(int i = 0; i < mCodingInstructions.size(); ++i)
 	{
+		ViAudioObject::Type type = mCodingInstructions[i];
 		locker.unlock();
-		thePath = filePath(mCodingInstructions[counter]);
-		locker.relock();
-		if(thePath == "")
+		if(hasBuffer(type) || !hasFile(type))
 		{
-			++invalid;
+			locker.relock();
+			mCodingInstructions.removeAt(i);
+			locker.unlock();
+			--i;
 		}
-		++counter;
+		locker.relock();
 	}
-	if(mCodingInstructions.isEmpty() || invalid == counter)
+	if(mCodingInstructions.isEmpty())
 	{
+		log("No files were decoded.");
 		mCodingInstructions.clear();
 		locker.unlock();
 		emit progressed(100);
@@ -493,77 +548,13 @@ bool ViAudioObject::decode(ViAudioObject::Type type)
 		return false;
 	}
 
-	if(mCoder != NULL)
-	{
-		delete mCoder;
-	}
-	mCoder = new ViAudioCoder();
-	QObject::connect(mCoder, SIGNAL(finished()), this, SLOT(decodeNext()));
-	QObject::connect(mCoder, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+	setDecoder(new ViAudioCoder());
+	
 	setProgress(mCodingInstructions.size());
 	locker.unlock();
-	emit statused("Decoding track");
+	logStatus("Decoding track.");
 	decodeNext();
 	return true;
-}
-
-void ViAudioObject::encodeNext()
-{
-	QMutexLocker locker(&mMutex);
-	if(mCodingInstructions.isEmpty())
-	{
-		if(mClearEncodedBuffer)
-		{
-			locker.unlock();
-			clearBuffer(mPreviousEncodedType);
-			locker.relock();
-			mPreviousEncodedType = ViAudioObject::Undefined;
-		}
-
-		LOG("Buffers encoded.");
-		if(mCoder != NULL)
-		{
-			QObject::disconnect(mCoder, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
-			QObject::disconnect(mCoder, SIGNAL(finished()), this, SLOT(encodeNext()));
-			delete mCoder;
-			mCoder = NULL;
-		}
-		locker.unlock();
-		emit encoded();
-	}
-	else
-	{
-		ViAudioObject::Type type = mCodingInstructions.dequeue();
-		
-		if(mClearEncodedBuffer)
-		{
-			locker.unlock();
-			clearBuffer(mPreviousEncodedType);
-			locker.relock();
-			mPreviousEncodedType = type;
-		}
-		locker.unlock();
-		
-		QString thePath = filePath(type);
-		ViBuffer *theBuffer = buffer(type, true);
-		locker.relock();
-		if(theBuffer != NULL && thePath != "" && mCoder != NULL)
-		{
-			if(mOutputFormat.isValid(true))
-			{
-				mCoder->encode(theBuffer, thePath, mOutputFormat, 0, mSongInfo);
-			}
-			else
-			{
-				mCoder->encode(theBuffer, thePath, theBuffer->format(), 0, mSongInfo);
-			}
-		}
-		else
-		{
-			locker.unlock();
-			encodeNext();
-		}
-	}
 }
 
 void ViAudioObject::decodeNext()
@@ -571,15 +562,11 @@ void ViAudioObject::decodeNext()
 	QMutexLocker locker(&mMutex);
 	if(mCodingInstructions.isEmpty())
 	{
-		LOG("Files decoded.");
-		if(mCoder != NULL)
-		{
-			QObject::disconnect(mCoder, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
-			QObject::disconnect(mCoder, SIGNAL(finished()), this, SLOT(decodeNext()));
-			delete mCoder;
-			mCoder = NULL;
-		}
+		log("Files decoded.");
+		delete mDecoder;
+		mDecoder = NULL;
 		locker.unlock();
+		emit progress(100);
 		emit decoded();
 	}
 	else
@@ -587,21 +574,10 @@ void ViAudioObject::decodeNext()
 		ViAudioObject::Type type = mCodingInstructions.dequeue();
 		locker.unlock();
 		QString thePath = filePath(type);
+		clearBuffer(type);
+		ViBuffer *theBuffer = buffer(type);
 		locker.relock();
-		if(thePath != "" && mCoder != NULL)
-		{
-			QObject::disconnect(mCoder, SIGNAL(formatChanged(ViAudioFormat)), 0, 0);
-			locker.unlock();
-			clearBuffer(type);
-			ViBuffer *theBuffer = buffer(type);
-			locker.relock();
-			mCoder->decode(thePath, theBuffer);
-		}
-		else
-		{
-			locker.unlock();
-			decodeNext();
-		}
+		mDecoder->decode(thePath, theBuffer);
 	}
 }
 
@@ -611,77 +587,62 @@ void ViAudioObject::decodeNext()
 
 *******************************************************************************************************************/
 
-bool ViAudioObject::align()
+void ViAudioObject::setAligner(ViAligner *aligner)
 {
-	mAlignerTypes = availableResources();
-	mAlignerInstructions = decomposeTypes(mAlignerTypes);
-	
-	if(mAlignerInstructions.size() <= 1)
-	{
-		LOG("At least two buffers are needed for alignment.");
-		emit aligned();
-		return false;
-	}
-	int decodeTypes = 0;
-	for(int i = 0; i < mAlignerInstructions.size(); ++i)
-	{
-		if(!hasBuffer(mAlignerInstructions[i]))
-		{
-			decodeTypes |= mAlignerInstructions[i];
-		}
-	}
-	mMainAligner = mAlignerInstructions.dequeue();
 	if(mAligner != NULL)
 	{
 		delete mAligner;
 	}
-	mAligner = new ViFourierCrossAligner();
+	mAligner = aligner;
 	QObject::connect(mAligner, SIGNAL(finished()), this, SLOT(alignNext()));
 	QObject::connect(mAligner, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
-
-	QObject::connect(this, SIGNAL(decoded()), this, SLOT(initializeAlign()));
-	setProgress(1, 0.05);
-	if(decode((ViAudioObject::Type) decodeTypes))
-	{
-		return true;
-	}
-	emit aligned();
-	emit progressed(100);
-	return false;
 }
 
-void ViAudioObject::initializeAlign()
+bool ViAudioObject::hasAligner()
 {
-	QObject::disconnect(this, SIGNAL(decoded()), this, SLOT(initializeAlign()));
-	setProgress(mAlignerInstructions.size(), 0.9);
-	emit statused("Aligning track");
+	return mAligner != NULL;
+}
+
+bool ViAudioObject::align(ViAligner *aligner)
+{
+	if(aligner != NULL)
+	{
+		setAligner(aligner);
+	}
+	if(!hasAligner())
+	{
+		log("No aligner was specified.");
+		emit aligned();
+		emit progressed(100);
+		return false;
+	}
+
+	mAlignerTypes = availableResources(ViAudioObject::Buffer);
+	mAlignerInstructions = decomposeTypes(mAlignerTypes);
+	if(mAlignerInstructions.size() < 2)
+	{
+		log("At least two buffers are needed for alignment.");
+		emit aligned();
+		emit progressed(100);
+		return false;
+	}
+
+	logStatus("Aligning track.");
+	mMainAligner = mAlignerInstructions.dequeue();
 	alignNext();
+	return false;
 }
 
 void ViAudioObject::alignNext()
 {
 	if(mAlignerInstructions.isEmpty())
 	{
-		LOG("Buffers aligned.");
-		if(mAligner != NULL)
-		{
-			QObject::disconnect(mAligner, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
-			QObject::disconnect(mAligner, SIGNAL(finished()), this, SLOT(alignNext()));
-			delete mAligner;
-			mAligner = NULL;
-			
-		}
-		setProgress(1, 0.05);
-		if(!encode(mAlignerTypes))
-		{
-			progressed(100);
-		}
+		log("Tracks aligned.");
 		emit aligned();
 	}
 	else
 	{
-		ViAudioObject::Type type = mAlignerInstructions.dequeue();
-		mAligner->align(buffer(mMainAligner), buffer(type));
+		mAligner->align(buffer(mMainAligner), buffer(mAlignerInstructions.dequeue()));
 	}
 }
 
@@ -723,14 +684,38 @@ ViAudioObject::Type ViAudioObject::outputType()
 
 /*******************************************************************************************************************
 
+	LOGGING
+
+*******************************************************************************************************************/
+
+void ViAudioObject::log(QString message, QtMsgType type)
+{
+	if(!message.endsWith("."))
+	{
+		message += ".";
+	}
+	LOG(message, type);
+}
+
+void ViAudioObject::logStatus(QString message, QtMsgType type)
+{
+	log(message, type);
+	if(message.endsWith("."))
+	{
+		message = message.remove(message.size() - 1, 1);
+	}
+	emit statused(message);
+}
+
+/*******************************************************************************************************************
+
 	PROGRESS
 
 *******************************************************************************************************************/
 
 void ViAudioObject::progress(qreal progress)
 {
-	qreal pro = (progress / mProgressParts) * mProgressRatio;
-
+	qreal pro = (progress / mProgressParts);
 	emit progressed(mProgress + pro);
 	if(progress >= 100)
 	{
@@ -739,35 +724,14 @@ void ViAudioObject::progress(qreal progress)
 	if(mProgress >= 100)
 	{
 		mProgress = 0;
-		mProgressRatio = 0;
-		mProgressParts = 0;
+		mProgressParts = 1;
 		emit progressed(100);
 	}
-}
-
-void ViAudioObject::setProgress(qreal parts, qreal ratio)
-{
-	setProgress(parts);
-	mProgressRatio = ratio;
 }
 
 void ViAudioObject::setProgress(qreal parts)
 {
 	mProgressParts = parts;
-}
-
-/*******************************************************************************************************************
-
-	SLOTS
-
-*******************************************************************************************************************/
-
-void ViAudioObject::checkFinished()
-{
-	if(!isUsed(QIODevice::WriteOnly))
-	{
-		emit finished();
-	}
 }
 
 /*******************************************************************************************************************
@@ -818,7 +782,6 @@ ViBuffer* ViAudioObject::targetBuffer(bool dontCreate)
 	if(!dontCreate && mTargetBuffer == NULL)
 	{
 		mTargetBuffer = new ViBuffer();
-		QObject::connect(mTargetBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 	}
 	return mTargetBuffer;
 }
@@ -829,7 +792,6 @@ ViBuffer* ViAudioObject::corruptedBuffer(bool dontCreate)
 	if(!dontCreate && mCorruptedBuffer == NULL)
 	{
 		mCorruptedBuffer = new ViBuffer();
-		QObject::connect(mCorruptedBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 	}
 	return mCorruptedBuffer;
 }
@@ -840,7 +802,6 @@ ViBuffer* ViAudioObject::correctedBuffer(bool dontCreate)
 	if(!dontCreate && mCorrectedBuffer == NULL)
 	{
 		mCorrectedBuffer = new ViBuffer();
-		QObject::connect(mCorrectedBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 	}
 	return mCorrectedBuffer;
 }
@@ -851,7 +812,6 @@ ViBuffer* ViAudioObject::temporaryBuffer(bool dontCreate)
 	if(!dontCreate && mTemporaryBuffer == NULL)
 	{
 		mTemporaryBuffer = new ViBuffer();
-		QObject::connect(mTemporaryBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 	}
 	return mTemporaryBuffer;
 }
@@ -980,7 +940,6 @@ void ViAudioObject::clearTargetBuffer()
 	QMutexLocker locker(&mMutex);
 	if(mTargetBuffer != NULL)
 	{
-		QObject::disconnect(mTargetBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 		delete mTargetBuffer;
 		mTargetBuffer = NULL;
 	}
@@ -991,7 +950,6 @@ void ViAudioObject::clearCorruptedBuffer()
 	QMutexLocker locker(&mMutex);
 	if(mCorruptedBuffer != NULL)
 	{
-		QObject::disconnect(mCorruptedBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 		delete mCorruptedBuffer;
 		mCorruptedBuffer = NULL;
 	}
@@ -1002,7 +960,6 @@ void ViAudioObject::clearCorrectedBuffer()
 	QMutexLocker locker(&mMutex);
 	if(mCorrectedBuffer != NULL)
 	{
-		QObject::disconnect(mCorrectedBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 		delete mCorrectedBuffer;
 		mCorrectedBuffer = NULL;
 	}
@@ -1013,7 +970,6 @@ void ViAudioObject::clearTemporaryBuffer()
 	QMutexLocker locker(&mMutex);
 	if(mTemporaryBuffer != NULL)
 	{
-		QObject::disconnect(mTemporaryBuffer, SIGNAL(unused()), this, SLOT(checkFinished()));
 		delete mTemporaryBuffer;
 		mTemporaryBuffer = NULL;
 	}
@@ -1137,7 +1093,7 @@ bool ViAudioObject::generateWaveForm(ViAudioObject::Type types)
 
 	if(mWaveInstructions.size() == 0)
 	{
-		LOG("No data available to generate a wave form.");
+		log("No data available to generate a wave form.");
 		locker.unlock();
 		emit waved();
 		return false;
@@ -1163,7 +1119,7 @@ bool ViAudioObject::generateWaveForm(ViAudioObject::Type types)
 	QObject::connect(mWaveFormer, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 
 	QObject::connect(this, SIGNAL(decoded()), this, SLOT(initializeWaveForm()));
-	setProgress(1, 0.05);
+	//setProgress(1, 0.05);
 	locker.unlock();
 	if(decodeTypes == 0)
 	{
@@ -1177,7 +1133,7 @@ bool ViAudioObject::generateWaveForm(ViAudioObject::Type types)
 	}
 
 	progress(100);
-	setProgress(1, 0.95);
+	//setProgress(1, 0.95);
 	progress(100);
 	emit waved();
 
@@ -1189,7 +1145,7 @@ void ViAudioObject::initializeWaveForm()
 	QMutexLocker locker(&mMutex);
 	QObject::disconnect(this, SIGNAL(decoded()), this, SLOT(initializeWaveForm()));
 	locker.unlock();
-	setProgress(mWaveInstructions.size(), 0.9);
+	//setProgress(mWaveInstructions.size(), 0.9);
 	emit statused("Generating wave form: "+QString::number(mWaveInstructions.size()));
 	generateNextWaveForm();
 }
@@ -1199,7 +1155,7 @@ void ViAudioObject::generateNextWaveForm()
 	QMutexLocker locker(&mMutex);
 	if(mWaveInstructions.isEmpty())
 	{
-		LOG("Wave forms generated.");
+		log("Wave forms generated.");
 		if(mWaveFormer != NULL)
 		{
 			QObject::disconnect(mWaveFormer, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
@@ -1208,7 +1164,7 @@ void ViAudioObject::generateNextWaveForm()
 			mWaveFormer = NULL;	
 		}
 		locker.unlock();
-		setProgress(1, 0.05);
+		//setProgress(1, 0.05);
 		progress(100);
 		emit waved();
 	}
@@ -1242,84 +1198,57 @@ ViWaveForm* ViAudioObject::waveForm(ViAudioObject::Type type)
 
 *******************************************************************************************************************/
 
-bool ViAudioObject::correct(ViModifyProcessor *corrector)
+void ViAudioObject::setCorrector(ViModifyProcessor *corrector)
 {
 	QMutexLocker locker(&mMutex);
-	
-	locker.unlock();
-	if(!hasResource(ViAudioObject::Corrupted))
-	{
-		locker.relock();
-		LOG("No corrupted signal is available for correction");
-		progress(100);
-		locker.unlock();
-		emit corrected();
-		return false;
-	}
-
-	locker.relock();
 	if(mCorrector != NULL)
 	{
 		delete mCorrector;
 	}
 	mCorrector = corrector;
-	QObject::connect(mCorrector, SIGNAL(finished()), this, SLOT(endCorrection()), Qt::QueuedConnection);
+	QObject::connect(mCorrector, SIGNAL(finished()), this, SLOT(endCorrect()));
 	QObject::connect(mCorrector, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+}
 
-	setProgress(1, 0.05);
-	locker.unlock();
+bool ViAudioObject::hasCorrector()
+{
+	QMutexLocker locker(&mMutex);
+	return mCorrector != NULL;
+}
 
-	if(hasBuffer(ViAudioObject::Corrupted))
+bool ViAudioObject::correct(ViModifyProcessor *corrector)
+{
+	if(corrector != NULL)
 	{
-		locker.relock();
+		setCorrector(corrector);
+	}
+
+	if(!hasCorrector())
+	{
+		log("No corrector was specified.", QtWarningMsg);
 		progress(100);
-		locker.unlock();
-		startCorrection();
+		emit corrected();
+		return false;
 	}
-	else
+	else if(!hasBuffer(ViAudioObject::Corrupted))
 	{
-		locker.relock();
-		QObject::connect(this, SIGNAL(decoded()), this, SLOT(startCorrection()));
-		locker.unlock();
-		decode(ViAudioObject::Corrupted);
+		log("No corrupted buffer is available for correction.", QtWarningMsg);
+		progress(100);
+		emit corrected();
+		return false;
 	}
-	
+
+	logStatus("Correcting track.");
+	correctedBuffer()->setFormat(corruptedFormat());
+	mCorrector->process(thisPointer, ViAudioObject::Corrupted, ViAudioObject::Corrected);
 	return true;
 }
 
-void ViAudioObject::startCorrection()
+void ViAudioObject::endCorrect()
 {
-	QMutexLocker locker(&mMutex);
-	QObject::disconnect(this, SIGNAL(decoded()), this, SLOT(startCorrection()));
-	setProgress(1, 0.90);
-	locker.unlock();
-	emit statused("Correcting track");
-	correctedBuffer()->setFormat(corruptedFormat());
-	mCorrector->process(thisPointer, ViAudioObject::Corrupted, ViAudioObject::Corrected);
-}
-
-void ViAudioObject::endCorrection()
-{
-	QMutexLocker locker(&mMutex);
-	QObject::disconnect(mCorrector, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
-	QObject::disconnect(mCorrector, SIGNAL(finished()), this, SLOT(endCorrection()));
-	locker.unlock();
-	LOG("Track corrected");
-	emit corrected();
-	setProgress(1, 0.05);
-	QObject::connect(this, SIGNAL(encoded()), this, SLOT(endCorrectionEncoding()));
-LOG("eee: " + QString::number(correctedBuffer()->size()));
-	encode(ViAudioObject::Corrected);
-}
-
-void ViAudioObject::endCorrectionEncoding()
-{
-	QMutexLocker locker(&mMutex);
-	QObject::disconnect(this, SIGNAL(encoded()), this, SLOT(endCorrectionEncoding()));
-	locker.unlock();
-	delete mCorrector;
-	mCorrector = NULL;
+	log("Track corrected.");
 	progress(100);
+	emit corrected();
 }
 
 /*******************************************************************************************************************

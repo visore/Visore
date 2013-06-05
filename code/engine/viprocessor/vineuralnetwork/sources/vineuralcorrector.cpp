@@ -3,9 +3,6 @@
 #include <viscaler.h>
 #include <qmath.h>
 
-#define TRAINER_LEFT_SAMPLES 2
-#define TRAINER_RIGHT_SAMPLES 2
-
 #define MAX_THREAD_CHUNKS 4096
 #define MIN_THREAD_CHUNKS 2048
 
@@ -14,8 +11,13 @@ ViNeuralCorrectorThread::ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTra
 {
 	mNetwork = network;
 	mTrainer = trainer;
-	mProvider = provider;
 	mTrainer->setNetwork(mNetwork);
+	mProvider = provider;
+
+	mProviderLeftSamples = mProvider->leftSamples();
+	mProviderRightSamples = mProvider->rightSamples();
+	mLeftTargetData.resize(mProviderLeftSamples);
+	mRightTargetData.resize(mProviderRightSamples);
 
 	mStop = false;
 
@@ -26,9 +28,6 @@ ViNeuralCorrectorThread::ViNeuralCorrectorThread(ViNeuralNetwork *network, ViTra
 	mOutputSize = 0;
 	mOutputSample = 0;
 	mOutput = NULL;
-
-	mLeftTargetData.resize(TRAINER_LEFT_SAMPLES);
-	mRightTargetData.resize(TRAINER_RIGHT_SAMPLES);
 }
 
 ViNeuralCorrectorThread::~ViNeuralCorrectorThread()
@@ -114,12 +113,12 @@ void ViNeuralCorrectorThread::run()
 				mNetwork->setInput(i, data->at(i + mDataOffset));
 			}
 
-			for(int i = 0; i < TRAINER_LEFT_SAMPLES; ++i)
+			for(int i = 0; i < mProviderLeftSamples; ++i)
 			{
 				mLeftTargetData[i] = data->at(mTargetLeftOffset + i);
 			}
 
-			for(int i = 0; i < TRAINER_RIGHT_SAMPLES; ++i)
+			for(int i = 0; i < mProviderRightSamples; ++i)
 			{
 				mRightTargetData[i] = data->at(mTargetRightOffset + i);
 			}
@@ -134,7 +133,9 @@ void ViNeuralCorrectorThread::run()
 			delete data;
 
 			mOutputMutex.lock();
-			if(mOutputSample == mOutputSize - 1)
+			mOutput->at(mOutputSample) = ViScaler::scale(mNetwork->output(), 0, 1, -1, 1);
+			++mOutputSample;
+			if(mOutputSample == mOutputSize)
 			{
 				mOutputs.append(mOutput);
 				mOutputMutex.unlock();
@@ -143,8 +144,6 @@ void ViNeuralCorrectorThread::run()
 				mOutput = new ViSampleChunk(mOutputSize);
 				mOutputSample = 0;
 			}
-			mOutput->at(mOutputSample) = ViScaler::scale(mNetwork->output(), 0, 1, -1, 1);
-			++mOutputSample;
 			mOutputMutex.unlock();
 			
 			if(mData.size() < MIN_THREAD_CHUNKS)
@@ -161,7 +160,7 @@ void ViNeuralCorrectorThread::run()
 		if(mStop)
 		{
 			mOutputMutex.lock();
-			mOutput->resize(mOutputSample + 1);
+			mOutput->resize(mOutputSample);
 			mOutputs.append(mOutput);
 			mOutput = NULL;
 			mOutputMutex.unlock();
@@ -188,6 +187,9 @@ ViNeuralCorrector::ViNeuralCorrector()
 	mTrainer = NULL;
 	mProvider = NULL;
 
+	mProviderLeftSamples = 0;
+	mProviderRightSamples = 0;
+
 	mChannels = 1;
 	mMinimumSamples = 0;
 	mLeftSamples = 0;
@@ -204,6 +206,9 @@ ViNeuralCorrector::ViNeuralCorrector(ViNeuralNetwork *network, ViTrainer *traine
 	mNetwork = network;
 	mTrainer = trainer;
 	mProvider = provider;
+
+	mProviderLeftSamples = mProvider->leftSamples();
+	mProviderRightSamples = mProvider->rightSamples();
 
 	mChannels = 1;
 	mMinimumSamples = 0;
@@ -302,20 +307,20 @@ void ViNeuralCorrector::initialize()
 	mFirstWrite = true;
 
 	int inputSamples = mNetwork->inputCount(false);
-	if(TRAINER_LEFT_SAMPLES > inputSamples)
+	if(mProviderLeftSamples > inputSamples)
 	{
-		mDataOffset = TRAINER_LEFT_SAMPLES - inputSamples;
-		mLeftSamples = TRAINER_LEFT_SAMPLES;
+		mDataOffset = mProviderLeftSamples - inputSamples;
+		mLeftSamples = mProviderLeftSamples;
 		mTargetLeftOffset = 0;
 	}
 	else
 	{
 		mDataOffset = 0;
 		mLeftSamples = inputSamples;
-		mTargetLeftOffset = inputSamples - TRAINER_LEFT_SAMPLES;
+		mTargetLeftOffset = inputSamples - mProviderLeftSamples;
 	}
 	mTargetRightOffset = mLeftSamples + 1;
-	mMinimumSamples = (mLeftSamples + 1 + TRAINER_RIGHT_SAMPLES) * mChannels;
+	mMinimumSamples = (mLeftSamples + 1 + mProviderRightSamples) * mChannels;
 	mWriteSamples = qFloor(sampleCount() / qreal(mChannels)) * mChannels;
 	
 	for(int i = 0; i < mChannels; ++i)

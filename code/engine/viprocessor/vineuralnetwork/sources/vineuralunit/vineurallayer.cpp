@@ -1,4 +1,5 @@
 #include <vineurallayer.h>
+#include <vistaticneuronfactory.h>
 #include <QThreadPool>
 
 ViNeuralLayer::ViNeuralLayer(ViNeuronList neurons)
@@ -15,9 +16,9 @@ ViNeuralLayer::ViNeuralLayer(const ViNeuralLayer &other)
 	{
 		add(new ViNeuron(*other.mNeurons[i]));
 	}
-	if(other.mBias != NULL)
+	if(other.hasBias())
 	{
-		mBias = new ViNeuron(*other.mBias);
+		mBias = ViStaticNeuronFactory::create(ViNeuron::BiasNeuron, other.mBias->value());
 	}
 }
 

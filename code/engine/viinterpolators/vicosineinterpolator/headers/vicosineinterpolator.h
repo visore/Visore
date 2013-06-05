@@ -8,6 +8,8 @@ class ViCosineInterpolator : public ViInterpolator
 
 	public:
 
+		ViCosineInterpolator();
+
 		qreal calculate();
 		ViSampleChunk calculate(int samples);
 

@@ -6,6 +6,7 @@ ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
 {
 	mUi = new Ui::ViProjectCorrectionWidget();
 	mUi->setupUi(this);
+	mUi->projectLoader->disableBufferSelection();
 
 	//Font
 	QFont font;

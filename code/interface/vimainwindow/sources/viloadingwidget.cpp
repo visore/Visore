@@ -105,6 +105,7 @@ void ViLoadingWidget::setText(QString text)
 	if(mUi->progressBar->text() != "")
 	{
 		mProcesses.append(QPair<QString, qint64>(mUi->progressBar->text(), mTime.elapsed()));
+		mTime.start();
 	}
 	mUi->progressBar->setTextStyle(ViProgressBar::Text);
 	mUi->progressBar->setText(text);
@@ -145,11 +146,14 @@ void ViLoadingWidget::stop()
 
 	if(instance->mProcesses.size() > 0)
 	{
-		QString message = "Processes finished (Ellapsed time: " + ViTimeConverter::toOptimalString(instance->mTime.elapsed(), ViTimeConverter::Milliseconds) + ")";
+		QString message = "";
+		int total = 0;
 		for(int i = 0; i < instance->mProcesses.size(); ++i)
 		{
-			message += "\n\t" + instance->mProcesses[i].first + " (Ellapsed time: " + ViTimeConverter::toOptimalString(instance->mTime.elapsed(), ViTimeConverter::Milliseconds) + ")";
+			total += instance->mProcesses[i].second;
+			message += "\n\t" + instance->mProcesses[i].first + " (Ellapsed time: " + ViTimeConverter::toOptimalString(instance->mProcesses[i].second, ViTimeConverter::Milliseconds) + ")";
 		}
+		message = "Processes finished (Ellapsed time: " + ViTimeConverter::toOptimalString(total, ViTimeConverter::Milliseconds) + ")" + message;
 		STATICLOG(message);
 		instance->mUi->progressBar->setText("");
 		instance->mProcesses.clear();

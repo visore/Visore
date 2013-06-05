@@ -35,6 +35,11 @@ void ViInterpolationTargetProvider::setInterpolator(ViInterpolator *interpolator
 		delete mInterpolator;
 	}
 	mInterpolator = interpolator;
+	if(mInterpolator != NULL)
+	{
+		setLeftSamples(mInterpolator->leftSamples());
+		setRightSamples(mInterpolator->rightSamples());
+	}
 }
 
 qreal ViInterpolationTargetProvider::calculate()

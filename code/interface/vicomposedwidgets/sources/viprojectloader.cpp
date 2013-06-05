@@ -8,6 +8,8 @@ ViProjectLoader::ViProjectLoader(QWidget *parent)
 	mUi = new Ui::ViProjectLoader();
 	mUi->setupUi(this);
 
+	mEnableBufferSelection = true;
+
 	mUi->fileBrowser->setDirectory(ViManager::projectPath());
 	mUi->fileBrowser->addFilter(ViManager::projectFilter());
 
@@ -155,7 +157,17 @@ void ViProjectLoader::analyseTrack(int index)
 	{
 		mSelectedObject = index;
 		ViAudioObject::Type resources = mObjects[index]->availableResources();
-		mUi->processLabel->show();
+		
+		if(mEnableBufferSelection)
+		{
+			mUi->processLabel->show();
+			mUi->processContainer->show();
+		}
+		else
+		{
+			mUi->processLabel->hide();
+			mUi->processContainer->hide();
+		}
 
 		if(resources & ViAudioObject::Target)
 		{
@@ -234,4 +246,14 @@ void ViProjectLoader::setMode(ViProjectLoader::Mode mode)
 	changeMode(mode);
 	mUi->modeLabel->hide();
 	mUi->modeComboBox->hide();
+}
+
+void ViProjectLoader::enableBufferSelection(bool enable)
+{
+	mEnableBufferSelection = enable;
+}
+
+void ViProjectLoader::disableBufferSelection(bool disable)
+{
+	mEnableBufferSelection = !disable;
 }

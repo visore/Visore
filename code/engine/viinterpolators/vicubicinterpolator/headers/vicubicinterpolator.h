@@ -12,6 +12,8 @@ class ViCubicInterpolator : public ViInterpolator
 
 	public:
 
+		ViCubicInterpolator();
+
 		qreal calculate();
 		ViSampleChunk calculate(int samples);
 

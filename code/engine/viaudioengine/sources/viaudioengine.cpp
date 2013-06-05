@@ -139,7 +139,10 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 	mObjectChain.add(objects);
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-	mObjectChain.setFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)));
+	mObjectChain.addFunction(ViFunctionCall("decode"), 0.05);
+	mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.85);
+	mObjectChain.addFunction(ViFunctionCall("align"), 0.05);
+	mObjectChain.addFunction(ViFunctionCall("encode"), 0.05);
 	mObjectChain.execute();
 }
 
@@ -166,7 +169,7 @@ void ViAudioEngine::align(ViProject &project)
 	mObjectChain.add(project);
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-	mObjectChain.setFunction("align");
+	mObjectChain.addFunction("align");
 	mObjectChain.execute();
 }
 
@@ -176,7 +179,7 @@ void ViAudioEngine::align(ViAudioObjectPointer object)
 	mObjectChain.add(object);
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-	mObjectChain.setFunction("align");
+	mObjectChain.addFunction("align");
 	mObjectChain.execute();
 }
 

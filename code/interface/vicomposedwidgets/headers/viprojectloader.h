@@ -50,6 +50,9 @@ class ViProjectLoader : public ViWidget
 
 		void setMode(ViProjectLoader::Mode mode);
 
+		void enableBufferSelection(bool enable = true);
+		void disableBufferSelection(bool disable = true);
+
 	private:
 
 		Ui::ViProjectLoader *mUi;
@@ -60,6 +63,8 @@ class ViProjectLoader : public ViWidget
 
 		ViProjectLoader::Mode mMode;
 		int mProjectCount;
+
+		bool mEnableBufferSelection;
 
 };
 

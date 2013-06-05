@@ -13,14 +13,21 @@ ViAudioObjectChain::ViAudioObjectChain(ViProject &project)
 
 void ViAudioObjectChain::progress(qreal percentage)
 {
-	emit progressed(mProgress + (percentage / mObjectCount));
-	if(percentage >= 100)
+	emit progressed(mProgress + ((percentage / mObjectCount) * mCurrentWeight));
+}
+
+void ViAudioObjectChain::progressNext()
+{
+	mProgress += (100.0 / mObjectCount) * mCurrentWeight;
+	emit progressed(mProgress);
+	if(mCurrentFunctionIndex == 0)
 	{
-		mProgress += 100.0 / mObjectCount;
 		QObject::disconnect(mCurrentObject.data(), SIGNAL(statused(QString)), this, SIGNAL(statused(QString)));
 		QObject::disconnect(mCurrentObject.data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
-		executeNext();
+		QObject::disconnect(mCurrentObject.data(), SIGNAL(finished()), this, SLOT(progressNext()));
 	}
+
+	executeNext();
 	if(mProgress == 100)
 	{
 		disconnect();
@@ -29,14 +36,29 @@ void ViAudioObjectChain::progress(qreal percentage)
 
 void ViAudioObjectChain::executeNext()
 {
-	if(!mObjects.isEmpty())
+	if(mObjects.isEmpty() && (mCurrentFunctionIndex == mFunctions.size() || mCurrentFunctionIndex == 0))
+	{
+		mProgress = 100;
+		return;
+	}
+	else if(mCurrentFunctionIndex == 0)
 	{
 		mCurrentObject = mObjects.dequeue();
-		mFunction.setObject(mCurrentObject.data());
 		QObject::connect(mCurrentObject.data(), SIGNAL(statused(QString)), this, SIGNAL(statused(QString)));
 		QObject::connect(mCurrentObject.data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
-		mFunction.execute();
+		QObject::connect(mCurrentObject.data(), SIGNAL(finished()), this, SLOT(progressNext()));
 	}
+
+	mCurrentFunction = mFunctions[mCurrentFunctionIndex];
+	mCurrentWeight = mWeights[mCurrentFunctionIndex];
+	++mCurrentFunctionIndex;
+	if(mCurrentFunctionIndex >= mFunctions.size())
+	{
+		mCurrentFunctionIndex = 0;
+	}
+
+	mCurrentFunction.setObject(mCurrentObject.data());
+	mCurrentFunction.execute();
 }
 
 void ViAudioObjectChain::add(ViAudioObjectPointer object)
@@ -57,24 +79,42 @@ void ViAudioObjectChain::add(ViProject &project)
 void ViAudioObjectChain::clear()
 {
 	mObjects.clear();
+	mFunctions.clear();
+	mWeights.clear();
 }
 
-void ViAudioObjectChain::setFunction(ViFunctionCall function)
+void ViAudioObjectChain::addFunction(ViFunctionCall function, qreal weight)
 {
-	mFunction = function;
+	mFunctions.append(function);
+	if(weight > 0)
+	{
+		mWeights.append(weight);
+	}
 }
 
-void ViAudioObjectChain::setFunction(QString function)
+void ViAudioObjectChain::addFunction(QString function, qreal weight)
 {
 	function = function.replace("(", "");
 	function = function.replace(")", "");
 	function = function.replace(" ", "");
-	setFunction(ViFunctionCall(function));
+	addFunction(ViFunctionCall(function), weight);
 }
 
 void ViAudioObjectChain::execute()
 {
+	if(mWeights.size() != mFunctions.size())
+	{
+		mWeights.clear();
+		qreal weight = 1.0 / mFunctions.size();
+		for(int i = 0; i < mFunctions.size(); ++i)
+		{
+			mWeights.append(weight);
+		}
+	}
+
+	emit progressed(0);
 	mProgress = 0;
+	mCurrentFunctionIndex = 0;
 	mObjectCount = mObjects.size();
 	executeNext();
 }

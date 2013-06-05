@@ -10,9 +10,14 @@ class ViInterpolator : public ViLibrary
 
 	public:
 
-		ViInterpolator();
+		ViInterpolator(int leftSamples = 0, int rightSamples = 0);
 		ViInterpolator(const ViInterpolator &other);
 		virtual ~ViInterpolator();
+
+		virtual int leftSamples();
+		virtual int rightSamples();
+		virtual void setLeftSamples(int samples);
+		virtual void setRightSamples(int samples);
 
 		virtual void clear();
 
@@ -42,11 +47,13 @@ class ViInterpolator : public ViLibrary
 		ViSampleChunk *mLeftData;
 		ViSampleChunk *mRightData;
 
-	public:
+	private:
 
 		qreal mRatio;
 		bool mDeleteLeft;
 		bool mDeleteRight;
+		int mLeftSamples;
+		int mRightSamples;
 
 };
 
