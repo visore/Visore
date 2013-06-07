@@ -111,7 +111,7 @@ void ViFrequencySegmentDetector::execute()
 					inRange(mRecordEndAverages, mRecordEndValueThreshold))
 				{
 					setRecordEnd(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, format1()));
-					initialize();
+                    //initialize();
 				}
 			}
 		}
@@ -143,7 +143,7 @@ void ViFrequencySegmentDetector::finalize()
 	mSongStartAverages.clear();
 	mSongEndAverages.clear();
 	mSpectrums.clear();
-	mMutex.unlock();
+    mMutex.unlock();
 }
 
 bool ViFrequencySegmentDetector::inRange(QQueue<qreal> &averages, ViRange &range)

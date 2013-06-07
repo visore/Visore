@@ -31,7 +31,7 @@ ViAudioRecorder::~ViAudioRecorder()
 bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, ViAudioFormat format, int sides, bool detectInfo)
 {
 	emit started();
-	setProgress(0);
+	setProgress(-1); //Infinite
 	mQueue.clear();
 
 	mProject = project;
@@ -76,9 +76,9 @@ void ViAudioRecorder::nextObject(bool startTimer)
 void ViAudioRecorder::finish()
 {
 	QObject::disconnect(mProject, SIGNAL(finished()), this, SLOT(finish()));
-	mObject.setNull();
+    mObject.setNull();
 	setProgress(100);
-	emit finished();
+    emit finished();
 }
 
 void ViAudioRecorder::startSong()
@@ -115,24 +115,24 @@ void ViAudioRecorder::startRecord()
 void ViAudioRecorder::endRecord()
 {
 	if(mCurrentSide == mSides)
-	{
-		mIdleTimer.stop();
-		mInput.stop();
-		mSegmentDetector.stop();
+    {
+        mIdleTimer.stop();
+        mInput.stop();
+        mSegmentDetector.stop();
 		if((mProject == NULL || mProject->isFinished()) && mQueue.isEmpty()) // If project is not finished, wait for it to finish
 		{
-			finish();
+            finish();
 		}
 		else
 		{
 			QObject::connect(mProject, SIGNAL(finished()), this, SLOT(finish()), Qt::UniqueConnection);
-		}
+        }
 	}
 	else
-	{
+    {
 		nextObject();
 		emit statused("Please turn over the record");
-	}
+    }
 }
 
 void ViAudioRecorder::serialize()
@@ -148,7 +148,7 @@ void ViAudioRecorder::serialize()
 
 void ViAudioRecorder::checkSize()
 {
-	if(mObject->inputBuffer()->size() >= IDLE_SIZE)
+    if(mObject->inputBuffer()->size() >= IDLE_SIZE)
 	{
 		nextObject();
 	}

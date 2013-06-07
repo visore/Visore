@@ -139,10 +139,11 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 	mObjectChain.add(objects);
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-	mObjectChain.addFunction(ViFunctionCall("decode"), 0.01);
-	mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.97);
+	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudioObject::Target | ViAudioObject::Corrupted)), 0.01);
+	mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.96);
 	mObjectChain.addFunction(ViFunctionCall("align"), 0.01);
-	mObjectChain.addFunction(ViFunctionCall("encode"), 0.01);
+	mObjectChain.addFunction(ViFunctionCall("encode", QVariant::fromValue(ViAudioObject::Target | ViAudioObject::Corrupted)), 0.01);
+	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01);
 	mObjectChain.execute();
 }
 

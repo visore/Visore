@@ -71,7 +71,7 @@ bool ViCoverRetriever::saveImage(QByteArray &data)
 	}
 
 	QString id = ViId().id();
-	QString newPath = ViManager::tempPath() + QDir::separator() + "albumart";
+	QString newPath = ViManager::tempPath() + "covers";
 	QDir dir(newPath);
 	if(!dir.exists())
 	{

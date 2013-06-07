@@ -39,7 +39,7 @@ ViLoadingWidget::ViLoadingWidget()
 
 ViLoadingWidget::~ViLoadingWidget()
 {
-	delete mUi;
+    delete mUi;
 }
 
 void ViLoadingWidget::progress(qreal percentage)

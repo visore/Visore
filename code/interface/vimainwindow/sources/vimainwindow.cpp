@@ -13,7 +13,7 @@ ViMainWindow::ViMainWindow()
 
 ViMainWindow::~ViMainWindow()
 {
-	delete mUi;
+    delete mUi;
 }
 
 ViMainWindow* ViMainWindow::instance()
@@ -67,7 +67,7 @@ void ViMainWindow::changeEvent(QEvent *event)
 
 void ViMainWindow::initialize()
 {
-	mUi = new Ui::ViMainWindow();
+    mUi = new Ui::ViMainWindow();
 	mUi->setupUi(this);
 	mEngine = ViAudioEngine::instance();
 
@@ -89,5 +89,5 @@ void ViMainWindow::initialize()
 	font.setPointSize(30);
 	font.setLetterSpacing(QFont::PercentageSpacing, 105);
 	mUi->logoLabel->setFont(font);
-	mUi->logoLabel->setStyleSheet("color: " + ViThemeManager::color(ViThemeColors::MainColor6).name());
+    mUi->logoLabel->setStyleSheet("color: " + ViThemeManager::color(ViThemeColors::MainColor6).name());
 }

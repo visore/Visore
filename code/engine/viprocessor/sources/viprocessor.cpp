@@ -45,7 +45,7 @@ ViProcessor::~ViProcessor()
 void ViProcessor::startThread()
 {
 	if(!mThread.isRunning())
-	{
+    {
 		mThread.start();
 	}
 }
@@ -60,18 +60,18 @@ void ViProcessor::startProgress()
 		execute();
 		setProgress((processedSize * 99.0) / totalSize);
 	}
-	if(mExit || !mMultiShot)
-	{
-		QObject::disconnect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()));
-		mExit = false;
-		finalize();
-		setProgress(100);
-		emit finished();
-	}
-	else
-	{
-		QObject::connect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
-	}
+    if(mExit || !mMultiShot)
+    {
+        QObject::disconnect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()));
+        mExit = false;
+        finalize();
+        setProgress(100);
+        emit finished();
+    }
+    else
+    {
+        //QObject::connect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
+    }
 }
 
 void ViProcessor::startProgressless()
@@ -81,18 +81,18 @@ void ViProcessor::startProgressless()
 		read1();
 		execute();
 	}
-	if(mExit || !mMultiShot)
-	{
-		QObject::disconnect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()));
-		mExit = false;
-		finalize();
-		setProgress(100);
-		emit finished();
-	}
-	else
-	{
-		QObject::connect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
-	}
+    if(mExit || !mMultiShot)
+    {
+        QObject::disconnect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()));
+        mExit = false;
+        finalize();
+        setProgress(100);
+        emit finished();
+    }
+    else
+    {
+
+    }
 }
 
 bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudioObject::Type type)
@@ -114,6 +114,7 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudioObj
 	if(mType != ViAudioObject::Undefined && mObject->hasBuffer(mType))
 	{
 		mReadStream = mObject->buffer(mType)->createReadStream();
+        QObject::connect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
 		int sampleSize = mObject->buffer(mType)->format().sampleSize();
 		mConverter.setSize(sampleSize);
 		mSamples.resize(mChunkSize / (sampleSize / 8));
@@ -248,10 +249,10 @@ void ViProcessor::stop()
 
 void ViProcessor::exit(bool exit)
 {
-	mExit = exit;
+    mExit = true;
 	if(mExit)
-	{
-		startThread(); // Ensure the buffer is disconnected
+    {
+        startThread(); // Ensure the buffer is disconnected
 	}
 }
 

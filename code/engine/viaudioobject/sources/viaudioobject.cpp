@@ -490,11 +490,11 @@ void ViAudioObject::encodeNext()
 	}
 	else
 	{
-		ViAudioObject::Type type = mCodingInstructions.dequeue();
+		mPreviousEncodedType = mCodingInstructions.dequeue();
 		locker.unlock();
 		
-		QString thePath = filePath(type);
-		ViBuffer *theBuffer = buffer(type, true);
+		QString thePath = filePath(mPreviousEncodedType);
+		ViBuffer *theBuffer = buffer(mPreviousEncodedType, true);
 		locker.relock();
 		if(mOutputFormat.isValid(true))
 		{

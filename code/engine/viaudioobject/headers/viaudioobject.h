@@ -245,12 +245,12 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void setCorruptedBuffer(ViBuffer *buffer);
 		void setCorrectedBuffer(ViBuffer *buffer);
 
-		void clearBuffers(ViAudioObject::Type type = ViAudioObject::All);
-		void clearBuffer(ViAudioObject::Type type);
-		void clearTargetBuffer();
-		void clearCorruptedBuffer();
-		void clearCorrectedBuffer();
-		void clearTemporaryBuffer();
+		Q_INVOKABLE void clearBuffers(ViAudioObject::Type type = ViAudioObject::All);
+		Q_INVOKABLE void clearBuffer(ViAudioObject::Type type);
+		Q_INVOKABLE void clearTargetBuffer();
+		Q_INVOKABLE void clearCorruptedBuffer();
+		Q_INVOKABLE void clearCorrectedBuffer();
+		Q_INVOKABLE void clearTemporaryBuffer();
 
 		bool hasBuffer(ViAudioObject::Type type);
 		bool hasInputBuffer();

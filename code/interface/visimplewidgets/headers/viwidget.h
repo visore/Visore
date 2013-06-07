@@ -21,7 +21,7 @@ class ViWidget : public QWidget, public ViId
 	public:
 
 		ViWidget(QWidget *parent = 0);
-		virtual ~ViWidget(){}
+        virtual ~ViWidget();
 		ViAudioEnginePointer engine();
 		virtual void refresh();
 		virtual void setStyleSheet(QString styleSheet);

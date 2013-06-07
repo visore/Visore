@@ -46,7 +46,7 @@ class ViProcessor : public ViNotifier
 		void setMultiShot(bool multishot = true); //If called, stop() has to be called manually in order to finish of the process. Has to be called for audio objects where the data is continuesly added to the buffer
 		bool isMultiShot();
 
-		void stop();
+        void stop();
 
 		virtual ~ViProcessor();
 		virtual void process(ViAudioObjectPointer audioObject);

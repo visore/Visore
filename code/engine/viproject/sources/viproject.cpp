@@ -276,7 +276,7 @@ bool ViProject::createStructure()
 	mPaths[ViProject::TargetData] = mPaths[ViProject::Data] + "target" + QDir::separator();
 	mPaths[ViProject::CorruptedData] = mPaths[ViProject::Data] + "corrupted" + QDir::separator();
 	mPaths[ViProject::CorrectedData] = mPaths[ViProject::Data] + "corrected" + QDir::separator();
-	mPaths[ViProject::CoverData] = mPaths[ViProject::Data] + "cover" + QDir::separator();
+	mPaths[ViProject::CoverData] = mPaths[ViProject::Data] + "covers" + QDir::separator();
 
 	//Create paths
 	for(QMap<ViProject::Directory, QString>::iterator iterator = mPaths.begin(); iterator != mPaths.end(); ++iterator)
@@ -488,7 +488,7 @@ bool ViProject::saveProperties()
 
 bool ViProject::saveTracks()
 {
-	ViElement root("Tracks");
+	ViElement root("sides");
 	bool save = true;
 
 	QMap<int, ViElement> sides;
@@ -501,21 +501,21 @@ bool ViProject::saveTracks()
 		info = object->songInfo();
 		if(!sides.contains(object->sideNumber()))
 		{
-			ViElement side("Side");
+			ViElement side("side");
 			side.addAttribute("id", object->sideNumber());
 			sides[object->sideNumber()] = side;
 		}
 		
-		ViElement track("Track");
+		ViElement track("track");
 		track.addAttribute("id", object->trackNumber());
-		track.addChild("Artist", info.artistName());
-		track.addChild("Title", info.songTitle());
+		track.addChild("artist", info.artistName());
+		track.addChild("title", info.songTitle());
 
-		ViElement data("Data");
-		data.addChild("AlbumArt", info.imagePath());
-		data.addChild("Target", relativePath(object->targetFilePath()));
-		data.addChild("Corrupted", relativePath(object->corruptedFilePath()));
-		data.addChild("Corrected", relativePath(object->correctedFilePath()));
+		ViElement data("data");
+		data.addChild("cover", info.imagePath());
+		data.addChild("target", relativePath(object->targetFilePath()));
+		data.addChild("corrupted", relativePath(object->corruptedFilePath()));
+		data.addChild("corrected", relativePath(object->correctedFilePath()));
 		track.addChild(data);
 
 		sides[object->sideNumber()].addChild(track);
@@ -567,13 +567,13 @@ bool ViProject::loadTracks()
 		{
 			ViAudioObjectPointer object = ViAudioObject::create();
 			ViSongInfo info;
-			info.setArtistName(tracks[i].child("Artist").toString());
-			info.setSongTitle(tracks[i].child("Title").toString());
-			ViElement data = tracks[i].child("Data");
-			object->setTargetFilePath(absolutePath(data.child("Target").toString()));
-			object->setCorruptedFilePath(absolutePath(data.child("Corrupted").toString()));
-			object->setCorrectedFilePath(absolutePath(data.child("Corrected").toString()));
-			info.setImagePath(absolutePath(data.child("AlbumArt").toString()));
+			info.setArtistName(tracks[i].child("artist").toString());
+			info.setSongTitle(tracks[i].child("title").toString());
+			ViElement data = tracks[i].child("data");
+			object->setTargetFilePath(absolutePath(data.child("target").toString()));
+			object->setCorruptedFilePath(absolutePath(data.child("corrupted").toString()));
+			object->setCorrectedFilePath(absolutePath(data.child("corrected").toString()));
+			info.setImagePath(absolutePath(data.child("cover").toString()));
 			object->setSongInfo(info);
 			object->setSideNumber(sides[j].attribute("id").toInt());
 			object->setTrackNumber(tracks[i].attribute("id").toInt());

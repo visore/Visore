@@ -17,11 +17,11 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<ViAudioPosition>("ViAudioPosition");
 	qRegisterMetaType<ViRealSpectrum>("ViRealSpectrum");
 
-	ViMainWindow *window = ViMainWindow::instance();
+    ViMainWindow *window = ViMainWindow::instance();
 	window->setWindowIcon(logo);
-	window->show();
+    window->show();
 	
-	application.exec();
+    application.exec();
 
 	return 0;
 }

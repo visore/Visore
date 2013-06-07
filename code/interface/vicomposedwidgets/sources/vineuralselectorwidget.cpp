@@ -86,7 +86,7 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 
 ViNeuralSelectorWidget::~ViNeuralSelectorWidget()
 {
-	delete mUi;
+    delete mUi;
 
 	for(int i = 0; i < mUi->hiddenLayerList->count(); ++i)
 	{
@@ -96,7 +96,7 @@ ViNeuralSelectorWidget::~ViNeuralSelectorWidget()
 	for(int i = 0; i < mUi->errorFunctionList->count(); ++i)
 	{
 		delete mUi->errorFunctionList->takeItem(i);
-	}
+    }
 }
 
 ViNeuralCorrector* ViNeuralSelectorWidget::corrector()

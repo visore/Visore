@@ -12,9 +12,13 @@ ViWidget::ViWidget(QWidget *parent)
 	setObjectName("viwidget" + id());
 }
 
+ViWidget::~ViWidget()
+{
+}
+
 void ViWidget::refresh()
 {
-	repaint();
+    repaint();
 }
 
 void ViWidget::setStyleSheet(QString styleSheet)

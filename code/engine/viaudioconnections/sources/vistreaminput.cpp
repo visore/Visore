@@ -139,16 +139,16 @@ void ViStreamInput::start()
 void ViStreamInput::stop()
 {
 	if(mAudioInput != NULL && mBufferDevice != NULL && state() != QAudio::StoppedState)
-	{
-		stopChecking();
-		mAudioInput->stop();
-		delete mBufferDevice;
-		mBufferDevice = NULL;
-		delete mAudioInput;
-		mAudioInput = NULL;
-		setState(QAudio::StoppedState);
+    {
+        stopChecking();
+        mAudioInput->stop();
+        delete mBufferDevice;
+        mBufferDevice = NULL;
+        delete mAudioInput;
+        mAudioInput = NULL;
+        setState(QAudio::StoppedState);
 		LOG("Recording stopped.");
-	}
+    }
 }
 
 void ViStreamInput::pause()

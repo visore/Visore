@@ -85,5 +85,5 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 
 ViMainMenu::~ViMainMenu()
 {
-	delete mUi;
+    delete mUi;
 }

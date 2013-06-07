@@ -31,7 +31,7 @@ ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
 
 ViProjectCorrectionWidget::~ViProjectCorrectionWidget()
 {
-	delete mUi;
+    delete mUi;
 }
 
 void ViProjectCorrectionWidget::correct()

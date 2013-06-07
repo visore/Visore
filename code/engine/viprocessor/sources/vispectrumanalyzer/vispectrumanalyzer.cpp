@@ -80,7 +80,6 @@ void ViSpectrumAnalyzer::execute()
 		{
 			double fourier[mWindowSize];
 			mTransformer.forwardTransform(mBuffer, fourier);
-			
 			mSpectrum.add(0, ViRealComplex(fourier[0], 0));
 			for(int i = 1; i < mHalfWindowSize; ++i)
 			{
