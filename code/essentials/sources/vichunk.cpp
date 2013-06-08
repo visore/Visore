@@ -1,6 +1,6 @@
 #ifdef VICHUNK_H
 
-#include <qmath.h>
+#include <QtCore/qmath.h>
 #include <string.h> //memcpy
 #include <algorithm> //fill
 

@@ -37,7 +37,8 @@ FILE(GLOB VI_NEURAL_NETWORK_HEADERS ${HEADERS}/*.h ${HEADERS}/*/*.h ${HEADERS}/*
 
 #Create library
 ADD_LIBRARY(vineuralnetwork SHARED ${VI_NEURAL_NETWORK_HEADERS} ${VI_NEURAL_NETWORK_SOURCES})
-TARGET_LINK_LIBRARIES(vineuralnetwork viessentials vifixedweightinitializer visigmoidactivationfunction vifunctions viinterpolationtargetprovider)
+TARGET_LINK_LIBRARIES(vineuralnetwork viessentials vifunctions)
+QT5_USE_MODULES(vineuralnetwork Multimedia Xml)
 
 #Install file
 INSTALL(TARGETS vineuralnetwork DESTINATION ${VI_NEURAL_NETWORK_INSTALL_PATH})

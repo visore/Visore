@@ -10,6 +10,7 @@ FILE(GLOB VI_AUDIOCODER_HEADERS ${HEADERS}/*.h ${HEADERS}/*/*.h)
 #Create library
 ADD_LIBRARY(viaudiocoder SHARED ${VI_AUDIOCODER_HEADERS} ${VI_AUDIOCODER_SOURCES})
 TARGET_LINK_LIBRARIES(viaudiocoder viaudiobuffer viessentials resample)
+QT5_USE_MODULES(viaudiocoder Multimedia)
 
 #Install file
 INSTALL(TARGETS viaudiocoder DESTINATION engine)

@@ -10,6 +10,7 @@ FILE(GLOB VI_AUDIOBUFFER_HEADERS ${HEADERS}/*.h)
 #Create library
 ADD_LIBRARY(viaudiobuffer SHARED ${VI_AUDIOBUFFER_HEADERS} ${VI_AUDIOBUFFER_SOURCES})
 TARGET_LINK_LIBRARIES(viaudiobuffer viessentials)
+QT5_USE_MODULES(viaudiobuffer Multimedia)
 
 #Install file
 INSTALL(TARGETS viaudiobuffer DESTINATION engine)

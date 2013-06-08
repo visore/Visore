@@ -15,6 +15,7 @@ FILE(GLOB VI_PROCESSOR_HEADERS ${HEADERS}/*.h ${HEADERS}/*/*.h ${HEADERS}/*/*/*.
 #Create library
 ADD_LIBRARY(viprocessor SHARED ${VI_PROCESSOR_HEADERS} ${VI_PROCESSOR_SOURCES})
 TARGET_LINK_LIBRARIES(viprocessor viaudioconnection vifouriertransformer visongidentifier viproject vineuralnetwork viinterpolator)
+QT5_USE_MODULES(viprocessor Multimedia Xml)
 
 #Install file
 INSTALL(TARGETS viprocessor DESTINATION engine)

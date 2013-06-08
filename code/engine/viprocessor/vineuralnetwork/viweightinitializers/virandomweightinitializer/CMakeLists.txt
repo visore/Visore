@@ -9,6 +9,8 @@ FILE(GLOB VI_RANDOM_WEIGHT_INITIALIZER_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
 ADD_LIBRARY(virandomweightinitializer SHARED ${VI_RANDOM_WEIGHT_INITIALIZER_HEADERS} ${VI_RANDOM_WEIGHT_INITIALIZER_SOURCES})
+TARGET_LINK_LIBRARIES(virandomweightinitializer vineuralnetwork)
+QT5_USE_MODULES(virandomweightinitializer Xml)
 
 #Install file
 INSTALL(TARGETS virandomweightinitializer DESTINATION ${VI_WEIGHT_INITIALIZER_INSTALL_PATH})

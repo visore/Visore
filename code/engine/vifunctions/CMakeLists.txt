@@ -9,6 +9,8 @@ FILE(GLOB VI_FUNCTIONS_HEADERS ${HEADERS}/*.h)
 
 #Create library
 ADD_LIBRARY(vifunctions SHARED ${VI_FUNCTIONS_HEADERS} ${VI_FUNCTIONS_SOURCES})
+TARGET_LINK_LIBRARIES(vifunctions viessentials)
+QT5_USE_MODULES(vifunctions Core)
 
 #Install file
 INSTALL(TARGETS vifunctions DESTINATION engine)

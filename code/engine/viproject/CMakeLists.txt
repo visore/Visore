@@ -10,6 +10,7 @@ FILE(GLOB VI_PROJECT_HEADERS ${HEADERS}/*.h ${HEADERS}/*/*.h)
 #Create library
 ADD_LIBRARY(viproject SHARED ${VI_PROJECT_HEADERS} ${VI_PROJECT_SOURCES})
 TARGET_LINK_LIBRARIES(viproject viaudiocoder viaudioobject)
+QT5_USE_MODULES(viproject Multimedia Xml)
 
 #Install file
 INSTALL(TARGETS viproject DESTINATION engine)

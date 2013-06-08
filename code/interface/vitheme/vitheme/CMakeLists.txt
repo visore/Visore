@@ -10,6 +10,7 @@ FILE(GLOB VI_THEME_HEADERS ${HEADERS}/*.h)
 #Create library
 ADD_LIBRARY(vitheme SHARED ${VI_THEME_HEADERS} ${VI_THEME_SOURCES})
 TARGET_LINK_LIBRARIES(vitheme viessentials)
+QT5_USE_MODULES(vitheme Gui)
 
 #Install file
 INSTALL(TARGETS vitheme DESTINATION interface)

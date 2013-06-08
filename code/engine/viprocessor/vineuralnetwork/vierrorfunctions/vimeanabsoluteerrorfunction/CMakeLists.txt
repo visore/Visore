@@ -9,6 +9,8 @@ FILE(GLOB VI_MEAN_ABSOLUTE_ERROR_FUNCTION_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
 ADD_LIBRARY(viabsolutesquarederrorfunction SHARED ${VI_MEAN_ABSOLUTE_ERROR_FUNCTION_HEADERS} ${VI_MEAN_ABSOLUTE_ERROR_FUNCTION_SOURCES})
+TARGET_LINK_LIBRARIES(viabsolutesquarederrorfunction vineuralnetwork)
+QT5_USE_MODULES(viabsolutesquarederrorfunction Xml)
 
 #Install file
 INSTALL(TARGETS viabsolutesquarederrorfunction DESTINATION ${VI_ERROR_FUNCTION_INSTALL_PATH})

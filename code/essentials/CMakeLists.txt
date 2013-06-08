@@ -22,8 +22,8 @@ FILE(GLOB VI_ESSENTIALS_HEADERS ${HEADERS}/*.h ${HEADERS}/*/*.h ${HEADERS}/*/*/*
 
 #Create library
 ADD_LIBRARY(viessentials SHARED ${VI_ESSENTIALS_HEADERS} ${VI_ESSENTIALS_SOURCES})
+QT5_USE_MODULES(viessentials Core Gui Widgets Xml Network Multimedia)
 TARGET_LINK_LIBRARIES(viessentials osdab)
-QT5_USE_MODULES(viessentials Xml)
 
 #Install file
 INSTALL(TARGETS viessentials DESTINATION essentials)

@@ -10,6 +10,7 @@ FILE(GLOB VI_GRADIENTCREATOR_HEADERS ${HEADERS}/*.h)
 #Create library
 ADD_LIBRARY(vigradientcreator SHARED ${VI_GRADIENTCREATOR_HEADERS} ${VI_GRADIENTCREATOR_SOURCES})
 TARGET_LINK_LIBRARIES(vigradientcreator vitheme)
+QT5_USE_MODULES(vigradientcreator Gui)
 
 #Install file
 INSTALL(TARGETS vigradientcreator DESTINATION interface)

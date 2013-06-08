@@ -1,11 +1,11 @@
 #ifndef VIAUDIOTRANSMISSION_H
 #define VIAUDIOTRANSMISSION_H
 
-#include <qaudio.h>
-#include "vibuffer.h"
-#include "viaudioformat.h"
-#include "viaudioposition.h"
-#include "vilogger.h"
+#include <QAudio>
+#include <vibuffer.h>
+#include <viaudioformat.h>
+#include <viaudioposition.h>
+#include <vilogger.h>
 
 class ViAudioTransmission : public QObject
 {

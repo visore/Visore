@@ -9,6 +9,8 @@ FILE(GLOB VI_FIXED_WEIGHT_INITIALIZER_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
 ADD_LIBRARY(vifixedweightinitializer SHARED ${VI_FIXED_WEIGHT_INITIALIZER_HEADERS} ${VI_FIXED_WEIGHT_INITIALIZER_SOURCES})
+TARGET_LINK_LIBRARIES(vifixedweightinitializer vineuralnetwork)
+QT5_USE_MODULES(vifixedweightinitializer Xml)
 
 #Install file
 INSTALL(TARGETS vifixedweightinitializer DESTINATION ${VI_WEIGHT_INITIALIZER_INSTALL_PATH})

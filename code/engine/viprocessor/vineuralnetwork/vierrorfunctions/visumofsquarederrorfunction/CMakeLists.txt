@@ -9,6 +9,8 @@ FILE(GLOB VI_SUM_OF_SQUARED_ERROR_FUNCTION_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
 ADD_LIBRARY(visumofsquarederrorfunction SHARED ${VI_SUM_OF_SQUARED_ERROR_FUNCTION_HEADERS} ${VI_SUM_OF_SQUARED_ERROR_FUNCTION_SOURCES})
+TARGET_LINK_LIBRARIES(visumofsquarederrorfunction vineuralnetwork)
+QT5_USE_MODULES(visumofsquarederrorfunction Xml)
 
 #Install file
 INSTALL(TARGETS visumofsquarederrorfunction DESTINATION ${VI_ERROR_FUNCTION_INSTALL_PATH})

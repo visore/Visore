@@ -22,6 +22,7 @@ ENDIF()
 
 #Link Visore to Qt
 TARGET_LINK_LIBRARIES(visore viaudioengine vimainwindow)
+QT5_USE_MODULES(visore Widgets Multimedia Xml)
 
 #Install file
 INSTALL(TARGETS visore RUNTIME DESTINATION .)

@@ -10,6 +10,7 @@ FILE(GLOB VI_AUDIOENGINE_HEADERS ${HEADERS}/*.h)
 #Create library
 ADD_LIBRARY(viaudioengine SHARED ${VI_AUDIOENGINE_HEADERS} ${VI_AUDIOENGINE_SOURCES})
 TARGET_LINK_LIBRARIES(viaudioengine viessentials viaudiorecorder vialigner)
+QT5_USE_MODULES(viaudioengine Multimedia Xml)
 
 #Install file
 INSTALL(TARGETS viaudioengine DESTINATION engine)

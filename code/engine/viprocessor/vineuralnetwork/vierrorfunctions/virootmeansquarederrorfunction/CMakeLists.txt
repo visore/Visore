@@ -9,6 +9,8 @@ FILE(GLOB VI_ROOT_MEAN_SQUARED_ERROR_FUNCTION_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
 ADD_LIBRARY(virootmeansquarederrorfunction SHARED ${VI_ROOT_MEAN_SQUARED_ERROR_FUNCTION_HEADERS} ${VI_ROOT_MEAN_SQUARED_ERROR_FUNCTION_SOURCES})
+TARGET_LINK_LIBRARIES(virootmeansquarederrorfunction vineuralnetwork)
+QT5_USE_MODULES(virootmeansquarederrorfunction Xml)
 
 #Install file
 INSTALL(TARGETS virootmeansquarederrorfunction DESTINATION ${VI_ERROR_FUNCTION_INSTALL_PATH})

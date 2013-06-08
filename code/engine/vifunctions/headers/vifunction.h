@@ -1,7 +1,7 @@
 #ifndef VIFUNCTION_H
 #define VIFUNCTION_H
 
-#include <qmath.h>
+#include <QtCore/qmath.h>
 
 class ViFunction
 {

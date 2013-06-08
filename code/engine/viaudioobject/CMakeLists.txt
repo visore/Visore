@@ -10,6 +10,7 @@ FILE(GLOB VI_AUDIOOBJECT_HEADERS ${HEADERS}/*.h)
 #Create library
 ADD_LIBRARY(viaudioobject SHARED ${VI_AUDIOOBJECT_HEADERS} ${VI_AUDIOOBJECT_SOURCES})
 TARGET_LINK_LIBRARIES(viaudioobject viaudiobuffer)
+QT5_USE_MODULES(viaudioobject Multimedia Xml)
 
 #Install file
 INSTALL(TARGETS viaudioobject DESTINATION engine)

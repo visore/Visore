@@ -10,6 +10,7 @@ FILE(GLOB VI_AUDIORECORDER_HEADERS ${HEADERS}/*.h)
 #Create library
 ADD_LIBRARY(viaudiorecorder SHARED ${VI_AUDIORECORDER_HEADERS} ${VI_AUDIORECORDER_SOURCES})
 TARGET_LINK_LIBRARIES(viaudiorecorder viaudioconnection viproject viprocessor)
+QT5_USE_MODULES(viaudiorecorder Multimedia Xml)
 
 #Install file
 INSTALL(TARGETS viaudiorecorder DESTINATION engine)

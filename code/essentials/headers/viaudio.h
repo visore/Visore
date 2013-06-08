@@ -1,7 +1,7 @@
 #ifndef VIAUDIO_H
 #define VIAUDIO_H
 
- #include <qaudio.h>
+#include <QAudio>
 
 namespace ViAudio
 {

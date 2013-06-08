@@ -9,6 +9,8 @@ FILE(GLOB VI_LINEAR_ACTIVATION_FUNCTION_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
 ADD_LIBRARY(vilinearactivationfunction SHARED ${VI_LINEAR_ACTIVATION_FUNCTION_HEADERS} ${VI_LINEAR_ACTIVATION_FUNCTION_SOURCES})
+TARGET_LINK_LIBRARIES(vilinearactivationfunction vineuralnetwork)
+QT5_USE_MODULES(vilinearactivationfunction Xml)
 
 #Install file
 INSTALL(TARGETS vilinearactivationfunction DESTINATION ${VI_ACTIVATION_FUNCTION_INSTALL_PATH})

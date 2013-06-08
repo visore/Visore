@@ -10,6 +10,7 @@ FILE(GLOB VI_SONGIDENTIFIER_HEADERS ${HEADERS}/*.h ${HEADERS}/*/*.h)
 #Create library
 ADD_LIBRARY(visongidentifier SHARED ${VI_SONGIDENTIFIER_HEADERS} ${VI_SONGIDENTIFIER_SOURCES})
 TARGET_LINK_LIBRARIES(visongidentifier viaudiobuffer ${ENMFP_LIBRARY} acoustid)
+QT5_USE_MODULES(visongidentifier Network Gui Multimedia Xml)
 
 #Install file
 INSTALL(TARGETS visongidentifier DESTINATION engine)
