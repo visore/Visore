@@ -19,10 +19,8 @@ ViMetadataer::ViMetadataer()
 
 ViMetadataer::~ViMetadataer()
 {
-	qDeleteAll(mIdentifiers);
-	mIdentifiers.clear();
-	qDeleteAll(mRetrievers);
-	mRetrievers.clear();
+    viDeleteAll(mIdentifiers);
+    viDeleteAll(mRetrievers);
 }
 
 void ViMetadataer::processIdentification(bool success)

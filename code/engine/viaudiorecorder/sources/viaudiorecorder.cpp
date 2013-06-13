@@ -40,7 +40,7 @@ bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, ViAud
 	mType = type;
 	mInput.setFormat(format);
 	mSides = sides;
-	mDetectInfo = detectInfo;
+    mDetectInfo = detectInfo;
 
 	mProject->save();
 	if(mType != ViAudioObject::Undefined)
@@ -64,6 +64,7 @@ void ViAudioRecorder::nextObject(bool startTimer)
 	mInput.setBuffer(newObject->inputBuffer());
 	mSegmentDetector.process(newObject, mType); // Important: The preious statment will create a buffer and set the format. Must be done before this is executed
 	mInput.start();
+
 	mObject = newObject;
 
 	mObject->setSideNumber(mCurrentSide);
@@ -79,6 +80,7 @@ void ViAudioRecorder::finish()
 {
 	QObject::disconnect(mProject, SIGNAL(finished()), this, SLOT(finish()));
     mObject.setNull();
+    mQueue.clear();
     mProject->clear();
 	setProgress(100);
     emit finished();
@@ -140,13 +142,13 @@ void ViAudioRecorder::endRecord()
 
 void ViAudioRecorder::serialize()
 {
-	ViAudioObjectPointer object = mQueue.dequeue();
-	QObject::disconnect(object.data(), SIGNAL(infoed(bool)), this, SLOT(serialize()));
-	if(mProject != NULL && object->length(ViAudioPosition::Seconds) > LENGTH_CUTOFF)
+    ViAudioObjectPointer object = mQueue.dequeue();
+    QObject::disconnect(object.data(), SIGNAL(infoed(bool)), this, SLOT(serialize()));
+    if(mProject != NULL && object->length(ViAudioPosition::Seconds) > LENGTH_CUTOFF)
 	{
 		mProject->add(object);
-		object->encode();
-	}
+        object->encode(mType, true);
+    }
 }
 
 void ViAudioRecorder::checkSize()

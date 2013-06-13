@@ -31,6 +31,13 @@ class ViLogEntry
 		void printMedium();
 		void printLong();
 
+        string clearColor();
+        string whiteColor();
+        string redColor();
+        string greenColor();
+        string yellowColor();
+        string blueColor();
+
 	private:
 
 		QString mFileName;

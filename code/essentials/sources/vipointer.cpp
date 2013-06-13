@@ -3,12 +3,12 @@
 template<class T>
 ViPointerData<T>::ViPointerData(T *data, ViFunctor *deleter, int counter, int limiter)
 {
-	mData = data;
-	mDeleter = deleter;
-	mCounter.setValue(counter);
-	mLimiter.setValue(limiter);
+    mData = data;
+    mDeleter = deleter;
+    mCounter.setValue(counter);
+    mLimiter.setValue(limiter);
 }
-	
+
 template<class T>	
 void ViPointerData<T>::setData(T *data)
 {
@@ -61,14 +61,16 @@ ViAtomicInt& ViPointerData<T>::limiter()
 template<class T>
 ViPointer<T>::ViPointer()
 {
-	mData = new ViPointerData<T>();
+    mData = new ViPointerData<T>();
+    mDestructMutex = new QMutex();
 }
 
 template<class T>
 ViPointer<T>::ViPointer(T *pointer)
 {
 	mData = new ViPointerData<T>();
-	mData->setData(pointer);
+    mData->setData(pointer);
+    mDestructMutex = new QMutex();
 }
 
 template<class T>
@@ -80,37 +82,57 @@ ViPointer<T>::ViPointer(const ViPointer<T> &other)
 template<class T>
 ViPointer<T>::~ViPointer()
 {
-	destruct();
+    destruct();
 }
 
 template<class T>
 void ViPointer<T>::copy(const ViPointer<T> &other)
 {
-	mData = other.mData;
-	mData->counter().increase();
+    mDestructMutex = other.mDestructMutex;
+    mData = other.mData;
+    mData->counter().increase();
 }
 
 template<class T>
 void ViPointer<T>::destruct()
 {
-	if(mData != NULL)
-	{
-		mData->counter().decrease();
-		if(referenceCount() == mData->limiter().value() && mData->deleter() != NULL)
-		{
-			mData->deleter()->execute(mData->data());
-		}
-		else if(!isUsed())
-		{
-			if(mData->data() != NULL)
-			{
-				delete mData->data();
-				mData->setData(NULL);
-			}
-			delete mData;
-			mData = NULL;
-		}
-	}
+    if(mDestructMutex != NULL)
+    {
+        if(!mDestructMutex->tryLock())
+        {
+            return;
+        }
+
+        if(mData != NULL)
+        {
+            mData->counter().decrease();
+            if(!isUsed())
+            {
+                if(mData->deleter() != NULL)
+                {
+                    mData->deleter()->execute(mData->data());
+                }
+                else
+                {
+                    delete mData->data();
+                    mData->setData(NULL);
+                }
+                delete mData;
+                mData = NULL;
+                mDestructMutex->unlock();
+                delete mDestructMutex;
+                mDestructMutex = NULL;
+            }
+            else
+            {
+                mDestructMutex->unlock();
+            }
+        }
+        else
+        {
+            mDestructMutex->unlock();
+        }
+    }
 }
 
 template<class T>
@@ -134,7 +156,7 @@ int ViPointer<T>::referenceCount()
 template<class T>
 bool ViPointer<T>::isUsed()
 {
-	return referenceCount() != 0;
+    return referenceCount() > mData->limiter().value();
 }
 
 template<class T>
@@ -171,8 +193,8 @@ T* ViPointer<T>::operator -> ()
 template<class T>
 ViPointer<T>& ViPointer<T>::operator = (const ViPointer<T> &other)
 {
-	destruct();
-	copy(other);
+    destruct();
+    copy(other);
 	return *this;
 }
 

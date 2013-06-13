@@ -15,10 +15,7 @@ ViBuffer::~ViBuffer()
 {
 	delete mData;
 	mData = NULL;
-	for(int i = 0; i < mStreams.size(); ++i)
-	{
-		mStreams[i].setDeleter(NULL);
-	}
+    mStreams.clear();
 }
 
 QByteArray* ViBuffer::data()
@@ -64,8 +61,6 @@ ViBufferStreamPointer ViBuffer::createStream(QIODevice::OpenMode mode)
 		return ViBufferStreamPointer();
 	}
 	ViBufferStreamPointer pointer = ViBufferStreamPointer(new ViBufferStream(mode, this, mData, &mMutex));
-	pointer.setUnusedLimit(1);
-	pointer.setDeleter(this);
 	mStreams.append(pointer);
 	return pointer;
 }

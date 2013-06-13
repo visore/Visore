@@ -56,10 +56,9 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 
 ViAudioObject::~ViAudioObject()
 {
-	clearBuffers(mDestructType);
+    clearBuffers(mDestructType);
 
-	qDeleteAll(mWaveForms);
-	mWaveForms.clear();
+    viDeleteAll(mWaveForms);
 
 	if(mEncoder != NULL)
 	{
@@ -94,30 +93,30 @@ ViAudioObject::~ViAudioObject()
 	{
 		delete mCorrector;
 		mCorrector = NULL;
-	}
+    }
 }
 
 ViAudioObjectPointer ViAudioObject::create(ViAudioObject *object)
 {
 	ViAudioObjectPointer pointer = ViAudioObjectPointer(object);
-	pointer.setUnusedLimit(2);
 	pointer->thisPointer = pointer;
+    pointer.setUnusedLimit(1);
 	return pointer;
 }
 
 ViAudioObjectPointer ViAudioObject::create(bool autoDestruct)
 {
 	ViAudioObjectPointer pointer = ViAudioObjectPointer(new ViAudioObject(autoDestruct));
-	pointer.setUnusedLimit(2);
 	pointer->thisPointer = pointer;
+    pointer.setUnusedLimit(1);
 	return pointer;
 }
 
 ViAudioObjectPointer ViAudioObject::createNull()
 {
 	ViAudioObjectPointer pointer = ViAudioObjectPointer(NULL);
-	pointer.setUnusedLimit(2);
 	pointer->thisPointer = pointer;
+    pointer.setUnusedLimit(1);
 	return pointer;
 }
 

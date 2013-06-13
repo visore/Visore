@@ -1,6 +1,8 @@
 #include "vilogger.h"
 #include <QDir>
 
+#define ENABLE_COLOR false
+
 // 0: Lite logging
 // 1: Medium logging
 // 2: Heavy logging
@@ -94,76 +96,104 @@ void ViLogEntry::print()
 }
 
 void ViLogEntry::printShort()
-{
+{   
 	switch(mType)
 	{
-		case QtDebugMsg:
-			cout << "\033[1;32mStatus: ";
+        case QtDebugMsg:
+            cout << greenColor() << "Status: ";
 			break;
-		case QtWarningMsg:
-			cout << "\033[1;33mWarning: ";
+        case QtWarningMsg:
+            cout << yellowColor() << "Warning: ";
 			break;
-		case QtCriticalMsg:
-			cout << "\033[1;31mCritical Error: ";
+        case QtCriticalMsg:
+            cout << redColor() << "Critical Error: ";
 			break;
         case QtFatalMsg:
-			cout << "\033[1;31mFatal Error: ";
-	}
-	cout << "\033[1;37m" << mMessage. toLatin1().data() << " \033[0m" << endl;
+            cout << redColor() << "Fatal Error: ";
+    }
+    cout << whiteColor() << mMessage. toLatin1().data() << clearColor() << endl;
 }
 
 void ViLogEntry::printMedium()
 {
-	switch(mType)
-	{
-		case QtDebugMsg:
-			cout << "\033[1;32mStatus: ";
-			break;
-		case QtWarningMsg:
-			cout << "\033[1;33mWarning: ";
-			break;
-		case QtCriticalMsg:
-			cout << "\033[1;31mCritical Error: ";
-			break;
+    switch(mType)
+    {
+        case QtDebugMsg:
+            cout << greenColor() << "Status: ";
+            break;
+        case QtWarningMsg:
+            cout << yellowColor() << "Warning: ";
+            break;
+        case QtCriticalMsg:
+            cout << redColor() << "Critical Error: ";
+            break;
         case QtFatalMsg:
-			cout << "\033[1;31mFatal Error: ";
+            cout << redColor() << "Fatal Error: ";
+    }
+    if(mClassName != "")
+    {
+        cout << blueColor() << mClassName.toLatin1().data() << " ";
 	}
-	if(mClassName == "")
-	{
-		cout << "\033[1;37m";
-	}
-	else
-	{
-		cout << "\033[1;34m" << mClassName.toLatin1().data() << "\033[1;37m ";
-	}
-	cout << mMessage. toLatin1().data() << " \033[0m" << endl;
+    cout << whiteColor() << mMessage. toLatin1().data() << clearColor() << endl;
 }
 
 void ViLogEntry::printLong()
 {
-	switch(mType)
-	{
-		case QtDebugMsg:
-			cout << "\033[1;32mStatus: ";
-			break;
-		case QtWarningMsg:
-			cout << "\033[1;33mWarning: ";
-			break;
-		case QtCriticalMsg:
-			cout << "\033[1;31mCritical Error: ";
-			break;
+    switch(mType)
+    {
+        case QtDebugMsg:
+            cout << greenColor() << "Status: ";
+            break;
+        case QtWarningMsg:
+            cout << yellowColor() << "Warning: ";
+            break;
+        case QtCriticalMsg:
+            cout << redColor() << "Critical Error: ";
+            break;
         case QtFatalMsg:
-			cout << "\033[1;31mFatal Error: ";
-	}
-	if(mClassName == "")
+            cout << redColor() << "Fatal Error: ";
+    }
+    if(mClassName != "")
 	{
-		cout << "\033[1;30m";
+        cout << blueColor() << mClassName.toLatin1().data() << " ";
 	}
-	else
-	{
-		cout << "\033[1;34m" << mClassName.toLatin1().data() << "\033[1;30m ";
-	}
-	cout << mFileName. toLatin1().data() << ":" << mLineNumber << ")\033[1;37m " << mMessage. toLatin1().data() << " \033[0m" << endl;
+    cout << whiteColor() << mFileName. toLatin1().data() << ":" << mLineNumber << ") " << whiteColor() << mMessage. toLatin1().data() << clearColor() << endl;
+}
+
+string ViLogEntry::clearColor()
+{
+    if(ENABLE_COLOR) return "\033[0m";
+    return "";
+}
+
+string ViLogEntry::whiteColor()
+{
+    if(ENABLE_COLOR) return "\033[1;37m";
+    return "";
+}
+
+string ViLogEntry::redColor()
+{
+    if(ENABLE_COLOR) return "\033[1;31m";
+    return "";
+}
+
+string ViLogEntry::greenColor()
+{
+    if(ENABLE_COLOR) return "\033[1;32m";
+    return "";
+}
+
+string ViLogEntry::yellowColor()
+{
+    if(ENABLE_COLOR) return "\033[1;33m";
+    return "";
+}
+
+string ViLogEntry::blueColor()
+{
+    if(ENABLE_COLOR) return "\033[1;34m";
+    return "";
 }
 
 QSharedPointer<ViLogger> ViLogger::mInstance;
