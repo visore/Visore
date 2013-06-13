@@ -6,7 +6,9 @@ class ViFourierCalculator
 
 	public:
 		
-		ViFourierCalculator();
+        ViFourierCalculator();
+        virtual ~ViFourierCalculator();
+
 		virtual void setData(const double input[], double output[]);
 		virtual void setData(double input[]);
 		virtual void setSize(const int size);

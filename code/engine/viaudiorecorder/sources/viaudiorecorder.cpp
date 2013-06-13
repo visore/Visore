@@ -33,6 +33,8 @@ bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, ViAud
 	emit started();
 	setProgress(-1); //Infinite
 	mQueue.clear();
+    mCurrentTrack = 0;
+    mCurrentSide = 0;
 
 	mProject = project;
 	mType = type;
@@ -77,6 +79,7 @@ void ViAudioRecorder::finish()
 {
 	QObject::disconnect(mProject, SIGNAL(finished()), this, SLOT(finish()));
     mObject.setNull();
+    mProject->clear();
 	setProgress(100);
     emit finished();
 }

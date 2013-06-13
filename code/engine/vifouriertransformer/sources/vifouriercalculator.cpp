@@ -2,9 +2,13 @@
 
 ViFourierCalculator::ViFourierCalculator()
 {
-	mInput = 0;
-	mOutput = 0;
-	mSize = 0;
+    mInput = 0;
+    mOutput = 0;
+    mSize = 0;
+}
+
+ViFourierCalculator::~ViFourierCalculator()
+{
 }
 
 void ViFourierCalculator::setData(const double input[], double output[])

@@ -52,8 +52,8 @@ ViProject::ViProject(const ViProject &other)
 
 ViProject::~ViProject()
 {
-	removeStructure();
-	mObjects.clear();
+    clearObjects();
+    clearFiles();
 }
 
 /*******************************************************************************************************************
@@ -192,7 +192,31 @@ ViVersion ViProject::editedVersion()
 
 /*******************************************************************************************************************
 
-	LOAD & SAVE
+    CLEAR
+
+*******************************************************************************************************************/
+
+void ViProject::clear()
+{
+    LOG("Clearing project.");
+    clearObjects();
+    clearFiles();
+    emit cleared();
+}
+
+void ViProject::clearObjects()
+{
+    mObjects.clear();
+}
+
+void ViProject::clearFiles()
+{
+    removeStructure();
+}
+
+/*******************************************************************************************************************
+
+    LOAD & SAVE
 
 *******************************************************************************************************************/
 
@@ -446,14 +470,17 @@ void ViProject::moveToProject()
 void ViProject::moveToProject(ViAudioObjectPointer object, ViAudioObject::Type type)
 {	
 	QString oldPath = object->filePath(type);
-	QString newPath = path(type, object->sideNumber()) + object->fileName();
-	ViAudioCodec *codec = object->format(type).codec();
-	if(codec != NULL)
-	{
-		newPath += codec->extension(".");
-	}
-	QFile::rename(oldPath, newPath);
-	object->setFilePath(type, newPath);
+    if(!oldPath.startsWith(mPaths[ViProject::Root]))
+    {
+        QString newPath = path(type, object->sideNumber()) + object->fileName();
+        ViAudioCodec *codec = object->format(type).codec();
+        if(codec != NULL)
+        {
+            newPath += codec->extension(".");
+        }
+        QFile::rename(oldPath, newPath);
+        object->setFilePath(type, newPath);
+    }
 }
 
 /*******************************************************************************************************************

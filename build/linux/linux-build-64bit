@@ -52,7 +52,6 @@ if $cmake; then
 	else
 		cmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit
 	fi
-	make -j4 install -j4
 fi
 
 if $build; then

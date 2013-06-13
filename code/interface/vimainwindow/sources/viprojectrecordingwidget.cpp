@@ -28,8 +28,6 @@ ViProjectRecordingWidget::ViProjectRecordingWidget(QWidget *parent)
 	QObject::connect(mUi->newRadioButton, SIGNAL(toggled(bool)), this, SLOT(changeType()));
 	QObject::connect(mUi->existingRadioButton, SIGNAL(toggled(bool)), this, SLOT(changeType()));
 	changeType();
-
-	QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(clear()));
 }
 
 ViProjectRecordingWidget::~ViProjectRecordingWidget()
@@ -42,16 +40,17 @@ void ViProjectRecordingWidget::load()
 {
 	clear();
 	mProject = new ViProject();
-	mProject->setProjectName(mUi->nameLineEdit->text());
-	mProject->setFilePath(mUi->newBrowser->fileName());
-
+    QObject::connect(mProject, SIGNAL(cleared()), this, SLOT(clear()));
 	if(mUi->existingRadioButton->isChecked())
 	{
+        mProject->setFilePath(mUi->existingBrowser->fileName());
 		QObject::connect(mProject, SIGNAL(loaded()), this, SLOT(start()));
 		mProject->load();
 	}
 	else
-	{
+    {
+        mProject->setProjectName(mUi->nameLineEdit->text());
+        mProject->setFilePath(mUi->newBrowser->fileName());
 		start();
 	}
 }
@@ -59,12 +58,20 @@ void ViProjectRecordingWidget::load()
 void ViProjectRecordingWidget::start()
 {
 	QObject::disconnect(mProject, SIGNAL(loaded()), this, SLOT(start()));
-	ViAudioObject::Type type = ViAudioObject::Target;
+
+    ViAudioObject::Type type = ViAudioObject::Target;
 	if(mUi->corruptedRadioButton->isChecked())
 	{
 		type = ViAudioObject::Corrupted;
 	}
-	engine()->recordProject(mProject, type, mUi->formatWidget->format(), mUi->sidesSpinBox->value(), mUi->songInfoBox->isChecked());
+
+    int sides = mUi->sidesSpinBox->value();
+    if(mUi->existingRadioButton->isChecked())
+    {
+        sides = mProject->sideCount();
+    }
+
+    engine()->recordProject(mProject, type, mUi->formatWidget->format(), sides, mUi->songInfoBox->isChecked());
 }
 
 void ViProjectRecordingWidget::changeType()
@@ -85,6 +92,7 @@ void ViProjectRecordingWidget::clear()
 {
 	if(mProject != NULL)
 	{
+        QObject::disconnect(mProject, SIGNAL(cleared()), this, SLOT(clear()));
 		delete mProject;
 		mProject = NULL;
 	}

@@ -166,7 +166,7 @@ void ViArchiveThread::decompressData()
 	else
 	{
 		convertUnzipError(unzip.extractFiles(mOutputFiles, mOutputLocation));
-	}
+    }
 	unzip.closeArchive();
 }
 
