@@ -129,11 +129,6 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudioObj
 	}
 }
 
-void ViProcessor::process(ViAudioObjectPointer audioObject)
-{
-	process(audioObject, audioObject->inputType());
-}
-
 void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type)
 {
 	if(initializeProcess(audioObject, type))
@@ -336,16 +331,6 @@ void ViDualProcessor::startProgressless()
 	}
 }
 
-void ViDualProcessor::process(ViAudioObjectPointer audioObject)
-{
-	process(audioObject, audioObject->inputType(), audioObject->outputType());
-}
-
-void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1)
-{
-	process(audioObject, type1, audioObject->outputType());
-}
-
 void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2)
 {
 	if(initializeProcess(audioObject, type1))
@@ -459,16 +444,6 @@ void ViModifyProcessor::startProgressless()
 	{
 		QObject::connect(readStream()->buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
 	}
-}
-
-void ViModifyProcessor::process(ViAudioObjectPointer audioObject)
-{
-	process(audioObject, audioObject->inputType(), audioObject->outputType());
-}
-
-void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1)
-{
-	process(audioObject, type1, audioObject->outputType());
 }
 
 void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2)

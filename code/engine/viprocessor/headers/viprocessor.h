@@ -49,8 +49,7 @@ class ViProcessor : public ViNotifier
         void stop();
 
         virtual ~ViProcessor();
-		virtual void process(ViAudioObjectPointer audioObject);
-		virtual void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type);
+        virtual void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type);
 
 	protected:
 
@@ -112,9 +111,7 @@ class ViDualProcessor : public ViProcessor
 
 		ViDualProcessor();
 		virtual ~ViDualProcessor();
-		void process(ViAudioObjectPointer audioObject);
-		void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1);
-		void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2);
+        void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2);
 
 	protected:
 
@@ -148,9 +145,7 @@ class ViModifyProcessor : public ViProcessor
 
 		ViModifyProcessor(bool autoWrite = true);
 		virtual ~ViModifyProcessor();
-		void process(ViAudioObjectPointer audioObject);
-		void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1);
-		void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2);
+        void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2);
 
 	protected:
 

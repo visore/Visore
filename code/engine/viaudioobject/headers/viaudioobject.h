@@ -88,8 +88,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		void setOutputFormat(ViAudioFormat format);
-
         void setFormat(ViAudioObject::Type type, ViAudioFormat format);
         void setTargetFormat(ViAudioFormat format);
         void setCorruptedFormat(ViAudioFormat format);
@@ -205,8 +203,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void setEncoder(ViAudioCoder *coder); //Takes ownership
 		bool hasEncoder();
         Q_INVOKABLE bool encode(int type);
-		Q_INVOKABLE bool encode(ViAudioFormat format, bool clearWhenFinished = false);
-		Q_INVOKABLE bool encode(ViAudioObject::Type type, ViAudioFormat format, bool clearWhenFinished = false);
 		Q_INVOKABLE bool encode(ViAudioObject::Type type = ViAudioObject::All, bool clearWhenFinished = false);
 		
 		void setDecoder(ViAudioCoder *coder); //Takes ownership
@@ -223,19 +219,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void setAligner(ViAligner *aligner); //Takes ownership
 		bool hasAligner();
 		Q_INVOKABLE bool align(ViAligner *aligner = NULL); //Takes ownership
-
-		/*******************************************************************************************************************
-
-			INPUT & OUTPUT
-
-		*******************************************************************************************************************/
-
-		void setType(ViAudioObject::Type input, ViAudioObject::Type output);
-		void setInputType(ViAudioObject::Type type);
-		void setOutputType(ViAudioObject::Type type);
-
-		ViAudioObject::Type inputType();
-		ViAudioObject::Type outputType();
 		
 		/*******************************************************************************************************************
 
@@ -244,7 +227,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		*******************************************************************************************************************/
 
 		// Transfer a certain buffer from object to this object.
-		// If type is UnknownType, the output buffer will be used.
 		// The ownership of the buffer will be transfered to this object, hence object will not delete it.
 		// The file path is also transfered.
 		void transferBuffer(ViAudioObjectPointer object, ViAudioObject::Type type = ViAudioObject::Undefined);
@@ -254,9 +236,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViBuffer* corruptedBuffer(bool dontCreate = false);
 		ViBuffer* correctedBuffer(bool dontCreate = false);
 		ViBuffer* temporaryBuffer(bool dontCreate = false);
-
-		ViBuffer* inputBuffer(bool dontCreate = false); // returns the buffer that will be used as input for the processing chain
-		ViBuffer* outputBuffer(bool dontCreate = false); // returns the buffer that will be used as output for the processing chain
 
 		void setBuffer(ViAudioObject::Type type, ViBuffer *buffer);
 		void setTargetBuffer(ViBuffer *buffer);
@@ -271,8 +250,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		Q_INVOKABLE void clearTemporaryBuffer();
 
 		bool hasBuffer(ViAudioObject::Type type);
-		bool hasInputBuffer();
-		bool hasOutputBuffer();
 
 		/*******************************************************************************************************************
 
@@ -306,7 +283,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViAudioFormat corruptedFormat();
 		ViAudioFormat correctedFormat();
 		ViAudioFormat inputFormat();
-		ViAudioFormat outputFormat();
 
 		/*******************************************************************************************************************
 
@@ -403,8 +379,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		ViAudioObjectPointer thisPointer; // Keep a ViPointer to own object. Needed for passing it to ViProcessor
 
-		ViAudioObject::Type mInputType;
-		ViAudioObject::Type mOutputType;
 		ViAudioObject::Type mDestructType;
 
 		ViBuffer *mTargetBuffer;
@@ -434,8 +408,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 			FORMATS
 
 		*******************************************************************************************************************/
-
-        ViAudioFormat mOutputFormat;
 
         ViAudioFormat mTargetFormat;
         ViAudioFormat mCorruptedFormat;

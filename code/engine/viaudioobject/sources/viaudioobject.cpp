@@ -21,9 +21,6 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	mIsFinished = false;
 	mIsSong = false;
 
-	mInputType = ViAudioObject::Undefined;
-	mOutputType = ViAudioObject::Undefined;
-
 	mTargetBuffer = NULL;
 	mCorruptedBuffer = NULL;
 	mCorrectedBuffer = NULL;
@@ -96,6 +93,8 @@ ViAudioObject::~ViAudioObject()
     }
 
     clearCorrelators();
+
+    LOG("rrrrrrrrrrrrrrrr++++++++++++++++++: ");
 }
 
 ViAudioObjectPointer ViAudioObject::create(ViAudioObject *object)
@@ -307,11 +306,6 @@ void ViAudioObject::addDestructRule(ViAudioObject::Type type, bool destruct)
 
 *******************************************************************************************************************/
 
-void ViAudioObject::setOutputFormat(ViAudioFormat format)
-{
-	mOutputFormat = format;
-}
-
 void ViAudioObject::setFormat(ViAudioObject::Type type, ViAudioFormat format)
 {
     if(type == ViAudioObject::Target)
@@ -375,26 +369,6 @@ ViAudioFormat ViAudioObject::correctedFormat()
     return mCorrectedFormat;
 }
 
-ViAudioFormat ViAudioObject::inputFormat()
-{
-	ViBuffer *buffer = inputBuffer(true);
-	if(buffer != NULL)
-	{
-		return buffer->format();
-	}
-	return ViAudioFormat();
-}
-
-ViAudioFormat ViAudioObject::outputFormat()
-{
-	ViBuffer *buffer = outputBuffer(true);
-	if(buffer != NULL)
-	{
-		return buffer->format();
-	}
-	return mOutputFormat;
-}
-
 /*******************************************************************************************************************
 
 	ENCODE & DECODE
@@ -422,37 +396,12 @@ bool ViAudioObject::encode(int type)
     return encode((ViAudioObject::Type) type);
 }
 
-bool ViAudioObject::encode(ViAudioFormat format, bool clearWhenFinished)
-{
-    setOutputFormat(format);
-    return encode(ViAudioObject::Undefined, clearWhenFinished);
-}
-
-bool ViAudioObject::encode(ViAudioObject::Type type, ViAudioFormat format, bool clearWhenFinished)
-{
-	setOutputFormat(format);
-	return encode(type, clearWhenFinished);
-}
-
 bool ViAudioObject::encode(ViAudioObject::Type type, bool clearWhenFinished)
 {
 	QMutexLocker locker(&mMutex);
 
 	mClearEncodedBuffer = clearWhenFinished;
 	mPreviousEncodedType = ViAudioObject::Undefined;
-
-	if(type == ViAudioObject::Undefined)
-	{
-		locker.unlock();
-		type = outputType();
-		locker.relock();
-	}
-	if(type == ViAudioObject::Undefined)
-	{
-		locker.unlock();
-		type = inputType();
-		locker.relock();
-	}
 	mCodingInstructions = decomposeTypes(type);
 
 	QString thePath = "";
@@ -495,7 +444,7 @@ void ViAudioObject::encodeNext()
 {
 	QMutexLocker locker(&mMutex);
 	if(mClearEncodedBuffer)
-	{
+    {
 		locker.unlock();
 		clearBuffer(mPreviousEncodedType);
 		locker.relock();
@@ -518,14 +467,7 @@ void ViAudioObject::encodeNext()
 		QString thePath = filePath(mPreviousEncodedType);
 		ViBuffer *theBuffer = buffer(mPreviousEncodedType, true);
 		locker.relock();
-		if(mOutputFormat.isValid(true))
-		{
-			mEncoder->encode(theBuffer, thePath, mOutputFormat, 0, mSongInfo);
-		}
-		else
-		{
-			mEncoder->encode(theBuffer, thePath, theBuffer->format(), 0, mSongInfo);
-		}
+        mEncoder->encode(theBuffer, thePath, theBuffer->format(), 0, mSongInfo);
 	}
 }
 
@@ -552,10 +494,6 @@ bool ViAudioObject::decode(int type)
 
 bool ViAudioObject::decode(ViAudioObject::Type type)
 {
-	if(type == ViAudioObject::Undefined)
-	{
-		type = inputType();
-	}
 	QMutexLocker locker(&mMutex);
 	mCodingInstructions = decomposeTypes(type);
 
@@ -682,42 +620,6 @@ void ViAudioObject::alignNext()
 
 /*******************************************************************************************************************
 
-	INPUT & OUTPUT
-
-*******************************************************************************************************************/
-
-void ViAudioObject::setType(ViAudioObject::Type input, ViAudioObject::Type output)
-{
-	setInputType(input);
-	setOutputType(output);
-}
-
-void ViAudioObject::setInputType(ViAudioObject::Type type)
-{
-	QMutexLocker locker(&mMutex);
-	mInputType = type;
-}
-
-void ViAudioObject::setOutputType(ViAudioObject::Type type)
-{
-	QMutexLocker locker(&mMutex);
-	mOutputType = type;
-}
-
-ViAudioObject::Type ViAudioObject::inputType()
-{
-	QMutexLocker locker(&mMutex);
-	return mInputType;
-}
-
-ViAudioObject::Type ViAudioObject::outputType()
-{
-	QMutexLocker locker(&mMutex);
-	return mOutputType;
-}
-
-/*******************************************************************************************************************
-
 	LOGGING
 
 *******************************************************************************************************************/
@@ -778,12 +680,6 @@ void ViAudioObject::setProgress(qreal parts)
 void ViAudioObject::transferBuffer(ViAudioObjectPointer object, ViAudioObject::Type type)
 {
 	QMutexLocker locker(&mMutex);
-	if(type == ViAudioObject::Undefined)
-	{
-		locker.unlock();
-		type = object->outputType();
-		locker.relock();
-	}
 	object->addDestructRule(type, false);
 	locker.unlock();
 	setBuffer(type, object->buffer(type));
@@ -852,48 +748,6 @@ ViBuffer* ViAudioObject::temporaryBuffer(bool dontCreate)
 		mTemporaryBuffer = new ViBuffer();
 	}
 	return mTemporaryBuffer;
-}
-
-ViBuffer* ViAudioObject::inputBuffer(bool dontCreate)
-{
-	if(mInputType == ViAudioObject::Target)
-	{
-		return targetBuffer(dontCreate);
-	}
-	else if(mInputType == ViAudioObject::Corrupted)
-	{
-		return corruptedBuffer(dontCreate);
-	}
-	else if(mInputType == ViAudioObject::Corrected)
-	{
-		return correctedBuffer(dontCreate);
-	}
-	else if(mInputType == ViAudioObject::Temporary)
-	{
-		return temporaryBuffer(dontCreate);
-	}
-	return NULL;
-}
-
-ViBuffer* ViAudioObject::outputBuffer(bool dontCreate)
-{
-	if(mOutputType == ViAudioObject::Target)
-	{
-		return targetBuffer(dontCreate);
-	}
-	else if(mOutputType == ViAudioObject::Corrupted)
-	{
-		return corruptedBuffer(dontCreate);
-	}
-	else if(mOutputType == ViAudioObject::Corrected)
-	{
-		return correctedBuffer(dontCreate);
-	}
-	else if(mOutputType == ViAudioObject::Temporary)
-	{
-		return temporaryBuffer(dontCreate);
-	}
-	return NULL;
 }
 
 void ViAudioObject::setBuffer(ViAudioObject::Type type, ViBuffer *buffer)
@@ -1019,16 +873,6 @@ void ViAudioObject::clearTemporaryBuffer()
 bool ViAudioObject::hasBuffer(ViAudioObject::Type type)
 {
 	return buffer(type, true) != NULL;
-}
-
-bool ViAudioObject::hasInputBuffer()
-{
-	return hasBuffer(mInputType);
-}
-
-bool ViAudioObject::hasOutputBuffer()
-{
-	return hasBuffer(mOutputType);
 }
 
 /*******************************************************************************************************************
