@@ -90,6 +90,11 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		void setOutputFormat(ViAudioFormat format);
 
+        void setFormat(ViAudioObject::Type type, ViAudioFormat format);
+        void setTargetFormat(ViAudioFormat format);
+        void setCorruptedFormat(ViAudioFormat format);
+        void setCorrectedFormat(ViAudioFormat format);
+
 	private slots:
 
 		/*******************************************************************************************************************
@@ -430,7 +435,11 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		ViAudioFormat mOutputFormat;
+        ViAudioFormat mOutputFormat;
+
+        ViAudioFormat mTargetFormat;
+        ViAudioFormat mCorruptedFormat;
+        ViAudioFormat mCorrectedFormat;
 
 		/*******************************************************************************************************************
 

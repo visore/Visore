@@ -35,7 +35,6 @@ bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, ViAud
 	mQueue.clear();
     mCurrentTrack = 0;
     mCurrentSide = 0;
-
 	mProject = project;
 	mType = type;
 	mInput.setFormat(format);
