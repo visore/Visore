@@ -15,6 +15,7 @@ run=false;
 package=false;
 valgrind=false;
 gdb=false;
+cloc=false;
 for i in $*
 do
 	if [ $i = "cmake" ]; then
@@ -29,6 +30,8 @@ do
 		valgrind=true;
 	elif [ $i = "gdb" ]; then
 		gdb=true;
+	elif [ $i = "cloc" ]; then
+		cloc=true;
 	fi
 done
 
@@ -82,4 +85,42 @@ elif $run; then
 elif $run; then
 	cd $install_directory
 	./launcher
+fi
+
+if $cloc; then
+	cd $code_directory;
+
+	totalCount=0;
+	for file in $(find . -name "*.*" -print)
+	do
+		if [ -f $file ]; then
+			totalCount=$(($totalCount + $(wc -l < $file)));
+		fi
+	done
+
+	sourceCount=0;
+	for file in $(find . -name "*.cpp" -not -iwholename "./cmake*" -not -iwholename "./common*" -not -iwholename "./external*" -print)
+	do
+		if [ -f $file ]; then
+			sourceCount=$(($sourceCount + $(wc -l < $file)));
+		fi
+	done
+	for file in $(find . -name "*.h" -not -iwholename "./cmake*" -not -iwholename "./common*" -not -iwholename "./external*" -print)
+	do
+		if [ -f $file ]; then
+			sourceCount=$(($sourceCount + $(wc -l < $file)));
+		fi
+	done
+
+	cmakeCount=0;
+	for file in $(find . -name "CMakeLists.txt" -print)
+	do
+		if [ -f $file ]; then
+			cmakeCount=$(($cmakeCount + $(wc -l < $file)));
+		fi
+	done
+
+	echo "Total lines of code:   $totalCount";
+	echo "Lines of Visore code:  $sourceCount";
+	echo "Lines of CMake code:   $cmakeCount";
 fi
