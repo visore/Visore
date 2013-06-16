@@ -37,7 +37,7 @@ class ViProcessor : public ViNotifier
 
 	public:
 
-		ViProcessor();
+        ViProcessor();
 
 		void enableProgress(bool enable = true);
 		void disableProgress(bool disable = true);
@@ -48,7 +48,7 @@ class ViProcessor : public ViNotifier
 
         void stop();
 
-		virtual ~ViProcessor();
+        virtual ~ViProcessor();
 		virtual void process(ViAudioObjectPointer audioObject);
 		virtual void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type);
 

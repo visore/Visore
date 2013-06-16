@@ -94,6 +94,8 @@ ViAudioObject::~ViAudioObject()
 		delete mCorrector;
 		mCorrector = NULL;
     }
+
+    clearCorrelators();
 }
 
 ViAudioObjectPointer ViAudioObject::create(ViAudioObject *object)
@@ -399,10 +401,15 @@ bool ViAudioObject::hasEncoder()
 	return mEncoder != NULL;
 }
 
+bool ViAudioObject::encode(int type)
+{
+    return encode((ViAudioObject::Type) type);
+}
+
 bool ViAudioObject::encode(ViAudioFormat format, bool clearWhenFinished)
 {
-	setOutputFormat(format);
-	return encode(ViAudioObject::Undefined, clearWhenFinished);
+    setOutputFormat(format);
+    return encode(ViAudioObject::Undefined, clearWhenFinished);
 }
 
 bool ViAudioObject::encode(ViAudioObject::Type type, ViAudioFormat format, bool clearWhenFinished)
@@ -520,6 +527,11 @@ void ViAudioObject::setDecoder(ViAudioCoder *coder)
 bool ViAudioObject::hasDecoder()
 {
 	return mDecoder != NULL;
+}
+
+bool ViAudioObject::decode(int type)
+{
+    return decode((ViAudioObject::Type) type);
 }
 
 bool ViAudioObject::decode(ViAudioObject::Type type)
@@ -737,6 +749,7 @@ void ViAudioObject::progress(qreal progress)
 
 void ViAudioObject::setProgress(qreal parts)
 {
+    mProgress = 0;
 	mProgressParts = parts;
 }
 
@@ -1331,6 +1344,108 @@ void ViAudioObject::endCorrect()
 
 /*******************************************************************************************************************
 
+    CORRELATE
+
+*******************************************************************************************************************/
+
+void ViAudioObject::clearCorrelators()
+{
+    viDeleteAll(mCorrelators);
+}
+
+void ViAudioObject::addCorrelator(ViDualProcessor *correlator)
+{
+    mCorrelators.append(correlator);
+    QObject::connect(correlator, SIGNAL(finished()), this, SLOT(correlateNext()));
+    QObject::connect(correlator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+}
+
+bool ViAudioObject::hasCorrelator()
+{
+    return !mCorrelators.isEmpty();
+}
+
+int ViAudioObject::correlatorCount()
+{
+    return mCorrelators.size();
+}
+
+bool ViAudioObject::correlate(ViDualProcessor *correlator)
+{
+    clearCorrelators();
+    addCorrelator(correlator);
+    return correlate();
+}
+
+bool ViAudioObject::correlate(QList<ViDualProcessor*> correlators)
+{
+    clearCorrelators();
+    for(int i = 0; i < correlators.size(); ++i)
+    {
+        addCorrelator(correlators[i]);
+    }
+    return correlate();
+}
+
+bool ViAudioObject::correlate()
+{
+    if(!hasCorrelator())
+    {
+        log("No correlators available for correlation", QtCriticalMsg);
+        progress(100);
+        emit correlated();
+        return false;
+    }
+
+    mCorrelations.clear();
+    if(hasBuffer(ViAudioObject::Target) && hasBuffer(ViAudioObject::Corrupted))
+    {
+        mCorrelations.enqueue(QPair<ViAudioObject::Type, ViAudioObject::Type>(ViAudioObject::Target, ViAudioObject::Corrupted));
+    }
+    if(hasBuffer(ViAudioObject::Target) && hasBuffer(ViAudioObject::Corrected))
+    {
+        mCorrelations.enqueue(QPair<ViAudioObject::Type, ViAudioObject::Type>(ViAudioObject::Target, ViAudioObject::Corrected));
+    }
+    if(hasBuffer(ViAudioObject::Corrected) && hasBuffer(ViAudioObject::Corrupted))
+    {
+        mCorrelations.enqueue(QPair<ViAudioObject::Type, ViAudioObject::Type>(ViAudioObject::Corrected, ViAudioObject::Corrupted));
+    }
+
+    if(mCorrelations.isEmpty())
+    {
+        log("No buffers available for correlation", QtCriticalMsg);
+        progress(100);
+        emit correlated();
+        return false;
+    }
+
+    mCurrentCorrelator = 0;
+    setProgress(mCorrelations.size() * correlatorCount());
+    logStatus("Correlating track");
+    correlateNext();
+    return true;
+}
+
+void ViAudioObject::correlateNext()
+{
+    if(mCorrelations.isEmpty())
+    {
+        log("The track was correlated.");
+        progress(100);
+        emit correlated();
+        return;
+    }
+    QPair<ViAudioObject::Type, ViAudioObject::Type> types = mCorrelations.dequeue();
+    mCorrelators[mCurrentCorrelator]->process(thisPointer, types.first, types.second);
+    ++mCurrentCorrelator;
+    if(mCurrentCorrelator >= correlatorCount())
+    {
+        mCurrentCorrelator = 0;
+    }
+}
+
+/*******************************************************************************************************************
+
 	SONG INFO
 
 *******************************************************************************************************************/
@@ -1462,16 +1577,4 @@ bool ViAudioObject::isUsed(QIODevice::OpenMode mode)
 			(mCorruptedBuffer != NULL && mCorruptedBuffer->streamCount(mode) > 0) ||
 			(mCorrectedBuffer != NULL && mCorrectedBuffer->streamCount(mode) > 0) ||
 			(mTemporaryBuffer != NULL && mTemporaryBuffer->streamCount(mode) > 0);
-}
-
-void ViAudioObject::addCorrelation(const ViElement &correlation)
-{
-	QMutexLocker locker(&mMutex);
-	mCorrelations.append(correlation);
-}
-
-ViElementList& ViAudioObject::correlations()
-{
-	QMutexLocker locker(&mMutex);
-	return mCorrelations;
 }

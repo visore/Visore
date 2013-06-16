@@ -1,9 +1,8 @@
 #ifndef VICROSSCORRELATOR_H
 #define VICROSSCORRELATOR_H
 
-#include "vicorrelator.h"
-#include "vifouriertransformer.h"
-#include <QThread>
+#include <vicorrelator.h>
+#include <vifouriertransformer.h>
 
 class ViCrossCorrelator : public ViCorrelator
 {
@@ -14,7 +13,6 @@ class ViCrossCorrelator : public ViCorrelator
 		
 		ViCrossCorrelator();
 		~ViCrossCorrelator();
-		void exportResults(ViElement &element);
 
 		void initialize();
 		void finalize();
@@ -30,10 +28,6 @@ class ViCrossCorrelator : public ViCorrelator
 	private:
 
 		ViFourierTransformer mTransformer;
-		qreal mMaximumDifference;
-		qreal mMinimumDifference;
-		qreal mAverageDifference;
-		qreal mCounter;
 
 		qreal *mRealData;
 		qreal *mFirstFourierData;

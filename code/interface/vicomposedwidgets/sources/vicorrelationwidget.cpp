@@ -1,7 +1,6 @@
 #include "vicorrelationwidget.h"
 #include "ui_vicorrelationwidget.h"
 #include "vimainwindow.h"
-#include <vicorrelation.h>
 
 ViCorrelationWidget::ViCorrelationWidget(QWidget *parent)
 	: ViWidget(parent)

@@ -1,6 +1,4 @@
-#include "vicrosscorrelator.h"
-#include <float.h>
-#include <viaudioposition.h>
+#include <vicrosscorrelator.h>
 
 ViCrossCorrelator::ViCrossCorrelator()
 	: ViCorrelator()
@@ -17,35 +15,20 @@ ViCrossCorrelator::~ViCrossCorrelator()
 	deallocateData();
 }
 
-void ViCrossCorrelator::exportResults(ViElement &element)
-{
-	//ViProcessor::exportResults(element);
-	element.addChild("Maximum", mMaximumDifference);
-	element.addChild("Minimum", mMinimumDifference);
-	element.addChild("Average", mAverageDifference);
-}
-
 void ViCrossCorrelator::initialize()
 {
+    ViCorrelator::initialize();
+
 	mTransformer.setSize(sampleCount());
 
 	deallocateData();
 	allocateData();
-
-	mMaximumDifference = -DBL_MAX;
-	mMinimumDifference = DBL_MAX;
-	mAverageDifference = 0;
-	mCounter = 0;
 }
 
 void ViCrossCorrelator::finalize()
 {
 	deallocateData();
-	mAverageDifference /= mCounter;
-
-	ViElement element;
-	//exportResults(element);
-	object()->addCorrelation(element);
+    ViCorrelator::finalize();
 }
 
 void ViCrossCorrelator::execute()
@@ -53,7 +36,8 @@ void ViCrossCorrelator::execute()
 	ViSampleChunk &theSamples1 = samples1();
 	ViSampleChunk &theSamples2 = samples2();
 
-	qreal subAverageDifference, subSampleCounter, difference, firstNorm, secondNorm, multipliedNorm;
+    qreal firstNorm, secondNorm, multipliedNorm;
+    int count = sampleCount();
 
 	memcpy(mRealData, theSamples1.data(), theSamples1.size() * sizeof(qreal));
 	firstNorm = norm(mRealData, theSamples1.size());
@@ -62,12 +46,12 @@ void ViCrossCorrelator::execute()
 	mTransformer.forwardTransform(mRealData, mFirstFourierData);
 
 	//Auto-correlation
-	memcpy(mRealData, mFirstFourierData, sampleCount() * sizeof(qreal));
+    memcpy(mRealData, mFirstFourierData, count * sizeof(qreal));
 	mTransformer.conjugate(mFirstFourierData);
 	mTransformer.multiply(mFirstFourierData, mRealData, mMultiplyData);	
 	mTransformer.inverseTransform(mMultiplyData, mAutocorrelationData);
 	mTransformer.rescale(mAutocorrelationData);
-	applyNorm(mAutocorrelationData, sampleCount(), multipliedNorm);
+    applyNorm(mAutocorrelationData, count, multipliedNorm);
 
 	//Cross-correlation
 	memcpy(mRealData, theSamples2.data(), theSamples2.size() * sizeof(qreal));
@@ -78,26 +62,12 @@ void ViCrossCorrelator::execute()
 	mTransformer.multiply(mFirstFourierData, mSecondFourierData, mMultiplyData);
 	mTransformer.inverseTransform(mMultiplyData, mRealData);
 	mTransformer.rescale(mRealData);
-	//applyNorm(mRealData, sampleCount(), multipliedNorm);
+    //applyNorm(mRealData, count, multipliedNorm);
 
-	subAverageDifference = 0;
-	subSampleCounter = 0;
-	for(int i = 0; i < sampleCount(); ++i)
+    for(int i = 0; i < count; ++i)
 	{
-		difference = qAbs(mRealData[i] - mAutocorrelationData[i]);
-		if(difference > mMaximumDifference)
-		{
-			mMaximumDifference = difference;
-		}
-		else if(difference < mMinimumDifference)
-		{
-			mMinimumDifference = difference;
-		}
-		subAverageDifference += difference;
-		++subSampleCounter;
+       addCorrelation(qAbs(mRealData[i] - mAutocorrelationData[i]));
 	}
-	mAverageDifference += (subAverageDifference / subSampleCounter);
-	++mCounter;
 }
 
 void ViCrossCorrelator::allocateData()

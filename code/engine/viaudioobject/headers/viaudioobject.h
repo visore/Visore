@@ -18,6 +18,7 @@ class ViWaveFormer;
 class ViMetadataer;
 class ViAudioObject;
 class ViModifyProcessor;
+class ViDualProcessor;
 
 typedef ViPointer<ViAudioObject> ViAudioObjectPointer;
 typedef QList<QList<ViAudioObjectPointer> > ViAudioObjectMatrix;
@@ -74,6 +75,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void waved();
 
 		void corrected();
+
+        void correlated();
 
 		void infoed(bool success);
 
@@ -140,6 +143,14 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		void endCorrect();
 
+        /*******************************************************************************************************************
+
+            CORRELATE
+
+        *******************************************************************************************************************/
+
+        void correlateNext();
+
 		/*******************************************************************************************************************
 
 			SONG INFO
@@ -188,13 +199,15 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		void setEncoder(ViAudioCoder *coder); //Takes ownership
 		bool hasEncoder();
+        Q_INVOKABLE bool encode(int type);
 		Q_INVOKABLE bool encode(ViAudioFormat format, bool clearWhenFinished = false);
 		Q_INVOKABLE bool encode(ViAudioObject::Type type, ViAudioFormat format, bool clearWhenFinished = false);
 		Q_INVOKABLE bool encode(ViAudioObject::Type type = ViAudioObject::All, bool clearWhenFinished = false);
 		
 		void setDecoder(ViAudioCoder *coder); //Takes ownership
 		bool hasDecoder();
-		Q_INVOKABLE bool decode(ViAudioObject::Type type = ViAudioObject::All);
+        Q_INVOKABLE bool decode(int type);
+        Q_INVOKABLE bool decode(ViAudioObject::Type type = ViAudioObject::All);
 
 		/*******************************************************************************************************************
 
@@ -300,15 +313,29 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void setWaveForm(ViAudioObject::Type type, ViWaveForm *form);
 		ViWaveForm* waveForm(ViAudioObject::Type type);
 
-		/*******************************************************************************************************************
+        /*******************************************************************************************************************
 
-			CORRECTION
+            CORRECTION
 
-		*******************************************************************************************************************/
+        *******************************************************************************************************************/
 
-		void setCorrector(ViModifyProcessor *corrector); //Takes ownership
-		bool hasCorrector();
-		Q_INVOKABLE bool correct(ViModifyProcessor *corrector = NULL); //Takes ownership
+        void setCorrector(ViModifyProcessor *corrector); //Takes ownership
+        bool hasCorrector();
+        Q_INVOKABLE bool correct(ViModifyProcessor *corrector = NULL); //Takes ownership
+
+        /*******************************************************************************************************************
+
+            CORRELATE
+
+        *******************************************************************************************************************/
+
+        void clearCorrelators();
+        void addCorrelator(ViDualProcessor *correlator); //Takes ownership
+        bool hasCorrelator();
+        int correlatorCount();
+        Q_INVOKABLE bool correlate(ViDualProcessor *correlator); //Takes ownership
+        Q_INVOKABLE bool correlate(QList<ViDualProcessor*> correlators); //Takes ownership
+        Q_INVOKABLE bool correlate();
 
 		/*******************************************************************************************************************
 
@@ -349,9 +376,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		bool isFinished();
 		bool isUsed(QIODevice::OpenMode mode = QIODevice::ReadWrite);
 
-		void addCorrelation(const ViElement &correlation);
-		ViElementList& correlations();
-
 	private:
 
 		/*******************************************************************************************************************
@@ -390,8 +414,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		QMutex mMutex;
 		bool mIsFinished;
 		bool mIsSong;
-
-		ViElementList mCorrelations;
 
 		/*******************************************************************************************************************
 
@@ -451,6 +473,16 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		*******************************************************************************************************************/
 
 		ViModifyProcessor *mCorrector;
+
+        /*******************************************************************************************************************
+
+            CORRELATE
+
+        *******************************************************************************************************************/
+
+        QList<ViDualProcessor*> mCorrelators;
+        QQueue<QPair<ViAudioObject::Type, ViAudioObject::Type> > mCorrelations;
+        int mCurrentCorrelator;
 
 		/*******************************************************************************************************************
 

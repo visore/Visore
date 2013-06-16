@@ -1,7 +1,7 @@
 #ifndef VISAMPLECORRELATOR_H
 #define VISAMPLECORRELATOR_H
 
-#include "vicorrelator.h"
+#include <vicorrelator.h>
 
 class ViSampleCorrelator : public ViCorrelator
 {
@@ -9,17 +9,8 @@ class ViSampleCorrelator : public ViCorrelator
 	public:
 		
 		ViSampleCorrelator();
-		void exportResults(ViElement &element);
-		void initialize();
-		void finalize();
+
 		void execute();
-
-	private:
-
-		qreal mMaximumDifference;
-		qreal mMinimumDifference;
-		qreal mAverageDifference;
-		qint32 mCounter;
 		
 };
 
