@@ -93,8 +93,6 @@ ViAudioObject::~ViAudioObject()
     }
 
     clearCorrelators();
-
-    LOG("rrrrrrrrrrrrrrrr++++++++++++++++++: ");
 }
 
 ViAudioObjectPointer ViAudioObject::create(ViAudioObject *object)
@@ -292,8 +290,8 @@ void ViAudioObject::addDestructRule(ViAudioObject::Type type, bool destruct)
 	{
 		QList<ViAudioObject::Type> list = set.toList();
 		int temp = list[0];
-		for(int i = 1; i < list.size(); ++i)
-		{
+        for(int i = 1; i < list.size(); ++i)
+        {
 			temp |= list[i];
 		}
 		mDestructType = (ViAudioObject::Type) temp;
@@ -497,6 +495,11 @@ bool ViAudioObject::decode(ViAudioObject::Type type)
 	QMutexLocker locker(&mMutex);
 	mCodingInstructions = decomposeTypes(type);
 
+    for(int i = 0; i < mCodingInstructions.size(); ++i)
+    {locker.unlock();
+        LOG("kkkkkkk999999k: "+QString::number(mCodingInstructions[i])+"  "+QString::number(hasFile(mCodingInstructions[i])));
+    }
+
 	for(int i = 0; i < mCodingInstructions.size(); ++i)
 	{
 		ViAudioObject::Type type = mCodingInstructions[i];
@@ -522,6 +525,11 @@ bool ViAudioObject::decode(ViAudioObject::Type type)
 
 	setDecoder(new ViAudioCoder());
 	
+    for(int i = 0; i < mCodingInstructions.size(); ++i)
+    {
+        LOG("kkkkkkkk: "+QString::number(mCodingInstructions[i]));
+    }
+
 	setProgress(mCodingInstructions.size());
 	locker.unlock();
 	logStatus("Decoding track.");
@@ -771,6 +779,10 @@ void ViAudioObject::setTargetBuffer(ViBuffer *buffer)
 	clearTargetBuffer();
 	QMutexLocker locker(&mMutex);
 	mTargetBuffer = buffer;
+    if(buffer->format().isValid())
+    {
+        setTargetFormat(buffer->format());
+    }
     QObject::connect(mTargetBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setTargetFormat(ViAudioFormat)));
 }
 
@@ -779,6 +791,10 @@ void ViAudioObject::setCorruptedBuffer(ViBuffer *buffer)
 	clearCorruptedBuffer();
 	QMutexLocker locker(&mMutex);
 	mCorruptedBuffer = buffer;
+    if(buffer->format().isValid())
+    {
+        setCorruptedFormat(buffer->format());
+    }
     QObject::connect(mCorruptedBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setCorruptedFormat(ViAudioFormat)));
 }
 
@@ -787,21 +803,25 @@ void ViAudioObject::setCorrectedBuffer(ViBuffer *buffer)
 	clearCorrectedBuffer();
 	QMutexLocker locker(&mMutex);
 	mCorrectedBuffer = buffer;
+    if(buffer->format().isValid())
+    {
+        setCorrectedFormat(buffer->format());
+    }
     QObject::connect(mCorrectedBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setCorrectedFormat(ViAudioFormat)));
 }
 
 void ViAudioObject::clearBuffers(ViAudioObject::Type type)
 {
 	if(type & ViAudioObject::Target)
-	{
+    {
 		clearTargetBuffer();
 	}
 	if(type & ViAudioObject::Corrupted)
-	{
+    {
 		clearCorruptedBuffer();
 	}
 	if(type & ViAudioObject::Corrected)
-	{
+    {
 		clearCorrectedBuffer();
 	}
 	if(type & ViAudioObject::Temporary)
@@ -1381,6 +1401,13 @@ bool ViAudioObject::isDetectingSongInfo()
 {
 	QMutexLocker locker(&mMutex);
 	return mIsDetectingInfo;
+}
+
+
+bool ViAudioObject::hasSongInfo()
+{
+    QMutexLocker locker(&mMutex);
+    return mSongInfo.isValid();
 }
 
 void ViAudioObject::setSideNumber(int side)

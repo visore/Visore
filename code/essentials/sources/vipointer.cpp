@@ -170,6 +170,7 @@ void ViPointer<T>::setNull()
 {
 	destruct();
 	mData = new ViPointerData<T>();
+    mDestructMutex = new QMutex();
 }
 
 template<class T>

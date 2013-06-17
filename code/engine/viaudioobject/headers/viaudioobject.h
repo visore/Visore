@@ -45,7 +45,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 			Target = 0x2,
 			Corrupted = 0x4,
 			Corrected = 0x8,
-			Temporary = 0x10,
+            Temporary = 0x10,
 			Correlated = Corrected,
 			Temp = Temporary,
 			All = Target | Corrupted | Corrected | Temporary
@@ -328,6 +328,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void setSongInfo(ViSongInfo info);
 		void detectSongInfo();
 		bool isDetectingSongInfo();
+        bool hasSongInfo();
 
 		void setSideNumber(int side);
 		int sideNumber();

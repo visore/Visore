@@ -46,6 +46,7 @@ class ViAudioRecorder : public ViNotifier
 		QTimer mIdleTimer;
 
 		bool mDetectInfo;
+        bool mExistingProject;
 		int mCurrentTrack;
 		int mCurrentSide;
 		int mSides;

@@ -64,11 +64,16 @@ ViProject::~ViProject()
 
 int ViProject::objectCount()
 {
-	return mObjects.size();
+    mObjectsMutex.lock();
+    int size = mObjects.size();
+            mObjectsMutex.unlock();
+    return size;
+    //return mObjects.size();
 }
 
 ViAudioObjectQueue ViProject::objects()
 {
+    QMutexLocker locker(&mObjectsMutex);
 	return mObjects;
 }
 
@@ -78,11 +83,13 @@ ViAudioObjectPointer ViProject::object(int index)
 	{
 		return ViAudioObject::createNull();
 	}
+    QMutexLocker locker(&mObjectsMutex);
 	return mObjects[index];
 }	
 
 ViAudioObjectPointer ViProject::object(int side, int track)
 {
+    QMutexLocker locker(&mObjectsMutex);
 	for(int i = 0; i < mObjects.size(); ++i)
 	{
 		if(mObjects[i]->sideNumber() == side && mObjects[i]->trackNumber() == track)
@@ -97,7 +104,9 @@ void ViProject::add(ViAudioObjectPointer object)
 {
 	QObject::connect(object.data(), SIGNAL(encoded()), this, SLOT(save()), Qt::DirectConnection);
 	createDirectory(object->sideNumber());
+    mObjectsMutex.lock();
 	mObjects.enqueue(object);
+    mObjectsMutex.unlock();
 }
 
 /*******************************************************************************************************************
@@ -142,24 +151,28 @@ bool ViProject::isFinished()
 int ViProject::sideCount()
 {
 	int max = 0;
-	for(int i = 0; i < mObjects.size(); ++i)
+    for(int i = 0; i < objectCount(); ++i)
 	{
+        mObjectsMutex.lock();
 		max = qMax(mObjects[i]->sideNumber(), max);
+        mObjectsMutex.unlock();
 	}
 	return max;
 }
 
 int ViProject::trackCount()
 {
-	return mObjects.size();
+    return objectCount();
 }
 
 int ViProject::trackCount(int side)
 {
 	int count = 0;
-	for(int i = 0; i < mObjects.size(); ++i)
+    for(int i = 0; i < objectCount(); ++i)
 	{
+        mObjectsMutex.lock();
 		count += (mObjects[i]->sideNumber() == side);
+        mObjectsMutex.unlock();
 	}
 	return count;
 }
@@ -206,6 +219,7 @@ void ViProject::clear()
 
 void ViProject::clearObjects()
 {
+    QMutexLocker locker(&mObjectsMutex);
     mObjects.clear();
 }
 
@@ -338,7 +352,8 @@ bool ViProject::createDirectory(int side)
 	bool result = true;
 	result &= createDirectory(ViProject::TargetData, side);
 	result &= createDirectory(ViProject::CorruptedData, side);
-	result &= createDirectory(ViProject::CorrectedData, side);
+    result &= createDirectory(ViProject::CorrectedData, side);
+    result &= createDirectory(ViProject::CoverData, side);
 	return result;
 }
 
@@ -434,9 +449,11 @@ QString ViProject::path(ViAudioObject::Type type, int side)
 QStringList ViProject::fileNames(bool track, bool side)
 {
 	QStringList result;
-	for(int i = 0; i < mObjects.size(); ++i)
+    for(int i = 0; i < objectCount(); ++i)
 	{
+        mObjectsMutex.lock();
 		result.append(mObjects[i]->fileName(track, side));
+        mObjectsMutex.unlock();
 	}
 	return result;
 }
@@ -444,9 +461,11 @@ QStringList ViProject::fileNames(bool track, bool side)
 void ViProject::moveToProject()
 {
 	ViAudioObjectPointer object;
-	for(int i = 0; i < mObjects.size(); ++i)
+    for(int i = 0; i < objectCount(); ++i)
 	{
+        mObjectsMutex.lock();
 		object = mObjects[i];
+        mObjectsMutex.unlock();
 		if(object->hasFile(ViAudioObject::Target))
 		{
 			moveToProject(object, ViAudioObject::Target);
@@ -461,8 +480,11 @@ void ViProject::moveToProject()
 		}
 		ViSongInfo info = object->songInfo();
 		if(info.imagePath() != "")
-		{
-			QFile::rename(info.imagePath(), path(ViProject::CoverData) + object->fileName() + info.imageExtension("."));
+        {
+            QString newPath = path(ViProject::CoverData, object->sideNumber()) + object->fileName() + info.imageExtension(".");
+            QFile::rename(info.imagePath(), newPath);
+            info.changeImagePath(info.imagePath(), newPath);
+            object->setSongInfo(info);
 		}
 	}
 }
@@ -491,22 +513,22 @@ void ViProject::moveToProject(ViAudioObjectPointer object, ViAudioObject::Type t
 
 bool ViProject::saveProperties()
 {
-	ViElement root("Properties");
-	root.addChild("ProjectName", mProjectName);
+    ViElement root("properties");
+    root.addChild("projectName", mProjectName);
 
-	ViElement created("Created");
-	ViElement createdVersion("Version");
-	createdVersion.addChild("Major", QString::number(mCreatedVersion.major()));
-	createdVersion.addChild("Minor", QString::number(mCreatedVersion.minor()));
-	createdVersion.addChild("Patch", QString::number(mCreatedVersion.patch()));
+    ViElement created("created");
+    ViElement createdVersion("version");
+    createdVersion.addChild("major", QString::number(mCreatedVersion.major()));
+    createdVersion.addChild("minor", QString::number(mCreatedVersion.minor()));
+    createdVersion.addChild("patch", QString::number(mCreatedVersion.patch()));
 	created.addChild(createdVersion);
 	root.addChild(created);
 
-	ViElement edited("Edited");
-	ViElement editedVersion("Version");
-	editedVersion.addChild("Major", QString::number(mEditedVersion.major()));
-	editedVersion.addChild("Minor", QString::number(mEditedVersion.minor()));
-	editedVersion.addChild("Patch", QString::number(mEditedVersion.patch()));
+    ViElement edited("edited");
+    ViElement editedVersion("version");
+    editedVersion.addChild("major", QString::number(mEditedVersion.major()));
+    editedVersion.addChild("minor", QString::number(mEditedVersion.minor()));
+    editedVersion.addChild("patch", QString::number(mEditedVersion.patch()));
 	edited.addChild(editedVersion);
 	root.addChild(edited);
 
@@ -521,10 +543,12 @@ bool ViProject::saveTracks()
 	QMap<int, ViElement> sides;
 	ViAudioObjectPointer object;
 	ViSongInfo info;
-	
-	for(int i = 0; i < mObjects.size(); ++i)
+
+    for(int i = 0; i < objectCount(); ++i)
 	{
+        mObjectsMutex.lock();
 		object = mObjects[i];
+        mObjectsMutex.unlock();
 		info = object->songInfo();
 		if(!sides.contains(object->sideNumber()))
 		{
@@ -539,7 +563,7 @@ bool ViProject::saveTracks()
 		track.addChild("title", info.songTitle());
 
 		ViElement data("data");
-		data.addChild("cover", info.imagePath());
+        data.addChild("cover", relativePath(info.imagePath()));
 		data.addChild("target", relativePath(object->targetFilePath()));
 		data.addChild("corrupted", relativePath(object->corruptedFilePath()));
 		data.addChild("corrected", relativePath(object->correctedFilePath()));
@@ -570,10 +594,10 @@ bool ViProject::loadProperties()
 		return false;
 	}
 
-	mProjectName = root.child("ProjectName").toString();
+    mProjectName = root.child("projectName").toString();
 	
-	ViElement created = root.child("Created");
-	mCreatedVersion = ViVersion(created.child("Major").toInt(), created.child("Minor").toInt(), created.child("Patch").toInt());
+    ViElement created = root.child("created");
+    mCreatedVersion = ViVersion(created.child("major").toInt(), created.child("minor").toInt(), created.child("patch").toInt());
 
 	return true;
 }
@@ -604,7 +628,9 @@ bool ViProject::loadTracks()
 			object->setSongInfo(info);
 			object->setSideNumber(sides[j].attribute("id").toInt());
 			object->setTrackNumber(tracks[i].attribute("id").toInt());
+            mObjectsMutex.lock();
 			mObjects.append(object);
+            mObjectsMutex.unlock();
 			QObject::connect(object.data(), SIGNAL(encoded()), this, SLOT(save()), Qt::UniqueConnection);
 		}
 	}

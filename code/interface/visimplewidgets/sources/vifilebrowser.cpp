@@ -24,7 +24,8 @@ ViFileBrowser::ViFileBrowser(QWidget *parent)
 	mButton->disableGlow();
 
 	QObject::connect(mButton, SIGNAL(clicked()), this, SLOT(showDialog()));
-	QObject::connect(mLineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkPath()));
+    QObject::connect(mLineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkPath()));
+    QObject::connect(mLineEdit, SIGNAL(doubleClicked()), this, SLOT(showDialog()));
 
 	setMode(ViFileBrowser::OpenFile);
 }

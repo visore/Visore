@@ -56,6 +56,7 @@ class ViLoadingWidget : public ViWidget, public ViSingleton<ViLoadingWidget>
 		QTime mTime;
 		QTimer mTimer;
 		QList<QPair<QString, qint64> > mProcesses;
+        qint64 mTotalTime;
 
 };
 

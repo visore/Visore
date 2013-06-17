@@ -13,6 +13,7 @@ class ViLineEdit : public ViWidget
 	signals:
 
 		void textChanged(const QString &text);
+        void doubleClicked();
 
 	public:
 
@@ -32,6 +33,10 @@ class ViLineEdit : public ViWidget
 		virtual void setSize(QSize size);
 		virtual void setWidth(int width);
 		virtual void setHeight(int height);
+
+    protected:
+
+        bool eventFilter(QObject *object, QEvent *event);
 
 	private:
 

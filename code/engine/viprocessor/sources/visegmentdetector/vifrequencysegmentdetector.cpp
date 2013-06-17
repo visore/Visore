@@ -2,13 +2,13 @@
 
 //Specifies how many of the frequencies have to be at least the user specified threshold.
 //Eg: 0.8 means that at least 80% of the frequencies must be equal or higher that the value threshold.
-#define RANGE_THRESHOLD 0.8
+#define RANGE_THRESHOLD 0.7
 
 ViFrequencySegmentDetector::ViFrequencySegmentDetector()
 	: ViSegmentDetector()
 {
 	setThreshold(ViSegmentDetector::SongStart, ViRange(0.05, 0.4), ViRange(0.00015, 1.0), 1000);
-	setThreshold(ViSegmentDetector::SongEnd, ViRange(0.05, 0.4), ViRange(0.0, 0.0001), 1700);
+    setThreshold(ViSegmentDetector::SongEnd, ViRange(0.05, 0.5), ViRange(0.0, 0.00008), 1700);
 	setThreshold(ViSegmentDetector::RecordStart, ViRange(0.05, 0.2), ViRange(0.0001, 1.0), 500);
 	setThreshold(ViSegmentDetector::RecordEnd, ViRange(0.05, 0.3), ViRange(0.0, 0.00005), 7000);
 

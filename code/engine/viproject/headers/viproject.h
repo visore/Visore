@@ -194,6 +194,8 @@ class ViProject : public QObject, public ViId
 
 		ViAudioObjectQueue mObjects;
 
+        QMutex mObjectsMutex;
+
 		/*******************************************************************************************************************
 
 			PROPERTIES

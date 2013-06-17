@@ -1,5 +1,6 @@
 #include "vilineedit.h"
 #include "vithememanager.h"
+#include <QEvent>
 
 ViLineEdit::ViLineEdit(QWidget *parent)
 	: ViWidget(parent)
@@ -9,6 +10,7 @@ ViLineEdit::ViLineEdit(QWidget *parent)
 
 	mLineEdit = new QLineEdit(this);
 	mLayout.addWidget(mLineEdit);
+    mLineEdit->installEventFilter(this);
 
 	setStyleSheet("\
 		QLineEdit\
@@ -80,4 +82,15 @@ void ViLineEdit::setHeight(int height)
 	ViWidget::setHeight(height);
 	mLineEdit->setMinimumHeight(height);
 	mLineEdit->setMaximumHeight(height);
+}
+
+bool ViLineEdit::eventFilter(QObject *object, QEvent *event)
+{
+    if(object == mLineEdit)
+    {
+        if(event->type() == QEvent::MouseButtonDblClick)
+        {
+            emit doubleClicked();
+        }
+    }
 }

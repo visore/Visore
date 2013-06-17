@@ -67,6 +67,8 @@ class ViSongInfo
 		QString toString();
 		void clear();
 
+        bool isValid();
+
 	private:
 
 		QString mMessage;

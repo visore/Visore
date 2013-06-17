@@ -45,6 +45,7 @@ void ViSegmentDetector::setRecordEnd(ViAudioPosition position)
 			setSongEnd(position);
 		}
 		LOG(QString("Record ended: " + QString::number(position.position(ViAudioPosition::Seconds), 'f', 2) + " sec."));
+        stop();
 		emit recordEnded(position);
 	}
 }

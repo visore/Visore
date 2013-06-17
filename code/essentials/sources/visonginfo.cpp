@@ -322,3 +322,8 @@ void ViSongInfo::clear()
 	mArtistHotness = -1;
 	mArtistFamiliarity = -1;
 }
+
+bool ViSongInfo::isValid()
+{
+    return mArtistName != "" || mSongTitle != "" || hasImage();
+}

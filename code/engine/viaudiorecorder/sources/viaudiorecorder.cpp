@@ -12,6 +12,7 @@ ViAudioRecorder::ViAudioRecorder()
 	mCurrentTrack = 0;
 	mCurrentSide = 0;
 	mSides = 0;
+    mExistingProject = false;
 
 	mIdleTimer.setInterval(IDLE_TIME);
 	QObject::connect(&mIdleTimer, SIGNAL(timeout()), this, SLOT(checkSize()));
@@ -38,10 +39,20 @@ bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, ViAud
 	mProject = project;
 	mType = type;
 	mInput.setFormat(format);
-	mSides = sides;
+
     mDetectInfo = detectInfo;
 
-	mProject->save();
+    if(mProject->objectCount() > 0)
+    {
+        mExistingProject = true;
+        mSides = mProject->sideCount();
+    }
+    else
+    {
+        mExistingProject = false;
+        mSides = sides;
+    }
+
 	if(mType != ViAudioObject::Undefined)
 	{
 		nextObject();
@@ -56,17 +67,14 @@ bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, ViAud
 void ViAudioRecorder::nextObject(bool startTimer)
 {
 	mIdleTimer.stop();
-	
-	ViAudioObjectPointer newObject = ViAudioObject::create();
-	
-    mInput.setBuffer(newObject->buffer(mType));
-	mSegmentDetector.process(newObject, mType); // Important: The preious statment will create a buffer and set the format. Must be done before this is executed
+
+    mObject = ViAudioObject::create();
+    mObject->setSideNumber(mCurrentSide);
+    mObject->setTrackNumber(mCurrentTrack);
+
+    mInput.setBuffer(mObject->buffer(mType));
+    mSegmentDetector.process(mObject, mType); // Important: The preious statment will create a buffer and set the format. Must be done before this is executed
 	mInput.start();
-
-	mObject = newObject;
-
-	mObject->setSideNumber(mCurrentSide);
-	mObject->setTrackNumber(mCurrentTrack);
 
 	if(startTimer)
 	{
@@ -93,8 +101,9 @@ void ViAudioRecorder::startSong()
 
 void ViAudioRecorder::endSong()
 {
+    mSegmentDetector.stop();
     mQueue.enqueue(mObject);
-	if(mDetectInfo)
+    if(mDetectInfo && !(mExistingProject && mProject->object(mObject->trackNumber() - 1)->hasSongInfo()))
 	{
 		QObject::connect(mObject.data(), SIGNAL(infoed(bool)), this, SLOT(serialize()));
 		mObject->detectSongInfo();
@@ -103,7 +112,6 @@ void ViAudioRecorder::endSong()
 	{
 		serialize();
     }
-	mSegmentDetector.stop();
 	nextObject();
 	emit statused("Waiting for track to start");
 }
@@ -117,7 +125,8 @@ void ViAudioRecorder::startRecord()
 
 void ViAudioRecorder::endRecord()
 {
-	if(mCurrentSide == mSides)
+    mCurrentTrack = 0;
+    if(mCurrentSide == mSides)
     {
         mIdleTimer.stop();
         mInput.stop();
@@ -143,8 +152,17 @@ void ViAudioRecorder::serialize()
     ViAudioObjectPointer object = mQueue.dequeue();
     QObject::disconnect(object.data(), SIGNAL(infoed(bool)), this, SLOT(serialize()));
     if(mProject != NULL && object->length(ViAudioPosition::Seconds) > LENGTH_CUTOFF)
-	{
-        mProject->add(object);
+    {
+        int objectIndex = object->trackNumber() - 1;
+        if(mExistingProject && mProject->objectCount() > objectIndex)
+        {
+            mProject->object(objectIndex)->transferBuffer(object, mType);
+            object = mProject->object(objectIndex);
+        }
+        else
+        {
+            mProject->add(object);
+        }
         object->encode(mType, true);
     }
 }
