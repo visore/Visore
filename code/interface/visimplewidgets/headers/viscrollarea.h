@@ -14,7 +14,7 @@ class ViScrollArea : public QScrollArea
 	public:
 
 		ViScrollArea(QWidget *parent = 0);
-		virtual ~ViScrollArea();
+        virtual ~ViScrollArea();
 
 };
 

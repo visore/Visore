@@ -69,12 +69,12 @@ void ViPlaybackWidget::record(bool checked)
 	mIsRecording = checked;
 	if(mIsRecording)
 	{
-		mEngine->startRecording();
+        engine()->startRecording();
 		mUi->playButton->enable();
 	}
 	else
 	{
-		mEngine->stopRecording();
+        engine()->stopRecording();
 	}
 }
 
@@ -90,7 +90,7 @@ void ViPlaybackWidget::play(bool checked)
 	}
 	if(checked)
 	{
-		mEngine->startPlayback();
+        engine()->startPlayback();
 		mUi->pauseButton->enable();
 		mUi->stopButton->enable();
 	}
@@ -106,12 +106,12 @@ void ViPlaybackWidget::pause(bool checked)
 		if(checked)
 		{
 			mUi->playButton->setChecked(false);
-			mEngine->pausePlayback();
+            engine()->pausePlayback();
 		}
 		else
 		{
 			mUi->playButton->setChecked(mIsPlaying);
-			mEngine->startPlayback();
+            engine()->startPlayback();
 		}
 	}
 	mUi->pauseButton->setChecked(mIsPausing);
@@ -121,7 +121,7 @@ void ViPlaybackWidget::stop(bool checked)
 {
 	if(mIsPlaying || mIsPausing)
 	{
-		mEngine->stopPlayback();
+        engine()->stopPlayback();
 	}
 	play(false);
 	mIsPlaying = false;

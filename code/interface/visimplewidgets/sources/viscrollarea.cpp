@@ -1,7 +1,6 @@
 #include <viscrollarea.h>
 #include <QPainter>
 #include <QStyleOption>
-#include<vilogger.h>
 
 ViScrollArea::ViScrollArea(QWidget *parent)
 	: QScrollArea(parent)
@@ -25,3 +24,4 @@ ViScrollArea::ViScrollArea(QWidget *parent)
 ViScrollArea::~ViScrollArea()
 {
 }
+

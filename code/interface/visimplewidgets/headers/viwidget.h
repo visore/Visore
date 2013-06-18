@@ -44,10 +44,10 @@ class ViWidget : public QWidget, public ViId
 	protected:
 
 		QWidget *mParent;
-		ViAudioEnginePointer mEngine;
+        ViAudioEnginePointer mEngine;
 		QString mStyleSheet;
 
-		ViFunctionCallSignalMap mFunctionCalls;
+        ViFunctionCallSignalMap mFunctionCalls;
 
 };
 

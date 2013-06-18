@@ -20,7 +20,7 @@ void ViAudioObjectChain::progressNext()
 {
 	mProgress += (100.0 / mObjectCount) * mCurrentWeight;
 	emit progressed(mProgress);
-	if(mCurrentFunctionIndex == 0)
+    if(mCurrentIndex == 0)
 	{
 		QObject::disconnect(mCurrentObject.data(), SIGNAL(statused(QString)), this, SIGNAL(statused(QString)));
 		QObject::disconnect(mCurrentObject.data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
@@ -36,12 +36,12 @@ void ViAudioObjectChain::progressNext()
 
 void ViAudioObjectChain::executeNext()
 {
-	if(mObjects.isEmpty() && (mCurrentFunctionIndex == mFunctions.size() || mCurrentFunctionIndex == 0))
-	{
+    if(mObjects.isEmpty() && (mCurrentIndex == mFunctions.size() || mCurrentIndex == 0))
+    {
 		mProgress = 100;
 		return;
 	}
-	else if(mCurrentFunctionIndex == 0)
+    else if(mCurrentIndex == 0)
 	{
 		mCurrentObject = mObjects.dequeue();
 		QObject::connect(mCurrentObject.data(), SIGNAL(statused(QString)), this, SIGNAL(statused(QString)));
@@ -49,16 +49,21 @@ void ViAudioObjectChain::executeNext()
 		QObject::connect(mCurrentObject.data(), SIGNAL(finished()), this, SLOT(progressNext()));
 	}
 
-	mCurrentFunction = mFunctions[mCurrentFunctionIndex];
-	mCurrentWeight = mWeights[mCurrentFunctionIndex];
-	++mCurrentFunctionIndex;
-	if(mCurrentFunctionIndex >= mFunctions.size())
+    bool wait = mWait[mCurrentIndex];
+    mCurrentFunction = mFunctions[mCurrentIndex];
+    mCurrentWeight = mWeights[mCurrentIndex];
+    ++mCurrentIndex;
+    if(mCurrentIndex >= mFunctions.size())
 	{
-		mCurrentFunctionIndex = 0;
+        mCurrentIndex = 0;
 	}
 
 	mCurrentFunction.setObject(mCurrentObject.data());
-	mCurrentFunction.execute();
+    mCurrentFunction.execute();
+    if(!wait)
+    {
+        progressNext();
+    }
 }
 
 void ViAudioObjectChain::add(ViAudioObjectPointer object)
@@ -81,23 +86,25 @@ void ViAudioObjectChain::clear()
 	mObjects.clear();
 	mFunctions.clear();
 	mWeights.clear();
+    mWait.clear();
 }
 
-void ViAudioObjectChain::addFunction(ViFunctionCall function, qreal weight)
+void ViAudioObjectChain::addFunction(ViFunctionCall function, qreal weight, bool wait)
 {
 	mFunctions.append(function);
 	if(weight > 0)
 	{
 		mWeights.append(weight);
+        mWait.append(wait);
 	}
 }
 
-void ViAudioObjectChain::addFunction(QString function, qreal weight)
+void ViAudioObjectChain::addFunction(QString function, qreal weight, bool wait)
 {
 	function = function.replace("(", "");
 	function = function.replace(")", "");
 	function = function.replace(" ", "");
-	addFunction(ViFunctionCall(function), weight);
+    addFunction(ViFunctionCall(function), weight, wait);
 }
 
 void ViAudioObjectChain::execute()
@@ -114,7 +121,7 @@ void ViAudioObjectChain::execute()
 
 	emit progressed(0);
 	mProgress = 0;
-	mCurrentFunctionIndex = 0;
+    mCurrentIndex = 0;
 	mObjectCount = mObjects.size();
 	executeNext();
 }

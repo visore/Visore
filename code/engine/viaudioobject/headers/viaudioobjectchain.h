@@ -32,8 +32,10 @@ class ViAudioObjectChain : public QObject
 
 		void clear();
 
-		void addFunction(ViFunctionCall function, qreal weight = -1);
-		void addFunction(QString function, qreal weight = -1);
+        //If wait is true, waiting for ViAudioObject to emit finished()
+        //If wait is false, the function will be called and continue without waiting for the finished signal
+        void addFunction(ViFunctionCall function, qreal weight = -1, bool wait = true);
+        void addFunction(QString function, qreal weight = -1, bool wait = true);
 
 		void execute();
 
@@ -44,9 +46,10 @@ class ViAudioObjectChain : public QObject
 		int mObjectCount;
 		qreal mProgress;
 		
-		int mCurrentFunctionIndex;
+        int mCurrentIndex;
 		QQueue<ViFunctionCall> mFunctions;
-		QQueue<qreal> mWeights;
+        QQueue<qreal> mWeights;
+        QQueue<bool> mWait;
 		ViFunctionCall mCurrentFunction;
 		qreal mCurrentWeight;
 

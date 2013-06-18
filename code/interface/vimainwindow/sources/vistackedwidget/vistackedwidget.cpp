@@ -8,16 +8,16 @@ ViStackedWidget::ViStackedWidget()
 
 ViStackedWidget::~ViStackedWidget()
 {
-	delete mWidget;
+    //The ownership of mWidget is transfered to ViMainWindow which will delete it.
 }
 
 int ViStackedWidget::addWidget(ViWidget *widget, bool scroll)
 {
-	if(scroll)
+    if(scroll)
 	{
-		ViScrollArea *scroll = new ViScrollArea(ViStackedWidget::widget());
-		scroll->setWidget(widget);
-		return ViStackedWidget::widget()->addWidget(scroll);
+        ViScrollArea *scrollArea = new ViScrollArea(ViStackedWidget::widget());
+        scrollArea->setWidget(widget);
+        return ViStackedWidget::widget()->addWidget(scrollArea);
 	}
 	else
 	{

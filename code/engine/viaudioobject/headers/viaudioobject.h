@@ -465,6 +465,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
         QList<ViDualProcessor*> mCorrelators;
         QQueue<QPair<ViAudioObject::Type, ViAudioObject::Type> > mCorrelations;
         int mCurrentCorrelator;
+        int mCurrentCorrelation;
 
 		/*******************************************************************************************************************
 

@@ -2,7 +2,7 @@
 #include "ui_viprojectcorrectionwidget.h"
 
 ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
-	: ViWidget(parent)
+    : ViWidget(parent)
 {
 	mUi = new Ui::ViProjectCorrectionWidget();
 	mUi->setupUi(this);
@@ -27,6 +27,7 @@ ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
 	mUi->button2->setIcon(ViThemeManager::icon("startprocess"), 40);
 	mUi->button2->setText("Process", color, font);
 	mUi->button2->setSize(140, 60);
+
 }
 
 ViProjectCorrectionWidget::~ViProjectCorrectionWidget()
@@ -36,5 +37,5 @@ ViProjectCorrectionWidget::~ViProjectCorrectionWidget()
 
 void ViProjectCorrectionWidget::correct()
 {
-	engine()->correct(mUi->projectLoader->objects(), mUi->neuralSelector->corrector());
+    engine()->correct(mUi->projectLoader->objects(), mUi->neuralSelector->corrector());
 }

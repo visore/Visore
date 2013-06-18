@@ -11,14 +11,14 @@
 #include <viinterpolationtargetprovider.h>
 
 ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
-	: ViWidget(parent)
+    : ViWidget(parent)
 {
-	mUi = new Ui::ViNeuralSelectorWidget();
-	mUi->setupUi(this);
+    mUi = new Ui::ViNeuralSelectorWidget();
+    mUi->setupUi(this);
 
 	//Mode
-	mUi->modeComboBox->addItem("Custom Correction");
-	mUi->modeComboBox->addItem("Quick Correction");
+    mUi->modeComboBox->addItem("Custom Correction");
+    mUi->modeComboBox->addItem("Quick Correction");
 	mUi->modeComboBox->addItem("Medium Correction");
 	mUi->modeComboBox->addItem("Advanced Correction");
 	mUi->modeComboBox->addItem("Extreme Correction");
@@ -81,13 +81,11 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 		mUi->interpolatorComboBox->addItem(interpolators[i]->name("Interpolator", true), interpolators[i]->name());
 	}
 
-	changeSettings(0);
+    changeSettings(0);
 }
 
 ViNeuralSelectorWidget::~ViNeuralSelectorWidget()
 {
-    delete mUi;
-
 	for(int i = 0; i < mUi->hiddenLayerList->count(); ++i)
 	{
 		delete mUi->hiddenLayerList->takeItem(i);
@@ -97,11 +95,13 @@ ViNeuralSelectorWidget::~ViNeuralSelectorWidget()
 	{
 		delete mUi->errorFunctionList->takeItem(i);
     }
+
+    delete mUi;
 }
 
 ViNeuralCorrector* ViNeuralSelectorWidget::corrector()
 {
-	ViNeuralNetworkFactory factory;
+    ViNeuralNetworkFactory factory;
 
 	//Activation function
 	factory.setActivationFunction(ViActivationFunctionManager::create(mUi->activationFunctionComboBox->itemData(mUi->activationFunctionComboBox->currentIndex()).toString()));
@@ -157,24 +157,24 @@ ViNeuralCorrector* ViNeuralSelectorWidget::corrector()
 	//Seperate channels
 	corrector->enableSeparateChannels(mUi->channelsCheckBox->isChecked());
 
-	return corrector;
+    return corrector;
 }
 
 void ViNeuralSelectorWidget::addHiddenLayer()
 {
-	if(mUi->biasCheckBox->isChecked())
+    if(mUi->biasCheckBox->isChecked())
 	{
 		addHiddenLayer(mUi->hiddenNeuronsSpinBox->value(), mUi->biasValueSpinBox->value());
 	}
 	else
 	{
 		addHiddenLayer(mUi->hiddenNeuronsSpinBox->value());
-	}
+    }
 }
 
 void ViNeuralSelectorWidget::addHiddenLayer(int neurons, double bias)
 {
-	QString text = "Hidden Layer " + QString::number(mUi->hiddenLayerList->count() + 1) + " (" + QString::number(neurons) + " neurons, ";
+    QString text = "Hidden Layer " + QString::number(mUi->hiddenLayerList->count() + 1) + " (" + QString::number(neurons) + " neurons, ";
 	QPair<int, double> value;
 	value.first = neurons;
 	value.second = bias;
@@ -189,12 +189,12 @@ void ViNeuralSelectorWidget::addHiddenLayer(int neurons, double bias)
 	text += ")";
 	QListWidgetItem *item = new QListWidgetItem(text);
 	item->setData(Qt::UserRole, QVariant::fromValue(value));
-	mUi->hiddenLayerList->addItem(item);
+    mUi->hiddenLayerList->addItem(item);
 }
 
 void ViNeuralSelectorWidget::removeHiddenLayer()
 {
-	QList<QListWidgetItem*> items = mUi->hiddenLayerList->selectedItems();
+    QList<QListWidgetItem*> items = mUi->hiddenLayerList->selectedItems();
 	for(int i = 0; i < items.size(); ++i)
 	{
 		delete mUi->hiddenLayerList->takeItem(mUi->hiddenLayerList->row(items[i]));
@@ -204,32 +204,32 @@ void ViNeuralSelectorWidget::removeHiddenLayer()
 	{
 		item = mUi->hiddenLayerList->item(i);
 		item->setText(item->text().replace(QRegExp("Hidden Layer [0-9]+"), "Hidden Layer " + QString::number(i + 1)));
-	}
+    }
 }
 
 void ViNeuralSelectorWidget::addErrorFunction()
 {
-	QString text = mUi->errorFunctionComboBox->currentText();
+    QString text = mUi->errorFunctionComboBox->currentText();
 	if(text != "" && mUi->errorFunctionList->findItems(text, Qt::MatchExactly).isEmpty())
 	{
 		QListWidgetItem *item = new QListWidgetItem(text);
 		item->setData(Qt::UserRole, mUi->errorFunctionComboBox->itemData(mUi->errorFunctionComboBox->currentIndex()));
 		mUi->errorFunctionList->addItem(item);
-	}
+    }
 }
 
 void ViNeuralSelectorWidget::removeErrorFunction()
 {
-	QList<QListWidgetItem*> items = mUi->errorFunctionList->selectedItems();
+    QList<QListWidgetItem*> items = mUi->errorFunctionList->selectedItems();
 	for(int i = 0; i < items.size(); ++i)
 	{
 		delete mUi->errorFunctionList->takeItem(mUi->errorFunctionList->row(items[i]));
-	}
+    }
 }
 
 void ViNeuralSelectorWidget::toggleTargetProvider()
 {
-	if(mUi->targetProviderComboBox->itemData(mUi->targetProviderComboBox->currentIndex()).toString().contains("Interpolation"))
+    if(mUi->targetProviderComboBox->itemData(mUi->targetProviderComboBox->currentIndex()).toString().contains("Interpolation"))
 	{
 		mUi->interpolatorLabel->show();
 		mUi->interpolatorComboBox->show();
@@ -238,12 +238,12 @@ void ViNeuralSelectorWidget::toggleTargetProvider()
 	{
 		mUi->interpolatorLabel->hide();
 		mUi->interpolatorComboBox->hide();
-	}
+    }
 }
 
 void ViNeuralSelectorWidget::changeSettings(int index)
 {
-	if(index == 0)
+    if(index == 0)
 	{
 		mUi->inputsGroupBox->show();
 		mUi->hiddenLayersGroupBox->show();
@@ -345,5 +345,5 @@ void ViNeuralSelectorWidget::changeSettings(int index)
 		mUi->targetProviderComboBox->setCurrentIndex(targetIndex);
 		mUi->interpolatorComboBox->setCurrentIndex(interpolatorIndex);
 		mUi->channelsCheckBox->setChecked(true);
-	}
+    }
 }

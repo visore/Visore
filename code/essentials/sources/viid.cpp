@@ -11,7 +11,7 @@ ViId::ViId()
 
 ViId::~ViId()
 {
-	ViIdManager::release(mId);
+    ViIdManager::release(mId);
 }
 
 QString ViId::id() const

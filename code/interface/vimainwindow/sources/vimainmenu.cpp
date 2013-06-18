@@ -7,12 +7,12 @@
 #include <viprojectcorrectionwidget.h>
 
 ViMainMenu::ViMainMenu(QWidget *parent)
-	: ViWidget(parent)
+    : ViWidget(parent)
 {
-	mUi = new Ui::ViMainMenu();
-	mUi->setupUi(this);
+    mUi = new Ui::ViMainMenu();
+    mUi->setupUi(this);
 
-	QFont font;
+    QFont font;
 	font.setFamily("Harabara");
 	font.setPointSize(16);
 	font.setBold(true);
@@ -21,7 +21,7 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	QColor textColor = ViThemeManager::color(ViThemeColors::TextColor1);
 	int index;
 
-	mUi->createProjectButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
+    mUi->createProjectButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
 	mUi->createProjectButton->setText("Record Project", textColor, font);
 	mUi->createProjectButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViProjectRecordingWidget());
@@ -54,10 +54,10 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	mUi->correctProjectButton->setIcon(ViThemeManager::icon("correctionproject"), 80);
 	mUi->correctProjectButton->setText("Correct Project", textColor, font);
 	mUi->correctProjectButton->setSize(250, 100);
-	index = ViStackedWidget::addWidget(new ViProjectCorrectionWidget());
-	mUi->correctProjectButton->addFunctionCall(SIGNAL(clicked()), ViStackedWidget::currentIndexCall(index));
+    index = ViStackedWidget::addWidget(new ViProjectCorrectionWidget());
+    mUi->correctProjectButton->addFunctionCall(SIGNAL(clicked()), ViStackedWidget::currentIndexCall(index));
 
-	QFont headingFont;
+    QFont headingFont;
 	headingFont.setFamily("Harabara");
 	headingFont.setPointSize(24);
 	headingFont.setBold(true);
@@ -73,7 +73,7 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	mUi->creationHeading->setStyleSheet("color: " + headingColor.name());
 	mUi->playbackHeading->setStyleSheet("color: " + headingColor.name());
 	mUi->analysisHeading->setStyleSheet("color: " + headingColor.name());
-	mUi->correctionHeading->setStyleSheet("color: " + headingColor.name());
+    mUi->correctionHeading->setStyleSheet("color: " + headingColor.name());
 
 	/*QColor lineColor = ViThemeManager::color(2);
 	mUi->line1->setStyleSheet("color: " + lineColor.name());

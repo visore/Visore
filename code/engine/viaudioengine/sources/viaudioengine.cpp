@@ -43,7 +43,6 @@ ViAudioEngine::ViAudioEngine()
 
 ViAudioEngine::~ViAudioEngine()
 {
-
 }
 
 void ViAudioEngine::changeInput(ViAudio::Input input)
@@ -143,16 +142,16 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
 	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudioObject::Target | ViAudioObject::Corrupted)), 0.01);
-    mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.95);
+    mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.94);
     mObjectChain.addFunction(ViFunctionCall("encode", QVariant::fromValue(ViAudioObject::Target | ViAudioObject::Corrupted)), 0.01);
     mObjectChain.addFunction(ViFunctionCall("align"), 0.01);
 
     QList<ViDualProcessor*> correlators;
     correlators.append(new ViSampleCorrelator());
     correlators.append(new ViCrossCorrelator());
-    mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(correlators)), 0.01);
+    mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(correlators)), 0.02);
 
-	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01);
+    mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
 	mObjectChain.execute();
 }
 

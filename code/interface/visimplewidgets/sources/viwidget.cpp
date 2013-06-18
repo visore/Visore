@@ -4,12 +4,12 @@
 #include <QStyleOption>
 
 ViWidget::ViWidget(QWidget *parent)
-	: QWidget(parent), ViId()
+    : QWidget(parent), ViId()
 {
 	mParent = parent;
-	mEngine = ViAudioEngine::instance();
+    mEngine = ViAudioEngine::instance();
 	mStyleSheet = "";
-	setObjectName("viwidget" + id());
+    setObjectName("viwidget" + id());
 }
 
 ViWidget::~ViWidget()
@@ -39,16 +39,16 @@ QString ViWidget::styleSheet()
 
 ViAudioEnginePointer ViWidget::engine()
 {
-	return mEngine;
+    return mEngine;
 }
 
 void ViWidget::paintEvent(QPaintEvent *event)
 {
-	QPainter painter(this);
+    QPainter painter(this);
 	QStyleOption option;
 	option.init(this);
 	style()->drawPrimitive(QStyle::PE_Widget, &option, &painter, this);
-	QWidget::paintEvent(event);
+    QWidget::paintEvent(event);
 }
 
 void ViWidget::setBorder(QColor color, int thickness, int roundness)
@@ -70,7 +70,7 @@ bool ViWidget::addFunctionCall(QString signal, ViFunctionCall functionCall)
 		LOG("The widget doesn't have a signal \"" + QString(newSignal) + "\"");
 		return false;
 	}
-	mFunctionCalls[newSignal.replace("()", "")] = ViFunctionCall(functionCall);
+    mFunctionCalls[newSignal.replace("()", "")] = ViFunctionCall(functionCall);
 	QObject::connect(this, signal.toLatin1().data(), this, SLOT(executeFunction()));
 	return true;
 }
@@ -78,7 +78,7 @@ bool ViWidget::addFunctionCall(QString signal, ViFunctionCall functionCall)
 bool ViWidget::executeFunction()
 {
 	QString name = QString(metaObject()->method(senderSignalIndex()).name());
-	mFunctionCalls[name].execute();
+    mFunctionCalls[name].execute();
 }
 
 void ViWidget::setSize(int width, int height)

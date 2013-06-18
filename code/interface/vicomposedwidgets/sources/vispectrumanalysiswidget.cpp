@@ -41,7 +41,7 @@ void ViSpectrumAnalysisWidget::showEvent(QShowEvent *event)
 void ViSpectrumAnalysisWidget::recalculate()
 {
 	//ViMainWindow::instance()->showLoading(true, false, ViLoadingWidget::Text, "Calculating Spectrum");
-	mEngine->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
+    engine()->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
 }
 
 void ViSpectrumAnalysisWidget::replot()

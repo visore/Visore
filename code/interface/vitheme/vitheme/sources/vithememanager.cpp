@@ -39,7 +39,7 @@ ViThemeManager::ViThemeManager()
 
 ViThemeManager::~ViThemeManager()
 {
-	//mLibrary.unload();
+    mLibrary.unload();
 }
 
 QColor ViThemeManager::color(ViThemeColors::Type type)

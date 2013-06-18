@@ -47,14 +47,17 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="4" column="0" colspan="2">
-    <widget class="QGroupBox" name="activationFunctionGroupBox">
+   <item row="7" column="0" colspan="2">
+    <widget class="QGroupBox" name="targetGroupBox">
      <property name="title">
-      <string>Activation Function</string>
+      <string>Target</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_7">
+     <layout class="QGridLayout" name="gridLayout_9">
+      <item row="1" column="1">
+       <widget class="QComboBox" name="interpolatorComboBox"/>
+      </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="label_7">
         <property name="minimumSize">
          <size>
           <width>150</width>
@@ -68,43 +71,19 @@
          </size>
         </property>
         <property name="text">
-         <string>Activation function:</string>
+         <string>Target provider:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="activationFunctionComboBox"/>
+       <widget class="QComboBox" name="targetProviderComboBox"/>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QGroupBox" name="trainerGroupBox">
-     <property name="title">
-      <string>Trainer</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_10">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
+      <item row="1" column="0">
+       <widget class="QLabel" name="interpolatorLabel">
         <property name="text">
-         <string>Trainer:</string>
+         <string>Interpolator:</string>
         </property>
        </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="trainerComboBox"/>
       </item>
      </layout>
     </widget>
@@ -265,17 +244,45 @@
      </layout>
     </widget>
    </item>
-   <item row="7" column="0" colspan="2">
-    <widget class="QGroupBox" name="targetGroupBox">
+   <item row="3" column="0" colspan="2">
+    <widget class="QGroupBox" name="weightsGroupBox">
      <property name="title">
-      <string>Target</string>
+      <string>Weights</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_9">
-      <item row="1" column="1">
-       <widget class="QComboBox" name="interpolatorComboBox"/>
-      </item>
+     <layout class="QGridLayout" name="gridLayout_8">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="label_2">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="sizeIncrement">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Weight initializer:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="weightInitializerComboBox"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_9">
+     <property name="title">
+      <string>Mode</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_11">
         <property name="minimumSize">
          <size>
           <width>150</width>
@@ -289,19 +296,12 @@
          </size>
         </property>
         <property name="text">
-         <string>Target provider:</string>
+         <string>Correction mode:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="targetProviderComboBox"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="interpolatorLabel">
-        <property name="text">
-         <string>Interpolator:</string>
-        </property>
-       </widget>
+       <widget class="QComboBox" name="modeComboBox"/>
       </item>
      </layout>
     </widget>
@@ -360,69 +360,6 @@
          <number>1</number>
         </property>
        </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="8" column="0">
-    <widget class="QGroupBox" name="channelsGroupBox">
-     <property name="title">
-      <string>Channels</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Separate channels:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="channelsCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QGroupBox" name="weightsGroupBox">
-     <property name="title">
-      <string>Weights</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_8">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="sizeIncrement">
-         <size>
-          <width>150</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Weight initializer:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="weightInitializerComboBox"/>
       </item>
      </layout>
     </widget>
@@ -503,14 +440,14 @@
      </layout>
     </widget>
    </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupBox_9">
+   <item row="6" column="0" colspan="2">
+    <widget class="QGroupBox" name="trainerGroupBox">
      <property name="title">
-      <string>Mode</string>
+      <string>Trainer</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4">
+     <layout class="QGridLayout" name="gridLayout_10">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_11">
+       <widget class="QLabel" name="label_8">
         <property name="minimumSize">
          <size>
           <width>150</width>
@@ -524,12 +461,75 @@
          </size>
         </property>
         <property name="text">
-         <string>Correction mode:</string>
+         <string>Trainer:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="modeComboBox"/>
+       <widget class="QComboBox" name="trainerComboBox"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QGroupBox" name="channelsGroupBox">
+     <property name="title">
+      <string>Channels</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_9">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Separate channels:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="channelsCheckBox">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="2">
+    <widget class="QGroupBox" name="activationFunctionGroupBox">
+     <property name="title">
+      <string>Activation Function</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_7">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Activation function:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="activationFunctionComboBox"/>
       </item>
      </layout>
     </widget>

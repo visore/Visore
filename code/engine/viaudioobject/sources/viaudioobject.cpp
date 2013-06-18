@@ -48,7 +48,8 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	QObject::connect(this, SIGNAL(encoded()), this, SIGNAL(finished()));
 	QObject::connect(this, SIGNAL(decoded()), this, SIGNAL(finished()));
 	QObject::connect(this, SIGNAL(aligned()), this, SIGNAL(finished()));
-	QObject::connect(this, SIGNAL(corrected()), this, SIGNAL(finished()));
+    QObject::connect(this, SIGNAL(corrected()), this, SIGNAL(finished()));
+    QObject::connect(this, SIGNAL(correlated()), this, SIGNAL(finished()));
 }
 
 ViAudioObject::~ViAudioObject()
@@ -495,11 +496,6 @@ bool ViAudioObject::decode(ViAudioObject::Type type)
 	QMutexLocker locker(&mMutex);
 	mCodingInstructions = decomposeTypes(type);
 
-    for(int i = 0; i < mCodingInstructions.size(); ++i)
-    {locker.unlock();
-        LOG("kkkkkkk999999k: "+QString::number(mCodingInstructions[i])+"  "+QString::number(hasFile(mCodingInstructions[i])));
-    }
-
 	for(int i = 0; i < mCodingInstructions.size(); ++i)
 	{
 		ViAudioObject::Type type = mCodingInstructions[i];
@@ -525,11 +521,6 @@ bool ViAudioObject::decode(ViAudioObject::Type type)
 
 	setDecoder(new ViAudioCoder());
 	
-    for(int i = 0; i < mCodingInstructions.size(); ++i)
-    {
-        LOG("kkkkkkkk: "+QString::number(mCodingInstructions[i]));
-    }
-
 	setProgress(mCodingInstructions.size());
 	locker.unlock();
 	logStatus("Decoding track.");
@@ -1306,6 +1297,8 @@ bool ViAudioObject::correlate()
     }
 
     mCurrentCorrelator = 0;
+    mCurrentCorrelation = 0;
+
     setProgress(mCorrelations.size() * correlatorCount());
     logStatus("Correlating track");
     correlateNext();
@@ -1314,19 +1307,22 @@ bool ViAudioObject::correlate()
 
 void ViAudioObject::correlateNext()
 {
-    if(mCorrelations.isEmpty())
+    if(mCurrentCorrelation >= mCorrelations.size())
     {
         log("The track was correlated.");
         progress(100);
         emit correlated();
         return;
     }
-    QPair<ViAudioObject::Type, ViAudioObject::Type> types = mCorrelations.dequeue();
+
+    QPair<ViAudioObject::Type, ViAudioObject::Type> types = mCorrelations[mCurrentCorrelation];
     mCorrelators[mCurrentCorrelator]->process(thisPointer, types.first, types.second);
+
     ++mCurrentCorrelator;
     if(mCurrentCorrelator >= correlatorCount())
     {
         mCurrentCorrelator = 0;
+        ++mCurrentCorrelation;
     }
 }
 

@@ -32,9 +32,9 @@ ViFileBrowser::ViFileBrowser(QWidget *parent)
 
 ViFileBrowser::~ViFileBrowser()
 {
-	delete mDialog;
+    delete mDialog;
 	delete mButton;
-	//delete mLineEdit;
+    delete mLineEdit;
 }
 
 void ViFileBrowser::resizeEvent(QResizeEvent *event)
