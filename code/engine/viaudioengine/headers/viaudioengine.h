@@ -46,7 +46,7 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		void correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector);
 
 		//Project
-		void recordProject(ViProject *project, ViAudioObject::Type type, ViAudioFormat format, int sides, bool detectInfo);
+		void recordProject(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectInfo);
 
 		//Volume
 		void setVolume(int volume);
@@ -54,7 +54,7 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		void unmute();
 
 		//Analyse
-		void generateWaveForm(ViAudioObjectPointer object, ViAudioObject::Type type = ViAudioObject::All);
+		void generateWaveForm(ViAudioObjectPointer object, ViAudio::Type type = ViAudio::All);
 
 		//Align
 		void align(ViProject &project);

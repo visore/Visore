@@ -59,10 +59,10 @@ void ViProjectRecordingWidget::start()
 {
 	QObject::disconnect(mProject, SIGNAL(loaded()), this, SLOT(start()));
 
-    ViAudioObject::Type type = ViAudioObject::Target;
+    ViAudio::Type type = ViAudio::Target;
 	if(mUi->corruptedRadioButton->isChecked())
 	{
-		type = ViAudioObject::Corrupted;
+		type = ViAudio::Corrupted;
 	}
 
     int sides = mUi->sidesSpinBox->value();

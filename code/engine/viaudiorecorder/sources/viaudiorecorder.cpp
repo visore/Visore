@@ -7,7 +7,7 @@
 ViAudioRecorder::ViAudioRecorder()
 {
 	mProject = NULL;
-	mType = ViAudioObject::Undefined;
+	mType = ViAudio::Undefined;
 
 	mCurrentTrack = 0;
 	mCurrentSide = 0;
@@ -29,7 +29,7 @@ ViAudioRecorder::~ViAudioRecorder()
 	mProject = NULL;
 }
 
-bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, ViAudioFormat format, int sides, bool detectInfo)
+bool ViAudioRecorder::record(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectInfo)
 {
 	emit started();
 	setProgress(-1); //Infinite
@@ -53,7 +53,7 @@ bool ViAudioRecorder::record(ViProject *project, ViAudioObject::Type type, ViAud
         mSides = sides;
     }
 
-	if(mType != ViAudioObject::Undefined)
+	if(mType != ViAudio::Undefined)
 	{
 		nextObject();
 		emit statused("Waiting for record to start");

@@ -47,4 +47,32 @@ inline void viDeleteAll(Container &container)
 	container.clear();
 }
 
+template<typename From, typename To>
+inline QList<To> viConvertList(QList<From> list)
+{
+    QList<To> result;
+    for(int i = 0; i < list.size(); ++i)
+    {
+        result.append(list[i]);
+    }
+    return result;
+}
+
+inline QString viTypeToString(ViAudio::Type type)
+{
+    if(type == ViAudio::Target) return "Target";
+    else if(type == ViAudio::Corrupted) return "Corrupted";
+    else if(type == ViAudio::Corrected) return "Corrected";
+    else return "Undefinied";
+}
+
+inline ViAudio::Type viStringToType(QString type)
+{
+    type = type.toLower().trimmed();
+    if(type == "target") return ViAudio::Target;
+    else if(type == "corrupted") return ViAudio::Corrupted;
+    else if(type == "corrected") return ViAudio::Corrected;
+    else return ViAudio::Undefined;
+}
+
 #endif

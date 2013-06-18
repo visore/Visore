@@ -125,27 +125,27 @@ QStringList ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::names(QString function
 template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
 int ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::load(QString directory, QString functionName)
 {
-	int loadCount = 0;
+    int loadCount = 0;
 	QStringList libraries = find(directory);
 	for(int i = 0; i < libraries.size(); ++i)
 	{
 		if(!contains(libraries[i]))
-		{
+        {
 			QLibrary *library = new QLibrary(libraries[i]);
 			if(library->load())
 			{
 				++loadCount;
-				mLibraryFiles.append(library);
+                mLibraryFiles.append(library);
 			}
 		}
 	}
-	typedef ViLibrary* (*FunctionPointer)();
+    typedef LIBRARY_TYPE* (*FunctionPointer)();
 	for(int i = 0; i < mLibraryFiles.size(); ++i)
 	{
 		QFunctionPointer pointer = mLibraryFiles[i]->resolve(functionName.toLatin1().data());
 		if(pointer != NULL)
-		{
-			mLibraries.append(((FunctionPointer) pointer)());
+        {
+            mLibraries.append(((FunctionPointer) pointer)());
 		}
 	}
 	return loadCount;
@@ -189,7 +189,7 @@ QStringList ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::find(QString directory
 	QStringList libraries;
 	QStringList allFiles = dir.entryList(QDir::Files);
 	for(int i = 0; i < allFiles.size(); ++i)
-	{
+    {
 		if(QLibrary::isLibrary(allFiles[i]))
 		{
 			libraries.append(allFiles[i]);

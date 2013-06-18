@@ -30,7 +30,7 @@ void ViProcessorThread::run()
 
 ViProcessor::ViProcessor()
 {
-	mType = ViAudioObject::Undefined;
+	mType = ViAudio::Undefined;
 	mChunkSize = CHUNK_SIZE;
 	mThread.setProcessor(this);
 	mProgressEnabled = true;
@@ -95,7 +95,7 @@ void ViProcessor::startProgressless()
     }
 }
 
-bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudioObject::Type type)
+bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::Type type)
 {
 	emit started();
 	if(mProgressEnabled)
@@ -109,9 +109,10 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudioObj
 
 	mObject = audioObject;
 	mType = type;
+    mExit = false;
 
 	mChunk.resize(mChunkSize);
-	if(mType != ViAudioObject::Undefined && mObject->hasBuffer(mType))
+	if(mType != ViAudio::Undefined && mObject->hasBuffer(mType))
 	{
 		mReadStream = mObject->buffer(mType)->createReadStream();
         QObject::connect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
@@ -129,7 +130,7 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudioObj
 	}
 }
 
-void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type)
+void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type)
 {
 	if(initializeProcess(audioObject, type))
 	{
@@ -161,12 +162,12 @@ ViBufferStreamPointer ViProcessor::readStream()
 	return mReadStream;
 }
 
-ViAudioObject::Type ViProcessor::type()
+ViAudio::Type ViProcessor::type()
 {
 	return type1();
 }
 
-ViAudioObject::Type ViProcessor::type1()
+ViAudio::Type ViProcessor::type1()
 {
 	return mType;
 }
@@ -274,7 +275,7 @@ int ViProcessor::sampleCount()
 ViDualProcessor::ViDualProcessor()
 	: ViProcessor()
 {
-	mType2 = ViAudioObject::Undefined;
+	mType2 = ViAudio::Undefined;
 }
 
 ViDualProcessor::~ViDualProcessor()
@@ -286,13 +287,13 @@ void ViDualProcessor::startProgress()
 	qint64 totalSize = ViAudioPosition::convertPosition(readStream()->size(), ViAudioPosition::Bytes, ViAudioPosition::Samples, format());
 	qint64 processedSize = 0;
 	while(hasData1() && hasData2() && !willExit())
-	{
+    {
 		processedSize += qMin(read1().size(), read2().size());
 		execute();
 		setProgress((processedSize * 99.0) / totalSize);
 	}
 	if(willExit() || !isMultiShot())
-	{
+    {
 		QObject::disconnect(readStream()->buffer(), SIGNAL(changed()), this, SLOT(startThread()));
 		QObject::disconnect(mReadStream2->buffer(), SIGNAL(changed()), this, SLOT(startThread()));
 		exit(false);
@@ -310,7 +311,7 @@ void ViDualProcessor::startProgress()
 void ViDualProcessor::startProgressless()
 {
 	while(hasData1() && hasData2() && !willExit())
-	{
+    {
 		read1().size();
 		read2().size();
 		execute();
@@ -331,21 +332,21 @@ void ViDualProcessor::startProgressless()
 	}
 }
 
-void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2)
+void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2)
 {
 	if(initializeProcess(audioObject, type1))
-	{
+    {
 		mType2 = type2;
 		mChunk2.resize(chunkSize());
 
-		if(mType2 != ViAudioObject::Undefined && object()->hasBuffer(mType2))
+		if(mType2 != ViAudio::Undefined && object()->hasBuffer(mType2))
 		{
 			mReadStream2 = object()->buffer(mType2)->createReadStream();
 			int sampleSize = object()->buffer(mType2)->format().sampleSize();
 			mConverter2.setSize(sampleSize);
-			mSamples2.resize(chunkSize() / (sampleSize / 8));
+            mSamples2.resize(chunkSize() / (sampleSize / 8));
 			initialize();
-			thread().start();
+            thread().start();
 		}
 		else
 		{
@@ -356,7 +357,7 @@ void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::T
 	}
 }
 
-ViAudioObject::Type ViDualProcessor::type2()
+ViAudio::Type ViDualProcessor::type2()
 {
 	return mType2;
 }
@@ -386,7 +387,7 @@ ViModifyProcessor::ViModifyProcessor(bool autoWrite)
 	: ViProcessor()
 {
 	mAutoWrite = autoWrite;
-	mType2 = ViAudioObject::Undefined;
+	mType2 = ViAudio::Undefined;
 }
 
 ViModifyProcessor::~ViModifyProcessor()
@@ -446,13 +447,13 @@ void ViModifyProcessor::startProgressless()
 	}
 }
 
-void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2)
+void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2)
 {
 	if(initializeProcess(audioObject, type1))
 	{
 		mType2 = type2;
 		mChunk2.resize(chunkSize());
-		if(mType2 != ViAudioObject::Undefined)
+		if(mType2 != ViAudio::Undefined)
 		{
 			mWriteStream = object()->buffer(mType2)->createWriteStream();
 			mConverter2.setSize(object()->buffer(mType2)->format().sampleSize());
@@ -468,7 +469,7 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudioObject:
 	}
 }
 
-ViAudioObject::Type ViModifyProcessor::type2()
+ViAudio::Type ViModifyProcessor::type2()
 {
 	return mType2;
 }

@@ -429,17 +429,17 @@ QString ViProject::path(ViProject::Directory directory, int side)
 	return path(directory) + "side" + QString::number(side) + QDir::separator();
 }
 
-QString ViProject::path(ViAudioObject::Type type, int side)
+QString ViProject::path(ViAudio::Type type, int side)
 {
-	if(type == ViAudioObject::Target)
+	if(type == ViAudio::Target)
 	{
 		return path(ViProject::TargetData, side);
 	}
-	else if(type == ViAudioObject::Corrupted)
+	else if(type == ViAudio::Corrupted)
 	{
 		return path(ViProject::CorruptedData, side);
 	}
-	else if(type == ViAudioObject::Corrected)
+	else if(type == ViAudio::Corrected)
 	{
 		return path(ViProject::CorrectedData, side);
 	}
@@ -466,17 +466,17 @@ void ViProject::moveToProject()
         mObjectsMutex.lock();
 		object = mObjects[i];
         mObjectsMutex.unlock();
-		if(object->hasFile(ViAudioObject::Target))
+		if(object->hasFile(ViAudio::Target))
 		{
-			moveToProject(object, ViAudioObject::Target);
+			moveToProject(object, ViAudio::Target);
 		}
-		if(object->hasFile(ViAudioObject::Corrupted))
+		if(object->hasFile(ViAudio::Corrupted))
 		{
-			moveToProject(object, ViAudioObject::Corrupted);
+			moveToProject(object, ViAudio::Corrupted);
 		}
-		if(object->hasFile(ViAudioObject::Corrected))
+		if(object->hasFile(ViAudio::Corrected))
 		{
-			moveToProject(object, ViAudioObject::Corrected);
+			moveToProject(object, ViAudio::Corrected);
 		}
 		ViSongInfo info = object->songInfo();
 		if(info.imagePath() != "")
@@ -489,7 +489,7 @@ void ViProject::moveToProject()
 	}
 }
 
-void ViProject::moveToProject(ViAudioObjectPointer object, ViAudioObject::Type type)
+void ViProject::moveToProject(ViAudioObjectPointer object, ViAudio::Type type)
 {	
 	QString oldPath = object->filePath(type);
     if(!oldPath.startsWith(mPaths[ViProject::Root]))

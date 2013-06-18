@@ -4,10 +4,8 @@
 #include <QString>
 #include <vicommon.h>
 
-class ViLibrary : public QObject
+class ViLibrary
 {
-
-	Q_OBJECT
 
 	public:
 

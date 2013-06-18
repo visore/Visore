@@ -6,7 +6,9 @@ SET(SOURCES ${ROOT}/sources)
 
 #Libraries
 SET(VI_NEURAL_NETWORK ${ROOT}/vineuralnetwork)
+SET(VI_CORRELATOR ${ROOT}/vicorrelator)
 ADD_SUBDIRECTORY(${VI_NEURAL_NETWORK})
+ADD_SUBDIRECTORY(${VI_CORRELATOR})
 
 #Initiate source files
 FILE(GLOB VI_PROCESSOR_SOURCES ${SOURCES}/*.cpp ${SOURCES}/*/*.cpp ${SOURCES}/*/*/*.cpp)

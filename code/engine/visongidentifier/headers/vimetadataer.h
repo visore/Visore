@@ -24,7 +24,7 @@ class ViMetadataer : public QObject
 		ViMetadataer();
 		~ViMetadataer();
 		bool detect(ViAudioObjectPointer object);
-		bool detect(ViAudioObjectPointer object, ViAudioObject::Type type);
+		bool detect(ViAudioObjectPointer object, ViAudio::Type type);
 		bool detect(ViBuffer *buffer);
 		bool detect(QList<ViBuffer*> buffers);
 		bool detected();

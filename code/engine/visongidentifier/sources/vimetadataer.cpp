@@ -90,17 +90,17 @@ bool ViMetadataer::detect(ViAudioObjectPointer object)
 {
 	reset();
 
-	if(object->hasBuffer(ViAudioObject::Target))
+	if(object->hasBuffer(ViAudio::Target))
 	{
-		mBuffers.enqueue(object->buffer(ViAudioObject::Target));
+		mBuffers.enqueue(object->buffer(ViAudio::Target));
 	}
-	if(object->hasBuffer(ViAudioObject::Corrected))
+	if(object->hasBuffer(ViAudio::Corrected))
 	{
-		mBuffers.enqueue(object->buffer(ViAudioObject::Corrected));
+		mBuffers.enqueue(object->buffer(ViAudio::Corrected));
 	}
-	if(object->hasBuffer(ViAudioObject::Corrupted))
+	if(object->hasBuffer(ViAudio::Corrupted))
 	{
-		mBuffers.enqueue(object->buffer(ViAudioObject::Corrupted));
+		mBuffers.enqueue(object->buffer(ViAudio::Corrupted));
 	}
 
 	if(mBuffers.isEmpty())
@@ -113,7 +113,7 @@ bool ViMetadataer::detect(ViAudioObjectPointer object)
 	return true;
 }
 
-bool ViMetadataer::detect(ViAudioObjectPointer object, ViAudioObject::Type type)
+bool ViMetadataer::detect(ViAudioObjectPointer object, ViAudio::Type type)
 {
 	reset();
 

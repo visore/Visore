@@ -49,7 +49,7 @@ class ViProcessor : public ViNotifier
         void stop();
 
         virtual ~ViProcessor();
-        virtual void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type);
+        virtual void process(ViAudioObjectPointer audioObject, ViAudio::Type type);
 
 	protected:
 
@@ -57,14 +57,14 @@ class ViProcessor : public ViNotifier
 		virtual void execute() = 0;
 		virtual void finalize();
 
-		bool initializeProcess(ViAudioObjectPointer audioObject, ViAudioObject::Type type);
+		bool initializeProcess(ViAudioObjectPointer audioObject, ViAudio::Type type);
 
 		ViProcessorThread& thread();
 		ViAudioObjectPointer object();
 		ViBufferStreamPointer readStream();
 
-		ViAudioObject::Type type();
-		ViAudioObject::Type type1();
+		ViAudio::Type type();
+		ViAudio::Type type1();
 		ViSampleChunk& read();
 		ViSampleChunk& read1();
 		ViSampleChunk& samples();
@@ -85,7 +85,7 @@ class ViProcessor : public ViNotifier
 
 		int mChunkSize;
 		ViAudioObjectPointer mObject;
-		ViAudioObject::Type mType;
+		ViAudio::Type mType;
 		ViBufferStreamPointer mReadStream;
 		ViRawChunk mChunk;
 		ViSampleChunk mSamples;
@@ -111,11 +111,11 @@ class ViDualProcessor : public ViProcessor
 
 		ViDualProcessor();
 		virtual ~ViDualProcessor();
-        void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2);
+        void process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2);
 
 	protected:
 
-		ViAudioObject::Type type2();
+		ViAudio::Type type2();
 		ViSampleChunk& read2();
 		ViSampleChunk& samples2();
 		bool hasData2();
@@ -123,7 +123,7 @@ class ViDualProcessor : public ViProcessor
 
 	private:
 
-		ViAudioObject::Type mType2;
+		ViAudio::Type mType2;
 		ViBufferStreamPointer mReadStream2;
 		ViRawChunk mChunk2;
 		ViSampleChunk mSamples2;
@@ -145,11 +145,11 @@ class ViModifyProcessor : public ViProcessor
 
 		ViModifyProcessor(bool autoWrite = true);
 		virtual ~ViModifyProcessor();
-        void process(ViAudioObjectPointer audioObject, ViAudioObject::Type type1, ViAudioObject::Type type2);
+        void process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2);
 
 	protected:
 
-		ViAudioObject::Type type2();
+		ViAudio::Type type2();
 		ViAudioFormat format2();
 		void write();
 		void write(ViSampleChunk& samples);
@@ -157,7 +157,7 @@ class ViModifyProcessor : public ViProcessor
 	private:
 
 		bool mAutoWrite;
-		ViAudioObject::Type mType2;
+		ViAudio::Type mType2;
 		ViBufferStreamPointer mWriteStream;
 		ViRawChunk mChunk2;
 		ViPcmConverter<qreal> mConverter2;

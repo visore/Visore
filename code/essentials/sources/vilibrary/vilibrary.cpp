@@ -26,6 +26,6 @@ QString ViLibrary::name(QString replace, bool spaced)
 				++i;
 			}
 		}
-	}
+    }
 	return result.trimmed();
 }

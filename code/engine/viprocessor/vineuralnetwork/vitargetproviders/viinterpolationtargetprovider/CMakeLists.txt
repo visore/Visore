@@ -10,7 +10,7 @@ FILE(GLOB VI_INTERPOLATION_TARGET_PROVIDER_SOURCES ${SOURCES}/*.cpp)
 #Create library
 ADD_LIBRARY(viinterpolationtargetprovider SHARED ${VI_INTERPOLATION_TARGET_PROVIDER_HEADERS} ${VI_INTERPOLATION_TARGET_PROVIDER_SOURCES})
 TARGET_LINK_LIBRARIES(viinterpolationtargetprovider vineuralnetwork)
-QT5_USE_MODULES(viinterpolationtargetprovider Xml)
+QT5_USE_MODULES(viinterpolationtargetprovider Xml Multimedia)
 
 #Install file
 INSTALL(TARGETS viinterpolationtargetprovider DESTINATION ${VI_TARGET_PROVIDER_INSTALL_PATH})

@@ -2,7 +2,6 @@
 #define VICODER_H
 
 #include <vicommon.h>
-#include <viaudio.h>
 #include <string.h>
 
 namespace ViCoder

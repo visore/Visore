@@ -1,6 +1,7 @@
 #ifndef VICOMMON_H
 #define VICOMMON_H
 
+#include <QAudio>
 #include <QString>
 #include <QQueue>
 #include <QtGlobal>
@@ -21,6 +22,9 @@ inline void viDeleteAll(ForwardIterator begin, ForwardIterator end);
 
 template <typename Container>
 inline void viDeleteAll(Container &container);
+
+template<typename From, typename To>
+inline QList<To> viConvertList(QList<From> list);
 
 typedef unsigned char qbyte8u;
 typedef unsigned short qbyte16u;
@@ -76,6 +80,49 @@ namespace Vi
 	};
 
 }
+
+/*******************************************************************************************************************
+
+    VIAUDIO
+
+*******************************************************************************************************************/
+
+namespace ViAudio
+{
+
+    //Values are important
+    enum Type
+    {
+        Undefined = 0x1,
+        Target = 0x2,
+        Corrupted = 0x4,
+        Corrected = 0x8,
+        Temporary = 0x10,
+        Correlated = Corrected,
+        Temp = Temporary,
+        All = Target | Corrupted | Corrected | Temporary
+    };
+
+    enum Mode
+    {
+        AudioInput,
+        AudioOutput,
+        AudioInputOutput
+    };
+
+    enum Input
+    {
+        Line,
+        File,
+        Project
+    };
+
+    using namespace QAudio;
+
+}
+
+inline QString viTypeToString(ViAudio::Type type);
+inline ViAudio::Type viStringToType(QString type);
 
 #include <vicommon.cpp>
 

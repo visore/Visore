@@ -45,7 +45,7 @@ void getdir(string directory, vector<string> &files)
 int main(int argc, char** argv)
 {
 	#if !(defined WINDOWS || defined MACOSX || defined LINUX)
-		cout << "Visore currently only supports Windows, Linux and Mac OS X." << endl;
+        cout << "Visore is currently only supported on Windows, Linux and Mac OS X." << endl;
 		return -1;
 	#endif
 

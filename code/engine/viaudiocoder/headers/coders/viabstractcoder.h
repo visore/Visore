@@ -6,7 +6,7 @@
 #include <QByteArray>
 #include <QStringList>
 #include <QLibrary>
-#include <viaudio.h>
+#include <vicommon.h>
 #include <viaudioformat.h>
 #include <visamplearray.h>
 #include <visonginfo.h>

@@ -10,7 +10,7 @@ FILE(GLOB VI_SIGMOID_ACTIVATION_FUNCTION_SOURCES ${SOURCES}/*.cpp)
 #Create library
 ADD_LIBRARY(visigmoidactivationfunction SHARED ${VI_SIGMOID_ACTIVATION_FUNCTION_HEADERS} ${VI_SIGMOID_ACTIVATION_FUNCTION_SOURCES})
 TARGET_LINK_LIBRARIES(visigmoidactivationfunction vineuralnetwork)
-QT5_USE_MODULES(visigmoidactivationfunction Xml)
+QT5_USE_MODULES(visigmoidactivationfunction Xml Multimedia)
 
 #Install file
 INSTALL(TARGETS visigmoidactivationfunction DESTINATION ${VI_ACTIVATION_FUNCTION_INSTALL_PATH})

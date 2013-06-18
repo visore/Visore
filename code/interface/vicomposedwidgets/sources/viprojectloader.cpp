@@ -119,11 +119,11 @@ void ViProjectLoader::loadTracks()
 	mUi->tracksComboBox->clear();
 
 	ViAudioObjectQueue objects = project->objects();
-	ViAudioObject::Type resources;
+	ViAudio::Type resources;
 	for(int i = 0; i < objects.size(); ++i)
 	{
 		resources = objects[i]->availableResources();
-		if(resources != ViAudioObject::Undefined)
+		if(resources != ViAudio::Undefined)
 		{
 			mObjects.enqueue(objects[i]);
 			mUi->tracksComboBox->addItem(objects[i]->fileName(true, true));
@@ -153,7 +153,7 @@ void ViProjectLoader::analyseTrack(int index)
 	if(index >= 0)
 	{
 		mSelectedObject = index;
-		ViAudioObject::Type resources = mObjects[index]->availableResources();
+		ViAudio::Type resources = mObjects[index]->availableResources();
 		
 		if(mEnableBufferSelection)
 		{
@@ -166,7 +166,7 @@ void ViProjectLoader::analyseTrack(int index)
 			mUi->processContainer->hide();
 		}
 
-		if(resources & ViAudioObject::Target)
+		if(resources & ViAudio::Target)
 		{
 			mUi->targetCheckBox->show();
 		}
@@ -175,7 +175,7 @@ void ViProjectLoader::analyseTrack(int index)
 			mUi->targetCheckBox->hide();
 		}
 
-		if(resources & ViAudioObject::Corrupted)
+		if(resources & ViAudio::Corrupted)
 		{
 			mUi->corruptedCheckBox->show();
 		}
@@ -185,7 +185,7 @@ void ViProjectLoader::analyseTrack(int index)
 		}
 
 
-		if(resources & ViAudioObject::Corrected)
+		if(resources & ViAudio::Corrected)
 		{
 			mUi->correctedCheckBox->show();
 		}
@@ -216,26 +216,26 @@ void ViProjectLoader::changeMode(int mode)
 	clear();
 }
 
-ViAudioObject::Type ViProjectLoader::processTypes()
+ViAudio::Type ViProjectLoader::processTypes()
 {
 	int result = 0;
 	if(mUi->targetCheckBox->isVisible() && mUi->targetCheckBox->isChecked())
 	{
-		result |= ViAudioObject::Target;
+		result |= ViAudio::Target;
 	}
 	if(mUi->corruptedCheckBox->isVisible() && mUi->corruptedCheckBox->isChecked())
 	{
-		result |= ViAudioObject::Corrupted;
+		result |= ViAudio::Corrupted;
 	}
 	if(mUi->correctedCheckBox->isVisible() && mUi->correctedCheckBox->isChecked())
 	{
-		result |= ViAudioObject::Corrected;
+		result |= ViAudio::Corrected;
 	}
 	if(result == 0)
 	{
-		return ViAudioObject::Undefined;
+		return ViAudio::Undefined;
 	}
-	return (ViAudioObject::Type) result;
+	return (ViAudio::Type) result;
 }
 
 void ViProjectLoader::setMode(ViProjectLoader::Mode mode)

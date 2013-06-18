@@ -10,7 +10,7 @@ FILE(GLOB VI_COSINE_INTERPOLATOR_HEADERS ${HEADERS}/*.h)
 #Create library
 ADD_LIBRARY(vicosineinterpolator SHARED ${VI_COSINE_INTERPOLATOR_HEADERS} ${VI_COSINE_INTERPOLATOR_SOURCES})
 TARGET_LINK_LIBRARIES(vicosineinterpolator viinterpolator)
-QT5_USE_MODULES(vicosineinterpolator Core)
+QT5_USE_MODULES(vicosineinterpolator Core Multimedia)
 
 #Install file
 INSTALL(TARGETS vicosineinterpolator DESTINATION ${VI_INTERPOLATORS_INSTALL_PATH})

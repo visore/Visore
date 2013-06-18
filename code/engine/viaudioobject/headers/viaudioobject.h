@@ -1,7 +1,7 @@
 #ifndef VIAUDIOOBJECT_H
 #define VIAUDIOOBJECT_H
 
-#include <viaudio.h>
+#include <vicommon.h>
 #include <vifunctor.h>
 #include <vibuffer.h>
 #include <vielement.h>
@@ -9,6 +9,7 @@
 #include <vilogger.h>
 #include <vialigner.h>
 #include <visongidentifier.h>
+#include <vicorrelation.h>
 #include <QQueue>
 #include <QMutex>
 #include <QMutexLocker>
@@ -19,6 +20,7 @@ class ViMetadataer;
 class ViAudioObject;
 class ViModifyProcessor;
 class ViDualProcessor;
+class ViCorrelator;
 
 typedef ViPointer<ViAudioObject> ViAudioObjectPointer;
 typedef QList<QList<ViAudioObjectPointer> > ViAudioObjectMatrix;
@@ -37,19 +39,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 			ENUMERATIONS
 
 		*******************************************************************************************************************/
-
-		//Values are important
-		enum Type
-		{
-			Undefined = 0x1,
-			Target = 0x2,
-			Corrupted = 0x4,
-			Corrected = 0x8,
-            Temporary = 0x10,
-			Correlated = Corrected,
-			Temp = Temporary,
-			All = Target | Corrupted | Corrected | Temporary
-		};
 
 		//Values are important
 		enum Resource
@@ -88,7 +77,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-        void setFormat(ViAudioObject::Type type, ViAudioFormat format);
+        void setFormat(ViAudio::Type type, ViAudioFormat format);
         void setTargetFormat(ViAudioFormat format);
         void setCorruptedFormat(ViAudioFormat format);
         void setCorrectedFormat(ViAudioFormat format);
@@ -175,15 +164,15 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		static ViAudioObjectPointer createNull();
 		~ViAudioObject();
 
-		static QQueue<ViAudioObject::Type> decomposeTypes(ViAudioObject::Type type, ViAudioObject::Type exclude = ViAudioObject::Undefined);
-		static ViAudioObject::Type composeTypes(QQueue<ViAudioObject::Type> &types, ViAudioObject::Type exclude = ViAudioObject::Undefined);
+		static QQueue<ViAudio::Type> decomposeTypes(ViAudio::Type type, ViAudio::Type exclude = ViAudio::Undefined);
+		static ViAudio::Type composeTypes(QQueue<ViAudio::Type> &types, ViAudio::Type exclude = ViAudio::Undefined);
 
-		bool hasResource(ViAudioObject::Type type);
-		ViAudioObject::Resource resourceAvailable(ViAudioObject::Type type);
-		ViAudioObject::Type availableResources(ViAudioObject::Resource resource = ViAudioObject::Both);
+		bool hasResource(ViAudio::Type type);
+		ViAudioObject::Resource resourceAvailable(ViAudio::Type type);
+		ViAudio::Type availableResources(ViAudioObject::Resource resource = ViAudioObject::Both);
 
 		qreal length(ViAudioPosition::Unit unit = ViAudioPosition::Bytes);
-		qreal length(ViAudioObject::Type type, ViAudioPosition::Unit unit = ViAudioPosition::Bytes);
+		qreal length(ViAudio::Type type, ViAudioPosition::Unit unit = ViAudioPosition::Bytes);
 		
 		/*******************************************************************************************************************
 
@@ -192,7 +181,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		*******************************************************************************************************************/
 
 		void setAutoDestruct(bool destruct);
-		void addDestructRule(ViAudioObject::Type type, bool destruct);
+		void addDestructRule(ViAudio::Type type, bool destruct);
 
 		/*******************************************************************************************************************
 
@@ -203,12 +192,12 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void setEncoder(ViAudioCoder *coder); //Takes ownership
 		bool hasEncoder();
         Q_INVOKABLE bool encode(int type);
-		Q_INVOKABLE bool encode(ViAudioObject::Type type = ViAudioObject::All, bool clearWhenFinished = false);
+		Q_INVOKABLE bool encode(ViAudio::Type type = ViAudio::All, bool clearWhenFinished = false);
 		
 		void setDecoder(ViAudioCoder *coder); //Takes ownership
 		bool hasDecoder();
         Q_INVOKABLE bool decode(int type);
-        Q_INVOKABLE bool decode(ViAudioObject::Type type = ViAudioObject::All);
+        Q_INVOKABLE bool decode(ViAudio::Type type = ViAudio::All);
 
 		/*******************************************************************************************************************
 
@@ -229,27 +218,27 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		// Transfer a certain buffer from object to this object.
 		// The ownership of the buffer will be transfered to this object, hence object will not delete it.
 		// The file path is also transfered.
-		void transferBuffer(ViAudioObjectPointer object, ViAudioObject::Type type = ViAudioObject::Undefined);
+		void transferBuffer(ViAudioObjectPointer object, ViAudio::Type type = ViAudio::Undefined);
 
-		ViBuffer* buffer(ViAudioObject::Type type, bool dontCreate = false); // dontCreate will not create buffers if they are NULL
+		ViBuffer* buffer(ViAudio::Type type, bool dontCreate = false); // dontCreate will not create buffers if they are NULL
 		ViBuffer* targetBuffer(bool dontCreate = false);
 		ViBuffer* corruptedBuffer(bool dontCreate = false);
 		ViBuffer* correctedBuffer(bool dontCreate = false);
 		ViBuffer* temporaryBuffer(bool dontCreate = false);
 
-		void setBuffer(ViAudioObject::Type type, ViBuffer *buffer);
+		void setBuffer(ViAudio::Type type, ViBuffer *buffer);
 		void setTargetBuffer(ViBuffer *buffer);
 		void setCorruptedBuffer(ViBuffer *buffer);
 		void setCorrectedBuffer(ViBuffer *buffer);
 
-		Q_INVOKABLE void clearBuffers(ViAudioObject::Type type = ViAudioObject::All);
-		Q_INVOKABLE void clearBuffer(ViAudioObject::Type type);
+		Q_INVOKABLE void clearBuffers(ViAudio::Type type = ViAudio::All);
+		Q_INVOKABLE void clearBuffer(ViAudio::Type type);
 		Q_INVOKABLE void clearTargetBuffer();
 		Q_INVOKABLE void clearCorruptedBuffer();
 		Q_INVOKABLE void clearCorrectedBuffer();
 		Q_INVOKABLE void clearTemporaryBuffer();
 
-		bool hasBuffer(ViAudioObject::Type type);
+		bool hasBuffer(ViAudio::Type type);
 
 		/*******************************************************************************************************************
 
@@ -257,20 +246,20 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		QString filePath(ViAudioObject::Type type);
+		QString filePath(ViAudio::Type type);
 		QString targetFilePath();
 		QString corruptedFilePath();
 		QString correctedFilePath();
 
-		void setFilePath(ViAudioObject::Type type, QString path);
+		void setFilePath(ViAudio::Type type, QString path);
 		void setTargetFilePath(QString path);
 		void setCorruptedFilePath(QString path);
 		void setCorrectedFilePath(QString path);
 
-		bool hasFile(ViAudioObject::Type type);
+		bool hasFile(ViAudio::Type type);
 
 		QString fileName(bool track = true, bool side = false);
-		QString temporaryFilePath(ViAudioObject::Type type);
+		QString temporaryFilePath(ViAudio::Type type);
 
 		/*******************************************************************************************************************
 
@@ -278,7 +267,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		ViAudioFormat format(ViAudioObject::Type type);
+		ViAudioFormat format(ViAudio::Type type);
 		ViAudioFormat targetFormat();
 		ViAudioFormat corruptedFormat();
 		ViAudioFormat correctedFormat();
@@ -290,9 +279,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		bool generateWaveForm(ViAudioObject::Type types);
-		void setWaveForm(ViAudioObject::Type type, ViWaveForm *form);
-		ViWaveForm* waveForm(ViAudioObject::Type type);
+		bool generateWaveForm(ViAudio::Type types);
+		void setWaveForm(ViAudio::Type type, ViWaveForm *form);
+		ViWaveForm* waveForm(ViAudio::Type type);
 
         /*******************************************************************************************************************
 
@@ -311,11 +300,13 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
         *******************************************************************************************************************/
 
         void clearCorrelators();
-        void addCorrelator(ViDualProcessor *correlator); //Takes ownership
+        void addCorrelator(ViCorrelator *correlator); //Takes ownership
         bool hasCorrelator();
         int correlatorCount();
-        Q_INVOKABLE bool correlate(ViDualProcessor *correlator); //Takes ownership
-        Q_INVOKABLE bool correlate(QList<ViDualProcessor*> correlators); //Takes ownership
+        ViCorrelation correlation(ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
+        ViCorrelations correlations();
+        Q_INVOKABLE bool correlate(ViCorrelator *correlator); //Takes ownership
+        Q_INVOKABLE bool correlate(QList<ViCorrelator*> correlators); //Takes ownership
         Q_INVOKABLE bool correlate();
 
 		/*******************************************************************************************************************
@@ -380,7 +371,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		ViAudioObjectPointer thisPointer; // Keep a ViPointer to own object. Needed for passing it to ViProcessor
 
-		ViAudioObject::Type mDestructType;
+		ViAudio::Type mDestructType;
 
 		ViBuffer *mTargetBuffer;
 		ViBuffer *mCorruptedBuffer;
@@ -423,9 +414,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViAudioCoder *mEncoder;
 		ViAudioCoder *mDecoder;
 
-		QQueue<ViAudioObject::Type> mCodingInstructions;
+		QQueue<ViAudio::Type> mCodingInstructions;
 		bool mClearEncodedBuffer;
-		ViAudioObject::Type mPreviousEncodedType;
+		ViAudio::Type mPreviousEncodedType;
 
 		/*******************************************************************************************************************
 
@@ -434,9 +425,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		*******************************************************************************************************************/
 
 		ViAligner *mAligner;
-		QQueue<ViAudioObject::Type> mAlignerInstructions;
-		ViAudioObject::Type mAlignerTypes;
-		ViAudioObject::Type mMainAligner;
+		QQueue<ViAudio::Type> mAlignerInstructions;
+		ViAudio::Type mAlignerTypes;
+		ViAudio::Type mMainAligner;
 
 		/*******************************************************************************************************************
 
@@ -445,8 +436,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		*******************************************************************************************************************/
 
 		ViWaveFormer *mWaveFormer;
-		QQueue<ViAudioObject::Type> mWaveInstructions;
-		QMap<ViAudioObject::Type, ViWaveForm*> mWaveForms;
+		QQueue<ViAudio::Type> mWaveInstructions;
+		QMap<ViAudio::Type, ViWaveForm*> mWaveForms;
 
 		/*******************************************************************************************************************
 
@@ -462,10 +453,11 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
         *******************************************************************************************************************/
 
-        QList<ViDualProcessor*> mCorrelators;
-        QQueue<QPair<ViAudioObject::Type, ViAudioObject::Type> > mCorrelations;
+        QList<ViCorrelator*> mCorrelators;
+        QQueue<QPair<ViAudio::Type, ViAudio::Type> > mCorrelationTypes;
         int mCurrentCorrelator;
         int mCurrentCorrelation;
+        ViCorrelations mCorrelations;
 
 		/*******************************************************************************************************************
 

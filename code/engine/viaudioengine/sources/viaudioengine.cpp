@@ -1,9 +1,5 @@
-#include "viaudioengine.h"
-
-#include "vineuralcorrector.h"
-
-#include "visamplecorrelator.h"
-#include "vicrosscorrelator.h"
+#include <viaudioengine.h>
+#include <vicorrelatormanager.h>
 
 ViAudioEngine::ViAudioEngine()
 {
@@ -38,7 +34,6 @@ ViAudioEngine::ViAudioEngine()
 	//Position
 	QObject::connect(mStreamOutput, SIGNAL(positionChanged(ViAudioPosition)), this, SIGNAL(positionChanged(ViAudioPosition)));
 	QObject::connect(mStreamOutput, SIGNAL(lengthChanged(ViAudioPosition)), this, SIGNAL(lengthChanged(ViAudioPosition)));
-
 }
 
 ViAudioEngine::~ViAudioEngine()
@@ -119,7 +114,7 @@ void ViAudioEngine::calculateCorrelation(ViAudioObjectPointer object)
 	/*ViSingleExecutor *executor = singleExecutor();
 	executor->setMessage("Correlating tracks");
 	mCrossCorrelator.setWindowSize(4096);
-	executor->execute(object, &mCrossCorrelator, ViAudioObject::Target, ViAudioObject::Corrupted);
+	executor->execute(object, &mCrossCorrelator, ViAudio::Target, ViAudio::Corrupted);
 */
 
 	
@@ -141,21 +136,16 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 	mObjectChain.add(objects);
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudioObject::Target | ViAudioObject::Corrupted)), 0.01);
-    mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.94);
-    mObjectChain.addFunction(ViFunctionCall("encode", QVariant::fromValue(ViAudioObject::Target | ViAudioObject::Corrupted)), 0.01);
+	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted)), 0.01);
+    mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.91);
+    mObjectChain.addFunction(ViFunctionCall("encode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted)), 0.01);
     mObjectChain.addFunction(ViFunctionCall("align"), 0.01);
-
-    QList<ViDualProcessor*> correlators;
-    correlators.append(new ViSampleCorrelator());
-    correlators.append(new ViCrossCorrelator());
-    mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(correlators)), 0.02);
-
+    mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(ViCorrelatorManager::libraries())), 0.05);
     mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
 	mObjectChain.execute();
 }
 
-void ViAudioEngine::recordProject(ViProject *project, ViAudioObject::Type type, ViAudioFormat format, int sides, bool detectInfo)
+void ViAudioEngine::recordProject(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectInfo)
 {
 	QObject::connect(&mRecorder, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)), Qt::UniqueConnection);
 	QObject::connect(&mRecorder, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)), Qt::UniqueConnection);
@@ -163,7 +153,7 @@ void ViAudioEngine::recordProject(ViProject *project, ViAudioObject::Type type, 
 	mRecorder.record(project, type, format, sides, detectInfo);
 }
 
-void ViAudioEngine::generateWaveForm(ViAudioObjectPointer object, ViAudioObject::Type type)
+void ViAudioEngine::generateWaveForm(ViAudioObjectPointer object, ViAudio::Type type)
 {
 	QObject::connect(object.data(), SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
 	QObject::connect(object.data(), SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));

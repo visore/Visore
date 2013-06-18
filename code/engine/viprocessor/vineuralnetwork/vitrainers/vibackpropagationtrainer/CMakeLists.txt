@@ -10,7 +10,7 @@ FILE(GLOB VI_BACKPROPAGATION_TRAINER_SOURCES ${SOURCES}/*.cpp)
 #Create library
 ADD_LIBRARY(vibackpropagationtrainer SHARED ${VI_BACKPROPAGATION_TRAINER_HEADERS} ${VI_BACKPROPAGATION_TRAINER_SOURCES})
 TARGET_LINK_LIBRARIES(vibackpropagationtrainer vineuralnetwork)
-QT5_USE_MODULES(vibackpropagationtrainer Xml)
+QT5_USE_MODULES(vibackpropagationtrainer Xml Multimedia)
 
 #Install file
 

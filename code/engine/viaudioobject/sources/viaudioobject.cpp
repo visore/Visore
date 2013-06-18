@@ -6,6 +6,7 @@
 #include <vienmfpidentifier.h>
 #include <vimanager.h>
 #include <viaudiocodec.h>
+#include <vicorrelator.h>
 #include <QSet>
 
 /*******************************************************************************************************************
@@ -120,29 +121,29 @@ ViAudioObjectPointer ViAudioObject::createNull()
 	return pointer;
 }
 
-QQueue<ViAudioObject::Type> ViAudioObject::decomposeTypes(ViAudioObject::Type type, ViAudioObject::Type exclude)
+QQueue<ViAudio::Type> ViAudioObject::decomposeTypes(ViAudio::Type type, ViAudio::Type exclude)
 {
-	QQueue<ViAudioObject::Type> result;
-	if(type & ViAudioObject::Target && !(exclude & ViAudioObject::Target))
+	QQueue<ViAudio::Type> result;
+	if(type & ViAudio::Target && !(exclude & ViAudio::Target))
 	{
-		result.enqueue(ViAudioObject::Target);
+		result.enqueue(ViAudio::Target);
 	}
-	if(type & ViAudioObject::Corrupted && !(exclude & ViAudioObject::Corrupted))
+	if(type & ViAudio::Corrupted && !(exclude & ViAudio::Corrupted))
 	{
-		result.enqueue(ViAudioObject::Corrupted);
+		result.enqueue(ViAudio::Corrupted);
 	}
-	if(type & ViAudioObject::Corrected && !(exclude & ViAudioObject::Corrected))
+	if(type & ViAudio::Corrected && !(exclude & ViAudio::Corrected))
 	{
-		result.enqueue(ViAudioObject::Corrected);
+		result.enqueue(ViAudio::Corrected);
 	}
-	if(type & ViAudioObject::Temporary && !(exclude & ViAudioObject::Temporary))
+	if(type & ViAudio::Temporary && !(exclude & ViAudio::Temporary))
 	{
-		result.enqueue(ViAudioObject::Temporary);
+		result.enqueue(ViAudio::Temporary);
 	}
 	return result;
 }
 
-ViAudioObject::Type ViAudioObject::composeTypes(QQueue<ViAudioObject::Type> &types, ViAudioObject::Type exclude)
+ViAudio::Type ViAudioObject::composeTypes(QQueue<ViAudio::Type> &types, ViAudio::Type exclude)
 {
 	int result = 0;
 	for(int i = 0; i < types.size(); ++i)
@@ -152,15 +153,15 @@ ViAudioObject::Type ViAudioObject::composeTypes(QQueue<ViAudioObject::Type> &typ
 			result |= types[i];
 		}
 	}
-	return (ViAudioObject::Type) result;
+	return (ViAudio::Type) result;
 }
 
-bool ViAudioObject::hasResource(ViAudioObject::Type type)
+bool ViAudioObject::hasResource(ViAudio::Type type)
 {
 	return (filePath(type) != "") || (buffer(type, true) != NULL);
 }
 
-ViAudioObject::Resource ViAudioObject::resourceAvailable(ViAudioObject::Type type)
+ViAudioObject::Resource ViAudioObject::resourceAvailable(ViAudio::Type type)
 {
 	bool fileAvailable = (filePath(type) != "");
 	bool bufferAvailable = (buffer(type, true) != NULL);
@@ -180,47 +181,47 @@ ViAudioObject::Resource ViAudioObject::resourceAvailable(ViAudioObject::Type typ
 	return ViAudioObject::None;
 }
 
-ViAudioObject::Type ViAudioObject::availableResources(ViAudioObject::Resource resource)
+ViAudio::Type ViAudioObject::availableResources(ViAudioObject::Resource resource)
 {
 	int result = 0;
-	if(resourceAvailable(ViAudioObject::Target) & resource)
+	if(resourceAvailable(ViAudio::Target) & resource)
 	{
-		result |= ViAudioObject::Target;
+		result |= ViAudio::Target;
 	}
-	if(resourceAvailable(ViAudioObject::Corrupted) & resource)
+	if(resourceAvailable(ViAudio::Corrupted) & resource)
 	{
-		result |= ViAudioObject::Corrupted;
+		result |= ViAudio::Corrupted;
 	}
-	if(resourceAvailable(ViAudioObject::Corrected) & resource)
+	if(resourceAvailable(ViAudio::Corrected) & resource)
 	{
-		result |= ViAudioObject::Corrected;
+		result |= ViAudio::Corrected;
 	}
 	if(result == 0)
 	{
-		return ViAudioObject::Undefined;
+		return ViAudio::Undefined;
 	}
-	return (ViAudioObject::Type) result;
+	return (ViAudio::Type) result;
 }
 
 qreal ViAudioObject::length(ViAudioPosition::Unit unit)
 {
 	qreal maximum = 0;
-	if(hasBuffer(ViAudioObject::Target) && buffer(ViAudioObject::Target)->size() > maximum)
+	if(hasBuffer(ViAudio::Target) && buffer(ViAudio::Target)->size() > maximum)
 	{
-		maximum = length(ViAudioObject::Target, unit);
+		maximum = length(ViAudio::Target, unit);
 	}
-	if(hasBuffer(ViAudioObject::Corrupted) && buffer(ViAudioObject::Corrupted)->size() > maximum)
+	if(hasBuffer(ViAudio::Corrupted) && buffer(ViAudio::Corrupted)->size() > maximum)
 	{
-		maximum = length(ViAudioObject::Corrupted, unit);
+		maximum = length(ViAudio::Corrupted, unit);
 	}
-	if(hasBuffer(ViAudioObject::Corrected) && buffer(ViAudioObject::Corrected)->size() > maximum)
+	if(hasBuffer(ViAudio::Corrected) && buffer(ViAudio::Corrected)->size() > maximum)
 	{
-		maximum = length(ViAudioObject::Corrected, unit);
+		maximum = length(ViAudio::Corrected, unit);
 	}
 	return maximum;
 }
 
-qreal ViAudioObject::length(ViAudioObject::Type type, ViAudioPosition::Unit unit)
+qreal ViAudioObject::length(ViAudio::Type type, ViAudioPosition::Unit unit)
 {
 	if(hasBuffer(type))
 	{
@@ -240,26 +241,26 @@ void ViAudioObject::setAutoDestruct(bool destruct)
 	QMutexLocker locker(&mMutex);
 	if(destruct)
 	{
-		mDestructType = ViAudioObject::All;
+		mDestructType = ViAudio::All;
 	}
 	else
 	{
-		mDestructType = ViAudioObject::Undefined;
+		mDestructType = ViAudio::Undefined;
 	}
 }
 
-void ViAudioObject::addDestructRule(ViAudioObject::Type type, bool destruct)
+void ViAudioObject::addDestructRule(ViAudio::Type type, bool destruct)
 {
 	QMutexLocker locker(&mMutex);
-	QSet<ViAudioObject::Type> set;
-	QSet<ViAudioObject::Type> values;
-	values.insert(ViAudioObject::Target);
-	values.insert(ViAudioObject::Corrupted);
-	values.insert(ViAudioObject::Corrected);
-	values.insert(ViAudioObject::Temporary);
+	QSet<ViAudio::Type> set;
+	QSet<ViAudio::Type> values;
+	values.insert(ViAudio::Target);
+	values.insert(ViAudio::Corrupted);
+	values.insert(ViAudio::Corrected);
+	values.insert(ViAudio::Temporary);
 
 	//Old Values
-	foreach(const ViAudioObject::Type &value, values)
+	foreach(const ViAudio::Type &value, values)
 	{
 		if(mDestructType & value)
 		{
@@ -268,7 +269,7 @@ void ViAudioObject::addDestructRule(ViAudioObject::Type type, bool destruct)
 	}
 
 	//New Values
-	foreach(const ViAudioObject::Type &value, values)
+	foreach(const ViAudio::Type &value, values)
 	{
 		if(type & value)
 		{
@@ -285,17 +286,17 @@ void ViAudioObject::addDestructRule(ViAudioObject::Type type, bool destruct)
 
 	if(set.isEmpty())
 	{
-		mDestructType = ViAudioObject::Undefined;
+		mDestructType = ViAudio::Undefined;
 	}
 	else
 	{
-		QList<ViAudioObject::Type> list = set.toList();
+		QList<ViAudio::Type> list = set.toList();
 		int temp = list[0];
         for(int i = 1; i < list.size(); ++i)
         {
 			temp |= list[i];
 		}
-		mDestructType = (ViAudioObject::Type) temp;
+		mDestructType = (ViAudio::Type) temp;
 	}
 }
 
@@ -305,17 +306,17 @@ void ViAudioObject::addDestructRule(ViAudioObject::Type type, bool destruct)
 
 *******************************************************************************************************************/
 
-void ViAudioObject::setFormat(ViAudioObject::Type type, ViAudioFormat format)
+void ViAudioObject::setFormat(ViAudio::Type type, ViAudioFormat format)
 {
-    if(type == ViAudioObject::Target)
+    if(type == ViAudio::Target)
     {
         return setTargetFormat(format);
     }
-    else if(type == ViAudioObject::Corrupted)
+    else if(type == ViAudio::Corrupted)
     {
         return setCorruptedFormat(format);
     }
-    else if(type == ViAudioObject::Corrected)
+    else if(type == ViAudio::Corrected)
     {
         return setCorrectedFormat(format);
     }
@@ -336,17 +337,17 @@ void ViAudioObject::setCorrectedFormat(ViAudioFormat format)
     mCorrectedFormat = format;
 }
 
-ViAudioFormat ViAudioObject::format(ViAudioObject::Type type)
+ViAudioFormat ViAudioObject::format(ViAudio::Type type)
 {
-	if(type == ViAudioObject::Target)
+	if(type == ViAudio::Target)
 	{
 		return targetFormat();
 	}
-	else if(type == ViAudioObject::Corrupted)
+	else if(type == ViAudio::Corrupted)
 	{
 		return corruptedFormat();
 	}
-	else if(type == ViAudioObject::Corrected)
+	else if(type == ViAudio::Corrected)
 	{
 		return correctedFormat();
 	}
@@ -392,15 +393,15 @@ bool ViAudioObject::hasEncoder()
 
 bool ViAudioObject::encode(int type)
 {
-    return encode((ViAudioObject::Type) type);
+    return encode((ViAudio::Type) type);
 }
 
-bool ViAudioObject::encode(ViAudioObject::Type type, bool clearWhenFinished)
+bool ViAudioObject::encode(ViAudio::Type type, bool clearWhenFinished)
 {
 	QMutexLocker locker(&mMutex);
 
 	mClearEncodedBuffer = clearWhenFinished;
-	mPreviousEncodedType = ViAudioObject::Undefined;
+	mPreviousEncodedType = ViAudio::Undefined;
 	mCodingInstructions = decomposeTypes(type);
 
 	QString thePath = "";
@@ -447,7 +448,7 @@ void ViAudioObject::encodeNext()
 		locker.unlock();
 		clearBuffer(mPreviousEncodedType);
 		locker.relock();
-		mPreviousEncodedType = ViAudioObject::Undefined;
+		mPreviousEncodedType = ViAudio::Undefined;
 	}
 
 	if(mCodingInstructions.isEmpty())
@@ -488,17 +489,17 @@ bool ViAudioObject::hasDecoder()
 
 bool ViAudioObject::decode(int type)
 {
-    return decode((ViAudioObject::Type) type);
+    return decode((ViAudio::Type) type);
 }
 
-bool ViAudioObject::decode(ViAudioObject::Type type)
+bool ViAudioObject::decode(ViAudio::Type type)
 {
 	QMutexLocker locker(&mMutex);
 	mCodingInstructions = decomposeTypes(type);
 
 	for(int i = 0; i < mCodingInstructions.size(); ++i)
 	{
-		ViAudioObject::Type type = mCodingInstructions[i];
+		ViAudio::Type type = mCodingInstructions[i];
 		locker.unlock();
 		if(hasBuffer(type) || !hasFile(type))
 		{
@@ -542,7 +543,7 @@ void ViAudioObject::decodeNext()
 	}
 	else
 	{
-		ViAudioObject::Type type = mCodingInstructions.dequeue();
+		ViAudio::Type type = mCodingInstructions.dequeue();
 		locker.unlock();
 		QString thePath = filePath(type);
 		clearBuffer(type);
@@ -676,7 +677,7 @@ void ViAudioObject::setProgress(qreal parts)
 
 *******************************************************************************************************************/
 
-void ViAudioObject::transferBuffer(ViAudioObjectPointer object, ViAudioObject::Type type)
+void ViAudioObject::transferBuffer(ViAudioObjectPointer object, ViAudio::Type type)
 {
 	QMutexLocker locker(&mMutex);
 	object->addDestructRule(type, false);
@@ -685,21 +686,21 @@ void ViAudioObject::transferBuffer(ViAudioObjectPointer object, ViAudioObject::T
 	setFilePath(type, object->filePath(type));
 }
 
-ViBuffer* ViAudioObject::buffer(ViAudioObject::Type type, bool dontCreate)
+ViBuffer* ViAudioObject::buffer(ViAudio::Type type, bool dontCreate)
 {
-	if(type == ViAudioObject::Target)
+	if(type == ViAudio::Target)
 	{
 		return targetBuffer(dontCreate);
 	}
-	else if(type == ViAudioObject::Corrupted)
+	else if(type == ViAudio::Corrupted)
 	{
 		return corruptedBuffer(dontCreate);
 	}
-	else if(type == ViAudioObject::Corrected)
+	else if(type == ViAudio::Corrected)
 	{
 		return correctedBuffer(dontCreate);
 	}
-	else if(type == ViAudioObject::Temporary)
+	else if(type == ViAudio::Temporary)
 	{
 		return temporaryBuffer(dontCreate);
 	}
@@ -749,17 +750,17 @@ ViBuffer* ViAudioObject::temporaryBuffer(bool dontCreate)
 	return mTemporaryBuffer;
 }
 
-void ViAudioObject::setBuffer(ViAudioObject::Type type, ViBuffer *buffer)
+void ViAudioObject::setBuffer(ViAudio::Type type, ViBuffer *buffer)
 {
-	if(type == ViAudioObject::Target)
+	if(type == ViAudio::Target)
 	{
 		setTargetBuffer(buffer);
 	}
-	else if(type == ViAudioObject::Corrupted)
+	else if(type == ViAudio::Corrupted)
 	{
 		setCorruptedBuffer(buffer);
 	}
-	else if(type == ViAudioObject::Corrected)
+	else if(type == ViAudio::Corrected)
 	{
 		setCorrectedBuffer(buffer);
 	}
@@ -801,41 +802,41 @@ void ViAudioObject::setCorrectedBuffer(ViBuffer *buffer)
     QObject::connect(mCorrectedBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setCorrectedFormat(ViAudioFormat)));
 }
 
-void ViAudioObject::clearBuffers(ViAudioObject::Type type)
+void ViAudioObject::clearBuffers(ViAudio::Type type)
 {
-	if(type & ViAudioObject::Target)
+	if(type & ViAudio::Target)
     {
 		clearTargetBuffer();
 	}
-	if(type & ViAudioObject::Corrupted)
+	if(type & ViAudio::Corrupted)
     {
 		clearCorruptedBuffer();
 	}
-	if(type & ViAudioObject::Corrected)
+	if(type & ViAudio::Corrected)
     {
 		clearCorrectedBuffer();
 	}
-	if(type & ViAudioObject::Temporary)
+	if(type & ViAudio::Temporary)
 	{
 		clearTemporaryBuffer();
 	}
 }
 
-void ViAudioObject::clearBuffer(ViAudioObject::Type type)
+void ViAudioObject::clearBuffer(ViAudio::Type type)
 {
-	if(type == ViAudioObject::Target)
+	if(type == ViAudio::Target)
 	{
 		clearTargetBuffer();
 	}
-	else if(type == ViAudioObject::Corrupted)
+	else if(type == ViAudio::Corrupted)
 	{
 		clearCorruptedBuffer();
 	}
-	else if(type == ViAudioObject::Corrected)
+	else if(type == ViAudio::Corrected)
 	{
 		clearCorrectedBuffer();
 	}
-	else if(type == ViAudioObject::Temporary)
+	else if(type == ViAudio::Temporary)
 	{
 		clearTemporaryBuffer();
 	}
@@ -881,7 +882,7 @@ void ViAudioObject::clearTemporaryBuffer()
 	}
 }
 
-bool ViAudioObject::hasBuffer(ViAudioObject::Type type)
+bool ViAudioObject::hasBuffer(ViAudio::Type type)
 {
 	return buffer(type, true) != NULL;
 }
@@ -892,17 +893,17 @@ bool ViAudioObject::hasBuffer(ViAudioObject::Type type)
 
 *******************************************************************************************************************/
 
-QString ViAudioObject::filePath(ViAudioObject::Type type)
+QString ViAudioObject::filePath(ViAudio::Type type)
 {
-	if(type == ViAudioObject::Target)
+	if(type == ViAudio::Target)
 	{
 		return targetFilePath();
 	}
-	else if(type == ViAudioObject::Corrupted)
+	else if(type == ViAudio::Corrupted)
 	{
 		return corruptedFilePath();
 	}
-	else if(type == ViAudioObject::Corrected)
+	else if(type == ViAudio::Corrected)
 	{
 		return correctedFilePath();
 	}
@@ -927,17 +928,17 @@ QString ViAudioObject::correctedFilePath()
 	return mCorrectedFile;
 }
 
-void ViAudioObject::setFilePath(ViAudioObject::Type type, QString path)
+void ViAudioObject::setFilePath(ViAudio::Type type, QString path)
 {
-	if(type == ViAudioObject::Target)
+	if(type == ViAudio::Target)
 	{
 		setTargetFilePath(path);
 	}
-	else if(type == ViAudioObject::Corrupted)
+	else if(type == ViAudio::Corrupted)
 	{
 		setCorruptedFilePath(path);
 	}
-	else if(type == ViAudioObject::Corrected)
+	else if(type == ViAudio::Corrected)
 	{
 		setCorrectedFilePath(path);
 	}
@@ -961,7 +962,7 @@ void ViAudioObject::setCorrectedFilePath(QString path)
 	mCorrectedFile = path;
 }
 
-bool ViAudioObject::hasFile(ViAudioObject::Type type)
+bool ViAudioObject::hasFile(ViAudio::Type type)
 {
 	return filePath(type) != "";
 }
@@ -1011,18 +1012,18 @@ QString ViAudioObject::fileName(bool track, bool side)
 	return result;
 }
 
-QString ViAudioObject::temporaryFilePath(ViAudioObject::Type type)
+QString ViAudioObject::temporaryFilePath(ViAudio::Type type)
 {
 	QString result = ViManager::tempPath() + id();
-	if(type == ViAudioObject::Target)
+	if(type == ViAudio::Target)
 	{
 		result += "_target";
 	}
-	else if(type == ViAudioObject::Corrupted)
+	else if(type == ViAudio::Corrupted)
 	{
 		result += "_corrupted";
 	}
-	else if(type == ViAudioObject::Corrected)
+	else if(type == ViAudio::Corrected)
 	{
 		result += "_corrected";
 	}
@@ -1044,11 +1045,11 @@ QString ViAudioObject::temporaryFilePath(ViAudioObject::Type type)
 
 *******************************************************************************************************************/
 
-bool ViAudioObject::generateWaveForm(ViAudioObject::Type types)
+bool ViAudioObject::generateWaveForm(ViAudio::Type types)
 {
-	ViAudioObject::Type waveTypes = availableResources();
+	ViAudio::Type waveTypes = availableResources();
 	QMutexLocker locker(&mMutex);
-	QQueue<ViAudioObject::Type> instructions = decomposeTypes(waveTypes);
+	QQueue<ViAudio::Type> instructions = decomposeTypes(waveTypes);
 
 	mWaveInstructions.clear();
 	for(int i = 0; i < instructions.size(); ++i)
@@ -1069,7 +1070,7 @@ bool ViAudioObject::generateWaveForm(ViAudioObject::Type types)
 	int decodeTypes = 0;
 	for(int i = 0; i < mWaveInstructions.size(); ++i)
 	{
-		ViAudioObject::Type instruction = mWaveInstructions[i];
+		ViAudio::Type instruction = mWaveInstructions[i];
 		locker.unlock();
 		if(!hasBuffer(instruction))
 		{
@@ -1095,7 +1096,7 @@ bool ViAudioObject::generateWaveForm(ViAudioObject::Type types)
 		initializeWaveForm();
 		return true;
 	}
-	else if(decode((ViAudioObject::Type) decodeTypes))
+	else if(decode((ViAudio::Type) decodeTypes))
 	{
 		return true;
 	}
@@ -1138,13 +1139,13 @@ void ViAudioObject::generateNextWaveForm()
 	}
 	else
 	{
-		ViAudioObject::Type type = mWaveInstructions.dequeue();
+		ViAudio::Type type = mWaveInstructions.dequeue();
 		locker.unlock();
 		mWaveFormer->process(thisPointer, type);
 	}
 }
 
-void ViAudioObject::setWaveForm(ViAudioObject::Type type, ViWaveForm *form)
+void ViAudioObject::setWaveForm(ViAudio::Type type, ViWaveForm *form)
 {
 	QMutexLocker locker(&mMutex);
 	if(mWaveForms.value(type, NULL) != NULL)
@@ -1154,7 +1155,7 @@ void ViAudioObject::setWaveForm(ViAudioObject::Type type, ViWaveForm *form)
 	mWaveForms[type] = form;
 }
 
-ViWaveForm* ViAudioObject::waveForm(ViAudioObject::Type type)
+ViWaveForm* ViAudioObject::waveForm(ViAudio::Type type)
 {
 	QMutexLocker locker(&mMutex);
 	return mWaveForms.value(type, NULL);
@@ -1198,7 +1199,7 @@ bool ViAudioObject::correct(ViModifyProcessor *corrector)
 		emit corrected();
 		return false;
 	}
-	else if(!hasBuffer(ViAudioObject::Corrupted))
+	else if(!hasBuffer(ViAudio::Corrupted))
 	{
 		log("No corrupted buffer is available for correction.", QtWarningMsg);
 		progress(100);
@@ -1208,7 +1209,7 @@ bool ViAudioObject::correct(ViModifyProcessor *corrector)
 
 	logStatus("Correcting track.");
 	correctedBuffer()->setFormat(corruptedFormat());
-	mCorrector->process(thisPointer, ViAudioObject::Corrupted, ViAudioObject::Corrected);
+	mCorrector->process(thisPointer, ViAudio::Corrupted, ViAudio::Corrected);
 	return true;
 }
 
@@ -1230,7 +1231,7 @@ void ViAudioObject::clearCorrelators()
     viDeleteAll(mCorrelators);
 }
 
-void ViAudioObject::addCorrelator(ViDualProcessor *correlator)
+void ViAudioObject::addCorrelator(ViCorrelator *correlator)
 {
     mCorrelators.append(correlator);
     QObject::connect(correlator, SIGNAL(finished()), this, SLOT(correlateNext()));
@@ -1247,14 +1248,39 @@ int ViAudioObject::correlatorCount()
     return mCorrelators.size();
 }
 
-bool ViAudioObject::correlate(ViDualProcessor *correlator)
+ViCorrelation ViAudioObject::correlation(ViAudio::Type type1, ViAudio::Type type2)
+{
+    for(int i = 0; i < mCorrelations.size(); ++i)
+    {
+        if(mCorrelations[i].type1() == type1 && mCorrelations[i].type2() == type2)
+        {
+            return mCorrelations[i];
+        }
+    }
+    for(int i = 0; i < mCorrelations.size(); ++i)
+    {
+        if(mCorrelations[i].type1() == type2 && mCorrelations[i].type2() == type1)
+        {
+            return mCorrelations[i];
+        }
+    }
+    LOG("Invalid correlation accessed.", QtCriticalMsg);
+    return ViCorrelation();
+}
+
+ViCorrelations ViAudioObject::correlations()
+{
+    return mCorrelations;
+}
+
+bool ViAudioObject::correlate(ViCorrelator *correlator)
 {
     clearCorrelators();
     addCorrelator(correlator);
     return correlate();
 }
 
-bool ViAudioObject::correlate(QList<ViDualProcessor*> correlators)
+bool ViAudioObject::correlate(QList<ViCorrelator*> correlators)
 {
     clearCorrelators();
     for(int i = 0; i < correlators.size(); ++i)
@@ -1275,20 +1301,22 @@ bool ViAudioObject::correlate()
     }
 
     mCorrelations.clear();
-    if(hasBuffer(ViAudioObject::Target) && hasBuffer(ViAudioObject::Corrupted))
+    mCorrelationTypes.clear();
+    if(hasBuffer(ViAudio::Target) && hasBuffer(ViAudio::Corrected))
     {
-        mCorrelations.enqueue(QPair<ViAudioObject::Type, ViAudioObject::Type>(ViAudioObject::Target, ViAudioObject::Corrupted));
+        mCorrelationTypes.enqueue(QPair<ViAudio::Type, ViAudio::Type>(ViAudio::Target, ViAudio::Corrected));
     }
-    if(hasBuffer(ViAudioObject::Target) && hasBuffer(ViAudioObject::Corrected))
+    if(hasBuffer(ViAudio::Target) && hasBuffer(ViAudio::Corrupted))
     {
-        mCorrelations.enqueue(QPair<ViAudioObject::Type, ViAudioObject::Type>(ViAudioObject::Target, ViAudioObject::Corrected));
+        mCorrelationTypes.enqueue(QPair<ViAudio::Type, ViAudio::Type>(ViAudio::Target, ViAudio::Corrupted));
     }
-    if(hasBuffer(ViAudioObject::Corrected) && hasBuffer(ViAudioObject::Corrupted))
+    if(hasBuffer(ViAudio::Corrected) && hasBuffer(ViAudio::Corrupted))
     {
-        mCorrelations.enqueue(QPair<ViAudioObject::Type, ViAudioObject::Type>(ViAudioObject::Corrected, ViAudioObject::Corrupted));
+        mCorrelationTypes.enqueue(QPair<ViAudio::Type, ViAudio::Type>(ViAudio::Corrected, ViAudio::Corrupted));
     }
+    mCorrelationTypes.enqueue(QPair<ViAudio::Type, ViAudio::Type>(ViAudio::Target, ViAudio::Target));
 
-    if(mCorrelations.isEmpty())
+    if(mCorrelationTypes.isEmpty())
     {
         log("No buffers available for correlation", QtCriticalMsg);
         progress(100);
@@ -1299,7 +1327,7 @@ bool ViAudioObject::correlate()
     mCurrentCorrelator = 0;
     mCurrentCorrelation = 0;
 
-    setProgress(mCorrelations.size() * correlatorCount());
+    setProgress(mCorrelationTypes.size() * correlatorCount());
     logStatus("Correlating track");
     correlateNext();
     return true;
@@ -1307,7 +1335,16 @@ bool ViAudioObject::correlate()
 
 void ViAudioObject::correlateNext()
 {
-    if(mCurrentCorrelation >= mCorrelations.size())
+    if(mCurrentCorrelator > 1 || mCurrentCorrelation > 1)
+    {
+        int correlator = mCurrentCorrelator - 1;
+        if(correlator < 0) correlator = 0;
+        ViCorrelation correlation = mCorrelators[correlator]->correlation();
+        mCorrelations.append(correlation);
+       // LOG(correlation.toString());
+    }
+
+    if(mCurrentCorrelation >= mCorrelationTypes.size())
     {
         log("The track was correlated.");
         progress(100);
@@ -1315,7 +1352,7 @@ void ViAudioObject::correlateNext()
         return;
     }
 
-    QPair<ViAudioObject::Type, ViAudioObject::Type> types = mCorrelations[mCurrentCorrelation];
+    QPair<ViAudio::Type, ViAudio::Type> types = mCorrelationTypes[mCurrentCorrelation];
     mCorrelators[mCurrentCorrelator]->process(thisPointer, types.first, types.second);
 
     ++mCurrentCorrelator;
@@ -1357,17 +1394,17 @@ void ViAudioObject::detectSongInfo()
 
 	locker.unlock();
 	QQueue<ViBuffer*> buffers;
-	if(hasBuffer(ViAudioObject::Target))
+	if(hasBuffer(ViAudio::Target))
 	{
-		buffers.enqueue(buffer(ViAudioObject::Target));
+		buffers.enqueue(buffer(ViAudio::Target));
 	}
-	if(hasBuffer(ViAudioObject::Corrected))
+	if(hasBuffer(ViAudio::Corrected))
 	{
-		buffers.enqueue(buffer(ViAudioObject::Corrected));
+		buffers.enqueue(buffer(ViAudio::Corrected));
 	}
-	if(hasBuffer(ViAudioObject::Corrupted))
+	if(hasBuffer(ViAudio::Corrupted))
 	{
-		buffers.enqueue(buffer(ViAudioObject::Corrupted));
+		buffers.enqueue(buffer(ViAudio::Corrupted));
 	}
 	locker.relock();
 	mMetadataer->detect(buffers);

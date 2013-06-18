@@ -1,5 +1,7 @@
 #!/bin/sh
 
+#-DCMAKE_INSTALL_PREFIX=/home/visore/Project/Visore/install/usr/local/visore -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit -DDISTRO=Debian
+
 current_directory=`dirname "$0"`
 current_directory=`cd $current_directory; pwd`
 

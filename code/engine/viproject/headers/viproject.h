@@ -162,12 +162,12 @@ class ViProject : public QObject, public ViId
 		QString path(ViProject::Directory directory);
 		QString path(ViProject::File file);
 		QString path(ViProject::Directory directory, int side);
-		QString path(ViAudioObject::Type type, int side);
+		QString path(ViAudio::Type type, int side);
 
 		QStringList fileNames(bool track = true, bool side = false);
 
 		void moveToProject();
-		void moveToProject(ViAudioObjectPointer object, ViAudioObject::Type type);
+		void moveToProject(ViAudioObjectPointer object, ViAudio::Type type);
 
 		/*******************************************************************************************************************
 
