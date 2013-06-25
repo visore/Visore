@@ -53,9 +53,9 @@ class ViTableWidget : public QTableWidget
 
 		void adjustHeight();
 
-		void setItem(int row, int column, QString text);
+        void setItem(int row, int column, QString text, Qt::Alignment alignment = Qt::AlignCenter);
 		void setItem(int row, int column, QWidget *widget, Qt::Alignment alignment = Qt::AlignCenter); //Takes ownership
-		void setItem(int row, int column, QTableWidgetItem *item); //Takes ownership
+        void setItem(int row, int column, QTableWidgetItem *item, Qt::Alignment alignment = Qt::AlignCenter); //Takes ownership
 
 		QHash<int, QWidget*> mWidgets;
 		int widgetRow(QWidget *widget);

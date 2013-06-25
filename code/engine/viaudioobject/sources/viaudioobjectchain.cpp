@@ -26,23 +26,20 @@ void ViAudioObjectChain::progressNext()
 		QObject::disconnect(mCurrentObject.data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 		QObject::disconnect(mCurrentObject.data(), SIGNAL(finished()), this, SLOT(progressNext()));
 	}
-
 	executeNext();
-	if(mProgress == 100)
-	{
-		disconnect();
-	}
 }
 
 void ViAudioObjectChain::executeNext()
 {
     if(mObjects.isEmpty() && (mCurrentIndex == mFunctions.size() || mCurrentIndex == 0))
     {
-		mProgress = 100;
+        mProgress = 100;
+        emit finished();
+        disconnect();
 		return;
 	}
     else if(mCurrentIndex == 0)
-	{
+    {
 		mCurrentObject = mObjects.dequeue();
 		QObject::connect(mCurrentObject.data(), SIGNAL(statused(QString)), this, SIGNAL(statused(QString)));
 		QObject::connect(mCurrentObject.data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));

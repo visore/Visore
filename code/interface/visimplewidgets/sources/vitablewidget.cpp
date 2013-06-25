@@ -115,9 +115,9 @@ void ViTableWidget::addRow(QString text)
 	addRow(&row);
 }
 
-void ViTableWidget::setItem(int row, int column, QString text)
+void ViTableWidget::setItem(int row, int column, QString text, Qt::Alignment alignment)
 {
-	setItem(row, column, new QTableWidgetItem(text));
+    setItem(row, column, new QTableWidgetItem(text), alignment);
 }
 
 void ViTableWidget::setItem(int row, int column, QWidget *widget, Qt::Alignment alignment)
@@ -127,12 +127,17 @@ void ViTableWidget::setItem(int row, int column, QWidget *widget, Qt::Alignment 
 	layout->addWidget(widget, 0, alignment);
 	layout->setContentsMargins(0, 0, 0, 0);
 	container->setLayout(layout);
-	setCellWidget(row, column, container);
+    setRowCount(qMax(row + 1, rowCount()));
+    setCellWidget(row, column, container);
+    adjustHeight();
 }
 
-void ViTableWidget::setItem(int row, int column, QTableWidgetItem *item)
+void ViTableWidget::setItem(int row, int column, QTableWidgetItem *item, Qt::Alignment alignment)
 {
+    item->setTextAlignment(alignment);
+    setRowCount(qMax(row + 1, rowCount()));
 	QTableWidget::setItem(row, column, item);
+    adjustHeight();
 }
 
 int ViTableWidget::widgetRow(QWidget *widget)

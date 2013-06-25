@@ -14,25 +14,29 @@ class ViCorrelationWidget : public ViWidget
 {
 	Q_OBJECT
 
-	public slots:
+    private slots:
 
-		void recalculate();
-		void update();
+        void updateCorrelators();
+        void changeCorrelator();
 
 	public:
 
 		ViCorrelationWidget(QWidget *parent = 0);
 		~ViCorrelationWidget();
 
+        void clear();
+
+        void setProject(ViProject *project);
+
 	protected:
 
-		void showEvent(QShowEvent *event);
-		void adjustTable();
+        QString percentage(qreal value);
+        void adjustTables();
 
 	private:
 
 		Ui::ViCorrelationWidget *mUi;
-		bool mWasInitialized;
+        ViProject *mProject;
 
 };
 

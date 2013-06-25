@@ -123,6 +123,12 @@ QStringList ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::names(QString function
 }
 
 template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
+QString ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::defaultName()
+{
+    return ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::instance()->defaultLibrary();
+}
+
+template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
 int ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::load(QString directory, QString functionName)
 {
     int loadCount = 0;

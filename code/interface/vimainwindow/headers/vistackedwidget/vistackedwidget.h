@@ -12,10 +12,15 @@ class ViStackedWidget : public QObject, public ViSingleton<ViStackedWidget>
 
 	friend class ViSingleton<ViStackedWidget>;
 
+    private slots:
+
+        void deleteTemporaryWidget();
+
 	public:
 
 		~ViStackedWidget();
 
+        static void showTemporaryWidget(ViWidget *widget, bool scroll = true);
         static int addWidget(ViWidget *widget, bool scroll = true);
 		static QStackedWidget* widget();
 		static void setCurrentWidget(ViWidget *widget);
@@ -29,6 +34,7 @@ class ViStackedWidget : public QObject, public ViSingleton<ViStackedWidget>
 	private:
 
 		QStackedWidget *mWidget;
+        int mTemporaryIndex;
 
 };
 

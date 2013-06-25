@@ -30,6 +30,7 @@ class ViLibraryManager : public ViSingleton<MANAGER_TYPE>
 
 		static QList<LIBRARY_TYPE*> libraries(QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
 		static QStringList names(QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
+        static QString defaultName();
 
 		virtual QString libraryPath() = 0;
 		virtual QString defaultLibrary() = 0;

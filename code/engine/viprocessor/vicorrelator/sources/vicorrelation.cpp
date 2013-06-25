@@ -44,6 +44,11 @@ void ViCorrelation::clear()
     mCounter = 0;
 }
 
+bool ViCorrelation::isValid()
+{
+    return mCorrelator != "" && mType1 != ViAudio::Undefined && mType2 != ViAudio::Undefined && mMean != 0 && mMinimum != DBL_MAX && mMaximum != -DBL_MAX;
+}
+
 QString ViCorrelation::correlator()
 {
     return mCorrelator;

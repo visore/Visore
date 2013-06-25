@@ -1255,11 +1255,11 @@ int ViAudioObject::correlatorCount()
     return mCorrelators.size();
 }
 
-ViCorrelation ViAudioObject::correlation(ViAudio::Type type1, ViAudio::Type type2)
+ViCorrelation ViAudioObject::correlation(QString correlator, ViAudio::Type type1, ViAudio::Type type2)
 {
     for(int i = 0; i < mCorrelations.size(); ++i)
     {
-        if(mCorrelations[i].type1() == type1 && mCorrelations[i].type2() == type2)
+        if(mCorrelations[i].type1() == type1 && mCorrelations[i].type2() == type2 && mCorrelations[i].correlator() == correlator)
         {
             return mCorrelations[i];
         }
@@ -1273,9 +1273,9 @@ ViCorrelations ViAudioObject::ViAudioObject::correlations()
     return mCorrelations;
 }
 
-qreal ViAudioObject::correlationImprovement()
+qreal ViAudioObject::correlationImprovement(QString correlator)
 {
-    return correlation(ViAudio::Target, ViAudio::Corrected).mean() - correlation(ViAudio::Target, ViAudio::Corrupted).mean();
+    return correlation(correlator, ViAudio::Target, ViAudio::Corrected).mean() - correlation(correlator, ViAudio::Target, ViAudio::Corrupted).mean();
 }
 
 bool ViAudioObject::correlate(ViCorrelator *correlator)
@@ -1315,10 +1315,6 @@ bool ViAudioObject::correlate()
     {
         mCorrelationTypes.enqueue(QPair<ViAudio::Type, ViAudio::Type>(ViAudio::Target, ViAudio::Corrupted));
     }
-    if(hasBuffer(ViAudio::Corrected) && hasBuffer(ViAudio::Corrupted))
-    {
-        mCorrelationTypes.enqueue(QPair<ViAudio::Type, ViAudio::Type>(ViAudio::Corrected, ViAudio::Corrupted));
-    }
 
     if(mCorrelationTypes.isEmpty())
     {
@@ -1339,10 +1335,10 @@ bool ViAudioObject::correlate()
 
 void ViAudioObject::correlateNext()
 {
-    if(mCurrentCorrelator > 1 || mCurrentCorrelation > 1)
+    if(mCurrentCorrelator > 0 || mCurrentCorrelation > 0)
     {
         int correlator = mCurrentCorrelator - 1;
-        if(correlator < 0) correlator = 0;
+        if(correlator < 0) correlator = correlatorCount() - 1;
         ViCorrelation correlation = mCorrelators[correlator]->correlation();
         mCorrelations.append(correlation);
         emit changed();

@@ -39,21 +39,11 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
-       <height>20</height>
+       <width>706</width>
+       <height>17</height>
       </size>
      </property>
     </spacer>
-   </item>
-   <item row="2" column="0" colspan="3">
-    <widget class="ViNeuralSelectorWidget" name="neuralSelector" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-    </widget>
    </item>
    <item row="1" column="0">
     <spacer name="horizontalSpacer_2">
@@ -88,12 +78,12 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="1" colspan="2">
-    <widget class="ViButton" name="button1" native="true">
+   <item row="2" column="0" colspan="3">
+    <widget class="ViNeuralSelectorWidget" name="neuralSelector" native="true">
      <property name="minimumSize">
       <size>
-       <width>10</width>
-       <height>10</height>
+       <width>0</width>
+       <height>0</height>
       </size>
      </property>
     </widget>
@@ -110,6 +100,16 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="1" column="1" colspan="2">
+    <widget class="ViButton" name="button1" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>10</width>
+       <height>10</height>
+      </size>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

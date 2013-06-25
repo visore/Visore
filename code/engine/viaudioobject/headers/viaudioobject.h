@@ -306,9 +306,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
         void addCorrelator(ViCorrelator *correlator); //Takes ownership
         bool hasCorrelator();
         int correlatorCount();
-        ViCorrelation correlation(ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
+        ViCorrelation correlation(QString correlator, ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
         ViCorrelations correlations();
-        qreal correlationImprovement();
+        qreal correlationImprovement(QString correlator);
         Q_INVOKABLE bool correlate(ViCorrelator *correlator); //Takes ownership
         Q_INVOKABLE bool correlate(QList<ViCorrelator*> correlators); //Takes ownership
         Q_INVOKABLE bool correlate();

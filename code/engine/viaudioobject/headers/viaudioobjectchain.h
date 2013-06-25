@@ -14,6 +14,7 @@ class ViAudioObjectChain : public QObject
 
 		void progressed(qreal percentage);
 		void statused(QString status);
+        void finished();
 
 	private slots:
 

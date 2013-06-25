@@ -17,11 +17,16 @@ class ViProjectCorrectionWidget : public ViWidget
 	private slots:
 
 		void correct();
+        void showCorrelation();
 
 	public:
 
 		ViProjectCorrectionWidget(QWidget *parent = 0);
 		~ViProjectCorrectionWidget();
+
+    protected:
+
+        void hideEvent(QHideEvent *event);
 
 	private:
 

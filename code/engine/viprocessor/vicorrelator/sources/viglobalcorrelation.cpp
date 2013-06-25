@@ -64,6 +64,21 @@ ViCorrelations ViGlobalCorrelation::correlations()
     return mCorrelations;
 }
 
+ViCorrelation ViGlobalCorrelation::correlation(QString correlator, ViAudio::Type type1, ViAudio::Type type2)
+{
+    for(int i = 0; i < mCorrelations.size(); ++i)
+    {
+        if( mCorrelations[i].type1() == type1 &&
+            mCorrelations[i].type2() == type2 &&
+            mCorrelations[i].correlator() == correlator
+        )
+        {
+            return mCorrelations[i];
+        }
+    }
+    return ViCorrelation();
+}
+
 ViElement ViGlobalCorrelation::exportData()
 {
     ViElement root("globalcorrelations");

@@ -14,6 +14,11 @@ class ViWidget : public QWidget, public ViId
 
 	Q_OBJECT
 
+    signals:
+
+        void shown();
+        void hidden();
+
 	private slots:
 
 		bool executeFunction();

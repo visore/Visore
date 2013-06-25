@@ -18,7 +18,8 @@ ViLoadingWidget::ViLoadingWidget()
 	mUi->cancelButton->setGlow(ViThemeManager::color(ViThemeColors::ButtonGlowColor1));
 	//mUi->cancelButton->setIcon(ViThemeManager::image("record.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 
-	QObject::connect(engine().data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+    QObject::connect(engine().data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+    QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(stopProgress()));
 	QObject::connect(engine().data(), SIGNAL(statusChanged(QString)), this, SLOT(setText(QString)));
 
 	QColor textColor = ViThemeManager::color(ViThemeColors::TextColor1);
@@ -59,10 +60,15 @@ void ViLoadingWidget::progress(qreal percentage)
 		mUi->progressBar->setValue(percentage);
 	}
 
-	if(percentage >= 100)
+    /*if(percentage >= 100)
 	{
 		stop();
-	}
+    }*/
+}
+
+void ViLoadingWidget::stopProgress()
+{
+    stop();
 }
 
 void ViLoadingWidget::updateTimes()
