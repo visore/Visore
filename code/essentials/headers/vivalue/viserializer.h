@@ -9,8 +9,8 @@ class ViSerializer
 
 	public:
 
-        virtual ViElement exportData() = 0;
-        virtual bool importData(ViElement element) = 0;
+        virtual ViElement exportData();
+        virtual bool importData(ViElement element);
 
 		virtual bool exportFile(QString filePath);
 		virtual bool exportFile(QFile &file);

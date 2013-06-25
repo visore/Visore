@@ -1,0 +1,28 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Setup install paths
+SET(VI_CORRELATOR_INSTALL_PATH engine/processors/correlators)
+
+#Add definitions
+ADD_DEFINITIONS(-DCORRELATOR_PATH="${VI_CORRELATOR_INSTALL_PATH}")
+
+#Add sub libraries
+SET(VI_CROSS_CORRELATOR ${ROOT}/vicrosscorrelator)
+SET(VI_SAMPLE_CORRELATOR ${ROOT}/visamplecorrelator)
+ADD_SUBDIRECTORY(${VI_CROSS_CORRELATOR})
+ADD_SUBDIRECTORY(${VI_SAMPLE_CORRELATOR})
+
+#Initiate source files
+FILE(GLOB VI_CORRELATOR_HEADERS ${HEADERS}/*.h)
+FILE(GLOB VI_CORRELATOR_SOURCES ${SOURCES}/*.cpp)
+
+#Create library
+ADD_LIBRARY(vicorrelator SHARED ${VI_CORRELATOR_HEADERS} ${VI_CORRELATOR_SOURCES})
+TARGET_LINK_LIBRARIES(vicorrelator viessentials)
+QT5_USE_MODULES(vicorrelator Multimedia Xml)
+
+#Install file
+INSTALL(TARGETS vicorrelator DESTINATION ${VI_CORRELATOR_INSTALL_PATH})

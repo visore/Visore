@@ -63,7 +63,7 @@ class ViNeuralCorrectorThread : public QThread
 
 };
 
-class ViNeuralCorrector : public ViModifyProcessor
+class ViNeuralCorrector : public ViModifyProcessor, public ViLibrary
 {
 
 	Q_OBJECT
@@ -85,6 +85,9 @@ class ViNeuralCorrector : public ViModifyProcessor
 		void initialize();
 		void execute();
 		void finalize();
+
+        ViElement exportData();
+        bool importData(ViElement element);
 
 	private:
 

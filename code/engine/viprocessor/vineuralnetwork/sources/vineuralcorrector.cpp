@@ -423,3 +423,53 @@ void ViNeuralCorrector::finalize()
 
 	viDeleteAll(mThreads);
 }
+
+ViElement ViNeuralCorrector::exportData()
+{
+    ViElement root("Corrector");
+    root.addChild("Name", name());
+    root.addChild("SeparateChannels", viBoolToString(mSeparateChannels));
+    if(mTrainer != NULL)
+    {
+        root.addChild(mTrainer->exportData());
+    }
+    if(mProvider != NULL)
+    {
+        root.addChild(mProvider->exportData());
+    }
+    if(mNetwork != NULL)
+    {
+        root.addChild(mNetwork->exportData());
+    }
+    return root;
+}
+
+bool ViNeuralCorrector::importData(ViElement element)
+{
+    if(element.name() == "Corrector" && element.child("Name").toString() == name())
+    {
+        enableSeparateChannels(viStringToBool(element.child("SeparateChannels").toString()));
+
+        if(mNetwork != NULL)
+        {
+            delete mNetwork;
+        }
+        ViNeuralNetworkFactory factory;
+        mNetwork = factory.create(element);
+
+        if(mTrainer != NULL)
+        {
+            delete mTrainer;
+        }
+        mTrainer = ViTrainerManager::create(element);
+
+        if(mProvider != NULL)
+        {
+            delete mProvider;
+        }
+        mProvider = ViTargetProviderManager::create(element);
+
+        return true;
+    }
+    return false;
+}

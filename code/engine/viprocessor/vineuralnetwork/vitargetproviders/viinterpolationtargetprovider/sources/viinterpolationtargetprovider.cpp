@@ -50,12 +50,12 @@ qreal ViInterpolationTargetProvider::calculate()
 
 ViElement ViInterpolationTargetProvider::exportData()
 {
-	
+    return ViTargetProvider::exportData();
 }
 
 bool ViInterpolationTargetProvider::importData(ViElement element)
 {
-
+    return ViTargetProvider::importData(element);
 }
 
 ViInterpolationTargetProvider* ViInterpolationTargetProvider::clone()

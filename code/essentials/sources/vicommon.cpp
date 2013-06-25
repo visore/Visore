@@ -75,4 +75,42 @@ inline ViAudio::Type viStringToType(QString type)
     else return ViAudio::Undefined;
 }
 
+QString viBoolToString(bool value, Vi::BoolType type, bool lowerCase)
+{
+    QString result = "";
+
+    if(type == Vi::YesNo)
+    {
+        if(value) result = "Yes";
+        else result = "No";
+    }
+    else if(type == Vi::TrueFalse)
+    {
+        if(value) result = "True";
+        else result = "False";
+    }
+    else if(type == Vi::OneZero)
+    {
+        if(value) result = "1";
+        else result = "0";
+    }
+
+    if(lowerCase)
+    {
+        result = result.toLower();
+    }
+
+    return result;
+}
+
+bool viStringToBool(QString value)
+{
+    value = value.toLower().trimmed();
+    if(value == "yes" || value == "true" || value == "1")
+    {
+        return true;
+    }
+    return false;
+}
+
 #endif

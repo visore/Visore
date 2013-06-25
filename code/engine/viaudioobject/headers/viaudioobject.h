@@ -52,6 +52,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 	signals:
 
 		void finished();
+        void changed(); //Project is saved once this signal is emitted;
 
 		void progressed(qreal percentage);
 		void statused(QString status);
@@ -63,6 +64,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		void waved();
 
+        void correctorChanged();
 		void corrected();
 
         void correlated();
@@ -291,6 +293,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
         void setCorrector(ViModifyProcessor *corrector); //Takes ownership
         bool hasCorrector();
+        ViModifyProcessor* corrector();
         Q_INVOKABLE bool correct(ViModifyProcessor *corrector = NULL); //Takes ownership
 
         /*******************************************************************************************************************
@@ -305,6 +308,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
         int correlatorCount();
         ViCorrelation correlation(ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
         ViCorrelations correlations();
+        qreal correlationImprovement();
         Q_INVOKABLE bool correlate(ViCorrelator *correlator); //Takes ownership
         Q_INVOKABLE bool correlate(QList<ViCorrelator*> correlators); //Takes ownership
         Q_INVOKABLE bool correlate();

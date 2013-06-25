@@ -26,6 +26,19 @@ inline void viDeleteAll(Container &container);
 template<typename From, typename To>
 inline QList<To> viConvertList(QList<From> list);
 
+namespace Vi
+{
+    enum BoolType
+    {
+        YesNo,
+        TrueFalse,
+        OneZero
+    };
+}
+
+inline QString viBoolToString(bool value, Vi::BoolType type = Vi::YesNo, bool lowerCase = false);
+inline bool viStringToBool(QString value);
+
 typedef unsigned char qbyte8u;
 typedef unsigned short qbyte16u;
 typedef unsigned int qbyte32u;
@@ -120,6 +133,8 @@ namespace ViAudio
     using namespace QAudio;
 
 }
+
+typedef QPair<ViAudio::Type, ViAudio::Type> ViAudioTypePair;
 
 inline QString viTypeToString(ViAudio::Type type);
 inline ViAudio::Type viStringToType(QString type);

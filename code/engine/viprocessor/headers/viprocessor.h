@@ -22,7 +22,7 @@ class ViProcessorThread : public QThread
 		ViProcessor *mProcessor;
 };
 
-class ViProcessor : public ViNotifier
+class ViProcessor : public ViNotifier, public ViSerializer
 {
 
 	Q_OBJECT

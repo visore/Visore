@@ -23,6 +23,22 @@ ViElement::ViElement(const ViElement &other)
 	mChildren = other.mChildren;
 }
 
+ViElement& ViElement::prependChild(ViElement child)
+{
+    mChildren.prepend(child);
+    return mChildren.first();
+}
+
+ViElement& ViElement::prependChild(QString name)
+{
+    return prependChild(ViElement(name));
+}
+
+ViElement& ViElement::prependChild(QString name, QVariant value)
+{
+    return prependChild(ViElement(name, value));
+}
+
 ViElement& ViElement::addChild(ViElement child)
 {
 	mChildren.append(child);
@@ -111,6 +127,18 @@ bool ViElement::hasAttributes()
 bool ViElement::hasChildren()
 {
 	return !mChildren.isEmpty();
+}
+
+bool ViElement::hasChild(QString name)
+{
+    for(int i = 0; i < childrenCount(); ++i)
+    {
+        if(name == mChildren[i].name())
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 ViAttribute ViElement::attribute(int index)

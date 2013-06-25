@@ -1,6 +1,15 @@
 #include <viserializer.h>
 #include <QTextStream>
 
+ViElement ViSerializer::exportData()
+{
+    return ViElement();
+}
+
+bool ViSerializer::importData(ViElement element)
+{
+}
+
 bool ViSerializer::exportFile(QString filePath)
 {
 	QFile file(filePath);

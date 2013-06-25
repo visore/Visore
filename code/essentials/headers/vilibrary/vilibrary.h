@@ -15,7 +15,7 @@ class ViLibrary
 
 		virtual QString name(QString replace = "", bool spaced = false);
 
-		virtual ViLibrary* clone() = 0;
+        virtual ViLibrary* clone();
 
 };
 

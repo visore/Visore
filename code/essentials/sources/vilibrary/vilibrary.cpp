@@ -29,3 +29,8 @@ QString ViLibrary::name(QString replace, bool spaced)
     }
 	return result.trimmed();
 }
+
+ViLibrary* ViLibrary::clone()
+{
+    return NULL;
+}

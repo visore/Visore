@@ -60,6 +60,7 @@ class ViProject : public QObject, public ViId
         void clear(); //Removes project files and clears memory
         void clearObjects();
         void clearFiles();
+        void clearCorrections();
 
         /*******************************************************************************************************************
 
@@ -75,6 +76,7 @@ class ViProject : public QObject, public ViId
 		bool loadAll();
 		void saveAll();
 		void setFinished(bool finish = true);
+        void infoCorrector();
 
 	public:
 
@@ -169,6 +171,18 @@ class ViProject : public QObject, public ViId
 		void moveToProject();
 		void moveToProject(ViAudioObjectPointer object, ViAudio::Type type);
 
+        /*******************************************************************************************************************
+
+            CORRECTIONS
+
+        *******************************************************************************************************************/
+
+        QString nextCorrectionId();
+        QString correctionId(QString path = "");
+        QString correctionPath(QString id = "");
+        bool hasCorrector(ViAudioObjectPointer object);
+        ViElement corrector(ViAudioObjectPointer object);
+
 		/*******************************************************************************************************************
 
 			SAVE & LOAD INFORMATION
@@ -177,11 +191,11 @@ class ViProject : public QObject, public ViId
 
 		bool saveProperties();
 		bool saveTracks();
-		bool saveCorrelations();
+        bool saveCorrections();
 
 		bool loadProperties();
 		bool loadTracks();
-		bool loadCorrelations();
+        bool loadCorrections();
 
 	private:
 
@@ -193,6 +207,9 @@ class ViProject : public QObject, public ViId
 		ViArchive mArchive;
 
 		ViAudioObjectQueue mObjects;
+
+        QList<QPair<ViAudioObjectPointer, ViElement>> mCorrectors;
+        QString mCurrentCorrectionId;
 
         QMutex mObjectsMutex;
 

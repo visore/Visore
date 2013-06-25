@@ -317,7 +317,7 @@ ViElement ViNeuralNetwork::exportData()
 
 bool ViNeuralNetwork::importData(ViElement element)
 {
-	if(element.name() != "NeuralNetwork")
+    if(element.name() != "NeuralNetwork" || element.hasChild("NeuralNetwork"))
 	{
 		return false;
 	}

@@ -458,6 +458,7 @@ void ViAudioObject::encodeNext()
 		mEncoder = NULL;
 		locker.unlock();
 		emit encoded();
+        emit changed();
 	}
 	else
 	{
@@ -1177,12 +1178,18 @@ void ViAudioObject::setCorrector(ViModifyProcessor *corrector)
 	mCorrector = corrector;
 	QObject::connect(mCorrector, SIGNAL(finished()), this, SLOT(endCorrect()));
 	QObject::connect(mCorrector, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+    emit correctorChanged();
 }
 
 bool ViAudioObject::hasCorrector()
 {
 	QMutexLocker locker(&mMutex);
 	return mCorrector != NULL;
+}
+
+ViModifyProcessor* ViAudioObject::corrector()
+{
+    return mCorrector;
 }
 
 bool ViAudioObject::correct(ViModifyProcessor *corrector)
@@ -1257,20 +1264,18 @@ ViCorrelation ViAudioObject::correlation(ViAudio::Type type1, ViAudio::Type type
             return mCorrelations[i];
         }
     }
-    for(int i = 0; i < mCorrelations.size(); ++i)
-    {
-        if(mCorrelations[i].type1() == type2 && mCorrelations[i].type2() == type1)
-        {
-            return mCorrelations[i];
-        }
-    }
     LOG("Invalid correlation accessed.", QtCriticalMsg);
     return ViCorrelation();
 }
 
-ViCorrelations ViAudioObject::correlations()
+ViCorrelations ViAudioObject::ViAudioObject::correlations()
 {
     return mCorrelations;
+}
+
+qreal ViAudioObject::correlationImprovement()
+{
+    return correlation(ViAudio::Target, ViAudio::Corrected).mean() - correlation(ViAudio::Target, ViAudio::Corrupted).mean();
 }
 
 bool ViAudioObject::correlate(ViCorrelator *correlator)
@@ -1314,7 +1319,6 @@ bool ViAudioObject::correlate()
     {
         mCorrelationTypes.enqueue(QPair<ViAudio::Type, ViAudio::Type>(ViAudio::Corrected, ViAudio::Corrupted));
     }
-    mCorrelationTypes.enqueue(QPair<ViAudio::Type, ViAudio::Type>(ViAudio::Target, ViAudio::Target));
 
     if(mCorrelationTypes.isEmpty())
     {
@@ -1341,7 +1345,7 @@ void ViAudioObject::correlateNext()
         if(correlator < 0) correlator = 0;
         ViCorrelation correlation = mCorrelators[correlator]->correlation();
         mCorrelations.append(correlation);
-       // LOG(correlation.toString());
+        emit changed();
     }
 
     if(mCurrentCorrelation >= mCorrelationTypes.size())
