@@ -1233,6 +1233,35 @@ void ViAudioObject::endCorrect()
 
 *******************************************************************************************************************/
 
+ViCorrelation ViAudioObject::correlation(QString correlator, ViAudio::Type type1, ViAudio::Type type2)
+{
+    for(int i = 0; i < mCorrelations.size(); ++i)
+    {
+        if(mCorrelations[i].type1() == type1 && mCorrelations[i].type2() == type2)
+        {
+            return mCorrelations[i].correlation(correlator);
+        }
+    }
+    return ViCorrelation();
+}
+
+ViCorrelationGroup ViAudioObject::correlation(ViAudio::Type type1, ViAudio::Type type2)
+{
+    for(int i = 0; i < mCorrelations.size(); ++i)
+    {
+        if(mCorrelations[i].type1() == type1 && mCorrelations[i].type2() == type2)
+        {
+            return mCorrelations[i];
+        }
+    }
+    return ViCorrelationGroup();
+}
+
+ViCorrelationGroups ViAudioObject::ViAudioObject::correlations()
+{
+    return mCorrelations;
+}
+
 void ViAudioObject::clearCorrelators()
 {
     viDeleteAll(mCorrelators);
@@ -1253,29 +1282,6 @@ bool ViAudioObject::hasCorrelator()
 int ViAudioObject::correlatorCount()
 {
     return mCorrelators.size();
-}
-
-ViCorrelation ViAudioObject::correlation(QString correlator, ViAudio::Type type1, ViAudio::Type type2)
-{
-    for(int i = 0; i < mCorrelations.size(); ++i)
-    {
-        if(mCorrelations[i].type1() == type1 && mCorrelations[i].type2() == type2 && mCorrelations[i].correlator() == correlator)
-        {
-            return mCorrelations[i];
-        }
-    }
-    LOG("Invalid correlation accessed.", QtCriticalMsg);
-    return ViCorrelation();
-}
-
-ViCorrelations ViAudioObject::ViAudioObject::correlations()
-{
-    return mCorrelations;
-}
-
-qreal ViAudioObject::correlationImprovement(QString correlator)
-{
-    return correlation(correlator, ViAudio::Target, ViAudio::Corrected).mean() - correlation(correlator, ViAudio::Target, ViAudio::Corrupted).mean();
 }
 
 bool ViAudioObject::correlate(ViCorrelator *correlator)
@@ -1340,7 +1346,7 @@ void ViAudioObject::correlateNext()
         int correlator = mCurrentCorrelator - 1;
         if(correlator < 0) correlator = correlatorCount() - 1;
         ViCorrelation correlation = mCorrelators[correlator]->correlation();
-        mCorrelations.append(correlation);
+        mCorrelations.last().add(mCorrelators[correlator], correlation);
         emit changed();
     }
 
@@ -1354,6 +1360,11 @@ void ViAudioObject::correlateNext()
 
     QPair<ViAudio::Type, ViAudio::Type> types = mCorrelationTypes[mCurrentCorrelation];
     mCorrelators[mCurrentCorrelator]->process(thisPointer, types.first, types.second);
+
+    if(mCurrentCorrelator == 0)
+    {
+        mCorrelations.append(ViCorrelationGroup(types));
+    }
 
     ++mCurrentCorrelator;
     if(mCurrentCorrelator >= correlatorCount())

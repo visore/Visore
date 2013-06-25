@@ -15,10 +15,8 @@ ViCorrelator::~ViCorrelator()
 }
 
 void ViCorrelator::initialize()
-{mCorrelation = ViCorrelation();
+{
     mCorrelation.clear();
-    mCorrelation.setCorrelator(name());
-    mCorrelation.setTypes(type1(), type2());
 }
 
 void ViCorrelator::finalize()

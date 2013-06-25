@@ -14,7 +14,7 @@ void ViGlobalCorrelation::clear()
     mCorrelations.clear();
 }
 
-void ViGlobalCorrelation::add(ViCorrelations correlations)
+void ViGlobalCorrelation::add(ViCorrelationGroups correlations)
 {
     for(int i = 0; i < correlations.size(); ++i)
     {
@@ -22,18 +22,14 @@ void ViGlobalCorrelation::add(ViCorrelations correlations)
     }
 }
 
-void ViGlobalCorrelation::add(ViCorrelation correlation)
+void ViGlobalCorrelation::add(ViCorrelationGroup correlation)
 {
     mCorrelations.append(correlation);
 
     bool contains = false;
     for(int i = 0; i < mCorrelations.size(); ++i)
     {
-        ViCorrelation &globalCorrelation = mCorrelations[i];
-        if( globalCorrelation.type1() == correlation.type1() &&
-            globalCorrelation.type2() == correlation.type2() &&
-            globalCorrelation.correlator() == correlation.correlator()
-        )
+        if(mCorrelations[i].hasEqualTypes(correlation))
         {
             contains = true;
             break;
@@ -42,41 +38,42 @@ void ViGlobalCorrelation::add(ViCorrelation correlation)
 
     if(!contains)
     {
-        mCorrelations.append(ViCorrelation(correlation.correlator(), correlation.type1(), correlation.type2()));
+        mCorrelations.append(ViCorrelationGroup(correlation.type1(), correlation.type2()));
     }
 
+    QString key;
+    QStringList keys;
     for(int i = 0; i < mCorrelations.size(); ++i)
     {
-        ViCorrelation &globalCorrelation = mCorrelations[i];
-        if( globalCorrelation.type1() == correlation.type1() &&
-            globalCorrelation.type2() == correlation.type2() &&
-            globalCorrelation.correlator() == correlation.correlator()
-        )
+        ViCorrelationGroup &globalCorrelation = mCorrelations[i];
+        if(globalCorrelation.hasEqualTypes(correlation))
         {
-            globalCorrelation.addCorrelation(correlation.mean(), correlation.minimum(), correlation.maximum());
+            keys = correlation.correlators();
+            foreach(key, keys)
+            {
+                ViCorrelation &currentCorrelation = correlation.correlation(key);
+                globalCorrelation.correlation(key).addCorrelation(currentCorrelation.mean(), currentCorrelation.minimum(), currentCorrelation.maximum());
+            }
             break;
         }
     }
 }
 
-ViCorrelations ViGlobalCorrelation::correlations()
+ViCorrelationGroups ViGlobalCorrelation::correlations()
 {
     return mCorrelations;
 }
 
-ViCorrelation ViGlobalCorrelation::correlation(QString correlator, ViAudio::Type type1, ViAudio::Type type2)
+ViCorrelationGroup ViGlobalCorrelation::correlation(ViAudio::Type type1, ViAudio::Type type2)
 {
     for(int i = 0; i < mCorrelations.size(); ++i)
     {
-        if( mCorrelations[i].type1() == type1 &&
-            mCorrelations[i].type2() == type2 &&
-            mCorrelations[i].correlator() == correlator
-        )
+        if(mCorrelations[i].type1() == type1 && mCorrelations[i].type2() == type2)
         {
             return mCorrelations[i];
         }
     }
-    return ViCorrelation();
+    return ViCorrelationGroup();
 }
 
 ViElement ViGlobalCorrelation::exportData()
@@ -93,14 +90,15 @@ bool ViGlobalCorrelation::importData(ViElement element)
 {
     if(element.name() != "globalcorrelations")
     {
-        return false;
+        if(element.hasChild("globalcorrelations")) element = element.child("globalcorrelations");
+        else return false;
     }
-    ViElementList elements = element.children("correlation");
-    for(int i = 0; i < elements.size(); ++i)
+    ViElementList children = element.children();
+    for(int i = 0; i < children.size(); ++i)
     {
-        ViCorrelation correlation;
-        correlation.importData(elements[i]);
-        add(correlation);
+        ViCorrelationGroup group;
+        group.importData(children[i]);
+        mCorrelations.append(group);
     }
     return true;
 }

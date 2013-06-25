@@ -9,7 +9,7 @@
 #include <vilogger.h>
 #include <vialigner.h>
 #include <visongidentifier.h>
-#include <vicorrelation.h>
+#include <vicorrelationgroup.h>
 #include <QQueue>
 #include <QMutex>
 #include <QMutexLocker>
@@ -302,13 +302,15 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
         *******************************************************************************************************************/
 
+        ViCorrelation correlation(QString correlator, ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
+        ViCorrelationGroup correlation(ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
+        ViCorrelationGroups correlations();
+
         void clearCorrelators();
         void addCorrelator(ViCorrelator *correlator); //Takes ownership
         bool hasCorrelator();
         int correlatorCount();
-        ViCorrelation correlation(QString correlator, ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
-        ViCorrelations correlations();
-        qreal correlationImprovement(QString correlator);
+
         Q_INVOKABLE bool correlate(ViCorrelator *correlator); //Takes ownership
         Q_INVOKABLE bool correlate(QList<ViCorrelator*> correlators); //Takes ownership
         Q_INVOKABLE bool correlate();
@@ -461,7 +463,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
         QQueue<QPair<ViAudio::Type, ViAudio::Type> > mCorrelationTypes;
         int mCurrentCorrelator;
         int mCurrentCorrelation;
-        ViCorrelations mCorrelations;
+        ViCorrelationGroups mCorrelations;
 
 		/*******************************************************************************************************************
 

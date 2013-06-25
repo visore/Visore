@@ -61,6 +61,7 @@ class ViProject : public QObject, public ViId
         void clearObjects();
         void clearFiles();
         void clearCorrections();
+        void clearCorrelations();
 
         /*******************************************************************************************************************
 
@@ -117,11 +118,23 @@ class ViProject : public QObject, public ViId
 
 		bool isFinished();
 
-		/*******************************************************************************************************************
+        /*******************************************************************************************************************
 
-			SIDES & TRACKS
+            CORRELATIONS
 
-		*******************************************************************************************************************/
+        *******************************************************************************************************************/
+
+        ViCorrelation bestCorrelation(QString correlator);
+        qreal bestImprovement(QString correlator);
+
+        QString bestCorrectionId(QString correlator);
+        QString currentCorrectionId();
+
+        /*******************************************************************************************************************
+
+            SIDES & TRACKS
+
+        *******************************************************************************************************************/
 
 		int sideCount();
 		int trackCount();
@@ -212,6 +225,16 @@ class ViProject : public QObject, public ViId
         QString mCurrentCorrectionId;
 
         QMutex mObjectsMutex;
+
+        /*******************************************************************************************************************
+
+            CORRELATIONS
+
+        *******************************************************************************************************************/
+
+        ViCorrelationGroup mBestCorrelation;
+        QHash<QString, qreal> mBestImprovement;
+        QHash<QString, QString> mBestCorrectionId;
 
 		/*******************************************************************************************************************
 
