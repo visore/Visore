@@ -16,6 +16,7 @@
 #define TEMPLATE_CLASSNAME stripTemplateClassName(__PRETTY_FUNCTION__) // call className() from within an object
 inline QString stripClassName(const char *text);
 inline QString stripTemplateClassName(const char *text);
+template <typename Type> inline QString className();
 
 template <typename ForwardIterator>
 inline void viDeleteAll(ForwardIterator begin, ForwardIterator end);

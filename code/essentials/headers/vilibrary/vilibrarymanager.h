@@ -4,6 +4,7 @@
 #include <QLibrary>
 #include <QDir>
 #include <QList>
+#include <QFileInfo>
 #include <QStringList>
 #include <vilibrary.h>
 #include <vipointer.h>
@@ -29,8 +30,8 @@ class ViLibraryManager : public ViSingleton<MANAGER_TYPE>
 		static LIBRARY_TYPE* createDefault(QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
 
 		static QList<LIBRARY_TYPE*> libraries(QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
-		static QStringList names(QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
-        static QString defaultName();
+        static QStringList names(QString replace = "", bool spaced = false, QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
+        static QString defaultName(QString replace = "", bool spaced = false);
 
 		virtual QString libraryPath() = 0;
 		virtual QString defaultLibrary() = 0;
@@ -46,6 +47,8 @@ class ViLibraryManager : public ViSingleton<MANAGER_TYPE>
 
 		bool contains(QLibrary *library);
 		bool contains(QString libraryPath);
+
+        virtual QStringList skipLibraries(); // Which library names to skip when loading
 
 		QStringList find(QString directory);
 		QString trailer();

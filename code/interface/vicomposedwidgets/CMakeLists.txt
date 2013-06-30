@@ -12,7 +12,7 @@ FILE(GLOB VI_COMPOSEDWIDGETS_HEADERS ${HEADERS}/*.h ${HEADERS}/*/*.h)
 #Create library
 QT5_WRAP_UI(VI_WRAPPER_FORMS ${VI_COMPOSEDWIDGETS_FORMS})
 ADD_LIBRARY(vicomposedwidgets SHARED ${VI_COMPOSEDWIDGETS_HEADERS} ${VI_COMPOSEDWIDGETS_SOURCES} ${VI_WRAPPER_FORMS})
-TARGET_LINK_LIBRARIES(vicomposedwidgets qwt visimplewidgets vigradientcreator viaudioengine viinterpolationtargetprovider)
+TARGET_LINK_LIBRARIES(vicomposedwidgets qwt visimplewidgets vigradientcreator viaudioengine viinterpolationtargetprovider vinoisedetector)
 QT5_USE_MODULES(vicomposedwidgets Widgets Multimedia Xml)
 
 #Install file

@@ -22,15 +22,18 @@ LIBRARY_TYPE* ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::create(QString name,
 		manager->load(manager->libraryPath(), functionName);
 	}
 
-	QString newName = name.toLower();
-	LIBRARY_TYPE *library = manager->createLibrary(newName);
-
+    LIBRARY_TYPE *library = NULL;
 	QStringList possibleNames;
+
+    QString newName = name.toLower().trimmed().replace(" ", "");
+    possibleNames.append(newName);
+
 	QString postfix = manager->trailer().toLower();
-	bool hasPrefix = newName.startsWith("vi");
+    QString prefix = "vi";
+    bool hasPrefix = newName.startsWith(prefix);
 	bool hasPostfix = newName.endsWith(postfix);
 
-	if(hasPrefix && !hasPostfix)
+    if(hasPrefix && !hasPostfix)
 	{
 		possibleNames.append(newName.remove(0, 2) + postfix);
 	}
@@ -38,13 +41,16 @@ LIBRARY_TYPE* ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::create(QString name,
 	{
 		possibleNames.append(newName.remove(0, 2));
 	}
-	else if(!hasPostfix)
-	{
-		possibleNames.append(newName + postfix);
-	}
-
+    else if(!hasPostfix)
+    {
+        possibleNames.append(newName + postfix);
+    }
+    else if(!hasPrefix)
+    {
+        possibleNames.append(prefix + newName);
+    }
 	for(int i = 0; i < possibleNames.size(); ++i)
-	{
+    {
 		library = manager->createLibrary(possibleNames[i]);
 		if(library != NULL)
 		{
@@ -82,9 +88,9 @@ LIBRARY_TYPE* ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::createDefault(QStrin
 template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
 LIBRARY_TYPE* ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::createLibrary(QString name)
 {
-	name = name.toLower();
+    name = name.toLower();
 	for(int i = 0; i < mLibraries.size(); ++i)
-	{
+    {
 		if(mLibraries[i]->name().toLower() == name)
 		{
 			return (LIBRARY_TYPE*) mLibraries[i]->clone();
@@ -105,27 +111,35 @@ QList<LIBRARY_TYPE*> ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::libraries(QSt
 	QList<LIBRARY_TYPE*> result;
 	for(int i = 0; i < manager->mLibraries.size(); ++i)
 	{
-		result.append((LIBRARY_TYPE*) manager->mLibraries[i]);
+        result.append((LIBRARY_TYPE*) manager->mLibraries[i]->clone());
 	}
 	return result;
 }
 
 template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
-QStringList ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::names(QString functionName)
+QStringList ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::names(QString replace, bool spaced, QString functionName)
 {
-	QList<LIBRARY_TYPE*> list = ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::libraries(functionName);
+    ViLibraryManagerPointer manager = ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::instance();
+    if(!manager->mWasLoaded)
+    {
+        manager->mWasLoaded = true;
+        manager->load(manager->libraryPath(), functionName);
+    }
 	QStringList result;
-	for(int i = 0; i < list.size(); ++i)
+    for(int i = 0; i < manager->mLibraries.size(); ++i)
 	{
-		result.append(list[i]->name());
+        result.append(manager->mLibraries[i]->name(replace, spaced));
 	}
 	return result;
 }
 
 template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
-QString ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::defaultName()
+QString ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::defaultName(QString replace, bool spaced)
 {
-    return ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::instance()->defaultLibrary();
+    LIBRARY_TYPE *library = createDefault();
+    QString name = library->name(replace, spaced);
+    delete library;
+    return name;
 }
 
 template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
@@ -135,7 +149,7 @@ int ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::load(QString directory, QStrin
 	QStringList libraries = find(directory);
 	for(int i = 0; i < libraries.size(); ++i)
 	{
-		if(!contains(libraries[i]))
+        if(!contains(libraries[i]))
         {
 			QLibrary *library = new QLibrary(libraries[i]);
 			if(library->load())
@@ -149,10 +163,14 @@ int ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::load(QString directory, QStrin
 	for(int i = 0; i < mLibraryFiles.size(); ++i)
 	{
 		QFunctionPointer pointer = mLibraryFiles[i]->resolve(functionName.toLatin1().data());
-		if(pointer != NULL)
+        if(pointer == NULL)
+        {
+            LOG("The library (" + QFileInfo(mLibraryFiles[i]->fileName()).baseName() + ") does not have a " + functionName + "() function.", QtFatalMsg);
+		}
+        else
         {
             mLibraries.append(((FunctionPointer) pointer)());
-		}
+        }
 	}
 	return loadCount;
 }
@@ -189,18 +207,44 @@ bool ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::contains(QString libraryPath)
 }
 
 template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
+QStringList ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::skipLibraries()
+{
+    QStringList result;
+    result.append(className<LIBRARY_TYPE>());
+    return result;
+}
+
+template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
 QStringList ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::find(QString directory)
 {
 	QDir dir(directory);
 	QStringList libraries;
-	QStringList allFiles = dir.entryList(QDir::Files);
+    QFileInfoList allFiles = dir.entryInfoList(QDir::Files);
+    QStringList skipNames = skipLibraries();
+    QString name, path;
+    bool skip;
+
 	for(int i = 0; i < allFiles.size(); ++i)
     {
-		if(QLibrary::isLibrary(allFiles[i]))
-		{
-			libraries.append(allFiles[i]);
+        skip = false;
+        path = allFiles[i].absoluteFilePath();
+        name = allFiles[i].baseName();
+
+        for(int j = 0; j < skipNames.size(); ++j)
+        {
+            if(name.contains(skipNames[j], Qt::CaseInsensitive))
+            {
+                skip = true;
+                break;
+            }
+        }
+
+        if(!skip && QLibrary::isLibrary(path))
+        {
+            libraries.append(path);
 		}
 	}
+
 	return libraries;
 }
 

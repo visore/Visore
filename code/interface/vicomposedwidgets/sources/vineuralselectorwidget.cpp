@@ -157,6 +157,11 @@ ViNeuralCorrector* ViNeuralSelectorWidget::corrector()
 	//Seperate channels
 	corrector->enableSeparateChannels(mUi->channelsCheckBox->isChecked());
 
+    //Noise detector
+    corrector->setProcessMode(mUi->noiseDetectorWidget->processMode());
+    corrector->setModifyMode(mUi->noiseDetectorWidget->modifyMode());
+    corrector->setNoiseDetector(mUi->noiseDetectorWidget->detector());
+
     return corrector;
 }
 
@@ -253,6 +258,7 @@ void ViNeuralSelectorWidget::changeSettings(int index)
 		mUi->trainerGroupBox->show();
 		mUi->targetGroupBox->show();
 		mUi->channelsGroupBox->show();
+        mUi->noiseGroupBox->show();
 	}
 	else
 	{
@@ -264,6 +270,7 @@ void ViNeuralSelectorWidget::changeSettings(int index)
 		mUi->trainerGroupBox->hide();
 		mUi->targetGroupBox->hide();
 		mUi->channelsGroupBox->hide();
+        mUi->noiseGroupBox->hide();
 	}
 
 	int weightIndex = mUi->weightInitializerComboBox->findText(ViWeightInitializerManager::createDefault()->name("WeightInitializer", true), Qt::MatchExactly);

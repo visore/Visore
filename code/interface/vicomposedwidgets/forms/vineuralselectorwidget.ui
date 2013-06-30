@@ -47,6 +47,37 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <item row="6" column="0" colspan="2">
+    <widget class="QGroupBox" name="trainerGroupBox">
+     <property name="title">
+      <string>Trainer</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_10">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Trainer:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="trainerComboBox"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item row="7" column="0" colspan="2">
     <widget class="QGroupBox" name="targetGroupBox">
      <property name="title">
@@ -275,14 +306,14 @@
      </layout>
     </widget>
    </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupBox_9">
+   <item row="4" column="0" colspan="2">
+    <widget class="QGroupBox" name="activationFunctionGroupBox">
      <property name="title">
-      <string>Mode</string>
+      <string>Activation Function</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4">
+     <layout class="QGridLayout" name="gridLayout_7">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_11">
+       <widget class="QLabel" name="label_5">
         <property name="minimumSize">
          <size>
           <width>150</width>
@@ -296,12 +327,12 @@
          </size>
         </property>
         <property name="text">
-         <string>Correction mode:</string>
+         <string>Activation function:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="modeComboBox"/>
+       <widget class="QComboBox" name="activationFunctionComboBox"/>
       </item>
      </layout>
     </widget>
@@ -440,14 +471,14 @@
      </layout>
     </widget>
    </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QGroupBox" name="trainerGroupBox">
+   <item row="0" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_9">
      <property name="title">
-      <string>Trainer</string>
+      <string>Mode</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_10">
+     <layout class="QGridLayout" name="gridLayout_4">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_8">
+       <widget class="QLabel" name="label_11">
         <property name="minimumSize">
          <size>
           <width>150</width>
@@ -461,17 +492,17 @@
          </size>
         </property>
         <property name="text">
-         <string>Trainer:</string>
+         <string>Correction mode:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="trainerComboBox"/>
+       <widget class="QComboBox" name="modeComboBox"/>
       </item>
      </layout>
     </widget>
    </item>
-   <item row="8" column="0">
+   <item row="8" column="0" colspan="2">
     <widget class="QGroupBox" name="channelsGroupBox">
      <property name="title">
       <string>Channels</string>
@@ -503,33 +534,14 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QGroupBox" name="activationFunctionGroupBox">
+   <item row="9" column="0" colspan="2">
+    <widget class="QGroupBox" name="noiseGroupBox">
      <property name="title">
-      <string>Activation Function</string>
+      <string>Noise Detection</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_7">
+     <layout class="QGridLayout" name="gridLayout_11">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Activation function:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="activationFunctionComboBox"/>
+       <widget class="ViNoiseDetectorWidget" name="noiseDetectorWidget" native="true"/>
       </item>
      </layout>
     </widget>
@@ -541,6 +553,12 @@
    <class>ViButton</class>
    <extends>QWidget</extends>
    <header>vibutton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ViNoiseDetectorWidget</class>
+   <extends>QWidget</extends>
+   <header>vinoisedetectorwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

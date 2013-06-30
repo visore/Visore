@@ -26,6 +26,12 @@ inline QString stripTemplateClassName(const char *text)
 	return name.mid(startIndex, name.indexOf("]") - startIndex);
 }
 
+template <typename Type>
+inline QString className()
+{
+    return stripClassName(typeid(Type).name());
+}
+
 template <typename ForwardIterator>
 inline void viDeleteAll(ForwardIterator begin, ForwardIterator end)
 {

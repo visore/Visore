@@ -36,10 +36,17 @@ ViProcessor::ViProcessor()
 	mProgressEnabled = true;
 	mExit = false;
 	mMultiShot = false;
+    mNoiseDetector = NULL;
+    mProcessMode = ViProcessor::All;
 }
 
 ViProcessor::~ViProcessor()
 {
+    if(mNoiseDetector != NULL)
+    {
+        delete mNoiseDetector;
+        mNoiseDetector = NULL;
+    }
 }
 
 void ViProcessor::startThread()
@@ -57,13 +64,20 @@ void ViProcessor::startProgress()
 	while(hasData1() && !mExit)
 	{
 		processedSize += read1().size();
-		execute();
+        if(mProcessMode == ViProcessor::All || isNoisy())
+        {
+            execute();
+        }
 		setProgress((processedSize * 99.0) / totalSize);
 	}
     if(mExit || !mMultiShot)
     {
         QObject::disconnect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()));
         mExit = false;
+        if(mNoiseDetector != NULL)
+        {
+            mNoiseDetector->finalize();
+        }
         finalize();
         setProgress(100);
         emit finished();
@@ -79,12 +93,19 @@ void ViProcessor::startProgressless()
 	while(hasData1() && !mExit)
 	{
 		read1();
-		execute();
+        if(mProcessMode == ViProcessor::All || isNoisy())
+        {
+            execute();
+        }
 	}
     if(mExit || !mMultiShot)
     {
         QObject::disconnect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()));
         mExit = false;
+        if(mNoiseDetector != NULL)
+        {
+            mNoiseDetector->finalize();
+        }
         finalize();
         setProgress(100);
         emit finished();
@@ -119,6 +140,10 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::T
 		int sampleSize = mObject->buffer(mType)->format().sampleSize();
 		mConverter.setSize(sampleSize);
 		mSamples.resize(mChunkSize / (sampleSize / 8));
+        if(mNoiseDetector != NULL)
+        {
+            mNoiseDetector->initialize();
+        }
 		return true;
 	}
 	else
@@ -137,6 +162,43 @@ void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type)
 		initialize();
 		mThread.start();
 	}
+}
+
+void ViProcessor::setNoiseDetector(ViProcessor *detector)
+{
+    if(mNoiseDetector == NULL)
+    {
+        delete mNoiseDetector;
+    }
+    mNoiseDetector = detector;
+}
+
+bool ViProcessor::isNoisy(ViSampleChunk &chunk)
+{
+    if(mNoiseDetector == NULL)
+    {
+        LOG("No noise detector specified.", QtCriticalMsg);
+        return false;
+    }
+    else
+    {
+        return mNoiseDetector->isNoisy(samples());
+    }
+}
+
+bool ViProcessor::isNoisy()
+{
+    return isNoisy(samples());
+}
+
+void ViProcessor::setProcessMode(ViProcessor::ProcessMode mode)
+{
+    mProcessMode = mode;
+}
+
+ViProcessor::ProcessMode ViProcessor::processMode()
+{
+    return mProcessMode;
 }
 
 void ViProcessor::initialize()
@@ -289,7 +351,10 @@ void ViDualProcessor::startProgress()
 	while(hasData1() && hasData2() && !willExit())
     {
 		processedSize += qMin(read1().size(), read2().size());
-		execute();
+        if(processMode() == ViProcessor::All || isNoisy())
+        {
+            execute();
+        }
 		setProgress((processedSize * 99.0) / totalSize);
 	}
 	if(willExit() || !isMultiShot())
@@ -314,7 +379,10 @@ void ViDualProcessor::startProgressless()
     {
 		read1().size();
 		read2().size();
-		execute();
+        if(processMode() == ViProcessor::All || isNoisy())
+        {
+            execute();
+        }
 	}
 	if(willExit() || !isMultiShot())
 	{
@@ -388,6 +456,7 @@ ViModifyProcessor::ViModifyProcessor(bool autoWrite)
 {
 	mAutoWrite = autoWrite;
 	mType2 = ViAudio::Undefined;
+    mModifyMode = ViModifyProcessor::All;
 }
 
 ViModifyProcessor::~ViModifyProcessor()
@@ -401,8 +470,16 @@ void ViModifyProcessor::startProgress()
 	while(hasData1() && !willExit())
 	{
 		processedSize += read1().size();
-		execute();
-		if(mAutoWrite)
+        bool noise = isNoisy();
+        if(mModifyMode == ViModifyProcessor::Noise)
+        {
+            mOriginalSamples.enqueue(QPair<bool, ViSampleChunk>(noise, samples1()));
+        }
+        if(processMode() == ViProcessor::All || noise)
+        {
+            execute();
+        }
+        if(mAutoWrite)
 		{
 			write();
 		}
@@ -427,7 +504,15 @@ void ViModifyProcessor::startProgressless()
 	while(hasData1() && !willExit())
 	{
 		read1();
-		execute();
+        bool noise = isNoisy();
+        if(mModifyMode == ViModifyProcessor::Noise)
+        {
+            mOriginalSamples.enqueue(QPair<bool, ViSampleChunk>(noise, samples1()));
+        }
+        if(processMode() == ViProcessor::All || noise)
+        {
+            execute();
+        }
 		if(mAutoWrite)
 		{
 			write();
@@ -457,6 +542,7 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
 		{
 			mWriteStream = object()->buffer(mType2)->createWriteStream();
 			mConverter2.setSize(object()->buffer(mType2)->format().sampleSize());
+            mOriginalSamples.clear();
 			initialize();
 			thread().start();
 		}
@@ -469,6 +555,16 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
 	}
 }
 
+void ViModifyProcessor::setModifyMode(ViModifyProcessor::ModifyMode mode)
+{
+    mModifyMode = mode;
+}
+
+ViModifyProcessor::ModifyMode ViModifyProcessor::modifyMode()
+{
+    return mModifyMode;
+}
+
 ViAudio::Type ViModifyProcessor::type2()
 {
 	return mType2;
@@ -479,12 +575,31 @@ ViAudioFormat ViModifyProcessor::format2()
 	return object()->format(mType2);
 }
 
-void ViModifyProcessor::write()
+bool ViModifyProcessor::write()
 {
-	write(samples1());
+    return write(samples1());
 }
 
-void ViModifyProcessor::write(ViSampleChunk& samples)
+bool ViModifyProcessor::write(ViSampleChunk& samples)
 {
-	mWriteStream->write(mChunk2.data(), mConverter2.realToPcm(samples.data(), mChunk2.data(), samples.size()));
+    bool success = false;
+    if(mModifyMode == ViModifyProcessor::All)
+    {
+        success = true;
+    }
+    else if(mOriginalSamples.isEmpty())
+    {
+        samples = samples1();
+    }
+    else
+    {
+        QPair<bool, ViSampleChunk> data = mOriginalSamples.dequeue();
+        if(!data.first)
+        {
+            samples = data.second;
+        }
+    }
+
+    mWriteStream->write(mChunk2.data(), mConverter2.realToPcm(samples.data(), mChunk2.data(), samples.size()));
+    return success;
 }

@@ -35,6 +35,14 @@ class ViProcessor : public ViNotifier, public ViSerializer
 		virtual void startProgress();
 		virtual void startProgressless();
 
+    public:
+
+        enum ProcessMode
+        {
+            All,    // All data is processed
+            Noise   // Only noisy windows are processed
+        };
+
 	public:
 
         ViProcessor();
@@ -50,6 +58,13 @@ class ViProcessor : public ViNotifier, public ViSerializer
 
         virtual ~ViProcessor();
         virtual void process(ViAudioObjectPointer audioObject, ViAudio::Type type);
+
+        void setNoiseDetector(ViProcessor *detector); //Takes ownership
+        virtual bool isNoisy(ViSampleChunk &chunk);
+        bool isNoisy();
+
+        void setProcessMode(ViProcessor::ProcessMode mode);
+        ViProcessor::ProcessMode processMode();
 
 	protected:
 
@@ -94,6 +109,8 @@ class ViProcessor : public ViNotifier, public ViSerializer
 		bool mProgressEnabled;
 		bool mExit;
 		bool mMultiShot;
+        ViProcessor *mNoiseDetector;
+        ViProcessor::ProcessMode mProcessMode;
 
 };
 
@@ -141,18 +158,29 @@ class ViModifyProcessor : public ViProcessor
 		void startProgress();
 		void startProgressless();
 
+    public:
+
+        enum ModifyMode
+        {
+            All,    // All data is modified
+            Noise   // Only noisy windows are modified
+        };
+
 	public:
 
 		ViModifyProcessor(bool autoWrite = true);
 		virtual ~ViModifyProcessor();
         void process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2);
 
+        void setModifyMode(ViModifyProcessor::ModifyMode mode);
+        ViModifyProcessor::ModifyMode modifyMode();
+
 	protected:
 
 		ViAudio::Type type2();
 		ViAudioFormat format2();
-		void write();
-		void write(ViSampleChunk& samples);
+        bool write();
+        bool write(ViSampleChunk& samples);
 
 	private:
 
@@ -161,6 +189,8 @@ class ViModifyProcessor : public ViProcessor
 		ViBufferStreamPointer mWriteStream;
 		ViRawChunk mChunk2;
 		ViPcmConverter<qreal> mConverter2;
+        ViModifyProcessor::ModifyMode mModifyMode;
+        QQueue<QPair<bool, ViSampleChunk>> mOriginalSamples;
 
 };
 
