@@ -85,11 +85,11 @@ void ViAudioRecorder::nextObject(bool startTimer)
 void ViAudioRecorder::finish()
 {
 	QObject::disconnect(mProject, SIGNAL(finished()), this, SLOT(finish()));
-    mObject.setNull();
-    mQueue.clear();
-    mProject->clear();
+	mObject.setNull();
+	mQueue.clear();
+	mProject->clear();
 	setProgress(100);
-    emit finished();
+	emit finished();
 }
 
 void ViAudioRecorder::startSong()
@@ -102,16 +102,19 @@ void ViAudioRecorder::startSong()
 void ViAudioRecorder::endSong()
 {
     mSegmentDetector.stop();
-    mQueue.enqueue(mObject);
-    if(mDetectInfo && !(mExistingProject && mProject->object(mObject->trackNumber() - 1)->hasSongInfo()))
+	if(mObject->length(ViAudioPosition::Seconds) > LENGTH_CUTOFF)
 	{
-		QObject::connect(mObject.data(), SIGNAL(infoed(bool)), this, SLOT(serialize()));
-		mObject->detectSongInfo();
+		mQueue.enqueue(mObject);
+		if(mDetectInfo && !(mExistingProject && mProject->object(mObject->trackNumber() - 1)->hasSongInfo()))
+		{
+			QObject::connect(mObject.data(), SIGNAL(infoed(bool)), this, SLOT(serialize()));
+			mObject->detectSongInfo();
+		}
+		else
+		{
+			serialize();
+		}
 	}
-	else
-	{
-		serialize();
-    }
 	nextObject();
 	emit statused("Waiting for track to start");
 }
@@ -133,12 +136,12 @@ void ViAudioRecorder::endRecord()
         mSegmentDetector.stop();
 		if((mProject == NULL || mProject->isFinished()) && mQueue.isEmpty()) // If project is not finished, wait for it to finish
 		{
-            finish();
+			finish();
 		}
 		else
 		{
 			QObject::connect(mProject, SIGNAL(finished()), this, SLOT(finish()), Qt::UniqueConnection);
-        }
+		}
 	}
 	else
     {
@@ -151,8 +154,8 @@ void ViAudioRecorder::serialize()
 {
     ViAudioObjectPointer object = mQueue.dequeue();
     QObject::disconnect(object.data(), SIGNAL(infoed(bool)), this, SLOT(serialize()));
-    if(mProject != NULL && object->length(ViAudioPosition::Seconds) > LENGTH_CUTOFF)
-    {
+	if(mProject != NULL)
+	{
         int objectIndex = object->trackNumber() - 1;
         if(mExistingProject && mProject->objectCount() > objectIndex)
         {

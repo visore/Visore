@@ -18,6 +18,7 @@ class ViAudioData
 
         void setBuffer(ViBuffer *buffer);
         ViBuffer* buffer();
+        int bufferSize();
 
         void setSampleCount(int samples);
         int sampleCount();
@@ -26,12 +27,14 @@ class ViAudioData
 
     protected:
 
+        void setDefaults();
         void update();
         virtual void clearOther() = 0;
         virtual void updateOther() = 0;
 
     protected:
 
+		QMutex mMutex;
         ViBuffer *mBuffer;
         ViBufferStreamPointer mStream;
 
@@ -52,6 +55,8 @@ class ViAudioReadData : public ViAudioData
 {
 
     public:
+
+        bool hasData();
 
         ViSampleChunk& read(); // Read next window
 

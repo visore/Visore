@@ -25,11 +25,7 @@ void ViEnmfpIdentifier::sendRequest()
 
 void ViEnmfpIdentifier::processReply(bool success)
 {
-	if(!success)
-	{
-		finish();
-	}
-	else
+	if(success)
 	{
 		QVariantMap result = jsonResult().toVariantMap()["response"].toMap();
 		QString message = result["status"].toMap()["message"].toString();

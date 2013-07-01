@@ -15,6 +15,15 @@ ViMetadataer::ViMetadataer()
 	mIdentifiers.append(new ViEnmfpIdentifier());
 
 	mRetrievers.append(new ViMusicBrainzCoverRetriever());
+
+	for(int i = 0; i < mIdentifiers.size(); ++i)
+	{
+		QObject::connect(mIdentifiers[i], SIGNAL(identified(bool)), this, SLOT(processIdentification(bool)), Qt::UniqueConnection);
+	}
+	for(int i = 0; i < mRetrievers.size(); ++i)
+	{
+		QObject::connect(mRetrievers[i], SIGNAL(retrieved(bool)), this, SLOT(processRetrieval(bool)), Qt::UniqueConnection);
+	}
 }
 
 ViMetadataer::~ViMetadataer()
@@ -27,7 +36,6 @@ void ViMetadataer::processIdentification(bool success)
 {
 	if(success)
 	{
-		mIdentifiers[mCurrentIdentifier]->disconnect();
 		mMetadata = mIdentifiers[mCurrentIdentifier]->metadata();
 		if(!startNextRetriever())
 		{
@@ -44,7 +52,6 @@ void ViMetadataer::processRetrieval(bool success)
 {
 	if(success)
 	{
-		mRetrievers[mCurrentRetriever]->disconnect();
 		mMetadata = mRetrievers[mCurrentRetriever]->metadata();
 		finish(true);
 	}
@@ -56,32 +63,22 @@ void ViMetadataer::processRetrieval(bool success)
 
 bool ViMetadataer::startNextIdentifier()
 {
-	if(mCurrentIdentifier >= 0)
-	{
-		mIdentifiers[mCurrentIdentifier]->disconnect();
-	}
 	++mCurrentIdentifier;
 	if(mCurrentIdentifier >= mIdentifiers.size())
 	{
 		return false;
 	}
-	QObject::connect(mIdentifiers[mCurrentIdentifier], SIGNAL(identified(bool)), this, SLOT(processIdentification(bool)));
 	mIdentifiers[mCurrentIdentifier]->identify(mBuffer);
 	return true;
 }
 
 bool ViMetadataer::startNextRetriever()
 {
-	if(mCurrentRetriever >= 0)
-	{
-		mRetrievers[mCurrentRetriever]->disconnect();
-	}
 	++mCurrentRetriever;
 	if(mCurrentRetriever >= mRetrievers.size())
 	{
 		return false;
 	}
-	QObject::connect(mRetrievers[mCurrentRetriever], SIGNAL(retrieved(bool)), this, SLOT(processRetrieval(bool)));
 	mRetrievers[mCurrentRetriever]->retrieve(mMetadata);
 	return true;
 }

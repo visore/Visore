@@ -51,6 +51,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 	signals:
 
+		void started();
 		void finished();
         void changed(); //Project is saved once this signal is emitted;
 
@@ -101,6 +102,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
+		void setFinished();
+		void setStarted();
 		void progress(qreal progress);
 
 		/*******************************************************************************************************************
@@ -184,6 +187,15 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		void setAutoDestruct(bool destruct);
 		void addDestructRule(ViAudio::Type type, bool destruct);
+
+		/*******************************************************************************************************************
+
+			PROGRESS
+
+		*******************************************************************************************************************/
+
+		bool isFinished();
+		bool isBusy();
 
 		/*******************************************************************************************************************
 
@@ -352,7 +364,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		bool isSong();
 
-		bool isFinished();
 		bool isUsed(QIODevice::OpenMode mode = QIODevice::ReadWrite);
 
 	private:
@@ -389,7 +400,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		QString mCorrectedFile;
 
 		QMutex mMutex;
-		bool mIsFinished;
 		bool mIsSong;
 
 		/*******************************************************************************************************************
@@ -400,6 +410,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		qreal mProgressParts;
 		qreal mProgress;
+		bool mIsBusy;
 
 		/*******************************************************************************************************************
 

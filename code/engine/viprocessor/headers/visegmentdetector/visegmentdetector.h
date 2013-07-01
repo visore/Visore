@@ -26,7 +26,9 @@ class ViSegmentDetector : public ViProcessor
 			RecordEnd = 3
 		};
 
-		ViSegmentDetector();
+    public:
+
+        ViSegmentDetector(ViProcessor::ChannelMode mode = ViProcessor::Combined);
 		virtual ~ViSegmentDetector();
 
 	protected:

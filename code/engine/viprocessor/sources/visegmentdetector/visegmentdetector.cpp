@@ -1,7 +1,7 @@
 #include <visegmentdetector.h>
 
-ViSegmentDetector::ViSegmentDetector()
-	: ViProcessor()
+ViSegmentDetector::ViSegmentDetector(ViProcessor::ChannelMode mode)
+    : ViProcessor(mode)
 {
 	mSongRunning = false;
 	mRecordRunning = false;

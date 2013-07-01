@@ -12,7 +12,7 @@ class ViWaveFormer : public ViProcessor
 		ViWaveFormer();
 
 		void initialize();
-		void execute();
+        void execute(int channel);
 		void finalize();
 
 	private:

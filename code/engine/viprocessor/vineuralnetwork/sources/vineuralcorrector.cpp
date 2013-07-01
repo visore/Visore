@@ -252,7 +252,7 @@ void ViNeuralCorrector::disableSeparateChannels(bool disable)
 
 bool ViNeuralCorrector::writeOutput()
 {
-	for(int c = 0; c < mChannels; ++c)
+    /*for(int c = 0; c < mChannels; ++c)
 	{
 		if(!mThreads[c]->hasOutput())
 		{
@@ -268,7 +268,7 @@ bool ViNeuralCorrector::writeOutput()
 	viDeleteAll(channels);
 	write(*merged);
 	delete merged;
-	return true;
+    return true;*/
 }
 
 void ViNeuralCorrector::initialize()
@@ -321,7 +321,7 @@ void ViNeuralCorrector::initialize()
 	}
 	mTargetRightOffset = mLeftSamples + 1;
 	mMinimumSamples = (mLeftSamples + 1 + mProviderRightSamples) * mChannels;
-	mWriteSamples = qFloor(sampleCount() / qreal(mChannels)) * mChannels;
+    mWriteSamples = qFloor(data().sampleCount() / qreal(mChannels)) * mChannels;
 	
 	for(int i = 0; i < mChannels; ++i)
 	{
@@ -340,7 +340,7 @@ void ViNeuralCorrector::initialize()
 
 void ViNeuralCorrector::executeWithChannels()
 {
-	ViSampleChunk &newSamples = samples();
+    /*ViSampleChunk &newSamples = samples();
 	for(int i = 0; i < newSamples.size(); ++i)
 	{
 		mReadBuffer.append(ViScaler::scale(newSamples[i], -1, 1, 0, 1));
@@ -369,12 +369,12 @@ void ViNeuralCorrector::executeWithChannels()
 		{
 			mThreads[c]->addData(channels[c]);
 		}
-	}
+    }*/
 }
 
 void ViNeuralCorrector::executeWithoutChannels()
 {
-	ViSampleChunk &newSamples = samples();
+    /*ViSampleChunk &newSamples = samples();
 	for(int i = 0; i < newSamples.size(); ++i)
 	{
 		mReadBuffer.append(ViScaler::scale(newSamples[i], -1, 1, 0, 1));
@@ -398,10 +398,10 @@ void ViNeuralCorrector::executeWithoutChannels()
 		mThreads[0]->addData(&wrapper);
 		mThreads[0]->run();
 		mReadBuffer.pop_front();
-	}
+    }*/
 }
 
-void ViNeuralCorrector::execute()
+void ViNeuralCorrector::execute(int channel)
 {
 	(this->*executePointer)();
 }

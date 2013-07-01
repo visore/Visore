@@ -11,13 +11,13 @@ void ViWaveFormer::initialize()
 	mForm = new ViWaveForm();
 }
 
-void ViWaveFormer::execute()
+void ViWaveFormer::execute(int channel)
 {
-	ViSampleChunk &theSamples = samples();
+/*	ViSampleChunk &theSamples = samples();
 	for(int i = 0; i < theSamples.size(); ++i)
 	{
 		mForm->append(theSamples[i]);
-	}
+    }*/
 }
 
 void ViWaveFormer::finalize()

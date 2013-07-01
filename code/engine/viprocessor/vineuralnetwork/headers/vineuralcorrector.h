@@ -83,7 +83,7 @@ class ViNeuralCorrector : public ViModifyProcessor, public ViLibrary
 		void disableSeparateChannels(bool disable = true);
 
 		void initialize();
-		void execute();
+        void execute(int channel);
 		void finalize();
 
         ViElement exportData();

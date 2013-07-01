@@ -5,12 +5,12 @@
 
 ViAudioData::ViAudioData()
 {
-    clear();
+    setDefaults();
 }
 
 ViAudioData::ViAudioData(ViBuffer *buffer)
 {
-    clear();
+    setDefaults();
     setBuffer(buffer);
 }
 
@@ -19,45 +19,67 @@ ViAudioData::~ViAudioData()
     clear();
 }
 
-void ViAudioData::clear()
+void ViAudioData::setDefaults()
 {
     mBuffer = NULL;
     mSampleCount = DEFAULT_SAMPLE_COUNT;
     mWindowSize = 0;
     mChannelCount = 0;
+    mTransformer.setWindowFunction("Hann");
+}
 
+void ViAudioData::clear()
+{
+	QMutexLocker locker(&mMutex);
+    setDefaults();
     clearOther();
 }
 
 void ViAudioData::setBuffer(ViBuffer *buffer)
 {
+	QMutexLocker locker(&mMutex);
     mBuffer = buffer;
     update();
 }
 
 ViBuffer* ViAudioData::buffer()
 {
+	QMutexLocker locker(&mMutex);
     return mBuffer;
+}
+
+int ViAudioData::bufferSize()
+{
+	QMutexLocker locker(&mMutex);
+    if(mBuffer == NULL)
+    {
+        return 0;
+    }
+    return mBuffer->size();
 }
 
 void ViAudioData::setSampleCount(int samples)
 {
+	QMutexLocker locker(&mMutex);
     mSampleCount = samples;
     update();
 }
 
 int ViAudioData::sampleCount()
 {
+	QMutexLocker locker(&mMutex);
     return mSampleCount;
 }
 
 int ViAudioData::channelCount()
 {
+	QMutexLocker locker(&mMutex);
     return mChannelCount;
 }
 
 int ViAudioData::windowSize()
 {
+	QMutexLocker locker(&mMutex);
     return mWindowSize;
 }
 
@@ -88,20 +110,30 @@ void ViAudioData::update()
     READ
 *****************************************/
 
+bool ViAudioReadData::hasData()
+{
+	QMutexLocker locker(&mMutex);
+    return mStream->hasData();
+}
+
 ViSampleChunk& ViAudioReadData::read()
 {
-    mSampleChunk.setSize(mConverter.pcmToReal(mRawChunk.data(), mSampleChunk.data(), mStream->read(mRawChunk)));
+	QMutexLocker locker(&mMutex);
+	mSampleChunk.setSize(mConverter.pcmToReal(mRawChunk.data(), mSampleChunk.data(), mStream->read(mRawChunk)));
     mNeedsSampleSplit = true;
     mNeedsFrequency = true;
+	return mSampleChunk;
 }
 
 ViSampleChunk& ViAudioReadData::samples()
 {
+	QMutexLocker locker(&mMutex);
     return mSampleChunk;
 }
 
 ViSampleChunks& ViAudioReadData::splitSamples()
 {
+	QMutexLocker locker(&mMutex);
     if(mNeedsSampleSplit)
     {
         ViSampleChanneler<qreal>::split(mSampleChunk.data(), mSampleChunk.size(), mChannelCount, mSplitSampleChunks);
@@ -117,6 +149,7 @@ ViSampleChunk& ViAudioReadData::splitSamples(int index)
 
 ViFrequencyChunk& ViAudioReadData::frequencies()
 {
+	QMutexLocker locker(&mMutex);
     if(mNeedsFrequency)
     {
         ViChunk<qreal>::copyData(mSampleChunk, mTemporaryChunk);
@@ -130,6 +163,7 @@ ViFrequencyChunk& ViAudioReadData::frequencies()
 
 ViFrequencyChunks& ViAudioReadData::splitFrequencies()
 {
+	QMutexLocker locker(&mMutex);
     if(mNeedsFrequencySplit)
     {
         ViSampleChanneler<qreal>::split(mFrequencyChunk.data(), mFrequencyChunk.size(), mChannelCount, mSplitFrequencyChunks);
@@ -158,30 +192,37 @@ void ViAudioReadData::updateOther()
 }
 
 /*****************************************
-    READ
+    WRITE
 *****************************************/
 
 void ViAudioWriteData::write(ViSampleChunk &chunk)
 {
+	QMutexLocker locker(&mMutex);
     mStream->write(mRawChunk.data(), mConverter.realToPcm(chunk.data(), mRawChunk.data(), chunk.size()));
 }
 
 void ViAudioWriteData::writeFrequencies(ViFrequencyChunk &frequencies)
 {
+	QMutexLocker locker(&mMutex);
     mTransformer.inverseTransform(frequencies.data(), mSampleChunk.data());
     mTransformer.rescale(mSampleChunk.data());
+	locker.unlock();
     write(mSampleChunk);
 }
 
 void ViAudioWriteData::writeSplitSamples(ViSampleChunks &samples)
 {
+	QMutexLocker locker(&mMutex);
     ViSampleChanneler<qreal>::merge(samples, mSampleChunk);
+	locker.unlock();
     write(mSampleChunk);
 }
 
 void ViAudioWriteData::writeSplitFrequencies(ViFrequencyChunks &frequencies)
 {
+	QMutexLocker locker(&mMutex);
     ViSampleChanneler<qreal>::merge(frequencies, mFrequencyChunk);
+	locker.unlock();
     writeFrequencies(mFrequencyChunk);
 }
 

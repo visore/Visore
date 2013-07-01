@@ -108,7 +108,11 @@ ViAudioObjectPointer ViProject::object(int side, int track)
 void ViProject::add(ViAudioObjectPointer object)
 {
     QObject::connect(object.data(), SIGNAL(changed()), this, SLOT(save()), Qt::DirectConnection);
-    QObject::connect(object.data(), SIGNAL(correctorChanged()), this, SLOT(infoCorrector()), Qt::DirectConnection);
+	QObject::connect(object.data(), SIGNAL(correctorChanged()), this, SLOT(infoCorrector()), Qt::DirectConnection);
+
+	QObject::connect(object.data(), SIGNAL(started()), this, SLOT(setBusy()), Qt::UniqueConnection);
+	QObject::connect(object.data(), SIGNAL(finished()), this, SLOT(setFinished()), Qt::UniqueConnection);
+
     createDirectory(object->sideNumber());
     mObjectsMutex.lock();
     mObjects.enqueue(object);
@@ -284,7 +288,7 @@ void ViProject::clearCorrelations()
 bool ViProject::load(bool minimal)
 {
     LOG("Loading project.");
-    setFinished(false);
+	setBusy();
 
     QObject::connect(&mArchive, SIGNAL(decompressed()), this, SLOT(loadAll()), Qt::UniqueConnection);
 
@@ -301,7 +305,7 @@ bool ViProject::load(bool minimal)
 void ViProject::save()
 {
     LOG("Saving project.");
-    setFinished(false);
+	setBusy();
 
     QObject::connect(&mArchive, SIGNAL(compressed()), this, SLOT(setFinished()), Qt::UniqueConnection);
     QObject::connect(&mArchive, SIGNAL(compressed()), this, SIGNAL(saved()), Qt::UniqueConnection);
@@ -320,7 +324,7 @@ bool ViProject::loadAll()
     }
     bool success = loadProperties() & loadTracks() & loadCorrections();
     emit loaded();
-    setFinished(true);
+	setFinished();
     return success;
 }
 
@@ -331,13 +335,26 @@ void ViProject::saveAll()
     saveCorrections();
 }
 
-void ViProject::setFinished(bool finish)
+void ViProject::setFinished()
 {
-    mFinished = finish;
-    if(mFinished)
-    {
-        emit finished();
-    }
+	mFinished = true;
+	for(int i = 0; i < mObjects.size(); ++i)
+	{
+		if(mObjects[i]->isBusy())
+		{
+			mFinished = false;
+			break;
+		}
+	}
+	if(mFinished)
+	{
+		emit finished();
+	}
+}
+
+void ViProject::setBusy()
+{
+	mFinished = false;
 }
 
 /*******************************************************************************************************************
@@ -807,6 +824,8 @@ bool ViProject::loadTracks()
             mObjectsMutex.unlock();
             QObject::connect(object.data(), SIGNAL(changed()), this, SLOT(save()), Qt::DirectConnection);
             QObject::connect(object.data(), SIGNAL(correctorChanged()), this, SLOT(infoCorrector()), Qt::DirectConnection);
+			QObject::connect(object.data(), SIGNAL(started()), this, SLOT(setBusy()), Qt::UniqueConnection);
+			QObject::connect(object.data(), SIGNAL(finished()), this, SLOT(setFinished()), Qt::UniqueConnection);
         }
     }
     return true;

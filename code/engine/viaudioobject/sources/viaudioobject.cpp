@@ -19,7 +19,6 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	: QObject(), ViId()
 {
 	setAutoDestruct(autoDestruct);
-	mIsFinished = false;
 	mIsSong = false;
 
 	mTargetBuffer = NULL;
@@ -40,17 +39,12 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 
 	mProgressParts = 1;
 	mProgress = 0;
+	mIsBusy = false;
 
 	mSideNumber = 0;
 	mTrackNumber = 0;
 
 	setAligner(new ViFourierCrossAligner());
-
-	QObject::connect(this, SIGNAL(encoded()), this, SIGNAL(finished()));
-	QObject::connect(this, SIGNAL(decoded()), this, SIGNAL(finished()));
-	QObject::connect(this, SIGNAL(aligned()), this, SIGNAL(finished()));
-    QObject::connect(this, SIGNAL(corrected()), this, SIGNAL(finished()));
-    QObject::connect(this, SIGNAL(correlated()), this, SIGNAL(finished()));
 }
 
 ViAudioObject::~ViAudioObject()
@@ -398,6 +392,7 @@ bool ViAudioObject::encode(int type)
 
 bool ViAudioObject::encode(ViAudio::Type type, bool clearWhenFinished)
 {
+	setStarted();
 	QMutexLocker locker(&mMutex);
 	mClearEncodedBuffer = clearWhenFinished;
 	mPreviousEncodedType = ViAudio::Undefined;
@@ -425,8 +420,8 @@ bool ViAudioObject::encode(ViAudio::Type type, bool clearWhenFinished)
 	{
 		mCodingInstructions.clear();
 		locker.unlock();
-		emit progressed(100);
 		emit encoded();
+		setFinished();
 		return false;
 	}
 
@@ -458,6 +453,7 @@ void ViAudioObject::encodeNext()
 		locker.unlock();
 		emit encoded();
         emit changed();
+		setFinished();
 	}
 	else
 	{
@@ -494,6 +490,7 @@ bool ViAudioObject::decode(int type)
 
 bool ViAudioObject::decode(ViAudio::Type type)
 {
+	setStarted();
 	QMutexLocker locker(&mMutex);
 	mCodingInstructions = decomposeTypes(type);
 
@@ -515,8 +512,8 @@ bool ViAudioObject::decode(ViAudio::Type type)
 		log("No files were decoded.");
 		mCodingInstructions.clear();
 		locker.unlock();
-		emit progressed(100);
 		emit decoded();
+		setFinished();
 		return false;
 	}
 
@@ -538,8 +535,8 @@ void ViAudioObject::decodeNext()
 		delete mDecoder;
 		mDecoder = NULL;
 		locker.unlock();
-		emit progress(100);
 		emit decoded();
+		setFinished();
 	}
 	else
 	{
@@ -577,6 +574,7 @@ bool ViAudioObject::hasAligner()
 
 bool ViAudioObject::align(ViAligner *aligner)
 {
+	setStarted();
 	if(aligner != NULL)
 	{
 		setAligner(aligner);
@@ -585,7 +583,7 @@ bool ViAudioObject::align(ViAligner *aligner)
 	{
 		log("No aligner was specified.");
 		emit aligned();
-		emit progressed(100);
+		setFinished();
 		return false;
 	}
 
@@ -595,7 +593,7 @@ bool ViAudioObject::align(ViAligner *aligner)
 	{
 		log("At least two buffers are needed for alignment.");
 		emit aligned();
-		emit progressed(100);
+		setFinished();
 		return false;
 	}
 
@@ -611,6 +609,7 @@ void ViAudioObject::alignNext()
 	{
 		log("Tracks aligned.");
 		emit aligned();
+		setFinished();
 	}
 	else
 	{
@@ -648,6 +647,30 @@ void ViAudioObject::logStatus(QString message, QtMsgType type)
 	PROGRESS
 
 *******************************************************************************************************************/
+
+void ViAudioObject::setFinished()
+{
+	mIsBusy = false;
+	emit progressed(100);
+	emit finished();
+}
+
+void ViAudioObject::setStarted()
+{
+	mIsBusy = true;
+	emit progressed(0);
+	emit started();
+}
+
+bool ViAudioObject::isFinished()
+{
+	return !mIsBusy;
+}
+
+bool ViAudioObject::isBusy()
+{
+	return mIsBusy;
+}
 
 void ViAudioObject::progress(qreal progress)
 {
@@ -1193,6 +1216,7 @@ ViModifyProcessor* ViAudioObject::corrector()
 
 bool ViAudioObject::correct(ViModifyProcessor *corrector)
 {
+	setStarted();
 	if(corrector != NULL)
 	{
 		setCorrector(corrector);
@@ -1201,15 +1225,15 @@ bool ViAudioObject::correct(ViModifyProcessor *corrector)
 	if(!hasCorrector())
 	{
 		log("No corrector was specified.", QtWarningMsg);
-		progress(100);
 		emit corrected();
+		setFinished();
 		return false;
 	}
 	else if(!hasBuffer(ViAudio::Corrupted))
 	{
 		log("No corrupted buffer is available for correction.", QtWarningMsg);
-		progress(100);
 		emit corrected();
+		setFinished();
 		return false;
 	}
 
@@ -1222,8 +1246,8 @@ bool ViAudioObject::correct(ViModifyProcessor *corrector)
 void ViAudioObject::endCorrect()
 {
 	log("Track corrected.");
-	progress(100);
 	emit corrected();
+	setFinished();
 }
 
 /*******************************************************************************************************************
@@ -1302,11 +1326,12 @@ bool ViAudioObject::correlate(QList<ViCorrelator*> correlators)
 
 bool ViAudioObject::correlate()
 {
+	setStarted();
     if(!hasCorrelator())
     {
         log("No correlators available for correlation", QtCriticalMsg);
-        progress(100);
         emit correlated();
+		setFinished();
         return false;
     }
 
@@ -1324,8 +1349,8 @@ bool ViAudioObject::correlate()
     if(mCorrelationTypes.isEmpty())
     {
         log("No buffers available for correlation", QtCriticalMsg);
-        progress(100);
         emit correlated();
+		setFinished();
         return false;
     }
 
@@ -1352,8 +1377,8 @@ void ViAudioObject::correlateNext()
     if(mCurrentCorrelation >= mCorrelationTypes.size())
     {
         log("The track was correlated.");
-        progress(100);
         emit correlated();
+		setFinished();
         return;
     }
 
@@ -1498,12 +1523,6 @@ bool ViAudioObject::isSong()
 {
 	QMutexLocker locker(&mMutex);
 	return mIsSong;
-}
-
-bool ViAudioObject::isFinished()
-{
-	QMutexLocker locker(&mMutex);
-	return mIsFinished;
 }
 
 bool ViAudioObject::isUsed(QIODevice::OpenMode mode)

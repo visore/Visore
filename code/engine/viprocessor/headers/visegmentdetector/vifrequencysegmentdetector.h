@@ -2,7 +2,6 @@
 #define VIFREQUENCYSEGMENTDETECTOR_H
 
 #include <visegmentdetector.h>
-#include <vispectrumanalyzer.h>
 #include <vispectrum.h>
 #include <viaverager.h>
 #include <virange.h>
@@ -10,12 +9,6 @@
 
 class ViFrequencySegmentDetector : public ViSegmentDetector
 {
-
-	Q_OBJECT
-
-	public slots:
-
-		void addSpectrum(ViRealSpectrum spectrums);
 
 	public:
 
@@ -27,21 +20,21 @@ class ViFrequencySegmentDetector : public ViSegmentDetector
 		void setThreshold(ViSegmentDetector::Type type, ViRange rangeThreshold, ViRange valueThreshold, qint64 timeThreshold);
 
 		void initialize();
-		void execute();
+        void execute(int channel);
 		void finalize();
 
 	private:
 
+		void clear();
+
 		bool inRange(QQueue<qreal> &averages, ViRange &range);
 
-		void updateRecordStartAverage(ViRealSpectrum &spectrum);
-		void updateRecordEndAverage(ViRealSpectrum &spectrum);
-		void updateSongStartAverage(ViRealSpectrum &spectrum);
-		void updateSongEndAverage(ViRealSpectrum &spectrum);
+		void updateRecordStartAverage(const ViRealSpectrum &spectrum, const int &milliseconds);
+		void updateRecordEndAverage(const ViRealSpectrum &spectrum, const int &milliseconds);
+		void updateSongStartAverage(const ViRealSpectrum &spectrum, const int &milliseconds);
+		void updateSongEndAverage(const ViRealSpectrum &spectrum, const int &milliseconds);
 
 	private:
-
-		ViSpectrumAnalyzer mAnalyzer;
 
 		ViRange mRecordStartRangeThreshold;
 		ViRange mRecordStartValueThreshold;
@@ -68,9 +61,6 @@ class ViFrequencySegmentDetector : public ViSegmentDetector
 		QQueue<qreal> mRecordEndAverages;
 		QQueue<qreal> mSongStartAverages;
 		QQueue<qreal> mSongEndAverages;
-
-		QQueue<ViRealSpectrum> mSpectrums;
-		QMutex mMutex;
 
 };
 

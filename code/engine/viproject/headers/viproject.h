@@ -76,7 +76,8 @@ class ViProject : public QObject, public ViId
 
 		bool loadAll();
 		void saveAll();
-		void setFinished(bool finish = true);
+		void setFinished();
+		void setBusy();
         void infoCorrector();
 
 	public:

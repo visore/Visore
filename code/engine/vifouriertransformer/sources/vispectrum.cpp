@@ -1,8 +1,37 @@
 #ifdef VISPECTRUM_H
 
+#include <float.h>
+
 template <typename T>
 ViSpectrum<T>::ViSpectrum()
 {
+	initialize(0, 0);
+}
+
+template <typename T>
+ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const ViAudioFormat &format)
+{
+	initialize((windowSize / 2) + 1, format.sampleRate() / 2);
+}
+
+template <typename T>
+ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const qint32 &sampleRate)
+{
+	initialize((windowSize / 2) + 1, sampleRate / 2);
+}
+
+template <typename T>
+ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const ViAudioFormat &format, const ViFrequencyChunk &chunk)
+{
+    initialize((windowSize / 2) + 1, format.sampleRate() / 2);
+    add(chunk);
+}
+
+template <typename T>
+ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const qint32 &sampleRate, const ViFrequencyChunk &chunk)
+{
+	initialize((windowSize / 2) + 1, sampleRate / 2);
+	add(chunk);
 }
 
 template <typename T>
@@ -20,11 +49,10 @@ ViSpectrum<T>::ViSpectrum(const ViSpectrum<T> &other)
 	mPreviousAdditionCounter = other.mPreviousAdditionCounter;
 	mMaximum = ViSpectrumElement<T>(other.mMaximum);
 	mMinimum = ViSpectrumElement<T>(other.mMinimum);
-	mInterval = other.mInterval;
 }
 
 template <typename T>
-ViSpectrumElement<T> ViSpectrum<T>::at(const qint32 index)
+ViSpectrumElement<T> ViSpectrum<T>::at(const qint32 index) const
 {
 	return mValues[index];
 }
@@ -38,27 +66,64 @@ ViSpectrumElement<T> ViSpectrum<T>::operator[](const qint32 index) const
 template <typename T>
 void ViSpectrum<T>::add(const qint32 index, ViComplexNumber<T> complex)
 {
-	++mAdditionCounter;
-	mRawValues[index].rectangular().amplitude() += complex;
-	mRawValues[index].polar().amplitude() += ViSpectrumElement<T>::toPolar(complex);
+    addValue(index, complex);
+    finalize();
 }
 
 template <typename T>
-qint32 ViSpectrum<T>::size()
+void ViSpectrum<T>::add(const ViFrequencyChunk &chunk)
+{
+    qint32 windowSize = size() - 1;
+	addValue(0, ViRealComplex(chunk[0], 0));
+    for(int i = 1; i < windowSize; ++i)
+    {
+		addValue(i, ViRealComplex(chunk[i], -chunk[i + windowSize]));
+    }
+	addValue(windowSize, ViRealComplex(chunk[windowSize], 0));
+    finalize();
+}
+
+template <typename T>
+void ViSpectrum<T>::add(const ViFrequencyChunks &chunks)
+{
+    qint32 windowSize = size() - 1;
+    for(int c = 0; c < chunks.size(); ++c)
+    {
+        const ViFrequencyChunk &chunk = chunks[c];
+		addValue(0, ViRealComplex(chunk[0], 0));
+        for(int i = 1; i < windowSize; ++i)
+        {
+			addValue(i, ViRealComplex(chunk[i], -chunk[i + windowSize]));
+        }
+		addValue(windowSize, ViRealComplex(chunk[windowSize], 0));
+    }
+    finalize();
+}
+
+template <typename T>
+qint32 ViSpectrum<T>::size() const
 {
 	return mValues.size();
 }
 
 template <typename T>
-ViSpectrumElement<T> ViSpectrum<T>::maximum()
+ViSpectrumElement<T> ViSpectrum<T>::maximum() const
 {
 	return mMaximum;
 }
 
 template <typename T>
-ViSpectrumElement<T> ViSpectrum<T>::minimum()
+ViSpectrumElement<T> ViSpectrum<T>::minimum() const
 {
 	return mMinimum;
+}
+
+template <typename T>
+void ViSpectrum<T>::addValue(const qint32 index, ViComplexNumber<T> complex)
+{
+    ++mAdditionCounter;
+    mRawValues[index].rectangular().amplitude() += complex;
+    mRawValues[index].polar().amplitude() += ViSpectrumElement<T>::toPolar(complex);
 }
 
 template <typename T>
@@ -106,18 +171,6 @@ void ViSpectrum<T>::clear()
 	mValues.clear();
 	mAdditionCounter = 0;
 	mPreviousAdditionCounter = 0;
-}
-
-template <typename T>
-ViAudioPosition ViSpectrum<T>::interval()
-{
-	return mInterval;
-}
-
-template <typename T>
-void ViSpectrum<T>::setInterval(ViAudioPosition interval)
-{
-	mInterval = interval;
 }
 
 template <typename T>

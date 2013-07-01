@@ -78,6 +78,7 @@ int ViBufferStream::write(const char *data, int length)
 	QMutexLocker streamLocker(&mStreamMutex);
 	QMutexLocker bufferLocker(mBufferMutex);
 	int written = mDevice->write(data, length);
+	bufferLocker.unlock();
 	emit mBuffer->changed();
 	return written;
 }
