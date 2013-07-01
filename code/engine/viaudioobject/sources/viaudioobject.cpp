@@ -399,7 +399,6 @@ bool ViAudioObject::encode(int type)
 bool ViAudioObject::encode(ViAudio::Type type, bool clearWhenFinished)
 {
 	QMutexLocker locker(&mMutex);
-
 	mClearEncodedBuffer = clearWhenFinished;
 	mPreviousEncodedType = ViAudio::Undefined;
 	mCodingInstructions = decomposeTypes(type);

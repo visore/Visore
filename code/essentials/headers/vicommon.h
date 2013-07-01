@@ -104,14 +104,13 @@ namespace Vi
 namespace ViAudio
 {
 
-    //Values are important
     enum Type
     {
-        Undefined = 0x1,
-        Target = 0x2,
-        Corrupted = 0x4,
-        Corrected = 0x8,
-        Temporary = 0x10,
+        Undefined,
+        Target,
+        Corrupted,
+        Corrected,
+        Temporary,
         Correlated = Corrected,
         Temp = Temporary,
         All = Target | Corrupted | Corrected | Temporary
