@@ -1,5 +1,6 @@
 #include <viprocessor.h>
 #include <vipowercalculator.h>
+#include <vinoisedetector.h>
 
 #define CHUNK_SIZE 4096
 
@@ -32,12 +33,16 @@ ViProcessor::ViProcessor()
 {
 	mType = ViAudio::Undefined;
 	mChunkSize = CHUNK_SIZE;
+    mSampleCount = 0;
 	mThread.setProcessor(this);
 	mProgressEnabled = true;
 	mExit = false;
 	mMultiShot = false;
     mNoiseDetector = NULL;
     mProcessMode = ViProcessor::All;
+
+    mRecalculateFrequencies = true;
+    mTransformer.setWindowFunction("Hann");
 }
 
 ViProcessor::~ViProcessor()
@@ -74,10 +79,6 @@ void ViProcessor::startProgress()
     {
         QObject::disconnect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()));
         mExit = false;
-        if(mNoiseDetector != NULL)
-        {
-            mNoiseDetector->finalize();
-        }
         finalize();
         setProgress(100);
         emit finished();
@@ -102,10 +103,6 @@ void ViProcessor::startProgressless()
     {
         QObject::disconnect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()));
         mExit = false;
-        if(mNoiseDetector != NULL)
-        {
-            mNoiseDetector->finalize();
-        }
         finalize();
         setProgress(100);
         emit finished();
@@ -139,11 +136,15 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::T
         QObject::connect(mReadStream->buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
 		int sampleSize = mObject->buffer(mType)->format().sampleSize();
 		mConverter.setSize(sampleSize);
-		mSamples.resize(mChunkSize / (sampleSize / 8));
-        if(mNoiseDetector != NULL)
-        {
-            mNoiseDetector->initialize();
-        }
+
+        mSampleCount = mChunkSize / (sampleSize / 8);
+        mSamples.resize(mSampleCount);
+
+        mTransformer.setSize(mSampleCount);
+        mFrequencies.resize(mSampleCount);
+        mTempFourierData.resize(mSampleCount);
+        mRecalculateFrequencies = true;
+
 		return true;
 	}
 	else
@@ -164,16 +165,17 @@ void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type)
 	}
 }
 
-void ViProcessor::setNoiseDetector(ViProcessor *detector)
+void ViProcessor::setNoiseDetector(ViNoiseDetector *detector)
 {
     if(mNoiseDetector == NULL)
     {
         delete mNoiseDetector;
     }
     mNoiseDetector = detector;
+    mNoiseDetector->setProcessor(this);
 }
 
-bool ViProcessor::isNoisy(ViSampleChunk &chunk)
+bool ViProcessor::isNoisy()
 {
     if(mNoiseDetector == NULL)
     {
@@ -182,13 +184,8 @@ bool ViProcessor::isNoisy(ViSampleChunk &chunk)
     }
     else
     {
-        return mNoiseDetector->isNoisy(samples());
+        return mNoiseDetector->isNoisy();
     }
-}
-
-bool ViProcessor::isNoisy()
-{
-    return isNoisy(samples());
 }
 
 void ViProcessor::setProcessMode(ViProcessor::ProcessMode mode)
@@ -241,6 +238,7 @@ ViSampleChunk& ViProcessor::read()
 
 ViSampleChunk& ViProcessor::read1()
 {
+    mRecalculateFrequencies = true;
 	mSamples.setSize(mConverter.pcmToReal(mChunk.data(), mSamples.data(), mReadStream->read(mChunk)));
 	return mSamples;
 }
@@ -331,13 +329,49 @@ int ViProcessor::chunkSize()
 
 int ViProcessor::sampleCount()
 {
-	return mSamples.size();
+    return mSampleCount;
+}
+
+int ViProcessor::sampleCount1()
+{
+    return mSampleCount;
+}
+
+ViFrequencyChunk& ViProcessor::frequencies()
+{
+    return frequencies1();
+}
+
+ViFrequencyChunk& ViProcessor::frequencies1()
+{
+    if(mRecalculateFrequencies)
+    {
+        mRecalculateFrequencies = false;
+        samplesToFrequencies(mSamples, mFrequencies, mTempFourierData);
+    }
+    return mFrequencies;
+}
+
+void ViProcessor::samplesToFrequencies(ViSampleChunk &inputSamples, ViFrequencyChunk &outputFrequencies, ViFrequencyChunk &intermidiate)
+{
+    ViChunk<qreal>::copyData(inputSamples, intermidiate);
+    mTransformer.pad(intermidiate.data(), inputSamples.size());
+
+    mTransformer.forwardTransform(intermidiate.data(), outputFrequencies.data());
+}
+
+void ViProcessor::frequenciesToSamples(ViFrequencyChunk &inputFrequencies, ViSampleChunk &outputSamples)
+{
+    mTransformer.inverseTransform(inputFrequencies.data(), outputSamples.data());
+    mTransformer.rescale(outputSamples.data());
 }
 
 ViDualProcessor::ViDualProcessor()
 	: ViProcessor()
 {
 	mType2 = ViAudio::Undefined;
+    mSampleCount2 = 0;
+    mRecalculateFrequencies2 = true;
 }
 
 ViDualProcessor::~ViDualProcessor()
@@ -412,7 +446,14 @@ void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type ty
 			mReadStream2 = object()->buffer(mType2)->createReadStream();
 			int sampleSize = object()->buffer(mType2)->format().sampleSize();
 			mConverter2.setSize(sampleSize);
-            mSamples2.resize(chunkSize() / (sampleSize / 8));
+
+            mSampleCount2 = chunkSize() / (sampleSize / 8);
+            mSamples2.resize(mSampleCount2);
+
+            mFrequencies2.resize(mSampleCount2);
+            mTempFourierData2.resize(mSampleCount2);
+            mRecalculateFrequencies2 = true;
+
 			initialize();
             thread().start();
 		}
@@ -451,6 +492,21 @@ ViAudioFormat ViDualProcessor::format2()
 	return object()->format(mType2);
 }
 
+int ViDualProcessor::sampleCount2()
+{
+    return mSampleCount2;
+}
+
+ViFrequencyChunk& ViDualProcessor::frequencies2()
+{
+    if(mRecalculateFrequencies2)
+    {
+        mRecalculateFrequencies2 = false;
+        samplesToFrequencies(mSamples2, mFrequencies2, mTempFourierData2);
+    }
+    return mFrequencies2;
+}
+
 ViModifyProcessor::ViModifyProcessor(bool autoWrite)
 	: ViProcessor()
 {
@@ -470,9 +526,12 @@ void ViModifyProcessor::startProgress()
 	while(hasData1() && !willExit())
 	{
 		processedSize += read1().size();
-        bool noise = isNoisy();
+        bool noise = false;
         if(mModifyMode == ViModifyProcessor::Noise)
         {
+            noise = isNoisy();
+            if(noise) LOG("Noise detected at: "+QString::number(tt)+"  "+QString::number(tt*sampleCount()));
+            ++tt;
             mOriginalSamples.enqueue(QPair<bool, ViSampleChunk>(noise, samples1()));
         }
         if(processMode() == ViProcessor::All || noise)
@@ -504,9 +563,10 @@ void ViModifyProcessor::startProgressless()
 	while(hasData1() && !willExit())
 	{
 		read1();
-        bool noise = isNoisy();
+        bool noise = false;
         if(mModifyMode == ViModifyProcessor::Noise)
         {
+            noise = isNoisy();
             mOriginalSamples.enqueue(QPair<bool, ViSampleChunk>(noise, samples1()));
         }
         if(processMode() == ViProcessor::All || noise)
@@ -533,7 +593,7 @@ void ViModifyProcessor::startProgressless()
 }
 
 void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2)
-{
+{tt=0;
 	if(initializeProcess(audioObject, type1))
 	{
 		mType2 = type2;
@@ -602,4 +662,11 @@ bool ViModifyProcessor::write(ViSampleChunk& samples)
 
     mWriteStream->write(mChunk2.data(), mConverter2.realToPcm(samples.data(), mChunk2.data(), samples.size()));
     return success;
+}
+
+bool ViModifyProcessor::writeFrequencies(ViFrequencyChunk &frequencies)
+{
+    ViSampleChunk samples(sampleCount());
+    frequenciesToSamples(frequencies, samples);
+    return write(samples);
 }

@@ -242,8 +242,14 @@ void ViChunk<T>::operator= (const ViChunk &other)
 template<typename T>
 void ViChunk<T>::copy(const ViChunk<T> &source, ViChunk<T> &destination)
 {
-	memcpy(destination.mData, source.mData, sizeof(T) * qMin(source.mSize, destination.mSize));
-	destination.mSize = source.mSize;
+    copyData(source, destination);
+    destination.mSize = qMin(source.mSize, destination.mSize);
+}
+
+template<typename T>
+void ViChunk<T>::copyData(const ViChunk<T> &source, ViChunk<T> &destination)
+{
+    memcpy(destination.mData, source.mData, sizeof(T) * qMin(source.mSize, destination.mSize));
 }
 
 #endif

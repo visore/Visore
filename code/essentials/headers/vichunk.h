@@ -1,6 +1,8 @@
 #ifndef VICHUNK_H
 #define VICHUNK_H
 
+#include <QList>
+
 template<typename T>
 class ViChunk
 {
@@ -45,7 +47,13 @@ class ViChunk
 
 		void operator= (const ViChunk &other);
 
-		static void copy(const ViChunk<T> &source, ViChunk<T> &destination);
+        // Copies the data from source to destination and sets the size of source to the destination size.
+        // If the destination is smaller than the source, only the maximum number of values that destination can hold will be copied.
+        static void copy(const ViChunk<T> &source, ViChunk<T> &destination);
+
+        // Copies the data from source to destination, but does not change the size.
+        // If the destination is smaller than the source, only the maximum number of values that destination can hold will be copied.
+        static void copyData(const ViChunk<T> &source, ViChunk<T> &destination);
 
 	private:
 
@@ -58,8 +66,12 @@ class ViChunk
 typedef ViChunk<double> ViDoubleChunk;
 typedef ViDoubleChunk ViRealChunk;
 typedef ViDoubleChunk ViSampleChunk;
+typedef ViDoubleChunk ViFrequencyChunk;
 typedef ViChunk<float> ViFloatChunk;
 typedef ViChunk<char> ViRawChunk;
+
+typedef QList<ViSampleChunk> ViSampleChunks;
+typedef QList<ViFrequencyChunk> ViFrequencyChunks;
 
 //Template decleration and implementation should actually be in the same file
 #include "../sources/vichunk.cpp"

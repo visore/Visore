@@ -5,8 +5,11 @@
 #include <vichunk.h>
 #include <viaudioobject.h>
 #include <vipcmconverter.h>
+#include <vifouriertransformer.h>
+#include <viprocessor.h>
 
 class ViProcessor;
+class ViNoiseDetector;
 
 class ViProcessorThread : public QThread
 {
@@ -59,12 +62,25 @@ class ViProcessor : public ViNotifier, public ViSerializer
         virtual ~ViProcessor();
         virtual void process(ViAudioObjectPointer audioObject, ViAudio::Type type);
 
-        void setNoiseDetector(ViProcessor *detector); //Takes ownership
-        virtual bool isNoisy(ViSampleChunk &chunk);
+        void setNoiseDetector(ViNoiseDetector *detector); //Takes ownership
         bool isNoisy();
 
         void setProcessMode(ViProcessor::ProcessMode mode);
         ViProcessor::ProcessMode processMode();
+
+        ViAudio::Type type();
+        ViAudio::Type type1();
+        ViSampleChunk& samples();
+        ViSampleChunk& samples1();
+        ViAudioFormat format();
+        ViAudioFormat format1();
+        ViFrequencyChunk& frequencies();
+        ViFrequencyChunk& frequencies1();
+
+        void setChunkSize(int size);
+        int chunkSize();
+        int sampleCount();
+        int sampleCount1();
 
 	protected:
 
@@ -78,23 +94,16 @@ class ViProcessor : public ViNotifier, public ViSerializer
 		ViAudioObjectPointer object();
 		ViBufferStreamPointer readStream();
 
-		ViAudio::Type type();
-		ViAudio::Type type1();
 		ViSampleChunk& read();
 		ViSampleChunk& read1();
-		ViSampleChunk& samples();
-		ViSampleChunk& samples1();
 		bool hasData();
 		bool hasData1();
-		ViAudioFormat format();
-		ViAudioFormat format1();
 
 		void exit(bool exit = true);
 		bool willExit();
 
-		void setChunkSize(int size);
-		int chunkSize();
-		int sampleCount();
+        void samplesToFrequencies(ViSampleChunk &inputSamples, ViFrequencyChunk &outputFrequencies, ViFrequencyChunk &intermidiate);
+        void frequenciesToSamples(ViFrequencyChunk &inputFrequencies, ViSampleChunk &outputSamples);
 
 	private:
 
@@ -104,13 +113,19 @@ class ViProcessor : public ViNotifier, public ViSerializer
 		ViBufferStreamPointer mReadStream;
 		ViRawChunk mChunk;
 		ViSampleChunk mSamples;
+        int mSampleCount;
 		ViPcmConverter<qreal> mConverter;
 		ViProcessorThread mThread;
 		bool mProgressEnabled;
 		bool mExit;
 		bool mMultiShot;
-        ViProcessor *mNoiseDetector;
+        ViNoiseDetector *mNoiseDetector;
         ViProcessor::ProcessMode mProcessMode;
+
+        ViFourierTransformer mTransformer;
+        bool mRecalculateFrequencies;
+        ViFrequencyChunk mFrequencies;
+        ViFrequencyChunk mTempFourierData;
 
 };
 
@@ -138,13 +153,22 @@ class ViDualProcessor : public ViProcessor
 		bool hasData2();
 		ViAudioFormat format2();
 
+        int sampleCount2();
+
+        ViFrequencyChunk& frequencies2();
+
 	private:
 
 		ViAudio::Type mType2;
 		ViBufferStreamPointer mReadStream2;
 		ViRawChunk mChunk2;
 		ViSampleChunk mSamples2;
+        int mSampleCount2;
 		ViPcmConverter<qreal> mConverter2;
+
+        bool mRecalculateFrequencies2;
+        ViFrequencyChunk mFrequencies2;
+        ViFrequencyChunk mTempFourierData2;
 
 };
 
@@ -181,6 +205,7 @@ class ViModifyProcessor : public ViProcessor
 		ViAudioFormat format2();
         bool write();
         bool write(ViSampleChunk& samples);
+        bool writeFrequencies(ViFrequencyChunk &frequencies);
 
 	private:
 
@@ -191,6 +216,8 @@ class ViModifyProcessor : public ViProcessor
 		ViPcmConverter<qreal> mConverter2;
         ViModifyProcessor::ModifyMode mModifyMode;
         QQueue<QPair<bool, ViSampleChunk>> mOriginalSamples;
+
+        int tt;
 
 };
 

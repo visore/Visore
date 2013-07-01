@@ -8,8 +8,8 @@ template <typename T>
 void ViWindowFunction<T>::apply(const T input[], T output[], const int size)
 {
 	for(int i = 0; i < size; ++i)
-	{
-		output[i] = input[i] * mWindow[i];
+    {
+        output[i] = input[i] * mWindow[i];
 	}
 }
 

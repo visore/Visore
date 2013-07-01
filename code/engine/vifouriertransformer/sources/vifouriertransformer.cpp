@@ -100,7 +100,7 @@ void ViFourierTransformer::transform(const double input[], double output[], Dire
 void ViFourierTransformer::forwardTransform(const double input[], double output[])
 {
 	if(mWindowFunction != 0)
-	{
+    {
 		mWindowFunction->apply(input, mWindowData, mSize);
 		mCalculator->setData(mWindowData, output);
 	}
