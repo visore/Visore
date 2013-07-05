@@ -81,7 +81,8 @@ ViNeuralSelectorWidget::ViNeuralSelectorWidget(QWidget *parent)
 		mUi->interpolatorComboBox->addItem(interpolators[i]->name("Interpolator", true), interpolators[i]->name());
 	}
 
-    changeSettings(0);
+	//changeSettings(0);
+	mUi->modeComboBox->setCurrentIndex(1);
 }
 
 ViNeuralSelectorWidget::~ViNeuralSelectorWidget()
@@ -155,7 +156,7 @@ ViNeuralCorrector* ViNeuralSelectorWidget::corrector()
 	ViNeuralCorrector *corrector = new ViNeuralCorrector(network, trainer, provider);
 	
 	//Seperate channels
-	corrector->enableSeparateChannels(mUi->channelsCheckBox->isChecked());
+//	corrector->enableSeparateChannels(mUi->channelsCheckBox->isChecked());
 
     //Noise detector
     corrector->setProcessMode(mUi->noiseDetectorWidget->processMode());

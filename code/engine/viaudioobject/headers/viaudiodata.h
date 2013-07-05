@@ -25,12 +25,16 @@ class ViAudioData
         int windowSize();
         int channelCount();
 
+		void setScaleRange(int from, int to);
+
     protected:
 
         void setDefaults();
         void update();
-        virtual void clearOther() = 0;
-        virtual void updateOther() = 0;
+
+		virtual void clearOther();
+		virtual void defaultOther();
+		virtual void updateOther();
 
     protected:
 
@@ -49,6 +53,9 @@ class ViAudioData
         int mSampleCount;
         int mChannelCount;
 
+		int mScaleFrom;
+		int mScaleTo;
+
 };
 
 class ViAudioReadData : public ViAudioData
@@ -58,11 +65,15 @@ class ViAudioReadData : public ViAudioData
 
         bool hasData();
 
-        ViSampleChunk& read(); // Read next window
+		ViSampleChunk& read();
 
         ViSampleChunk& samples();
         ViSampleChunks& splitSamples();
         ViSampleChunk& splitSamples(int index);
+
+		ViSampleChunk& scaledSamples();
+		ViSampleChunks& scaledSplitSamples();
+		ViSampleChunk& scaledSplitSamples(int index);
 
         ViFrequencyChunk& frequencies();
         ViFrequencyChunks& splitFrequencies();
@@ -71,6 +82,7 @@ class ViAudioReadData : public ViAudioData
     protected:
 
         void clearOther();
+		void defaultOther();
         void updateOther();
 
     private:
@@ -78,9 +90,14 @@ class ViAudioReadData : public ViAudioData
         ViSampleChunks mSplitSampleChunks;
         ViFrequencyChunks mSplitFrequencyChunks;
 
+		ViSampleChunk mScaledSampleChunk;
+		ViSampleChunks mScaledSplitSampleChunks;
+
         bool mNeedsSampleSplit;
         bool mNeedsFrequencySplit;
         bool mNeedsFrequency;
+		bool mNeedsSampleScale;
+		bool mNeedsSampleScaleSplit;
 
         ViFrequencyChunk mTemporaryChunk;
 
@@ -89,19 +106,29 @@ class ViAudioReadData : public ViAudioData
 class ViAudioWriteData : public ViAudioData
 {
 
-    public:
+	public:
 
-      void write(ViSampleChunk &chunk); // Write next window
-      void writeFrequencies(ViFrequencyChunk &frequencies);
-      void writeSplitSamples(ViSampleChunks &samples);
-      void writeSplitFrequencies(ViFrequencyChunks &frequencies);
+		//Enqueues samples. Once a chunk is available for each channel, they are written.
+		void enqueueSplitSamples(ViSampleChunk &samples, const int &channel);
+		void enqueueSplitScaledSamples(ViSampleChunk &samples, const int &channel);
+
+		void write(ViSampleChunk &chunk);
+		void writeScaled(ViSampleChunk &chunk);
+		void writeFrequencies(ViFrequencyChunk &frequencies);
+		void writeSplitSamples(ViSampleChunks &samples);
+		void writeSplitScaledSamples(ViSampleChunks &samples);
+		void writeSplitFrequencies(ViFrequencyChunks &frequencies);
 
     protected:
 
-        void clearOther();
+		void dequeueSamples();
+
+		void clearOther();
         void updateOther();
 
-    private:
+	private:
+
+		QVector<QQueue<ViSampleChunk>> mChannelSamples;
 
 };
 

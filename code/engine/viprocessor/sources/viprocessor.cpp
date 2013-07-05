@@ -2,6 +2,16 @@
 #include <vipowercalculator.h>
 #include <vinoisedetector.h>
 
+void ViProcessorThread::setProcessor(ViProcessor *processor)
+{
+	mProcessor = processor;
+}
+
+void ViProcessorThread::run()
+{
+	mProcessor->executeThread();
+}
+
 ViProcessor::ViProcessor(ViProcessor::ChannelMode mode)
     : QRunnable()
 {
@@ -10,7 +20,7 @@ ViProcessor::ViProcessor(ViProcessor::ChannelMode mode)
 	mThreadPool->setMaxThreadCount(QThread::idealThreadCount());
 
 	mType = ViAudio::Undefined;
-	mExit = false;
+	mStopped = false;
 	mMultiShot = false;
     mNoiseDetector = NULL;
 
@@ -19,6 +29,11 @@ ViProcessor::ViProcessor(ViProcessor::ChannelMode mode)
 
     mTotalChannels = 0;
     mCurrentChannel = 0;
+
+	mTotalSize = 0;
+	mProcessedSize = 0;
+
+	mThread.setProcessor(this);
 }
 
 ViProcessor::~ViProcessor()
@@ -34,70 +49,65 @@ ViProcessor::~ViProcessor()
 
 void ViProcessor::run()
 {
-    executeNext();
+	QMutexLocker locker(&mMutex);
+	int channel = mCurrentChannel;
+	++mCurrentChannel;
+	if(mProcessMode == ViProcessor::All || isNoisy())
+	{
+		locker.unlock();
+		execute(channel);
+	}
 }
 
 void ViProcessor::startThread()
 {
+	mTotalSize = ViAudioPosition::convertPosition(mData.bufferSize(), ViAudioPosition::Bytes, ViAudioPosition::Samples, format());
+	if(!mThread.isRunning())
+	{
+		mThread.start();
+	}
+}
+
+void ViProcessor::executeThread()
+{
 	if(mThreadMutex.tryLock())
 	{
-		mThreadPool->waitForDone();
-		if(mExit || !mMultiShot)
+		if(mStopped)
 		{
-			handleExit();
-			QObject::disconnect(mData.buffer(), SIGNAL(changed()), this, SLOT(startThread()));
-			mExit = false;
-			finalize();
-			setProgress(100);
-			emit finished();
+			exit();
 		}
 		else
 		{
-			int count = 1;
-			if(mChannelMode == ViProcessor::Separated)
+			int size, count = usedChannelCount();
+			while(!mStopped && (size = readNext()))
 			{
-				count = mTotalChannels;
-			}
-			if(readNext())
-			{
+				mProcessedSize += size;
 				for(int i = 0; i < count; ++i)
 				{
+					//run();
 					mThreadPool->start(this);
 				}
+				mThreadPool->waitForDone();
+				setProgress((mProcessedSize * 99.0) / mTotalSize);
 				mThreadMutex.unlock();
-				startThread();
+			}
+			if(mStopped || !mMultiShot)
+			{
+				exit();
 			}
 		}
 		mThreadMutex.unlock();
 	}
 }
 
-void ViProcessor::executeNext()
-{
-    QMutexLocker locker(&mMutex);
-    if(mCurrentChannel < mTotalChannels)
-    {
-        if(mProcessMode == ViProcessor::All || isNoisy())
-        {
-            locker.unlock();
-            execute(mCurrentChannel);
-            locker.relock();
-        }
-        ++mCurrentChannel;
-    }
-}
-
-bool ViProcessor::readNext()
+int ViProcessor::readNext()
 {
 	mCurrentChannel = 0;
     if(mData.hasData())
 	{
-        qint64 totalSize = ViAudioPosition::convertPosition(mData.bufferSize(), ViAudioPosition::Bytes, ViAudioPosition::Samples, format());
-		qint64 processedSize = mData.read().size();
-        setProgress((processedSize * 99.0) / totalSize);
-		return true;
+		return mData.read().size();
     }
-    return false;
+	return 0;
 }
 
 void ViProcessor::handleExit()
@@ -111,10 +121,13 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::T
 
 	mObject = audioObject;
 	mType = type;
-    mExit = false;
+	mStopped = false;
 
     mCurrentChannel = 0;
     mTotalChannels = format().channelCount();
+
+	mTotalSize = 0;
+	mProcessedSize = 0;
 
 	if(mType != ViAudio::Undefined && mObject->hasBuffer(mType))
 	{
@@ -136,7 +149,7 @@ void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type)
 	if(initializeProcess(audioObject, type))
 	{
 		initialize();
-        startThread();
+		startThread();
 	}
 }
 
@@ -147,7 +160,7 @@ void ViProcessor::setNoiseDetector(ViNoiseDetector *detector)
         delete mNoiseDetector;
     }
     mNoiseDetector = detector;
-    mNoiseDetector->setProcessor(this);
+	mNoiseDetector->setMode(mChannelMode);
 }
 
 bool ViProcessor::isNoisy()
@@ -159,18 +172,54 @@ bool ViProcessor::isNoisy()
     }
     else
     {
-        return mNoiseDetector->isNoisy();
+		return mNoiseDetector->isNoisy(mData, mCurrentChannel);
     }
 }
 
 void ViProcessor::setChannelMode(ViProcessor::ChannelMode mode)
 {
+	QMutexLocker locker(&mMutex);
     mChannelMode = mode;
+}
+
+ViProcessor::ChannelMode ViProcessor::channelMode()
+{
+	QMutexLocker locker(&mMutex);
+	return mChannelMode;
 }
 
 void ViProcessor::setProcessMode(ViProcessor::ProcessMode mode)
 {
+	QMutexLocker locker(&mMutex);
     mProcessMode = mode;
+}
+
+ViProcessor::ProcessMode ViProcessor::processMode()
+{
+	QMutexLocker locker(&mMutex);
+	return mProcessMode;
+}
+
+int ViProcessor::channelCount()
+{
+	QMutexLocker locker(&mMutex);
+	return mTotalChannels;
+}
+
+int ViProcessor::usedChannelCount()
+{
+	QMutexLocker locker(&mMutex);
+	if(mChannelMode == ViProcessor::Separated)
+	{
+		return mTotalChannels;
+	}
+	return 1;
+}
+
+int ViProcessor::currentChannel()
+{
+	QMutexLocker locker(&mMutex);
+	return mCurrentChannel;
 }
 
 void ViProcessor::initialize()
@@ -183,61 +232,78 @@ void ViProcessor::finalize()
 
 ViAudioObjectPointer ViProcessor::object()
 {
+	QMutexLocker locker(&mMutex);
 	return mObject;
 }
 
 ViAudio::Type ViProcessor::type()
 {
+	QMutexLocker locker(&mMutex);
 	return mType;
 }
 
 ViAudioFormat ViProcessor::format()
 {
+	QMutexLocker locker(&mMutex);
 	return mObject->format(mType);
 }
 
 ViAudioReadData& ViProcessor::data()
 {
+	QMutexLocker locker(&mMutex);
     return mData;
 }
 
 ViSampleChunk& ViProcessor::currentSamples()
 {
-    if(mChannelMode == ViProcessor::Combined)
-    {
-        return mData.samples();
-    }
-    return mData.splitSamples(mCurrentChannel);
+	QMutexLocker locker(&mMutex);
+	return mData.samples();
+}
+
+ViSampleChunk& ViProcessor::currentSamples(int channel)
+{
+	QMutexLocker locker(&mMutex);
+	return mData.splitSamples(channel);
 }
 
 ViFrequencyChunk& ViProcessor::currentFrequencies()
 {
-    if(mChannelMode == ViProcessor::Combined)
-    {
-        return mData.frequencies();
-    }
-    return mData.splitFrequencies(mCurrentChannel);
+	QMutexLocker locker(&mMutex);
+	return mData.frequencies();
+}
+
+ViFrequencyChunk& ViProcessor::currentFrequencies(int channel)
+{
+	QMutexLocker locker(&mMutex);
+	return mData.splitFrequencies(channel);
 }
 
 void ViProcessor::setMultiShot(bool multishot)
 {
+	QMutexLocker locker(&mMutex);
 	mMultiShot = multishot;
 }
 
 bool ViProcessor::isMultiShot()
 {
+	QMutexLocker locker(&mMutex);
     return mMultiShot;
 }
 
 void ViProcessor::stop()
 {
+	mStopped = true;
 	exit();
 }
 
-void ViProcessor::exit(bool exit)
+void ViProcessor::exit()
 {
-    mExit = true;
-    if(mExit) startThread(); // Ensure the buffer is disconnected
+	handleExit();
+	QObject::disconnect(mData.buffer(), SIGNAL(changed()), this, SLOT(startThread()));
+	mStopped = false;
+	finalize();
+	setProgress(100);
+	emit finished();
 }
 
 ViDualProcessor::ViDualProcessor()
@@ -250,23 +316,20 @@ ViDualProcessor::~ViDualProcessor()
 {
 }
 
-bool ViDualProcessor::readNext()
+int ViDualProcessor::readNext()
 {
-    QMutexLocker locker(&mMutex);
+	QMutexLocker locker(&mMutex);
     mCurrentChannel = 0;
     if(mData.hasData())
     {
-        qint64 totalSize = ViAudioPosition::convertPosition(qMin(mData.bufferSize(), mData2.bufferSize()), ViAudioPosition::Bytes, ViAudioPosition::Samples, format());
-        qint64 processedSize = qMin(mData.read().size(), mData2.read().size());
-        setProgress((processedSize * 99.0) / totalSize);
-        return true;
+		return qMin(mData.read().size(), mData2.read().size());
     }
-    return false;
+	return 0;
 }
 
 void ViDualProcessor::handleExit()
 {
-    QObject::disconnect(mData2.buffer(), SIGNAL(changed()), this, SLOT(startThread()));
+	QObject::disconnect(mData2.buffer(), SIGNAL(changed()), this, SLOT(startThread()));
 }
 
 void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2)
@@ -278,9 +341,9 @@ void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type ty
         if(mType2 != ViAudio::Undefined && mObject->hasBuffer(mType2))
 		{
             mData2.setBuffer(mObject->buffer(mType2));
-            QObject::connect(mData2.buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
+			QObject::connect(mData2.buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
 			initialize();
-            startThread();
+			startThread();
 		}
 		else
 		{
@@ -293,11 +356,13 @@ void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type ty
 
 ViAudio::Type ViDualProcessor::type2()
 {
+	QMutexLocker locker(&mMutex);
 	return mType2;
 }
 
 ViAudioFormat ViDualProcessor::format2()
 {
+	QMutexLocker locker(&mMutex);
     return mObject->format(mType2);
 }
 
@@ -313,22 +378,20 @@ ViModifyProcessor::~ViModifyProcessor()
 {
 }
 
-bool ViModifyProcessor::readNext()
+int ViModifyProcessor::readNext()
 {
-    QMutexLocker locker(&mMutex);
+	QMutexLocker locker(&mMutex);
     mCurrentChannel = 0;
     if(mData.hasData())
     {
-        qint64 totalSize = ViAudioPosition::convertPosition(mData.bufferSize(), ViAudioPosition::Bytes, ViAudioPosition::Samples, format());
-        qint64 processedSize = mData.read().size();
-        setProgress((processedSize * 99.0) / totalSize);
+		int size = mData.read().size();
         if(mModifyMode == ViModifyProcessor::Noise)
         {
             mOriginalSamples.enqueue(QPair<bool, ViSampleChunk>(isNoisy(), mData.samples()));
         }
-        return true;
+		return size;
     }
-    return false;
+	return 0;
 }
 
 void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2)
@@ -341,7 +404,7 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
             mData2.setBuffer(mObject->buffer(mType2));
             mOriginalSamples.clear();
 			initialize();
-            startThread();
+			startThread();
 		}
 		else
 		{
@@ -354,15 +417,48 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
 
 void ViModifyProcessor::setModifyMode(ViModifyProcessor::ModifyMode mode)
 {
+	QMutexLocker locker(&mMutex);
     mModifyMode = mode;
 }
 
 ViAudio::Type ViModifyProcessor::type2()
 {
+	QMutexLocker locker(&mMutex);
 	return mType2;
 }
 
 ViAudioFormat ViModifyProcessor::format2()
 {
+	QMutexLocker locker(&mMutex);
     return mObject->format(mType2);
+}
+
+ViAudioWriteData& ViModifyProcessor::data2()
+{
+	QMutexLocker locker(&mMutex);
+	return mData2;
+}
+
+void ViModifyProcessor::write(ViSampleChunk &chunk)
+{
+	QMutexLocker locker(&mMutex);
+	mData2.write(chunk);
+}
+
+void ViModifyProcessor::write(ViSampleChunk &chunk, int channel)
+{
+	QMutexLocker locker(&mMutex);
+	mData2.enqueueSplitSamples(chunk, channel);
+}
+
+void ViModifyProcessor::writeScaled(ViSampleChunk &chunk)
+{
+	QMutexLocker locker(&mMutex);
+	mData2.writeScaled(chunk);
+}
+
+void ViModifyProcessor::writeScaled(ViSampleChunk &chunk, int channel)
+{
+	QMutexLocker locker(&mMutex);
+	mData2.enqueueSplitScaledSamples(chunk, channel);
 }

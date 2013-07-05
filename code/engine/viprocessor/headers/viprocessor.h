@@ -7,7 +7,22 @@
 #include <viprocessor.h>
 #include <QThreadPool>
 
+class ViProcessor;
 class ViNoiseDetector;
+
+class ViProcessorThread : public QThread
+{
+
+	public:
+
+		void setProcessor(ViProcessor *processor);
+		void run();
+
+	private:
+
+		ViProcessor *mProcessor;
+
+};
 
 class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 {
@@ -19,8 +34,8 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 	protected slots:
 
 		void startThread();
-		void executeNext();
-		virtual bool readNext();
+		void executeThread();
+		virtual int readNext();
 		virtual void handleExit();
 
     public:
@@ -53,7 +68,13 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
         bool isNoisy();
 
 		void setChannelMode(ViProcessor::ChannelMode mode);
+		ViProcessor::ChannelMode channelMode();
         void setProcessMode(ViProcessor::ProcessMode mode);
+		ViProcessor::ProcessMode processMode();
+
+		int channelCount();
+		int usedChannelCount(); // Returns how many channels are actually used. 1 if ChannelMode == Combined, channelCount() if ChannelMode == Separated
+		int currentChannel();
 
         ViAudio::Type type();
 		inline ViAudio::Type type1(){ return type(); }
@@ -67,8 +88,14 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 		ViSampleChunk& currentSamples();
 		inline ViSampleChunk& currentSamples1(){ return currentSamples(); }
 
+		ViSampleChunk& currentSamples(int channel);
+		inline ViSampleChunk& currentSamples1(int channel){ return currentSamples(channel); }
+
 		ViFrequencyChunk& currentFrequencies();
 		inline ViFrequencyChunk& currentFrequencies1(){ return currentFrequencies(); }
+
+		ViFrequencyChunk& currentFrequencies(int channel);
+		inline ViFrequencyChunk& currentFrequencies1(int channel){ return currentFrequencies(channel); }
 
 	protected:
 
@@ -81,20 +108,21 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 		bool initializeProcess(ViAudioObjectPointer audioObject, ViAudio::Type type);
 
 		ViAudioObjectPointer object();
-		void exit(bool exit = true);
+		void exit();
 
 	protected:
 
 		ViAudioObjectPointer mObject;
 		ViAudioReadData mData;
 
+		ViProcessorThread mThread;
 		QThreadPool *mThreadPool;
 		QMutex mThreadMutex;
 
 		QMutex mMutex;
 
 		ViAudio::Type mType;
-		bool mExit;
+		bool mStopped;
 		bool mMultiShot;
         ViNoiseDetector *mNoiseDetector;
 
@@ -103,6 +131,9 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 
 		int mTotalChannels;
 		int mCurrentChannel;
+
+		qint64 mTotalSize;
+		qint64 mProcessedSize;
 
 };
 
@@ -113,7 +144,7 @@ class ViDualProcessor : public ViProcessor
 
 	protected slots:
 
-		bool readNext();
+		int readNext();
 		void handleExit();
 
 	public:
@@ -142,7 +173,7 @@ class ViModifyProcessor : public ViProcessor
 
 	protected slots:
 
-		bool readNext();
+		int readNext();
 
     public:
 
@@ -165,6 +196,11 @@ class ViModifyProcessor : public ViProcessor
 		ViAudio::Type type2();
 		ViAudioFormat format2();
 		ViAudioWriteData& data2();
+
+		void write(ViSampleChunk &chunk);
+		void write(ViSampleChunk &chunk, int channel);
+		void writeScaled(ViSampleChunk &chunk);
+		void writeScaled(ViSampleChunk &chunk, int channel);
 
 	private:
 

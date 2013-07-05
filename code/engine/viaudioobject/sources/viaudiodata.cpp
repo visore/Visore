@@ -1,7 +1,11 @@
 #include <viaudiodata.h>
 #include <visamplechanneler.h>
+#include <viscaler.h>
+#include <QQueue>
 
 #define DEFAULT_SAMPLE_COUNT 2048
+#define DEFAULT_SCALE_FROM -1
+#define DEFAULT_SCALE_TO 1
 
 ViAudioData::ViAudioData()
 {
@@ -26,6 +30,9 @@ void ViAudioData::setDefaults()
     mWindowSize = 0;
     mChannelCount = 0;
     mTransformer.setWindowFunction("Hann");
+	mScaleFrom = -1;
+	mScaleTo = 1;
+	defaultOther();
 }
 
 void ViAudioData::clear()
@@ -77,6 +84,12 @@ int ViAudioData::channelCount()
     return mChannelCount;
 }
 
+void ViAudioData::setScaleRange(int from, int to)
+{
+	mScaleFrom = from;
+	mScaleTo = to;
+}
+
 int ViAudioData::windowSize()
 {
 	QMutexLocker locker(&mMutex);
@@ -106,6 +119,18 @@ void ViAudioData::update()
     updateOther();
 }
 
+void ViAudioData::clearOther()
+{
+}
+
+void ViAudioData::defaultOther()
+{
+}
+
+void ViAudioData::updateOther()
+{
+}
+
 /*****************************************
     READ
 *****************************************/
@@ -122,6 +147,8 @@ ViSampleChunk& ViAudioReadData::read()
 	mSampleChunk.setSize(mConverter.pcmToReal(mRawChunk.data(), mSampleChunk.data(), mStream->read(mRawChunk)));
     mNeedsSampleSplit = true;
     mNeedsFrequency = true;
+	mNeedsSampleScale = true;
+	mNeedsSampleScaleSplit = true;
 	return mSampleChunk;
 }
 
@@ -145,6 +172,37 @@ ViSampleChunks& ViAudioReadData::splitSamples()
 ViSampleChunk& ViAudioReadData::splitSamples(int index)
 {
     return splitSamples()[index];
+}
+
+ViSampleChunk& ViAudioReadData::scaledSamples()
+{
+	QMutexLocker locker(&mMutex);
+	if(mNeedsSampleScale)
+	{
+		ViScaler<qreal>::scale(mSampleChunk, mScaledSampleChunk, DEFAULT_SCALE_FROM, DEFAULT_SCALE_TO, mScaleFrom, mScaleTo);
+		mNeedsSampleScale = false;
+		mNeedsSampleScaleSplit = true;
+	}
+	return mScaledSampleChunk;
+}
+
+ViSampleChunks& ViAudioReadData::scaledSplitSamples()
+{
+	QMutexLocker locker(&mMutex);
+	if(mNeedsSampleScaleSplit)
+	{
+		locker.unlock();
+		scaledSamples();
+		locker.relock();
+		ViSampleChanneler<qreal>::split(mScaledSampleChunk.data(), mScaledSampleChunk.size(), mChannelCount, mScaledSplitSampleChunks);
+		mNeedsSampleScaleSplit = false;
+	}
+	return mScaledSplitSampleChunks;
+}
+
+ViSampleChunk& ViAudioReadData::scaledSplitSamples(int index)
+{
+	return scaledSplitSamples()[index];
 }
 
 ViFrequencyChunk& ViAudioReadData::frequencies()
@@ -183,6 +241,17 @@ void ViAudioReadData::clearOther()
     mNeedsSampleSplit = true;
     mNeedsFrequencySplit = true;
     mNeedsFrequency = true;
+	mNeedsSampleScale = true;
+	mNeedsSampleScaleSplit = true;
+}
+
+void ViAudioReadData::defaultOther()
+{
+	mNeedsSampleSplit = true;
+	mNeedsFrequencySplit = true;
+	mNeedsFrequency = true;
+	mNeedsSampleScale = true;
+	mNeedsSampleScaleSplit = true;
 }
 
 void ViAudioReadData::updateOther()
@@ -195,10 +264,54 @@ void ViAudioReadData::updateOther()
     WRITE
 *****************************************/
 
+void ViAudioWriteData::enqueueSplitSamples(ViSampleChunk &samples, const int &channel)
+{
+	QMutexLocker locker(&mMutex);
+	mChannelSamples[channel].enqueue(samples);
+	locker.unlock();
+	dequeueSamples();
+}
+
+void ViAudioWriteData::enqueueSplitScaledSamples(ViSampleChunk &samples, const int &channel)
+{
+	QMutexLocker locker(&mMutex);
+	ViScaler<qreal>::scale(samples, mSampleChunk, mScaleFrom, mScaleTo, DEFAULT_SCALE_FROM, DEFAULT_SCALE_TO);
+	mChannelSamples[channel].enqueue(mSampleChunk);
+	locker.unlock();
+	dequeueSamples();
+}
+
+void ViAudioWriteData::dequeueSamples()
+{
+	QMutexLocker locker(&mMutex);
+	for(int i = 0; i < mChannelCount; ++i)
+	{
+		if(mChannelSamples[i].isEmpty())
+		{
+			return;
+		}
+	}
+	ViSampleChunks temp;
+	for(int i = 0; i < mChannelCount; ++i)
+	{
+		temp.append(mChannelSamples[i].dequeue());
+	}
+	locker.unlock();
+	writeSplitSamples(temp);
+}
+
 void ViAudioWriteData::write(ViSampleChunk &chunk)
 {
 	QMutexLocker locker(&mMutex);
     mStream->write(mRawChunk.data(), mConverter.realToPcm(chunk.data(), mRawChunk.data(), chunk.size()));
+}
+
+void ViAudioWriteData::writeScaled(ViSampleChunk &chunk)
+{
+	QMutexLocker locker(&mMutex);
+	ViScaler<qreal>::scale(chunk, mSampleChunk, mScaleFrom, mScaleTo, DEFAULT_SCALE_FROM, DEFAULT_SCALE_TO);
+	locker.unlock();
+	write(mSampleChunk);
 }
 
 void ViAudioWriteData::writeFrequencies(ViFrequencyChunk &frequencies)
@@ -218,6 +331,14 @@ void ViAudioWriteData::writeSplitSamples(ViSampleChunks &samples)
     write(mSampleChunk);
 }
 
+void ViAudioWriteData::writeSplitScaledSamples(ViSampleChunks &samples)
+{
+	QMutexLocker locker(&mMutex);
+	ViSampleChanneler<qreal>::merge(samples, mSampleChunk);
+	locker.unlock();
+	writeScaled(mSampleChunk);
+}
+
 void ViAudioWriteData::writeSplitFrequencies(ViFrequencyChunks &frequencies)
 {
 	QMutexLocker locker(&mMutex);
@@ -228,9 +349,12 @@ void ViAudioWriteData::writeSplitFrequencies(ViFrequencyChunks &frequencies)
 
 void ViAudioWriteData::clearOther()
 {
+	mChannelSamples.clear();
 }
 
 void ViAudioWriteData::updateOther()
 {
     mStream = mBuffer->createWriteStream();
+	mChannelSamples.clear();
+	mChannelSamples.resize(mChannelCount);
 }

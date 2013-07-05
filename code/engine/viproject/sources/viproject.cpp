@@ -544,11 +544,12 @@ void ViProject::moveToProject()
             moveToProject(object, ViAudio::Corrected);
         }
         ViSongInfo info = object->songInfo();
-        if(info.imagePath() != "")
+		QString imagePath = info.imagePath();
+		if(imagePath != "" && !imagePath.startsWith(mPaths[ViProject::Root]))
         {
             QString newPath = path(ViProject::CoverData, object->sideNumber()) + object->fileName() + info.imageExtension(".");
-            QFile::rename(info.imagePath(), newPath);
-            info.changeImagePath(info.imagePath(), newPath);
+			QFile::rename(imagePath, newPath);
+			info.changeImagePath(imagePath, newPath);
             object->setSongInfo(info);
         }
     }

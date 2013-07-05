@@ -87,7 +87,7 @@ void ViAudioRecorder::finish()
 	QObject::disconnect(mProject, SIGNAL(finished()), this, SLOT(finish()));
 	mObject.setNull();
 	mQueue.clear();
-	mProject->clear();
+	//mProject->clear();
 	setProgress(100);
 	emit finished();
 }
