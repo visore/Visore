@@ -208,7 +208,7 @@ class ViModifyProcessor : public ViProcessor
 		bool mAutoWrite;
 		ViAudio::Type mType2;
         ViModifyProcessor::ModifyMode mModifyMode;
-        QQueue<QPair<bool, ViSampleChunk>> mOriginalSamples;
+		QQueue<QPair<bool, ViSampleChunk>> mOriginalData;
 
 };
 

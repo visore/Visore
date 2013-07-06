@@ -101,7 +101,7 @@ void ViNeuralCorrector::initialize()
 	{
 		mFirstWrites[i] = true;
 
-		mWriteBuffers[i] = ViSampleChunk(data().sampleCount());
+		mWriteBuffers[i] = ViSampleChunk(data().sampleCount() / channels);
 		mWritePositions[i] = 0;
 
 		ViNeuralNetwork *network = mNetwork->clone();
@@ -197,10 +197,10 @@ void ViNeuralCorrector::execute(int channel)
 
 		// Run training
 		trainer->setTargetValues({provider->calculate()});
-		/*for(int i = 0; i < 1; ++i)
-		{
-			trainer->trainSingle();
-		}*/
+		//for(int i = 0; i < 1; ++i)
+		//{
+		//	trainer->trainSingle();
+		//}
 		trainer->trainSingle();
 
 		// Get output
@@ -208,8 +208,7 @@ void ViNeuralCorrector::execute(int channel)
 		++position;
 		if(position == writeBuffer.size())
 		{
-			writeScaled(writeBuffer, channel);
-			writeBuffer.resize(data().sampleCount());
+			writeScaled(writeBuffer, channel); //SEGFAULT ERROR HERE (minimizing gui)
 			position = 0;
 		}
 	}

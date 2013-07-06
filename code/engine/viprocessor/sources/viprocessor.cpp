@@ -84,8 +84,8 @@ void ViProcessor::executeThread()
 				mProcessedSize += size;
 				for(int i = 0; i < count; ++i)
 				{
-					//run();
-					mThreadPool->start(this);
+					run();
+					//mThreadPool->start(this);
 				}
 				mThreadPool->waitForDone();
 				setProgress((mProcessedSize * 99.0) / mTotalSize);
@@ -387,7 +387,7 @@ int ViModifyProcessor::readNext()
 		int size = mData.read().size();
         if(mModifyMode == ViModifyProcessor::Noise)
         {
-            mOriginalSamples.enqueue(QPair<bool, ViSampleChunk>(isNoisy(), mData.samples()));
+			//mOriginalData.enqueue(QPair<bool, ViSampleChunk>(isNoisy(), mData.samples()));
         }
 		return size;
     }
@@ -402,7 +402,7 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
 		if(mType2 != ViAudio::Undefined)
 		{
             mData2.setBuffer(mObject->buffer(mType2));
-            mOriginalSamples.clear();
+            mOriginalData.clear();
 			initialize();
 			startThread();
 		}

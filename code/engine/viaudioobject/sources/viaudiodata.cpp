@@ -112,9 +112,9 @@ void ViAudioData::update()
     mConverter.setSize(sampleSize);
     mTransformer.setSize(mSampleCount);
 
-    mSampleChunk.resize(mSampleCount);
-    mRawChunk.resize(mWindowSize);
-    mFrequencyChunk.resize(mSampleCount);
+	mSampleChunk = ViSampleChunk(mSampleCount);
+	mRawChunk = ViRawChunk(mWindowSize);
+	mFrequencyChunk = ViFrequencyChunk(mSampleCount);
 
     updateOther();
 }
@@ -257,7 +257,7 @@ void ViAudioReadData::defaultOther()
 void ViAudioReadData::updateOther()
 {
     mStream = mBuffer->createReadStream();
-    mTemporaryChunk.resize(mSampleCount);
+	mTemporaryChunk = ViFrequencyChunk(mSampleCount);
 }
 
 /*****************************************
@@ -303,7 +303,7 @@ void ViAudioWriteData::dequeueSamples()
 void ViAudioWriteData::write(ViSampleChunk &chunk)
 {
 	QMutexLocker locker(&mMutex);
-    mStream->write(mRawChunk.data(), mConverter.realToPcm(chunk.data(), mRawChunk.data(), chunk.size()));
+	mStream->write(mRawChunk.data(), mConverter.realToPcm(chunk.data(), mRawChunk.data(), chunk.size()));
 }
 
 void ViAudioWriteData::writeScaled(ViSampleChunk &chunk)
