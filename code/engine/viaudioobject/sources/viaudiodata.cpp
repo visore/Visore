@@ -115,6 +115,7 @@ void ViAudioData::update()
 	mSampleChunk = ViSampleChunk(mSampleCount);
 	mRawChunk = ViRawChunk(mWindowSize);
 	mFrequencyChunk = ViFrequencyChunk(mSampleCount);
+	mChannleChunk = ViSampleChunk(mSampleCount / mChannelCount);
 
     updateOther();
 }
@@ -214,7 +215,6 @@ ViFrequencyChunk& ViAudioReadData::frequencies()
         mTransformer.pad(mTemporaryChunk.data(), mSampleChunk.size());
         mTransformer.forwardTransform(mTemporaryChunk.data(), mFrequencyChunk.data());
         mNeedsFrequency = false;
-        mNeedsFrequencySplit = true;
     }
     return mFrequencyChunk;
 }
@@ -224,8 +224,17 @@ ViFrequencyChunks& ViAudioReadData::splitFrequencies()
 	QMutexLocker locker(&mMutex);
     if(mNeedsFrequencySplit)
     {
-        ViSampleChanneler<qreal>::split(mFrequencyChunk.data(), mFrequencyChunk.size(), mChannelCount, mSplitFrequencyChunks);
-        mNeedsFrequencySplit = false;
+		ViSampleChunks& splits = splitSamples();
+		ViFrequencyChunk temp(mSampleCount / mChannelCount);
+		for(int i = 0; i < splits.size(); ++i)
+		{
+			ViSampleChunk &chunk = mSplitSampleChunks[i];
+			ViChunk<qreal>::copyData(chunk, mChannleChunk);
+			mTransformer.pad(mChannleChunk.data(), chunk.size());
+			mTransformer.forwardTransform(mChannleChunk.data(), temp.data());
+			mSplitFrequencyChunks.append(temp);
+			mNeedsFrequencySplit = true;
+		}
     }
     return mSplitFrequencyChunks;
 }
@@ -275,10 +284,19 @@ void ViAudioWriteData::enqueueSplitSamples(ViSampleChunk &samples, const int &ch
 void ViAudioWriteData::enqueueSplitScaledSamples(ViSampleChunk &samples, const int &channel)
 {
 	QMutexLocker locker(&mMutex);
-	ViScaler<qreal>::scale(samples, mSampleChunk, mScaleFrom, mScaleTo, DEFAULT_SCALE_FROM, DEFAULT_SCALE_TO);
-	mChannelSamples[channel].enqueue(mSampleChunk);
+	ViScaler<qreal>::scale(samples, mChannleChunk, mScaleFrom, mScaleTo, DEFAULT_SCALE_FROM, DEFAULT_SCALE_TO);
+	mChannelSamples[channel].enqueue(mChannleChunk);
 	locker.unlock();
 	dequeueSamples();
+}
+
+void ViAudioWriteData::enqueueSplitFrequencies(ViFrequencyChunk &frequencies, const int &channel)
+{
+	QMutexLocker locker(&mMutex);
+	mTransformer.inverseTransform(frequencies.data(), mChannleChunk.data());
+	mTransformer.rescale(mChannleChunk.data());
+	locker.unlock();
+	enqueueSplitSamples(mChannleChunk, channel);
 }
 
 void ViAudioWriteData::dequeueSamples()

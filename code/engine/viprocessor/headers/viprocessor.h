@@ -65,7 +65,8 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
         virtual void process(ViAudioObjectPointer audioObject, ViAudio::Type type);
 
         void setNoiseDetector(ViNoiseDetector *detector); //Takes ownership
-        bool isNoisy();
+		bool isNoisy();
+		bool isNoisy(int channel);
 
 		void setChannelMode(ViProcessor::ChannelMode mode);
 		ViProcessor::ChannelMode channelMode();
@@ -166,6 +167,41 @@ class ViDualProcessor : public ViProcessor
 
 };
 
+class ViModifyData
+{
+
+	private:
+
+		enum Usage
+		{
+			NotAdded,
+			Added,
+			Written
+		};
+
+	public:
+
+		ViModifyData();
+
+		void setChannels(const int &channels);
+
+		void clear();
+
+		void enqueue(const bool &noisy, const ViSampleChunk &data, const int &channel = 1);
+
+		bool isNoisy(const int &channel = 1);
+
+		ViSampleChunk& dequeue(const int &channel = 1);
+
+	private:
+
+		int mChannels;
+		QQueue<QVector<bool>> mNoise;
+		QQueue<QVector<ViModifyData::Usage>> mUsed;
+		QQueue<QVector<ViSampleChunk>> mData;
+
+};
+
 class ViModifyProcessor : public ViProcessor
 {
 
@@ -201,6 +237,8 @@ class ViModifyProcessor : public ViProcessor
 		void write(ViSampleChunk &chunk, int channel);
 		void writeScaled(ViSampleChunk &chunk);
 		void writeScaled(ViSampleChunk &chunk, int channel);
+		void writeFrequencies(ViFrequencyChunk &chunk);
+		void writeFrequencies(ViFrequencyChunk &chunk, int channel);
 
 	private:
 
@@ -208,7 +246,7 @@ class ViModifyProcessor : public ViProcessor
 		bool mAutoWrite;
 		ViAudio::Type mType2;
         ViModifyProcessor::ModifyMode mModifyMode;
-		QQueue<QPair<bool, ViSampleChunk>> mOriginalData;
+		ViModifyData mOriginalData;
 
 };
 

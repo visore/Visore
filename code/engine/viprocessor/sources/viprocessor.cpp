@@ -155,25 +155,33 @@ void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type)
 
 void ViProcessor::setNoiseDetector(ViNoiseDetector *detector)
 {
-    if(mNoiseDetector == NULL)
+	if(mNoiseDetector != NULL)
     {
         delete mNoiseDetector;
     }
     mNoiseDetector = detector;
-	mNoiseDetector->setMode(mChannelMode);
+	if(mNoiseDetector != NULL)
+	{
+		mNoiseDetector->setMode(mChannelMode);
+	}
 }
 
 bool ViProcessor::isNoisy()
 {
-    if(mNoiseDetector == NULL)
-    {
-        LOG("No noise detector specified.", QtCriticalMsg);
-        return false;
-    }
-    else
-    {
-		return mNoiseDetector->isNoisy(mData, mCurrentChannel);
-    }
+	return isNoisy(mCurrentChannel);
+}
+
+bool ViProcessor::isNoisy(int channel)
+{
+	if(mNoiseDetector == NULL)
+	{
+		LOG("No noise detector specified.", QtCriticalMsg);
+		return false;
+	}
+	else
+	{
+		return mNoiseDetector->isNoisy(mData, channel);
+	}
 }
 
 void ViProcessor::setChannelMode(ViProcessor::ChannelMode mode)
@@ -387,7 +395,17 @@ int ViModifyProcessor::readNext()
 		int size = mData.read().size();
         if(mModifyMode == ViModifyProcessor::Noise)
         {
-			//mOriginalData.enqueue(QPair<bool, ViSampleChunk>(isNoisy(), mData.samples()));
+			if(mChannelMode == ViProcessor::Separated)
+			{
+				for(int i = 0; i < mTotalChannels; ++i)
+				{
+					mOriginalData.enqueue(isNoisy(i), mData.splitSamples(i), i);
+				}
+			}
+			else
+			{
+				mOriginalData.enqueue(isNoisy(), mData.samples());
+			}
         }
 		return size;
     }
@@ -403,6 +421,7 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
 		{
             mData2.setBuffer(mObject->buffer(mType2));
             mOriginalData.clear();
+			mOriginalData.setChannels(mTotalChannels);
 			initialize();
 			startThread();
 		}
@@ -442,23 +461,149 @@ ViAudioWriteData& ViModifyProcessor::data2()
 void ViModifyProcessor::write(ViSampleChunk &chunk)
 {
 	QMutexLocker locker(&mMutex);
-	mData2.write(chunk);
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy())
+	{
+		mData2.write(mOriginalData.dequeue());
+	}
+	else
+	{
+		mData2.write(chunk);
+	}
 }
 
 void ViModifyProcessor::write(ViSampleChunk &chunk, int channel)
 {
 	QMutexLocker locker(&mMutex);
-	mData2.enqueueSplitSamples(chunk, channel);
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy(channel))
+	{
+		mData2.enqueueSplitSamples(mOriginalData.dequeue(channel), channel);
+	}
+	else
+	{
+		mData2.enqueueSplitSamples(chunk, channel);
+	}
 }
 
 void ViModifyProcessor::writeScaled(ViSampleChunk &chunk)
 {
 	QMutexLocker locker(&mMutex);
-	mData2.writeScaled(chunk);
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy())
+	{
+		mData2.writeScaled(mOriginalData.dequeue());
+	}
+	else
+	{
+		mData2.writeScaled(chunk);
+	}
 }
 
 void ViModifyProcessor::writeScaled(ViSampleChunk &chunk, int channel)
 {
 	QMutexLocker locker(&mMutex);
-	mData2.enqueueSplitScaledSamples(chunk, channel);
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy(channel))
+	{
+		mData2.enqueueSplitScaledSamples(mOriginalData.dequeue(channel), channel);
+	}
+	else
+	{
+		mData2.enqueueSplitScaledSamples(chunk, channel);
+	}
+}
+
+void ViModifyProcessor::writeFrequencies(ViFrequencyChunk &chunk)
+{
+	QMutexLocker locker(&mMutex);
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy())
+	{
+		mData2.write(mOriginalData.dequeue());
+	}
+	else
+	{
+		mData2.writeFrequencies(chunk);
+	}
+}
+
+void ViModifyProcessor::writeFrequencies(ViFrequencyChunk &chunk, int channel)
+{
+	QMutexLocker locker(&mMutex);
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy(channel))
+	{
+		mData2.enqueueSplitSamples(mOriginalData.dequeue(channel), channel);
+	}
+	else
+	{
+		mData2.enqueueSplitFrequencies(chunk, channel);
+	}
+}
+
+
+ViModifyData::ViModifyData()
+{
+	setChannels(1);
+}
+
+void ViModifyData::setChannels(const int &channels)
+{
+	mChannels = channels;
+}
+
+void ViModifyData::clear()
+{
+	mNoise.clear();
+	mUsed.clear();
+	mData.clear();
+}
+
+void ViModifyData::enqueue(const bool &noisy, const ViSampleChunk &data, const int &channel)
+{
+	if(mUsed.isEmpty() || mUsed.last()[channel] != ViModifyData::NotAdded)
+	{
+		QVector<ViModifyData::Usage> usage(mChannels);
+		for(int i = 0; i < mChannels; ++i)
+		{
+			usage[i] = ViModifyData::NotAdded;
+		}
+		mNoise.enqueue(QVector<bool>(mChannels));
+		mUsed.enqueue(usage);
+		mData.enqueue(QVector<ViSampleChunk>(mChannels));
+	}
+
+	int lastUnusedIndex = 0;
+	for(int i = mUsed.size() - 1; i >= 0; --i)
+	{
+		if(mUsed[i][channel] != ViModifyData::NotAdded)
+		{
+			lastUnusedIndex = i + 1;
+			break;
+		}
+	}
+
+	mNoise[lastUnusedIndex][channel] = noisy;
+	mUsed[lastUnusedIndex][channel] = ViModifyData::Added;
+	mData[lastUnusedIndex][channel] = data;
+}
+
+bool ViModifyData::isNoisy(const int &channel)
+{
+	for(int i = mUsed.size() - 1; i >= 0; --i)
+	{
+		if(mUsed[i][channel] == ViModifyData::Added)
+		{
+			return mNoise[i][channel];
+		}
+	}
+	return false;
+}
+
+ViSampleChunk& ViModifyData::dequeue(const int &channel)
+{
+	for(int i = mUsed.size() - 1; i >= 0; --i)
+	{
+		if(mUsed[i][channel] == ViModifyData::Added)
+		{
+			mUsed[i][channel] = ViModifyData::Written;
+			return mData[i][channel];
+		}
+	}
+	LOG("Trying to use a non-existing chunk", QtFatalMsg);
 }

@@ -46,6 +46,7 @@ class ViAudioData
         ViRawChunk mRawChunk;
         ViSampleChunk mSampleChunk;
         ViFrequencyChunk mFrequencyChunk;
+		ViSampleChunk mChannleChunk;
 
         ViFourierTransformer mTransformer;
 
@@ -111,6 +112,7 @@ class ViAudioWriteData : public ViAudioData
 		//Enqueues samples. Once a chunk is available for each channel, they are written.
 		void enqueueSplitSamples(ViSampleChunk &samples, const int &channel);
 		void enqueueSplitScaledSamples(ViSampleChunk &samples, const int &channel);
+		void enqueueSplitFrequencies(ViFrequencyChunk &frequencies, const int &channel);
 
 		void write(ViSampleChunk &chunk);
 		void writeScaled(ViSampleChunk &chunk);

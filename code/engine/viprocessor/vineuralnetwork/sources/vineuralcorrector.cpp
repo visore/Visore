@@ -208,7 +208,7 @@ void ViNeuralCorrector::execute(int channel)
 		++position;
 		if(position == writeBuffer.size())
 		{
-			writeScaled(writeBuffer, channel); //SEGFAULT ERROR HERE (minimizing gui)
+			writeScaled(writeBuffer, channel);
 			position = 0;
 		}
 	}
