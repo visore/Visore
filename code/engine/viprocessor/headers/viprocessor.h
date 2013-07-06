@@ -189,8 +189,7 @@ class ViModifyData
 
 		void enqueue(const bool &noisy, const ViSampleChunk &data, const int &channel = 1);
 
-		bool isNoisy(const int &channel = 1);
-
+		bool dequeueNoisy(const int &channel = 1); // If noisy, dequeues and return true. If not noisy, just returns false (manually call dequeue() to dequeue the values)
 		ViSampleChunk& dequeue(const int &channel = 1);
 
 	private:

@@ -461,7 +461,7 @@ ViAudioWriteData& ViModifyProcessor::data2()
 void ViModifyProcessor::write(ViSampleChunk &chunk)
 {
 	QMutexLocker locker(&mMutex);
-	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy())
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.dequeueNoisy())
 	{
 		mData2.write(mOriginalData.dequeue());
 	}
@@ -474,7 +474,7 @@ void ViModifyProcessor::write(ViSampleChunk &chunk)
 void ViModifyProcessor::write(ViSampleChunk &chunk, int channel)
 {
 	QMutexLocker locker(&mMutex);
-	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy(channel))
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.dequeueNoisy(channel))
 	{
 		mData2.enqueueSplitSamples(mOriginalData.dequeue(channel), channel);
 	}
@@ -487,9 +487,9 @@ void ViModifyProcessor::write(ViSampleChunk &chunk, int channel)
 void ViModifyProcessor::writeScaled(ViSampleChunk &chunk)
 {
 	QMutexLocker locker(&mMutex);
-	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy())
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.dequeueNoisy())
 	{
-		mData2.writeScaled(mOriginalData.dequeue());
+		mData2.write(mOriginalData.dequeue());
 	}
 	else
 	{
@@ -500,9 +500,9 @@ void ViModifyProcessor::writeScaled(ViSampleChunk &chunk)
 void ViModifyProcessor::writeScaled(ViSampleChunk &chunk, int channel)
 {
 	QMutexLocker locker(&mMutex);
-	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy(channel))
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.dequeueNoisy(channel))
 	{
-		mData2.enqueueSplitScaledSamples(mOriginalData.dequeue(channel), channel);
+		mData2.enqueueSplitSamples(mOriginalData.dequeue(channel), channel);
 	}
 	else
 	{
@@ -513,7 +513,7 @@ void ViModifyProcessor::writeScaled(ViSampleChunk &chunk, int channel)
 void ViModifyProcessor::writeFrequencies(ViFrequencyChunk &chunk)
 {
 	QMutexLocker locker(&mMutex);
-	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy())
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.dequeueNoisy())
 	{
 		mData2.write(mOriginalData.dequeue());
 	}
@@ -526,7 +526,7 @@ void ViModifyProcessor::writeFrequencies(ViFrequencyChunk &chunk)
 void ViModifyProcessor::writeFrequencies(ViFrequencyChunk &chunk, int channel)
 {
 	QMutexLocker locker(&mMutex);
-	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.isNoisy(channel))
+	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.dequeueNoisy(channel))
 	{
 		mData2.enqueueSplitSamples(mOriginalData.dequeue(channel), channel);
 	}
@@ -581,23 +581,55 @@ void ViModifyData::enqueue(const bool &noisy, const ViSampleChunk &data, const i
 	mNoise[lastUnusedIndex][channel] = noisy;
 	mUsed[lastUnusedIndex][channel] = ViModifyData::Added;
 	mData[lastUnusedIndex][channel] = data;
+
+	//Ensure old written values are removed.
+	int written;
+	do
+	{
+		written = 0;
+		QVector<ViModifyData::Usage> &usage = mUsed.first();
+		for(int i = 0; i < usage.size(); ++i)
+		{
+			if(usage[i] == ViModifyData::Written)
+			{
+				++written;
+			}
+			else
+			{
+				break;
+			}
+		}
+		if(written == mChannels)
+		{
+			mNoise.dequeue();
+			mUsed.dequeue();
+			mData.dequeue();
+		}
+	}
+	while(written == mChannels);
 }
 
-bool ViModifyData::isNoisy(const int &channel)
+bool ViModifyData::dequeueNoisy(const int &channel)
 {
-	for(int i = mUsed.size() - 1; i >= 0; --i)
+	for(int i = 0; i < mUsed.size(); ++i)
 	{
 		if(mUsed[i][channel] == ViModifyData::Added)
 		{
-			return mNoise[i][channel];
+			if(mNoise[i][channel])
+			{
+				dequeue(channel);
+				return true;
+			}
+			return false;
 		}
 	}
+	LOG("Trying to access non-existing usage.", QtFatalMsg);
 	return false;
 }
 
 ViSampleChunk& ViModifyData::dequeue(const int &channel)
 {
-	for(int i = mUsed.size() - 1; i >= 0; --i)
+	for(int i = 0; i < mUsed.size(); ++i)
 	{
 		if(mUsed[i][channel] == ViModifyData::Added)
 		{
@@ -605,5 +637,5 @@ ViSampleChunk& ViModifyData::dequeue(const int &channel)
 			return mData[i][channel];
 		}
 	}
-	LOG("Trying to use a non-existing chunk", QtFatalMsg);
+	LOG("Trying to use a non-existing chunk.", QtFatalMsg);
 }
