@@ -29,7 +29,7 @@ ViCrossCorrelator::~ViCrossCorrelator()
 void ViCrossCorrelator::initialize()
 {
 	ViCorrelator::initialize();
-
+	cout<<"+++++++++++"<<sampleCount()<<endl;
 	mTransformer.setSize(sampleCount());
 	deallocateData();
 	allocateData();
@@ -78,9 +78,9 @@ void ViCrossCorrelator::execute(int channel)
 	{
        addCorrelation(1 - (qAbs(mRealData[i] - mAutocorrelationData[i]) / 2));
 	}
-	cout<<mRealData[0]<<" ";
+	/*cout<<mRealData[0]<<" ";
 	cout <<mAutocorrelationData[0] << "  ";
-	cout<<(1 - (qAbs(mRealData[0] - mAutocorrelationData[0]) / 2))<<endl;
+	cout<<(1 - (qAbs(mRealData[0] - mAutocorrelationData[0]) / 2))<<endl;*/
 }
 
 ViCrossCorrelator* ViCrossCorrelator::clone()

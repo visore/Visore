@@ -4,11 +4,11 @@ ViWaveFormer::ViWaveFormer()
 	: ViProcessor()
 {
 	mForm = NULL;
-	setChannelMode(ViProcessor::Combined);
 }
 
 void ViWaveFormer::initialize()
 {
+	setChannelMode(ViProcessor::Combined);
 	mForm = new ViWaveForm();
 }
 
