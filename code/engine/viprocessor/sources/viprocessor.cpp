@@ -33,6 +33,10 @@ ViProcessor::ViProcessor(ViProcessor::ChannelMode mode)
 	mTotalSize = 0;
 	mProcessedSize = 0;
 
+	mHasScale = false;
+	mScaleFrom = 0;
+	mScaleTo = 0;
+
 	mThread.setProcessor(this);
 }
 
@@ -129,6 +133,11 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::T
 	mTotalSize = 0;
 	mProcessedSize = 0;
 
+	if(mHasScale)
+	{
+		mData.setScaleRange(mScaleFrom, mScaleTo);
+	}
+
 	if(mType != ViAudio::Undefined && mObject->hasBuffer(mType))
 	{
         mData.setBuffer(mObject->buffer(mType));
@@ -142,6 +151,13 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::T
 		emit finished();
 		return false;
 	}
+}
+
+void ViProcessor::scaleSamples(qreal from, qreal to)
+{
+	mHasScale = true;
+	mScaleFrom = from;
+	mScaleTo = to;
 }
 
 void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type)
@@ -265,12 +281,20 @@ ViAudioReadData& ViProcessor::data()
 ViSampleChunk& ViProcessor::currentSamples()
 {
 	QMutexLocker locker(&mMutex);
+	if(mHasScale)
+	{
+		return mData.scaledSamples();
+	}
 	return mData.samples();
 }
 
 ViSampleChunk& ViProcessor::currentSamples(int channel)
 {
 	QMutexLocker locker(&mMutex);
+	if(mHasScale)
+	{
+		return mData.scaledSplitSamples(channel);
+	}
 	return mData.splitSamples(channel);
 }
 
@@ -416,6 +440,10 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
 {
 	if(initializeProcess(audioObject, type1))
 	{
+		if(mHasScale)
+		{
+			mData2.setScaleRange(mScaleFrom, mScaleTo);
+		}
 		mType2 = type2;
 		if(mType2 != ViAudio::Undefined)
 		{
@@ -465,6 +493,10 @@ void ViModifyProcessor::write(ViSampleChunk &chunk)
 	{
 		mData2.write(mOriginalData.dequeue());
 	}
+	else if(mHasScale)
+	{
+		mData2.writeScaled(chunk);
+	}
 	else
 	{
 		mData2.write(chunk);
@@ -478,35 +510,13 @@ void ViModifyProcessor::write(ViSampleChunk &chunk, int channel)
 	{
 		mData2.enqueueSplitSamples(mOriginalData.dequeue(channel), channel);
 	}
+	else if(mHasScale)
+	{
+		mData2.enqueueSplitScaledSamples(chunk, channel);
+	}
 	else
 	{
 		mData2.enqueueSplitSamples(chunk, channel);
-	}
-}
-
-void ViModifyProcessor::writeScaled(ViSampleChunk &chunk)
-{
-	QMutexLocker locker(&mMutex);
-	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.dequeueNoisy())
-	{
-		mData2.write(mOriginalData.dequeue());
-	}
-	else
-	{
-		mData2.writeScaled(chunk);
-	}
-}
-
-void ViModifyProcessor::writeScaled(ViSampleChunk &chunk, int channel)
-{
-	QMutexLocker locker(&mMutex);
-	if(mModifyMode == ViModifyProcessor::Noise && !mOriginalData.dequeueNoisy(channel))
-	{
-		mData2.enqueueSplitSamples(mOriginalData.dequeue(channel), channel);
-	}
-	else
-	{
-		mData2.enqueueSplitScaledSamples(chunk, channel);
 	}
 }
 

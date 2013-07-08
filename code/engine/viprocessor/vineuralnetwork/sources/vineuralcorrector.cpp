@@ -18,6 +18,9 @@ ViNeuralCorrector::ViNeuralCorrector()
 	mDataOffset = 0;
 	mTargetLeftOffset = 0;
 	mTargetRightOffset = 0;
+
+	// All values that are read/written are scaled from [-1, 1] to [0, 1] and vice versa.
+	scaleSamples(0, 1);
 }
 
 ViNeuralCorrector::ViNeuralCorrector(ViNeuralNetwork *network, ViTrainer *trainer, ViTargetProvider *provider)
@@ -35,6 +38,9 @@ ViNeuralCorrector::ViNeuralCorrector(ViNeuralNetwork *network, ViTrainer *traine
 	mDataOffset = 0;
 	mTargetLeftOffset = 0;
 	mTargetRightOffset = 0;
+
+	// All values that are read/written are scaled from [-1, 1] to [0, 1] and vice versa.
+	scaleSamples(0, 1);
 }
 
 ViNeuralCorrector::~ViNeuralCorrector()
@@ -77,10 +83,6 @@ void ViNeuralCorrector::initialize()
 		LOG("No target provider was specified.", QtCriticalMsg);
 		return;
 	}
-
-	// All values that are read/written are scaled from [-1, 1] to [0, 1] and vice versa.
-	data().setScaleRange(0, 1);
-	data2().setScaleRange(0, 1);
 
 	int channels = usedChannelCount();
 
@@ -167,7 +169,7 @@ void ViNeuralCorrector::execute(int channel)
 		{
 			buffer[size] = readBuffer[i];
 		}
-		data2().enqueueSplitScaledSamples(buffer, channel);
+		write(buffer, channel);
 	}
 	mMutex.unlock();
 
@@ -208,7 +210,7 @@ void ViNeuralCorrector::execute(int channel)
 		++position;
 		if(position == writeBuffer.size())
 		{
-			writeScaled(writeBuffer, channel);
+			write(writeBuffer, channel);
 			position = 0;
 		}
 	}
@@ -220,7 +222,7 @@ void ViNeuralCorrector::finalize()
 	for(int i = 0; i < usedChannelCount(); ++i)
 	{
 		mWriteBuffers[i].setSize(mWritePositions[i]);
-		writeScaled(mWriteBuffers[i], i);
+		write(mWriteBuffers[i], i);
 	}
 
 	mReadBuffers.clear();

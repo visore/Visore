@@ -108,6 +108,8 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 
 		bool initializeProcess(ViAudioObjectPointer audioObject, ViAudio::Type type);
 
+		void scaleSamples(qreal from, qreal to);
+
 		ViAudioObjectPointer object();
 		void exit();
 
@@ -135,6 +137,10 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 
 		qint64 mTotalSize;
 		qint64 mProcessedSize;
+
+		bool mHasScale;
+		qreal mScaleFrom;
+		qreal mScaleTo;
 
 };
 
@@ -234,8 +240,6 @@ class ViModifyProcessor : public ViProcessor
 
 		void write(ViSampleChunk &chunk);
 		void write(ViSampleChunk &chunk, int channel);
-		void writeScaled(ViSampleChunk &chunk);
-		void writeScaled(ViSampleChunk &chunk, int channel);
 		void writeFrequencies(ViFrequencyChunk &chunk);
 		void writeFrequencies(ViFrequencyChunk &chunk, int channel);
 
