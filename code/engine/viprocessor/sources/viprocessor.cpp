@@ -88,8 +88,8 @@ void ViProcessor::executeThread()
 				mProcessedSize += size;
 				for(int i = 0; i < count; ++i)
 				{
-					run();
-					//mThreadPool->start(this);
+					//run();
+					mThreadPool->start(this);
 				}
 				mThreadPool->waitForDone();
 				setProgress((mProcessedSize * 99.0) / mTotalSize);
@@ -222,6 +222,11 @@ ViProcessor::ProcessMode ViProcessor::processMode()
 {
 	QMutexLocker locker(&mMutex);
 	return mProcessMode;
+}
+
+int ViProcessor::sampleCount()
+{
+	return mData.sampleCount();
 }
 
 int ViProcessor::channelCount()
@@ -396,6 +401,44 @@ ViAudioFormat ViDualProcessor::format2()
 {
 	QMutexLocker locker(&mMutex);
     return mObject->format(mType2);
+}
+
+ViAudioReadData& ViDualProcessor::data2()
+{
+	QMutexLocker locker(&mMutex);
+	return mData2;
+}
+
+ViSampleChunk& ViDualProcessor::currentSamples2()
+{
+	QMutexLocker locker(&mMutex);
+	if(mHasScale)
+	{
+		return mData2.scaledSamples();
+	}
+	return mData2.samples();
+}
+
+ViSampleChunk& ViDualProcessor::currentSamples2(int channel)
+{
+	QMutexLocker locker(&mMutex);
+	if(mHasScale)
+	{
+		return mData2.scaledSplitSamples(channel);
+	}
+	return mData2.splitSamples(channel);
+}
+
+ViFrequencyChunk& ViDualProcessor::currentFrequencies2()
+{
+	QMutexLocker locker(&mMutex);
+	return mData2.frequencies();
+}
+
+ViFrequencyChunk& ViDualProcessor::currentFrequencies2(int channel)
+{
+	QMutexLocker locker(&mMutex);
+	return mData2.splitFrequencies(channel);
 }
 
 ViModifyProcessor::ViModifyProcessor(bool autoWrite)
@@ -633,8 +676,7 @@ bool ViModifyData::dequeueNoisy(const int &channel)
 			return false;
 		}
 	}
-	LOG("Trying to access non-existing usage.", QtFatalMsg);
-	return false;
+	return true;
 }
 
 ViSampleChunk& ViModifyData::dequeue(const int &channel)

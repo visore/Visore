@@ -3,6 +3,7 @@
 ViCorrelator::ViCorrelator()
     : ViDualProcessor()
 {
+	setChannelMode(ViProcessor::Combined);
 }
 
 ViCorrelator::ViCorrelator(const ViCorrelator &other)

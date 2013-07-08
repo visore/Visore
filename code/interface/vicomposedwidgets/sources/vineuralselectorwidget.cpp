@@ -156,7 +156,14 @@ ViNeuralCorrector* ViNeuralSelectorWidget::corrector()
 	ViNeuralCorrector *corrector = new ViNeuralCorrector(network, trainer, provider);
 	
 	//Seperate channels
-//	corrector->enableSeparateChannels(mUi->channelsCheckBox->isChecked());
+	if(mUi->channelsCheckBox->isChecked())
+	{
+		corrector->setChannelMode(ViProcessor::Separated);
+	}
+	else
+	{
+		corrector->setChannelMode(ViProcessor::Combined);
+	}
 
     //Noise detector
     corrector->setProcessMode(mUi->noiseDetectorWidget->processMode());

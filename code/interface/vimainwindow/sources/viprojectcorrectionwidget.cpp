@@ -44,10 +44,10 @@ void ViProjectCorrectionWidget::correct()
 
 void ViProjectCorrectionWidget::showCorrelation()
 {
-	/*QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(showCorrelation()));
+	QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(showCorrelation()));
     ViCorrelationWidget *widget = new ViCorrelationWidget();
     widget->setProject(mUi->projectLoader->project());
-	ViStackedWidget::showTemporaryWidget(widget);*/
+	ViStackedWidget::showTemporaryWidget(widget);
 }
 
 void ViProjectCorrectionWidget::hideEvent(QHideEvent *event)

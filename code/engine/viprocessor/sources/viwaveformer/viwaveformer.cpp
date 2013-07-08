@@ -4,6 +4,7 @@ ViWaveFormer::ViWaveFormer()
 	: ViProcessor()
 {
 	mForm = NULL;
+	setChannelMode(ViProcessor::Combined);
 }
 
 void ViWaveFormer::initialize()
@@ -13,11 +14,11 @@ void ViWaveFormer::initialize()
 
 void ViWaveFormer::execute(int channel)
 {
-/*	ViSampleChunk &theSamples = samples();
+	ViSampleChunk &theSamples = currentSamples();
 	for(int i = 0; i < theSamples.size(); ++i)
 	{
 		mForm->append(theSamples[i]);
-    }*/
+	}
 }
 
 void ViWaveFormer::finalize()

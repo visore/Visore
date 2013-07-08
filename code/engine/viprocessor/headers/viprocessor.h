@@ -73,6 +73,7 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
         void setProcessMode(ViProcessor::ProcessMode mode);
 		ViProcessor::ProcessMode processMode();
 
+		int sampleCount();
 		int channelCount();
 		int usedChannelCount(); // Returns how many channels are actually used. 1 if ChannelMode == Combined, channelCount() if ChannelMode == Separated
 		int currentChannel();
@@ -160,11 +161,13 @@ class ViDualProcessor : public ViProcessor
 		virtual ~ViDualProcessor();
         void process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2);
 
-	protected:
-
 		ViAudio::Type type2();
 		ViAudioFormat format2();
 		ViAudioReadData& data2();
+		ViSampleChunk& currentSamples2();
+		ViSampleChunk& currentSamples2(int channel);
+		ViFrequencyChunk& currentFrequencies2();
+		ViFrequencyChunk& currentFrequencies2(int channel);
 
 	private:
 

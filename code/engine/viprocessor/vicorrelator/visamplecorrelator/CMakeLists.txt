@@ -1,0 +1,16 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Initiate source files
+FILE(GLOB VI_SAMPLE_CORRELATOR_HEADERS ${HEADERS}/*.h)
+FILE(GLOB VI_SAMPLE_CORRELATOR_SOURCES ${SOURCES}/*.cpp)
+
+#Create library
+ADD_LIBRARY(visamplecorrelator SHARED ${VI_SAMPLE_CORRELATOR_HEADERS} ${VI_SAMPLE_CORRELATOR_SOURCES})
+TARGET_LINK_LIBRARIES(visamplecorrelator vicorrelator)
+QT5_USE_MODULES(visamplecorrelator Multimedia Xml)
+
+#Install file
+INSTALL(TARGETS visamplecorrelator DESTINATION ${VI_CORRELATOR_INSTALL_PATH})
