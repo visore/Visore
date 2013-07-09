@@ -25,7 +25,8 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	mUi->createProjectButton->setText("Record Project", textColor, font);
 	mUi->createProjectButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViProjectRecordingWidget());
-	mUi->createProjectButton->addFunctionCall(SIGNAL(clicked()), ViStackedWidget::currentIndexCall(index));
+	mUi->createProjectButton->setProperty("index", index);
+	QObject::connect(mUi->createProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->projectPlaybackButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
 	mUi->projectPlaybackButton->setText("Playback Project", textColor, font);
@@ -40,22 +41,25 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	mUi->filePlaybackButton->setSize(250, 100);
 
 	mUi->analyseWaveButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
-	mUi->analyseWaveButton->setText("Analyse Sound Wave", textColor, font);
+	mUi->analyseWaveButton->setText("Analyse Wave", textColor, font);
 	mUi->analyseWaveButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViWaveAnalysisWidget());
-	mUi->analyseWaveButton->addFunctionCall(SIGNAL(clicked()), ViStackedWidget::currentIndexCall(index));
+	mUi->analyseWaveButton->setProperty("index", index);
+	QObject::connect(mUi->analyseWaveButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->correlateProjectButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
 	mUi->correlateProjectButton->setText("Correlate Project", textColor, font);
 	mUi->correlateProjectButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViProjectCorrelationWidget());
-	mUi->correlateProjectButton->addFunctionCall(SIGNAL(clicked()), ViStackedWidget::currentIndexCall(index));
+	mUi->correlateProjectButton->setProperty("index", index);
+	QObject::connect(mUi->correlateProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->correctProjectButton->setIcon(ViThemeManager::icon("correctionproject"), 80);
 	mUi->correctProjectButton->setText("Correct Project", textColor, font);
 	mUi->correctProjectButton->setSize(250, 100);
     index = ViStackedWidget::addWidget(new ViProjectCorrectionWidget());
-    mUi->correctProjectButton->addFunctionCall(SIGNAL(clicked()), ViStackedWidget::currentIndexCall(index));
+	mUi->correctProjectButton->setProperty("index", index);
+	QObject::connect(mUi->correctProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
     QFont headingFont;
 	headingFont.setFamily("Harabara");

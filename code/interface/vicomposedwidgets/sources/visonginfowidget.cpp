@@ -17,8 +17,6 @@ ViSongInfoWidget::ViSongInfoWidget(QWidget *parent)
 	setBorder(ViThemeManager::color(ViThemeColors::BorderColor1), 5, 10);
 
 	//mUi->button->setIcon(ViThemeManager::image("", ViThemeImage::Selected, ViThemeManager::Icon), ViThemeImage::Selected);
-	mUi->button->setCheckable(false);
-	mUi->button->setGlow(ViThemeManager::color(ViThemeColors::ButtonGlowColor1));
 	mUi->button->setSize(20, 20);
 	QObject::connect(mUi->button, SIGNAL(clicked()), this, SLOT(switchInfo()));
 	mTimer = new QTimer(this);

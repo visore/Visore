@@ -25,6 +25,8 @@ class ViThemeManager : public ViSingleton<ViThemeManager>
 
 		~ViThemeManager(); //Must be public for QSharedPointer
 
+		static QString globalStyleSheet();
+
 		static QColor color(ViThemeColors::Type type);
 		static ViFont font(ViThemeFonts::Type type);
 

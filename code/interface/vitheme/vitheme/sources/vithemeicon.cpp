@@ -20,12 +20,12 @@ ViThemeIcon::ViThemeIcon(const ViThemeIcon &other)
 	mDisabledPath = other.mDisabledPath;
 }
 
-QIcon ViThemeIcon::icon(ViThemeIcon::Mode mode, int size)
+QIcon ViThemeIcon::icon(ViThemeIcon::Mode mode, int size) const
 {
 	return QIcon(pixmap(mode, size));
 }
 
-QImage ViThemeIcon::image(ViThemeIcon::Mode mode, int size)
+QImage ViThemeIcon::image(ViThemeIcon::Mode mode, int size) const
 {
 	QImage image = transform(mode);
 	if(!image.isNull() && size >= 0)
@@ -35,7 +35,7 @@ QImage ViThemeIcon::image(ViThemeIcon::Mode mode, int size)
 	return image;
 }
 
-QPixmap ViThemeIcon::pixmap(ViThemeIcon::Mode mode, int size)
+QPixmap ViThemeIcon::pixmap(ViThemeIcon::Mode mode, int size) const
 {
 	return QPixmap::fromImage(image(mode, size));
 }
@@ -86,7 +86,7 @@ void ViThemeIcon::set(const ViThemeIcon::Mode &mode, const QString &path)
 	}
 }
 
-QImage ViThemeIcon::transform(ViThemeIcon::Mode mode)
+QImage ViThemeIcon::transform(ViThemeIcon::Mode mode) const
 {
 	QImage image;
 	if(path() != "")

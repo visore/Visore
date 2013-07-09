@@ -23,6 +23,24 @@ ViElement::ViElement(const ViElement &other)
 	mChildren = other.mChildren;
 }
 
+ViAttribute& ViElement::addAttribute(ViAttribute attribute)
+{
+	mAttributes.append(attribute);
+	mAttributes.last();
+}
+
+ViAttribute& ViElement::addAttribute(QString name)
+{
+	mAttributes.append(ViAttribute(name));
+	return mAttributes.last();
+}
+
+ViAttribute& ViElement::addAttribute(QString name, QVariant value)
+{
+	mAttributes.append(ViAttribute(name, value));
+	return mAttributes.last();
+}
+
 ViElement& ViElement::prependChild(ViElement child)
 {
     mChildren.prepend(child);
@@ -45,34 +63,16 @@ ViElement& ViElement::addChild(ViElement child)
 	return mChildren.last();
 }
 
-ViAttribute& ViElement::addAttribute(ViAttribute attribute)
-{
-	mAttributes.append(attribute);
-	mAttributes.last();
-}
-
 ViElement& ViElement::addChild(QString name)
 {
 	mChildren.append(ViElement(name));
 	return mChildren.last();
 }
 
-ViAttribute& ViElement::addAttribute(QString name)
-{
-	mAttributes.append(ViAttribute(name));
-	return mAttributes.last();
-}
-
 ViElement& ViElement::addChild(QString name, QVariant value)
 {
 	mChildren.append(ViElement(name, value));
 	return mChildren.last();
-}
-
-ViAttribute& ViElement::addAttribute(QString name, QVariant value)
-{
-	mAttributes.append(ViAttribute(name, value));
-	return mAttributes.last();
 }
 
 ViAttributeList ViElement::attributes(QString nameFilter)
@@ -141,16 +141,15 @@ bool ViElement::hasChild(QString name)
     return false;
 }
 
-ViAttribute ViElement::attribute(int index)
+ViAttribute& ViElement::attribute(int index)
 {
 	if(attributeCount() > index)
 	{
 		return mAttributes[index];
 	}
-	return ViAttribute();
 }
 
-ViAttribute ViElement::attribute(QString name)
+ViAttribute& ViElement::attribute(QString name)
 {
 	for(int i = 0; i < attributeCount(); ++i)
 	{
@@ -159,19 +158,18 @@ ViAttribute ViElement::attribute(QString name)
 			return mAttributes[i];
 		}
 	}
-	return ViAttribute();
 }
 
-ViElement ViElement::child(int index)
+ViElement& ViElement::child(int index)
 {
 	if(childrenCount() > index)
 	{
 		return mChildren[index];
 	}
-	return ViElement();
+	return *this;
 }
 
-ViElement ViElement::child(QString name)
+ViElement& ViElement::child(QString name)
 {
 	for(int i = 0; i < childrenCount(); ++i)
 	{
@@ -182,13 +180,9 @@ ViElement ViElement::child(QString name)
 	}
 	for(int i = 0; i < childrenCount(); ++i)
 	{
-		ViElement child = mChildren[i].child(name);
-		if(!child.isNull())
-		{
-			return child;
-		}
+		return mChildren[i].child(name);
 	}
-	return ViElement();
+	return *this;
 }
 
 

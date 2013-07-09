@@ -18,10 +18,9 @@ ViFileBrowser::ViFileBrowser(QWidget *parent)
 	mButton->setSize(size, size);
 	mButton->setIcon(ViThemeManager::icon("browse"), 20);
 	mButton->setHeight(25);
-	mButton->setCursor(Qt::ArrowCursor);
 	mButton->setToolTip("Browse");
 	mButton->disableBackground();
-	mButton->disableGlow();
+	mButton->disbaleBorder();
 
 	QObject::connect(mButton, SIGNAL(clicked()), this, SLOT(showDialog()));
     QObject::connect(mLineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkPath()));

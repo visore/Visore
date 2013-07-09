@@ -12,7 +12,7 @@ void ViWaveFormer::initialize()
 	mForm = new ViWaveForm();
 }
 
-void ViWaveFormer::execute(int channel)
+void ViWaveFormer::execute(const int &channel)
 {
 	ViSampleChunk &theSamples = currentSamples();
 	for(int i = 0; i < theSamples.size(); ++i)

@@ -15,7 +15,7 @@ ViLoadingWidget::ViLoadingWidget()
 	mUi->animationWidget->setAnimation(ViThemeManager::animation("loading"));
 
 	mUi->cancelButton->setSize(50, 20);
-	mUi->cancelButton->setGlow(ViThemeManager::color(ViThemeColors::ButtonGlowColor1));
+	//mUi->cancelButton->setGlow(ViThemeManager::color(ViThemeColors::ButtonGlowColor1));
 	//mUi->cancelButton->setIcon(ViThemeManager::image("record.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 
     QObject::connect(engine().data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));

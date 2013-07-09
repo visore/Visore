@@ -11,8 +11,6 @@ ViRemoveWidget::ViRemoveWidget(int row)
 	mButton = new ViButton();
 	mButton->setIcon(ViThemeManager::icon("remove"), 30);
 	mButton->setSize(30, 30);
-	mButton->disableBackground();
-	mButton->disableGlow();
 	QHBoxLayout *layout = new QHBoxLayout(this);
 	layout->addWidget(mButton);
 	layout->setContentsMargins(0, 0, 0, 0);

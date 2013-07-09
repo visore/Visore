@@ -71,19 +71,25 @@ void ViMainWindow::initialize()
 	mUi->setupUi(this);
     mEngine = ViAudioEngine::instance();
 
-    setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile").path() + ") repeat-x;}");
+	centralWidget()->setStyleSheet(ViThemeManager::globalStyleSheet());
+
+	//setStyleSheet("QWidget#centralWidget{background-image: url(" + ViThemeManager::image("tile").path() + ") repeat-x;}");
+	QString color = ViThemeManager::color(ViThemeColors::MainColor6).name();
+	mUi->lineWidget->setStyleSheet("background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0.0 transparent, stop: 0.02 " + color + ", stop: 0.7 " + color + ", stop: 1.0 transparent);");
 
     mUi->stack->layout()->addWidget(ViStackedWidget::widget());
     mUi->stack->setStyleSheet(".QWidget{background:transparent;border:0px;}");
 
     int index = ViStackedWidget::addWidget(new ViMainMenu(), false);
     ViStackedWidget::setCurrentIndex(index);
-    mUi->logoButton->addFunctionCall(SIGNAL(clicked()), ViFunctionCall(ViStackedWidget::instance().data(), "setCurrentIndex", index));
+	mUi->logoButton->setProperty("index", index);
+	QObject::connect(mUi->logoButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
-	mUi->logoButton->setSize(64, 64);
-	mUi->logoButton->setIcon("logo", 64);
 	mUi->logoButton->disableBackground();
-	mUi->logoButton->setGlow(ViGradientCreator::Circle);
+	mUi->logoButton->disbaleBorder();
+	mUi->logoButton->addStyleSheet("background: qradialgradient(cx: 0.5, cy: 0.5, radius: 1, fx: 0.5, fy: 0.5, stop: 0 " + ViThemeManager::color(ViThemeColors::ButtonNormalColor2).name() + ", stop: 0.45 transparent);", ViButton::Hovered);
+	mUi->logoButton->setSize(64, 64);
+	mUi->logoButton->setIcon(ViThemeManager::icon("logo"), 64);
 
 	ViFont font = ViThemeManager::font(ViThemeFonts::MainFont);
 	font.setPointSize(30);

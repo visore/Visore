@@ -13,6 +13,8 @@ class ViTheme
 
 		virtual ~ViTheme();
 
+		QString globalStyleSheet();
+
 		QString name();
 		ViThemeColors* colors();
 		ViThemeFonts* fonts();
@@ -23,6 +25,7 @@ class ViTheme
 
 	protected:
 
+		QString mGlobalStyleSheet;
 		QString mName;
 		ViThemeColors *mColors;
 		ViThemeFonts *mFonts;

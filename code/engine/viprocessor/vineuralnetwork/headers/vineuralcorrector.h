@@ -16,7 +16,7 @@ class ViNeuralCorrector : public ViModifyProcessor, public ViLibrary
 		~ViNeuralCorrector();
 
 		void initialize();
-        void execute(int channel);
+		void execute(const int &channel);
 		void finalize();
 
         ViElement exportData();

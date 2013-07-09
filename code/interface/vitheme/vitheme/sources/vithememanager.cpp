@@ -42,6 +42,11 @@ ViThemeManager::~ViThemeManager()
     mLibrary.unload();
 }
 
+QString ViThemeManager::globalStyleSheet()
+{
+	return ViThemeManager::instance()->mCurrentTheme->globalStyleSheet();
+}
+
 QColor ViThemeManager::color(ViThemeColors::Type type)
 {
 	return ViThemeManager::instance()->mCurrentTheme->colors()->color(type);

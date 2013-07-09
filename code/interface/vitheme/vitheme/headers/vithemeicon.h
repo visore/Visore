@@ -22,9 +22,9 @@ class ViThemeIcon : public ViThemeResource
 		ViThemeIcon(QString name = "");
 		ViThemeIcon(const ViThemeIcon &other);
 		
-		QIcon icon(ViThemeIcon::Mode mode = ViThemeIcon::Normal, int size = -1);
-		QImage image(ViThemeIcon::Mode mode = ViThemeIcon::Normal, int size = -1);
-		QPixmap pixmap(ViThemeIcon::Mode mode = ViThemeIcon::Normal, int size = -1);
+		QIcon icon(ViThemeIcon::Mode mode = ViThemeIcon::Normal, int size = -1) const;
+		QImage image(ViThemeIcon::Mode mode = ViThemeIcon::Normal, int size = -1) const;
+		QPixmap pixmap(ViThemeIcon::Mode mode = ViThemeIcon::Normal, int size = -1) const;
 
 		QString path(ViThemeIcon::Mode mode = ViThemeIcon::Normal) const;
 
@@ -33,7 +33,7 @@ class ViThemeIcon : public ViThemeResource
 
 	protected:
 
-		QImage transform(ViThemeIcon::Mode mode);
+		QImage transform(ViThemeIcon::Mode mode) const;
 		QRgb transformColor(QRgb rgb, const int &red, const int &green, const int &blue);
 
 		static QRgb toSelectedColor(QRgb rgb);

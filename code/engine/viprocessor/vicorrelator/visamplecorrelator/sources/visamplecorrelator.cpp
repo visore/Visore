@@ -10,7 +10,7 @@ ViSampleCorrelator::ViSampleCorrelator(const ViSampleCorrelator &other)
 {
 }
 
-void ViSampleCorrelator::execute(int channel)
+void ViSampleCorrelator::execute(const int &channel)
 {
 	ViSampleChunk &theSamples1 = currentSamples();
 	ViSampleChunk &theSamples2 = currentSamples2();

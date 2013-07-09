@@ -12,6 +12,11 @@ ViStackedWidget::~ViStackedWidget()
     //The ownership of mWidget is transfered to ViMainWindow which will delete it.
 }
 
+void ViStackedWidget::changeCurrentIndex()
+{
+	setCurrentIndex(sender()->property("index").toInt());
+}
+
 void ViStackedWidget::deleteTemporaryWidget()
 {
     if(mTemporaryIndex >= 0)

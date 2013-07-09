@@ -5,7 +5,7 @@
 ViScrollArea::ViScrollArea(QWidget *parent)
 	: QScrollArea(parent)
 {
-	setStyleSheet("\
+	/*setStyleSheet("\
 		QScrollArea\
 		{\
 			background: transparent;\
@@ -16,7 +16,7 @@ ViScrollArea::ViScrollArea(QWidget *parent)
 			background: transparent;\
 			border: 0px;\
 		}\
-	");
+	");*/
 
 	setWidgetResizable(true);
 }

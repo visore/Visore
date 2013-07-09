@@ -24,5 +24,9 @@
         <file>zoomout/zoomout_normal.png</file>
         <file>logo/logo_normal.png</file>
         <file>correctionproject/correctionproject_normal.png</file>
+        <file>down/down_hover.png</file>
+        <file>down/down_normal.png</file>
+        <file>up/up_hover.png</file>
+        <file>up/up_normal.png</file>
     </qresource>
 </RCC>

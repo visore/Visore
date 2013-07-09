@@ -12,6 +12,10 @@ class ViStackedWidget : public QObject, public ViSingleton<ViStackedWidget>
 
 	friend class ViSingleton<ViStackedWidget>;
 
+	public slots:
+
+		void changeCurrentIndex();
+
     private slots:
 
         void deleteTemporaryWidget();

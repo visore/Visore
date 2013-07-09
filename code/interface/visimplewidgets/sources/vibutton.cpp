@@ -1,344 +1,168 @@
 #include <vibutton.h>
-#include <QStyleOptionButton>
-
-#define GLOW_OFFSET_PERCENTAGE 0.07
+#include <vithememanager.h>
 
 ViButton::ViButton(QWidget *parent)
-	: ViWidget(parent)
+	: QToolButton(parent)
 {
-	mBackgroundEnabled = true;
+	setCursor(Qt::PointingHandCursor);
+	setToolButtonStyle(Qt::ToolButtonIconOnly);
 
-	mIsHover = false;
-	mIsPressed = false;
-	mGlowEnabled = false;
-
-	mIsEnabled = true;
-	mIsCheckable = false;
-	mIsChecked = false;
-
-	mIconSize = -1;
-
-	mText = "";
-
-	mNormalGradient.setColorAt(0, ViThemeManager::color(ViThemeColors::ButtonNormalColor1));
-	mNormalGradient.setColorAt(0.5, ViThemeManager::color(ViThemeColors::ButtonNormalColor2));
-	mNormalGradient.setColorAt(1, ViThemeManager::color(ViThemeColors::ButtonNormalColor1));
-
-	mSelectedGradient.setColorAt(0, ViThemeManager::color(ViThemeColors::ButtonSelectedColor1));
-	mSelectedGradient.setColorAt(0.5, ViThemeManager::color(ViThemeColors::ButtonSelectedColor2));
-	mSelectedGradient.setColorAt(1, ViThemeManager::color(ViThemeColors::ButtonSelectedColor1));
-
-	mDisabledGradient.setColorAt(0, ViThemeManager::color(ViThemeColors::ButtonHoveredColor1));
-	mDisabledGradient.setColorAt(0.5, ViThemeManager::color(ViThemeColors::ButtonHoveredColor2));
-	mDisabledGradient.setColorAt(1, ViThemeManager::color(ViThemeColors::ButtonHoveredColor1));
-
-	setGlow(ViThemeManager::color(ViThemeColors::ButtonGlowColor1));
-	setSize(64, 64);
-	setCornerRounding(15);
+	mTextColor = ViThemeManager::color(ViThemeColors::ButtonTextColor2);
+	mEnableBorder = true;
+	mEnableBackground = true;
+	initialize();
 }
 
-void ViButton::setIcon(QString icon, int size)
+void ViButton::clearStyleSheet()
 {
-	setIcon(ViThemeManager::icon(icon), size);
+	setStyleSheet("");
 }
 
-void ViButton::setIcon(ViThemeIcon icon, int size)
+void ViButton::addStyleSheet(QString style)
 {
-	mIcon = icon;
-	mIconSize = size;
-	repaint();
+	setStyleSheet(styleSheet() + style);
 }
 
-void ViButton::setText(QString text)
+void ViButton::addStyleSheet(QString style, ViButton::Mode mode)
 {
-	QFont font;
-	font.setPointSize(15);
-	setText(text, ViThemeManager::color(ViThemeColors::ButtonTextColor1), font);
-}
-
-void ViButton::setText(QString text, ViFont font)
-{
-	mText = text;
-	mTextColor = font.color();
-	mTextFont = font;
-}
-
-void ViButton::setText(QString text, QColor color, QFont font)
-{
-	mText = text;
-	mTextColor = color;
-	mTextFont = font;
-}
-
-void ViButton::setCornerRounding(qreal value)
-{
-	mCornerRounding = value;
-}
-
-void ViButton::paintEvent(QPaintEvent *event)
-{
-	ViWidget::paintEvent(event);
-
-	QPainter painter(this);
-	painter.setRenderHint(QPainter::Antialiasing);
-
-	//Used to draw style sheets with ViButton:pressed
-	QStyleOptionButton option;
-	option.initFrom(this);
-	if(mIsPressed)
+	if(mode == ViButton::Normal)
 	{
-		option.state |= QStyle::State_Sunken;
-		style()->drawPrimitive(QStyle::PE_Widget, &option, &painter, this);
+		addStyleSheet("QToolButton{" + style + "}");
 	}
-
-	paintGlow(painter);
-	paintBackground(painter);
-	paintIcon(painter);
-	paintText(painter);
-}
-
-void ViButton::paintGlow(QPainter &painter)
-{
-	painter.setPen(Qt::NoPen);
-	if(mIsHover && mGlowEnabled && isEnabled())
+	else if(mode == ViButton::Hovered)
 	{
-		QImage gradient = ViGradientCreator::createGradient(mGlowType, width(), height(), mGlowColor);
-		painter.drawImage(rect(), gradient, gradient.rect());
+		addStyleSheet("QToolButton:hover{" + style + "}");
+	}
+	else if(mode == ViButton::Selected)
+	{
+		addStyleSheet("QToolButton:pressed{" + style + "}");
 	}
 }
 
-void ViButton::paintBackground(QPainter &painter)
+void ViButton::initialize()
 {
-	if(mBackgroundEnabled)
-	{
-		painter.setPen(Qt::NoPen);
-		QRect rectangle = QRect(mGlowOffset, mGlowOffset, width() - (mGlowOffset * 2), height() - (mGlowOffset * 2));
+	clearStyleSheet();
+	addStyleSheet("color: " + mTextColor.name() + ";", ViButton::Normal);
 
-		if(!mIsEnabled)
-		{
-			painter.setBrush(mDisabledGradient);
-		}
-		else if((mIsCheckable && mIsChecked) || mIsPressed)
-		{
-			painter.setBrush(mSelectedGradient);
-		}
-		else
-		{
-			painter.setBrush(mNormalGradient);
-		}
+	setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+	if(text() == "")
+	{
+		setToolButtonStyle(Qt::ToolButtonIconOnly);
+	}
 
-		if(width() > height())
-		{
-			painter.drawRoundedRect(rectangle, mCornerRounding, mCornerRounding * (width() / height()), Qt::RelativeSize);
-		}
-		else if(width() < height())
-		{
-			painter.drawRoundedRect(rectangle, mCornerRounding * (width() / height()), mCornerRounding, Qt::RelativeSize);
-		}
-		else
-		{
-			painter.drawRoundedRect(rectangle, mCornerRounding * 1.5, mCornerRounding * 1.5, Qt::RelativeSize);
-		}
-	}
-}
-
-void ViButton::paintIcon(QPainter &painter)
-{
-	QRect rectangle;
-	QImage image;
-
-	if(!mIsEnabled)
+	if(mEnableBorder)
 	{
-		image = mIcon.image(ViThemeIcon::Disabled, mIconSize);
-	}
-	else if((mIsCheckable && mIsChecked))
-	{
-		image = mIcon.image(ViThemeIcon::Selected, mIconSize);
-	}
-	else if(mIsPressed)
-	{
-		image = mIcon.image(ViThemeIcon::Selected, mIconSize * 0.95);
-	}
-	else if(mIsHover)
-	{
-		image = mIcon.image(ViThemeIcon::Hovered, mIconSize);
+		QString borderColor1 = ViThemeManager::color(ViThemeColors::BorderColor1).name();
+		QString borderColor2 = ViThemeManager::color(ViThemeColors::BorderColor2).name();
+		addStyleSheet("border: 2px solid  " + borderColor2 + "; border-radius: 10px;", ViButton::Normal);
+		addStyleSheet("border-color: " + borderColor1 + ";", ViButton::Hovered);
 	}
 	else
 	{
-		image = mIcon.image(ViThemeIcon::Normal, mIconSize);
+		addStyleSheet("border: 0px;", ViButton::Normal);
 	}
 
-	if(image.isNull())
+	if(mEnableBorder)
 	{
-		return;
-	}
-
-	mIconWidth = image.width();
-	mIconHeight = image.height();
-
-	if(mText == "")
-	{
-		rectangle = QRect((width() - mIconWidth) / 2, (height() - mIconHeight) / 2, mIconWidth, mIconHeight);
+		QString backgroundColor1 = ViThemeManager::color(ViThemeColors::ButtonNormalColor1).name();
+		QString backgroundColor2 = ViThemeManager::color(ViThemeColors::ButtonNormalColor2).name();
+		addStyleSheet("padding: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 " + backgroundColor1 + ", stop: 0.05 " + backgroundColor1 + ", stop: 0.5 " + backgroundColor2 + ", stop: 0.95 " + backgroundColor1 + ", stop: 1.0 " + backgroundColor1 + ");", ViButton::Normal);
+		addStyleSheet("background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 " + backgroundColor1 + ", stop: 0.4 " + backgroundColor2 + ", stop: 0.6 " + backgroundColor2 + ", stop: 1.0 " + backgroundColor1 + ");", ViButton::Hovered);
 	}
 	else
 	{
-		rectangle = QRect((width() * GLOW_OFFSET_PERCENTAGE), (height() - mIconHeight + (height() * GLOW_OFFSET_PERCENTAGE)) / 2, mIconWidth, mIconHeight);
+		addStyleSheet("background: transparent;", ViButton::Normal);
 	}
-	painter.drawImage(rectangle, image, image.rect());
-}
-
-void ViButton::paintText(QPainter &painter)
-{
-	QRect rectangle;
-	if(mText != "")
-	{
-		QPen pen(mTextColor);
-		pen.setCapStyle(Qt::RoundCap);
-		painter.setPen(pen);
-		painter.setFont(mTextFont);
-		int offset = (width() * GLOW_OFFSET_PERCENTAGE * 1.5) + mIconWidth;
-		painter.drawText(QRect(offset, 0, width() - offset - (GLOW_OFFSET_PERCENTAGE * width()), height()), Qt::AlignVCenter | Qt::AlignLeft | Qt::TextWordWrap, mText);
-	}
-}
-
-void ViButton::enableBackground(bool enable)
-{
-	mBackgroundEnabled = enable;
-}
-
-void ViButton::disableBackground()
-{
-	mBackgroundEnabled = false;
-}
-
-void ViButton::setGlow(QColor color, ViGradientCreator::ViGradientType type)
-{
-	enableGlow(true);
-	mGlowColor = color;
-	mGlowType = type;
-}
-
-void ViButton::setGlow(ViGradientCreator::ViGradientType type)
-{
-	enableGlow(true);
-	mGlowType = type;
-}
-
-void ViButton::enableGlow(bool enable)
-{
-	mGlowEnabled = enable;
-}
-
-void ViButton::disableGlow()
-{
-	mGlowEnabled = false;
-}
-
-void ViButton::setEnabled(bool enable)
-{
-	mIsEnabled = enable;
-	repaint();
-}
-
-void ViButton::enable()
-{
-	mIsEnabled = true;
 }
 
 void ViButton::disable()
 {
-	mIsEnabled = false;
+	setEnabled(false);
 }
 
-void ViButton::setCheckable(bool checkable)
+void ViButton::enable()
 {
-	mIsCheckable = checkable;
+	setEnabled(true);
 }
 
-bool ViButton::isCheckable()
+void ViButton::enableBorder()
 {
-	return mIsCheckable;
+	mEnableBorder = true;
+	initialize();
 }
 
-void ViButton::setChecked(bool checked)
+void ViButton::disbaleBorder()
 {
-	mIsChecked = checked;
+	mEnableBorder = false;
+	initialize();
 }
 
-void ViButton::check()
+void ViButton::enableBackground()
 {
-	mIsChecked = true;
+	mEnableBackground = true;
+	initialize();
 }
 
-void ViButton::uncheck()
+void ViButton::disableBackground()
 {
-	mIsChecked = false;
+	mEnableBackground = false;
+	initialize();
 }
 
-bool ViButton::isChecked()
+void ViButton::setText(const QString &text)
 {
-	return mIsChecked;
+	QToolButton::setText(text);
 }
 
-bool ViButton::pressed()
+void ViButton::setText(const QString &text, const QColor &color, const QFont &font)
 {
-	return mIsPressed;
+	setText(text);
+	setFont(color, font);
 }
 
-void ViButton::enterEvent(QEvent *event)
+void ViButton::setText(const QString &text, const ViFont &font)
 {
-	mIsHover = true;
-	repaint();
+	setText(text);
+	setFont(font);
 }
 
-void ViButton::leaveEvent(QEvent *event)
+void ViButton::setFont(const QColor &color, const QFont &font)
 {
-	mIsHover = false;
-	repaint();
+	mTextColor = color;
+	QToolButton::setFont(font);
+	initialize();
 }
 
-void ViButton::mouseReleaseEvent(QMouseEvent *event)
+void ViButton::setFont(const ViFont &font)
 {
-	if(isCheckable())
-	{
-		setChecked(!isChecked());
-		emit clicked(isChecked());
-	}
-	else
-	{
-		emit clicked();
-	}
-	mIsPressed = false;
-	repaint();
+	setFont(font.color(), font);
 }
 
-void ViButton::mousePressEvent(QMouseEvent *event)
+void ViButton::setSize(const int &width, const int &height)
 {
-	mIsPressed = true;
-	repaint();
+	setWidth(width);
+	setHeight(height);
 }
 
-void ViButton::resizeEvent(QResizeEvent *event)
+void ViButton::setWidth(const int &width)
 {
-	mHalfWidth = width() / 2;
-	mHalfHeight = height() / 2;
+	setMinimumWidth(width);
+	setMaximumWidth(width);
+}
 
-	if(height() < width())
-	{
-		mGlowOffset = height() * GLOW_OFFSET_PERCENTAGE;
-	}
-	else
-	{
-		mGlowOffset = width() * GLOW_OFFSET_PERCENTAGE;
-	}
-	++mGlowOffset;
+void ViButton::setHeight(const int &height)
+{
+	setMinimumHeight(height);
+	setMaximumHeight(height);
+}
 
-	mNormalGradient.setStart(mHalfWidth, 0);
-	mNormalGradient.setFinalStop(mHalfWidth, height());
+void ViButton::setIcon(const ViThemeIcon &icon, const int &size)
+{
+	setIcon(icon.icon(ViThemeIcon::Normal, size), size);
+}
 
-	mSelectedGradient.setStart(mHalfWidth, 0);
-	mSelectedGradient.setFinalStop(mHalfWidth, height());
-
-	mDisabledGradient.setStart(mHalfWidth, 0);
-	mDisabledGradient.setFinalStop(mHalfWidth, height());
+void ViButton::setIcon(const QIcon &icon, const int &size)
+{
+	QToolButton::setIcon(icon);
+	setIconSize(QSize(size, size));
 }

@@ -2,6 +2,7 @@
 
 ViTheme::ViTheme()
 {
+	mGlobalStyleSheet = "";
 	mName = "";
 	mColors = NULL;
 	mFonts = NULL;
@@ -19,6 +20,11 @@ ViTheme::~ViTheme()
 		delete mFonts;
 		mFonts = NULL;
 	}
+}
+
+QString ViTheme::globalStyleSheet()
+{
+	return mGlobalStyleSheet;
 }
 
 QString ViTheme::name()

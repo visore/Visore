@@ -64,7 +64,7 @@ void ViFrequencySegmentDetector::initialize()
 	clear();
 }
 
-void ViFrequencySegmentDetector::execute(int channel)
+void ViFrequencySegmentDetector::execute(const int &channel)
 {
 	int sampleCount = data().sampleCount();
 	ViRealSpectrum spectrum(sampleCount, format(), currentFrequencies());

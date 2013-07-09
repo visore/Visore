@@ -131,7 +131,7 @@ void ViNeuralCorrector::initialize()
 	mMinimumSamples = (mLeftSamples + 1 + mProviderRightSamples);
 }
 
-void ViNeuralCorrector::execute(int channel)
+void ViNeuralCorrector::execute(const int &channel)
 {
 	mMutex.lock();
 	ViSampleChunk &newSamples = currentSamples(channel);
@@ -237,8 +237,8 @@ void ViNeuralCorrector::finalize()
 
 ViElement ViNeuralCorrector::exportData()
 {
-    ViElement root("Corrector");
-    root.addChild("Name", name());
+	ViElement root = ViModifyProcessor::exportData();
+	root.prependChild("name", name());
     if(mTrainer != NULL)
     {
         root.addChild(mTrainer->exportData());
@@ -256,7 +256,7 @@ ViElement ViNeuralCorrector::exportData()
 
 bool ViNeuralCorrector::importData(ViElement element)
 {
-	if(element.name() == "Corrector" && element.child("Name").toString() == name())
+	/*if(element.name() == "corrector" && element.child("name").toString() == name())
     {
         if(mNetwork != NULL)
         {
@@ -278,6 +278,6 @@ bool ViNeuralCorrector::importData(ViElement element)
         mProvider = ViTargetProviderManager::create(element);
 
         return true;
-    }
+	}*/
 	return false;
 }

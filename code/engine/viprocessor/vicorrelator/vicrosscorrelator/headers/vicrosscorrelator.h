@@ -17,7 +17,7 @@ class ViCrossCorrelator : public ViCorrelator
 
 		void initialize();
 		void finalize();
-        void execute(int channel);
+		void execute(const int &channel);
 
         ViCrossCorrelator* clone();
 

@@ -39,7 +39,7 @@ ViProjectCorrectionWidget::~ViProjectCorrectionWidget()
 void ViProjectCorrectionWidget::correct()
 {
     QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(showCorrelation()));
-    engine()->correct(mUi->projectLoader->objects(), mUi->neuralSelector->corrector());
+	//engine()->correct(mUi->projectLoader->objects(), mUi->neuralSelector->corrector());
 }
 
 void ViProjectCorrectionWidget::showCorrelation()

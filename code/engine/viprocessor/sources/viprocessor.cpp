@@ -343,6 +343,56 @@ void ViProcessor::exit()
 	emit finished();
 }
 
+ViElement ViProcessor::exportData()
+{
+	ViElement root("processor");
+
+	ViElement window("windowsize");
+	window.addChild("samples", mData.sampleCount());
+	window.addChild("bytes", mData.windowSize());
+	root.addChild(window);
+
+	ViElement mode("mode");
+	mode.addChild("channels", (mChannelMode == ViProcessor::Combined) ? "combined" : "separated");
+	mode.addChild("process", (mProcessMode == ViProcessor::All) ? "all" : "noise");
+	root.addChild(mode);
+
+	return root;
+}
+
+bool ViProcessor::importData(ViElement element)
+{
+	/*if(element.name() != "processor" && element.hasChild("processor"))
+	{
+		element = element.child("processor");
+	}
+	if(element.name() != "processor")
+	{
+		return false;
+	}
+
+	bool success = true;
+
+	if(element.hasChild("windowsize"))
+	{
+		ViElement &window = element.child("windowsize");
+		if(window.hasChild("bytes"))
+		{
+			//mData.
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		success = false;
+	}
+*/
+	return false;
+}
+
 ViDualProcessor::ViDualProcessor()
 	: ViProcessor()
 {
@@ -587,6 +637,38 @@ void ViModifyProcessor::writeFrequencies(ViFrequencyChunk &chunk, int channel)
 	{
 		mData2.enqueueSplitFrequencies(chunk, channel);
 	}
+}
+
+ViElement ViModifyProcessor::exportData()
+{
+	ViElement root = ViProcessor::exportData();
+	root.child("mode").addChild("modify", (mModifyMode == ViModifyProcessor::All) ? "all" : "noise");
+	return root;
+}
+
+bool ViModifyProcessor::importData(ViElement element)
+{
+	if(ViProcessor::importData(element))
+	{
+		if(element.hasChild("mode"))
+		{
+			if(element.child("mode").hasChild("modify"))
+			{
+				QString value = element.child("mode").child("modify").toString();
+				if(value == "all")
+				{
+					setModifyMode(ViModifyProcessor::All);
+					return true;
+				}
+				else if(value == "noise")
+				{
+					setModifyMode(ViModifyProcessor::Noise);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 

@@ -20,7 +20,7 @@ class ViFrequencySegmentDetector : public ViSegmentDetector
 		void setThreshold(ViSegmentDetector::Type type, ViRange rangeThreshold, ViRange valueThreshold, qint64 timeThreshold);
 
 		void initialize();
-        void execute(int channel);
+		void execute(const int &channel);
 		void finalize();
 
 	private:

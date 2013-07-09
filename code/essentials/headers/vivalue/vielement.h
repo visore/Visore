@@ -17,16 +17,17 @@ class ViElement : public ViValue
 		ViElement(QString name, QVariant value);
 		ViElement(const ViElement &other);
 
+		ViAttribute& addAttribute(ViAttribute attribute);
+		ViAttribute& addAttribute(QString name);
+		ViAttribute& addAttribute(QString name, QVariant value);
+
         ViElement& prependChild(ViElement child);
         ViElement& prependChild(QString name);
         ViElement& prependChild(QString name, QVariant value);
 
         ViElement& addChild(ViElement child);
-		ViAttribute& addAttribute(ViAttribute attribute);
 		ViElement& addChild(QString name);
-		ViAttribute& addAttribute(QString name);
 		ViElement& addChild(QString name, QVariant value);
-		ViAttribute& addAttribute(QString name, QVariant value);
 
 		ViAttributeList attributes(QString nameFilter = "");
 		ViElementList children(QString nameFilter = "");
@@ -38,10 +39,10 @@ class ViElement : public ViValue
 		bool hasChildren();
         bool hasChild(QString name);
 
-		ViAttribute attribute(int index);
-		ViAttribute attribute(QString name);
-		ViElement child(int index);
-		ViElement child(QString name);
+		ViAttribute& attribute(int index);
+		ViAttribute& attribute(QString name);
+		ViElement& child(int index);
+		ViElement& child(QString name);
 
 		void fromXml(QString xml);
 		QString toXml();

@@ -11,7 +11,7 @@ class ViSampleCorrelator : public ViCorrelator
 		ViSampleCorrelator();
         ViSampleCorrelator(const ViSampleCorrelator &other);
 
-        void execute(int channel);
+		void execute(const int &channel);
 
         ViSampleCorrelator* clone();
 		

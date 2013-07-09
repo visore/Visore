@@ -9,16 +9,12 @@ ViWaveControlToolbar::ViWaveControlToolbar(QWidget *parent)
 	button = new ViButton(this);
 	button->setSize(36, 36);
 	button->setIcon(ViThemeManager::icon("zoomin"), 24);
-	button->disableBackground();
-	button->disableGlow();
 	addWidget(button);
 	QObject::connect(button, SIGNAL(clicked()), this, SIGNAL(zoomedIn()));
 
 	button = new ViButton(this);
 	button->setSize(36, 36);
 	button->setIcon(ViThemeManager::icon("zoomout"), 24);
-	button->disableBackground();
-	button->disableGlow();
 	addWidget(button);
 	QObject::connect(button, SIGNAL(clicked()), this, SIGNAL(zoomedOut()));
 
@@ -27,9 +23,6 @@ ViWaveControlToolbar::ViWaveControlToolbar(QWidget *parent)
 	ViThemeIcon icon = ViThemeManager::icon("zoomout");
 	icon.set(ViThemeIcon::Selected, ViThemeManager::icon("zoomin"));
 	button->setIcon(icon , 24);
-	button->disableBackground();
-	button->disableGlow();
-	button->setCheckable();
 	addWidget(button);
 	QObject::connect(button, SIGNAL(clicked()), this, SIGNAL(toggledGroup()));
 	

@@ -1,103 +1,70 @@
-#include "vitabwidget.h"
-#include "ui_vitabwidget.h"
+#include <vitabwidget.h>
+#include <vithememanager.h>
+#include <QTabBar>
 
 ViTabWidget::ViTabWidget(QWidget *parent)
-	: QWidget(parent)
+	: QTabWidget(parent)
 {
-	mUi = new Ui::ViTabWidget();
-	mUi->setupUi(this);
-	mCurrentId = 0;
-	mMainAngle = 0;
-	mButtonAngle = 0;
-}
+	tabBar()->setCursor(Qt::PointingHandCursor);
 
-ViTabWidget::~ViTabWidget()
-{
-	for(int i = 0; i < mButtons.size(); ++i)
-	{
-		delete mButtons[i];
-	}
-	mButtons.clear();
-	delete mUi;
-}
+	ViFont font;
+	font.setFamily("Harabara");
+	font.setPointSize(18);
+	font.setBold(true);
+	font.setLetterSpacing(QFont::PercentageSpacing, 105);
+	font.setColor(ViThemeManager::color(ViThemeColors::ButtonTextColor1));
 
-void ViTabWidget::selectTab(qint8 index)
-{
-	for(int i = 0; i < mButtons.size(); ++i)
-	{
-		if(mButtons[i]->id() != index)
-		{
-			mButtons[i]->select(false);
-		}
-	}
-	mUi->stackedWidget->setCurrentIndex(index);
-	emit tabChanged(index);
-}
+	QString backgroundColor1 = ViThemeManager::color(ViThemeColors::ButtonNormalColor1).name();
+	QString backgroundColor2 = ViThemeManager::color(ViThemeColors::ButtonNormalColor2).name();
 
-void ViTabWidget::setSize(int width, int height)
-{
-	setWidth(width);
-	setHeight(height);
-}
-
-void ViTabWidget::setWidth(int width)
-{
-	setMinimumWidth(width);
-	setMaximumWidth(width);
-}
-
-void ViTabWidget::setHeight(int height)
-{
-	setMinimumHeight(height);
-	setMaximumHeight(height);
-}
-
-void ViTabWidget::setRounding(qint8 mainAngle, qint8 buttonAngle)
-{
-	mMainAngle = mainAngle;
-	mButtonAngle = buttonAngle;
-	for(int i = 0; i < mButtons.size(); ++i)
-	{
-		mButtons[i]->setRounding(mButtonAngle);
-	}
-}
-
-void ViTabWidget::setTabOffset(int offset)
-{
-	mUi->buttonOffset->changeSize(offset, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
-}
-
-void ViTabWidget::addTab(QString title, QWidget *widget)
-{
-	ViTabButton *button = new ViTabButton(title, mCurrentId, this);
-	button->setRounding(mButtonAngle);
-	QObject::connect(button, SIGNAL(selected(qint8)), this, SLOT(selectTab(qint8)));
-	mButtons.append(button);
-	mUi->buttonWidget->layout()->addWidget(button);
-	mUi->stackedWidget->layout()->addWidget(widget);
-	repaint();
-	++mCurrentId;
-	if(mCurrentId == 1)
-	{
-		button->select(true);
-	}
-}
-
-void ViTabWidget::paintEvent(QPaintEvent *event)
-{
-	/*static qint16 alpha = 150;
-	QLinearGradient gradient(width() / 2, 0, width() / 2, height());
-	QColor color = ViThemeManager::color(2);
-	color.setAlpha(alpha);
-	gradient.setColorAt(0, color);
-	gradient.setColorAt(0.8, color);
-	color = ViThemeManager::color(3);
-	color.setAlpha(alpha);
-	gradient.setColorAt(1, color);
-
-	QPainter painter(this);
-	painter.setBrush(gradient);
-	painter.setPen(Qt::NoPen);
-	painter.drawRoundedRect(mUi->tabContainer->pos().x(), mUi->tabContainer->pos().y(), mUi->tabContainer->width(), mUi->tabContainer->height(), mMainAngle, mMainAngle);
-	painter.drawRect(mUi->tabContainer->pos().x(), mUi->tabContainer->pos().y(), mMainAngle, mMainAngle);*/
+	setStyleSheet("\
+		QTabWidget:pane\
+		{\
+			border: 2px solid " + ViThemeManager::color(ViThemeColors::BorderColor1).name() + ";\
+			border-top-right-radius: 5px;\
+			border-bottom-left-radius: 5px;\
+			border-bottom-right-radius: 5px;\
+			top: -2px;\
+		}\
+		QTabBar::tab\
+		{\
+			background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 " + backgroundColor1 + ", stop: 0.05 " + backgroundColor1 + ", stop: 0.5 " + backgroundColor2 + ", stop: 0.95 " + backgroundColor1 + ", stop: 1.0 " + backgroundColor1 + ");\
+			border: 2px solid " + ViThemeManager::color(ViThemeColors::BorderColor1).name() + ";\
+			border-top-left-radius: 5px;\
+			border-top-right-radius: 5px;\
+			padding-left: 6px;\
+			padding-right: 6px;\
+			padding-top: 3px;\
+			padding-bottom: 3px;\
+			" + font.styleSheet() + "\
+		}\
+		QTabBar::tab:!selected\
+		{\
+			margin-top: 2px; /* make non-selected tabs look smaller */\
+		}\
+		/* make use of negative margins for overlapping tabs */\
+		QTabBar::tab:selected\
+		{\
+			background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 " + backgroundColor1 + ", stop: 0.4 " + backgroundColor2 + ", stop: 0.6 " + backgroundColor2 + ", stop: 1.0 " + backgroundColor1 + ");\
+			/* expand/overlap to the left and right by 4px */\
+			margin-left: -2px;\
+			margin-right: -2px;\
+		}\
+		QTabBar::tab:hover\
+		{\
+			background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 " + backgroundColor1 + ", stop: 0.4 " + backgroundColor2 + ", stop: 0.6 " + backgroundColor2 + ", stop: 1.0 " + backgroundColor1 + ");\
+		}\
+		QTabBar::tab:first:selected\
+		{\
+			margin-left: 0; /* the first selected tab has nothing to overlap with on the left */\
+		}\
+		QTabBar::tab:last:selected\
+		{\
+			margin-right: 0; /* the last selected tab has nothing to overlap with on the right */\
+		}\
+		QTabBar::tab:only-one\
+		{\
+			margin: 0; /* if there is only one tab, we don't want overlapping margins */\
+		}\
+	");
 }

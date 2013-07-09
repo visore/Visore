@@ -11,7 +11,7 @@ class ViFont : public QFont
 
 		QString styleSheet();
 		void setColor(QColor color);
-		QColor color();
+		QColor color() const;
 
 	private:
 

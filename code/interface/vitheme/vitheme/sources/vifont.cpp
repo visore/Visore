@@ -20,7 +20,7 @@ void ViFont::setColor(QColor color)
 	mColor = color;
 }
 
-QColor ViFont::color()
+QColor ViFont::color() const
 {
 	return mColor;
 }

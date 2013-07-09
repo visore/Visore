@@ -99,12 +99,15 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 		ViFrequencyChunk& currentFrequencies(int channel);
 		inline ViFrequencyChunk& currentFrequencies1(int channel){ return currentFrequencies(channel); }
 
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
+
 	protected:
 
 		void run();
 
 		virtual void initialize();
-		virtual void execute(int channel) = 0;
+		virtual void execute(const int &channel) = 0;
 		virtual void finalize();
 
 		bool initializeProcess(ViAudioObjectPointer audioObject, ViAudio::Type type);
@@ -234,6 +237,9 @@ class ViModifyProcessor : public ViProcessor
         void process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2);
 
         void setModifyMode(ViModifyProcessor::ModifyMode mode);
+
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
 
 	protected:
 
