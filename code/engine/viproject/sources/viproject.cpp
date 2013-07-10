@@ -865,7 +865,7 @@ bool ViProject::loadCorrections()
                 bestImprovement[correlator] = -1;
             }
 
-            qreal improvement = group1.correlation(correlator).mean() - group2.correlation(correlator).mean();
+			qreal improvement = (group1.correlation(correlator).mean() - group2.correlation(correlator).mean()) / (1 - group2.correlation(correlator).mean());
             if(improvement > bestImprovement[correlator])
             {
                 bestImprovement[correlator] = improvement;

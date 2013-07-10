@@ -174,7 +174,8 @@ void ViCorrelationWidget::changeCorrelator()
 
         if(correctedCorrelation.isValid() && corruptedCorrelation.isValid())
         {
-            qreal imporovement = correctedCorrelation.mean() - corruptedCorrelation.mean();
+
+			qreal imporovement = (correctedCorrelation.mean() - corruptedCorrelation.mean()) / (1 - corruptedCorrelation.mean());
             if(imporovement < 0) font.setColor(Qt::red);
             else if(imporovement > 0) font.setColor(Qt::green);
             else font.setColor(ViThemeManager::color(ViThemeColors::TextColor1));
