@@ -4,7 +4,7 @@
 ViButton::ViButton(QWidget *parent)
 	: QToolButton(parent)
 {
-	setCursor(Qt::PointingHandCursor);
+	//setCursor(Qt::PointingHandCursor);
 	setToolButtonStyle(Qt::ToolButtonIconOnly);
 
 	mTextColor = ViThemeManager::color(ViThemeColors::ButtonTextColor2);

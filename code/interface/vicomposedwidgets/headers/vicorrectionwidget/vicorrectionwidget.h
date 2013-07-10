@@ -2,6 +2,7 @@
 #define VICORRECTIONINGWIDGET_H
 
 #include <viwidget.h>
+#include <QTableWidget>
 
 namespace Ui
 {
@@ -22,6 +23,10 @@ class ViCorrectionWidget : public ViWidget
 
 		ViCorrectionWidget(QWidget *parent = 0);
 		~ViCorrectionWidget();
+
+	private:
+
+		void addTab(QTabWidget *tabWidget, const QString &text, QWidget *widget);
 
 	private:
 

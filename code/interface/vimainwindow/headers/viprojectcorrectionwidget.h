@@ -17,6 +17,8 @@ class ViProjectCorrectionWidget : public ViWidget
 	private slots:
 
 		void correct();
+		void showCorrector();
+		void hideCorrector();
         void showCorrelation();
 
 	public:

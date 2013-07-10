@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>554</width>
-    <height>145</height>
+    <height>121</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,10 +25,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <property name="styleSheet">
-   <string/>
-  </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QFormLayout" name="formLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -41,26 +38,14 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="2" column="0">
-    <widget class="QLabel" name="tracksLabel">
-     <property name="minimumSize">
-      <size>
-       <width>70</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>70</width>
-       <height>16777215</height>
-      </size>
-     </property>
+   <item row="0" column="0">
+    <widget class="QLabel" name="modeLabel">
      <property name="text">
-      <string>Track:</string>
+      <string>Load:</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="1" colspan="2">
+   <item row="0" column="1">
     <widget class="QComboBox" name="modeComboBox">
      <property name="currentIndex">
       <number>-1</number>
@@ -82,7 +67,67 @@
      </item>
     </widget>
    </item>
-   <item row="3" column="1" colspan="2">
+   <item row="1" column="0">
+    <widget class="QLabel" name="fileLabel">
+     <property name="minimumSize">
+      <size>
+       <width>70</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>70</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>File:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="tracksLabel">
+     <property name="minimumSize">
+      <size>
+       <width>70</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>70</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Track:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QComboBox" name="tracksComboBox"/>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="processLabel">
+     <property name="minimumSize">
+      <size>
+       <width>70</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>70</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Process:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
     <widget class="QWidget" name="processContainer" native="true">
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
@@ -143,65 +188,16 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="processLabel">
-     <property name="minimumSize">
-      <size>
-       <width>70</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>70</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Process:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="fileLabel">
-     <property name="minimumSize">
-      <size>
-       <width>70</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>70</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>File:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1" colspan="2">
-    <widget class="ViFileBrowser" name="fileBrowser" native="true"/>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="modeLabel">
-     <property name="text">
-      <string>Mode:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1" colspan="2">
-    <widget class="QComboBox" name="tracksComboBox"/>
+   <item row="1" column="1">
+    <widget class="ViFileBrowser" name="fileBrowser"/>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
    <class>ViFileBrowser</class>
-   <extends>QWidget</extends>
+   <extends>QLineEdit</extends>
    <header>vifilebrowser.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

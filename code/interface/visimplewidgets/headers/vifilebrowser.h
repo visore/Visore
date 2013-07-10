@@ -8,7 +8,7 @@
 #include <vilineedit.h>
 #include <vithememanager.h>
 
-class ViFileBrowser : public ViWidget
+class ViFileBrowser : public ViLineEdit
 {
 	Q_OBJECT
 
@@ -40,7 +40,6 @@ class ViFileBrowser : public ViWidget
 		QStringList fileNames();
 		void setFileName(QString fileName);
 		void setFileNames(QStringList fileNames);
-		void clear();
 	
 	protected:
 
@@ -51,9 +50,6 @@ class ViFileBrowser : public ViWidget
 	private:
 
 		QFileDialog *mDialog;
-
-		QGridLayout mLayout;
-		ViLineEdit *mLineEdit;
 		ViButton *mButton;
 		ViFileBrowser::Mode mMode;
 

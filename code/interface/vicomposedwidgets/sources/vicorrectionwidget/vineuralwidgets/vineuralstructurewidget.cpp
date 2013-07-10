@@ -9,12 +9,11 @@ ViNeuralStructureWidget::ViNeuralStructureWidget(QWidget *parent)
     mUi->setupUi(this);
 
 	QObject::connect(mUi->biasCheckBox, SIGNAL(toggled(bool)), mUi->biasSpinBox, SLOT(setVisible(bool)));
-	QObject::connect(mUi->biasCheckBox, SIGNAL(toggled(bool)), mUi->biasValueLabel, SLOT(setVisible(bool)));
 	QObject::connect(mUi->addButton, SIGNAL(clicked()), this, SLOT(addHiddenLayer()));
 	QObject::connect(mUi->removeButton, SIGNAL(clicked()), this, SLOT(removeHiddenLayer()));
 
-	mUi->addButton->setIcon(ViThemeManager::icon("add"), 24);
-	mUi->removeButton->setIcon(ViThemeManager::icon("remove"), 24);
+	mUi->addButton->setIcon(ViThemeManager::icon("add"), 14);
+	mUi->removeButton->setIcon(ViThemeManager::icon("remove"), 14);
 
 	addHiddenLayer();
 }
@@ -127,6 +126,10 @@ void ViNeuralStructureWidget::addHiddenLayer(int neurons, double bias)
 void ViNeuralStructureWidget::removeHiddenLayer()
 {
 	QList<QListWidgetItem*> items = mUi->hiddenList->selectedItems();
+	if(items.isEmpty() && mUi->hiddenList->count() > 0)
+	{
+		items.append(mUi->hiddenList->item(0));
+	}
 	for(int i = 0; i < items.size(); ++i)
 	{
 		delete mUi->hiddenList->takeItem(mUi->hiddenList->row(items[i]));

@@ -2,45 +2,41 @@
 #include <QStringList>
 
 ViFileBrowser::ViFileBrowser(QWidget *parent)
-	: ViWidget(parent)
+	: ViLineEdit(parent)
 {
-	mLayout.setContentsMargins(0, 0, 0, 0);
-	setLayout(&mLayout);
-
 	mDialog = new QFileDialog(this);
 	setDirectory(QDir::homePath());
+	mDialog->setStyleSheet("");
 
-	mLineEdit = new ViLineEdit(this);
-	mLayout.addWidget(mLineEdit);
-
-	mButton = new ViButton(mLineEdit);
-	int size = mLineEdit->height() * 0.8;
+	mButton = new ViButton(this);
+	int size = height() * 0.8;
 	mButton->setSize(size, size);
 	mButton->setIcon(ViThemeManager::icon("browse"), 20);
 	mButton->setHeight(25);
 	mButton->setToolTip("Browse");
 	mButton->disableBackground();
 	mButton->disbaleBorder();
+	mButton->setCursor(Qt::ArrowCursor);
+
+	setStyleSheet(styleSheet() + "ViLineEdit { padding-right: " + QString::number(mButton->width()) + "px; }");
 
 	QObject::connect(mButton, SIGNAL(clicked()), this, SLOT(showDialog()));
-    QObject::connect(mLineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkPath()));
-    QObject::connect(mLineEdit, SIGNAL(doubleClicked()), this, SLOT(showDialog()));
+	QObject::connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(checkPath()));
+	QObject::connect(this, SIGNAL(doubleClicked()), this, SLOT(showDialog()));
 
 	setMode(ViFileBrowser::OpenFile);
 }
 
 ViFileBrowser::~ViFileBrowser()
 {
-    delete mDialog;
+	delete mDialog;
 	delete mButton;
-    delete mLineEdit;
 }
 
 void ViFileBrowser::resizeEvent(QResizeEvent *event)
 {
-	mButton->move(mLineEdit->width() - mButton->width() - 3, (mLineEdit->height() / 2) - (mButton->height() / 2));
-	mLineEdit->pad(ViLineEdit::Right, mButton->width());
-	ViWidget::resizeEvent(event);
+	mButton->move(width() - mButton->width() - 3, (height() / 2) - (mButton->height() / 2));
+	ViLineEdit::resizeEvent(event);
 }
 
 QString ViFileBrowser::listToString(QStringList fileNames)
@@ -66,16 +62,16 @@ QStringList ViFileBrowser::stringToList(QString fileNames)
 
 void ViFileBrowser::showDialog()
 {
-	if(mLineEdit->text() != "")
+	if(text() != "")
 	{
-		setDirectory(mLineEdit->text());
+		setDirectory(text());
 	}
 	QStringList fileNames;
 	if(mDialog->exec())
 	{
 		fileNames = mDialog->selectedFiles();
 	}
-	mLineEdit->setText(listToString(fileNames));
+	setText(listToString(fileNames));
 }
 
 void ViFileBrowser::checkPath()
@@ -173,20 +169,15 @@ QString ViFileBrowser::fileName()
 
 QStringList ViFileBrowser::fileNames()
 {
-	return stringToList(mLineEdit->text());
+	return stringToList(text());
 }
 
 void ViFileBrowser::setFileName(QString fileName)
 {
-	mLineEdit->setText(fileName);
+	setText(fileName);
 }
 
 void ViFileBrowser::setFileNames(QStringList fileNames)
 {
-	mLineEdit->setText(listToString(fileNames));
-}
-
-void ViFileBrowser::clear()
-{
-	mLineEdit->clear();
+	setText(listToString(fileNames));
 }

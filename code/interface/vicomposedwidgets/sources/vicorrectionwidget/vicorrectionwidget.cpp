@@ -1,8 +1,10 @@
 #include <vicorrectionwidget.h>
 #include <ui_vicorrectionwidget.h>
-#include <vitabwidget.h>
 
 #include <vineuralstructurewidget.h>
+#include <vineuralweightinitializerwidget.h>
+#include <vineuraltrainerwidget.h>
+#include <vineuralerrorfunctionwidget.h>
 
 ViCorrectionWidget::ViCorrectionWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -16,8 +18,11 @@ ViCorrectionWidget::ViCorrectionWidget(QWidget *parent)
 
 	// Neural Corrector
 	mUi->correctorComboBox->addItem("Neural Corrector");
-	ViTabWidget *neuralTabWidget = new ViTabWidget();
-	neuralTabWidget->addTab(new ViNeuralStructureWidget(), "Neural Structure");
+	QTabWidget *neuralTabWidget = new QTabWidget();
+	addTab(neuralTabWidget, "Structure", new ViNeuralStructureWidget());
+	addTab(neuralTabWidget, "Weights", new ViNeuralWeightInitializerWidget());
+	addTab(neuralTabWidget, "Trainer", new ViNeuralTrainerWidget());
+	addTab(neuralTabWidget, "Error Functions", new ViNeuralErrorFunctionWidget());
 	mUi->stackedWidget->addWidget(neuralTabWidget);
 
 	QObject::connect(mUi->correctorComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(selectCorrector()));
@@ -29,6 +34,17 @@ ViCorrectionWidget::ViCorrectionWidget(QWidget *parent)
 ViCorrectionWidget::~ViCorrectionWidget()
 {
 	delete mUi;
+}
+
+void ViCorrectionWidget::addTab(QTabWidget *tabWidget, const QString &text, QWidget *widget)
+{
+	QVBoxLayout *layout = new QVBoxLayout();
+	QWidget *container = new QWidget();
+	//container->setContentsMargins(QMargins(9, 9, 9, 9));
+	container->setLayout(layout);
+	layout->addWidget(widget);
+	layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
+	tabWidget->addTab(container, text);
 }
 
 void ViCorrectionWidget::selectCorrector()
@@ -49,11 +65,11 @@ void ViCorrectionWidget::selectMode()
 {
 	ViCorrectionMode::Mode mode = ViCorrectionMode::stringToMode(mUi->modeComboBox->currentText());
 	int count1 = mUi->stackedWidget->count(), count2;
-	ViTabWidget *tabWidget;
+	QTabWidget *tabWidget;
 	ViCorrectionMode *modeWidget;
 	for(int i = 0; i < count1; ++i)
 	{
-		tabWidget = dynamic_cast<ViTabWidget*>(mUi->stackedWidget->widget(i));
+		tabWidget = dynamic_cast<QTabWidget*>(mUi->stackedWidget->widget(i));
 		if(tabWidget != NULL)
 		{
 			count2 = tabWidget->count();

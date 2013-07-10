@@ -8,7 +8,12 @@ ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
 {
     mUi = new Ui::ViProjectCorrectionWidget();
     mUi->setupUi(this);
+
     mUi->projectLoader->disableBufferSelection();
+	QObject::connect(mUi->projectLoader, SIGNAL(finished()), this, SLOT(showCorrector()));
+	QObject::connect(mUi->projectLoader, SIGNAL(trackChanged()), this, SLOT(hideCorrector()));
+	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), this, SLOT(hideCorrector()));
+	//hideCorrector();
 
     //Font
     QFont font;
@@ -18,17 +23,15 @@ ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
     font.setLetterSpacing(QFont::PercentageSpacing, 105);
     QColor color = ViThemeManager::color(ViThemeColors::TextColor1);
 
-    //Button1
-    QObject::connect(mUi->button1, SIGNAL(clicked()), this, SLOT(correct()));
-    mUi->button1->setIcon(ViThemeManager::icon("startprocess"), 40);
-    mUi->button1->setText("Process", color, font);
-    mUi->button1->setSize(140, 60);
+	//Button
+	QObject::connect(mUi->button, SIGNAL(clicked()), this, SLOT(correct()));
+	mUi->button->setIcon(ViThemeManager::icon("startprocess"), 40);
+	mUi->button->setText("Process", color, font);
+	mUi->button->setSize(140, 60);
 
-    //Button2
-    QObject::connect(mUi->button2, SIGNAL(clicked()), this, SLOT(correct()));
-    mUi->button2->setIcon(ViThemeManager::icon("startprocess"), 40);
-    mUi->button2->setText("Process", color, font);
-    mUi->button2->setSize(140, 60);
+	//Label width
+	mUi->projectLoader->setStyleSheet(mUi->projectLoader->styleSheet() + "QLabel { width: 150px; min-width: 150px; }");
+	mUi->correctionWidget->setStyleSheet(mUi->correctionWidget->styleSheet() + "QLabel { width: 150px; min-width: 150px; }");
 }
 
 ViProjectCorrectionWidget::~ViProjectCorrectionWidget()
@@ -42,11 +45,23 @@ void ViProjectCorrectionWidget::correct()
 	//engine()->correct(mUi->projectLoader->objects(), mUi->neuralSelector->corrector());
 }
 
+void ViProjectCorrectionWidget::showCorrector()
+{
+	mUi->correctionWidget->show();
+	mUi->button->show();
+}
+
+void ViProjectCorrectionWidget::hideCorrector()
+{
+	mUi->correctionWidget->hide();
+	mUi->button->hide();
+}
+
 void ViProjectCorrectionWidget::showCorrelation()
 {
 	QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(showCorrelation()));
-    ViCorrelationWidget *widget = new ViCorrelationWidget();
-    widget->setProject(mUi->projectLoader->project());
+	ViCorrelationWidget *widget = new ViCorrelationWidget();
+	widget->setProject(mUi->projectLoader->project());
 	ViStackedWidget::showTemporaryWidget(widget);
 }
 
