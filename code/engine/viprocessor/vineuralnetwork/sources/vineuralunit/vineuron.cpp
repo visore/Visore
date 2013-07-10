@@ -5,7 +5,7 @@
 ViNeuron::ViNeuron()
 	: ViNeuralUnit(), QRunnable()
 {
-	setActivationFunction(NULL);
+	mActivationFunction = NULL;
 	mValue = 0;
 	mError = 0;
 	mType = ViNeuron::UnknownNeuron;
@@ -14,7 +14,7 @@ ViNeuron::ViNeuron()
 ViNeuron::ViNeuron(ViNeuron::Type type, ViActivationFunction *activationFunction)
 	: ViNeuralUnit(), QRunnable()
 {
-	setActivationFunction(activationFunction);
+	mActivationFunction = activationFunction;
 	mValue = 0;
 	mError = 0;
 	mType = type;
@@ -91,6 +91,10 @@ ViActivationFunction* ViNeuron::activationFunction() const
 
 void ViNeuron::setActivationFunction(ViActivationFunction *activationFunction)
 {
+	if(mActivationFunction != NULL)
+	{
+		delete mActivationFunction;
+	}
 	mActivationFunction = activationFunction;
 }
 

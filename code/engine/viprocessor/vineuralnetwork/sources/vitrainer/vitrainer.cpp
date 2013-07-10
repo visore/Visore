@@ -118,6 +118,14 @@ void ViTrainer::addErrorFunction(ViErrorFunction *function)
 	}
 }
 
+void ViTrainer::addErrorFunctions(QList<ViErrorFunction*> functions)
+{
+	for(int i = 0; i < functions.size(); ++i)
+	{
+		addErrorFunction(functions[i]);
+	}
+}
+
 void ViTrainer::calculateError()
 {
 	//QString message = "";

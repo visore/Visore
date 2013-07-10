@@ -39,6 +39,8 @@ class ViNeuralLayer : public ViNeuralUnit, public QRunnable
 
 		void setValue(int index, double value);
 
+		void setActivationFunction(ViActivationFunction *activationFunction); // Takes ownership
+
 		ViNeuron* operator [] (const int index) const;
 		ViNeuron* operator [] (const QString id) const;
 		bool operator == (const ViNeuralLayer &other) const;

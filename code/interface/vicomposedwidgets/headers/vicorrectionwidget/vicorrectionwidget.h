@@ -24,7 +24,11 @@ class ViCorrectionWidget : public ViWidget
 		ViCorrectionWidget(QWidget *parent = 0);
 		~ViCorrectionWidget();
 
+		ViModifyProcessor* corrector();
+
 	private:
+
+		ViModifyProcessor* neuralCorrector(QTabWidget *tabWidget);
 
 		void addTab(QTabWidget *tabWidget, const QString &text, QWidget *widget);
 

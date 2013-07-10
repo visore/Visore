@@ -13,7 +13,7 @@ ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
 	QObject::connect(mUi->projectLoader, SIGNAL(finished()), this, SLOT(showCorrector()));
 	QObject::connect(mUi->projectLoader, SIGNAL(trackChanged()), this, SLOT(hideCorrector()));
 	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), this, SLOT(hideCorrector()));
-	//hideCorrector();
+	hideCorrector();
 
     //Font
     QFont font;
@@ -41,8 +41,12 @@ ViProjectCorrectionWidget::~ViProjectCorrectionWidget()
 
 void ViProjectCorrectionWidget::correct()
 {
-    QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(showCorrelation()));
-	//engine()->correct(mUi->projectLoader->objects(), mUi->neuralSelector->corrector());
+	ViModifyProcessor *corrector = mUi->correctionWidget->corrector();
+	if(corrector != NULL)
+	{
+		QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(showCorrelation()));
+		engine()->correct(mUi->projectLoader->objects(), corrector);
+	}
 }
 
 void ViProjectCorrectionWidget::showCorrector()

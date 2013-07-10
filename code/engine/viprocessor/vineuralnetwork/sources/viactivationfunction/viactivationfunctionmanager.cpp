@@ -7,5 +7,5 @@ QString ViActivationFunctionManager::libraryPath()
 
 QString ViActivationFunctionManager::defaultLibrary()
 {
-	return "SigmoidActivationFunction";
+	return "DirectActivationFunction";
 }

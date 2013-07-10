@@ -32,11 +32,6 @@ ViNeuralErrorFunctionWidget::~ViNeuralErrorFunctionWidget()
 void ViNeuralErrorFunctionWidget::setMode(ViCorrectionMode::Mode mode)
 {
 	mUi->listWidget->clear();
-	for(int i = 0; i < mUi->comboBox->count(); ++i)
-	{
-		mUi->comboBox->setCurrentIndex(i);
-		addErrorFunction();
-	}
 	mUi->comboBox->setCurrentText(mDefaultFunction);
 }
 

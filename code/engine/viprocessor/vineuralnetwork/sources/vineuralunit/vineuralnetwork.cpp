@@ -255,6 +255,18 @@ int ViNeuralNetwork::neuronCount()
 	return count;
 }
 
+void ViNeuralNetwork::setActivationFunction(ViActivationFunction *activationFunction)
+{
+	if(activationFunction != NULL)
+	{
+		for(int i = 1; i < mLayers.size(); ++i)
+		{
+			mLayers[i]->setActivationFunction(activationFunction->clone());
+		}
+		delete activationFunction;
+	}
+}
+
 ViNeuralNetwork* ViNeuralNetwork::clone()
 {
 	return new ViNeuralNetwork(*this);

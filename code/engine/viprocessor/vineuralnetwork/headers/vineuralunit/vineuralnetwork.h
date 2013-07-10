@@ -43,6 +43,8 @@ class ViNeuralNetwork : public ViNeuralUnit, public QRunnable
 		int outputCount();
 		int neuronCount();
 
+		void setActivationFunction(ViActivationFunction *activationFunction); // Takes ownership
+
 		ViNeuralNetwork* clone();
 
 		ViNeuralLayer* operator [] (const int index) const;

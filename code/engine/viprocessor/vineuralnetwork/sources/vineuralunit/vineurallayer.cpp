@@ -187,6 +187,18 @@ void ViNeuralLayer::setValue(int index, double value)
 	}
 }
 
+void ViNeuralLayer::setActivationFunction(ViActivationFunction *activationFunction)
+{
+	if(activationFunction != NULL)
+	{
+		for(int i = 0; i < mNeurons.size(); ++i)
+		{
+			mNeurons[i]->setActivationFunction(activationFunction->clone());
+		}
+		delete activationFunction;
+	}
+}
+
 ViNeuron* ViNeuralLayer::operator [] (const int index) const
 {
 	return at(index);

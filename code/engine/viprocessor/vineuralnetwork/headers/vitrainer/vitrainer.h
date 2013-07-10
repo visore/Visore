@@ -35,7 +35,8 @@ class ViTrainer : public ViLibrary, public ViSerializer
 		void setLearningRate(qreal learningRate);
 		qreal learningRate();
 
-		virtual void addErrorFunction(ViErrorFunction *function);
+		virtual void addErrorFunction(ViErrorFunction *function); //Takes ownership
+		virtual void addErrorFunctions(QList<ViErrorFunction*> functions); //Takes ownership
 
 		void train();
 		void train(ViNeuralNetwork *network);

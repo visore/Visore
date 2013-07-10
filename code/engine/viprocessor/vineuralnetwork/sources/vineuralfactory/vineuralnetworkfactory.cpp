@@ -59,12 +59,26 @@ void ViNeuralNetworkFactory::setHistory(int neuronCount)
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount)
 {
-	addLayer(neuronCount, 0, mGlobalActivationFunction->clone());
+	if(mGlobalActivationFunction == NULL)
+	{
+		addLayer(neuronCount, 0, NULL);
+	}
+	else
+	{
+		addLayer(neuronCount, 0, mGlobalActivationFunction->clone());
+	}
 }
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount, double bias)
 {
-	addLayer(neuronCount, bias, mGlobalActivationFunction->clone());
+	if(mGlobalActivationFunction == NULL)
+	{
+		addLayer(neuronCount, bias, NULL);
+	}
+	else
+	{
+		addLayer(neuronCount, bias, mGlobalActivationFunction->clone());
+	}
 }
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount, ViActivationFunction *activationFunction)
@@ -74,6 +88,10 @@ void ViNeuralNetworkFactory::addLayer(int neuronCount, ViActivationFunction *act
 
 void ViNeuralNetworkFactory::addLayer(int neuronCount, double bias, ViActivationFunction *activationFunction)
 {
+	if(activationFunction == NULL)
+	{
+		activationFunction = ViActivationFunctionManager::createDefault();
+	}
 	mActivationFunctions.append(activationFunction);
 	mNeurons.append(neuronCount);
 	mBiases.append(bias);
@@ -87,13 +105,6 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 	for(int i = 0; i < mNeurons.size(); ++i)
 	{
 		ViActivationFunction *activationFunction = mActivationFunctions[i];
-		bool deleteFunction = false;
-		if(activationFunction == NULL)
-		{
-			deleteFunction = true;
-			activationFunction = ViActivationFunctionManager::createDefault();
-			LOG("No activation function was specified for layer " + QString::number(i + 1) + ". The default activation function (" + activationFunction->name() + ") will be used.", QtCriticalMsg);
-		}
 		if(mNeurons[i] <= 0)
 		{
 			LOG("Layer " + QString::number(i + 1) + " has an invalid amount (" + QString::number(mNeurons[i]) + ") of neurons. At least one neuron must be specified.", QtCriticalMsg);
@@ -118,10 +129,6 @@ ViNeuralNetwork* ViNeuralNetworkFactory::create()
 		else
 		{
 			network->add(ViNeuralLayerFactory::createHidden(mNeurons[i], activationFunction, mBiases[i]));
-		}
-		if(deleteFunction)
-		{
-			delete activationFunction;
 		}
 	}
 
