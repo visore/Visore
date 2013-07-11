@@ -8,13 +8,11 @@ class ViVarianceNoiseDetector : public ViNoiseDetector
 
     public:
 
-        ViVarianceNoiseDetector();
-        ViVarianceNoiseDetector(const ViVarianceNoiseDetector &other);
-        ~ViVarianceNoiseDetector();
-
-        bool isNoisy();
-
         ViVarianceNoiseDetector* clone();
+
+	protected:
+
+		bool calculateNoise();
 
 };
 

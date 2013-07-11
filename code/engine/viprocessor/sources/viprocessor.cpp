@@ -140,6 +140,10 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::T
 
 	if(mType != ViAudio::Undefined && mObject->hasBuffer(mType))
 	{
+		if(mNoiseDetector != NULL)
+		{
+			mNoiseDetector->setFormat(mObject->format(mType));
+		}
         mData.setBuffer(mObject->buffer(mType));
 		QObject::connect(mData.buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
 		return true;

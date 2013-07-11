@@ -4,6 +4,7 @@
 #include <viserializer.h>
 #include <vilibrary.h>
 #include <viprocessor.h>
+#include <vinoiselist.h>
 
 class ViNoiseDetector : public ViSerializer, public ViLibrary
 {
@@ -14,6 +15,8 @@ class ViNoiseDetector : public ViSerializer, public ViLibrary
 		ViNoiseDetector(ViProcessor::ChannelMode mode);
         ViNoiseDetector(const ViNoiseDetector &other);
         virtual ~ViNoiseDetector();
+
+		void setFormat(const ViAudioFormat &format);
 
 		void setMode(ViProcessor::ChannelMode mode);
 		ViProcessor::ChannelMode mode();
@@ -27,9 +30,9 @@ class ViNoiseDetector : public ViSerializer, public ViLibrary
 		bool isNoisy(int channel);
 		bool isNoisy(ViAudioReadData &data);
 		bool isNoisy(ViAudioReadData &data, int channel);
-        virtual bool isNoisy() = 0;
+		bool isNoisy();
 
-        ViIntList noisyWindows();
+		ViNoiseList noisyWindows();
 
         void clear();
 
@@ -40,6 +43,8 @@ class ViNoiseDetector : public ViSerializer, public ViLibrary
 
 	protected:
 
+		virtual bool calculateNoise() = 0;
+
 		ViSampleChunk& samples();
 		ViFrequencyChunk& frequencies();
 
@@ -49,7 +54,7 @@ class ViNoiseDetector : public ViSerializer, public ViLibrary
 		int mChannel;
 		ViAudioReadData *mData;
         int mCounter;
-        ViIntList mNoise;
+		ViNoiseList mNoise;
 
 };
 

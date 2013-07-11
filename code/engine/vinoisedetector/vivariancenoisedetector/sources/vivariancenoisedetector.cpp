@@ -3,21 +3,7 @@
 
 #define THRESHOLD 0.3
 
-ViVarianceNoiseDetector::ViVarianceNoiseDetector()
-    : ViNoiseDetector()
-{
-}
-
-ViVarianceNoiseDetector::ViVarianceNoiseDetector(const ViVarianceNoiseDetector &other)
-    : ViNoiseDetector(other)
-{
-}
-
-ViVarianceNoiseDetector::~ViVarianceNoiseDetector()
-{
-}
-
-bool ViVarianceNoiseDetector::isNoisy()
+bool ViVarianceNoiseDetector::calculateNoise()
 {
     /*ViSampleChunk &chunk = processor()->samples();
     qreal total = 0;

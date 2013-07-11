@@ -13,7 +13,20 @@ ViNeuralActivationFunctionWidget::ViNeuralActivationFunctionWidget(QWidget *pare
 	{
 		mUi->comboBox->addItem(activationFunctions[i]->name("ActivationFunction", true), activationFunctions[i]->name());
 	}
-	mDefaultFunction = ViActivationFunctionManager::defaultName("ActivationFunction", true);
+
+	mDefaultFunction = "";
+	for(int i = 0; i < mUi->comboBox->count(); ++i)
+	{
+		if(mUi->comboBox->itemText(i) == "Sigmoid")
+		{
+			mDefaultFunction = "Sigmoid";
+			break;
+		}
+	}
+	if(mDefaultFunction == "")
+	{
+		mDefaultFunction = ViActivationFunctionManager::defaultName("ActivationFunction", true);
+	}
 	mUi->comboBox->setCurrentText(mDefaultFunction);
 }
 

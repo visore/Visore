@@ -2,7 +2,7 @@
 
 #define JUMP_THRESHOLD 0.5 // The difference between samples that is considered as a jump
 
-bool ViSampleJumpNoiseDetector::isNoisy()
+bool ViSampleJumpNoiseDetector::calculateNoise()
 {
 	ViSampleChunk &chunk = samples();
     int end = chunk.size() - 1;

@@ -8,13 +8,11 @@ class ViFrequencyNoiseDetector : public ViNoiseDetector
 
     public:
 
-        ViFrequencyNoiseDetector();
-        ViFrequencyNoiseDetector(const ViFrequencyNoiseDetector &other);
-        ~ViFrequencyNoiseDetector();
-
-        bool isNoisy();
-
         ViFrequencyNoiseDetector* clone();
+
+	protected:
+
+		bool calculateNoise();
 
 };
 

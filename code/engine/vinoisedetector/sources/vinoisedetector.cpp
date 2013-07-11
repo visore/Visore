@@ -24,9 +24,22 @@ ViNoiseDetector::~ViNoiseDetector()
 {
 }
 
+void ViNoiseDetector::setFormat(const ViAudioFormat &format)
+{
+	mNoise.setFormat(format);
+}
+
 void ViNoiseDetector::setMode(ViProcessor::ChannelMode mode)
 {
 	mMode = mode;
+	if(mMode == ViProcessor::Separated)
+	{
+		mNoise.setSeparateChannels();
+	}
+	else
+	{
+		mNoise.setCombinedChannels();
+	}
 }
 
 ViProcessor::ChannelMode ViNoiseDetector::mode()
@@ -73,7 +86,35 @@ bool ViNoiseDetector::isNoisy(ViAudioReadData &data, int channel)
 	return isNoisy();
 }
 
-ViIntList ViNoiseDetector::noisyWindows()
+bool ViNoiseDetector::isNoisy()
+{
+	int size = mData->sampleCount();
+	bool returnValue = false;
+
+	if(calculateNoise())
+	{
+		mNoise.add(mCounter, size, mChannel);
+
+		QString message = "Noise detected (sample " + QString::number(mCounter);
+		if(mMode == ViProcessor::Separated)
+		{
+			message += ", sample " + QString::number(mCounter / mNoise.format().channelCount()) + " in channel " + QString::number(mChannel + 1);
+		}
+		message += ").";
+		LOG(message);
+
+		returnValue = true;
+	}
+
+	if(mMode == ViProcessor::Combined || mChannel == mNoise.format().channelCount() - 1)
+	{
+		mCounter += size;
+	}
+
+	return returnValue;
+}
+
+ViNoiseList ViNoiseDetector::noisyWindows()
 {
     return mNoise;
 }
@@ -82,7 +123,7 @@ void ViNoiseDetector::clear()
 {
 	mData = NULL;
 	mChannel = 0;
-	mMode = ViProcessor::Combined;
+	setMode(ViProcessor::Combined);
     mCounter = 0;
     mNoise.clear();
 }

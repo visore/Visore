@@ -13,7 +13,7 @@ ViNeuralWeightInitializerWidget::ViNeuralWeightInitializerWidget(QWidget *parent
 	{
 		mUi->comboBox->addItem(weightInitializers[i]->name("WeightInitializer", true), weightInitializers[i]->name());
 	}
-	mDefaultInitializer = ViWeightInitializerManager::defaultName();
+	mDefaultInitializer = ViWeightInitializerManager::defaultName("WeightInitializer", true);
 	mUi->comboBox->setCurrentText(mDefaultInitializer);
 }
 

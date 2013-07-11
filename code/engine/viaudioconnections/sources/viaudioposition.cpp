@@ -2,13 +2,13 @@
 
 ViAudioPosition::ViAudioPosition()
 {
-	mMicroseconds = 0;
+	mSamples = 0;
 	mFormat = ViAudioFormat();
 }
 
 ViAudioPosition::ViAudioPosition(const ViAudioPosition &other)
 {
-	mMicroseconds = other.mMicroseconds;
+	mSamples = other.mSamples;
 	mFormat = other.mFormat;
 }
 
@@ -19,48 +19,48 @@ ViAudioPosition::ViAudioPosition(const qreal value, const ViAudioPosition::Unit 
 
 qreal ViAudioPosition::convertPosition(const qreal position, const ViAudioPosition::Unit fromUnit, const ViAudioPosition::Unit toUnit, const ViAudioFormat &format)
 {
-	qreal microseconds = 0;
+	qreal samples = 0;
 
 	if(fromUnit == ViAudioPosition::Microseconds)
 	{
-		microseconds = position;
+		samples = (position / 1000000.0) * format.sampleRate() * format.channelCount();
 	}
 	else if(fromUnit == ViAudioPosition::Milliseconds)
 	{
-		microseconds = position * 1000.0;
+		samples = (position / 1000.0) * format.sampleRate() * format.channelCount();
 	}
 	else if(fromUnit == ViAudioPosition::Seconds)
 	{
-		microseconds = position * 1000000.0;
+		samples = position * format.sampleRate() * format.channelCount();
 	}
 	else if(fromUnit == ViAudioPosition::Samples)
 	{
-		microseconds = position / (format.sampleRate() * format.channelCount()) * 1000000.0;
+		samples = position;
 	}
 	else if(fromUnit == ViAudioPosition::Bytes)
 	{
-		microseconds = position / (format.sampleRate() * format.channelCount() * (format.sampleSize() / 8)) * 1000000.0;
+		samples = position / (format.sampleSize() / 8);
 	}
 
 	if(toUnit == ViAudioPosition::Microseconds)
 	{
-		return microseconds;
+		return samples * format.sampleRate() * format.channelCount() * 1000000.0;
 	}
 	else if(toUnit == ViAudioPosition::Milliseconds)
 	{
-		return microseconds / 1000.0;
+		return samples * format.sampleRate() * format.channelCount() * 1000.0;
 	}
 	else if(toUnit == ViAudioPosition::Seconds)
 	{
-		return microseconds / 1000000.0;
+		return samples * format.sampleRate() * format.channelCount();
 	}
 	else if(toUnit == ViAudioPosition::Samples)
 	{
-		return (microseconds / 1000000.0) * format.sampleRate() * format.channelCount();
+		return samples;
 	}
 	else if(toUnit == ViAudioPosition::Bytes)
 	{
-		return (microseconds / 1000000.0) * format.sampleRate() * format.channelCount() * (format.sampleSize() / 8);
+		return samples * (format.sampleSize() / 8);
 	}
 }
 
@@ -72,12 +72,12 @@ void ViAudioPosition::setPosition(const qreal position, const ViAudioPosition::U
 
 void ViAudioPosition::setPosition(const qreal position, const ViAudioPosition::Unit unit)
 {
-	mMicroseconds = ViAudioPosition::convertPosition(position, unit, ViAudioPosition::Microseconds, mFormat);
+	mSamples = ViAudioPosition::convertPosition(position, unit, ViAudioPosition::Samples, mFormat);
 }
 
 qreal ViAudioPosition::position(const ViAudioPosition::Unit unit) const
 {
-	return ViAudioPosition::convertPosition(mMicroseconds, ViAudioPosition::Microseconds, unit, mFormat);
+	return ViAudioPosition::convertPosition(mSamples, ViAudioPosition::Samples, unit, mFormat);
 }
 
 void ViAudioPosition::setMicroseconds(qreal value)
@@ -137,10 +137,10 @@ ViAudioFormat ViAudioPosition::format() const
 
 bool ViAudioPosition::operator ==(const ViAudioPosition &other) const
 {
-	return mMicroseconds == other.mMicroseconds;
+	return mSamples == other.mSamples;
 }
 
 bool ViAudioPosition::operator !=(const ViAudioPosition &other) const
 {
-	return mMicroseconds != other.mMicroseconds;
+	return mSamples != other.mSamples;
 }

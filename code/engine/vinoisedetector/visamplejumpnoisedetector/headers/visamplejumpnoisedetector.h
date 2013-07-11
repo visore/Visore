@@ -8,9 +8,11 @@ class ViSampleJumpNoiseDetector : public ViNoiseDetector
 
     public:
 
-        bool isNoisy();
-
         ViSampleJumpNoiseDetector* clone();
+
+	protected:
+
+		bool calculateNoise();
 
 };
 

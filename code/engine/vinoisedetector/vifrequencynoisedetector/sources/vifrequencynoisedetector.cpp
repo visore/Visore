@@ -4,21 +4,7 @@
 #define FREQUENCY_FROM 0.9 // Start percentage of the spectrum to observe
 #define FREQUENCY_TO 1.0 // End percentage of the spectrum to observe
 
-ViFrequencyNoiseDetector::ViFrequencyNoiseDetector()
-    : ViNoiseDetector()
-{
-}
-
-ViFrequencyNoiseDetector::ViFrequencyNoiseDetector(const ViFrequencyNoiseDetector &other)
-    : ViNoiseDetector(other)
-{
-}
-
-ViFrequencyNoiseDetector::~ViFrequencyNoiseDetector()
-{
-}
-
-bool ViFrequencyNoiseDetector::isNoisy()
+bool ViFrequencyNoiseDetector::calculateNoise()
 {
 	ViFrequencyChunk &chunk = frequencies();
     int end = chunk.size() * FREQUENCY_TO;

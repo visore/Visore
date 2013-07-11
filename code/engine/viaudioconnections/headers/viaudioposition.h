@@ -49,7 +49,7 @@ class ViAudioPosition
 
 	private:
 
-		qreal mMicroseconds;
+		qreal mSamples;
 		ViAudioFormat mFormat;
 
 };
