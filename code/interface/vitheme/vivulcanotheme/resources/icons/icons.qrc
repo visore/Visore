@@ -28,5 +28,6 @@
         <file>down/down_normal.png</file>
         <file>up/up_hover.png</file>
         <file>up/up_normal.png</file>
+        <file>microphone/microphone_normal.png</file>
     </qresource>
 </RCC>

@@ -44,15 +44,15 @@ qreal ViAudioPosition::convertPosition(const qreal position, const ViAudioPositi
 
 	if(toUnit == ViAudioPosition::Microseconds)
 	{
-		return samples * format.sampleRate() * format.channelCount() * 1000000.0;
+		return samples / (format.sampleRate() * format.channelCount()) * 1000000.0;
 	}
 	else if(toUnit == ViAudioPosition::Milliseconds)
 	{
-		return samples * format.sampleRate() * format.channelCount() * 1000.0;
+		return samples / (format.sampleRate() * format.channelCount()) * 1000.0;
 	}
 	else if(toUnit == ViAudioPosition::Seconds)
 	{
-		return samples * format.sampleRate() * format.channelCount();
+		return samples / (format.sampleRate() * format.channelCount());
 	}
 	else if(toUnit == ViAudioPosition::Samples)
 	{

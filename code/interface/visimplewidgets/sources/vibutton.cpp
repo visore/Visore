@@ -7,9 +7,17 @@ ViButton::ViButton(QWidget *parent)
 	//setCursor(Qt::PointingHandCursor);
 	setToolButtonStyle(Qt::ToolButtonIconOnly);
 
-	mTextColor = ViThemeManager::color(ViThemeColors::ButtonTextColor2);
 	mEnableBorder = true;
 	mEnableBackground = true;
+
+	ViFont font;
+	font.setFamily("Harabara");
+	font.setPointSize(16);
+	font.setBold(true);
+	font.setLetterSpacing(QFont::PercentageSpacing, 105);
+	font.setColor(ViThemeManager::color(ViThemeColors::ButtonTextColor2));
+	setFont(font);
+
 	initialize();
 }
 
@@ -112,6 +120,7 @@ void ViButton::disableBackground()
 void ViButton::setText(const QString &text)
 {
 	QToolButton::setText(text);
+	initialize();
 }
 
 void ViButton::setText(const QString &text, const QColor &color, const QFont &font)

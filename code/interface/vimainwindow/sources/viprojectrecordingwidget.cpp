@@ -21,13 +21,14 @@ ViProjectRecordingWidget::ViProjectRecordingWidget(QWidget *parent)
 	mUi->nameLineEdit->setText("Visore Project (" + date + ")");
 	mUi->newBrowser->setFileName(ViManager::projectPath() + "Visore Project (" + date + ")." + ViManager::projectExtension());
 
-	mUi->startButton->setSize(64, 64);
-	mUi->startButton->setIcon(ViThemeManager::icon("startprocess"), 36);
+	mUi->startButton->setIcon(ViThemeManager::icon("microphone"), 36);
 	QObject::connect(mUi->startButton, SIGNAL(clicked()), this, SLOT(load()));
 
 	QObject::connect(mUi->newRadioButton, SIGNAL(toggled(bool)), this, SLOT(changeType()));
 	QObject::connect(mUi->existingRadioButton, SIGNAL(toggled(bool)), this, SLOT(changeType()));
 	changeType();
+
+	setStyleSheet(styleSheet() + "QLabel { width: 150px; min-width: 150px; }");
 }
 
 ViProjectRecordingWidget::~ViProjectRecordingWidget()

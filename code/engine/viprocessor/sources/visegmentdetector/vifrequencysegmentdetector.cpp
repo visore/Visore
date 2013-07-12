@@ -48,19 +48,16 @@ void ViFrequencySegmentDetector::setThreshold(ViSegmentDetector::Type type, ViRa
 
 void ViFrequencySegmentDetector::clear()
 {
-	mRecordStartTotalValue = 0;
-	mRecordEndTotalValue = 0;
-	mSongStartTotalValue = 0;
-	mSongEndTotalValue = 0;
 	mRecordStartAverages.clear();
 	mRecordEndAverages.clear();
 	mSongStartAverages.clear();
 	mSongEndAverages.clear();
+	mTotalSamples = 0;
 }
 
 void ViFrequencySegmentDetector::initialize()
 {
-	mTotalSamples = 0;
+	mHadSong = false;
 	clear();
 }
 
@@ -71,45 +68,49 @@ void ViFrequencySegmentDetector::execute(const int &channel)
 	mTotalSamples += sampleCount;
 	int milliseconds = ViAudioPosition::convertPosition(sampleCount, ViAudioPosition::Samples, ViAudioPosition::Milliseconds, format());
 
-	if(!mSongRunning)
+	if(mRecordRunning)
 	{
-		updateRecordStartAverage(spectrum, milliseconds);
-		if(	!mRecordRunning &&
-			mRecordStartAverages.size() >= mRecordStartTimeThreshold / milliseconds &&
-			inRange(mRecordStartAverages, mRecordStartValueThreshold))
+		if(mSongRunning)
 		{
-			clear();
-			setRecordStart(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, format()));
-		}
-
-		updateSongStartAverage(spectrum, milliseconds);
-		if(	mRecordRunning &&
-			mSongStartAverages.size() >= mSongStartTimeThreshold / milliseconds &&
-			inRange(mSongStartAverages, mSongStartValueThreshold))
-		{
-			clear();
-			setSongStart(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, format()));
-		}
-
-		if(mRecordRunning)
-		{
-			updateRecordEndAverage(spectrum, milliseconds);
-			if(	mRecordEndAverages.size() >= mRecordEndTimeThreshold / milliseconds &&
-				inRange(mRecordEndAverages, mRecordEndValueThreshold))
+			bool isFull = mSongEndAverages.size() >= mSongEndTimeThreshold / milliseconds;
+			updateSongEndAverage(spectrum, isFull);
+			if(isFull && inRange(mSongEndAverages, mSongEndValueThreshold))
 			{
+				setSongEnd(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, format()));
 				clear();
-				setRecordEnd(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, format()));
+			}
+		}
+		else
+		{
+			bool isFull = mSongStartAverages.size() >= mSongStartTimeThreshold / milliseconds;
+			updateSongStartAverage(spectrum, isFull);
+			if(isFull && inRange(mSongStartAverages, mSongStartValueThreshold))
+			{
+				mHadSong = true;
+				setSongStart(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, format()));
+				clear();
+			}
+
+			if(mHadSong)
+			{
+				bool isFull = mRecordEndAverages.size() >= mRecordEndTimeThreshold / milliseconds;
+				updateRecordEndAverage(spectrum, isFull);
+				if(isFull && inRange(mRecordEndAverages, mRecordEndValueThreshold))
+				{
+					setRecordEnd(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, format()));
+					clear();
+				}
 			}
 		}
 	}
-	else if(mRecordRunning)
+	else
 	{
-		updateSongEndAverage(spectrum, milliseconds);
-		if(	mSongEndAverages.size() >= mSongEndTimeThreshold / milliseconds &&
-			inRange(mSongEndAverages, mSongEndValueThreshold))
+		bool isFull = mRecordStartAverages.size() >= mRecordStartTimeThreshold / milliseconds;
+		updateRecordStartAverage(spectrum, isFull);
+		if(isFull && inRange(mRecordStartAverages, mRecordStartValueThreshold))
 		{
+			setRecordStart(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, format()));
 			clear();
-			setSongEnd(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, format()));
 		}
 	}
 }
@@ -136,7 +137,7 @@ bool ViFrequencySegmentDetector::inRange(QQueue<qreal> &averages, ViRange &range
 	return false;
 }
 
-void ViFrequencySegmentDetector::updateRecordStartAverage(const ViRealSpectrum &spectrum, const int &milliseconds)
+void ViFrequencySegmentDetector::updateRecordStartAverage(const ViRealSpectrum &spectrum, const bool &isFull)
 {
 	qreal total = 0;
 	int start = mRecordStartRangeThreshold.start() * spectrum.size();
@@ -146,15 +147,14 @@ void ViFrequencySegmentDetector::updateRecordStartAverage(const ViRealSpectrum &
 		total += spectrum[i].polar().amplitude().real();
 	}
 	total /= end - start;
-	if(mRecordStartAverages.size() >= mRecordStartTimeThreshold / milliseconds)
+	if(isFull)
 	{
-		mRecordStartTotalValue -= mRecordStartAverages.dequeue();
+		mRecordStartAverages.dequeue();
 	}
-	mRecordStartTotalValue += total;
 	mRecordStartAverages.enqueue(total);
 }
 
-void ViFrequencySegmentDetector::updateRecordEndAverage(const ViRealSpectrum &spectrum, const int &milliseconds)
+void ViFrequencySegmentDetector::updateRecordEndAverage(const ViRealSpectrum &spectrum, const bool &isFull)
 {
 	qreal total = 0;
 	int start = mRecordEndRangeThreshold.start() * spectrum.size();
@@ -165,15 +165,14 @@ void ViFrequencySegmentDetector::updateRecordEndAverage(const ViRealSpectrum &sp
 	}
 	total /= end - start;
 
-	if(mRecordEndAverages.size() >= mRecordEndTimeThreshold / milliseconds)
+	if(isFull)
 	{
-		mRecordEndTotalValue -= mRecordEndAverages.dequeue();
+		mRecordEndAverages.dequeue();
 	}
-	mRecordEndTotalValue += total;
 	mRecordEndAverages.enqueue(total);
 }
 
-void ViFrequencySegmentDetector::updateSongStartAverage(const ViRealSpectrum &spectrum, const int &milliseconds)
+void ViFrequencySegmentDetector::updateSongStartAverage(const ViRealSpectrum &spectrum, const bool &isFull)
 {
 	qreal total = 0;
 	int start = mSongStartRangeThreshold.start() * spectrum.size();
@@ -184,15 +183,14 @@ void ViFrequencySegmentDetector::updateSongStartAverage(const ViRealSpectrum &sp
 	}
 	total /= end - start;
 
-	if(mSongStartAverages.size() >= mSongStartTimeThreshold / milliseconds)
+	if(isFull)
 	{
-		mSongStartTotalValue -= mSongStartAverages.dequeue();
+		mSongStartAverages.dequeue();
 	}
-	mSongStartTotalValue += total;
 	mSongStartAverages.enqueue(total);
 }
 
-void ViFrequencySegmentDetector::updateSongEndAverage(const ViRealSpectrum &spectrum, const int &milliseconds)
+void ViFrequencySegmentDetector::updateSongEndAverage(const ViRealSpectrum &spectrum, const bool &isFull)
 {
 	qreal total = 0;
 	int start = mSongEndRangeThreshold.start() * spectrum.size();
@@ -203,10 +201,9 @@ void ViFrequencySegmentDetector::updateSongEndAverage(const ViRealSpectrum &spec
 	}
 	total /= end - start;
 
-	if(mSongEndAverages.size() >= mSongEndTimeThreshold / milliseconds)
+	if(isFull)
 	{
-		mSongEndTotalValue -= mSongEndAverages.dequeue();
+		mSongEndAverages.dequeue();
 	}
-	mSongEndTotalValue += total;
 	mSongEndAverages.enqueue(total);
 }

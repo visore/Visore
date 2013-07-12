@@ -127,6 +127,7 @@ void ViStreamInput::start()
 		mBufferDevice = new ViStreamBuffer(mBuffer);
 		if(mAudioInput != NULL)
 		{
+			mAudioInput->stop();
 			delete mAudioInput;
 		}
 		mAudioInput = new QAudioInput(mDevice, mFormat.toQAudioFormat(), this);

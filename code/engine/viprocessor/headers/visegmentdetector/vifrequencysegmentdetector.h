@@ -29,10 +29,10 @@ class ViFrequencySegmentDetector : public ViSegmentDetector
 
 		bool inRange(QQueue<qreal> &averages, ViRange &range);
 
-		void updateRecordStartAverage(const ViRealSpectrum &spectrum, const int &milliseconds);
-		void updateRecordEndAverage(const ViRealSpectrum &spectrum, const int &milliseconds);
-		void updateSongStartAverage(const ViRealSpectrum &spectrum, const int &milliseconds);
-		void updateSongEndAverage(const ViRealSpectrum &spectrum, const int &milliseconds);
+		void updateRecordStartAverage(const ViRealSpectrum &spectrum, const bool &isFull);
+		void updateRecordEndAverage(const ViRealSpectrum &spectrum, const bool &isFull);
+		void updateSongStartAverage(const ViRealSpectrum &spectrum, const bool &isFull);
+		void updateSongEndAverage(const ViRealSpectrum &spectrum, const bool &isFull);
 
 	private:
 
@@ -50,17 +50,14 @@ class ViFrequencySegmentDetector : public ViSegmentDetector
 		ViRange mSongEndValueThreshold;
 		qint64 mSongEndTimeThreshold;
 
-		qreal mRecordStartTotalValue;
-		qreal mRecordEndTotalValue;
-		qreal mSongStartTotalValue;
-		qreal mSongEndTotalValue;
-
 		qint64 mTotalSamples;
 
 		QQueue<qreal> mRecordStartAverages;
 		QQueue<qreal> mRecordEndAverages;
 		QQueue<qreal> mSongStartAverages;
 		QQueue<qreal> mSongEndAverages;
+
+		bool mHadSong;
 
 };
 
