@@ -8,6 +8,7 @@ ViSongIdentifier::ViSongIdentifier()
 {
 	mFound = false;
 	mKey = "";
+	mDescription = "";
 	QObject::connect(&mServicer, SIGNAL(finished(bool)), this, SLOT(processReply(bool)));
 }
 
@@ -45,24 +46,32 @@ QString ViSongIdentifier::key()
 	return mKey;
 }
 
+void ViSongIdentifier::identify(ViBufferOffsets bufferOffset, QString description)
+{
+	reset();
+	mDescription = description;
+	identify(bufferOffset);
+}
+
 void ViSongIdentifier::reset()
 {
 	mMetadata = ViMetadata();
 	mFound = false;
+	mDescription = "";
 	mServicer.disconnect();
 	QObject::connect(&mServicer, SIGNAL(finished(bool)), this, SLOT(processReply(bool)));
 }
 
 void ViSongIdentifier::finish()
 {
-	LOG("The track's metadata could not be detected.");
+	LOG("The track's metadata could not be detected (" + mDescription + ").");
 	mFound = false;
 	emit identified(mFound);
 }
 
 void ViSongIdentifier::finish(ViMetadata metadata)
 {
-	LOG("The track's metadata was detected as \"" + metadata.artist() + " - " + metadata.title() + "\".");
+	LOG("The track's metadata was detected as \"" + metadata.artist() + " - " + metadata.title() + "\" (" + mDescription + ").");
 	mMetadata = metadata;
 	mFound = true;
 	emit identified(mFound);

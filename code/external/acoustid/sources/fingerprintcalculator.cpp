@@ -6,7 +6,7 @@ QMutex FingerprintCalculator::m_mutex;
 FingerprintCalculator::FingerprintCalculator()
 {
     QMutexLocker locker(&m_mutex);
-    m_context = chromaprint_new(CHROMAPRINT_ALGORITHM_DEFAULT);
+	m_context = chromaprint_new(CHROMAPRINT_ALGORITHM_DEFAULT);
 }
 
 FingerprintCalculator::~FingerprintCalculator()

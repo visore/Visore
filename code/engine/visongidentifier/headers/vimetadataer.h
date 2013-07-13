@@ -32,6 +32,7 @@ class ViMetadataer : public QObject
 
 	private:
 
+		void enqueueBuffer(ViBuffer *buffer);
 		bool startNextIdentifier();
 		bool startNextRetriever();
 		void processNextBuffer();
@@ -44,8 +45,9 @@ class ViMetadataer : public QObject
 		QList<ViCoverRetriever*> mRetrievers;
 
 		ViAudioObjectPointer mObject;
-		QQueue<ViBuffer*> mBuffers;
-		ViBuffer *mBuffer;
+		QQueue<QPair<ViBufferOffsets, QString>> mBufferOffsets;
+		ViBufferOffsets mCurrentBufferOffset;
+		QString mCurrentDescription;
 		ViMetadata mMetadata;
 
 		bool mDetected;

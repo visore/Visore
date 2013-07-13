@@ -1,12 +1,10 @@
 #ifndef VICODINGCHAINCOMPONENT_H
 #define VICODINGCHAINCOMPONENT_H
 
-#include <QMutex>
 #include <QThread>
 #include <QFile>
 #include <viabstractcoder.h>
 #include <vibuffer.h>
-#include <QMutexLocker>
 
 /**********************************************************
 ViCodingChainComponent
@@ -37,7 +35,7 @@ class ViCodingChainComponent : public QObject
 
 	signals:
 
-		void failed(ViCoder::Error error);
+		void failed(ViCoder::Error);
 
 	protected slots:
 
@@ -68,6 +66,7 @@ class ViCodingChainComponent : public QObject
 		QQueue<ViSampleArray*> mData;
 		ViCodingChainComponent *mNext;
 		QByteArray mHeader;
+		bool mContinue;
 
 };
 
@@ -80,16 +79,30 @@ class ViCodingChainInput : public ViCodingChainComponent
 
 	Q_OBJECT
 
+	protected slots:
+
+		virtual void seek(int position) = 0;
+
 	public:
 
 		ViCodingChainInput();
 		virtual bool hasData() = 0;
 		virtual int size() = 0;
 		void setSampleSize(int size);
+		void setOffsets(qint64 from, qint64 to);
+
+	protected:
+
+		void initializeOffsets(int size);
+		int readSize();
+		void addReadSize(const int &size);
 
 	protected:
 
 		int mSampleSize;
+		qint64 mFromOffset;
+		qint64 mToOffset;
+		qint64 mTotalReadSize;
 
 };
 
@@ -101,6 +114,10 @@ class ViCodingChainFileInput : public ViCodingChainInput
 {
 
 	Q_OBJECT
+
+	protected slots:
+
+		void seek(int position);
 
 	public:
 
@@ -127,6 +144,10 @@ class ViCodingChainDataInput : public ViCodingChainInput
 {
 
 	Q_OBJECT
+
+	protected slots:
+
+		void seek(int position);
 
 	public:
 
@@ -155,6 +176,10 @@ class ViCodingChainBufferInput : public ViCodingChainInput
 
 	Q_OBJECT
 
+	protected slots:
+
+		void seek(int position);
+
 	public:
 
 		ViCodingChainBufferInput();
@@ -170,7 +195,6 @@ class ViCodingChainBufferInput : public ViCodingChainInput
 
 		ViBuffer *mBuffer;
 		ViBufferStreamPointer mStream;
-		QMutex mMutex;
 
 };
 
@@ -202,6 +226,10 @@ class ViCodingChainDecoder : public ViCodingChainCoder
 {
 
 	Q_OBJECT
+
+	signals:
+
+		void formatChanged(ViAudioFormat);
 
 	public:
 
@@ -248,16 +276,6 @@ class ViCodingChainOutput : public ViCodingChainComponent
 
 		ViCodingChainOutput();
 		virtual void initialize();
-
-		// TODO: Currently samples are decoded/encoded and are only 'skipped' if they are written to the output.
-		// This should actually be done before decoding/encoding to save computational power.
-		// The current problem is that we need to read/write the header and the offset will skip the header.
-		void setOffset(int offset);
-
-	protected:
-
-		int mOffset;
-		int mCurrentOffset;
 
 };
 

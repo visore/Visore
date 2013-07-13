@@ -1,4 +1,51 @@
 #include <vifingerprinter.h>
+#include <vilogger.h>
+ViBufferOffsets::ViBufferOffsets()
+{
+	clear();
+}
+
+ViBufferOffsets::ViBufferOffsets(ViBuffer *buffer, int from, int to)
+{
+	mFrom = from;
+	mTo = to;
+	mBuffer = buffer;
+}
+
+ViBufferOffsets::ViBufferOffsets(const ViBufferOffsets &other)
+{
+	mFrom = other.mFrom;
+	mTo = other.mTo;
+	mBuffer = other.mBuffer;
+}
+
+int ViBufferOffsets::from()
+{
+	return mFrom;
+}
+
+int ViBufferOffsets::to()
+{
+	return mTo;
+}
+
+ViBuffer* ViBufferOffsets::buffer()
+{
+	return mBuffer;
+}
+
+void ViBufferOffsets::clear()
+{
+	mFrom = 0;
+	mTo = 0;
+	mBuffer = NULL;
+}
+
+bool ViBufferOffsets::isValid()
+{
+	return mBuffer != NULL && mTo > mFrom;
+}
+
 
 ViFingerprinterThread::ViFingerprinterThread()
 	: QThread()
@@ -10,9 +57,10 @@ ViFingerprinterThread::~ViFingerprinterThread()
 {
 }
 
-void ViFingerprinterThread::setBuffer(ViBuffer *buffer)
+void ViFingerprinterThread::setBufferOffset(ViBufferOffsets bufferOffset)
 {
-	mStream = buffer->createReadStream();
+	mBufferOffset = bufferOffset;
+	mStream = mBufferOffset.buffer()->createReadStream();
 }
 
 void ViFingerprinterThread::generate()
@@ -35,6 +83,16 @@ void ViFingerprinterThread::setFingerprint(QString fingerprint)
 	mFingerprint = fingerprint;
 }
 
+ViAudioPosition ViFingerprinterThread::duration()
+{
+	return mDuration;
+}
+
+void ViFingerprinterThread::setDuration(ViAudioPosition duration)
+{
+	mDuration = duration;
+}
+
 ViFingerprinter::ViFingerprinter()
 	: QObject()
 {
@@ -54,17 +112,18 @@ ViFingerprinter::~ViFingerprinter()
 void ViFingerprinter::finishFingerprint()
 {
 	mFingerprint = mThread->fingerprint();
-	if(mThread != NULL)
-	{
-		delete mThread;
-		mThread = NULL;
-	}
+	mDuration = mThread->duration();
 	emit generated();
 }
 
 QString ViFingerprinter::fingerprint()
 {
 	return mFingerprint;
+}
+
+ViAudioPosition ViFingerprinter::duration()
+{
+	return mDuration;
 }
 
 void ViFingerprinter::setThread(ViFingerprinterThread *thread)

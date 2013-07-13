@@ -8,10 +8,9 @@ ViEnmfpIdentifier::ViEnmfpIdentifier()
 	QObject::connect(&mFingerprinter, SIGNAL(generated()), this, SLOT(sendRequest()));
 }
 
-void ViEnmfpIdentifier::identify(ViBuffer *buffer)
+void ViEnmfpIdentifier::identify(ViBufferOffsets bufferOffset)
 {
-	reset();
-	mFingerprinter.generate(buffer);
+	mFingerprinter.generate(bufferOffset);
 }
 
 void ViEnmfpIdentifier::sendRequest()

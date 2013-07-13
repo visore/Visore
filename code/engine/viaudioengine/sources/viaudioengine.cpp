@@ -144,18 +144,6 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 	mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(ViCorrelatorManager::libraries())), 0.05);
 	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
 	mObjectChain.execute();
-
-	/*mObjectChain.clear();
-	mObjectChain.add(objects);
-	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)), Qt::UniqueConnection);
-	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)), Qt::UniqueConnection);
-	QObject::connect(&mObjectChain, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::UniqueConnection);
-	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted | ViAudio::Corrected)), 0.25);
-
-	mObjectChain.addFunction(ViFunctionCall("align"), 0.25);
-	mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(ViCorrelatorManager::libraries())), 0.25);
-	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.25, false);
-	mObjectChain.execute();*/
 }
 
 void ViAudioEngine::recordProject(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectInfo)

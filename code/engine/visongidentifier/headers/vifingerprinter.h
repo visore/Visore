@@ -2,7 +2,31 @@
 #define VIFINGERPRINTER_H
 
 #include <vibuffer.h>
+#include <viaudioposition.h>
 #include <QThread>
+
+class ViBufferOffsets
+{
+
+	public:
+
+		ViBufferOffsets();
+		ViBufferOffsets(ViBuffer *buffer, int from = 0, int to = 0);
+		ViBufferOffsets(const ViBufferOffsets &other);
+
+		int from();
+		int to();
+		ViBuffer* buffer();
+		void clear();
+		bool isValid();
+
+	private:
+
+		int mFrom;
+		int mTo;
+		ViBuffer *mBuffer;
+
+};
 
 class ViFingerprinterThread : public QThread
 {
@@ -11,14 +35,16 @@ class ViFingerprinterThread : public QThread
 
 		ViFingerprinterThread();
 		virtual ~ViFingerprinterThread();
-		void setBuffer(ViBuffer *buffer);
+		void setBufferOffset(ViBufferOffsets bufferOffset);
 		void generate();
 		QString fingerprint();
+		ViAudioPosition duration();
 		virtual void run() = 0;
 
 	protected:
 
 		void setFingerprint(QString fingerprint);
+		void setDuration(ViAudioPosition duration);
 
 	private:
 
@@ -26,11 +52,13 @@ class ViFingerprinterThread : public QThread
 
 	protected:
 
+		ViBufferOffsets mBufferOffset;
 		ViBufferStreamPointer mStream;
 
 	private:
 
 		QString mFingerprint;
+		ViAudioPosition mDuration;
 
 };
 
@@ -53,8 +81,9 @@ class ViFingerprinter : public QObject
 		virtual ~ViFingerprinter();
 
 		QString fingerprint();
+		ViAudioPosition duration();
 
-		virtual void generate(ViBuffer *buffer) = 0;
+		virtual void generate(ViBufferOffsets bufferOffset) = 0;
 
 	protected:
 
@@ -64,6 +93,7 @@ class ViFingerprinter : public QObject
 	private:
 
 		QString mFingerprint;
+		ViAudioPosition mDuration;
 		ViFingerprinterThread *mThread;
 
 };

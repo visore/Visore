@@ -13,6 +13,7 @@ ViAudioRecorder::ViAudioRecorder()
 	mCurrentSide = 0;
 	mSides = 0;
     mExistingProject = false;
+	mWaitForQueue = false;
 
 	mIdleTimer.setInterval(IDLE_TIME);
 	QObject::connect(&mIdleTimer, SIGNAL(timeout()), this, SLOT(checkSize()));
@@ -41,6 +42,7 @@ bool ViAudioRecorder::record(ViProject *project, ViAudio::Type type, ViAudioForm
 	mInput.setFormat(format);
 
     mDetectInfo = detectInfo;
+	mWaitForQueue = false;
 
     if(mProject->objectCount() > 0)
     {
@@ -68,7 +70,7 @@ void ViAudioRecorder::nextObject(bool startTimer)
 {
 	mIdleTimer.stop();
 
-    mObject = ViAudioObject::create();
+	mObject = ViAudioObject::create();
     mObject->setSideNumber(mCurrentSide);
     mObject->setTrackNumber(mCurrentTrack);
 
@@ -90,6 +92,22 @@ void ViAudioRecorder::finish()
 	//mProject->clear();
 	setProgress(100);
 	emit finished();
+}
+
+void ViAudioRecorder::finishProject()
+{
+	if(!mQueue.isEmpty())
+	{
+		mWaitForQueue = true;
+	}
+	else if((mProject == NULL || mProject->isFinished())) // If project is not finished, wait for it to finish
+	{
+		finish();
+	}
+	else
+	{
+		QObject::connect(mProject, SIGNAL(finished()), this, SLOT(finish()), Qt::UniqueConnection);
+	}
 }
 
 void ViAudioRecorder::startSong()
@@ -128,26 +146,33 @@ void ViAudioRecorder::startRecord()
 
 void ViAudioRecorder::endRecord()
 {
-    mCurrentTrack = 0;
-    if(mCurrentSide == mSides)
-    {
-        mIdleTimer.stop();
-        mInput.stop();
-        mSegmentDetector.stop();
-		if((mProject == NULL || mProject->isFinished()) && mQueue.isEmpty()) // If project is not finished, wait for it to finish
+	if(mCurrentTrack == 0) // If there wasn't a song start yet. Eg: record takes very long to start
+	{
+		nextObject();
+	}
+	else
+	{
+		mCurrentTrack = 0;
+		if(mCurrentSide == mSides)
 		{
-			finish();
+			mIdleTimer.stop();
+			mInput.stop();
+			mSegmentDetector.stop();
+			finishProject();
 		}
 		else
 		{
-			QObject::connect(mProject, SIGNAL(finished()), this, SLOT(finish()), Qt::UniqueConnection);
+			nextObject();
+			if(mCurrentSide % 2 == 0)
+			{
+				emit statused("Please mount the next record");
+			}
+			else
+			{
+				emit statused("Please turn over the record");
+			}
 		}
 	}
-	else
-    {
-		nextObject();
-		emit statused("Please turn over the record");
-    }
 }
 
 void ViAudioRecorder::serialize()
@@ -168,6 +193,10 @@ void ViAudioRecorder::serialize()
         }
         object->encode(mType, true);
     }
+	if(mWaitForQueue)
+	{
+		finishProject();
+	}
 }
 
 void ViAudioRecorder::checkSize()

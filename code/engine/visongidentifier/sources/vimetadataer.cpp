@@ -9,10 +9,10 @@ ViMetadataer::ViMetadataer()
 	mDetected = false;
 	mCurrentIdentifier = 0;
 	mCurrentRetriever = 0;
-	mBuffer = NULL;
+	mCurrentDescription = "";
 
+	mIdentifiers.append(new ViEnmfpIdentifier()); // ENMFP slower, but more accurate - make first identifier
 	mIdentifiers.append(new ViAcoustidIdentifier());
-	mIdentifiers.append(new ViEnmfpIdentifier());
 
 	mRetrievers.append(new ViMusicBrainzCoverRetriever());
 
@@ -61,6 +61,14 @@ void ViMetadataer::processRetrieval(bool success)
 	}
 }
 
+void ViMetadataer::enqueueBuffer(ViBuffer *buffer)
+{
+	mBufferOffsets.enqueue(QPair<ViBufferOffsets, QString>(ViBufferOffsets(buffer, 0, buffer->size()), "Full track")); // Entire track
+	mBufferOffsets.enqueue(QPair<ViBufferOffsets, QString>(ViBufferOffsets(buffer, buffer->size() * 0.2, buffer->size() * 0.8), "20% - 80% of track")); // From 20% to 80% of the track
+	mBufferOffsets.enqueue(QPair<ViBufferOffsets, QString>(ViBufferOffsets(buffer, 0, buffer->size() / 2), "First half of track")); // First half of the track
+	mBufferOffsets.enqueue(QPair<ViBufferOffsets, QString>(ViBufferOffsets(buffer, buffer->size() / 2, buffer->size()), "Second half of track")); // Second half of the track
+}
+
 bool ViMetadataer::startNextIdentifier()
 {
 	++mCurrentIdentifier;
@@ -68,7 +76,7 @@ bool ViMetadataer::startNextIdentifier()
 	{
 		return false;
 	}
-	mIdentifiers[mCurrentIdentifier]->identify(mBuffer);
+	mIdentifiers[mCurrentIdentifier]->identify(mCurrentBufferOffset, mCurrentDescription);
 	return true;
 }
 
@@ -89,18 +97,18 @@ bool ViMetadataer::detect(ViAudioObjectPointer object)
 
 	if(object->hasBuffer(ViAudio::Target))
 	{
-		mBuffers.enqueue(object->buffer(ViAudio::Target));
+		enqueueBuffer(object->buffer(ViAudio::Target));
 	}
 	if(object->hasBuffer(ViAudio::Corrected))
 	{
-		mBuffers.enqueue(object->buffer(ViAudio::Corrected));
+		enqueueBuffer(object->buffer(ViAudio::Corrected));
 	}
 	if(object->hasBuffer(ViAudio::Corrupted))
 	{
-		mBuffers.enqueue(object->buffer(ViAudio::Corrupted));
+		enqueueBuffer(object->buffer(ViAudio::Corrupted));
 	}
 
-	if(mBuffers.isEmpty())
+	if(mBufferOffsets.isEmpty())
 	{
 		LOG("Invalid buffer passed for the song identification.");
 		return false;
@@ -116,7 +124,7 @@ bool ViMetadataer::detect(ViAudioObjectPointer object, ViAudio::Type type)
 
 	if(object->hasBuffer(type))
 	{
-		mBuffers.enqueue(object->buffer(type));
+		enqueueBuffer(object->buffer(type));
 	}
 	else
 	{
@@ -137,7 +145,7 @@ bool ViMetadataer::detect(ViBuffer *buffer)
 		LOG("Invalid buffer passed for the song identification.");
 		return false;
 	}
-	mBuffers.enqueue(buffer);
+	enqueueBuffer(buffer);
 
 	processNextBuffer();
 	return true;
@@ -151,11 +159,11 @@ bool ViMetadataer::detect(QList<ViBuffer*> buffers)
 	{
 		if(buffers[i] != NULL)
 		{
-			mBuffers.enqueue(buffers[i]);
+			enqueueBuffer(buffers[i]);
 		}
 	}
 
-	if(mBuffers.isEmpty())
+	if(mBufferOffsets.isEmpty())
 	{
 		LOG("Invalid buffer passed for the song identification.");
 		return false;
@@ -167,12 +175,16 @@ bool ViMetadataer::detect(QList<ViBuffer*> buffers)
 
 void ViMetadataer::processNextBuffer()
 {
-	if(mBuffers.isEmpty())
+	if(mBufferOffsets.isEmpty())
 	{
 		finish(false);
 		return;
 	}
-	mBuffer = mBuffers.dequeue();
+	mCurrentIdentifier = -1;
+	mCurrentRetriever = -1;
+	QPair<ViBufferOffsets, QString> pair = mBufferOffsets.dequeue();
+	mCurrentBufferOffset = pair.first;
+	mCurrentDescription = pair.second;
 	startNextIdentifier();
 }
 
@@ -181,8 +193,9 @@ void ViMetadataer::reset()
 	mDetected = false;
 	mCurrentIdentifier = -1;
 	mCurrentRetriever = -1;
-	mBuffer = NULL;
-	mBuffers.clear();
+	mCurrentBufferOffset.clear();
+	mCurrentDescription = "";
+	mBufferOffsets.clear();
 	mMetadata = ViMetadata();
 }
 
@@ -191,7 +204,7 @@ void ViMetadataer::finish(bool success)
 	mDetected = success;
 	if(mDetected)
 	{
-		mBuffers.clear();
+		mBufferOffsets.clear();
 	}
 	emit finished(mDetected);
 }

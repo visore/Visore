@@ -8,7 +8,7 @@ ViCodingChain::ViCodingChain()
 {
 	mInput = NULL;
 	mOutput = NULL;
-	setOffset(0);
+	setOffsets(-1, -1);
 	setMode(ViCodingChain::Unknown);
 }
 
@@ -44,6 +44,8 @@ void ViCodingChain::reset()
 	mOutput = NULL;
 	mInputCoder = NULL;
 	mOutputCoder = NULL;
+
+	setOffsets(-1, -1);
 }
 
 void ViCodingChain::setError(ViCoder::Error error)
@@ -148,9 +150,10 @@ void ViCodingChain::detectCoderFile()
 	mInputCoder = ViAudioManager::detect(mInputFilePath);
 }
 
-void ViCodingChain::setOffset(int offset)
+void ViCodingChain::setOffsets(qint64 fromOffset, qint64 toOffset)
 {
-	mOffset = offset;
+	mFromOffset = fromOffset;
+	mToOffset = toOffset;
 }
 
 void ViCodingChain::run()
@@ -265,10 +268,10 @@ void ViCodingChain::run()
 		mOutputCoder->setFormat(ViAudio::AudioOutput, mOutputFormat);
 	}
 
+	mInput->setOffsets(mFromOffset, mToOffset);
 	mInput->initialize();
 	if(mError != ViCoder::NoError) return;
 
-	mOutput->setOffset(mOffset);
 	mOutput->initialize();
 	if(mError != ViCoder::NoError) return;
 	if(mMode != ViCodingChain::EncodeFile && mMode != ViCodingChain::EncodeData)
@@ -304,23 +307,14 @@ void ViCodingChain::run()
 	qreal progressedData = 0;
 	qint64 totalSize = mInput->size();
 	static qint32 chunkSize = mInput->chunkSize();
-	qreal progress = 0;
+	qreal progress = 0, newProgress;
 
-	while(mInput->hasData())
+	while(mInput->hasData() && mError == ViCoder::NoError)
 	{
 		mInput->execute();
-
 		progressedData += chunkSize;
-		if(totalSize <= 0)
-		{
-			progress = 0;
-		}
-		else
-		{
-			progress = progressedData / totalSize * 99; // * 99 to first finalize everything before 100% is emitted
-		}
+		progress = progressedData / totalSize * 99; // * 99 to first finalize everything before 100% is emitted
 		emit progressed(progress);
-		if(mError != ViCoder::NoError) return;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////

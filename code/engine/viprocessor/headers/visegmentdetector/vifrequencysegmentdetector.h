@@ -57,8 +57,6 @@ class ViFrequencySegmentDetector : public ViSegmentDetector
 		QQueue<qreal> mSongStartAverages;
 		QQueue<qreal> mSongEndAverages;
 
-		bool mHadSong;
-
 };
 
 #endif

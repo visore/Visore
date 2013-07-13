@@ -10,6 +10,7 @@ ViEnmfpFingerprinterThread::ViEnmfpFingerprinterThread()
 void ViEnmfpFingerprinterThread::run()
 {
 	int size = mStream->size();
+	setDuration(ViAudioPosition(size, ViAudioPosition::Bytes, mBufferOffset.buffer()->format()));
 	if(size > 0)
 	{
 		ViRawChunk chunk(size);
@@ -32,7 +33,8 @@ ViEnmfpFingerprinter::ViEnmfpFingerprinter()
 
 void ViEnmfpFingerprinter::generate()
 {
-	thread()->setBuffer(&mOutput);
+	ViBufferOffsets temp(&mOutput);
+	thread()->setBufferOffset(temp);
 	thread()->generate();
 }
 
@@ -41,10 +43,10 @@ QString ViEnmfpFingerprinter::version()
 	return mVersion;
 }
 
-void ViEnmfpFingerprinter::generate(ViBuffer *buffer)
+void ViEnmfpFingerprinter::generate(ViBufferOffsets bufferOffset)
 {
 	mOutput.clear();
-	mCoder.encode(buffer, &mOutput, encodingFormat());
+	mCoder.encode(bufferOffset.buffer(), &mOutput, encodingFormat(), ViSongInfo(), bufferOffset.from(), bufferOffset.to());
 }
 
 ViAudioFormat ViEnmfpFingerprinter::encodingFormat()

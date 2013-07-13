@@ -17,7 +17,7 @@ class ViEnmfpIdentifier : public ViSongIdentifier
 	public:
 
 		ViEnmfpIdentifier();
-		void identify(ViBuffer *buffer);
+		void identify(ViBufferOffsets bufferOffset);
 
 	private:
 

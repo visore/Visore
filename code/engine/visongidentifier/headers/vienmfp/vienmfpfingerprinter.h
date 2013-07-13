@@ -26,7 +26,7 @@ class ViEnmfpFingerprinter : public ViFingerprinter
 	public:
 
 		ViEnmfpFingerprinter();
-		void generate(ViBuffer *buffer);
+		void generate(ViBufferOffsets bufferOffset);
 		QString version();
 
 	protected:

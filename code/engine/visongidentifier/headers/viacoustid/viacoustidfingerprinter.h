@@ -20,7 +20,7 @@ class ViAcoustidFingerprinter : public ViFingerprinter
 	public:
 
 		ViAcoustidFingerprinter();
-		void generate(ViBuffer *buffer);
+		void generate(ViBufferOffsets bufferOffset);
 
 };
 

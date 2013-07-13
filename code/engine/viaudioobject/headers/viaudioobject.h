@@ -335,7 +335,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		ViSongInfo& songInfo();
 		void setSongInfo(ViSongInfo info);
-		void detectSongInfo();
+		Q_INVOKABLE void detectSongInfo();
 		bool isDetectingSongInfo();
         bool hasSongInfo();
 

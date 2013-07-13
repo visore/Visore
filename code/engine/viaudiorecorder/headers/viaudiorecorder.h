@@ -19,6 +19,7 @@ class ViAudioRecorder : public ViNotifier
 		void endSong();
 		void serialize();
 		void finish();
+		void finishProject();
 		void checkSize();
 
 	public:
@@ -47,6 +48,7 @@ class ViAudioRecorder : public ViNotifier
 
 		bool mDetectInfo;
         bool mExistingProject;
+		bool mWaitForQueue;
 		int mCurrentTrack;
 		int mCurrentSide;
 		int mSides;

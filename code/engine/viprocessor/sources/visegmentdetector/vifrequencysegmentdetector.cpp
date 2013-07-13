@@ -57,7 +57,6 @@ void ViFrequencySegmentDetector::clear()
 
 void ViFrequencySegmentDetector::initialize()
 {
-	mHadSong = false;
 	clear();
 }
 
@@ -86,14 +85,12 @@ void ViFrequencySegmentDetector::execute(const int &channel)
 			updateSongStartAverage(spectrum, isFull);
 			if(isFull && inRange(mSongStartAverages, mSongStartValueThreshold))
 			{
-				mHadSong = true;
 				setSongStart(ViAudioPosition(mTotalSamples, ViAudioPosition::Samples, format()));
 				clear();
 			}
-
-			if(mHadSong)
+			else
 			{
-				bool isFull = mRecordEndAverages.size() >= mRecordEndTimeThreshold / milliseconds;
+				isFull = mRecordEndAverages.size() >= mRecordEndTimeThreshold / milliseconds;
 				updateRecordEndAverage(spectrum, isFull);
 				if(isFull && inRange(mRecordEndAverages, mRecordEndValueThreshold))
 				{

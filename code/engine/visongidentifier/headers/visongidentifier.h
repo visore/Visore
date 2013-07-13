@@ -1,7 +1,7 @@
 #ifndef VISONGIDENTIFIER_H
 #define VISONGIDENTIFIER_H
 
-#include <vibuffer.h>
+#include <vifingerprinter.h>
 #include <vimetadata.h>
 #include <viwebservicer.h>
 
@@ -32,7 +32,8 @@ class ViSongIdentifier : public QObject
 		void setKey(QString key);
 		QString key();
 
-		virtual void identify(ViBuffer *buffer) = 0;
+		void identify(ViBufferOffsets bufferOffset, QString description);
+		virtual void identify(ViBufferOffsets bufferOffset) = 0;
 
 	protected:
 
@@ -59,6 +60,7 @@ class ViSongIdentifier : public QObject
 		ViMetadata mMetadata;
 		bool mFound;
 		QString mKey;
+		QString mDescription;
 
 };
 

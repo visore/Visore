@@ -13,6 +13,7 @@ ViCodingChainComponent::ViCodingChainComponent()
 {
 	mNext = NULL;
 	mError = ViCoder::NoError;
+	mContinue = true;
 }
 
 ViCoder::Error ViCodingChainComponent::error()
@@ -59,11 +60,55 @@ ViCodingChainInput::ViCodingChainInput()
 	: ViCodingChainComponent()
 {
 	mSampleSize = -1;
+	mFromOffset = -1;
+	mToOffset = -1;
+	mTotalReadSize = 0;
 }
 
 void ViCodingChainInput::setSampleSize(int size)
 {
 	mSampleSize = size / 8;
+}
+
+void ViCodingChainInput::setOffsets(qint64 from, qint64 to)
+{
+	mFromOffset = from;
+	mToOffset = to;
+}
+
+void ViCodingChainInput::initializeOffsets(int size)
+{
+	mTotalReadSize = 0;
+
+	if(mFromOffset < 0)
+	{
+		mFromOffset = 0;
+	}
+	if(mToOffset < 0 || mToOffset > size)
+	{
+		mToOffset = size;
+	}
+	if(mFromOffset > 0)
+	{
+		seek(mFromOffset);
+	}
+}
+
+int ViCodingChainInput::readSize()
+{
+	if(mTotalReadSize + CHUNK_SIZE <= mToOffset)
+	{
+		return CHUNK_SIZE;
+	}
+	else
+	{
+		return mToOffset - mTotalReadSize;
+	}
+}
+
+void ViCodingChainInput::addReadSize(const int &size)
+{
+	mTotalReadSize += size;
 }
 
 /**********************************************************
@@ -76,6 +121,11 @@ ViCodingChainFileInput::ViCodingChainFileInput()
 	mFilePath = "";
 }
 
+void ViCodingChainFileInput::seek(int position)
+{
+	mFile.seek(position);
+}
+
 void ViCodingChainFileInput::setFilePath(QString filePath)
 {
 	mFilePath = filePath;
@@ -83,7 +133,7 @@ void ViCodingChainFileInput::setFilePath(QString filePath)
 
 bool ViCodingChainFileInput::hasData()
 {
-	return !mFile.atEnd();
+	return readSize() > 0 && !mFile.atEnd();
 }
 
 int ViCodingChainFileInput::size()
@@ -100,7 +150,11 @@ void ViCodingChainFileInput::initialize()
 		return;
 	}
 	mFile.setFileName(mFilePath);
-	if(!mFile.open(QIODevice::ReadOnly))
+	if(mFile.open(QIODevice::ReadOnly))
+	{
+		initializeOffsets(mFile.size());
+	}
+	else
 	{
 		setError(ViCoder::InputFileError);
 	}
@@ -108,9 +162,14 @@ void ViCodingChainFileInput::initialize()
 
 void ViCodingChainFileInput::execute()
 {
-	char *data = new char[CHUNK_SIZE];
-	int size = mFile.read(data, CHUNK_SIZE);
-	mNext->addData(new ViSampleArray(data, size));
+	int size = readSize();
+	if(size > 0)
+	{
+		char *data = new char[size];
+		size = mFile.read(data, size);
+		addReadSize(size);
+		mNext->addData(new ViSampleArray(data, size));
+	}
 }
 
 void ViCodingChainFileInput::finalize()
@@ -139,6 +198,16 @@ ViCodingChainDataInput::~ViCodingChainDataInput()
 	mByteArray = NULL;
 }
 
+void ViCodingChainDataInput::seek(int position)
+{
+	if(mStream != NULL)
+	{
+		delete mStream;
+	}
+	mStream = new QDataStream(mByteArray, QIODevice::ReadOnly);
+	mStream->skipRawData(position);
+}
+
 void ViCodingChainDataInput::setData(QByteArray &data)
 {
 	mByteArray = &data;
@@ -146,7 +215,7 @@ void ViCodingChainDataInput::setData(QByteArray &data)
 
 bool ViCodingChainDataInput::hasData()
 {
-	return !mStream->atEnd();
+	return readSize() > 0 && !mStream->atEnd();
 }
 
 int ViCodingChainDataInput::size()
@@ -160,16 +229,21 @@ void ViCodingChainDataInput::initialize()
 	if(mStream != NULL)
 	{
 		delete mStream;
-		mStream = NULL;
 	}
 	mStream = new QDataStream(mByteArray, QIODevice::ReadOnly);
+	initializeOffsets(mByteArray->size());
 }
 
 void ViCodingChainDataInput::execute()
 {
-	char *data = new char[CHUNK_SIZE];
-	int size = mStream->readRawData(data, CHUNK_SIZE);
-	mNext->addData(new ViSampleArray(data, size, size / mSampleSize));
+	int size = readSize();
+	if(size > 0)
+	{
+		char *data = new char[size];
+		size = mStream->readRawData(data, size);
+		addReadSize(size);
+		mNext->addData(new ViSampleArray(data, size, size / mSampleSize));
+	}
 }
 
 void ViCodingChainDataInput::finalize()
@@ -194,7 +268,12 @@ ViCodingChainBufferInput::ViCodingChainBufferInput()
 
 ViCodingChainBufferInput::~ViCodingChainBufferInput()
 {
-	mBuffer= NULL;
+	mBuffer = NULL;
+}
+
+void ViCodingChainBufferInput::seek(int position)
+{
+	mStream->setPosition(position);
 }
 
 void ViCodingChainBufferInput::setBuffer(ViBuffer *buffer)
@@ -204,7 +283,7 @@ void ViCodingChainBufferInput::setBuffer(ViBuffer *buffer)
 
 bool ViCodingChainBufferInput::hasData()
 {
-	return !mStream->atEnd();
+	return readSize() > 0 && !mStream->atEnd();
 }
 
 int ViCodingChainBufferInput::size()
@@ -215,13 +294,19 @@ int ViCodingChainBufferInput::size()
 void ViCodingChainBufferInput::initialize()
 {
 	mStream = mBuffer->createReadStream();
+	initializeOffsets(mStream->size());
 }
 
 void ViCodingChainBufferInput::execute()
 {
-	char *data = new char[CHUNK_SIZE];
-	int size = mStream->read(data, CHUNK_SIZE);
-	mNext->addData(new ViSampleArray(data, size, size / mSampleSize));
+	int size = readSize();
+	if(size > 0)
+	{
+		char *data = new char[size];
+		size = mStream->read(data, size);
+		addReadSize(size);
+		mNext->addData(new ViSampleArray(data, size, size / mSampleSize));
+	}
 }
 
 void ViCodingChainBufferInput::finalize()
@@ -348,6 +433,7 @@ void ViCodingChainEncoder::execute()
 	delete array;
 }
 
+
 /**********************************************************
 ViCodingChainOutput
 **********************************************************/
@@ -355,18 +441,10 @@ ViCodingChainOutput
 ViCodingChainOutput::ViCodingChainOutput()
 	: ViCodingChainComponent()
 {
-	mOffset = 0;
-	mCurrentOffset = 0;
 }
 
 void ViCodingChainOutput::initialize()
 {
-	mCurrentOffset = 0;
-}
-
-void ViCodingChainOutput::setOffset(int offset)
-{
-	mOffset = offset;
 }
 
 /**********************************************************
@@ -434,19 +512,7 @@ void ViCodingChainFileOutput::finalize()
 void ViCodingChainFileOutput::execute()
 {
 	ViSampleArray *array = mData.dequeue();
-	if(mCurrentOffset < mOffset)
-	{
-		int offset = mOffset - mCurrentOffset;
-		if(offset <= array->size())
-		{
-			mTempFile.write(array->charData() + offset, array->size() - offset);
-		}
-		mCurrentOffset += array->size();
-	}
-	else
-	{
-		mTempFile.write(array->charData(), array->size());
-	}
+	mTempFile.write(array->charData(), array->size());
 	delete array;
 }
 
@@ -503,19 +569,7 @@ void ViCodingChainDataOutput::finalize()
 void ViCodingChainDataOutput::execute()
 {
 	ViSampleArray *array = mData.dequeue();
-	if(mCurrentOffset < mOffset)
-	{
-		int offset = mOffset - mCurrentOffset;
-		if(offset <= array->size())
-		{
-			mStream->writeRawData(array->charData() + offset, array->size() - offset);
-		}
-		mCurrentOffset += array->size();
-	}
-	else
-	{
-		mStream->writeRawData(array->charData(), array->size());
-	}
+	mStream->writeRawData(array->charData(), array->size());
 	delete array;
 }
 
@@ -564,18 +618,6 @@ void ViCodingChainBufferOutput::finalize()
 void ViCodingChainBufferOutput::execute()
 {
 	ViSampleArray *array = mData.dequeue();
-	if(mCurrentOffset < mOffset)
-	{
-		int offset = mOffset - mCurrentOffset;
-		if(offset <= array->size())
-		{
-			mStream->write(array->charData() + offset, array->size() - offset);
-		}
-		mCurrentOffset += array->size();
-	}
-	else
-	{
-		mStream->write(array->charData(), array->size());
-	}
+	mStream->write(array->charData(), array->size());
 	delete array;
 }

@@ -463,7 +463,7 @@ void ViAudioObject::encodeNext()
 		QString thePath = filePath(mPreviousEncodedType);
 		ViBuffer *theBuffer = buffer(mPreviousEncodedType, true);
 		locker.relock();
-        mEncoder->encode(theBuffer, thePath, theBuffer->format(), 0, mSongInfo);
+		mEncoder->encode(theBuffer, thePath, theBuffer->format(), mSongInfo);
 	}
 }
 
