@@ -3,7 +3,7 @@
 
 #include "viwidget.h"
 #include <QTimer>
-
+/*
 namespace Ui
 {
     class ViSongInfoWidget;
@@ -30,6 +30,6 @@ class ViSongInfoWidget : public ViWidget
 		Ui::ViSongInfoWidget *mUi;
 		QTimer *mTimer;
 
-};
+};*/
 
 #endif

@@ -9,14 +9,14 @@ ViFileOutput::ViFileOutput()
 	setState(QAudio::IdleState);
 }
 
-void ViFileOutput::setSongInfo(ViSongInfo info)
+void ViFileOutput::setMetadata(ViMetadata metadata)
 {
-	mSongInfo = info;
+	mMetadata = metadata;
 }
 
-void ViFileOutput::clearSongInfo()
+void ViFileOutput::clearMetadata()
 {
-	mSongInfo.clear();
+	mMetadata.clear();
 }
 
 void ViFileOutput::setFile(QString directory, QString trackNumber, QString extension)
@@ -37,22 +37,10 @@ void ViFileOutput::setFile(QString directory, QString trackNumber, QString exten
 	{
 		directory += trackNumber + ". ";
 	}
-	if(mSongInfo.artistName() == "")
-	{
-		directory += "Unknown Artist - ";
-	}
-	else
-	{
-		directory += mSongInfo.artistName() + " - ";
-	}
-	if(mSongInfo.songTitle() == "")
-	{
-		directory += "Unknown Title";
-	}
-	else
-	{
-		directory += mSongInfo.songTitle();
-	}
+
+	directory += mMetadata.artist() + " - ";
+	directory += mMetadata.title();
+
 	if(!extension.startsWith("."))
 	{
 		directory += ".";
@@ -76,9 +64,9 @@ void ViFileOutput::setFormat(ViAudioFormat format)
 	mFormat = format;
 }
 
-ViSongInfo ViFileOutput::songInfo()
+ViMetadata ViFileOutput::metadata()
 {
-	return mSongInfo;
+	return mMetadata;
 }
 
 QString ViFileOutput::filePath()
@@ -89,7 +77,7 @@ QString ViFileOutput::filePath()
 void ViFileOutput::start()
 {
 	LOG("Writing to file started.");
-	mCoder.encode(mBuffer, mFilePath, mFormat, mSongInfo);
+	mCoder.encode(mBuffer, mFilePath, mFormat, mMetadata);
 	setState(QAudio::ActiveState);
 }
 

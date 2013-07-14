@@ -10,8 +10,8 @@ class ViFileOutput : public ViAudioOutput
 
 	public slots:
 
-		void setSongInfo(ViSongInfo info);
-		void clearSongInfo();
+		void setMetadata(ViMetadata metadata);
+		void clearMetadata();
 
 	public:
 
@@ -22,7 +22,7 @@ class ViFileOutput : public ViAudioOutput
 		ViAudioFormat format();
 		void setFormat(ViAudioFormat format);
 
-		ViSongInfo songInfo();
+		ViMetadata metadata();
 		QString filePath();
 
 		void start();
@@ -34,7 +34,7 @@ class ViFileOutput : public ViAudioOutput
 		QString mFilePath;
 		ViAudioCoder mCoder;
 		ViAudioFormat mFormat;
-		ViSongInfo mSongInfo;
+		ViMetadata mMetadata;
 
 };
 

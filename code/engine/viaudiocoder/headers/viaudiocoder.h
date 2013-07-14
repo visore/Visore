@@ -3,7 +3,7 @@
 
 #include <vicodingchain.h>
 #include <viaudiomanager.h>
-#include <visonginfo.h>
+#include <vimetadata.h>
 
 class ViAudioCoder : public QObject
 {
@@ -46,11 +46,16 @@ class ViAudioCoder : public QObject
 		void decode(QString inputFilePath, QByteArray &output, qint64 fromOffset = -1, qint64 toOffset = -1);
 		void decode(QByteArray &input, QByteArray &output, qint64 fromOffset = -1, qint64 toOffset = -1);
 
-		void encode(ViBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo(), qint64 fromOffset = -1, qint64 toOffset = -1);
-		void encode(ViBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo(), qint64 fromOffset = -1, qint64 toOffset = -1);
-		void encode(ViBuffer *buffer, ViBuffer *output, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo(), qint64 fromOffset = -1, qint64 toOffset = -1);
-		void encode(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo(), qint64 fromOffset = -1, qint64 toOffset = -1);
-		void encode(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat, ViSongInfo info = ViSongInfo(), qint64 fromOffset = -1, qint64 toOffset = -1);
+		void encode(ViBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat, qint64 fromOffset = -1, qint64 toOffset = -1);
+		void encode(ViBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat, qint64 fromOffset = -1, qint64 toOffset = -1);
+		void encode(ViBuffer *buffer, ViBuffer *output, ViAudioFormat outputFormat, qint64 fromOffset = -1, qint64 toOffset = -1);
+		void encode(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat, qint64 fromOffset = -1, qint64 toOffset = -1);
+		void encode(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat, qint64 fromOffset = -1, qint64 toOffset = -1);
+		void encode(ViBuffer *buffer, QString outputFilePath, ViAudioFormat outputFormat, ViMetadata metadata, qint64 fromOffset = -1, qint64 toOffset = -1);
+		void encode(ViBuffer *buffer, QByteArray &output, ViAudioFormat outputFormat, ViMetadata metadata, qint64 fromOffset = -1, qint64 toOffset = -1);
+		void encode(ViBuffer *buffer, ViBuffer *output, ViAudioFormat outputFormat, ViMetadata metadata, qint64 fromOffset = -1, qint64 toOffset = -1);
+		void encode(QByteArray &input, ViAudioFormat inputFormat, QString outputFilePath, ViAudioFormat outputFormat, ViMetadata metadata, qint64 fromOffset = -1, qint64 toOffset = -1);
+		void encode(QByteArray &input, ViAudioFormat inputFormat, QByteArray &output, ViAudioFormat outputFormat, ViMetadata metadata, qint64 fromOffset = -1, qint64 toOffset = -1);
 
 		static ViCoderList coders(ViAudioManager::Mode mode = ViAudioManager::Available);
 		static ViCodecList codecs(ViAudioManager::Mode mode = ViAudioManager::Available);

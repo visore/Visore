@@ -46,7 +46,7 @@ QString ViEnmfpFingerprinter::version()
 void ViEnmfpFingerprinter::generate(ViBufferOffsets bufferOffset)
 {
 	mOutput.clear();
-	mCoder.encode(bufferOffset.buffer(), &mOutput, encodingFormat(), ViSongInfo(), bufferOffset.from(), bufferOffset.to());
+	mCoder.encode(bufferOffset.buffer(), &mOutput, encodingFormat(), bufferOffset.from(), bufferOffset.to());
 }
 
 ViAudioFormat ViEnmfpFingerprinter::encodingFormat()

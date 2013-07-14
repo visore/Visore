@@ -1,6 +1,5 @@
 #include <visampleconverter.h>
-#include <iostream>
-using namespace std;
+
 ViSampleConverter::ViSampleConverter()
 {
 	mFloatSampleSize = 1;
@@ -82,9 +81,9 @@ bool ViSampleConverter::initialize(ViAudioFormat inputFormat, ViAudioFormat outp
 		return false;
 	}
 
-	if(mChannelConverter.initialize(inputChannels, outputChannels, outputType, outputSize))
+	if(mChannelConverter.initialize(inputChannels, outputChannels, ViAudioFormat::Float, floatBits))
 	{
-		mChannelSampleSize = outputSize / 8;
+		mChannelSampleSize = floatBits / 8;
 		mChannelDifference = outputChannels / qreal(inputChannels);
 	}
 	else
@@ -97,26 +96,29 @@ bool ViSampleConverter::initialize(ViAudioFormat inputFormat, ViAudioFormat outp
 
 void* ViSampleConverter::convert(const void *input, int &samples, int &size)
 {
+	//First convert samples to float (resample only works on floats)
 	size = int(samples * mFloatDifference * mFloatSampleSize);
 	qbyte *floatData = new qbyte[size];
 	mFloatConverter.convert(input, floatData, samples);
 
-	size = int(samples * mRateDifference * mRateSampleSize);
-	qbyte *rateData = new qbyte[size];
-	mRateConverter.convert((qfloat*) floatData, (qfloat*) rateData, samples);
-	samples *= mRateDifference;
+	//Convert channels
+	size = int(samples * mChannelDifference * mChannelSampleSize);
+	qbyte *channelData = new qbyte[size];
+	mChannelConverter.convert(floatData, channelData, samples);
+	samples *= mChannelDifference;
 	delete [] floatData;
 
+	//Resample the data
+	size = int(samples * mRateDifference * mRateSampleSize);
+	qbyte *rateData = new qbyte[size];
+	samples = mRateConverter.convert((qfloat*) channelData, (qfloat*) rateData, samples);
+	delete [] channelData;
+
+	//Convert resampled floats to new sample size integers (or float if output type isn't integer)
 	size = int(samples * mSizeDifference * mSizeSampleSize);
 	qbyte *sizeData = new qbyte[size];
 	mSizeConverter.convert(rateData, sizeData, samples);
 	delete [] rateData;
 
-	size = int(samples * mChannelDifference * mChannelSampleSize);
-	qbyte *channelData = new qbyte[size];
-	mChannelConverter.convert(sizeData, channelData, samples);
-	samples *= mChannelDifference;
-	delete [] sizeData;
-
-	return channelData;
+	return sizeData;
 }

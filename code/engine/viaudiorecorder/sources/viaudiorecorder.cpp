@@ -30,7 +30,7 @@ ViAudioRecorder::~ViAudioRecorder()
 	mProject = NULL;
 }
 
-bool ViAudioRecorder::record(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectInfo)
+bool ViAudioRecorder::record(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectMetadata)
 {
 	emit started();
 	setProgress(-1); //Infinite
@@ -41,7 +41,7 @@ bool ViAudioRecorder::record(ViProject *project, ViAudio::Type type, ViAudioForm
 	mType = type;
 	mInput.setFormat(format);
 
-    mDetectInfo = detectInfo;
+	mDetectMetadata = detectMetadata;
 	mWaitForQueue = false;
 
     if(mProject->objectCount() > 0)
@@ -123,10 +123,10 @@ void ViAudioRecorder::endSong()
 	if(mObject->length(ViAudioPosition::Seconds) > LENGTH_CUTOFF)
 	{
 		mQueue.enqueue(mObject);
-		if(mDetectInfo && !(mExistingProject && mProject->object(mObject->trackNumber() - 1)->hasSongInfo()))
+		if(mDetectMetadata && !mObject->hasMetadata())
 		{
-			QObject::connect(mObject.data(), SIGNAL(infoed(bool)), this, SLOT(serialize()));
-			mObject->detectSongInfo();
+			QObject::connect(mObject.data(), SIGNAL(metadataDetected(bool)), this, SLOT(serialize()));
+			mObject->detectMetadata();
 		}
 		else
 		{
@@ -178,14 +178,19 @@ void ViAudioRecorder::endRecord()
 void ViAudioRecorder::serialize()
 {
     ViAudioObjectPointer object = mQueue.dequeue();
-    QObject::disconnect(object.data(), SIGNAL(infoed(bool)), this, SLOT(serialize()));
+	QObject::disconnect(object.data(), SIGNAL(metadataDetected(bool)), this, SLOT(serialize()));
 	if(mProject != NULL)
 	{
         int objectIndex = object->trackNumber() - 1;
         if(mExistingProject && mProject->objectCount() > objectIndex)
         {
-            mProject->object(objectIndex)->transferBuffer(object, mType);
-            object = mProject->object(objectIndex);
+			ViAudioObjectPointer exisitngObject = mProject->object(objectIndex);
+			exisitngObject->transferBuffer(object, mType);
+			if(object->hasMetadata() && !exisitngObject->hasMetadata())
+			{
+				exisitngObject->setMetadata(object->metadata());
+			}
+			object = exisitngObject;
         }
         else
         {

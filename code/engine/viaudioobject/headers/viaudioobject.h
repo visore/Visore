@@ -70,7 +70,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
         void correlated();
 
-		void infoed(bool success);
+		void metadataDetected(bool success);
 
 	public slots:
 
@@ -154,7 +154,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		void finishDetection(bool success);
+		void changeMetadata(bool success);
 
 	public:
 
@@ -333,11 +333,13 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		ViSongInfo& songInfo();
-		void setSongInfo(ViSongInfo info);
-		Q_INVOKABLE void detectSongInfo();
-		bool isDetectingSongInfo();
-        bool hasSongInfo();
+		ViMetadata& metadata();
+		void setMetadata(const ViMetadata &metadata);
+
+		bool isDetectingMetadata();
+		bool hasMetadata();
+
+		Q_INVOKABLE void detectMetadata(bool force = false); // If force is false, it will only detect if it wasn't detected before
 
 		void setSideNumber(int side);
 		int sideNumber();
@@ -484,8 +486,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		ViMetadataer *mMetadataer;
 		ViMetadata mMetadata;
-		ViSongInfo mSongInfo;
-		bool mIsDetectingInfo;
+		bool mIsDetectingMetadata;
 		int mSideNumber;
 		int mTrackNumber;
 

@@ -2,9 +2,8 @@
 #include <vimanager.h>
 #include <vilogger.h>
 #include <viid.h>
-#include <QBuffer>
 #include <QFileInfo>
-#include <QImageReader>
+#include <QImageWriter>
 #include <QDir>
 
 ViCoverRetriever::ViCoverRetriever()
@@ -39,7 +38,14 @@ void ViCoverRetriever::testImage(bool success)
 void ViCoverRetriever::processUrls(ViStringQueue urls)
 {
 	mUrls = urls;
-	processNext(mUrls.dequeue());
+	if(mUrls.isEmpty())
+	{
+		testImage(false);
+	}
+	else
+	{
+		processNext(mUrls.dequeue());
+	}
 }
 
 void ViCoverRetriever::processNext(QString url)
@@ -61,33 +67,20 @@ ViMetadata ViCoverRetriever::metadata()
 
 bool ViCoverRetriever::saveImage(QByteArray &data)
 {
-	QBuffer buffer(&data);
-	buffer.open(QIODevice::ReadOnly);
-	QString extension = QString(QImageReader::imageFormat(&buffer)).toLower();
-	buffer.close();
-	if(extension == "")
-	{
-		return false;
-	}
-
-	QString id = ViId().id();
-	QString newPath = ViManager::tempPath() + "covers";
-	QDir dir(newPath);
+	QString path = ViManager::tempPath() + "covers";
+	QDir dir(path);
 	if(!dir.exists())
 	{
-		dir.mkpath(newPath);
+		dir.mkpath(path);
 	}
-	newPath += QDir::separator() + id + "." + extension;
+	path += QDir::separator() + ViId().id() + ".png";
 
-	QFileInfo info(newPath);
-	QFile file(newPath);
-	if(!file.open(QIODevice::WriteOnly))
+	QImageWriter writer(path, "png");
+	writer.setQuality(100);
+	if(writer.write(QImage::fromData(data)))
 	{
-		return false;
+		mMetadata.setCover(path);
+		return true;
 	}
-	file.write(data);
-	file.close();
-
-	mMetadata.setCover(newPath);
-	return true;
+	return false;
 }

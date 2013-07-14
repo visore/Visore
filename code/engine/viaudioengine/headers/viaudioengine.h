@@ -82,9 +82,6 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		//Input
 		void inputChanged(ViAudio::Input input);		
 
-		//Song detector
-		void songDetected(ViSongInfo info);
-
 		//Spectrum
 		void spectrumChanged(ViRealSpectrum spectrum, qint64 milliseconds);
 		void spectrumProgressed(short percentage);

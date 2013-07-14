@@ -2,7 +2,7 @@
 #include <QPair>
 #include <QJsonDocument>
 #include <QJsonObject>
-
+#include<vilogger.h>
 #define MAXIMUM_YEAR 3000
 
 ViMusicBrainzCoverRetriever::ViMusicBrainzCoverRetriever()

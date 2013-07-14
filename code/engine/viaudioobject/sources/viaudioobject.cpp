@@ -463,7 +463,7 @@ void ViAudioObject::encodeNext()
 		QString thePath = filePath(mPreviousEncodedType);
 		ViBuffer *theBuffer = buffer(mPreviousEncodedType, true);
 		locker.relock();
-		mEncoder->encode(theBuffer, thePath, theBuffer->format(), mSongInfo);
+		mEncoder->encode(theBuffer, thePath, theBuffer->format(), mMetadata);
 	}
 }
 
@@ -1013,24 +1013,9 @@ QString ViAudioObject::fileName(bool track, bool side)
 		result += QString::number(mTrackNumber) + ". ";
 	}
 
-	if(mSongInfo.artistName() == "")
-	{
-		result += "Unknown Artist";
-	}
-	else
-	{
-		result += mSongInfo.artistName();
-	}
+	result += mMetadata.artist();
 	result += " - ";
-
-	if(mSongInfo.songTitle() == "")
-	{
-		result += "Unknown Title";
-	}
-	else
-	{
-		result += mSongInfo.songTitle();
-	}
+	result += mMetadata.title();
 
 	return result;
 }
@@ -1404,28 +1389,35 @@ void ViAudioObject::correlateNext()
 
 *******************************************************************************************************************/
 
-ViSongInfo& ViAudioObject::songInfo()
+ViMetadata& ViAudioObject::metadata()
 {
 	QMutexLocker locker(&mMutex);
-	return mSongInfo;
+	return mMetadata;
 }
 
-void ViAudioObject::setSongInfo(ViSongInfo info)
+void ViAudioObject::setMetadata(const ViMetadata &metadata)
 {
 	QMutexLocker locker(&mMutex);
-	mSongInfo = info;
+	mMetadata = metadata;
 }
 
-void ViAudioObject::detectSongInfo()
-{
+void ViAudioObject::detectMetadata(bool force)
+{force=true;
+	setStarted();
+	if(!force && hasMetadata())
+	{
+		emit metadataDetected(true);
+		setFinished();
+	}
+
 	QMutexLocker locker(&mMutex);
-	mIsDetectingInfo = true;
+	mIsDetectingMetadata = true;
 	if(mMetadataer != NULL)
 	{
 		delete mMetadataer;
 	}
 	mMetadataer = new ViMetadataer();
-	QObject::connect(mMetadataer, SIGNAL(finished(bool)), this, SLOT(finishDetection(bool)));
+	QObject::connect(mMetadataer, SIGNAL(finished(bool)), this, SLOT(changeMetadata(bool)));
 
 	locker.unlock();
 	QQueue<ViBuffer*> buffers;
@@ -1445,7 +1437,7 @@ void ViAudioObject::detectSongInfo()
 	mMetadataer->detect(buffers);
 }
 
-void ViAudioObject::finishDetection(bool success)
+void ViAudioObject::changeMetadata(bool success)
 {
 	QMutexLocker locker(&mMutex);
 	if(mMetadataer != NULL)
@@ -1453,29 +1445,31 @@ void ViAudioObject::finishDetection(bool success)
 		if(success)
 		{
 			mMetadata = mMetadataer->metadata();
-			mSongInfo.setSongTitle(mMetadata.title());
-			mSongInfo.setArtistName(mMetadata.artist());
-			mSongInfo.setImagePath(mMetadata.cover());
 		}
 		delete mMetadataer;
 		mMetadataer = NULL;
-		mIsDetectingInfo = false;
-		locker.unlock();
-		emit infoed(success);
 	}
+	else
+	{
+		success = false;
+	}
+
+	locker.unlock();
+	mIsDetectingMetadata = false;
+	emit metadataDetected(success);
+	setFinished();
 }
 
-bool ViAudioObject::isDetectingSongInfo()
+bool ViAudioObject::isDetectingMetadata()
 {
 	QMutexLocker locker(&mMutex);
-	return mIsDetectingInfo;
+	return mIsDetectingMetadata;
 }
 
-
-bool ViAudioObject::hasSongInfo()
+bool ViAudioObject::hasMetadata()
 {
     QMutexLocker locker(&mMutex);
-    return mSongInfo.isValid();
+	return mMetadata.isValid();
 }
 
 void ViAudioObject::setSideNumber(int side)

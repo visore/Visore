@@ -543,15 +543,8 @@ void ViProject::moveToProject()
         {
             moveToProject(object, ViAudio::Corrected);
         }
-        ViSongInfo info = object->songInfo();
-		QString imagePath = info.imagePath();
-		if(imagePath != "" && !imagePath.startsWith(mPaths[ViProject::Root]))
-        {
-            QString newPath = path(ViProject::CoverData, object->sideNumber()) + object->fileName() + info.imageExtension(".");
-			QFile::rename(imagePath, newPath);
-			info.changeImagePath(imagePath, newPath);
-            object->setSongInfo(info);
-        }
+		ViMetadata &metadata = object->metadata();
+		metadata.moveCover(path(ViProject::CoverData, object->sideNumber()) + object->fileName() + "." + metadata.coverFormat());
     }
 }
 
@@ -692,14 +685,14 @@ bool ViProject::saveTracks()
 
     QMap<int, ViElement> sides;
     ViAudioObjectPointer object;
-    ViSongInfo info;
+	ViMetadata metadata;
 
     for(int i = 0; i < objectCount(); ++i)
     {
         mObjectsMutex.lock();
         object = mObjects[i];
         mObjectsMutex.unlock();
-        info = object->songInfo();
+		metadata = object->metadata();
         if(!sides.contains(object->sideNumber()))
         {
             ViElement side("side");
@@ -709,11 +702,11 @@ bool ViProject::saveTracks()
 
         ViElement track("track");
         track.addAttribute("id", object->trackNumber());
-        track.addChild("artist", info.artistName());
-        track.addChild("title", info.songTitle());
+		track.addChild("artist", metadata.artist());
+		track.addChild("title", metadata.title());
 
         ViElement data("data");
-        data.addChild("cover", relativePath(info.imagePath()));
+		data.addChild("cover", relativePath(metadata.cover()));
         data.addChild("target", relativePath(object->targetFilePath()));
         data.addChild("corrupted", relativePath(object->corruptedFilePath()));
         data.addChild("corrected", relativePath(object->correctedFilePath()));
@@ -809,15 +802,15 @@ bool ViProject::loadTracks()
         for(int i = 0; i < tracks.size(); ++i)
         {
             ViAudioObjectPointer object = ViAudioObject::create();
-            ViSongInfo info;
-            info.setArtistName(tracks[i].child("artist").toString());
-            info.setSongTitle(tracks[i].child("title").toString());
+			ViMetadata metadata;
+			metadata.setArtist(tracks[i].child("artist").toString());
+			metadata.setTitle(tracks[i].child("title").toString());
             ViElement data = tracks[i].child("data");
             object->setTargetFilePath(absolutePath(data.child("target").toString()));
             object->setCorruptedFilePath(absolutePath(data.child("corrupted").toString()));
             object->setCorrectedFilePath(absolutePath(data.child("corrected").toString()));
-            info.setImagePath(absolutePath(data.child("cover").toString()));
-            object->setSongInfo(info);
+			metadata.setCover(absolutePath(data.child("cover").toString()));
+			object->setMetadata(metadata);
             object->setSideNumber(sides[j].attribute("id").toInt());
             object->setTrackNumber(tracks[i].attribute("id").toInt());
             mObjectsMutex.lock();

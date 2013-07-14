@@ -105,14 +105,14 @@ void ViAbstractCoder::setFormat(ViAudio::Mode mode, ViAudioFormat format)
 	}
 }
 
-ViSongInfo ViAbstractCoder::songInfo() const
+ViMetadata ViAbstractCoder::metadata() const
 {
-	return mSongInfo;
+	return mMetadata;
 }
 
-void ViAbstractCoder::setSongInfo(ViSongInfo info)
+void ViAbstractCoder::setMetadata(const ViMetadata &metadata)
 {
-	mSongInfo = info;
+	mMetadata = metadata;
 }
 
 QString ViAbstractCoder::name() const

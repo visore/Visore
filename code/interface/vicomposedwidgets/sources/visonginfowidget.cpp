@@ -7,7 +7,7 @@
 #include <QPixmap>
 
 #define INFO_CHANGE_TIMEOUT 5000
-
+/*
 ViSongInfoWidget::ViSongInfoWidget(QWidget *parent)
 	: ViWidget(parent)
 {
@@ -85,3 +85,4 @@ void ViSongInfoWidget::switchInfo()
 	}
 	mUi->stackedWidget->setCurrentIndex(currentInfo);
 }
+*/

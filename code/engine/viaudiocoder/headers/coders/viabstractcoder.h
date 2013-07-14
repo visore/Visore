@@ -9,7 +9,7 @@
 #include <vicommon.h>
 #include <viaudioformat.h>
 #include <visamplearray.h>
-#include <visonginfo.h>
+#include <vimetadata.h>
 
 class ViAbstractCoder : public QObject
 {
@@ -51,8 +51,8 @@ class ViAbstractCoder : public QObject
 		ViAudioFormat format(ViAudio::Mode mode) const;
 		void setFormat(ViAudio::Mode mode, ViAudioFormat format);
 
-		ViSongInfo songInfo() const;
-		void setSongInfo(ViSongInfo info);
+		ViMetadata metadata() const;
+		void setMetadata(const ViMetadata &metadata);
 
 		QString name() const;
 		QString version() const;
@@ -87,7 +87,7 @@ class ViAbstractCoder : public QObject
 		ViAudioFormat mInputFormat;
 		ViAudioFormat mOutputFormat;
 
-		ViSongInfo mSongInfo;
+		ViMetadata mMetadata;
 
 	private:
 

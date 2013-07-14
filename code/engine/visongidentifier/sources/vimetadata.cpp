@@ -1,11 +1,12 @@
 #include <vimetadata.h>
+#include <QImageReader>
+#include <QFileInfo>
+#include <QBuffer>
+#include <QDir>
 
 ViMetadata::ViMetadata()
 {
-	mArtist = "";
-	mTitle = "";
-	mAlbum = "";
-	mCover = "";
+	clear();
 }
 
 ViMetadata::ViMetadata(const ViMetadata &other)
@@ -20,47 +21,192 @@ ViMetadata::~ViMetadata()
 {
 }
 
-void ViMetadata::setArtist(QString artist)
+void ViMetadata::clear()
 {
-	mArtist = artist;
+	mArtist = "";
+	mTitle = "";
+	mAlbum = "";
+	mCover = "";
 }
 
-void ViMetadata::setTitle(QString title)
+bool ViMetadata::isValid() const
 {
-	mTitle = title;
+	return hasArtist() || hasTitle() || hasAlbum() || hasCover();
 }
 
-void ViMetadata::setAlbum(QString album)
+void ViMetadata::setArtist(const QString &artist)
 {
-	mAlbum = album;
+	if(QString(artist).replace(" ", "").toLower() == unknownArtist().replace(" ", "").toLower())
+	{
+		mArtist = "";
+	}
+	else
+	{
+		mArtist = artist;
+	}
 }
 
-void ViMetadata::setCover(QString cover)
+void ViMetadata::setTitle(const QString &title)
+{
+	if(QString(title).replace(" ", "").toLower() == unknownTitle().replace(" ", "").toLower())
+	{
+		mTitle = "";
+	}
+	else
+	{
+		mTitle = title;
+	}
+}
+
+void ViMetadata::setAlbum(const QString &album)
+{
+	if(QString(album).replace(" ", "").toLower() == unknownAlbum().replace(" ", "").toLower())
+	{
+		mAlbum = "";
+	}
+	else
+	{
+		mAlbum = album;
+	}
+}
+
+void ViMetadata::setCover(const QString &cover)
 {
 	mCover = cover;
 }
 
-QString ViMetadata::artist()
+QString ViMetadata::artist() const
 {
-	return mArtist;
+	if(hasArtist())
+	{
+		return mArtist;
+	}
+	return unknownArtist();
 }
 
-QString ViMetadata::title()
+QString ViMetadata::title() const
 {
-	return mTitle;
+	if(hasTitle())
+	{
+		return mTitle;
+	}
+	return unknownTitle();
 }
 
-QString ViMetadata::album()
+QString ViMetadata::album() const
 {
-	return mAlbum;
+	if(hasAlbum())
+	{
+		return mAlbum;
+	}
+	return unknownAlbum();
 }
 
-QString ViMetadata::cover()
+QString ViMetadata::cover() const
 {
 	return mCover;
 }
 
-QImage ViMetadata::coverImage()
+bool ViMetadata::hasArtist() const
+{
+	return mArtist != "";
+}
+
+bool ViMetadata::hasTitle() const
+{
+	return mTitle != "";
+}
+
+bool ViMetadata::hasAlbum() const
+{
+	return mAlbum != "";
+}
+
+bool ViMetadata::hasCover() const
+{
+	return mCover != "";
+}
+
+QImage ViMetadata::coverImage() const
 {
 	return QImage(mCover);
+}
+
+QByteArray ViMetadata::coverData() const
+{
+	if(hasCover())
+	{
+		QByteArray data;
+		QBuffer buffer(&data);
+		buffer.open(QIODevice::WriteOnly);
+		coverImage().save(&buffer, coverFormat().toLatin1().data());
+		return data;
+	}
+	return QByteArray();
+}
+
+QString ViMetadata::coverFormat() const
+{
+	return QString(QImageReader::imageFormat(mCover)).toLower();
+}
+
+QString ViMetadata::coverMimeType() const
+{
+	if(hasCover())
+	{
+		return "image/" + coverFormat();
+	}
+	return "";
+}
+
+bool ViMetadata::moveCover(const QString &newPath)
+{
+	if(hasCover())
+	{
+		QString path = newPath;
+		QFileInfo info(path);
+		bool isDir = info.isDir();
+		if(isDir)
+		{
+			if(!path.endsWith(QDir::separator()))
+			{
+				path += QDir::separator();
+			}
+			path += QFileInfo(mCover).fileName();
+		}
+		if(info.isFile() || isDir)
+		{
+			if(QFile::rename(mCover, path))
+			{
+				setCover(path);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+QString ViMetadata::toString() const
+{
+	QString result = "Metadata:";
+	result += "\n\tTitle: " + title();
+	result += "\n\tArtist: " + artist();
+	result += "\n\tAlbum: " + album();
+	result += "\n\tCover: " + cover();
+	return result;
+}
+
+QString ViMetadata::unknownArtist()
+{
+	return "Unknown Artist";
+}
+
+QString ViMetadata::unknownTitle()
+{
+	return "Unknown Title";
+}
+
+QString ViMetadata::unknownAlbum()
+{
+	return "Unknown Album";
 }

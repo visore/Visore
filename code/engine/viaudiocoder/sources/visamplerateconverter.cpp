@@ -45,18 +45,19 @@ bool ViSampleRateConverter::initialize(short channels, qreal inputRate, qreal ou
 	return true;
 }
 
-void ViSampleRateConverter::convert(const qfloat *input, qfloat *output, int samples)
+int ViSampleRateConverter::convert(const qfloat *input, qfloat *output, int samples)
 {
-	(this->*convertPointer)(input, output, samples);
+	return (this->*convertPointer)(input, output, samples);
 }
 
-void ViSampleRateConverter::copy(const qfloat *input, qfloat *output, int samples)
+int ViSampleRateConverter::copy(const qfloat *input, qfloat *output, int samples)
 {
 	memcpy(output, input, sizeof(qfloat) * samples);
+	return samples;
 }
 
-void ViSampleRateConverter::resample(const qfloat *input, qfloat *output, int samples)
+int ViSampleRateConverter::resample(const qfloat *input, qfloat *output, int samples)
 {
 	int used;
-	resample_process(mResampler, mFactor, (float*) input, samples, 0, &used, output, ceil(samples * mFactor));
+	return resample_process(mResampler, mFactor, (float*) input, samples, 0, &used, output, ceil(samples * mFactor));
 }
