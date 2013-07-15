@@ -132,7 +132,7 @@ void ViAudioEngine::calculateCorrelation(ViAudioObjectPointer object)
 
 void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector)
 {
-	/*mObjectChain.clear();
+	mObjectChain.clear();
 	mObjectChain.add(objects);
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)), Qt::UniqueConnection);
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)), Qt::UniqueConnection);
@@ -143,16 +143,6 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 	mObjectChain.addFunction(ViFunctionCall("align"), 0.01);
 	mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(ViCorrelatorManager::libraries())), 0.05);
 	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
-	mObjectChain.execute();*/
-
-	mObjectChain.clear();
-	mObjectChain.add(objects);
-	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)), Qt::UniqueConnection);
-	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)), Qt::UniqueConnection);
-	QObject::connect(&mObjectChain, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::UniqueConnection);
-	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue((int)ViAudio::Target)), 0.01);
-	mObjectChain.addFunction(ViFunctionCall("detectMetadata"), 0.98);
-	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
 	mObjectChain.execute();
 }
 
@@ -162,6 +152,19 @@ void ViAudioEngine::recordProject(ViProject *project, ViAudio::Type type, ViAudi
 	QObject::connect(&mRecorder, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)), Qt::UniqueConnection);
 	QObject::connect(&mRecorder, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::UniqueConnection);
 	mRecorder.record(project, type, format, sides, detectInfo);
+}
+
+void ViAudioEngine::updateMetadata(ViProject *project)
+{
+	mObjectChain.clear();
+	mObjectChain.add(*project);
+	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)), Qt::UniqueConnection);
+	QObject::connect(&mObjectChain, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::UniqueConnection);
+	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted | ViAudio::Corrected)), 0.40);
+	mObjectChain.addFunction(ViFunctionCall("encode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted | ViAudio::Corrected)), 0.59);
+	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
+	mObjectChain.execute();
+	emit statusChanged("Updating Metadata");
 }
 
 void ViAudioEngine::generateWaveForm(ViAudioObjectPointer object, ViAudio::Type type)

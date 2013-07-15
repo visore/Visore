@@ -21,12 +21,10 @@ void ViCoverRetriever::testImage(bool success)
 	if(success && saveImage(mImageServicer.byteResult()))
 	{
 		mUrls.clear();
-		LOG("Cover image found for \"" + mMetadata.artist() + " - " + mMetadata.title() + "\".");
 		emit retrieved(true);
 	}
 	else if(mUrls.isEmpty())
 	{
-		LOG("No cover image could be found for \"" + mMetadata.artist() + " - " + mMetadata.title() + "\".");
 		emit retrieved(false);
 	}
 	else
@@ -67,7 +65,7 @@ ViMetadata ViCoverRetriever::metadata()
 
 bool ViCoverRetriever::saveImage(QByteArray &data)
 {
-	QString path = ViManager::tempPath() + "covers";
+	QString path = ViManager::tempCoverPath();
 	QDir dir(path);
 	if(!dir.exists())
 	{

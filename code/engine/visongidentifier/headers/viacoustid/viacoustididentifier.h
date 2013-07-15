@@ -18,7 +18,7 @@ class ViAcoustidIdentifier : public ViSongIdentifier
 
 		ViAcoustidIdentifier();
 
-		void identify(ViBufferOffsets bufferOffset);
+		void identifyTrack(ViBufferOffsets bufferOffset);
 
 	private:
 

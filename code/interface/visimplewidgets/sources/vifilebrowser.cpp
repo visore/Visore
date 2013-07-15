@@ -11,11 +11,11 @@ ViFileBrowser::ViFileBrowser(QWidget *parent)
 	mButton = new ViButton(this);
 	int size = height() * 0.8;
 	mButton->setSize(size, size);
-	mButton->setIcon(ViThemeManager::icon("browse"), 20);
+	mButton->setIcon(ViThemeManager::icon("search"), 20);
 	mButton->setHeight(25);
 	mButton->setToolTip("Browse");
 	mButton->disableBackground();
-	mButton->disbaleBorder();
+	mButton->disableBorder();
 	mButton->setCursor(Qt::ArrowCursor);
 
 	setStyleSheet(styleSheet() + "ViLineEdit { padding-right: " + QString::number(mButton->width()) + "px; }");

@@ -27,16 +27,14 @@ class ViWidget : public QWidget, public ViId
 
 		ViWidget(QWidget *parent = 0);
         virtual ~ViWidget();
-		ViAudioEnginePointer engine();
-		virtual void refresh();
-		virtual void setStyleSheet(QString styleSheet);
-		virtual void addStyleSheet(QString styleSheet);
-		virtual QString styleSheet();
 
-		virtual void setBorder(QColor color = Qt::gray, int thickness = 1, int roundness = 0);
+		ViAudioEnginePointer engine();
+
+		virtual void addStyleSheet(QString style);
 
 		virtual bool addFunctionCall(QString signal, ViFunctionCall functionCall);
 
+		virtual void setSize(int widthHeight);
 		virtual void setSize(int width, int height);
 		virtual void setSize(QSize size);
 		virtual void setWidth(int width);

@@ -410,10 +410,7 @@ bool ViAudioObject::encode(ViAudio::Type type, bool clearWhenFinished)
 			--i;
 			locker.unlock();
 		}
-		else if(!hasFile(mCodingInstructions[i]))
-		{
-			setFilePath(mCodingInstructions[i], temporaryFilePath(mCodingInstructions[i]));
-		}
+		setFilePath(mCodingInstructions[i], temporaryFilePath(mCodingInstructions[i]));
 		locker.relock();
 	}
 	if(mCodingInstructions.isEmpty())
@@ -1022,7 +1019,7 @@ QString ViAudioObject::fileName(bool track, bool side)
 
 QString ViAudioObject::temporaryFilePath(ViAudio::Type type)
 {
-	QString result = ViManager::tempPath() + id();
+	QString result = ViManager::tempDataPath() + id();
 	if(type == ViAudio::Target)
 	{
 		result += "_target";

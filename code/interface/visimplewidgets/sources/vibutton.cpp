@@ -99,7 +99,7 @@ void ViButton::enableBorder()
 	initialize();
 }
 
-void ViButton::disbaleBorder()
+void ViButton::disableBorder()
 {
 	mEnableBorder = false;
 	initialize();
@@ -142,9 +142,20 @@ void ViButton::setFont(const QColor &color, const QFont &font)
 	initialize();
 }
 
+void ViButton::setFont(const QFont &font)
+{
+	QToolButton::setFont(font);
+}
+
 void ViButton::setFont(const ViFont &font)
 {
 	setFont(font.color(), font);
+}
+
+void ViButton::setSize(const int &widthHeight)
+{
+	setWidth(widthHeight);
+	setHeight(widthHeight);
 }
 
 void ViButton::setSize(const int &width, const int &height)

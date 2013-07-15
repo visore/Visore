@@ -8,7 +8,7 @@ ViEnmfpIdentifier::ViEnmfpIdentifier()
 	QObject::connect(&mFingerprinter, SIGNAL(generated()), this, SLOT(sendRequest()));
 }
 
-void ViEnmfpIdentifier::identify(ViBufferOffsets bufferOffset)
+void ViEnmfpIdentifier::identifyTrack(ViBufferOffsets bufferOffset)
 {
 	mFingerprinter.generate(bufferOffset);
 }
@@ -19,7 +19,8 @@ void ViEnmfpIdentifier::sendRequest()
 	object.insert("code", QJsonValue(mFingerprinter.fingerprint()));
 
 	redirectReply(SLOT(processReply(bool)));
-	retrieve("http://developer.echonest.com/api/v4/song/identify?api_key=" + key() + "&version=" + mFingerprinter.version() + "&bucket=id:7digital-US&bucket=tracks&bucket=audio_summary&bucket=artist_familiarity&bucket=artist_hotttnesss&bucket=song_hotttnesss", object);
+	//retrieve("http://developer.echonest.com/api/v4/song/identify?api_key=" + key() + "&version=" + mFingerprinter.version() + "&bucket=id:7digital-US&bucket=tracks&bucket=audio_summary&bucket=artist_familiarity&bucket=artist_hotttnesss&bucket=song_hotttnesss", object);
+	retrieve("http://developer.echonest.com/api/v4/song/identify?api_key=" + key() + "&version=" + mFingerprinter.version() + "&bucket=id:7digital-US&bucket=tracks", object);
 }
 
 void ViEnmfpIdentifier::processReply(bool success)
@@ -33,6 +34,7 @@ void ViEnmfpIdentifier::processReply(bool success)
 			finish();
 			return;
 		}
+		QList<ViMetadata> metadatas;
 		QVariantList songs = result["songs"].toList();
 		for(int i = 0; i < songs.size(); ++i)
 		{
@@ -42,10 +44,13 @@ void ViEnmfpIdentifier::processReply(bool success)
 				ViMetadata metadata;
 				metadata.setTitle(song["title"].toString());
 				metadata.setArtist(song["artist_name"].toString());
-				finish(metadata);
-				return;
+				metadatas.append(metadata);
 			}
 		}
+		finish(metadatas);
 	}
-	finish();
+	else
+	{
+		finish();
+	}
 }

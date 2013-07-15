@@ -35,13 +35,17 @@ class ViMetadata
 		QByteArray coverData() const;
 		QString coverFormat() const;
 		QString coverMimeType() const;
-		bool moveCover(const QString &newPath);
+		bool copyCover(const QString &newPath, const bool &deleteOld = false); // Copy the current cover to the new location
 
 		QString toString() const;
+		QString toShortString() const;
 
 		static QString unknownArtist();
 		static QString unknownTitle();
 		static QString unknownAlbum();
+
+		bool operator == (const ViMetadata &other) const;
+		bool operator != (const ViMetadata &other) const;
 
 	private:
 

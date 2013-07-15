@@ -23,8 +23,11 @@ class ViSongIdentifier : public QObject
 		ViSongIdentifier();
 		virtual ~ViSongIdentifier();
 
+		static ViMetadata metadata(QList<ViSongIdentifier*> identifiers);
+		static ViMetadata metadata(QList<ViMetadata> metadatas);
+
 		bool found();
-		ViMetadata metadata();
+		QList<ViMetadata> metadatas();
 
 		void setProxy(QNetworkProxy::ProxyType type, QString host, quint16 port, QString username, QString password);
 		QNetworkReply::NetworkError networkError();
@@ -32,15 +35,15 @@ class ViSongIdentifier : public QObject
 		void setKey(QString key);
 		QString key();
 
-		void identify(ViBufferOffsets bufferOffset, QString description);
-		virtual void identify(ViBufferOffsets bufferOffset) = 0;
+		void identify(ViBufferOffsets bufferOffset);
+		virtual void identifyTrack(ViBufferOffsets bufferOffset) = 0;
 
 	protected:
 
 		virtual void reset();
 
 		void finish();
-		void finish(ViMetadata metadata);
+		void finish(QList<ViMetadata> metadatas);
 
 		void retrieve(QString url);
 		void retrieve(QString url, QJsonObject jsonObject);
@@ -57,10 +60,9 @@ class ViSongIdentifier : public QObject
 	private:
 
 		ViWebServicer mServicer;
-		ViMetadata mMetadata;
+		QList<ViMetadata> mMetadatas;
 		bool mFound;
 		QString mKey;
-		QString mDescription;
 
 };
 

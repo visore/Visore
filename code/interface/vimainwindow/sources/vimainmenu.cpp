@@ -5,6 +5,7 @@
 #include <viprojectcorrelationwidget.h>
 #include <viwaveanalysiswidget.h>
 #include <viprojectcorrectionwidget.h>
+#include <viprojectmetadatawidget.h>
 
 ViMainMenu::ViMainMenu(QWidget *parent)
     : ViWidget(parent)
@@ -21,12 +22,19 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	QColor textColor = ViThemeManager::color(ViThemeColors::TextColor1);
 	int index;
 
-    mUi->createProjectButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
+	mUi->createProjectButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
 	mUi->createProjectButton->setText("Record Project", textColor, font);
 	mUi->createProjectButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViProjectRecordingWidget());
 	mUi->createProjectButton->setProperty("index", index);
 	QObject::connect(mUi->createProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
+
+	mUi->metadataButton->setIcon(ViThemeManager::icon("metadata"), 80);
+	mUi->metadataButton->setText("Update Metadata", textColor, font);
+	mUi->metadataButton->setSize(250, 100);
+	index = ViStackedWidget::addWidget(new ViProjectMetadataWidget());
+	mUi->metadataButton->setProperty("index", index);
+	QObject::connect(mUi->metadataButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->projectPlaybackButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
 	mUi->projectPlaybackButton->setText("Playback Project", textColor, font);

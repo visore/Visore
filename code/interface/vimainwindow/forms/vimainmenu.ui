@@ -41,7 +41,7 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="ViButton" name="createProjectButton" native="true"/>
+    <widget class="ViButton" name="createProjectButton"/>
    </item>
    <item row="5" column="1" colspan="7">
     <spacer name="verticalSpacer">
@@ -57,13 +57,13 @@
     </spacer>
    </item>
    <item row="2" column="3">
-    <widget class="ViButton" name="projectPlaybackButton" native="true"/>
+    <widget class="ViButton" name="projectPlaybackButton"/>
    </item>
    <item row="3" column="3">
-    <widget class="ViButton" name="linePlaybackButton" native="true"/>
+    <widget class="ViButton" name="linePlaybackButton"/>
    </item>
    <item row="4" column="3">
-    <widget class="ViButton" name="filePlaybackButton" native="true"/>
+    <widget class="ViButton" name="filePlaybackButton"/>
    </item>
    <item row="2" column="4" rowspan="3">
     <widget class="Line" name="line2">
@@ -80,10 +80,10 @@
     </widget>
    </item>
    <item row="2" column="5">
-    <widget class="ViButton" name="analyseWaveButton" native="true"/>
+    <widget class="ViButton" name="analyseWaveButton"/>
    </item>
    <item row="2" column="7">
-    <widget class="ViButton" name="correlateProjectButton" native="true"/>
+    <widget class="ViButton" name="correlateProjectButton"/>
    </item>
    <item row="2" column="6" rowspan="3">
     <widget class="Line" name="line3">
@@ -123,14 +123,21 @@
     </widget>
    </item>
    <item row="3" column="7">
-    <widget class="ViButton" name="correctProjectButton" native="true"/>
+    <widget class="ViButton" name="correctProjectButton"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="ViButton" name="metadataButton">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
    <class>ViButton</class>
-   <extends>QWidget</extends>
+   <extends>QToolButton</extends>
    <header>vibutton.h</header>
    <container>1</container>
   </customwidget>

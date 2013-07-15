@@ -16,25 +16,9 @@ ViWidget::~ViWidget()
 {
 }
 
-void ViWidget::refresh()
+void ViWidget::addStyleSheet(QString style)
 {
-    repaint();
-}
-
-void ViWidget::setStyleSheet(QString styleSheet)
-{
-	mStyleSheet = styleSheet;
-	QWidget::setStyleSheet(mStyleSheet);
-}
-
-void ViWidget::addStyleSheet(QString styleSheet)
-{
-	setStyleSheet(mStyleSheet + styleSheet);
-}
-
-QString ViWidget::styleSheet()
-{
-	return mStyleSheet;
+	setStyleSheet(styleSheet() + style);
 }
 
 ViAudioEnginePointer ViWidget::engine()
@@ -48,13 +32,6 @@ void ViWidget::paintEvent(QPaintEvent *event)
 	QStyleOption option;
 	option.init(this);
 	style()->drawPrimitive(QStyle::PE_Widget, &option, &painter, this);
-    QWidget::paintEvent(event);
-}
-
-void ViWidget::setBorder(QColor color, int thickness, int roundness)
-{
-	//mStyleSheet = "border-style: solid; border-color: " + color.name() + "; border-width: " + QString::number(thickness) + "px; border-radius: " + QString::number(roundness) + "px;";
-	setStyleSheet("QWidget#" + objectName() + "{border-style: solid; border-color: " + color.name() + "; border-width: " + QString::number(thickness) + "px; border-radius: " + QString::number(roundness) + "px;}");
 }
 
 bool ViWidget::addFunctionCall(QString signal, ViFunctionCall functionCall)
@@ -79,6 +56,12 @@ bool ViWidget::executeFunction()
 {
 	QString name = QString(metaObject()->method(senderSignalIndex()).name());
     mFunctionCalls[name].execute();
+}
+
+void ViWidget::setSize(int widthHeight)
+{
+	setWidth(widthHeight);
+	setHeight(widthHeight);
 }
 
 void ViWidget::setSize(int width, int height)

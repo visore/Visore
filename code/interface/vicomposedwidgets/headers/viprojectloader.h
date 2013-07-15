@@ -31,6 +31,7 @@ class ViProjectLoader : public ViWidget
 	private slots:
 
 		void loadProjects();
+		void loadProjects(QList<ViProject*> projects);
 		void loadTracks();
 		void analyseTrack(int index);
 		void changeMode(int mode);
@@ -39,6 +40,9 @@ class ViProjectLoader : public ViWidget
 
 		ViProjectLoader(QWidget *parent = 0);
 		~ViProjectLoader();
+
+		void setProject(ViProject *project, bool load = true);
+		void setProject(QString path, bool load = true);
 
 		ViProjectQueue projects();
 		ViProject* project();

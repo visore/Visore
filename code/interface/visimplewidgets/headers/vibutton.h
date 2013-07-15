@@ -29,7 +29,7 @@ class ViButton : public QToolButton
 		void enable();
 
 		void enableBorder();
-		void disbaleBorder();
+		void disableBorder();
 
 		void enableBackground();
 		void disableBackground();
@@ -39,8 +39,10 @@ class ViButton : public QToolButton
 		void setText(const QString &text, const ViFont &font);
 
 		void setFont(const QColor &color, const QFont &font);
+		void setFont(const QFont &font);
 		void setFont(const ViFont &font);
 
+		void setSize(const int &widthHeight);
 		void setSize(const int &width, const int &height);
 		void setWidth(const int &width);
 		void setHeight(const int &height);

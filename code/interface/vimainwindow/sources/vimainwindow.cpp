@@ -86,7 +86,7 @@ void ViMainWindow::initialize()
 	QObject::connect(mUi->logoButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->logoButton->disableBackground();
-	mUi->logoButton->disbaleBorder();
+	mUi->logoButton->disableBorder();
 	mUi->logoButton->addStyleSheet("background: qradialgradient(cx: 0.5, cy: 0.5, radius: 1, fx: 0.5, fy: 0.5, stop: 0 " + ViThemeManager::color(ViThemeColors::ButtonNormalColor2).name() + ", stop: 0.45 transparent);", ViButton::Hovered);
 	mUi->logoButton->setSize(64, 64);
 	mUi->logoButton->setIcon(ViThemeManager::icon("logo"), 64);

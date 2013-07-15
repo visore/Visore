@@ -6,7 +6,7 @@
 
 ViId::ViId()
 {
-	mId = ViIdManager::generate();
+	mId = generate();
 }
 
 ViId::~ViId()
@@ -34,12 +34,6 @@ bool ViId::setId(QString id)
 	return true;
 }
 
-void ViId::createId()
-{
-	ViIdManager::release(mId);
-	mId = ViIdManager::generate();
-}
-
 bool ViId::operator ==(const ViId &other) const
 {
 	return (mId == other.mId);
@@ -48,6 +42,11 @@ bool ViId::operator ==(const ViId &other) const
 bool ViId::operator !=(const ViId &other) const
 {
 	return (mId != other.mId);
+}
+
+QString ViId::generate()
+{
+	return ViIdManager::generate();
 }
 
 QSharedPointer<ViIdManager> ViIdManager::mInstance;

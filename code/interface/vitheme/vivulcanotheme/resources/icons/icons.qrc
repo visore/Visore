@@ -1,8 +1,6 @@
 <RCC>
     <qresource prefix="/icons">
         <file>add/add_normal.png</file>
-        <file>browse/browse_normal.png</file>
-        <file>browse/browse_selected.png</file>
         <file>correlation/correlation_normal.png</file>
         <file>correlationproject/correlationproject_normal.png</file>
         <file>fileinput/fileinput_normal.png</file>
@@ -29,5 +27,10 @@
         <file>up/up_hover.png</file>
         <file>up/up_normal.png</file>
         <file>microphone/microphone_normal.png</file>
+        <file>left/left_normal.png</file>
+        <file>right/right_normal.png</file>
+        <file>save/save_normal.png</file>
+        <file>metadata/metadata_normal.png</file>
+        <file>search/search_normal.png</file>
     </qresource>
 </RCC>

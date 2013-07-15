@@ -310,9 +310,10 @@ void ViProject::save()
     QObject::connect(&mArchive, SIGNAL(compressed()), this, SLOT(setFinished()), Qt::UniqueConnection);
     QObject::connect(&mArchive, SIGNAL(compressed()), this, SIGNAL(saved()), Qt::UniqueConnection);
 
-    moveToProject();
-    saveAll();
-    mArchive.compressData(path(ViProject::Root));
+	moveToProject();
+	cleanProject();
+	saveAll();
+	mArchive.compressData(path(ViProject::Root));
 }
 
 bool ViProject::loadAll()
@@ -523,6 +524,40 @@ QStringList ViProject::fileNames(bool track, bool side)
     return result;
 }
 
+void ViProject::cleanProject()
+{
+	QList<ViProject::Directory> types = {ViProject::TargetData, ViProject::CorruptedData, ViProject::CorrectedData, ViProject::CoverData};
+	QList<ViAudio::Type> audioTypes = {ViAudio::Target, ViAudio::Corrupted, ViAudio::Corrected};
+	QDir dir;
+	QFileInfoList files;
+	bool found;
+	int sides = sideCount() + 1;
+	for(int i = 1; i < sides; ++i)
+	{
+		for(int t = 0; t < types.size(); ++t)
+		{
+			dir.setPath(path(types[t], i));
+			files = dir.entryInfoList(QDir::Files);
+			for(int j = 0; j < files.size(); ++j)
+			{
+				found = false;
+				for(int k = 0; k < objectCount(); ++k)
+				{
+					if(types[t] == ViProject::CoverData)
+					{
+						if(files[j].absolutePath() == mObjects[k]->metadata().cover()) found = true;
+					}
+					else
+					{
+						if(files[j].absolutePath() == mObjects[k]->filePath(audioTypes[t])) found = true;
+					}
+				}
+				if(!found) QFile::remove(files[j].absolutePath());
+			}
+		}
+	}
+}
+
 void ViProject::moveToProject()
 {
     ViAudioObjectPointer object;
@@ -542,10 +577,16 @@ void ViProject::moveToProject()
         if(object->hasFile(ViAudio::Corrected))
         {
             moveToProject(object, ViAudio::Corrected);
-        }
+		}
+
 		ViMetadata &metadata = object->metadata();
-		metadata.moveCover(path(ViProject::CoverData, object->sideNumber()) + object->fileName() + "." + metadata.coverFormat());
-    }
+		bool deleteOld = false;
+		if(metadata.cover().startsWith(ViManager::tempCoverPath()))
+		{
+			deleteOld = true;
+		}
+		metadata.copyCover(path(ViProject::CoverData, object->sideNumber()) + object->fileName() + "." + metadata.coverFormat(), deleteOld);
+	}
 }
 
 void ViProject::moveToProject(ViAudioObjectPointer object, ViAudio::Type type)

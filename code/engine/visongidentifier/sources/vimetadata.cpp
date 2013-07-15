@@ -3,7 +3,7 @@
 #include <QFileInfo>
 #include <QBuffer>
 #include <QDir>
-
+#include<vilogger.h>
 ViMetadata::ViMetadata()
 {
 	clear();
@@ -159,14 +159,12 @@ QString ViMetadata::coverMimeType() const
 	return "";
 }
 
-bool ViMetadata::moveCover(const QString &newPath)
+bool ViMetadata::copyCover(const QString &newPath, const bool &deleteOld)
 {
 	if(hasCover())
 	{
 		QString path = newPath;
-		QFileInfo info(path);
-		bool isDir = info.isDir();
-		if(isDir)
+		if(QFileInfo(path).isDir())
 		{
 			if(!path.endsWith(QDir::separator()))
 			{
@@ -174,13 +172,11 @@ bool ViMetadata::moveCover(const QString &newPath)
 			}
 			path += QFileInfo(mCover).fileName();
 		}
-		if(info.isFile() || isDir)
+		if(QFile::copy(mCover, path))
 		{
-			if(QFile::rename(mCover, path))
-			{
-				setCover(path);
-				return true;
-			}
+			if(deleteOld) QFile::remove(mCover);
+			setCover(path);
+			return true;
 		}
 	}
 	return false;
@@ -196,6 +192,11 @@ QString ViMetadata::toString() const
 	return result;
 }
 
+QString ViMetadata::toShortString() const
+{
+	return artist() + " - " + title();
+}
+
 QString ViMetadata::unknownArtist()
 {
 	return "Unknown Artist";
@@ -209,4 +210,14 @@ QString ViMetadata::unknownTitle()
 QString ViMetadata::unknownAlbum()
 {
 	return "Unknown Album";
+}
+
+bool ViMetadata::operator == (const ViMetadata &other) const
+{
+	return title() == other.title() && artist() == other.artist() && album() == other.album();
+}
+
+bool ViMetadata::operator != (const ViMetadata &other) const
+{
+	return !(operator == (other));
 }

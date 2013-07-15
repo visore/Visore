@@ -51,6 +51,10 @@ class ViManager : public ViSingleton<ViManager>
 		//Paths
 		static QString tempPath();
 		static void setTempPath(QString path);
+		static QString tempCoverPath();
+		static void setTempCoverPath(QString path);
+		static QString tempDataPath();
+		static void setTempDataPath(QString path);
 
 		static QString projectPath();
 		static void setProjectPath(QString path);
@@ -82,6 +86,8 @@ class ViManager : public ViSingleton<ViManager>
 		QString mProjectName;
 
 		QString mTempPath;
+		QString mTempCoverPath;
+		QString mTempDataPath;
 		QString mProjectPath;
 		QString mThemesPath;
 

@@ -11,8 +11,8 @@ ViMetadataer::ViMetadataer()
 	mCurrentRetriever = 0;
 	mCurrentDescription = "";
 
-	mIdentifiers.append(new ViEnmfpIdentifier()); // ENMFP slower, but more accurate - make first identifier
-	mIdentifiers.append(new ViAcoustidIdentifier());
+	//mIdentifiers.append(new ViAcoustidIdentifier());
+	//mIdentifiers.append(new ViEnmfpIdentifier());
 
 	mRetrievers.append(new ViMusicBrainzCoverRetriever());
 
@@ -34,17 +34,22 @@ ViMetadataer::~ViMetadataer()
 
 void ViMetadataer::processIdentification(bool success)
 {
-	if(success)
+	if(!startNextIdentifier())
 	{
-		mMetadata = mIdentifiers[mCurrentIdentifier]->metadata();
-		if(!startNextRetriever())
+		mMetadata = ViSongIdentifier::metadata(mIdentifiers);
+		if(mMetadata.isValid())
 		{
-			finish(true);
+			LOG("Metadata detected as \"" + mMetadata.toShortString() + "\" (" + mCurrentDescription + ").");
+			if(!startNextRetriever())
+			{
+				finish(true);
+			}
 		}
-	}
-	else if(!startNextIdentifier())
-	{
-		processNextBuffer();
+		else
+		{
+			LOG("No metadata detected (" + mCurrentDescription + ").");
+			processNextBuffer();
+		}
 	}
 }
 
@@ -53,10 +58,12 @@ void ViMetadataer::processRetrieval(bool success)
 	if(success)
 	{
 		mMetadata = mRetrievers[mCurrentRetriever]->metadata();
+		LOG("Cover image found for \"" + mMetadata.toShortString() + "\".");
 		finish(true);
 	}
 	else if(!startNextRetriever())
 	{
+		LOG("No cover image found for \"" + mMetadata.toShortString() + "\".");
 		finish(true);
 	}
 }
@@ -76,7 +83,7 @@ bool ViMetadataer::startNextIdentifier()
 	{
 		return false;
 	}
-	mIdentifiers[mCurrentIdentifier]->identify(mCurrentBufferOffset, mCurrentDescription);
+	mIdentifiers[mCurrentIdentifier]->identify(mCurrentBufferOffset);
 	return true;
 }
 

@@ -52,15 +52,43 @@ ViManager::ViManager()
 	}
 
 	//Paths
+	QString tempPath;
 	if(mSettings->value("paths/temp").isNull())
 	{
-		mSettings->setValue("paths/temp", QDir::tempPath() + QDir::separator() + "visore" + QDir::separator());
+		tempPath = QDir::tempPath() + QDir::separator() + "visore" + QDir::separator();
+		mSettings->setValue("paths/temp", tempPath);
 	}
-	QDir dir(mSettings->value("paths/temp").toString());
-	if(!dir.exists())
+	else
 	{
-		dir.mkpath(mSettings->value("paths/temp").toString());
+		tempPath = mSettings->value("paths/temp").toString();
 	}
+	QDir dir(tempPath);
+	if(!dir.exists()) dir.mkpath(tempPath);
+
+	QString path;
+	if(mSettings->value("paths/tempcover").isNull())
+	{
+		path = tempPath + "covers" + QDir::separator();
+		mSettings->setValue("paths/tempcover", path);
+	}
+	else
+	{
+		path = mSettings->value("paths/tempcover").toString();
+	}
+	dir = QDir(path);
+	if(!dir.exists()) dir.mkpath(path);
+
+	if(mSettings->value("paths/tempdata").isNull())
+	{
+		path = tempPath + "data" + QDir::separator();
+		mSettings->setValue("paths/tempdata", path);
+	}
+	else
+	{
+		path = mSettings->value("paths/tempdata").toString();
+	}
+	dir = QDir(path);
+	if(!dir.exists()) dir.mkpath(path);
 
 	if(mSettings->value("paths/project").isNull())
 	{
@@ -154,6 +182,26 @@ QString ViManager::tempPath()
 void ViManager::setTempPath(QString path)
 {
 	ViManager::setValue("paths/temp", path);
+}
+
+QString ViManager::tempCoverPath()
+{
+	return ViManager::value("paths/tempcover").toString();
+}
+
+void ViManager::setTempCoverPath(QString path)
+{
+	ViManager::setValue("paths/tempcover", path);
+}
+
+QString ViManager::tempDataPath()
+{
+	return ViManager::value("paths/tempdata").toString();
+}
+
+void ViManager::setTempDataPath(QString path)
+{
+	ViManager::setValue("paths/tempdata", path);
 }
 
 QString ViManager::projectPath()

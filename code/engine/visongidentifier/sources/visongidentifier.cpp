@@ -8,7 +8,6 @@ ViSongIdentifier::ViSongIdentifier()
 {
 	mFound = false;
 	mKey = "";
-	mDescription = "";
 	QObject::connect(&mServicer, SIGNAL(finished(bool)), this, SLOT(processReply(bool)));
 }
 
@@ -16,14 +15,59 @@ ViSongIdentifier::~ViSongIdentifier()
 {
 }
 
+ViMetadata ViSongIdentifier::metadata(QList<ViSongIdentifier*> identifiers)
+{
+	QList<ViMetadata> metadatas;
+	for(int i = 0; i < identifiers.size(); ++i)
+	{
+		metadatas.append(identifiers[i]->metadatas());
+	}
+	return metadata(metadatas);
+}
+
+ViMetadata ViSongIdentifier::metadata(QList<ViMetadata> metadatas)
+{
+	QList<QPair<ViMetadata, int>> ranks;
+	bool found;
+	for(int i = 0; i < metadatas.size(); ++i)
+	{
+		found = false;
+		for(int j = 0; j < ranks.size(); ++j)
+		{
+			if(ranks[j].first == metadatas[i])
+			{
+				found = true;
+				ranks[j].second += 1;
+			}
+		}
+		if(!found)
+		{
+			ranks.append(QPair<ViMetadata, int>(metadatas[i], 1));
+		}
+	}
+
+	ViMetadata topMetadata;
+	int topCount = 0, count;
+	for(int i = 0; i < ranks.size(); ++i)
+	{
+		count = ranks[i].second;
+		if(count > topCount)
+		{
+			topMetadata = ranks[i].first;
+			topCount = count;
+		}
+	}
+	return topMetadata;
+}
+
 bool ViSongIdentifier::found()
 {
 	return mFound;
 }
 
-ViMetadata ViSongIdentifier::metadata()
+QList<ViMetadata> ViSongIdentifier::metadatas()
 {
-	return mMetadata;
+	return mMetadatas;
 }
 
 void ViSongIdentifier::setProxy(QNetworkProxy::ProxyType type, QString host, quint16 port, QString username, QString password)
@@ -46,34 +90,30 @@ QString ViSongIdentifier::key()
 	return mKey;
 }
 
-void ViSongIdentifier::identify(ViBufferOffsets bufferOffset, QString description)
+void ViSongIdentifier::identify(ViBufferOffsets bufferOffset)
 {
 	reset();
-	mDescription = description;
-	identify(bufferOffset);
+	identifyTrack(bufferOffset);
 }
 
 void ViSongIdentifier::reset()
 {
-	mMetadata = ViMetadata();
+	mMetadatas.clear();
 	mFound = false;
-	mDescription = "";
 	mServicer.disconnect();
 	QObject::connect(&mServicer, SIGNAL(finished(bool)), this, SLOT(processReply(bool)));
 }
 
 void ViSongIdentifier::finish()
 {
-	LOG("The track's metadata could not be detected (" + mDescription + ").");
 	mFound = false;
 	emit identified(mFound);
 }
 
-void ViSongIdentifier::finish(ViMetadata metadata)
+void ViSongIdentifier::finish(QList<ViMetadata> metadatas)
 {
-	LOG("The track's metadata was detected as \"" + metadata.artist() + " - " + metadata.title() + "\" (" + mDescription + ").");
-	mMetadata = metadata;
-	mFound = true;
+	mMetadatas = metadatas;
+	mFound = !mMetadatas.isEmpty();
 	emit identified(mFound);
 }
 
@@ -107,7 +147,6 @@ QString ViSongIdentifier::saveImage(QByteArray &data, QString name)
 	}
 	newPath += QDir::separator() + name + "." + extension;
 
-	QFileInfo metadata(newPath);
 	QFile file(newPath);
 	if(!file.open(QIODevice::WriteOnly))
 	{

@@ -48,6 +48,9 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		//Project
 		void recordProject(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectInfo);
 
+		//Metadata
+		void updateMetadata(ViProject *project);
+
 		//Volume
 		void setVolume(int volume);
 		void mute(bool value = true);

@@ -2,7 +2,6 @@
 #include <viaudioposition.h>
 #include <vipcmconverter.h>
 #include <vimanager.h>
-#include <vilogger.h>
 
 // For some reason, adding a couple of seconds (2 - 5) to the request duration, will result in a positive retrieval.
 // Not sure why this is, but if you play the encoded FLAC files, the play a couple of seconds longer than the indicated duration. Maybe it has something to do with this?
@@ -42,66 +41,32 @@ void ViAcoustidIdentifier::processReply(bool success)
 		QVariantMap result = jsonResult().toVariantMap();
 		if(result["status"].toString() == "ok")
 		{
+			QList<ViMetadata> metadatas;
 			QList<QVariant> results = result["results"].toList();
-			for(int j = 0; j < results.size(); ++j)
+			for(int i = 0; i < results.size(); ++i)
 			{
-				QList<QVariant> recordings = results[0].toMap()["recordings"].toList();
-
-				// Take the song that has most occurences
-				QHash<QString, int> songs;
-				QString title;
-				for(int i = 0; i < recordings.size(); ++i)
+				QList<QVariant> recordings = results[i].toMap()["recordings"].toList();
+				for(int j = 0; j < recordings.size(); ++j)
 				{
-					title = recordings[0].toMap()["title"].toString();
-					if(songs.contains(title))
+					ViMetadata metadata;
+					QVariantMap infoMap = recordings[j].toMap();
+					metadata.setTitle(infoMap["title"].toString());
+					QList<QVariant> artistsMap = infoMap["artists"].toList();
+					if(!artistsMap.isEmpty())
 					{
-						songs[title] += 1;
+						metadata.setArtist(artistsMap[0].toMap()["name"].toString());
 					}
-					else
-					{
-						songs[title] = 1;
-					}
-				}
-
-				QString maxTitle = "";
-				int max = 0;
-				foreach(title, songs.keys())
-				{
-					if(songs[title] > max)
-					{
-						max = songs[title];
-						maxTitle = title;
-					}
-				}
-
-				if(maxTitle != "")
-				{
-					for(int i = 0; i < recordings.size(); ++i)
-					{
-						QVariantMap infoMap = recordings[0].toMap();
-						title = infoMap["title"].toString();
-						if(title == maxTitle)
-						{
-							ViMetadata metadata;
-							metadata.setTitle(title);
-							QList<QVariant> artistsMap = infoMap["artists"].toList();
-							if(!artistsMap.isEmpty())
-							{
-								metadata.setArtist(artistsMap[0].toMap()["name"].toString());
-								finish(metadata);
-								return;
-							}
-							break;
-						}
-					}
+					metadatas.append(metadata);
 				}
 			}
+			finish(metadatas);
+			return;
 		}
 	}
 	finish();
 }
 
-void ViAcoustidIdentifier::identify(ViBufferOffsets bufferOffset)
+void ViAcoustidIdentifier::identifyTrack(ViBufferOffsets bufferOffset)
 {
 	mFingerprinter.generate(bufferOffset);
 }

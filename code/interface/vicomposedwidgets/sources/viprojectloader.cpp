@@ -28,6 +28,18 @@ ViProjectLoader::~ViProjectLoader()
 	clear();
 }
 
+void ViProjectLoader::setProject(ViProject *project, bool load)
+{
+	mUi->fileBrowser->setText(project->filePath());
+	if(load) loadProjects({project});
+}
+
+void ViProjectLoader::setProject(QString path, bool load)
+{
+	mUi->fileBrowser->setText(path);
+	if(load) loadProjects();
+}
+
 ViProjectQueue ViProjectLoader::projects()
 {
 	return mProjects;
@@ -91,16 +103,27 @@ void ViProjectLoader::loadProjects()
 	}
 	ViLoadingWidget::start(true, false, message, ViProgressBar::Text, ViProgressBar::Infinite);
 
-	QStringList projects = mUi->fileBrowser->fileNames();
+	QStringList projectPaths = mUi->fileBrowser->fileNames();
+	QList<ViProject*> projects;
+	for(int i = 0; i < projectPaths.size(); ++i)
+	{
+		projects.append(new ViProject(projectPaths[i]));
+	}
+	loadProjects(projects);
+}
+
+void ViProjectLoader::loadProjects(QList<ViProject*> projects)
+{
+	ViProject *project;
 	for(int i = 0; i < projects.size(); ++i)
 	{
 		++mProjectCount;
-		ViProject *project = new ViProject(projects[i]);
+		project = projects[i];
 		QObject::connect(project, SIGNAL(loaded()), this, SLOT(loadTracks()), Qt::UniqueConnection);
 		if(!project->load())
 		{
 			--mProjectCount;
-			LOG("The project (" + projects[i] + ") could not be loaded.");
+			LOG("The project (" + projects[i]->filePath() + ") could not be loaded.");
 			ViLoadingWidget::stop();
 		}
 	}
@@ -209,7 +232,7 @@ void ViProjectLoader::changeMode(int mode)
 	}
 	else
 	{
-		mUi->fileLabel->setText("Files:");
+		mUi->fileLabel->setText("File:");
 		mUi->fileBrowser->setMode(ViFileBrowser::OpenFile);
 	}
 
