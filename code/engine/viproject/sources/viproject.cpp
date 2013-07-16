@@ -304,7 +304,7 @@ bool ViProject::load(bool minimal)
 
 void ViProject::save()
 {
-    LOG("Saving project.");
+	LOG("Saving project.");
 	setBusy();
 
     QObject::connect(&mArchive, SIGNAL(compressed()), this, SLOT(setFinished()), Qt::UniqueConnection);
@@ -331,9 +331,9 @@ bool ViProject::loadAll()
 
 void ViProject::saveAll()
 {
-    saveProperties();
-    saveTracks();
-    saveCorrections();
+	saveProperties();
+	saveTracks();
+	saveCorrections();
 }
 
 void ViProject::setFinished()
@@ -580,12 +580,15 @@ void ViProject::moveToProject()
 		}
 
 		ViMetadata &metadata = object->metadata();
-		bool deleteOld = false;
-		if(metadata.cover().startsWith(ViManager::tempCoverPath()))
+		if(metadata.hasCover())
 		{
-			deleteOld = true;
+			bool deleteOld = false;
+			if(metadata.cover().startsWith(ViManager::tempCoverPath()))
+			{
+				deleteOld = true;
+			}
+			metadata.copyCover(path(ViProject::CoverData, object->sideNumber()) + object->fileName() + "." + metadata.coverFormat(), deleteOld);
 		}
-		metadata.copyCover(path(ViProject::CoverData, object->sideNumber()) + object->fileName() + "." + metadata.coverFormat(), deleteOld);
 	}
 }
 
@@ -722,8 +725,6 @@ bool ViProject::saveProperties()
 bool ViProject::saveTracks()
 {
     ViElement root("sides");
-    bool save = true;
-
     QMap<int, ViElement> sides;
     ViAudioObjectPointer object;
 	ViMetadata metadata;
@@ -737,12 +738,13 @@ bool ViProject::saveTracks()
         if(!sides.contains(object->sideNumber()))
         {
             ViElement side("side");
-            side.addAttribute("id", object->sideNumber());
+			side.addAttribute("number", object->sideNumber());
             sides[object->sideNumber()] = side;
         }
 
         ViElement track("track");
-        track.addAttribute("id", object->trackNumber());
+		track.addAttribute("number", object->trackNumber());
+		track.addChild("globalid", object->id());
 		track.addChild("artist", metadata.artist());
 		track.addChild("title", metadata.title());
 
@@ -851,9 +853,10 @@ bool ViProject::loadTracks()
             object->setCorruptedFilePath(absolutePath(data.child("corrupted").toString()));
             object->setCorrectedFilePath(absolutePath(data.child("corrected").toString()));
 			metadata.setCover(absolutePath(data.child("cover").toString()));
+			object->setId(tracks[i].child("globalid").toString());
 			object->setMetadata(metadata);
-            object->setSideNumber(sides[j].attribute("id").toInt());
-            object->setTrackNumber(tracks[i].attribute("id").toInt());
+			object->setSideNumber(sides[j].attribute("number").toInt());
+			object->setTrackNumber(tracks[i].attribute("number").toInt());
             mObjectsMutex.lock();
             mObjects.append(object);
             mObjectsMutex.unlock();

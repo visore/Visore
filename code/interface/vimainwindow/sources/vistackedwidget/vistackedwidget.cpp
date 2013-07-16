@@ -1,5 +1,6 @@
 #include <vistackedwidget.h>
 #include <viscrollarea.h>
+#include <vilogger.h>
 
 ViStackedWidget::ViStackedWidget()
 {
@@ -64,9 +65,39 @@ QStackedWidget* ViStackedWidget::widget()
 	return instance()->mWidget;
 }
 
+ViWidget* ViStackedWidget::widget(QString widgetName)
+{
+	widgetName = widgetName.toLower();
+	if(widgetName.startsWith("vi"))
+	{
+		widgetName = widgetName.remove(0, 2);
+	}
+	QStackedWidget *stack = ViStackedWidget::widget();
+	ViWidget *widget;
+	for(int i = 0; i < stack->count(); ++i)
+	{
+		widget = dynamic_cast<ViWidget*>(stack->widget(i));
+		STATICLOG(widget->name().toLower()+"  "+widgetName);
+		if(widget != NULL && widget->name().toLower() == widgetName)
+		{
+			return widget;
+		}
+	}
+	STATICLOG("The specified widget does not exist or is not a subclass of ViWidget.", QtCriticalMsg, "ViStackedWidget");
+	return NULL;
+}
+
 void ViStackedWidget::setCurrentWidget(ViWidget *widget)
 {
-	ViStackedWidget::widget()->setCurrentWidget(widget);
+	if(widget != NULL)
+	{
+		ViStackedWidget::widget()->setCurrentWidget(widget);
+	}
+}
+
+void ViStackedWidget::setCurrentWidget(QString widgetName)
+{
+	setCurrentWidget(widget(widgetName));
 }
 
 void ViStackedWidget::setCurrentIndex(int index)

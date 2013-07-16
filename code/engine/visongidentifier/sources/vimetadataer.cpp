@@ -192,7 +192,10 @@ void ViMetadataer::processNextBuffer()
 	QPair<ViBufferOffsets, QString> pair = mBufferOffsets.dequeue();
 	mCurrentBufferOffset = pair.first;
 	mCurrentDescription = pair.second;
-	startNextIdentifier();
+	if(!startNextIdentifier())
+	{
+		finish(false);
+	}
 }
 
 void ViMetadataer::reset()

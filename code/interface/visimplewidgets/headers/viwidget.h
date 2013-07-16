@@ -8,8 +8,9 @@
 #include <vifunctioncall.h>
 #include <vithememanager.h>
 #include <vicommon.h>
+#include <viname.h>
 
-class ViWidget : public QWidget, public ViId
+class ViWidget : public QWidget, public ViId, public ViName
 {
 
 	Q_OBJECT

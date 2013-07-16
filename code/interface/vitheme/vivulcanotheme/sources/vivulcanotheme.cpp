@@ -77,10 +77,13 @@ ViVulcanoTheme::ViVulcanoTheme()
 	mGlobalStyleSheet += "QListWidget { border: 2px solid " + borderColor2 + "; border-radius: 4px; padding: 3px; }";
 
 	// QCheckBox
-	mGlobalStyleSheet += "QCheckBox { width: 10px; min-width: 10px; height: 30px; min-height: 30px; }";
+	mGlobalStyleSheet += "QCheckBox { min-height: 30px; }";
+
+	// QRadioButton
+	mGlobalStyleSheet += "QRadioButton { min-height: 30px; }";
 
 	// QLabel
-	mGlobalStyleSheet += "QLabel { height: 30px; min-height: 30px; text-align: left center; }";
+	mGlobalStyleSheet += "QLabel { min-height: 30px; text-align: left center; }";
 
 	// QGroupBox
 	font.setColor(borderColor2);

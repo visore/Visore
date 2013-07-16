@@ -55,12 +55,13 @@ bool ViAudioRecorder::record(ViProject *project, ViAudio::Type type, ViAudioForm
         mSides = sides;
     }
 
-	if(mType != ViAudio::Undefined)
+	if(mType == ViAudio::Target || mType == ViAudio::Corrupted)
 	{
 		nextObject();
 		emit statused("Waiting for record to start");
 		return true;
 	}
+	LOG("Invalid type specified for the recording. The type must be Target or Corrupted.", QtCriticalMsg);
 	setProgress(100);
 	emit finished();
 	return false;
@@ -96,6 +97,7 @@ void ViAudioRecorder::finish()
 
 void ViAudioRecorder::finishProject()
 {
+	emit statused("Waiting for project to finish");
 	if(!mQueue.isEmpty())
 	{
 		mWaitForQueue = true;

@@ -478,7 +478,7 @@ void ViCodingChainFileOutput::initialize()
 	{
 		dir.mkpath(folder);
 	}
-	mTempFile.setFileName(folder + QDir::separator() + info.fileName());
+	mTempFile.setFileName(folder + info.baseName() + "_temp." + info.completeSuffix());
 	if(!mTempFile.open(QIODevice::WriteOnly))
 	{
 		setError(ViCoder::OutputFileError);

@@ -1,6 +1,8 @@
-#include "viprojectrecordingwidget.h"
-#include "ui_viprojectrecordingwidget.h"
-#include "vimanager.h"
+#include <viprojectrecordingwidget.h>
+#include <ui_viprojectrecordingwidget.h>
+#include <viprojectmetadatawidget.h>
+#include <vistackedwidget.h>
+#include <vimanager.h>
 #include <QDate>
 
 ViProjectRecordingWidget::ViProjectRecordingWidget(QWidget *parent)
@@ -8,6 +10,8 @@ ViProjectRecordingWidget::ViProjectRecordingWidget(QWidget *parent)
 {
 	mUi = new Ui::ViProjectRecordingWidget();
 	mUi->setupUi(this);
+
+	QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(finishRecording()));
 
 	mProject = NULL;
 
@@ -72,7 +76,7 @@ void ViProjectRecordingWidget::start()
         sides = mProject->sideCount();
     }
 
-    engine()->recordProject(mProject, type, mUi->formatWidget->format(), sides, mUi->songInfoBox->isChecked());
+	engine()->recordProject(mProject, type, mUi->formatWidget->format(), sides, mUi->detectBox->isChecked());
 }
 
 void ViProjectRecordingWidget::changeType()
@@ -96,5 +100,18 @@ void ViProjectRecordingWidget::clear()
         QObject::disconnect(mProject, SIGNAL(cleared()), this, SLOT(clear()));
 		delete mProject;
 		mProject = NULL;
+	}
+}
+
+void ViProjectRecordingWidget::finishRecording()
+{
+	if(mUi->editBox->isChecked())
+	{
+		ViProjectMetadataWidget *widget = dynamic_cast<ViProjectMetadataWidget*>(ViStackedWidget::widget("ViProjectMetadataWidget"));
+		if(widget != NULL)
+		{
+			widget->setProject(mProject);
+			ViStackedWidget::setCurrentWidget(widget);
+		}
 	}
 }

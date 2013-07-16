@@ -19,6 +19,7 @@ class ViProjectRecordingWidget : public ViWidget
 		void start();
 		void changeType();
 		void clear();
+		void finishRecording();
 
 	public:
 

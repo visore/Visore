@@ -3,8 +3,9 @@
 
 #include <QString>
 #include <vicommon.h>
+#include <viname.h>
 
-class ViLibrary
+class ViLibrary : public ViName
 {
 
 	public:
@@ -12,8 +13,6 @@ class ViLibrary
 		ViLibrary();
 		ViLibrary(const ViLibrary &other);
 		virtual ~ViLibrary();
-
-		virtual QString name(QString replace = "", bool spaced = false);
 
         virtual ViLibrary* clone();
 

@@ -397,9 +397,6 @@ bool ViAudioObject::encode(ViAudio::Type type, bool clearWhenFinished)
 	mClearEncodedBuffer = clearWhenFinished;
 	mPreviousEncodedType = ViAudio::Undefined;
 	mCodingInstructions = decomposeTypes(type);
-
-	QString thePath = "";
-	ViBuffer *theBuffer = NULL;
 	for(int i = 0; i < mCodingInstructions.size(); ++i)
 	{
 		locker.unlock();
@@ -410,7 +407,10 @@ bool ViAudioObject::encode(ViAudio::Type type, bool clearWhenFinished)
 			--i;
 			locker.unlock();
 		}
-		setFilePath(mCodingInstructions[i], temporaryFilePath(mCodingInstructions[i]));
+		else
+		{
+			setFilePath(mCodingInstructions[i], temporaryFilePath(mCodingInstructions[i]));
+		}
 		locker.relock();
 	}
 	if(mCodingInstructions.isEmpty())
@@ -456,7 +456,6 @@ void ViAudioObject::encodeNext()
 	{
 		mPreviousEncodedType = mCodingInstructions.dequeue();
 		locker.unlock();
-		
 		QString thePath = filePath(mPreviousEncodedType);
 		ViBuffer *theBuffer = buffer(mPreviousEncodedType, true);
 		locker.relock();
@@ -1399,7 +1398,7 @@ void ViAudioObject::setMetadata(const ViMetadata &metadata)
 }
 
 void ViAudioObject::detectMetadata(bool force)
-{force=true;
+{
 	setStarted();
 	if(!force && hasMetadata())
 	{
@@ -1430,7 +1429,6 @@ void ViAudioObject::detectMetadata(bool force)
 	{
 		buffers.enqueue(buffer(ViAudio::Corrupted));
 	}
-	locker.relock();
 	mMetadataer->detect(buffers);
 }
 
