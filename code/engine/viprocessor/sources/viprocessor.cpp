@@ -333,17 +333,28 @@ bool ViProcessor::isMultiShot()
 
 void ViProcessor::stop()
 {
-	mStopped = true;
-	exit();
+	if(!mThread.isRunning())
+	{
+		exit();
+	}
+	else
+	{
+		mStopped = true;
+	}
 }
 
 void ViProcessor::exit()
 {
 	handleExit();
-	QObject::disconnect(mData.buffer(), SIGNAL(changed()), this, SLOT(startThread()));
+	if(mData.buffer() != NULL)
+	{
+		QObject::disconnect(mData.buffer(), SIGNAL(changed()), this, SLOT(startThread()));
+		mData.clear();
+	}
 	mStopped = false;
 	finalize();
 	setProgress(100);
+	mObject.setNull();
 	emit finished();
 }
 

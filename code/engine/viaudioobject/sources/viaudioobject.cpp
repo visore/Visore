@@ -48,7 +48,7 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 }
 
 ViAudioObject::~ViAudioObject()
-{LOG("999999");
+{
     clearBuffers(mDestructType);
 
     viDeleteAll(mWaveForms);

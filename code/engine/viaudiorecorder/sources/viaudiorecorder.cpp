@@ -147,6 +147,10 @@ void ViAudioRecorder::startRecord()
 
 void ViAudioRecorder::endRecord()
 {
+	mIdleTimer.stop();
+	mSegmentDetector.stop();
+	mInput.stop();
+
 	if(mCurrentTrack == 0) // If there wasn't a song start yet. Eg: record takes very long to start
 	{
 		nextObject();
@@ -155,10 +159,7 @@ void ViAudioRecorder::endRecord()
 	{
 		mCurrentTrack = 0;
 		if(mCurrentSide == mSides)
-		{
-			mIdleTimer.stop();
-			mInput.stop();
-			mSegmentDetector.stop();
+		{	
 			finishProject();
 		}
 		else
