@@ -6,6 +6,7 @@
 ViWidget::ViWidget(QWidget *parent)
     : QWidget(parent), ViId()
 {
+	mClearOnHide = true;
 	mParent = parent;
     mEngine = ViAudioEngine::instance();
 	mStyleSheet = "";
@@ -14,6 +15,20 @@ ViWidget::ViWidget(QWidget *parent)
 
 ViWidget::~ViWidget()
 {
+}
+
+void ViWidget::clear()
+{
+}
+
+void ViWidget::enableClearOnHide(bool enable)
+{
+	mClearOnHide = enable;
+}
+
+void ViWidget::disableClearOnHide(bool disable)
+{
+	mClearOnHide = !disable;
 }
 
 void ViWidget::addStyleSheet(QString style)
@@ -26,12 +41,17 @@ ViAudioEnginePointer ViWidget::engine()
     return mEngine;
 }
 
-void ViWidget::paintEvent(QPaintEvent *event)
+void ViWidget::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
 	QStyleOption option;
 	option.init(this);
 	style()->drawPrimitive(QStyle::PE_Widget, &option, &painter, this);
+}
+
+void ViWidget::hideEvent(QHideEvent*)
+{
+	if(mClearOnHide) clear();
 }
 
 bool ViWidget::addFunctionCall(QString signal, ViFunctionCall functionCall)

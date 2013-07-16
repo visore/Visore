@@ -67,6 +67,24 @@ QStackedWidget* ViStackedWidget::widget()
 
 ViWidget* ViStackedWidget::widget(QString widgetName)
 {
+	int stackIndex = index(widgetName);
+	if(stackIndex >= 0)
+	{
+		QWidget *widget = ViStackedWidget::widget()->widget(stackIndex);
+		ViScrollArea *area = dynamic_cast<ViScrollArea*>(widget);
+		if(area != NULL) widget = area->widget();
+		return dynamic_cast<ViWidget*>(widget);
+	}
+	return NULL;
+}
+
+int ViStackedWidget::index(ViWidget *widget)
+{
+	return index(widget->name());
+}
+
+int ViStackedWidget::index(QString widgetName)
+{
 	widgetName = widgetName.toLower();
 	if(widgetName.startsWith("vi"))
 	{
@@ -74,30 +92,32 @@ ViWidget* ViStackedWidget::widget(QString widgetName)
 	}
 	QStackedWidget *stack = ViStackedWidget::widget();
 	ViWidget *widget;
+	ViScrollArea *area;
 	for(int i = 0; i < stack->count(); ++i)
 	{
-		widget = dynamic_cast<ViWidget*>(stack->widget(i));
-		STATICLOG(widget->name().toLower()+"  "+widgetName);
+		area = dynamic_cast<ViScrollArea*>(stack->widget(i));
+		if(area == NULL) widget = dynamic_cast<ViWidget*>(stack->widget(i));
+		else widget = dynamic_cast<ViWidget*>(area->widget());
 		if(widget != NULL && widget->name().toLower() == widgetName)
 		{
-			return widget;
+			return i;
 		}
 	}
 	STATICLOG("The specified widget does not exist or is not a subclass of ViWidget.", QtCriticalMsg, "ViStackedWidget");
-	return NULL;
+	return -1;
 }
 
 void ViStackedWidget::setCurrentWidget(ViWidget *widget)
 {
 	if(widget != NULL)
 	{
-		ViStackedWidget::widget()->setCurrentWidget(widget);
+		setCurrentWidget(widget->name());
 	}
 }
 
 void ViStackedWidget::setCurrentWidget(QString widgetName)
 {
-	setCurrentWidget(widget(widgetName));
+	setCurrentIndex(index(widgetName));
 }
 
 void ViStackedWidget::setCurrentIndex(int index)

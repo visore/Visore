@@ -25,14 +25,14 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	mUi->createProjectButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
 	mUi->createProjectButton->setText("Record Project", textColor, font);
 	mUi->createProjectButton->setSize(250, 100);
-	index = ViStackedWidget::addWidget(new ViProjectRecordingWidget());
+	index = ViStackedWidget::addWidget(new ViProjectRecordingWidget(), false);
 	mUi->createProjectButton->setProperty("index", index);
 	QObject::connect(mUi->createProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->metadataButton->setIcon(ViThemeManager::icon("metadata"), 80);
 	mUi->metadataButton->setText("Update Metadata", textColor, font);
 	mUi->metadataButton->setSize(250, 100);
-	index = ViStackedWidget::addWidget(new ViProjectMetadataWidget());
+	index = ViStackedWidget::addWidget(new ViProjectMetadataWidget(), false);
 	mUi->metadataButton->setProperty("index", index);
 	QObject::connect(mUi->metadataButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 

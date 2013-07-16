@@ -19,24 +19,30 @@ ViProjectMetadataEditor::ViProjectMetadataEditor(QWidget *parent)
 	QObject::connect(mUi->albumButton, SIGNAL(clicked()), this, SLOT(setGlobalAlbum()));
 	QObject::connect(mUi->saveButton, SIGNAL(clicked()), this, SLOT(save()));
 
+	setStyleSheet(styleSheet() + "QLabel { width: 150px; min-width: 150px; }");
+
+	mProject = NULL;
 	clear();
 }
 
 ViProjectMetadataEditor::~ViProjectMetadataEditor()
 {
-	if(hasProject() && mAutoClear)
-	{
-		mProject->clear();
-	}
+	clear();
 	delete mUi;
 }
 
 void ViProjectMetadataEditor::clear()
 {
+	QObject::disconnect(mUi->trackComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTrack())); // Important
+	if(mTakeOwnership && mProject != NULL)
+	{
+		delete mProject;
+	}
+	mProject = NULL;
+
 	mUi->trackEditor->hide();
 
-	mAutoClear = false;
-	mProject = NULL;
+	mTakeOwnership = false;
 	mGlobalArtist = "";
 	mGlobalAlbum = "";
 
@@ -47,10 +53,10 @@ void ViProjectMetadataEditor::clear()
 	mUi->trackComboBox->clear();
 }
 
-void ViProjectMetadataEditor::setProject(ViProject *project, bool autoClear)
+void ViProjectMetadataEditor::setProject(ViProject *project, bool takeOwnership)
 {
 	clear();
-	mAutoClear = autoClear;
+	mTakeOwnership = takeOwnership;
 	mProject = project;
 
 	mUi->trackEditor->show();
@@ -72,6 +78,7 @@ void ViProjectMetadataEditor::setProject(ViProject *project, bool autoClear)
 			break;
 		}
 	}
+	if(artist == ViMetadata::unknownArtist()) artist = "";
 	if(same) mUi->artistEdit->setText(artist);
 	else mUi->artistEdit->setText("Various Artists");
 }
@@ -91,10 +98,13 @@ void ViProjectMetadataEditor::save()
 
 void ViProjectMetadataEditor::changeTrack()
 {
-	int index = mUi->trackComboBox->itemData(mUi->trackComboBox->currentIndex()).toInt();
-	mUi->trackEditor->setMetadata(&mProject->object(index)->metadata());
-	if(mGlobalArtist != "") mUi->trackEditor->setArtist(mGlobalArtist);
-	if(mGlobalAlbum != "") mUi->trackEditor->setAlbum(mGlobalAlbum);
+	int index = mUi->trackComboBox->currentIndex();
+	if(index > 0 && index < mProject->objectCount())
+	{
+		mUi->trackEditor->setMetadata(&mProject->object(index)->metadata());
+		if(mGlobalArtist != "") mUi->trackEditor->setArtist(mGlobalArtist);
+		if(mGlobalAlbum != "") mUi->trackEditor->setAlbum(mGlobalAlbum);
+	}
 }
 
 void ViProjectMetadataEditor::updateTracks()
@@ -106,7 +116,7 @@ void ViProjectMetadataEditor::updateTracks()
 		mUi->trackComboBox->clear();
 		for(int i = 0; i < mProject->objectCount(); ++i)
 		{
-			mUi->trackComboBox->addItem(mProject->object(i)->fileName(true, true), i);
+			mUi->trackComboBox->addItem(mProject->object(i)->fileName(true, true));
 			mUi->trackEditor->addPossibleImage(mProject->object(i)->metadata().cover());
 		}
 		if(currentIndex >= 0 && currentIndex < mUi->trackComboBox->count())
@@ -139,12 +149,4 @@ void ViProjectMetadataEditor::setGlobalAlbum()
 {
 	mGlobalAlbum = mUi->albumEdit->text();
 	if(mGlobalAlbum != "") mUi->trackEditor->setAlbum(mGlobalAlbum);
-}
-
-void ViProjectMetadataEditor::hideEvent(QHideEvent *event)
-{
-	if(hasProject() && mAutoClear)
-	{
-		mProject->clear();
-	}
 }

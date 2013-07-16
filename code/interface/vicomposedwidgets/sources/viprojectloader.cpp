@@ -28,18 +28,6 @@ ViProjectLoader::~ViProjectLoader()
 	clear();
 }
 
-void ViProjectLoader::setProject(ViProject *project, bool load)
-{
-	mUi->fileBrowser->setText(project->filePath());
-	if(load) loadProjects({project});
-}
-
-void ViProjectLoader::setProject(QString path, bool load)
-{
-	mUi->fileBrowser->setText(path);
-	if(load) loadProjects();
-}
-
 ViProjectQueue ViProjectLoader::projects()
 {
 	return mProjects;
@@ -75,6 +63,7 @@ ViAudioObjectPointer ViProjectLoader::object()
 void ViProjectLoader::clear()
 {
 	mSelectedObject = -1;
+	mEnableBufferSelection = true;
 
 	mUi->tracksComboBox->clear();
 	mUi->fileBrowser->clear();

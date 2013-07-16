@@ -148,6 +148,7 @@ void ViStreamInput::stop()
         delete mAudioInput;
         mAudioInput = NULL;
         setState(QAudio::StoppedState);
+		clear();
 		LOG("Recording stopped.");
     }
 }

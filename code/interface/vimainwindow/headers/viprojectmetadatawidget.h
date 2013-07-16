@@ -26,10 +26,6 @@ class ViProjectMetadataWidget : public ViWidget
 
 		void setProject(ViProject *project);
 
-	protected:
-
-		void hideEvent(QHideEvent *event);
-
 	private:
 
 		Ui::ViProjectMetadataWidget *mUi;

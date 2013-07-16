@@ -41,9 +41,6 @@ class ViProjectLoader : public ViWidget
 		ViProjectLoader(QWidget *parent = 0);
 		~ViProjectLoader();
 
-		void setProject(ViProject *project, bool load = true);
-		void setProject(QString path, bool load = true);
-
 		ViProjectQueue projects();
 		ViProject* project();
 		ViAudioObjectQueue objects();

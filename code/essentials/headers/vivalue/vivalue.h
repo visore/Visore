@@ -14,6 +14,7 @@ class ViValue
 		ViValue(const QString name);
 		ViValue(const QString name, const QVariant value);
 		ViValue(const ViValue &other);
+		virtual ~ViValue();
 
 		QString name() const;
 		QVariant value() const;

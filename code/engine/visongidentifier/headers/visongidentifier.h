@@ -38,9 +38,9 @@ class ViSongIdentifier : public QObject
 		void identify(ViBufferOffsets bufferOffset);
 		virtual void identifyTrack(ViBufferOffsets bufferOffset) = 0;
 
-	protected:
-
 		virtual void reset();
+
+	protected:
 
 		void finish();
 		void finish(QList<ViMetadata> metadatas);

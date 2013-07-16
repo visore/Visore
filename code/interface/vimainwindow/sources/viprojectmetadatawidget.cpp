@@ -9,9 +9,6 @@ ViProjectMetadataWidget::ViProjectMetadataWidget(QWidget *parent)
 
 	clear();
 
-	mUi->projectLoader->setStyleSheet(mUi->projectLoader->styleSheet() + "QLabel { width: 150px; min-width: 150px; }");
-	mUi->projectEditor->setStyleSheet(mUi->projectEditor->styleSheet() + "QLabel { width: 150px; min-width: 150px; }");
-
 	mUi->projectLoader->setMode(ViProjectLoader::SingleProject);
 	mUi->projectLoader->disableBufferSelection();
 	QObject::connect(mUi->projectLoader, SIGNAL(finished()), this, SLOT(changeProject()));
@@ -34,16 +31,12 @@ void ViProjectMetadataWidget::setProject(ViProject *project)
 {
 	clear();
 	mUi->projectLoader->hide();
-	mUi->projectLoader->setProject(project);
+	mUi->projectEditor->show();
+	mUi->projectEditor->setProject(project, true);
 }
 
 void ViProjectMetadataWidget::changeProject()
 {
 	mUi->projectEditor->show();
-	mUi->projectEditor->setProject(mUi->projectLoader->project());
-}
-
-void ViProjectMetadataWidget::hideEvent(QHideEvent *event)
-{
-	clear();
+	mUi->projectEditor->setProject(mUi->projectLoader->project(), false);
 }

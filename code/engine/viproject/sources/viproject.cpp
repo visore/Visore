@@ -61,8 +61,7 @@ ViProject::ViProject(const ViProject &other)
 
 ViProject::~ViProject()
 {
-    clearObjects();
-    clearFiles();
+	clear();
 }
 
 /*******************************************************************************************************************

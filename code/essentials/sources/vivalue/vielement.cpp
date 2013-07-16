@@ -4,23 +4,45 @@
 ViElement::ViElement()
 	: ViValue()
 {
+	mDummyAttribute = NULL;
+	mDummyElement = NULL;
 }
 
 ViElement::ViElement(QString name)
 	: ViValue(name)
 {
+	mDummyAttribute = NULL;
+	mDummyElement = NULL;
 }
 
 ViElement::ViElement(QString name, QVariant value)
 	: ViValue(name, value)
 {
+	mDummyAttribute = NULL;
+	mDummyElement = NULL;
 }
 
 ViElement::ViElement(const ViElement &other)
 	: ViValue(other)
 {
+	mDummyAttribute = NULL;
+	mDummyElement = NULL;
 	mAttributes = other.mAttributes;
 	mChildren = other.mChildren;
+}
+
+ViElement::~ViElement()
+{
+	if(mDummyAttribute != NULL)
+	{
+		delete mDummyAttribute;
+		mDummyAttribute = NULL;
+	}
+	if(mDummyElement != NULL)
+	{
+		delete mDummyElement;
+		mDummyElement = NULL;
+	}
 }
 
 ViAttribute& ViElement::addAttribute(ViAttribute attribute)
@@ -147,6 +169,7 @@ ViAttribute& ViElement::attribute(int index)
 	{
 		return mAttributes[index];
 	}
+	return dummyAttribute();
 }
 
 ViAttribute& ViElement::attribute(QString name)
@@ -158,6 +181,7 @@ ViAttribute& ViElement::attribute(QString name)
 			return mAttributes[i];
 		}
 	}
+	return dummyAttribute();
 }
 
 ViElement& ViElement::child(int index)
@@ -166,7 +190,7 @@ ViElement& ViElement::child(int index)
 	{
 		return mChildren[index];
 	}
-	return *this;
+	return dummyElement();
 }
 
 ViElement& ViElement::child(QString name)
@@ -182,7 +206,7 @@ ViElement& ViElement::child(QString name)
 	{
 		return mChildren[i].child(name);
 	}
-	return *this;
+	return dummyElement();
 }
 
 
@@ -282,4 +306,24 @@ bool ViElement::loadFromFile(QString fileName)
 	fromXml(file.readAll());
 	file.close();
 	return true;
+}
+
+ViAttribute& ViElement::dummyAttribute()
+{
+	if(mDummyAttribute != NULL)
+	{
+		delete mDummyAttribute;
+	}
+	mDummyAttribute = new ViAttribute();
+	return *mDummyAttribute;
+}
+
+ViElement& ViElement::dummyElement()
+{
+	if(mDummyElement != NULL)
+	{
+		delete mDummyElement;
+	}
+	mDummyElement = new ViElement();
+	return *mDummyElement;
 }

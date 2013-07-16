@@ -29,6 +29,12 @@ class ViWidget : public QWidget, public ViId, public ViName
 		ViWidget(QWidget *parent = 0);
         virtual ~ViWidget();
 
+		virtual void clear();
+
+		// Will call clear once the widgetis hidden
+		void enableClearOnHide(bool enable);
+		void disableClearOnHide(bool disable);
+
 		ViAudioEnginePointer engine();
 
 		virtual void addStyleSheet(QString style);
@@ -43,9 +49,12 @@ class ViWidget : public QWidget, public ViId, public ViName
 
 	protected:
 
-		virtual void paintEvent(QPaintEvent *event);
+		virtual void paintEvent(QPaintEvent*);
+		virtual void hideEvent(QHideEvent*);
 
 	protected:
+
+		bool mClearOnHide;
 
 		QWidget *mParent;
         ViAudioEnginePointer mEngine;

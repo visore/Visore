@@ -45,7 +45,7 @@ void ViProjectRecordingWidget::load()
 {
 	clear();
 	mProject = new ViProject();
-    QObject::connect(mProject, SIGNAL(cleared()), this, SLOT(clear()));
+	QObject::connect(mProject, SIGNAL(cleared()), this, SLOT(clear()));
 	if(mUi->existingRadioButton->isChecked())
 	{
         mProject->setFilePath(mUi->existingBrowser->fileName());
@@ -97,8 +97,11 @@ void ViProjectRecordingWidget::clear()
 {
 	if(mProject != NULL)
 	{
-        QObject::disconnect(mProject, SIGNAL(cleared()), this, SLOT(clear()));
-		delete mProject;
+		if(!mUi->editBox->isChecked())
+		{
+			QObject::disconnect(mProject, SIGNAL(cleared()), this, SLOT(clear()));
+			delete mProject;
+		}
 		mProject = NULL;
 	}
 }

@@ -16,6 +16,7 @@ class ViElement : public ViValue
 		ViElement(QString name);
 		ViElement(QString name, QVariant value);
 		ViElement(const ViElement &other);
+		virtual ~ViElement();
 
 		ViAttribute& addAttribute(ViAttribute attribute);
 		ViAttribute& addAttribute(QString name);
@@ -55,8 +56,16 @@ class ViElement : public ViValue
 
 	private:
 
+		ViAttribute& dummyAttribute();
+		ViElement& dummyElement();
+
+	private:
+
 		ViAttributeList mAttributes;
 		ViElementList mChildren;
+
+		ViAttribute *mDummyAttribute;
+		ViElement *mDummyElement;
 
 };
 

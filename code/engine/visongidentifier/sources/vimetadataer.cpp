@@ -11,8 +11,8 @@ ViMetadataer::ViMetadataer()
 	mCurrentRetriever = 0;
 	mCurrentDescription = "";
 
-	//mIdentifiers.append(new ViAcoustidIdentifier());
-	//mIdentifiers.append(new ViEnmfpIdentifier());
+	mIdentifiers.append(new ViAcoustidIdentifier());
+	mIdentifiers.append(new ViEnmfpIdentifier());
 
 	mRetrievers.append(new ViMusicBrainzCoverRetriever());
 
@@ -78,13 +78,24 @@ void ViMetadataer::enqueueBuffer(ViBuffer *buffer)
 
 bool ViMetadataer::startNextIdentifier()
 {
-	++mCurrentIdentifier;
-	if(mCurrentIdentifier >= mIdentifiers.size())
+	bool success = false;
+	do
 	{
-		return false;
+		++mCurrentIdentifier;
+		if(	mCurrentIdentifier < mIdentifiers.size() &&
+			mIdentifiers[mCurrentIdentifier]->networkError() == QNetworkReply::NoError) // Connection error to the server
+		{
+			success = true;
+			break;
+		}
 	}
-	mIdentifiers[mCurrentIdentifier]->identify(mCurrentBufferOffset);
-	return true;
+	while(mCurrentIdentifier < mIdentifiers.size());
+
+	if(success)
+	{
+		mIdentifiers[mCurrentIdentifier]->identify(mCurrentBufferOffset);
+	}
+	return success;
 }
 
 bool ViMetadataer::startNextRetriever()
@@ -200,6 +211,10 @@ void ViMetadataer::processNextBuffer()
 
 void ViMetadataer::reset()
 {
+	for(int i = 0; i < mIdentifiers.size(); ++i)
+	{
+		mIdentifiers[i]->reset();
+	}
 	mDetected = false;
 	mCurrentIdentifier = -1;
 	mCurrentRetriever = -1;

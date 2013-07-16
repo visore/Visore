@@ -48,7 +48,7 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 }
 
 ViAudioObject::~ViAudioObject()
-{
+{LOG("999999");
     clearBuffers(mDestructType);
 
     viDeleteAll(mWaveForms);
@@ -417,8 +417,8 @@ bool ViAudioObject::encode(ViAudio::Type type, bool clearWhenFinished)
 	{
 		mCodingInstructions.clear();
 		locker.unlock();
-		emit encoded();
 		setFinished();
+		emit encoded();
 		return false;
 	}
 
@@ -448,9 +448,9 @@ void ViAudioObject::encodeNext()
 		delete mEncoder;
 		mEncoder = NULL;
 		locker.unlock();
+		setFinished();
 		emit encoded();
         emit changed();
-		setFinished();
 	}
 	else
 	{
@@ -508,8 +508,8 @@ bool ViAudioObject::decode(ViAudio::Type type)
 		log("No files were decoded.");
 		mCodingInstructions.clear();
 		locker.unlock();
-		emit decoded();
 		setFinished();
+		emit decoded();
 		return false;
 	}
 
@@ -531,8 +531,8 @@ void ViAudioObject::decodeNext()
 		delete mDecoder;
 		mDecoder = NULL;
 		locker.unlock();
-		emit decoded();
 		setFinished();
+		emit decoded();
 	}
 	else
 	{
@@ -578,8 +578,8 @@ bool ViAudioObject::align(ViAligner *aligner)
 	if(!hasAligner())
 	{
 		log("No aligner was specified.");
-		emit aligned();
 		setFinished();
+		emit aligned();
 		return false;
 	}
 
@@ -588,8 +588,8 @@ bool ViAudioObject::align(ViAligner *aligner)
 	if(mAlignerInstructions.size() < 2)
 	{
 		log("At least two buffers are needed for alignment.");
-		emit aligned();
 		setFinished();
+		emit aligned();
 		return false;
 	}
 
@@ -604,8 +604,8 @@ void ViAudioObject::alignNext()
 	if(mAlignerInstructions.isEmpty())
 	{
 		log("Tracks aligned.");
-		emit aligned();
 		setFinished();
+		emit aligned();
 	}
 	else
 	{
@@ -1206,15 +1206,15 @@ bool ViAudioObject::correct(ViModifyProcessor *corrector)
 	if(!hasCorrector())
 	{
 		log("No corrector was specified.", QtWarningMsg);
-		emit corrected();
 		setFinished();
+		emit corrected();
 		return false;
 	}
 	else if(!hasBuffer(ViAudio::Corrupted))
 	{
 		log("No corrupted buffer is available for correction.", QtWarningMsg);
-		emit corrected();
 		setFinished();
+		emit corrected();
 		return false;
 	}
 
@@ -1227,8 +1227,8 @@ bool ViAudioObject::correct(ViModifyProcessor *corrector)
 void ViAudioObject::endCorrect()
 {
 	log("Track corrected.");
-	emit corrected();
 	setFinished();
+	emit corrected();
 }
 
 /*******************************************************************************************************************
@@ -1311,8 +1311,8 @@ bool ViAudioObject::correlate()
     if(!hasCorrelator())
     {
         log("No correlators available for correlation", QtCriticalMsg);
-        emit correlated();
 		setFinished();
+        emit correlated();;
         return false;
     }
 
@@ -1330,8 +1330,8 @@ bool ViAudioObject::correlate()
     if(mCorrelationTypes.isEmpty())
     {
         log("No buffers available for correlation", QtCriticalMsg);
-        emit correlated();
 		setFinished();
+        emit correlated();
         return false;
     }
 
@@ -1358,8 +1358,8 @@ void ViAudioObject::correlateNext()
     if(mCurrentCorrelation >= mCorrelationTypes.size())
     {
         log("The track was correlated.");
-        emit correlated();
 		setFinished();
+        emit correlated();
         return;
     }
 
@@ -1402,8 +1402,8 @@ void ViAudioObject::detectMetadata(bool force)
 	setStarted();
 	if(!force && hasMetadata())
 	{
-		emit metadataDetected(true);
 		setFinished();
+		emit metadataDetected(true);
 	}
 
 	QMutexLocker locker(&mMutex);
@@ -1451,8 +1451,8 @@ void ViAudioObject::changeMetadata(bool success)
 
 	locker.unlock();
 	mIsDetectingMetadata = false;
-	emit metadataDetected(success);
 	setFinished();
+	emit metadataDetected(success);
 }
 
 bool ViAudioObject::isDetectingMetadata()

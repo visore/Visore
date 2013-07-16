@@ -29,17 +29,13 @@ class ViProjectMetadataEditor : public ViWidget
 
 		void clear();
 
-		void setProject(ViProject *project, bool autoClear = true); // Auto clear if widget is hidden
+		void setProject(ViProject *project, bool takeOwnership = true);
 		bool hasProject();
-
-	protected:
-
-		void hideEvent(QHideEvent *event);
 
 	private:
 
 		Ui::ViProjectMetadataEditor *mUi;
-		bool mAutoClear;
+		bool mTakeOwnership;
 		ViProject *mProject;
 		QString mGlobalArtist;
 		QString mGlobalAlbum;

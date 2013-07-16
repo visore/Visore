@@ -26,11 +26,17 @@ class ViStackedWidget : public QObject, public ViSingleton<ViStackedWidget>
 
         static void showTemporaryWidget(ViWidget *widget, bool scroll = true);
         static int addWidget(ViWidget *widget, bool scroll = true);
+
 		static QStackedWidget* widget();
 		static ViWidget* widget(QString widgetName);
+
+		static int index(ViWidget *widget);
+		static int index(QString widgetName);
+
 		static void setCurrentWidget(ViWidget *widget);
 		static void setCurrentWidget(QString widgetName);
 		Q_INVOKABLE static void setCurrentIndex(int index);
+
 		static ViFunctionCall currentIndexCall(int index);
 
 	protected:

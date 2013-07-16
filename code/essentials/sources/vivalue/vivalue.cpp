@@ -22,6 +22,11 @@ ViValue::ViValue(const ViValue &other)
 	setValue(other.mValue);
 }
 
+ViValue::~ViValue()
+{
+}
+
+
 QString ViValue::name() const
 {
 	return mName;
