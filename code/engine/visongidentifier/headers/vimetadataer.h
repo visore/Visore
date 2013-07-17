@@ -33,13 +33,15 @@ class ViMetadataer : public QObject
 	private:
 
 		void enqueueBuffer(ViBuffer *buffer);
-		bool startNextIdentifier();
+		bool startIdentifiers();
 		bool startNextRetriever();
 		void processNextBuffer();
 		void reset();
-		void finish(bool success);
+		void finish();
 
 	private:
+
+		QMutex mMutex;
 
 		QList<ViSongIdentifier*> mIdentifiers;
 		QList<ViCoverRetriever*> mRetrievers;
@@ -52,6 +54,7 @@ class ViMetadataer : public QObject
 
 		bool mDetected;
 		int mCurrentIdentifier;
+		int mTotalIdentifiers;
 		int mCurrentRetriever;
 
 };

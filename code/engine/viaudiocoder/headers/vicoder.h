@@ -22,6 +22,7 @@ namespace ViCoder
 		DecodingError,
 		EncodingError,
 		HeaderError,
+		MetadataError,
 
 		LibraryFileError,
 		LibraryVersionError,

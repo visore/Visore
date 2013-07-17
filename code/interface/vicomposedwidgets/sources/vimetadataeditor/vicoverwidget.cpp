@@ -1,6 +1,5 @@
 #include <vicoverwidget.h>
 #include <QPainter>
-#include <QStyleOption>
 
 ViCoverWidget::ViCoverWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -18,25 +17,44 @@ ViCoverWidget::~ViCoverWidget()
 void ViCoverWidget::clear()
 {
 	mImage = QImage();
+	repaint();
 }
 
 void ViCoverWidget::setImage(QString path)
 {
 	if(path == "") clear();
 	else mImage = QImage(path);
+	repaint();
 }
 
 void ViCoverWidget::setImage(QImage image)
 {
 	mImage = image;
+	repaint();
+}
+
+int ViCoverWidget::calculateBorder()
+{
+	QString style = styleSheet().toLower();
+	int start = style.indexOf("border-radius:");
+	if(start >= 0)
+	{
+		int end = style.indexOf(";", start);
+		return style.mid(start, end - start).replace("border-radius:", "").replace("px", "").replace(" ", "").toInt();
+	}
+	return 0;
 }
 
 void ViCoverWidget::paintEvent(QPaintEvent *event)
 {
 	if(!mImage.isNull())
 	{
+		int border = calculateBorder();
+		QBrush brush(mImage.scaled(width(), height(), Qt::KeepAspectRatioByExpanding));
 		QPainter painter(this);
-		painter.drawImage(0, 0, mImage.scaled(width(), height(), Qt::KeepAspectRatioByExpanding));
+		painter.setRenderHint(QPainter::Antialiasing);
+		painter.setBrush(brush);
+		painter.drawRoundedRect(0, 0, width(), height(), border, border);
 	}
 	ViWidget::paintEvent(event);
 }

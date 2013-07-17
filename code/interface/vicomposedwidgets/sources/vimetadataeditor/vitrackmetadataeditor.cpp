@@ -68,8 +68,13 @@ void ViTrackMetadataEditor::setMetadata(ViMetadata *metadata)
 	mMetadata = metadata;
 
 	if(mMetadata->hasTitle()) setTitle(mMetadata->title());
+	else setTitle("");
+
 	if(mMetadata->hasArtist()) setArtist(mMetadata->artist());
+	else setArtist("");
+
 	if(mMetadata->hasAlbum()) setAlbum(mMetadata->album());
+	else setAlbum("");
 
 	mCurrentImage = addPossibleImage(mMetadata->cover());
 	for(int i = 0; i < mImages.size(); ++i)

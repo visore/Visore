@@ -34,7 +34,28 @@ ViMetadataer::~ViMetadataer()
 
 void ViMetadataer::processIdentification(bool success)
 {
-	if(!startNextIdentifier())
+	mMutex.lock();
+	++mCurrentIdentifier;
+	if(mCurrentIdentifier == mTotalIdentifiers)
+	{
+		mMutex.unlock();
+		mMetadata = ViSongIdentifier::metadata(mIdentifiers);
+		if(mMetadata.isValid())
+		{
+			if(!startNextRetriever())
+			{
+				finish();
+			}
+		}
+		else
+		{
+			processNextBuffer();
+		}
+	}
+	mMutex.unlock();
+
+
+	/*if(!startNextIdentifier())
 	{
 		mMetadata = ViSongIdentifier::metadata(mIdentifiers);
 		if(mMetadata.isValid())
@@ -50,7 +71,7 @@ void ViMetadataer::processIdentification(bool success)
 			LOG("No metadata detected (" + mCurrentDescription + ").");
 			processNextBuffer();
 		}
-	}
+	}*/
 }
 
 void ViMetadataer::processRetrieval(bool success)
@@ -58,13 +79,11 @@ void ViMetadataer::processRetrieval(bool success)
 	if(success)
 	{
 		mMetadata = mRetrievers[mCurrentRetriever]->metadata();
-		LOG("Cover image found for \"" + mMetadata.toShortString() + "\".");
-		finish(true);
+		finish();
 	}
 	else if(!startNextRetriever())
 	{
-		LOG("No cover image found for \"" + mMetadata.toShortString() + "\".");
-		finish(true);
+		finish();
 	}
 }
 
@@ -76,9 +95,41 @@ void ViMetadataer::enqueueBuffer(ViBuffer *buffer)
 	mBufferOffsets.enqueue(QPair<ViBufferOffsets, QString>(ViBufferOffsets(buffer, buffer->size() / 2, buffer->size()), "Second half of track")); // Second half of the track
 }
 
-bool ViMetadataer::startNextIdentifier()
+bool ViMetadataer::startIdentifiers()
 {
-	bool success = false;
+	mCurrentIdentifier = 0;
+	mTotalIdentifiers = 0;
+
+	QList<ViSongIdentifier*> identifiers;
+	QString message = "";
+	for(int i = 0; i < mIdentifiers.size(); ++i)
+	{
+		if(mIdentifiers[i]->networkError() == QNetworkReply::NoError)
+		{
+			identifiers.append(mIdentifiers[i]);
+			if(message != "")
+			{
+				message += ", ";
+			}
+			message += mIdentifiers[i]->name();
+		}
+	}
+
+	mTotalIdentifiers = identifiers.size();
+	if(mTotalIdentifiers == 0)
+	{
+		LOG("No song identifiers available to detect the metadata.");
+		return false;
+	}
+
+	LOG("Detecting the metadata: " + mCurrentDescription + " (" + message + ").");
+	for(int i = 0; i < identifiers.size(); ++i)
+	{
+		identifiers[i]->identify(mCurrentBufferOffset);
+	}
+	return true;
+
+	/*bool success = false;
 	do
 	{
 		++mCurrentIdentifier;
@@ -95,7 +146,7 @@ bool ViMetadataer::startNextIdentifier()
 	{
 		mIdentifiers[mCurrentIdentifier]->identify(mCurrentBufferOffset);
 	}
-	return success;
+	return success;*/
 }
 
 bool ViMetadataer::startNextRetriever()
@@ -195,17 +246,21 @@ void ViMetadataer::processNextBuffer()
 {
 	if(mBufferOffsets.isEmpty())
 	{
-		finish(false);
+		finish();
 		return;
 	}
+
+	mTotalIdentifiers = 0;
 	mCurrentIdentifier = -1;
 	mCurrentRetriever = -1;
+
 	QPair<ViBufferOffsets, QString> pair = mBufferOffsets.dequeue();
 	mCurrentBufferOffset = pair.first;
 	mCurrentDescription = pair.second;
-	if(!startNextIdentifier())
+
+	if(!startIdentifiers())
 	{
-		finish(false);
+		finish();
 	}
 }
 
@@ -216,21 +271,34 @@ void ViMetadataer::reset()
 		mIdentifiers[i]->reset();
 	}
 	mDetected = false;
+	mTotalIdentifiers = 0;
 	mCurrentIdentifier = -1;
 	mCurrentRetriever = -1;
 	mCurrentBufferOffset.clear();
 	mCurrentDescription = "";
 	mBufferOffsets.clear();
-	mMetadata = ViMetadata();
+	mMetadata.clear();
 }
 
-void ViMetadataer::finish(bool success)
+void ViMetadataer::finish()
 {
-	mDetected = success;
+	mDetected = mMetadata.isValid();
 	if(mDetected)
 	{
-		mBufferOffsets.clear();
+		if(mMetadata.hasCover())
+		{
+			LOG("The metadata and cover image was detected as \"" + mMetadata.toShortString() + "\".");
+		}
+		else
+		{
+			LOG("The metadata without the cover image was detected as \"" + mMetadata.toShortString() + "\".");
+		}
 	}
+	else
+	{
+		LOG("No metadata detected.");
+	}
+	mBufferOffsets.clear();
 	emit finished(mDetected);
 }
 

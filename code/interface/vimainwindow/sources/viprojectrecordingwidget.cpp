@@ -11,8 +11,6 @@ ViProjectRecordingWidget::ViProjectRecordingWidget(QWidget *parent)
 	mUi = new Ui::ViProjectRecordingWidget();
 	mUi->setupUi(this);
 
-	QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(finishRecording()));
-
 	mProject = NULL;
 
 	mUi->existingBrowser->addFilter(ViManager::projectFilter());
@@ -76,6 +74,7 @@ void ViProjectRecordingWidget::start()
         sides = mProject->sideCount();
     }
 
+	QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(finishRecording()));
 	engine()->recordProject(mProject, type, mUi->formatWidget->format(), sides, mUi->detectBox->isChecked());
 }
 
@@ -108,6 +107,7 @@ void ViProjectRecordingWidget::clear()
 
 void ViProjectRecordingWidget::finishRecording()
 {
+	QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(finishRecording()));
 	if(mUi->editBox->isChecked())
 	{
 		ViProjectMetadataWidget *widget = dynamic_cast<ViProjectMetadataWidget*>(ViStackedWidget::widget("ViProjectMetadataWidget"));

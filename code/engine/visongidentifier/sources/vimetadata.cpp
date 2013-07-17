@@ -75,31 +75,43 @@ void ViMetadata::setCover(const QString &cover)
 	mCover = cover;
 }
 
-QString ViMetadata::artist() const
+QString ViMetadata::artist(const bool &returnDefault) const
 {
 	if(hasArtist())
 	{
 		return mArtist;
 	}
-	return unknownArtist();
+	else if(returnDefault)
+	{
+		return unknownArtist();
+	}
+	return "";
 }
 
-QString ViMetadata::title() const
+QString ViMetadata::title(const bool &returnDefault) const
 {
 	if(hasTitle())
 	{
 		return mTitle;
 	}
-	return unknownTitle();
+	else if(returnDefault)
+	{
+		return unknownTitle();
+	}
+	return "";
 }
 
-QString ViMetadata::album() const
+QString ViMetadata::album(const bool &returnDefault) const
 {
 	if(hasAlbum())
 	{
 		return mAlbum;
 	}
-	return unknownAlbum();
+	else if(returnDefault)
+	{
+		return unknownAlbum();
+	}
+	return "";
 }
 
 QString ViMetadata::cover() const

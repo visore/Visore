@@ -9,8 +9,6 @@ ViProjectMetadataWidget::ViProjectMetadataWidget(QWidget *parent)
 
 	clear();
 
-	mUi->projectLoader->setMode(ViProjectLoader::SingleProject);
-	mUi->projectLoader->disableBufferSelection();
 	QObject::connect(mUi->projectLoader, SIGNAL(finished()), this, SLOT(changeProject()));
 }
 
@@ -23,6 +21,9 @@ ViProjectMetadataWidget::~ViProjectMetadataWidget()
 void ViProjectMetadataWidget::clear()
 {
 	mUi->projectLoader->clear();
+	mUi->projectLoader->setMode(ViProjectLoader::SingleProject);
+	mUi->projectLoader->disableBufferSelection();
+
 	mUi->projectEditor->clear();
 	mUi->projectEditor->hide();
 }

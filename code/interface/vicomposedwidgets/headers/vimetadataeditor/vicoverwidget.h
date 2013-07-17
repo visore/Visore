@@ -20,6 +20,8 @@ class ViCoverWidget : public ViWidget
 
 	protected:
 
+		int calculateBorder();
+
 		void paintEvent(QPaintEvent *event);
 		void enterEvent(QEvent*);
 		void leaveEvent(QEvent*);

@@ -4,8 +4,9 @@
 #include <vifingerprinter.h>
 #include <vimetadata.h>
 #include <viwebservicer.h>
+#include <viname.h>
 
-class ViSongIdentifier : public QObject
+class ViSongIdentifier : public QObject, public ViName
 {
 
 	Q_OBJECT

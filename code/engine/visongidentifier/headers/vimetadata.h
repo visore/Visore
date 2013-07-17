@@ -21,9 +21,9 @@ class ViMetadata
 		void setAlbum(const QString &album);
 		void setCover(const QString &cover);
 
-		QString artist() const;
-		QString title() const;
-		QString album() const;
+		QString artist(const bool &returnDefault = true) const;
+		QString title(const bool &returnDefault = true) const;
+		QString album(const bool &returnDefault = true) const;
 		QString cover() const;
 
 		bool hasArtist() const;

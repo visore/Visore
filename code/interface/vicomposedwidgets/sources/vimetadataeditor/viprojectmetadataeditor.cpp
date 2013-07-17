@@ -36,7 +36,7 @@ void ViProjectMetadataEditor::clear()
 	QObject::disconnect(mUi->trackComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTrack())); // Important
 	if(mTakeOwnership && mProject != NULL)
 	{
-		delete mProject;
+		//delete mProject;
 	}
 	mProject = NULL;
 
@@ -99,7 +99,7 @@ void ViProjectMetadataEditor::save()
 void ViProjectMetadataEditor::changeTrack()
 {
 	int index = mUi->trackComboBox->currentIndex();
-	if(index > 0 && index < mProject->objectCount())
+	if(index >= 0 && index < mProject->objectCount())
 	{
 		mUi->trackEditor->setMetadata(&mProject->object(index)->metadata());
 		if(mGlobalArtist != "") mUi->trackEditor->setArtist(mGlobalArtist);

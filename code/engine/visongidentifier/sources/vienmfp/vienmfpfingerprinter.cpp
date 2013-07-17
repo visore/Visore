@@ -20,6 +20,7 @@ void ViEnmfpFingerprinterThread::run()
 		Codegen codegen(sampleChunk.data(), size / 2, 0);
 		setFingerprint(QString::fromStdString(codegen.getCodeString()));
 	}
+	mBufferOffset.clear();
 }
 
 ViEnmfpFingerprinter::ViEnmfpFingerprinter()

@@ -544,14 +544,14 @@ void ViProject::cleanProject()
 				{
 					if(types[t] == ViProject::CoverData)
 					{
-						if(files[j].absolutePath() == mObjects[k]->metadata().cover()) found = true;
+						if(files[j].absoluteFilePath() == mObjects[k]->metadata().cover()) found = true;
 					}
 					else
 					{
-						if(files[j].absolutePath() == mObjects[k]->filePath(audioTypes[t])) found = true;
+						if(files[j].absoluteFilePath() == mObjects[k]->filePath(audioTypes[t])) found = true;
 					}
 				}
-				if(!found) QFile::remove(files[j].absolutePath());
+				if(!found) QFile::remove(files[j].absoluteFilePath());
 			}
 		}
 	}
@@ -602,7 +602,8 @@ void ViProject::moveToProject(ViAudioObjectPointer object, ViAudio::Type type)
         {
             newPath += codec->extension(".");
         }
-        QFile::rename(oldPath, newPath);
+		QFile::remove(newPath); // Make sure the old file is removed first
+		QFile::rename(oldPath, newPath);
         object->setFilePath(type, newPath);
     }
 }
@@ -744,8 +745,9 @@ bool ViProject::saveTracks()
         ViElement track("track");
 		track.addAttribute("number", object->trackNumber());
 		track.addChild("globalid", object->id());
-		track.addChild("artist", metadata.artist());
-		track.addChild("title", metadata.title());
+		track.addChild("artist", metadata.artist(false));
+		track.addChild("title", metadata.title(false));
+		track.addChild("album", metadata.album(false));
 
         ViElement data("data");
 		data.addChild("cover", relativePath(metadata.cover()));
@@ -847,6 +849,7 @@ bool ViProject::loadTracks()
 			ViMetadata metadata;
 			metadata.setArtist(tracks[i].child("artist").toString());
 			metadata.setTitle(tracks[i].child("title").toString());
+			metadata.setAlbum(tracks[i].child("album").toString());
             ViElement data = tracks[i].child("data");
             object->setTargetFilePath(absolutePath(data.child("target").toString()));
             object->setCorruptedFilePath(absolutePath(data.child("corrupted").toString()));

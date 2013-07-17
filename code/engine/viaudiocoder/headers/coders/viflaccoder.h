@@ -81,6 +81,7 @@ class ViFlacCoder : public ViAbstractCoder, public QThread
 		FLAC__bool (*m_FLAC__metadata_object_picture_set_mime_type)(FLAC__StreamMetadata*, char*, FLAC__bool);
 		FLAC__bool (*m_FLAC__metadata_object_picture_set_description)(FLAC__StreamMetadata*, FLAC__byte*, FLAC__bool);
 		FLAC__bool (*m_FLAC__metadata_object_picture_set_data)(FLAC__StreamMetadata*, FLAC__byte*, FLAC__uint32, FLAC__bool);
+		FLAC__bool (*m_FLAC__metadata_object_picture_is_legal)(const FLAC__StreamMetadata *object, const char **violation);
 
 		FLAC_API FLAC__StreamMetadata *FLAC__metadata_object_new(FLAC__MetadataType type);
 

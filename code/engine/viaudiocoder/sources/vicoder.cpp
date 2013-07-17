@@ -41,6 +41,24 @@ QString ViCoder::errorString(ViCoder::Error error)
 		return "The data could not be encoded.";
 	}
 
+	else if(error == ViCoder::HeaderError)
+	{
+		return "The header is invalid.";
+	}
+	else if(error == ViCoder::MetadataError)
+	{
+		return "The metadata is invalid.";
+	}
+
+	else if(error == ViCoder::LibraryFileError)
+	{
+		return "The library file is invalid.";
+	}
+	else if(error == ViCoder::LibraryVersionError)
+	{
+		return "The library version is invalid.";
+	}
+
 	else if(error == ViCoder::UnsupportedCodecError)
 	{
 		return "The codec is not supported.";
