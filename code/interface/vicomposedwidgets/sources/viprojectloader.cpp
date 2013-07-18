@@ -17,6 +17,10 @@ ViProjectLoader::ViProjectLoader(QWidget *parent)
 	QObject::connect(mUi->modeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeMode(int)));
 	QObject::connect(mUi->tracksComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(analyseTrack(int)));
 
+	QObject::connect(mUi->targetCheckBox, SIGNAL(stateChanged(int)), this, SIGNAL(typesChanged()));
+	QObject::connect(mUi->correctedCheckBox, SIGNAL(stateChanged(int)), this, SIGNAL(typesChanged()));
+	QObject::connect(mUi->corruptedCheckBox, SIGNAL(stateChanged(int)), this, SIGNAL(typesChanged()));
+
 	clear();
 
 	mUi->modeComboBox->setCurrentIndex(2);
@@ -113,9 +117,19 @@ void ViProjectLoader::loadProjects(QList<ViProject*> projects)
 		{
 			--mProjectCount;
 			LOG("The project (" + projects[i]->filePath() + ") could not be loaded.");
-			ViLoadingWidget::stop();
 		}
 	}
+	ViLoadingWidget::stop();
+	QString message = "The project";
+	if(mMode == ViProjectLoader::MultipleProjects)
+	{
+		message += "s were";
+	}
+	else
+	{
+		message += "was";
+	}
+	LOG(message + " loaded.");
 	if(projects.size() > 0)
 	{
 		emit projectChanged();
@@ -155,7 +169,6 @@ void ViProjectLoader::loadTracks()
 	--mProjectCount;
 	if(mProjectCount == 0)
 	{
-		ViLoadingWidget::stop();
 		emit finished();
 	}
 }

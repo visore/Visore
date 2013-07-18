@@ -7,6 +7,8 @@
 ViWaveWidget::ViWaveWidget(QWidget *parent)
 	: ViWidget(parent)
 {
+	setMinimumHeight(150);
+
 	mGroup = NULL;
 
 	mBaseWidget = new ViWaveBaseWidget(this);

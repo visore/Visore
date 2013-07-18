@@ -129,8 +129,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		void initializeWaveForm();
-		void generateNextWaveForm();
+		void generateNextWave();
 
 		/*******************************************************************************************************************
 
@@ -238,7 +237,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViBuffer* targetBuffer(bool dontCreate = false);
 		ViBuffer* corruptedBuffer(bool dontCreate = false);
 		ViBuffer* correctedBuffer(bool dontCreate = false);
-		ViBuffer* temporaryBuffer(bool dontCreate = false);
 
 		void setBuffer(ViAudio::Type type, ViBuffer *buffer);
 		void setTargetBuffer(ViBuffer *buffer);
@@ -250,7 +248,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		Q_INVOKABLE void clearTargetBuffer();
 		Q_INVOKABLE void clearCorruptedBuffer();
 		Q_INVOKABLE void clearCorrectedBuffer();
-		Q_INVOKABLE void clearTemporaryBuffer();
 
 		bool hasBuffer(ViAudio::Type type);
 
@@ -293,9 +290,10 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		bool generateWaveForm(ViAudio::Type types);
-		void setWaveForm(ViAudio::Type type, ViWaveForm *form);
-		ViWaveForm* waveForm(ViAudio::Type type);
+		Q_INVOKABLE bool generateWave(ViAudio::Type types, const bool &force = false);
+		ViWaveForm* wave(ViAudio::Type type);
+		bool hasWave(ViAudio::Type type);
+		void clearWaves(ViAudio::Type types = ViAudio::All);
 
         /*******************************************************************************************************************
 
@@ -395,7 +393,6 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViBuffer *mTargetBuffer;
 		ViBuffer *mCorruptedBuffer;
 		ViBuffer *mCorrectedBuffer;
-		ViBuffer *mTemporaryBuffer;
 
 		QString mTargetFile;
 		QString mCorruptedFile;

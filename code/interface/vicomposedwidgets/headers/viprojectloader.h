@@ -26,6 +26,7 @@ class ViProjectLoader : public ViWidget
 
 		void trackChanged();
 		void projectChanged();
+		void typesChanged();
 		void finished();
 
 	private slots:

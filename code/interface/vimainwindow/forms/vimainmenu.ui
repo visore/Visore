@@ -59,12 +59,6 @@
    <item row="2" column="3">
     <widget class="ViButton" name="projectPlaybackButton"/>
    </item>
-   <item row="3" column="3">
-    <widget class="ViButton" name="linePlaybackButton"/>
-   </item>
-   <item row="4" column="3">
-    <widget class="ViButton" name="filePlaybackButton"/>
-   </item>
    <item row="2" column="4" rowspan="3">
     <widget class="Line" name="line2">
      <property name="orientation">

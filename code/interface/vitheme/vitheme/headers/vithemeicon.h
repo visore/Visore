@@ -21,6 +21,8 @@ class ViThemeIcon : public ViThemeResource
 
 		ViThemeIcon(QString name = "");
 		ViThemeIcon(const ViThemeIcon &other);
+
+		bool contains(ViThemeIcon::Mode mode);
 		
 		QIcon icon(ViThemeIcon::Mode mode = ViThemeIcon::Normal, int size = -1) const;
 		QImage image(ViThemeIcon::Mode mode = ViThemeIcon::Normal, int size = -1) const;

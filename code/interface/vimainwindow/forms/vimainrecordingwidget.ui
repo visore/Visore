@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ViProjectRecordingWidget</class>
- <widget class="QWidget" name="ViProjectRecordingWidget">
+ <class>ViMainRecordingWidget</class>
+ <widget class="QWidget" name="ViMainRecordingWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -452,6 +452,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ViButton</class>
+   <extends>QToolButton</extends>
+   <header>vibutton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>ViFormatWidget</class>
    <extends>QWidget</extends>
    <header>viformatwidget.h</header>
@@ -461,11 +467,6 @@
    <class>ViFileBrowser</class>
    <extends>QLineEdit</extends>
    <header>vifilebrowser.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ViButton</class>
-   <extends>QToolButton</extends>
-   <header>vibutton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

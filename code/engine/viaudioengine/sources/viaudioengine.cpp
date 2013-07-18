@@ -160,20 +160,24 @@ void ViAudioEngine::updateMetadata(ViProject *project)
 	mObjectChain.add(*project);
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)), Qt::UniqueConnection);
 	QObject::connect(&mObjectChain, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::UniqueConnection);
+	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)), Qt::UniqueConnection);
 	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted | ViAudio::Corrected)), 0.40);
 	mObjectChain.addFunction(ViFunctionCall("encode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted | ViAudio::Corrected)), 0.59);
 	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
-	mObjectChain.execute();
-	emit statusChanged("Updating Metadata");
+	mObjectChain.execute("Updating Metadata");
 }
 
-void ViAudioEngine::generateWaveForm(ViAudioObjectPointer object, ViAudio::Type type)
+void ViAudioEngine::generateWave(ViAudioObjectPointer object, ViAudio::Type type)
 {
-	QObject::connect(object.data(), SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
-	QObject::connect(object.data(), SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-	QObject::connect(object.data(), SIGNAL(waved()), this, SIGNAL(progressFinished()));
-	QObject::connect(object.data(), SIGNAL(waved()), this, SLOT(disconnectObject()));
-	object->generateWaveForm(type);
+	mObjectChain.clear();
+	mObjectChain.add(object);
+	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)), Qt::UniqueConnection);
+	QObject::connect(&mObjectChain, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::UniqueConnection);
+	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)), Qt::UniqueConnection);
+	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(type)), 0.19);
+	mObjectChain.addFunction(ViFunctionCall("generateWave", QVariant::fromValue(type)), 0.80);
+	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
+	mObjectChain.execute("Generating Waves");
 }
 
 void ViAudioEngine::align(ViProject &project)

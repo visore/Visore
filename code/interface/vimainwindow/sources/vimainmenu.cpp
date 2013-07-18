@@ -1,11 +1,11 @@
 #include <vimainmenu.h>
 #include <ui_vimainmenu.h>
 #include <vistackedwidget.h>
-#include <viprojectrecordingwidget.h>
-#include <viprojectcorrelationwidget.h>
-#include <viwaveanalysiswidget.h>
-#include <viprojectcorrectionwidget.h>
-#include <viprojectmetadatawidget.h>
+#include <vimainrecordingwidget.h>
+#include <vimaincorrelationwidget.h>
+#include <vimainwavewidget.h>
+#include <vimaincorrectionwidget.h>
+#include <vimainmetadatawidget.h>
 
 ViMainMenu::ViMainMenu(QWidget *parent)
     : ViWidget(parent)
@@ -22,50 +22,42 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	QColor textColor = ViThemeManager::color(ViThemeColors::TextColor1);
 	int index;
 
-	mUi->createProjectButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
+	mUi->createProjectButton->setIcon(ViThemeManager::icon("microphone"), 80);
 	mUi->createProjectButton->setText("Record Project", textColor, font);
 	mUi->createProjectButton->setSize(250, 100);
-	index = ViStackedWidget::addWidget(new ViProjectRecordingWidget(), false);
+	index = ViStackedWidget::addWidget(new ViMainRecordingWidget(), false);
 	mUi->createProjectButton->setProperty("index", index);
 	QObject::connect(mUi->createProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->metadataButton->setIcon(ViThemeManager::icon("metadata"), 80);
 	mUi->metadataButton->setText("Update Metadata", textColor, font);
 	mUi->metadataButton->setSize(250, 100);
-	index = ViStackedWidget::addWidget(new ViProjectMetadataWidget(), false);
+	index = ViStackedWidget::addWidget(new ViMainMetadataWidget(), false);
 	mUi->metadataButton->setProperty("index", index);
 	QObject::connect(mUi->metadataButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
-	mUi->projectPlaybackButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
+	mUi->projectPlaybackButton->setIcon(ViThemeManager::icon("playback"), 80);
 	mUi->projectPlaybackButton->setText("Playback Project", textColor, font);
 	mUi->projectPlaybackButton->setSize(250, 100);
 
-	mUi->linePlaybackButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
-	mUi->linePlaybackButton->setText("Playback Vinyl", textColor, font);
-	mUi->linePlaybackButton->setSize(250, 100);
-
-	mUi->filePlaybackButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
-	mUi->filePlaybackButton->setText("Playback File", textColor, font);
-	mUi->filePlaybackButton->setSize(250, 100);
-
-	mUi->analyseWaveButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
-	mUi->analyseWaveButton->setText("Analyse Wave", textColor, font);
+	mUi->analyseWaveButton->setIcon(ViThemeManager::icon("soundwave"), 80);
+	mUi->analyseWaveButton->setText("Sound Wave", textColor, font);
 	mUi->analyseWaveButton->setSize(250, 100);
-	index = ViStackedWidget::addWidget(new ViWaveAnalysisWidget());
+	index = ViStackedWidget::addWidget(new ViMainWaveWidget(), false);
 	mUi->analyseWaveButton->setProperty("index", index);
 	QObject::connect(mUi->analyseWaveButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
-	mUi->correlateProjectButton->setIcon(ViThemeManager::icon("recordingproject"), 80);
+	mUi->correlateProjectButton->setIcon(ViThemeManager::icon("correlation"), 80);
 	mUi->correlateProjectButton->setText("Correlate Project", textColor, font);
 	mUi->correlateProjectButton->setSize(250, 100);
-	index = ViStackedWidget::addWidget(new ViProjectCorrelationWidget());
+	index = ViStackedWidget::addWidget(new ViMainCorrelationWidget());
 	mUi->correlateProjectButton->setProperty("index", index);
 	QObject::connect(mUi->correlateProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
-	mUi->correctProjectButton->setIcon(ViThemeManager::icon("correctionproject"), 80);
+	mUi->correctProjectButton->setIcon(ViThemeManager::icon("correction"), 80);
 	mUi->correctProjectButton->setText("Correct Project", textColor, font);
 	mUi->correctProjectButton->setSize(250, 100);
-    index = ViStackedWidget::addWidget(new ViProjectCorrectionWidget());
+	index = ViStackedWidget::addWidget(new ViMainCorrectionWidget());
 	mUi->correctProjectButton->setProperty("index", index);
 	QObject::connect(mUi->correctProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 

@@ -1,14 +1,14 @@
-#include <viprojectrecordingwidget.h>
-#include <ui_viprojectrecordingwidget.h>
-#include <viprojectmetadatawidget.h>
+#include <vimainrecordingwidget.h>
+#include <ui_vimainrecordingwidget.h>
+#include <vimainmetadatawidget.h>
 #include <vistackedwidget.h>
 #include <vimanager.h>
 #include <QDate>
 
-ViProjectRecordingWidget::ViProjectRecordingWidget(QWidget *parent)
+ViMainRecordingWidget::ViMainRecordingWidget(QWidget *parent)
 	: ViWidget(parent)
 {
-	mUi = new Ui::ViProjectRecordingWidget();
+	mUi = new Ui::ViMainRecordingWidget();
 	mUi->setupUi(this);
 
 	mProject = NULL;
@@ -33,13 +33,13 @@ ViProjectRecordingWidget::ViProjectRecordingWidget(QWidget *parent)
 	setStyleSheet(styleSheet() + "QLabel { width: 150px; min-width: 150px; }");
 }
 
-ViProjectRecordingWidget::~ViProjectRecordingWidget()
+ViMainRecordingWidget::~ViMainRecordingWidget()
 {
 	delete mUi;
 	clear();
 }
 
-void ViProjectRecordingWidget::load()
+void ViMainRecordingWidget::load()
 {
 	clear();
 	mProject = new ViProject();
@@ -58,7 +58,7 @@ void ViProjectRecordingWidget::load()
 	}
 }
 
-void ViProjectRecordingWidget::start()
+void ViMainRecordingWidget::start()
 {
 	QObject::disconnect(mProject, SIGNAL(loaded()), this, SLOT(start()));
 
@@ -78,7 +78,7 @@ void ViProjectRecordingWidget::start()
 	engine()->recordProject(mProject, type, mUi->formatWidget->format(), sides, mUi->detectBox->isChecked());
 }
 
-void ViProjectRecordingWidget::changeType()
+void ViMainRecordingWidget::changeType()
 {
 	if(mUi->newRadioButton->isChecked())
 	{
@@ -92,7 +92,7 @@ void ViProjectRecordingWidget::changeType()
 	}
 }
 
-void ViProjectRecordingWidget::clear()
+void ViMainRecordingWidget::clear()
 {
 	if(mProject != NULL)
 	{
@@ -105,12 +105,12 @@ void ViProjectRecordingWidget::clear()
 	}
 }
 
-void ViProjectRecordingWidget::finishRecording()
+void ViMainRecordingWidget::finishRecording()
 {
 	QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(finishRecording()));
 	if(mUi->editBox->isChecked())
 	{
-		ViProjectMetadataWidget *widget = dynamic_cast<ViProjectMetadataWidget*>(ViStackedWidget::widget("ViProjectMetadataWidget"));
+		ViMainMetadataWidget *widget = dynamic_cast<ViMainMetadataWidget*>(ViStackedWidget::widget("ViMainMetadataWidget"));
 		if(widget != NULL)
 		{
 			widget->setProject(mProject);

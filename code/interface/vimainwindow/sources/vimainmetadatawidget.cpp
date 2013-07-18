@@ -1,10 +1,10 @@
-#include <viprojectmetadatawidget.h>
-#include <ui_viprojectmetadatawidget.h>
+#include <vimainmetadatawidget.h>
+#include <ui_vimainmetadatawidget.h>
 
-ViProjectMetadataWidget::ViProjectMetadataWidget(QWidget *parent)
+ViMainMetadataWidget::ViMainMetadataWidget(QWidget *parent)
 	: ViWidget(parent)
 {
-	mUi = new Ui::ViProjectMetadataWidget();
+	mUi = new Ui::ViMainMetadataWidget();
 	mUi->setupUi(this);
 
 	clear();
@@ -12,13 +12,13 @@ ViProjectMetadataWidget::ViProjectMetadataWidget(QWidget *parent)
 	QObject::connect(mUi->projectLoader, SIGNAL(finished()), this, SLOT(changeProject()));
 }
 
-ViProjectMetadataWidget::~ViProjectMetadataWidget()
+ViMainMetadataWidget::~ViMainMetadataWidget()
 {
 	clear();
 	delete mUi;
 }
 
-void ViProjectMetadataWidget::clear()
+void ViMainMetadataWidget::clear()
 {
 	mUi->projectLoader->clear();
 	mUi->projectLoader->setMode(ViProjectLoader::SingleProject);
@@ -28,7 +28,7 @@ void ViProjectMetadataWidget::clear()
 	mUi->projectEditor->hide();
 }
 
-void ViProjectMetadataWidget::setProject(ViProject *project)
+void ViMainMetadataWidget::setProject(ViProject *project)
 {
 	clear();
 	mUi->projectLoader->hide();
@@ -36,7 +36,7 @@ void ViProjectMetadataWidget::setProject(ViProject *project)
 	mUi->projectEditor->setProject(project, true);
 }
 
-void ViProjectMetadataWidget::changeProject()
+void ViMainMetadataWidget::changeProject()
 {
 	mUi->projectEditor->show();
 	mUi->projectEditor->setProject(mUi->projectLoader->project(), false);

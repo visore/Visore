@@ -111,10 +111,7 @@ namespace ViAudio
 		Target = 0x2,
 		Corrupted = 0x4,
 		Corrected = 0x8,
-		Temporary = 0x16,
-        Correlated = Corrected,
-        Temp = Temporary,
-        All = Target | Corrupted | Corrected | Temporary
+		All = Target | Corrupted | Corrected
     };
 
     enum Mode
@@ -134,6 +131,10 @@ namespace ViAudio
     using namespace QAudio;
 
 }
+
+Q_DECLARE_METATYPE(ViAudio::Type)
+Q_DECLARE_METATYPE(ViAudio::Mode)
+Q_DECLARE_METATYPE(ViAudio::Input)
 
 typedef QPair<ViAudio::Type, ViAudio::Type> ViAudioTypePair;
 

@@ -38,7 +38,7 @@ class ViAudioObjectChain : public QObject
         void addFunction(ViFunctionCall function, qreal weight = -1, bool wait = true);
         void addFunction(QString function, qreal weight = -1, bool wait = true);
 
-		void execute();
+		void execute(QString status = "");
 
 	private:
 

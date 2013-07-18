@@ -8,7 +8,7 @@ ViThemeIcon::ViThemeIcon(QString name)
 	mNormalPath = generatePath("normal");
 	mSelectedPath = generatePath("selected");
 	mHoveredPath = generatePath("hovered");
-	mDisabledPath = generatePath("disbaled");
+	mDisabledPath = generatePath("disabled");
 }
 
 ViThemeIcon::ViThemeIcon(const ViThemeIcon &other)
@@ -18,6 +18,11 @@ ViThemeIcon::ViThemeIcon(const ViThemeIcon &other)
 	mSelectedPath = other.mSelectedPath;
 	mHoveredPath = other.mHoveredPath;
 	mDisabledPath = other.mDisabledPath;
+}
+
+bool ViThemeIcon::contains(ViThemeIcon::Mode mode)
+{
+	return path(mode) != "";
 }
 
 QIcon ViThemeIcon::icon(ViThemeIcon::Mode mode, int size) const

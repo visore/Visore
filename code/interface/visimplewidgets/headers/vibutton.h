@@ -8,6 +8,8 @@
 class ViButton : public QToolButton
 {
 
+	Q_OBJECT
+
 	public:
 
 		enum Mode
@@ -16,6 +18,10 @@ class ViButton : public QToolButton
 			Hovered,
 			Selected
 		};
+
+	private slots:
+
+		void changeIcon(const bool &hover = false);
 
 	public:
 
@@ -48,13 +54,19 @@ class ViButton : public QToolButton
 		void setHeight(const int &height);
 
 		void setIcon(const ViThemeIcon &icon, const int &size);
-		void setIcon(const QIcon &icon, const int &size);
 
 	protected:
 
+		void enterEvent(QEvent*);
+		void leaveEvent(QEvent*);
 		void initialize();
 
 	private:
+
+		bool mSelectionEnabled;
+		bool mIsSelected;
+
+		ViThemeIcon mIcon;
 
 		QColor mTextColor;
 		bool mEnableBorder;

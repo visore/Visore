@@ -33,6 +33,7 @@ class ViWaveOverlayWidget : public ViWidget
 	public:
 
 		ViWaveOverlayWidget(ViWidget *parent = 0);
+		~ViWaveOverlayWidget();
 		void setZoomLevel(qint16 level);
 		void setWaveForm(ViWaveForm *form, ViAudioFormat format = ViAudioFormat());
 		void clear();
@@ -48,6 +49,8 @@ class ViWaveOverlayWidget : public ViWidget
 		void calculatePosition();
 
 	private:
+
+		ViWidget *mPastBox;
 
 		ViWaveForm *mForm;
 		ViAudioFormat mFormat;

@@ -4,8 +4,13 @@
 ViButton::ViButton(QWidget *parent)
 	: QToolButton(parent)
 {
+	QObject::connect(this, SIGNAL(toggled(bool)), this, SLOT(changeIcon()));
+
 	//setCursor(Qt::PointingHandCursor);
 	setToolButtonStyle(Qt::ToolButtonIconOnly);
+
+	mSelectionEnabled = false;
+	mIsSelected = false;
 
 	mEnableBorder = true;
 	mEnableBackground = true;
@@ -45,6 +50,32 @@ void ViButton::addStyleSheet(QString style, ViButton::Mode mode)
 	{
 		addStyleSheet("QToolButton:pressed{" + style + "}");
 	}
+}
+
+void ViButton::changeIcon(const bool &hover)
+{
+	if(hover && mIcon.contains(ViThemeIcon::Hovered))
+	{
+		QToolButton::setIcon(mIcon.icon(ViThemeIcon::Hovered));
+	}
+	else if(isCheckable() && isChecked())
+	{
+		QToolButton::setIcon(mIcon.icon(ViThemeIcon::Selected));
+	}
+	else
+	{
+		QToolButton::setIcon(mIcon.icon(ViThemeIcon::Normal));
+	}
+}
+
+void ViButton::enterEvent(QEvent*)
+{
+	changeIcon(true);
+}
+
+void ViButton::leaveEvent(QEvent*)
+{
+	changeIcon();
 }
 
 void ViButton::initialize()
@@ -178,11 +209,7 @@ void ViButton::setHeight(const int &height)
 
 void ViButton::setIcon(const ViThemeIcon &icon, const int &size)
 {
-	setIcon(icon.icon(ViThemeIcon::Normal, size), size);
-}
-
-void ViButton::setIcon(const QIcon &icon, const int &size)
-{
-	QToolButton::setIcon(icon);
+	mIcon = icon;
 	setIconSize(QSize(size, size));
+	changeIcon();
 }

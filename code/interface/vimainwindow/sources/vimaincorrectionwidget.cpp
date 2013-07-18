@@ -1,12 +1,12 @@
-#include "viprojectcorrectionwidget.h"
-#include "ui_viprojectcorrectionwidget.h"
+#include <vimaincorrectionwidget.h>
+#include <ui_vimaincorrectionwidget.h>
 #include <vistackedwidget.h>
-#include <vicorrelationwidget.h>
+#include <vimaincorrelationwidget.h>
 
-ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
+ViMainCorrectionWidget::ViMainCorrectionWidget(QWidget *parent)
     : ViWidget(parent)
 {
-    mUi = new Ui::ViProjectCorrectionWidget();
+	mUi = new Ui::ViMainCorrectionWidget();
     mUi->setupUi(this);
 
     mUi->projectLoader->disableBufferSelection();
@@ -34,12 +34,12 @@ ViProjectCorrectionWidget::ViProjectCorrectionWidget(QWidget *parent)
 	mUi->correctionWidget->setStyleSheet(mUi->correctionWidget->styleSheet() + "QLabel { width: 150px; min-width: 150px; }");
 }
 
-ViProjectCorrectionWidget::~ViProjectCorrectionWidget()
+ViMainCorrectionWidget::~ViMainCorrectionWidget()
 {
     delete mUi;
 }
 
-void ViProjectCorrectionWidget::correct()
+void ViMainCorrectionWidget::correct()
 {
 	ViModifyProcessor *corrector = mUi->correctionWidget->corrector();
 	if(corrector != NULL)
@@ -49,27 +49,27 @@ void ViProjectCorrectionWidget::correct()
 	}
 }
 
-void ViProjectCorrectionWidget::showCorrector()
+void ViMainCorrectionWidget::showCorrector()
 {
 	mUi->correctionWidget->show();
 	mUi->button->show();
 }
 
-void ViProjectCorrectionWidget::hideCorrector()
+void ViMainCorrectionWidget::hideCorrector()
 {
 	mUi->correctionWidget->hide();
 	mUi->button->hide();
 }
 
-void ViProjectCorrectionWidget::showCorrelation()
+void ViMainCorrectionWidget::showCorrelation()
 {
-	QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(showCorrelation()));
+	/*QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(showCorrelation()));
 	ViCorrelationWidget *widget = new ViCorrelationWidget();
 	widget->setProject(mUi->projectLoader->project());
-	ViStackedWidget::showTemporaryWidget(widget);
+	ViStackedWidget::showTemporaryWidget(widget);*/
 }
 
-void ViProjectCorrectionWidget::hideEvent(QHideEvent *event)
+void ViMainCorrectionWidget::hideEvent(QHideEvent *event)
 {
     //TODO: clear the project. Currently segfault since the correlation widget is still using it
     //mUi->projectLoader->clear();

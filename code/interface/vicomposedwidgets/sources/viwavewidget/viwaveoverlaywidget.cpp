@@ -18,14 +18,17 @@ ViWaveOverlayWidget::ViWaveOverlayWidget(ViWidget *parent)
 
 	mScroll = false;
 
-	setStyleSheet("\
-		ViWaveOverlayWidget{\
-			border-radius: 10px;\
-			border-style: solid;\
-			border-color: " + ViThemeManager::color(ViThemeColors::BorderColor1).name() + ";\
-			border-width: 5px;\
-		}\
-	");
+	setStyleSheet("ViWaveOverlayWidget { border-radius: 4px; border-style: solid; border-width: 2px; border-color: " + ViThemeManager::color(ViThemeColors::BorderColor2).name() + " }");
+
+	QColor color = ViThemeManager::color(ViThemeColors::MainColor1);
+	mPastBox = new ViWidget(this);
+	mPastBox->setStyleSheet("border-top-left-radius: 4px; border-bottom-left-radius: 4ps; background: rgba(" + QString::number(color.red()) + ", " + QString::number(color.green()) + ", " + QString::number(color.blue()) + ", 100);");
+	mPastBox->lower();
+}
+
+ViWaveOverlayWidget::~ViWaveOverlayWidget()
+{
+	delete mPastBox;
 }
 
 void ViWaveOverlayWidget::updateWave()
@@ -48,10 +51,7 @@ void ViWaveOverlayWidget::paintEvent(QPaintEvent *event)
 	painter.setPen(penPosition);
 	painter.drawLine(0, mHalfHeight, width(), mHalfHeight);
 
-	QRect rectangle(0, 0, mHalfWidth, height());
-	QColor color = ViThemeManager::color(ViThemeColors::MainColor1);
-	color = QColor(color.red(), color.green(), color.blue(), 100);
-	painter.fillRect(rectangle, color);
+	mPastBox->setSize(mHalfWidth, height());
 
 	painter.drawLine(mHalfWidth, 0, mHalfWidth, height());
 

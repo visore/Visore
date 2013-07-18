@@ -104,7 +104,7 @@ void ViAudioObjectChain::addFunction(QString function, qreal weight, bool wait)
     addFunction(ViFunctionCall(function), weight, wait);
 }
 
-void ViAudioObjectChain::execute()
+void ViAudioObjectChain::execute(QString status)
 {
 	if(mWeights.size() != mFunctions.size())
 	{
@@ -117,6 +117,7 @@ void ViAudioObjectChain::execute()
 	}
 
 	emit progressed(0);
+	emit statused(status);
 	mProgress = 0;
     mCurrentIndex = 0;
 	mObjectCount = mObjects.size();

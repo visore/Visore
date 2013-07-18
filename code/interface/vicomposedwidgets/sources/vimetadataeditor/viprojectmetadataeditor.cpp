@@ -36,7 +36,7 @@ void ViProjectMetadataEditor::clear()
 	QObject::disconnect(mUi->trackComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTrack())); // Important
 	if(mTakeOwnership && mProject != NULL)
 	{
-		//delete mProject;
+		delete mProject;
 	}
 	mProject = NULL;
 

@@ -51,6 +51,19 @@ ViProcessor::~ViProcessor()
 	delete mThreadPool;
 }
 
+void ViProcessor::clear()
+{
+	mObject.setNull();
+	mData.clear();
+	mType = ViAudio::Undefined;
+	mStopped = false;
+	mCurrentChannel = 0;
+	mTotalChannels = 0;
+	mTotalSize = 0;
+	mProcessedSize = 0;
+
+}
+
 void ViProcessor::run()
 {
 	QMutexLocker locker(&mMutex);
@@ -61,6 +74,22 @@ void ViProcessor::run()
 		locker.unlock();
 		execute(channel);
 	}
+}
+
+void ViProcessor::exit()
+{
+	QObject::disconnect(&mThread, SIGNAL(finished()), this, SLOT(exit()));
+	handleExit();
+	if(mData.buffer() != NULL)
+	{
+		QObject::disconnect(mData.buffer(), SIGNAL(changed()), this, SLOT(startThread()));
+		mData.clear();
+	}
+	mStopped = false;
+	finalize();
+	setProgress(100);
+	mObject.setNull();
+	emit finished();
 }
 
 void ViProcessor::startThread()
@@ -78,26 +107,35 @@ void ViProcessor::executeThread()
 	{
 		if(mStopped)
 		{
-			exit();
+			stop();
 		}
 		else
 		{
 			int size, count = usedChannelCount();
-			while(!mStopped && (size = readNext()))
+			if(count > 1)
 			{
-				mProcessedSize += size;
-				for(int i = 0; i < count; ++i)
+				while(!mStopped && (size = readNext()))
 				{
-					//run();
-					mThreadPool->start(this);
+					mProcessedSize += size;
+					for(int i = 0; i < count; ++i) mThreadPool->start(this);
+					mThreadPool->waitForDone();
+					setProgress((mProcessedSize * 99.0) / mTotalSize);
+					mThreadMutex.unlock();
 				}
-				mThreadPool->waitForDone();
-				setProgress((mProcessedSize * 99.0) / mTotalSize);
-				mThreadMutex.unlock();
+			}
+			else
+			{
+				while(!mStopped && (size = readNext()))
+				{
+					mProcessedSize += size;
+					run();
+					setProgress((mProcessedSize * 99.0) / mTotalSize);
+					mThreadMutex.unlock();
+				}
 			}
 			if(mStopped || !mMultiShot)
 			{
-				exit();
+				stop();
 			}
 		}
 		mThreadMutex.unlock();
@@ -333,29 +371,15 @@ bool ViProcessor::isMultiShot()
 
 void ViProcessor::stop()
 {
-	if(!mThread.isRunning())
+	if(mThread.isRunning())
 	{
-		exit();
+		QObject::connect(&mThread, SIGNAL(finished()), this, SLOT(exit()), Qt::UniqueConnection);
+		mStopped = true;
 	}
 	else
 	{
-		mStopped = true;
+		exit();
 	}
-}
-
-void ViProcessor::exit()
-{
-	handleExit();
-	if(mData.buffer() != NULL)
-	{
-		QObject::disconnect(mData.buffer(), SIGNAL(changed()), this, SLOT(startThread()));
-		mData.clear();
-	}
-	mStopped = false;
-	finalize();
-	setProgress(100);
-	mObject.setNull();
-	emit finished();
 }
 
 ViElement ViProcessor::exportData()

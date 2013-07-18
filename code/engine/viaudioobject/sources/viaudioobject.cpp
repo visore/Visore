@@ -24,7 +24,6 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	mTargetBuffer = NULL;
 	mCorruptedBuffer = NULL;
 	mCorrectedBuffer = NULL;
-	mTemporaryBuffer = NULL;
 
 	mTargetFile = "";
 	mCorruptedFile = "";
@@ -50,8 +49,7 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 ViAudioObject::~ViAudioObject()
 {
     clearBuffers(mDestructType);
-
-    viDeleteAll(mWaveForms);
+	clearWaves();
 
 	if(mEncoder != NULL)
 	{
@@ -129,10 +127,6 @@ QQueue<ViAudio::Type> ViAudioObject::decomposeTypes(ViAudio::Type type, ViAudio:
 	if(type & ViAudio::Corrected && !(exclude & ViAudio::Corrected))
 	{
 		result.enqueue(ViAudio::Corrected);
-	}
-	if(type & ViAudio::Temporary && !(exclude & ViAudio::Temporary))
-	{
-		result.enqueue(ViAudio::Temporary);
 	}
 	return result;
 }
@@ -251,7 +245,6 @@ void ViAudioObject::addDestructRule(ViAudio::Type type, bool destruct)
 	values.insert(ViAudio::Target);
 	values.insert(ViAudio::Corrupted);
 	values.insert(ViAudio::Corrected);
-	values.insert(ViAudio::Temporary);
 
 	//Old Values
 	foreach(const ViAudio::Type &value, values)
@@ -635,7 +628,7 @@ void ViAudioObject::logStatus(QString message, QtMsgType type)
 	{
 		message = message.remove(message.size() - 1, 1);
 	}
-	emit statused(message);
+	//emit statused(message);
 }
 
 /*******************************************************************************************************************
@@ -719,10 +712,6 @@ ViBuffer* ViAudioObject::buffer(ViAudio::Type type, bool dontCreate)
 	{
 		return correctedBuffer(dontCreate);
 	}
-	else if(type == ViAudio::Temporary)
-	{
-		return temporaryBuffer(dontCreate);
-	}
 	return NULL;
 }
 
@@ -757,16 +746,6 @@ ViBuffer* ViAudioObject::correctedBuffer(bool dontCreate)
         QObject::connect(mCorrectedBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setCorrectedFormat(ViAudioFormat)));
 	}
 	return mCorrectedBuffer;
-}
-
-ViBuffer* ViAudioObject::temporaryBuffer(bool dontCreate)
-{
-	QMutexLocker locker(&mMutex);
-	if(!dontCreate && mTemporaryBuffer == NULL)
-	{
-		mTemporaryBuffer = new ViBuffer();
-	}
-	return mTemporaryBuffer;
 }
 
 void ViAudioObject::setBuffer(ViAudio::Type type, ViBuffer *buffer)
@@ -835,10 +814,6 @@ void ViAudioObject::clearBuffers(ViAudio::Type type)
     {
 		clearCorrectedBuffer();
 	}
-	if(type & ViAudio::Temporary)
-	{
-		clearTemporaryBuffer();
-	}
 }
 
 void ViAudioObject::clearBuffer(ViAudio::Type type)
@@ -854,10 +829,6 @@ void ViAudioObject::clearBuffer(ViAudio::Type type)
 	else if(type == ViAudio::Corrected)
 	{
 		clearCorrectedBuffer();
-	}
-	else if(type == ViAudio::Temporary)
-	{
-		clearTemporaryBuffer();
 	}
 }
 
@@ -888,16 +859,6 @@ void ViAudioObject::clearCorrectedBuffer()
 	{
 		delete mCorrectedBuffer;
 		mCorrectedBuffer = NULL;
-	}
-}
-
-void ViAudioObject::clearTemporaryBuffer()
-{
-	QMutexLocker locker(&mMutex);
-	if(mTemporaryBuffer != NULL)
-	{
-		delete mTemporaryBuffer;
-		mTemporaryBuffer = NULL;
 	}
 }
 
@@ -1049,96 +1010,94 @@ QString ViAudioObject::temporaryFilePath(ViAudio::Type type)
 
 *******************************************************************************************************************/
 
-bool ViAudioObject::generateWaveForm(ViAudio::Type types)
+bool ViAudioObject::generateWave(ViAudio::Type types, const bool &force)
 {
-	ViAudio::Type waveTypes = availableResources();
+	setStarted();
 	QMutexLocker locker(&mMutex);
-	QQueue<ViAudio::Type> instructions = decomposeTypes(waveTypes);
 
 	mWaveInstructions.clear();
-	for(int i = 0; i < instructions.size(); ++i)
+	QQueue<ViAudio::Type> instructions;
+	QQueue<ViAudio::Type> decomposeInstructions = decomposeTypes(types);
+
+	for(int i = 0; i < decomposeInstructions.size(); ++i)
 	{
-		if(types & instructions[i])
-		{
-			mWaveInstructions.append(instructions[i]);
-		}
+		locker.unlock();
+		bool hasTheBuffer = hasBuffer(decomposeInstructions[i]);
+		locker.relock();
+		if(hasTheBuffer) instructions.append(decomposeInstructions[i]);
 	}
 
-	if(mWaveInstructions.size() == 0)
+	if(instructions.size() == 0)
 	{
-		log("No data available to generate a wave form.");
+		log("No data available to generate the wave.");
 		locker.unlock();
+		setFinished();
 		emit waved();
 		return false;
 	}
-	int decodeTypes = 0;
-	for(int i = 0; i < mWaveInstructions.size(); ++i)
+
+	if(!force)
 	{
-		ViAudio::Type instruction = mWaveInstructions[i];
-		locker.unlock();
-		if(!hasBuffer(instruction))
+		for(int i = 0; i < instructions.size(); ++i)
 		{
-			decodeTypes |= instruction;
+			locker.unlock();
+			bool hasTheWave = hasWave(instructions[i]);
+			locker.relock();
+			if(!hasTheWave) mWaveInstructions.append(instructions[i]);
 		}
-		locker.relock();
+		if(mWaveInstructions.size() == 0)
+		{
+			locker.unlock();
+			setFinished();
+			emit waved();
+			return false;
+		}
 	}
+	else
+	{
+		mWaveInstructions = instructions;
+	}
+	setProgress(mWaveInstructions.size());
 
 	if(mWaveFormer != NULL)
 	{
 		delete mWaveFormer;
 	}
 	mWaveFormer = new ViWaveFormer();
-	QObject::connect(mWaveFormer, SIGNAL(finished()), this, SLOT(generateNextWaveForm()));
+	QObject::connect(mWaveFormer, SIGNAL(finished()), this, SLOT(generateNextWave()));
 	QObject::connect(mWaveFormer, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
-
-	QObject::connect(this, SIGNAL(decoded()), this, SLOT(initializeWaveForm()));
-	//setProgress(1, 0.05);
+	log("Generating waves.");
 	locker.unlock();
-	if(decodeTypes == 0)
-	{
-		progress(100);
-		initializeWaveForm();
-		return true;
-	}
-	else if(decode((ViAudio::Type) decodeTypes))
-	{
-		return true;
-	}
-
-	progress(100);
-	//setProgress(1, 0.95);
-	progress(100);
-	emit waved();
-
-	return false;
+	generateNextWave();
+	return true;
 }
 
-void ViAudioObject::initializeWaveForm()
+void ViAudioObject::generateNextWave()
 {
 	QMutexLocker locker(&mMutex);
-	QObject::disconnect(this, SIGNAL(decoded()), this, SLOT(initializeWaveForm()));
-	locker.unlock();
-	//setProgress(mWaveInstructions.size(), 0.9);
-	emit statused("Generating wave form: "+QString::number(mWaveInstructions.size()));
-	generateNextWaveForm();
-}
 
-void ViAudioObject::generateNextWaveForm()
-{
-	QMutexLocker locker(&mMutex);
+	ViAudio::Type type = mWaveFormer->type();
+	if(type != ViAudio::Undefined)
+	{
+		locker.unlock();
+		clearWaves(type);
+		locker.relock();
+		mWaveForms[mWaveFormer->type()] = mWaveFormer->takeWave();
+		mWaveFormer->clear();
+	}
+
 	if(mWaveInstructions.isEmpty())
 	{
-		log("Wave forms generated.");
+		log("Waves generated.");
 		if(mWaveFormer != NULL)
 		{
 			QObject::disconnect(mWaveFormer, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
-			QObject::disconnect(mWaveFormer, SIGNAL(finished()), this, SLOT(generateNextWaveForm()));
+			QObject::disconnect(mWaveFormer, SIGNAL(finished()), this, SLOT(generateNextWave()));
 			delete mWaveFormer;
 			mWaveFormer = NULL;	
 		}
 		locker.unlock();
-		//setProgress(1, 0.05);
-		progress(100);
+		setFinished();
 		emit waved();
 	}
 	else
@@ -1149,20 +1108,29 @@ void ViAudioObject::generateNextWaveForm()
 	}
 }
 
-void ViAudioObject::setWaveForm(ViAudio::Type type, ViWaveForm *form)
-{
-	QMutexLocker locker(&mMutex);
-	if(mWaveForms.value(type, NULL) != NULL)
-	{
-		delete mWaveForms[type];
-	}
-	mWaveForms[type] = form;
-}
-
-ViWaveForm* ViAudioObject::waveForm(ViAudio::Type type)
+ViWaveForm* ViAudioObject::wave(ViAudio::Type type)
 {
 	QMutexLocker locker(&mMutex);
 	return mWaveForms.value(type, NULL);
+}
+
+bool ViAudioObject::hasWave(ViAudio::Type type)
+{
+	QMutexLocker locker(&mMutex);
+	return mWaveForms.contains(type);
+}
+
+void ViAudioObject::clearWaves(ViAudio::Type types)
+{
+	QMutexLocker locker(&mMutex);
+	QQueue<ViAudio::Type> instructions = decomposeTypes(types);
+	for(int i = 0; i < instructions.size(); ++i)
+	{
+		locker.unlock();
+		bool hasTheWave = hasWave(instructions[i]);
+		locker.relock();
+		if(hasTheWave) delete mWaveForms.take(instructions[i]);
+	}
 }
 
 /*******************************************************************************************************************
@@ -1519,6 +1487,5 @@ bool ViAudioObject::isUsed(QIODevice::OpenMode mode)
 	QMutexLocker locker(&mMutex);
 	return	(mTargetBuffer != NULL && mTargetBuffer->streamCount(mode) > 0) ||
 			(mCorruptedBuffer != NULL && mCorruptedBuffer->streamCount(mode) > 0) ||
-			(mCorrectedBuffer != NULL && mCorrectedBuffer->streamCount(mode) > 0) ||
-			(mTemporaryBuffer != NULL && mTemporaryBuffer->streamCount(mode) > 0);
+			(mCorrectedBuffer != NULL && mCorrectedBuffer->streamCount(mode) > 0);
 }

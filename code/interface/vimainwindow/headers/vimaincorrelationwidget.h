@@ -1,13 +1,12 @@
-#ifndef VIPROJECTCORRELATIONWIDGET_H
-#define VIPROJECTCORRELATIONWIDGET_H
+#ifndef VIMAINCORRELATIONWIDGET_H
+#define VIMAINCORRELATIONWIDGET_H
 
-#include "viwidget.h"
-#include "vithememanager.h"
-#include "vibutton.h"
+#include <viwidget.h>
+#include <vibutton.h>
 
 namespace Ui
 {
-    class ViProjectCorrelationWidget;
+	class ViMainCorrelationWidget;
 }
 
 class ViRemoveWidget : public ViWidget
@@ -37,7 +36,7 @@ class ViRemoveWidget : public ViWidget
 
 };
 
-class ViProjectCorrelationWidget : public ViWidget
+class ViMainCorrelationWidget : public ViWidget
 {
 	Q_OBJECT
 
@@ -49,12 +48,12 @@ class ViProjectCorrelationWidget : public ViWidget
 
 	public:
 
-		ViProjectCorrelationWidget(QWidget *parent = 0);
-		~ViProjectCorrelationWidget();
+		ViMainCorrelationWidget(QWidget *parent = 0);
+		~ViMainCorrelationWidget();
 
 	private:
 
-		Ui::ViProjectCorrelationWidget *mUi;
+		Ui::ViMainCorrelationWidget *mUi;
 		QList<ViRemoveWidget*> mButtons;
 
 };

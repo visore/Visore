@@ -1,15 +1,12 @@
 <RCC>
     <qresource prefix="/icons">
         <file>add/add_normal.png</file>
-        <file>correlation/correlation_normal.png</file>
-        <file>correlationproject/correlationproject_normal.png</file>
         <file>fileinput/fileinput_normal.png</file>
         <file>mute/mute_normal.png</file>
         <file>mute/mute_selected.png</file>
         <file>pause/pause_normal.png</file>
         <file>play/play_normal.png</file>
         <file>record/record_normal.png</file>
-        <file>recordingproject/recordingproject_normal.png</file>
         <file>remove/remove_normal.png</file>
         <file>spectrum/spectrum_normal.png</file>
         <file>star/star_normal.png</file>
@@ -21,7 +18,6 @@
         <file>zoomin/zoomin_normal.png</file>
         <file>zoomout/zoomout_normal.png</file>
         <file>logo/logo_normal.png</file>
-        <file>correctionproject/correctionproject_normal.png</file>
         <file>down/down_hover.png</file>
         <file>down/down_normal.png</file>
         <file>up/up_hover.png</file>
@@ -32,5 +28,11 @@
         <file>save/save_normal.png</file>
         <file>metadata/metadata_normal.png</file>
         <file>search/search_normal.png</file>
+        <file>soundwave/soundwave_normal.png</file>
+        <file>correction/correction_normal.png</file>
+        <file>correlation/correlation_normal.png</file>
+        <file>playback/playback_normal.png</file>
+        <file>switch/switch_normal.png</file>
+        <file>switch/switch_selected.png</file>
     </qresource>
 </RCC>

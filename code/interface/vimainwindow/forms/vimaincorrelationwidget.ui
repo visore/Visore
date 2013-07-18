@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ViProjectCorrelationWidget</class>
- <widget class="QWidget" name="ViProjectCorrelationWidget">
+ <class>ViMainCorrelationWidget</class>
+ <widget class="QWidget" name="ViMainCorrelationWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,7 +23,16 @@
    <string/>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>10</number>
+   </property>
+   <property name="topMargin">
+    <number>10</number>
+   </property>
+   <property name="rightMargin">
+    <number>10</number>
+   </property>
+   <property name="bottomMargin">
     <number>10</number>
    </property>
    <item row="2" column="0">
@@ -56,7 +65,7 @@
     </spacer>
    </item>
    <item row="2" column="1" colspan="2">
-    <widget class="ViButton" name="processButton" native="true"/>
+    <widget class="ViButton" name="processButton"/>
    </item>
    <item row="0" column="0" colspan="3">
     <widget class="ViProjectLoader" name="projectLoader" native="true"/>
@@ -66,20 +75,20 @@
  <customwidgets>
   <customwidget>
    <class>ViButton</class>
-   <extends>QWidget</extends>
+   <extends>QToolButton</extends>
    <header>vibutton.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ViTableWidget</class>
-   <extends>QTableWidget</extends>
-   <header>vitablewidget.h</header>
   </customwidget>
   <customwidget>
    <class>ViProjectLoader</class>
    <extends>QWidget</extends>
    <header>viprojectloader.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ViTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>vitablewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

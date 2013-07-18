@@ -13,6 +13,8 @@ class ViNoiseDetector;
 class ViProcessorThread : public QThread
 {
 
+	Q_OBJECT
+
 	public:
 
 		void setProcessor(ViProcessor *processor);
@@ -33,6 +35,7 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 
 	protected slots:
 
+		void exit();
 		void startThread();
 		void executeThread();
 		virtual int readNext();
@@ -56,6 +59,8 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 
 		ViProcessor(ViProcessor::ChannelMode mode = ViProcessor::Separated);
 		virtual ~ViProcessor();
+
+		virtual void clear();
 
 		void setMultiShot(bool multishot = true); //If called, stop() has to be called manually in order to finish of the process. Has to be called for audio objects where the data is continuesly added to the buffer
 		bool isMultiShot();
@@ -115,7 +120,6 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
 		void scaleSamples(qreal from, qreal to);
 
 		ViAudioObjectPointer object();
-		void exit();
 
 	protected:
 
@@ -197,7 +201,7 @@ class ViModifyData
 
 		void setChannels(const int &channels);
 
-		void clear();
+		virtual void clear();
 
 		void enqueue(const bool &noisy, const ViSampleChunk &data, const int &channel = 1);
 

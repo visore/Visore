@@ -1,4 +1,4 @@
-#include "viwaveformer.h"
+#include <viwaveformer.h>
 
 ViWaveFormer::ViWaveFormer()
 	: ViProcessor()
@@ -6,9 +6,24 @@ ViWaveFormer::ViWaveFormer()
 	mForm = NULL;
 }
 
-void ViWaveFormer::initialize()
+ViWaveFormer::~ViWaveFormer()
 {
+	clear();
+}
+
+void ViWaveFormer::clear()
+{
+	if(mForm != NULL)
+	{
+		delete mForm;
+		mForm = NULL;
+	}
+}
+
+void ViWaveFormer::initialize()
+{LOG("tttt1");
 	setChannelMode(ViProcessor::Combined);
+	clear();
 	mForm = new ViWaveForm();
 }
 
@@ -23,5 +38,16 @@ void ViWaveFormer::execute(const int &channel)
 
 void ViWaveFormer::finalize()
 {
-	object()->setWaveForm(type(), mForm);
+}
+
+ViWaveForm* ViWaveFormer::wave()
+{
+	return mForm;
+}
+
+ViWaveForm* ViWaveFormer::takeWave()
+{
+	ViWaveForm *result = mForm;
+	mForm = NULL;
+	return result;
 }

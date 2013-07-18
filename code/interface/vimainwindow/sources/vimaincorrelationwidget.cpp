@@ -1,9 +1,5 @@
-#include "viprojectcorrelationwidget.h"
-#include "ui_viprojectcorrelationwidget.h"
-#include "viproject.h"
-#include <QEventLoop>
-
-#include "vilogger.h"
+#include <vimaincorrelationwidget.h>
+#include <ui_vimaincorrelationwidget.h>
 
 ViRemoveWidget::ViRemoveWidget(int row)
 {
@@ -38,10 +34,10 @@ void ViRemoveWidget::click()
 	emit clicked(mRow);
 }
 
-ViProjectCorrelationWidget::ViProjectCorrelationWidget(QWidget *parent)
+ViMainCorrelationWidget::ViMainCorrelationWidget(QWidget *parent)
 	: ViWidget(parent)
 {
-	mUi = new Ui::ViProjectCorrelationWidget();
+	mUi = new Ui::ViMainCorrelationWidget();
 	mUi->setupUi(this);
 
 	//QObject::connect(mUi->projectLoader, SIGNAL(started()), this, SLOT(correlateTracks()));
@@ -53,12 +49,12 @@ ViProjectCorrelationWidget::ViProjectCorrelationWidget(QWidget *parent)
 	mUi->tableWidget->setHorizontalHeaderItem(3, new QTableWidgetItem("Remove"));
 }
 
-ViProjectCorrelationWidget::~ViProjectCorrelationWidget()
+ViMainCorrelationWidget::~ViMainCorrelationWidget()
 {
 	delete mUi;
 }
 
-void ViProjectCorrelationWidget::addProjects()
+void ViMainCorrelationWidget::addProjects()
 {
 	/*QStringList projects = mUi->fileBrowser->fileNames();
 	int row = mUi->tableWidget->rowCount();
@@ -88,7 +84,7 @@ void ViProjectCorrelationWidget::addProjects()
 	mUi->tableWidget->setRowCount(mUi->tableWidget->rowCount() - invalidProjects);*/
 }
 
-void ViProjectCorrelationWidget::remove(int row)
+void ViMainCorrelationWidget::remove(int row)
 {
 	for(int i = row + 1; i < mButtons.size(); ++i)
 	{
@@ -98,7 +94,7 @@ void ViProjectCorrelationWidget::remove(int row)
 	mUi->tableWidget->removeRow(row);
 }
 
-void ViProjectCorrelationWidget::correlateTracks()
+void ViMainCorrelationWidget::correlateTracks()
 {
 	//engine()->calculateCorrelation(mUi->projectLoader->currentObject());
 	//engine()->align(*mUi->projectLoader->project());
