@@ -57,7 +57,7 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		void unmute();
 
 		//Analyse
-		void generateWave(ViAudioObjectPointer object, ViAudio::Type type = ViAudio::All);
+		void generateWave(ViAudioObjectPointer object, ViAudio::Type type = ViAudio::All, const bool &align = false);
 
 		//Align
 		void align(ViProject &project);

@@ -31,6 +31,7 @@ class ViMainWaveWidget : public ViWidget
 
 		Ui::ViMainWaveWidget *mUi;
 		ViWaveWidgetGroup mWaveGroup;
+		QList<QPair<ViAudioObjectPointer, bool>> mAlignments;
 
 };
 

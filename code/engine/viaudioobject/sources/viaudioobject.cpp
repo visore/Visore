@@ -47,7 +47,7 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 }
 
 ViAudioObject::~ViAudioObject()
-{
+{	LOG("rrrrrrrr"+QString::number(mWaveForms.size()));
     clearBuffers(mDestructType);
 	clearWaves();
 
@@ -1111,6 +1111,7 @@ void ViAudioObject::generateNextWave()
 ViWaveForm* ViAudioObject::wave(ViAudio::Type type)
 {
 	QMutexLocker locker(&mMutex);
+	LOG("rrrrrrrttttttt"+QString::number(mWaveForms.size()));
 	return mWaveForms.value(type, NULL);
 }
 
@@ -1121,16 +1122,20 @@ bool ViAudioObject::hasWave(ViAudio::Type type)
 }
 
 void ViAudioObject::clearWaves(ViAudio::Type types)
-{
+{	LOG("rrrrrrrrppppppppp"+QString::number(mWaveForms.size()));
 	QMutexLocker locker(&mMutex);
 	QQueue<ViAudio::Type> instructions = decomposeTypes(types);
 	for(int i = 0; i < instructions.size(); ++i)
-	{
+	{LOG("rrrrrrr****++++: "+QString::number(instructions[i])+" "+QString::number( mWaveForms.size())+" ");
 		locker.unlock();
 		bool hasTheWave = hasWave(instructions[i]);
 		locker.relock();
-		if(hasTheWave) delete mWaveForms.take(instructions[i]);
+		if(hasTheWave)
+		{LOG("rrrrrrr****");
+			delete mWaveForms.take(instructions[i]);
+		}
 	}
+	LOG("rrrrrrr****++++----: "+QString::number( mWaveForms.size())+" ");
 }
 
 /*******************************************************************************************************************

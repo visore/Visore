@@ -45,6 +45,7 @@ void ViWaveForm::append(qreal value)
 		++mMinimumCounter;
 		mAverageMinimum += value;
 	}
+	mAverage += value;
 	if(mTotalCounter == FIRST_ZOOM_LEVEL)
 	{
 		if(mMaximumCounter > 0)
@@ -55,23 +56,25 @@ void ViWaveForm::append(qreal value)
 		{
 			mAverageMinimum /= mMinimumCounter;
 		}
+		mAverage /= mTotalCounter;
 		if(mLevel < MAXIMUM_ZOOM_LEVELS)
 		{
-			mNextLevel->appendValues(mMaximum, mMinimum, mAverageMaximum, mAverageMinimum);
+			mNextLevel->appendValues(mMaximum, mMinimum, mAverageMaximum, mAverageMinimum, mAverage);
 		}
 		appendResults();
 	}
 }
 
-void ViWaveForm::scaleValues(qreal *maximum, qreal *minimum, qreal *averageMaximum, qreal *averageMinimum)
+void ViWaveForm::scaleValues(qreal *maximum, qreal *minimum, qreal *averageMaximum, qreal *averageMinimum, qreal *average)
 {
 	*maximum = UNSIGNED_CHAR_HALF_VALUE - (UNSIGNED_CHAR_HALF_VALUE * (*maximum));
 	*minimum = UNSIGNED_CHAR_HALF_VALUE - (UNSIGNED_CHAR_HALF_VALUE * (*minimum));
 	*averageMaximum = UNSIGNED_CHAR_HALF_VALUE - (UNSIGNED_CHAR_HALF_VALUE * (*averageMaximum));
 	*averageMinimum = UNSIGNED_CHAR_HALF_VALUE - (UNSIGNED_CHAR_HALF_VALUE * (*averageMinimum));
+	*average = UNSIGNED_CHAR_HALF_VALUE - (UNSIGNED_CHAR_HALF_VALUE * (*average));
 }
 
-void ViWaveForm::appendValues(qreal maximum, qreal minimum, qreal averageMaximum, qreal averageMinimum)
+void ViWaveForm::appendValues(qreal maximum, qreal minimum, qreal averageMaximum, qreal averageMinimum, qreal average)
 {
 	++mTotalCounter;
 	if(maximum > mMaximum)
@@ -92,6 +95,7 @@ void ViWaveForm::appendValues(qreal maximum, qreal minimum, qreal averageMaximum
 		++mMinimumCounter;
 		mAverageMinimum += averageMinimum;
 	}
+	mAverage += average;
 	if(mTotalCounter == ZOOM_LEVEL_INCREASE)
 	{
 		if(mMaximumCounter > 0)
@@ -102,9 +106,10 @@ void ViWaveForm::appendValues(qreal maximum, qreal minimum, qreal averageMaximum
 		{
 			mAverageMinimum /= mMinimumCounter;
 		}
+		mAverage /= mTotalCounter;
 		if(mLevel < MAXIMUM_ZOOM_LEVELS)
 		{
-			mNextLevel->appendValues(mMaximum, mMinimum, mAverageMaximum, mAverageMinimum);
+			mNextLevel->appendValues(mMaximum, mMinimum, mAverageMaximum, mAverageMinimum, mAverage);
 		}
 		appendResults();
 	}
@@ -112,7 +117,7 @@ void ViWaveForm::appendValues(qreal maximum, qreal minimum, qreal averageMaximum
 
 void ViWaveForm::appendResults()
 {
-	scaleValues(&mMaximum, &mMinimum, &mAverageMaximum, &mAverageMinimum);
+	scaleValues(&mMaximum, &mMinimum, &mAverageMaximum, &mAverageMinimum, &mAverage);
 	mMutex.lock();
 	if(mIsUnderCutoff)
 	{
@@ -131,6 +136,7 @@ void ViWaveForm::appendResults()
 		mMinimums.push_back(mMinimum);
 		mAverageMaximums.push_back(mAverageMaximum);
 		mAverageMinimums.push_back(mAverageMinimum);
+		mAverages.push_back(mAverage);
 	}
 	mMutex.unlock();
 	reset();
@@ -146,6 +152,11 @@ qint32 ViWaveForm::size(qint16 level)
 	qint32 size = mMaximums.size();
 	mMutex.unlock();
 	return size;
+}
+
+qint64 ViWaveForm::samples()
+{
+	return mMaximums.size() * FIRST_ZOOM_LEVEL;
 }
 
 unsigned char ViWaveForm::maximum(qint32 position, qint16 level)
@@ -196,6 +207,18 @@ unsigned char ViWaveForm::minimumAverage(qint32 position, qint16 level)
 	return result;
 }
 
+unsigned char ViWaveForm::average(qint32 position, qint16 level)
+{
+	if(level != mLevel)
+	{
+		return mNextLevel->average(position, level);
+	}
+	mMutex.lock();
+	unsigned char result = mAverages[position];
+	mMutex.unlock();
+	return result;
+}
+
 void ViWaveForm::clear()
 {
 	reset();
@@ -203,6 +226,7 @@ void ViWaveForm::clear()
 	mMinimums.clear();
 	mAverageMaximums.clear();
 	mAverageMinimums.clear();
+	mAverages.clear();
 	if(mNextLevel != NULL)
 	{
 		mNextLevel->clear();
@@ -233,6 +257,7 @@ void ViWaveForm::reset()
 	mMinimum = 0;
 	mAverageMaximum = 0;
 	mAverageMinimum = 0;
+	mAverage = 0;
 	mMaximumCounter = 0;
 	mMinimumCounter = 0;
 	mTotalCounter = 0;

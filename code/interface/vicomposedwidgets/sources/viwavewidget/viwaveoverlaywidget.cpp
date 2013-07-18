@@ -130,6 +130,11 @@ void ViWaveOverlayWidget::setZoomLevel(qint16 level)
 	repaint();
 }
 
+int ViWaveOverlayWidget::zoomLevel()
+{
+	return mZoomLevel;
+}
+
 void ViWaveOverlayWidget::setWaveForm(ViWaveForm *form, ViAudioFormat format)
 {
 	mForm = form;
@@ -149,8 +154,7 @@ void ViWaveOverlayWidget::setPointer(qint32 position)
 
 	qreal max = 0.0;
 	qreal min = 0.0;
-	qreal maxAvg = 0.0;
-	qreal minAvg = 0.0;
+	qreal avg = 0.0;
 	position /= mZoomRatio;
 	if(mForm != NULL && position >= 0 && position < mForm->size(mZoomLevel))
 	{
@@ -158,17 +162,15 @@ void ViWaveOverlayWidget::setPointer(qint32 position)
 		if(!mUnderCutOff)
 		{
 			min = (UNSIGNED_CHAR_HALF_VALUE - int(mForm->minimum(position, mZoomLevel))) / 255.0;
-			maxAvg = (UNSIGNED_CHAR_HALF_VALUE - int(mForm->maximumAverage(position, mZoomLevel))) / 255.0;
-			minAvg = (UNSIGNED_CHAR_HALF_VALUE - int(mForm->minimumAverage(position, mZoomLevel))) / 255.0;
+			avg = (UNSIGNED_CHAR_HALF_VALUE - int(mForm->average(position, mZoomLevel))) / 255.0;
 		}
 		else
 		{
 			min = max;
-			maxAvg = max;
-			minAvg = max;
+			avg = max;
 		}
 	}
-	emit pointerValuesChanged(max, min, maxAvg, minAvg);
+	emit pointerValuesChanged(max, min, avg);
 	update();
 }
 

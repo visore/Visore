@@ -14,7 +14,7 @@ class ViWaveOverlayWidget : public ViWidget
 	signals:
 
 		void pointerChanged(qint32 position);
-		void pointerValuesChanged(qreal maximum, qreal minimum, qreal maximumAverage, qreal minimumAverage);
+		void pointerValuesChanged(qreal maximum, qreal minimum, qreal average);
 		void zoomLevelChanged(qint16 levels);
 		void positionChanged(ViAudioPosition position);
 
@@ -34,7 +34,10 @@ class ViWaveOverlayWidget : public ViWidget
 
 		ViWaveOverlayWidget(ViWidget *parent = 0);
 		~ViWaveOverlayWidget();
+
 		void setZoomLevel(qint16 level);
+		int zoomLevel();
+
 		void setWaveForm(ViWaveForm *form, ViAudioFormat format = ViAudioFormat());
 		void clear();
 

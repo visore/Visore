@@ -116,8 +116,8 @@ class ViAudioFormat
 		ViAudioFormat(const ViAudioFormat &other);
 		ViAudioFormat(const QAudioFormat &other);
 
-		bool isValid(bool includingCodec = false);
-		bool hasCodec();
+		bool isValid(bool includingCodec = false) const;
+		bool hasCodec() const;
 
 		ViAudioFormat::SampleType sampleType() const;
 		ViAudioFormat::Endian byteOrder() const;

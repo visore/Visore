@@ -72,6 +72,9 @@ class ViWaveWidget : public ViWidget
 
 		ViWaveBaseWidget *mBaseWidget;
 		ViWaveOverlayWidget *mOverlayWidget;
+
+		ViWaveForm *mForm;
+		ViAudioFormat mFormat;
 		
 		qint16 mZoomLevel;
 

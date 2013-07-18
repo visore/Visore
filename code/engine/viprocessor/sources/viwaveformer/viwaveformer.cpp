@@ -21,7 +21,7 @@ void ViWaveFormer::clear()
 }
 
 void ViWaveFormer::initialize()
-{LOG("tttt1");
+{
 	setChannelMode(ViProcessor::Combined);
 	clear();
 	mForm = new ViWaveForm();

@@ -2,7 +2,7 @@
 #include <vibutton.h>
 #include <viwavewidgetgroup.h>
 
-#define TOOLBAR_SHOW_MILLISECONDS 2000
+#define TOOLBAR_SHOW_MILLISECONDS 5000
 
 ViWaveWidget::ViWaveWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -25,7 +25,7 @@ ViWaveWidget::ViWaveWidget(QWidget *parent)
 	QObject::connect(mControlToolbar, SIGNAL(toggledGroup()), this, SLOT(toggleGroup()));
 
 	mInfoToolbar = new ViWaveInfoToolbar(this);
-	QObject::connect(mOverlayWidget, SIGNAL(pointerValuesChanged(qreal, qreal, qreal, qreal)), mInfoToolbar, SLOT(setValues(qreal, qreal, qreal, qreal)));
+	QObject::connect(mOverlayWidget, SIGNAL(pointerValuesChanged(qreal, qreal, qreal)), mInfoToolbar, SLOT(setValues(qreal, qreal, qreal)));
 
 	mToolbarTimer.setInterval(TOOLBAR_SHOW_MILLISECONDS);
 	QObject::connect(&mToolbarTimer, SIGNAL(timeout()), this, SLOT(hideToolbars()));
@@ -59,16 +59,20 @@ void ViWaveWidget::setZoom(qint16 level)
 
 void ViWaveWidget::setWaveForm(ViWaveForm *form, ViAudioFormat format)
 {
+	mForm = form;
+	mFormat = format;
 	mBaseWidget->setWaveForm(form, format);
 	mOverlayWidget->setWaveForm(form, format);
 }
 
 void ViWaveWidget::clear()
 {
+	mForm = NULL;
+	mFormat = ViAudioFormat();
 	mBaseWidget->clear();
 	mOverlayWidget->clear();
 
-	setZoom(6);
+	setZoom(8);
 	setPosition(0);
 	setPointer(0);
 }
@@ -145,6 +149,12 @@ void ViWaveWidget::hideToolbars()
 
 void ViWaveWidget::setPointer(qint32 position)
 {
+	ViAudioPosition audioPosition;
+	if(mForm != NULL && position >= 0 && mForm->samples() >= position)
+	{
+		audioPosition = ViAudioPosition(position, ViAudioPosition::Samples, mFormat);
+	}
+	mInfoToolbar->setPosition(audioPosition);
 	mOverlayWidget->setPointer(position);
 }
 

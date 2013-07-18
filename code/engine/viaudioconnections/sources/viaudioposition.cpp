@@ -39,20 +39,20 @@ qreal ViAudioPosition::convertPosition(const qreal position, const ViAudioPositi
 	}
 	else if(fromUnit == ViAudioPosition::Bytes)
 	{
-		samples = position / (format.sampleSize() / 8);
+		samples = position / (format.sampleSize() / 8.0);
 	}
 
 	if(toUnit == ViAudioPosition::Microseconds)
 	{
-		return samples / (format.sampleRate() * format.channelCount()) * 1000000.0;
+		return (samples * 1000000.0) / (format.sampleRate() * format.channelCount());
 	}
 	else if(toUnit == ViAudioPosition::Milliseconds)
 	{
-		return samples / (format.sampleRate() * format.channelCount()) * 1000.0;
+		return (samples * 1000.0) / (format.sampleRate() * format.channelCount());
 	}
 	else if(toUnit == ViAudioPosition::Seconds)
 	{
-		return samples / (format.sampleRate() * format.channelCount());
+		return samples / float(format.sampleRate() * format.channelCount());
 	}
 	else if(toUnit == ViAudioPosition::Samples)
 	{
@@ -60,7 +60,7 @@ qreal ViAudioPosition::convertPosition(const qreal position, const ViAudioPositi
 	}
 	else if(toUnit == ViAudioPosition::Bytes)
 	{
-		return samples * (format.sampleSize() / 8);
+		return samples * (format.sampleSize() / 8.0);
 	}
 }
 
@@ -133,6 +133,11 @@ qreal ViAudioPosition::bytes()
 ViAudioFormat ViAudioPosition::format() const
 {
 	return mFormat;
+}
+
+bool ViAudioPosition::isValid() const
+{
+	return mFormat.isValid() && mSamples >= 0;
 }
 
 bool ViAudioPosition::operator ==(const ViAudioPosition &other) const

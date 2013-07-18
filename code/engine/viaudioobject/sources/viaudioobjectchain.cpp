@@ -33,6 +33,7 @@ void ViAudioObjectChain::executeNext()
 {
     if(mObjects.isEmpty() && (mCurrentIndex == mFunctions.size() || mCurrentIndex == 0))
     {
+		clear();
         mProgress = 100;
         emit finished();
         disconnect();

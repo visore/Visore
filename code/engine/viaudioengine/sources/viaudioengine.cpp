@@ -167,7 +167,7 @@ void ViAudioEngine::updateMetadata(ViProject *project)
 	mObjectChain.execute("Updating Metadata");
 }
 
-void ViAudioEngine::generateWave(ViAudioObjectPointer object, ViAudio::Type type)
+void ViAudioEngine::generateWave(ViAudioObjectPointer object, ViAudio::Type type, const bool &align)
 {
 	mObjectChain.clear();
 	mObjectChain.add(object);
@@ -175,7 +175,15 @@ void ViAudioEngine::generateWave(ViAudioObjectPointer object, ViAudio::Type type
 	QObject::connect(&mObjectChain, SIGNAL(finished()), this, SIGNAL(progressFinished()), Qt::UniqueConnection);
 	QObject::connect(&mObjectChain, SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)), Qt::UniqueConnection);
 	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(type)), 0.19);
-	mObjectChain.addFunction(ViFunctionCall("generateWave", QVariant::fromValue(type)), 0.80);
+
+	qfloat percentage = 0.8;
+	if(align)
+	{
+		percentage = 0.75;
+		mObjectChain.addFunction(ViFunctionCall("align"), 0.05);
+	}
+
+	mObjectChain.addFunction(ViFunctionCall("generateWave", {QVariant::fromValue(type), true}), percentage);
 	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
 	mObjectChain.execute("Generating Waves");
 }

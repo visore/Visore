@@ -7,23 +7,17 @@ ViMainWaveWidget::ViMainWaveWidget(QWidget *parent)
 	mUi = new Ui::ViMainWaveWidget();
 	mUi->setupUi(this);
 
+	clear();
+
 	mUi->projectLoader->setMode(ViProjectLoader::SingleTrack);
 
-	QObject::connect(mUi->projectLoader, SIGNAL(trackChanged()), this, SLOT(generateWave()));
-	QObject::connect(mUi->projectLoader, SIGNAL(typesChanged()), this, SLOT(generateWave()));
-	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), this, SLOT(clearProject()), Qt::DirectConnection);
-
-	mUi->targetGroupBox->hide();
-	mUi->corruptedGroupBox->hide();
-	mUi->correctedGroupBox->hide();
-	mUi->scrollArea->hide();
+	setStyleSheet("QLabel { min-width: 100px; }");
 }
 
 ViMainWaveWidget::~ViMainWaveWidget()
 {
 	delete mUi;
 	clear();
-	mUi->projectLoader->clear();
 }
 
 void ViMainWaveWidget::clearProject()
@@ -40,6 +34,32 @@ void ViMainWaveWidget::generateWave()
 	ViAudioObjectPointer object = mUi->projectLoader->object();
 	QQueue<ViAudio::Type> instructions = ViAudioObject::decomposeTypes(mUi->projectLoader->processTypes());
 	QQueue<ViAudio::Type> newInstructions;
+
+	if(!instructions.empty())
+	{
+		mUi->alignWidget->show();
+	}
+	bool regenerate = false;
+	bool found = false;
+	for(int i = 0; i < mAlignments.size(); ++i)
+	{
+		if(mAlignments[i].first == object)
+		{
+			found = true;
+			if(mAlignments[i].second != mUi->alignCheckBox->isChecked())
+			{
+				mAlignments[i].second = mUi->alignCheckBox->isChecked();
+				regenerate = true;
+				break;
+			}
+		}
+	}
+	if(!found)
+	{
+		mAlignments.append(QPair<ViAudioObjectPointer, bool>(object, mUi->alignCheckBox->isChecked()));
+		regenerate = true;
+	}
+
 	for(int i = 0; i < instructions.size(); ++i)
 	{
 		if(!object->hasWave(instructions[i]))
@@ -47,14 +67,19 @@ void ViMainWaveWidget::generateWave()
 			newInstructions.append(instructions[i]);
 		}
 	}
-	if(newInstructions.isEmpty())
+
+	if(newInstructions.isEmpty() && !regenerate)
 	{
 		drawWave();
 	}
 	else
 	{
+		ViAudio::Type type;
+		if(regenerate) type = mUi->projectLoader->processTypes();
+		else type = ViAudioObject::composeTypes(newInstructions);
+
 		QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(drawWave()));
-		engine()->generateWave(object, ViAudioObject::composeTypes(newInstructions));
+		engine()->generateWave(object, type, mUi->alignCheckBox->isChecked());
 	}
 }
 
@@ -110,6 +135,17 @@ void ViMainWaveWidget::drawWave()
 
 void ViMainWaveWidget::clear()
 {
+	//LOG("xxxxxxxxx1");
+	/*if(mUi->alignWidget->isVisible())
+	{
+		mUi->projectLoader->object()->clearWaves();
+	}*/
+
+	mUi->alignCheckBox->disconnect();
+	mUi->projectLoader->disconnect();
+
+	mAlignments.clear();
+
 	mUi->targetWaveForm->clear();
 	mUi->corruptedWaveForm->clear();
 	mUi->correctedWaveForm->clear();
@@ -117,4 +153,12 @@ void ViMainWaveWidget::clear()
 	mUi->corruptedGroupBox->hide();
 	mUi->correctedGroupBox->hide();
 	mUi->scrollArea->hide();
+	mUi->alignWidget->hide();
+	mUi->alignCheckBox->setChecked(false);
+	mUi->projectLoader->clear();
+
+	QObject::connect(mUi->alignCheckBox, SIGNAL(stateChanged(int)), this, SLOT(generateWave()));
+	QObject::connect(mUi->projectLoader, SIGNAL(trackChanged()), this, SLOT(generateWave()));
+	QObject::connect(mUi->projectLoader, SIGNAL(typesChanged()), this, SLOT(generateWave()));
+	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), this, SLOT(clearProject()), Qt::DirectConnection);
 }

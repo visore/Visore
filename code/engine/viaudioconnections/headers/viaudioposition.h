@@ -43,6 +43,8 @@ class ViAudioPosition
 		qreal bytes();
 
 		ViAudioFormat format() const;
+
+		bool isValid() const;
 		
 		bool operator ==(const ViAudioPosition &other) const;
 		bool operator !=(const ViAudioPosition &other) const;

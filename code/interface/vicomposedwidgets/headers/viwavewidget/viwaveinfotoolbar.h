@@ -12,7 +12,8 @@ class ViWaveInfoToolbar : public ViWidgetToolbar
 
 	public slots:
 
-		void setValues(qreal maximum, qreal minimum, qreal maximumAverage, qreal minimumAverage);
+		void setValues(qreal maximum, qreal minimum, qreal average);
+		void setPosition(ViAudioPosition position);
 
 	public:
 
@@ -24,10 +25,12 @@ class ViWaveInfoToolbar : public ViWidgetToolbar
 
 		QWidget *mWidget;
 		QGridLayout *mLayout;
-		QLabel *mMaxLabel;
-		QLabel *mMinLabel;
-		QLabel *mMaxAvgLabel;
-		QLabel *mMinAvgLabel;
+		QLabel *mSampleLabel;
+		QLabel *mSecondLabel;
+		QLabel *mMaximumLabel;
+		QLabel *mMinimumLabel;
+		QLabel *mAverageLabel;
+		bool mValid;
 		
 };
 

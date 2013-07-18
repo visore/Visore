@@ -21,19 +21,11 @@ ViWidgetToolbar::ViWidgetToolbar(Qt::Alignment align, QWidget *parent)
 	setStyleSheet
 	("\
 		QWidget#toolbar{\
-			border-radius: 10px;\
+			border-radius: 5px;\
 			border-style: solid;\
 			border-color: " + color1.name() + ";\
-			border-width: 3px;\
-			background: rgba(" + QString::number(color1.red()) + ", " + QString::number(color1.green()) + ", " + QString::number(color1.blue()) + ", 175);\
-		}\
-		ViButton{\
-			border-radius: 7px;\
-			border-style: solid;\
 			border-width: 2px;\
-			border-color: transparent;\
-			padding: 5px;\
-			background: transparent;\
+			background: rgba(" + QString::number(color1.red()) + ", " + QString::number(color1.green()) + ", " + QString::number(color1.blue()) + ", 175);\
 		}\
 		ViButton:hover{\
 			border-color: " + color2.name() + ";\
