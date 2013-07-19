@@ -27,7 +27,7 @@ class ViPositionSlider : public ViWidget
 
 	private slots:
 
-		void movePosition();
+		void movePosition(int position);
 		void setPosition(int seconds);
 		void setDuration(int seconds);
 
@@ -52,6 +52,7 @@ class ViPositionSlider : public ViWidget
 		bool mHasPosition;
 		bool mHasDuration;
 		ViAudioFormat mFormat;
+		bool mUnblockPosition;
 
 };
 

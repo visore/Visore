@@ -26,15 +26,17 @@ void ViStreamOutput::setDevice(QAudioDeviceInfo device)
 
 void ViStreamOutput::setBuffer(ViBuffer *buffer)
 {
-	if(mBuffer != NULL)
-	{
-		QObject::disconnect(this, SLOT(checkLength()));
-	}
 	ViAudioOutput::setBuffer(buffer);
-	if(mBuffer != NULL)
+
+	if(mBuffer == NULL)
 	{
-		//QObject::connect(mBuffer, SIGNAL(changed()), this, SLOT(checkLength()));
-		//checkLength();
+		LOG("Invalid buffer detected.");
+	}
+	else
+	{
+		mBufferDevice.close();
+		mBufferDevice.setBuffer(mBuffer->data());
+		mBufferDevice.open(QIODevice::ReadOnly);
 	}
 }
 
@@ -64,9 +66,6 @@ void ViStreamOutput::start()
 	else
 	{
 		LOG("Playback started.");
-		mBufferDevice.close();
-		mBufferDevice.setBuffer(mBuffer->data());
-		mBufferDevice.open(QIODevice::ReadOnly);
 		if(mAudioOutput != NULL)
 		{
 			mAudioOutput->disconnect();
@@ -74,7 +73,6 @@ void ViStreamOutput::start()
 		}
 		mAudioOutput = new QAudioOutput(mDevice, format().toQAudioFormat(), this);
 		mAudioOutput->setNotifyInterval(150);
-		setVolume(100);
 		mOldLength = 0;
 		QObject::connect(mAudioOutput, SIGNAL(notify()), this, SLOT(checkPosition()), Qt::DirectConnection);
 		QObject::connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(checkUnderrun()));
@@ -117,8 +115,7 @@ bool ViStreamOutput::setPosition(ViAudioPosition position)
 
 bool ViStreamOutput::setPosition(int seconds)
 {
-	mBufferDevice.seek(ViAudioPosition::convertPosition(seconds, ViAudioPosition::Seconds, ViAudioPosition::Bytes, format()));
-	checkPosition();
+	setPosition(ViAudioPosition(seconds, ViAudioPosition::Seconds, format()));
 }
 
 ViAudioPosition ViStreamOutput::position()
@@ -145,7 +142,7 @@ void ViStreamOutput::checkPosition()
 }
 
 void ViStreamOutput::checkLength()
-{
+{LOG("ttttttttttttttttt");
 	if(buffer()->size() != mOldLength)
 	{
 		mOldLength = buffer()->size();

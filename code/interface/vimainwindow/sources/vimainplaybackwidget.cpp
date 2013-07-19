@@ -33,14 +33,16 @@ ViMainPlaybackWidget::~ViMainPlaybackWidget()
 
 void ViMainPlaybackWidget::loadTrack()
 {
+	mUi->playbackWidget->stop();
+	mUi->playbackWidget->clear();
+	engine()->clearPlayback();
+
 	ViAudioObjectQueue objects = mUi->projectLoader->objects();
 	for(int i = 0; i < objects.size(); ++i)
 	{
 		objects[i]->clearBuffers();
 	}
 
-	mUi->playbackWidget->stop();
-	mUi->playbackWidget->clear();
 	engine()->playback(mUi->projectLoader->object(), mUi->projectLoader->types());
 }
 

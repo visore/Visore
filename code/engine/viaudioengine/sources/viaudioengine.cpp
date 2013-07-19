@@ -18,6 +18,7 @@ void ViAudioEngine::playback(ViAudioObjectPointer object, ViAudio::Type type)
 
 void ViAudioEngine::clearPlayback()
 {
+	mPlayer.stop();
 	mPlayer.clear();
 }
 

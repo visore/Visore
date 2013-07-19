@@ -22,6 +22,7 @@ void ViAudioPlayer::clear()
 	mFormat = ViAudioFormat();
 	mOutput.clear();
 	mOldDuration = 0;
+	mBuffer = NULL;
 	mObject.setNull();
 }
 
@@ -31,18 +32,17 @@ void ViAudioPlayer::setData(ViAudioObjectPointer object, ViAudio::Type type, boo
 	QMutexLocker locker(&mMutex);
 	mObject = object;
 	bool hasBuffer = object->hasBuffer(type);
-	ViBuffer *buffer = object->buffer(type);
-	mOutput.setBuffer(buffer);
+	mBuffer = object->buffer(type);
 	if(!hasBuffer)
 	{
 		if(object->hasFile(type))
 		{
 			if(startPlaying)
 			{
-				QObject::connect(buffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(play()));
+				QObject::connect(mBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(play()));
 			}
 			locker.unlock();
-			QObject::connect(object.data(), SIGNAL(decoded()), this, SLOT(checkDuration()));
+			QObject::connect(object.data(), SIGNAL(decoded()), this, SLOT(changeBuffer()));
 			object->decode(type);
 		}
 		else
@@ -53,6 +53,7 @@ void ViAudioPlayer::setData(ViAudioObjectPointer object, ViAudio::Type type, boo
 	else if(startPlaying)
 	{
 		locker.unlock();
+		changeBuffer();
 		play();
 	}
 }
@@ -61,18 +62,19 @@ void ViAudioPlayer::setData(ViBuffer *buffer, bool startPlaying)
 {
 	clear();
 	QMutexLocker locker(&mMutex);
-	mOutput.setBuffer(buffer);
+	mBuffer = buffer;
+	locker.unlock();
+	changeBuffer();
 	if(startPlaying)
 	{
-		locker.unlock();
 		play();
 	}
 }
 
 void ViAudioPlayer::play()
 {
-	QMutexLocker locker(&mMutex);
 	checkDuration();
+	QMutexLocker locker(&mMutex);
 	mFormat = mOutput.format();
 	if(mOutput.buffer() != NULL)
 	{
@@ -93,10 +95,21 @@ void ViAudioPlayer::stop()
 	mOutput.stop();
 }
 
-void ViAudioPlayer::changePosition(ViAudioPosition position)
+void ViAudioPlayer::changeBuffer()
 {
 	QMutexLocker locker(&mMutex);
-	mOutput.setPosition(position);
+	mOutput.setBuffer(mBuffer);
+	locker.unlock();
+	checkDuration();
+}
+
+void ViAudioPlayer::changePosition(ViAudioPosition position)
+{
+	if(position.isValid())
+	{
+		QMutexLocker locker(&mMutex);
+		mOutput.setPosition(position);
+	}
 }
 
 void ViAudioPlayer::changeVolume(int volume)
@@ -112,15 +125,16 @@ void ViAudioPlayer::checkUnderrun()
 
 void ViAudioPlayer::checkDuration()
 {
+	QMutexLocker locker(&mMutex);
 	if(!mObject.isNull())
 	{
 		QObject::disconnect(mObject.data(), SIGNAL(decoded()), this, SLOT(checkDuration()));
 	}
 
-	ViBuffer *buffer = mOutput.buffer();
-	if(buffer!= NULL && mOldDuration != buffer->size())
+	if(mBuffer != NULL && mOldDuration != mBuffer->size())
 	{
-		mOldDuration = buffer->size();
-		emit durationChanged(ViAudioPosition(mOldDuration, ViAudioPosition::Bytes, buffer->format()));
+		mOldDuration = mBuffer->size();
+		locker.unlock();
+		emit durationChanged(ViAudioPosition(mOldDuration, ViAudioPosition::Bytes, mBuffer->format()));
 	}
 }

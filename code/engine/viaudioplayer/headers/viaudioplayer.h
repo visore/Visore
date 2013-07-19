@@ -28,6 +28,7 @@ class ViAudioPlayer : public QObject
 
 	private slots:
 
+		void changeBuffer();
 		void checkUnderrun();
 		void checkDuration();
 
@@ -48,7 +49,9 @@ class ViAudioPlayer : public QObject
 		ViAudioFormat mFormat;
 		ViStreamOutput mOutput;
 
+		ViBuffer *mBuffer;
 		ViAudioObjectPointer mObject;
+
 		qint64 mOldDuration;
 
 };

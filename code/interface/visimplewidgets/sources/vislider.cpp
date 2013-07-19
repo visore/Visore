@@ -1,8 +1,11 @@
-#include "vislider.h"
+#include <vislider.h>
+#include <QMouseEvent>
 
 ViSlider::ViSlider(QWidget *parent)
 	: QSlider(parent)
 {
+	mIsPressed = false;
+
 	QString color1 = ViThemeManager::color(ViThemeColors::MainColor3).name();
 	QString color2 = ViThemeManager::color(ViThemeColors::MainColor4).name();
 	QString color3 = ViThemeManager::color(ViThemeColors::MainColor5).name();
@@ -78,4 +81,31 @@ ViSlider::ViSlider(QWidget *parent)
 		}\
 		\
 	");
+}
+
+void ViSlider::mousePressEvent(QMouseEvent *event)
+{
+	mIsPressed = true;
+	changePosition(event->x());
+	emit pressed();
+}
+
+void ViSlider::mouseReleaseEvent(QMouseEvent *event)
+{
+	mIsPressed = false;
+	changePosition(event->x());
+	emit released();
+}
+
+void ViSlider::mouseMoveEvent(QMouseEvent *event)
+{
+	if(mIsPressed)
+	{
+		changePosition(event->x());
+	}
+}
+
+void ViSlider::changePosition(int pixel)
+{
+	setValue(maximum() * (pixel / qreal(width())));
 }

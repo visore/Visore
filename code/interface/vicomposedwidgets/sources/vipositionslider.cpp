@@ -8,9 +8,8 @@ ViPositionSlider::ViPositionSlider(QWidget *parent)
 	mUi = new Ui::ViPositionSlider();
 	mUi->setupUi(this);
 	clear();
-	mUi->slider->setTracking(true);
-	QObject::connect(mUi->slider, SIGNAL(sliderReleased()), this, SLOT(movePosition()));
-	QObject::connect(mUi->slider, SIGNAL(valueChanged(int)), this, SLOT(setPosition(int)));
+
+	QObject::connect(mUi->slider, SIGNAL(valueChanged(int)), this, SLOT(movePosition(int)));
 }
 
 ViPositionSlider::~ViPositionSlider()
@@ -30,35 +29,40 @@ void ViPositionSlider::clear()
 	mUi->slider->setMaximum(0);
 	mHasPosition = false;
 	mHasDuration = false;
+	mUnblockPosition = true;
+	mFormat = ViAudioFormat();
 }
 
 void ViPositionSlider::changePosition(ViAudioPosition position)
 {
 	QMutexLocker locker(&mMutex);
-	mFormat = position.format();
-	int seconds = position.position(ViAudioPosition::Seconds);
-	if(seconds >= 0 && seconds != mUi->slider->value())
+	if(mUnblockPosition)
 	{
-		mHasPosition = true;
-		setPosition(seconds);
-		if(!mHasDuration || mUi->slider->maximum() < seconds)
+		int seconds = position.seconds();
+		if(seconds >= 0 && seconds != mUi->slider->value())
 		{
-			locker.unlock();
-			changeDuration(position);
-			locker.relock();
+			mHasPosition = true;
+			setPosition(seconds);
+			if(!mHasDuration || mUi->slider->maximum() < seconds)
+			{
+				locker.unlock();
+				changeDuration(position);
+				locker.relock();
+			}
+			//Block signals to ensure that the signal doesn't cause the output to request a position changed.
+			mUi->slider->blockSignals(true);
+			mUi->slider->setValue(seconds);
+			mUi->slider->blockSignals(false);
+			emit positionChanged(position);
 		}
-		//Block signals to ensure that the signal doesn't cause the output to request a position changed.
-		mUi->slider->blockSignals(true);
-		mUi->slider->setValue(seconds);
-		mUi->slider->blockSignals(false);
-		emit positionChanged(position);
 	}
 }
 
 void ViPositionSlider::changeDuration(ViAudioPosition duration)
 {
 	QMutexLocker locker(&mMutex);
-	int seconds = duration.position(ViAudioPosition::Seconds);
+	mFormat = duration.format();
+	int seconds = duration.seconds();
 	if(seconds >= 0 && seconds != mUi->slider->maximum())
 	{
 		mHasDuration = true;
@@ -72,9 +76,15 @@ void ViPositionSlider::changeDuration(ViAudioPosition duration)
 	}
 }
 
-void ViPositionSlider::movePosition()
+void ViPositionSlider::movePosition(int position)
 {
-	emit positionMoved(ViAudioPosition(mUi->slider->value(), ViAudioPosition::Seconds, mFormat));
+	QMutexLocker locker(&mMutex);
+	mUnblockPosition = false;
+	ViAudioPosition audioPosition(position, ViAudioPosition::Seconds, mFormat);
+	setPosition(position);
+	mUnblockPosition = true;
+	locker.unlock();
+	emit positionMoved(audioPosition);
 }
 
 QString ViPositionSlider::minutesString(int seconds)
