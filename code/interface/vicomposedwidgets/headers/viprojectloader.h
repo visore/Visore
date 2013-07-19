@@ -57,6 +57,7 @@ class ViProjectLoader : public ViWidget
 		ViAudioObjectPointer object();
 
 		void clear();
+		ViAudio::Type type();
 		ViAudio::Type types();
 
 		void setProjectMode(ViProjectLoader::ProjectMode mode);

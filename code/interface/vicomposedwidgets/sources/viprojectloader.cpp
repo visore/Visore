@@ -290,6 +290,13 @@ void ViProjectLoader::changeRadioTypes(bool checked)
 	}
 }
 
+ViAudio::Type ViProjectLoader::type()
+{
+	QQueue<ViAudio::Type> theTypes = ViAudioObject::decomposeTypes(types());
+	if(theTypes.isEmpty()) return ViAudio::Undefined;
+	return theTypes[0];
+}
+
 ViAudio::Type ViProjectLoader::types()
 {
 	int result = 0;

@@ -105,24 +105,24 @@ int ViAudioBitrate::maximum() const
 
 QString ViAudioBitrate::toString()
 {
-	QString result = "";
-
-	if(mMode == ViAudioBitrate::Unknown) result += "Unknown";
-	else if(mMode == ViAudioBitrate::Constant) result += "Constant";
-	else if(mMode == ViAudioBitrate::Variable) result += "Variable";
-	else if(mMode == ViAudioBitrate::Average) result += "Average";
-	result += " Bitrate ";
-
+	QString result = toString(mMode) + " Bitrate ";
 	result += "(normal: " + QString::number(mNormal) + ", minimum: " + QString::number(mMinimum) + ", maximum: " + QString::number(mMaximum) + ")";
-
 	return result;
+}
+
+QString ViAudioBitrate::toString(const ViAudioBitrate::Mode &mode)
+{
+	if(mode == ViAudioBitrate::Constant) return "Constant";
+	else if(mode == ViAudioBitrate::Variable) return "Variable";
+	else if(mode == ViAudioBitrate::Average) return "Average";
+	return "Uknown";
 }
 
 ViAudioFormat::ViAudioFormat()
 {
 	mSampleType = ViAudioFormat::Unknown;
 	mByteOrder = ViAudioFormat::LittleEndian;
-	mQuality = ViAudioFormat::Average;
+	mQuality = ViAudioFormat::None;
 	mSampleSize = 0;
 	mSampleRate = 0;
 	mChannelCount = 0;
@@ -615,41 +615,60 @@ QString ViAudioFormat::toString()
 {
 	QString result = "";
 
-	result += "Sample Type: ";
-	if(mSampleType == ViAudioFormat::SignedInt) result += "Signed Integer";
-	else if(mSampleType == ViAudioFormat::SignedInt) result += "Signed Integer";
-	else if(mSampleType == ViAudioFormat::UnSignedInt) result += "Unsigned Integer";
-	else if(mSampleType == ViAudioFormat::Float) result += "Float";
-	else if(mSampleType == ViAudioFormat::Real) result += "Real";
-	result += "\n";
+	result += "Sample Type: " + toString(mSampleType) + "\n";
 
 	result += "Sample Size: " + QString::number(mSampleSize) + "\n";
 
 	result += "Sample Rate: " + QString::number(mSampleRate) + "\n";
 
-	result += "Channel Count: " + QString::number(mChannelCount) + "\n";
+	result += "Channel Count: " + QString::number(mChannelCount) + " (" + toStringChannels(mChannelCount) +  ")\n";
 
-	result += "Byte Order: ";
-	if(mByteOrder == ViAudioFormat::BigEndian) result += "Big Endian";
-	else if(mByteOrder == ViAudioFormat::LittleEndian) result += "Little Endian";
-	result += "\n";
+	result += "Byte Order: " + toString(mByteOrder) + "\n";
 
 	result += "Codec: " + mCodec->toString() + "\n";
 
 	result += "Bitrate: " + mBitrate.toString() + "\n";
 
-	result += "Quality: ";
-	if(mQuality == ViAudioFormat::InsaneHigh) result += "Insane High";
-	else if(mQuality == ViAudioFormat::ExtremeHigh) result += "Extreme High";
-	else if(mQuality == ViAudioFormat::VeryHigh) result += "Very High";
-	else if(mQuality == ViAudioFormat::High) result += "High";
-	else if(mQuality == ViAudioFormat::AboveAverage) result += "Above Average";
-	else if(mQuality == ViAudioFormat::Average) result += "Average";
-	else if(mQuality == ViAudioFormat::BelowAverage) result += "Below Average";
-	else if(mQuality == ViAudioFormat::Low) result += "Low";
-	else if(mQuality == ViAudioFormat::VeryLow) result += "Very Low";
-	else if(mQuality == ViAudioFormat::ExtremeLow) result += "Extreme Low";
-	result += "\n";
+	result += "Quality: " + toString(mQuality) + "\n";
 
 	return result;
+}
+
+QString ViAudioFormat::toString(const ViAudioFormat::SampleType &type)
+{
+	if(type == ViAudioFormat::SignedInt) return "Signed Integer";
+	else if(type == ViAudioFormat::UnSignedInt) return "Unsigned Integer";
+	else if(type == ViAudioFormat::Float) return "Float";
+	else if(type == ViAudioFormat::Real) return "Real";
+	return "Unknown";
+}
+
+QString ViAudioFormat::toString(const ViAudioFormat::Endian &order)
+{
+	if(order == ViAudioFormat::BigEndian) return "Big Endian";
+	else if(order == ViAudioFormat::LittleEndian) return"Little Endian";
+	return "Unknown";
+}
+
+QString ViAudioFormat::toString(const ViAudioFormat::Quality &quality)
+{
+	if(quality == ViAudioFormat::InsaneHigh) return "Insane High";
+	else if(quality == ViAudioFormat::ExtremeHigh) return "Extreme High";
+	else if(quality == ViAudioFormat::VeryHigh) return "Very High";
+	else if(quality == ViAudioFormat::High) return "High";
+	else if(quality == ViAudioFormat::AboveAverage) return "Above Average";
+	else if(quality == ViAudioFormat::Average) return "Average";
+	else if(quality == ViAudioFormat::BelowAverage) return "Below Average";
+	else if(quality == ViAudioFormat::Low) return "Low";
+	else if(quality == ViAudioFormat::VeryLow) return "Very Low";
+	else if(quality == ViAudioFormat::ExtremeLow) return "Extreme Low";
+	return "Unknown";
+}
+
+QString ViAudioFormat::toStringChannels(const int &channels)
+{
+	if(channels == 1) return "Mono";
+	else if(channels == 2) return "Stereo";
+	else if(channels > 2) return "Surround";
+	return "Unknown";
 }

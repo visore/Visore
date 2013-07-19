@@ -58,6 +58,8 @@ class ViAudioBitrate
 
 		QString toString();
 
+		static QString toString(const ViAudioBitrate::Mode &mode);
+
 	private:
 
 		ViAudioBitrate::Mode mMode;
@@ -97,6 +99,7 @@ class ViAudioFormat
 		*/
 		enum Quality
 		{
+			None,
 			InsaneHigh,
 			ExtremeHigh,
 			VeryHigh,
@@ -124,7 +127,7 @@ class ViAudioFormat
 		ViAudioFormat::Quality quality() const;
 		ViAudioBitrate bitrate() const;
 		ViAudioBitrate::Mode bitrateMode() const;
-		int bitrate(const ViAudioBitrate::Type type = ViAudioBitrate::Normal) const;
+		int bitrate(const ViAudioBitrate::Type type) const;
 		int sampleSize() const;
 		int sampleRate() const;
 		int channelCount() const;
@@ -159,6 +162,11 @@ class ViAudioFormat
 		static ViFormatMap supportedChannels();
 
 		QString toString();
+
+		static QString toString(const ViAudioFormat::SampleType &type);
+		static QString toString(const ViAudioFormat::Endian &order);
+		static QString toString(const ViAudioFormat::Quality &quality);
+		static QString toStringChannels(const int &channels);
 
 	private:
 

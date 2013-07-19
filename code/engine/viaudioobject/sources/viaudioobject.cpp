@@ -867,6 +867,12 @@ bool ViAudioObject::hasBuffer(ViAudio::Type type)
 	return buffer(type, true) != NULL;
 }
 
+qint64 ViAudioObject::bufferSize(ViAudio::Type type)
+{
+	if(hasBuffer(type)) return buffer(type)->size();
+	return 0;
+}
+
 /*******************************************************************************************************************
 
 	FILES
@@ -945,6 +951,16 @@ void ViAudioObject::setCorrectedFilePath(QString path)
 bool ViAudioObject::hasFile(ViAudio::Type type)
 {
 	return filePath(type) != "";
+}
+
+qint64 ViAudioObject::fileSize(ViAudio::Type type)
+{
+	if(hasFile(type))
+	{
+		QFile file(filePath(type));
+		return file.size();
+	}
+	return 0;
 }
 
 QString ViAudioObject::fileName(bool track, bool side)

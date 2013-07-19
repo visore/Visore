@@ -43,7 +43,23 @@ void ViMainPlaybackWidget::loadTrack()
 		objects[i]->clearBuffers();
 	}
 
-	engine()->playback(mUi->projectLoader->object(), mUi->projectLoader->types());
+	ViAudioObjectPointer object = mUi->projectLoader->object();
+	ViAudio::Type type = mUi->projectLoader->type();
+
+	mUi->metadataWidget->clear();
+	mUi->metadataWidget->setMetadata(object->metadata());
+	QObject::connect(engine().data(), SIGNAL(durationChanged(ViAudioPosition)), this, SLOT(changeMetadata()));
+
+	engine()->playback(object, type);
+}
+
+void ViMainPlaybackWidget::changeMetadata()
+{
+	QObject::disconnect(engine().data(), SIGNAL(durationChanged(ViAudioPosition)), this, SLOT(changeMetadata()));
+	ViAudioObjectPointer object = mUi->projectLoader->object();
+	ViAudio::Type type = mUi->projectLoader->type();
+	mUi->metadataWidget->setFileInfo(ViAudioPosition::convertPosition(object->bufferSize(type), ViAudioPosition::Bytes, ViAudioPosition::Milliseconds, object->format(type)), object->fileSize(type));
+	mUi->metadataWidget->setFormat(object->format(type));
 }
 
 void ViMainPlaybackWidget::clear()
@@ -51,5 +67,6 @@ void ViMainPlaybackWidget::clear()
 	mUi->projectLoader->clear();
 	mUi->playbackWidget->clear();
 	mUi->playbackWidget->hide();
+	mUi->metadataWidget->clear();
 	engine()->clearPlayback();
 }

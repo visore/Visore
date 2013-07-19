@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/images">
         <file>tile/tile.png</file>
+        <file>cover/cover.png</file>
     </qresource>
 </RCC>

@@ -16,6 +16,7 @@ class ViMainPlaybackWidget : public ViWidget
 	private slots:
 
 		void loadTrack();
+		void changeMetadata();
 
 	public:
 

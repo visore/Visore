@@ -251,6 +251,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		bool hasBuffer(ViAudio::Type type);
 
+		qint64 bufferSize(ViAudio::Type type);
+
 		/*******************************************************************************************************************
 
 			FILES
@@ -268,6 +270,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void setCorrectedFilePath(QString path);
 
 		bool hasFile(ViAudio::Type type);
+
+		qint64 fileSize(ViAudio::Type type);
 
 		QString fileName(bool track = true, bool side = false);
 		QString temporaryFilePath(ViAudio::Type type);
