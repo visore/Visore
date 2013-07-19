@@ -9,7 +9,7 @@ ViMainCorrectionWidget::ViMainCorrectionWidget(QWidget *parent)
 	mUi = new Ui::ViMainCorrectionWidget();
     mUi->setupUi(this);
 
-    mUi->projectLoader->disableBufferSelection();
+	mUi->projectLoader->setTypeMode(ViProjectLoader::NoTypes);
 	QObject::connect(mUi->projectLoader, SIGNAL(finished()), this, SLOT(showCorrector()));
 	QObject::connect(mUi->projectLoader, SIGNAL(trackChanged()), this, SLOT(hideCorrector()));
 	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), this, SLOT(hideCorrector()));

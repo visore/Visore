@@ -90,21 +90,21 @@
     </widget>
    </item>
    <item row="0" column="6">
-    <widget class="QLabel" name="lengthMinutes">
+    <widget class="QLabel" name="durationMinutes">
      <property name="text">
       <string>--</string>
      </property>
     </widget>
    </item>
    <item row="0" column="7">
-    <widget class="QLabel" name="lengthSeparator">
+    <widget class="QLabel" name="durationSeparator">
      <property name="text">
       <string>:</string>
      </property>
     </widget>
    </item>
    <item row="0" column="8">
-    <widget class="QLabel" name="lengthSeconds">
+    <widget class="QLabel" name="durationSeconds">
      <property name="text">
       <string>--</string>
      </property>

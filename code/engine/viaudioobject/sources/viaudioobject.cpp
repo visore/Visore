@@ -487,7 +487,7 @@ bool ViAudioObject::decode(ViAudio::Type type)
 	{
 		ViAudio::Type type = mCodingInstructions[i];
 		locker.unlock();
-		if(hasBuffer(type) || !hasFile(type))
+		if((hasBuffer(type) && !buffer(type)->isEmpty()) || !hasFile(type))
 		{
 			locker.relock();
 			mCodingInstructions.removeAt(i);
@@ -510,7 +510,6 @@ bool ViAudioObject::decode(ViAudio::Type type)
 	
 	setProgress(mCodingInstructions.size());
 	locker.unlock();
-	logStatus("Decoding track.");
 	decodeNext();
 	return true;
 }
@@ -520,7 +519,7 @@ void ViAudioObject::decodeNext()
 	QMutexLocker locker(&mMutex);
 	if(mCodingInstructions.isEmpty())
 	{
-		log("Files decoded.");
+		log("Tracks decoded.");
 		delete mDecoder;
 		mDecoder = NULL;
 		locker.unlock();
@@ -529,6 +528,7 @@ void ViAudioObject::decodeNext()
 	}
 	else
 	{
+		logStatus("Decoding track.");
 		ViAudio::Type type = mCodingInstructions.dequeue();
 		locker.unlock();
 		QString thePath = filePath(type);

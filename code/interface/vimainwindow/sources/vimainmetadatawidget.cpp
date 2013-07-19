@@ -21,8 +21,8 @@ ViMainMetadataWidget::~ViMainMetadataWidget()
 void ViMainMetadataWidget::clear()
 {
 	mUi->projectLoader->clear();
-	mUi->projectLoader->setMode(ViProjectLoader::SingleProject);
-	mUi->projectLoader->disableBufferSelection();
+	mUi->projectLoader->setProjectMode(ViProjectLoader::SingleProject);
+	mUi->projectLoader->setTypeMode(ViProjectLoader::NoTypes);
 
 	mUi->projectEditor->clear();
 	mUi->projectEditor->hide();

@@ -14,32 +14,44 @@ class ViPositionSlider : public ViWidget
 
 	Q_OBJECT
 
+	signals:
+
+		void positionMoved(ViAudioPosition position); // If the slider was manually moved
+		void positionChanged(ViAudioPosition position); // If the position was changed programtically
+		void durationChanged(ViAudioPosition position); // If the duration was changed programtically
+
 	public slots:
 
-		void clear();
+		void changePosition(ViAudioPosition position);
+		void changeDuration(ViAudioPosition duration);
 
 	private slots:
 
-		void changedPosition(ViAudioPosition position);
-		void changedLength(ViAudioPosition length);
+		void movePosition();
+		void setPosition(int seconds);
+		void setDuration(int seconds);
 
 	public:
 
 		ViPositionSlider(QWidget *parent = 0);
 		~ViPositionSlider();
 
+		void clear();
+
 	private:
 
 		QString minutesString(int seconds);
 		QString secondsString(int seconds);
-		void setPosition(int seconds);
-		void setLength(int seconds);
 
 	private:
 
 		Ui::ViPositionSlider *mUi;
+
+		QMutex mMutex;
+
 		bool mHasPosition;
-		bool mHasLength;
+		bool mHasDuration;
+		ViAudioFormat mFormat;
 
 };
 

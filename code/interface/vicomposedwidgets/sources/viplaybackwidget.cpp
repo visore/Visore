@@ -19,6 +19,9 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	QObject::connect(mUi->playButton, SIGNAL(clicked(bool)), this, SLOT(play()));
 	QObject::connect(mUi->pauseButton, SIGNAL(clicked(bool)), this, SLOT(pause()));
 	QObject::connect(mUi->stopButton, SIGNAL(clicked(bool)), this, SLOT(stop()));
+
+	QObject::connect(mUi->volume, SIGNAL(volumeChanged(int)), this, SIGNAL(volumeChanged(int)));
+	QObject::connect(mUi->positionSlider, SIGNAL(positionMoved(ViAudioPosition)), this, SIGNAL(positionMoved(ViAudioPosition)));
 }
 
 ViPlaybackWidget::~ViPlaybackWidget()
@@ -29,12 +32,16 @@ ViPlaybackWidget::~ViPlaybackWidget()
 
 void ViPlaybackWidget::clear()
 {
+	stop();
+
 	mUi->playButton->setChecked(false);
 	mUi->pauseButton->setChecked(false);
-
-	mUi->playButton->enable();
+	mUi->playButton->disable();
 	mUi->pauseButton->disable();
 	mUi->stopButton->disable();
+
+	mUi->volume->clear();
+	mUi->positionSlider->clear();
 }
 
 void ViPlaybackWidget::play()
@@ -58,13 +65,43 @@ void ViPlaybackWidget::pause()
 	else
 	{
 		mUi->playButton->setChecked(true);
-		emit unpaused();
 		emit played();
 	}
 }
 
 void ViPlaybackWidget::stop()
 {
-	clear();
+	mUi->playButton->setChecked(false);
+	mUi->pauseButton->setChecked(false);
+	mUi->playButton->enable();
+	mUi->pauseButton->disable();
+	mUi->stopButton->disable();
+	mUi->positionSlider->changePosition(ViAudioPosition());
 	emit stopped();
+}
+
+void ViPlaybackWidget::changeVolume(int volume)
+{
+	mUi->volume->changeVolume(volume);
+}
+
+void ViPlaybackWidget::changePosition(ViAudioPosition position)
+{
+	if(position.isValid())
+	{
+		mUi->positionSlider->changePosition(position);
+	}
+	else
+	{
+		stop();
+	}
+}
+
+void ViPlaybackWidget::changeDuration(ViAudioPosition duration)
+{
+	if(duration.samples() > 0)
+	{
+		mUi->playButton->enable();
+	}
+	mUi->positionSlider->changeDuration(duration);
 }

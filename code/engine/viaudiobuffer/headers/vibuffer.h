@@ -59,6 +59,7 @@ class ViBuffer : public QObject, public ViId, public ViFunctor
 	protected:
 
 		void execute(ViFunctorParameter *data = NULL);
+		void change();
 
 	private:
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>554</width>
-    <height>121</height>
+    <width>497</width>
+    <height>155</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -26,6 +26,9 @@
    <string>Form</string>
   </property>
   <layout class="QFormLayout" name="formLayout">
+   <property name="fieldGrowthPolicy">
+    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+   </property>
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -40,6 +43,12 @@
    </property>
    <item row="0" column="0">
     <widget class="QLabel" name="modeLabel">
+     <property name="minimumSize">
+      <size>
+       <width>70</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="text">
       <string>Load:</string>
      </property>
@@ -77,7 +86,7 @@
      </property>
      <property name="maximumSize">
       <size>
-       <width>70</width>
+       <width>16777215</width>
        <height>16777215</height>
       </size>
      </property>
@@ -85,6 +94,9 @@
       <string>File:</string>
      </property>
     </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="ViFileBrowser" name="fileBrowser"/>
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="tracksLabel">
@@ -96,7 +108,7 @@
      </property>
      <property name="maximumSize">
       <size>
-       <width>70</width>
+       <width>16777215</width>
        <height>16777215</height>
       </size>
      </property>
@@ -108,28 +120,9 @@
    <item row="2" column="1">
     <widget class="QComboBox" name="tracksComboBox"/>
    </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="processLabel">
-     <property name="minimumSize">
-      <size>
-       <width>70</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>70</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Process:</string>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="1">
-    <widget class="QWidget" name="processContainer" native="true">
-     <layout class="QGridLayout" name="gridLayout_2">
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QGridLayout" name="gridLayout_3">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -142,45 +135,105 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item row="1" column="0">
+       <widget class="QWidget" name="singleTypeContainer" native="true">
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="2">
+          <widget class="QRadioButton" name="correctedRadioButton">
+           <property name="text">
+            <string>Corrected</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="corruptedRadioButton">
+           <property name="text">
+            <string>Corrupted</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="targetRadioButton">
+           <property name="text">
+            <string>Target</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
       <item row="0" column="0">
-       <widget class="QCheckBox" name="targetCheckBox">
-        <property name="text">
-         <string>Target Signal</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
+       <widget class="QWidget" name="multiTypeContainer" native="true">
+        <layout class="QGridLayout" name="gridLayout_2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="2">
+          <widget class="QCheckBox" name="correctedCheckBox">
+           <property name="text">
+            <string>Corrected</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="corruptedCheckBox">
+           <property name="text">
+            <string>Corrupted</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="targetCheckBox">
+           <property name="text">
+            <string>Target</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="corruptedCheckBox">
-        <property name="text">
-         <string>Corrupted Signal</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QCheckBox" name="correctedCheckBox">
-        <property name="text">
-         <string>Corrected Signal</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
+      <item row="0" column="1" rowspan="2">
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>35</width>
-          <height>0</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
        </spacer>
@@ -188,8 +241,24 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="ViFileBrowser" name="fileBrowser"/>
+   <item row="3" column="0">
+    <widget class="QLabel" name="typeLabel">
+     <property name="minimumSize">
+      <size>
+       <width>70</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Types:</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

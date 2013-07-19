@@ -9,7 +9,7 @@ ViMainWaveWidget::ViMainWaveWidget(QWidget *parent)
 
 	clear();
 
-	mUi->projectLoader->setMode(ViProjectLoader::SingleTrack);
+	mUi->projectLoader->setProjectMode(ViProjectLoader::SingleTrack);
 
 	setStyleSheet("QLabel { min-width: 100px; }");
 }
@@ -41,7 +41,7 @@ void ViMainWaveWidget::generateWave()
 	mUi->correctedWaveForm->clear();
 
 	ViAudioObjectPointer object = mUi->projectLoader->object();
-	QQueue<ViAudio::Type> instructions = ViAudioObject::decomposeTypes(mUi->projectLoader->processTypes());
+	QQueue<ViAudio::Type> instructions = ViAudioObject::decomposeTypes(mUi->projectLoader->types());
 	QQueue<ViAudio::Type> newInstructions;
 
 	if(!instructions.empty())
@@ -84,7 +84,7 @@ void ViMainWaveWidget::generateWave()
 	else
 	{
 		ViAudio::Type type;
-		if(regenerate) type = mUi->projectLoader->processTypes();
+		if(regenerate) type = mUi->projectLoader->types();
 		else type = ViAudioObject::composeTypes(newInstructions);
 
 		QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(drawWave()));
@@ -97,7 +97,7 @@ void ViMainWaveWidget::drawWave()
 	mUi->scrollArea->show();
 
 	QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(drawWave()));
-	ViAudio::Type types = mUi->projectLoader->processTypes();
+	ViAudio::Type types = mUi->projectLoader->types();
 	ViWaveForm *form;
 
 	ViAudioObjectPointer object = mUi->projectLoader->object();
@@ -149,7 +149,6 @@ void ViMainWaveWidget::clear()
 	mUi->projectLoader->clear();
 	clearProject();
 	QObject::connect(mUi->alignCheckBox, SIGNAL(stateChanged(int)), this, SLOT(generateWave()));
-	QObject::connect(mUi->projectLoader, SIGNAL(trackChanged()), this, SLOT(generateWave()));
 	QObject::connect(mUi->projectLoader, SIGNAL(typesChanged()), this, SLOT(generateWave()));
 	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), this, SLOT(clearProject()), Qt::DirectConnection);
 }

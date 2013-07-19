@@ -8,6 +8,7 @@
 #include "viaudioobjectchain.h"
 
 #include <viaudiorecorder.h>
+#include <viaudioplayer.h>
 
 class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 {
@@ -18,23 +19,14 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 
 	public slots:
 
-		//Input
-		void changeInput(ViAudio::Input input);
-
 		//Playback
+		void playback(ViAudioObjectPointer object, ViAudio::Type type);
+		void clearPlayback();
 		void startPlayback();
 		void stopPlayback();
 		void pausePlayback();
-		void setPosition(int seconds);
-
-		//Recording
-		void startRecording();
-		void stopRecording();
-		void pauseRecording();
-
-		//File I/O
-		void openFile(QString filePath);
-		void saveFile(QString filePath);
+		void setPlaybackPosition(ViAudioPosition position);
+		void setPlaybackVolume(int volume);
 
 		//Spectrum
 		void calculateSpectrum(qint32 size, QString windowFunction);
@@ -51,21 +43,12 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		//Metadata
 		void updateMetadata(ViProject *project);
 
-		//Volume
-		void setVolume(int volume);
-		void mute(bool value = true);
-		void unmute();
-
 		//Analyse
 		void generateWave(ViAudioObjectPointer object, ViAudio::Type type = ViAudio::All, const bool &align = false);
 
 		//Align
 		void align(ViProject &project);
 		void align(ViAudioObjectPointer object);
-
-	private slots:
-
-		void disconnectObject();
 
 	signals:
 
@@ -74,16 +57,9 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		void progressFinished();
 		void statusChanged(QString status);
 
-		//Chain
-		void chainChanged();
-		void buffering(short progress);
-
 		//Playback
 		void positionChanged(ViAudioPosition position);
-		void lengthChanged(ViAudioPosition length);
-
-		//Input
-		void inputChanged(ViAudio::Input input);		
+		void durationChanged(ViAudioPosition duration);
 
 		//Spectrum
 		void spectrumChanged(ViRealSpectrum spectrum, qint64 milliseconds);
@@ -94,22 +70,9 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		void correlationProgressed(short percentage);
 		void correlationFinished();
 
-		//Project
-		void loadProjectStarted();
-		void saveProjectStarted();
-		void projectFinished();
-
-		//Volume
-		void volumeChanged(int volume);
-		void muted();
-		void unmuted();
-
 	public:
 
 		~ViAudioEngine();
-
-		//Volume
-		int volume();
 
 	protected:
 
@@ -117,15 +80,9 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 
 	private:
 
-		ViAudioConnection mConnection;
-		ViFileInput *mFileInput;
-		ViFileOutput *mFileOutput;
-		ViStreamInput *mStreamInput;
-		ViStreamOutput *mStreamOutput;
-
 		ViAudioObjectChain mObjectChain;
-
 		ViAudioRecorder mRecorder;
+		ViAudioPlayer mPlayer;
 
 };
 

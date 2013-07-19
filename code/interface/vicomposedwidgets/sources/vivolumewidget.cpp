@@ -26,6 +26,11 @@ ViVolumeWidget::~ViVolumeWidget()
 	delete mUi;
 }
 
+void ViVolumeWidget::changeVolume(int volume)
+{
+	mUi->volumeBar->setValue(volume);
+}
+
 void ViVolumeWidget::mute(bool mute)
 {
 	if(mute)

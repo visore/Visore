@@ -100,6 +100,11 @@ void ViBuffer::execute(ViFunctorParameter *data)
 	}
 }
 
+void ViBuffer::change()
+{
+	emit changed();
+}
+
 int ViBuffer::size()
 {
 	QMutexLocker locker(&mMutex);

@@ -15,11 +15,19 @@ class ViProjectLoader : public ViWidget
 
 	public:
 
-		enum Mode
+		enum ProjectMode
 		{
 			MultipleProjects,
 			SingleProject,
 			SingleTrack
+		};
+
+		//How many buffer types can be selected
+		enum TypeMode
+		{
+			NoTypes,
+			MultipleTypes,
+			SingleType
 		};
 
 	signals:
@@ -35,7 +43,8 @@ class ViProjectLoader : public ViWidget
 		void loadProjects(QList<ViProject*> projects);
 		void loadTracks();
 		void analyseTrack(int index);
-		void changeMode(int mode);
+		void changeProjectMode(int mode);
+		void changeRadioTypes(bool checked);
 
 	public:
 
@@ -48,12 +57,10 @@ class ViProjectLoader : public ViWidget
 		ViAudioObjectPointer object();
 
 		void clear();
-		ViAudio::Type processTypes();
+		ViAudio::Type types();
 
-		void setMode(ViProjectLoader::Mode mode);
-
-		void enableBufferSelection(bool enable = true);
-		void disableBufferSelection(bool disable = true);
+		void setProjectMode(ViProjectLoader::ProjectMode mode);
+		void setTypeMode(ViProjectLoader::TypeMode mode);
 
 	private:
 
@@ -63,10 +70,10 @@ class ViProjectLoader : public ViWidget
 		ViAudioObjectQueue mObjects;
 		int mSelectedObject;
 
-		ViProjectLoader::Mode mMode;
+		ViProjectLoader::ProjectMode mProjectMode;
 		int mProjectCount;
 
-		bool mEnableBufferSelection;
+		ViProjectLoader::TypeMode mTypeMode;
 
 };
 

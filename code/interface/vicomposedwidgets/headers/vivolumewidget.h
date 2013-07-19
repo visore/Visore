@@ -21,6 +21,7 @@ class ViVolumeWidget : public ViWidget
 
 	public slots:
 
+		void changeVolume(int volume);
 		void mute(bool mute = true);
 		void unmute(bool unmute = true);
 

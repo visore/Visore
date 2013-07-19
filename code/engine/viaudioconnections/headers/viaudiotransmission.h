@@ -15,6 +15,8 @@ class ViAudioTransmission : public QObject
 
 		void stateChanged(QAudio::State state);
 		void started();
+		void stopped();
+		void paused();
 		void finished();
 		void bufferChanged();
 
