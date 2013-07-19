@@ -72,14 +72,9 @@ void ViProjectLoader::clear()
 	mUi->tracksComboBox->clear();
 	mUi->fileBrowser->clear();
 
-	if(mObjects.size()>0){
-		ViAudioObjectPointer o = mObjects[0];
-	LOG("xxxxxxxxx******1: "+QString::number(o.referenceCount()));
-
 	viDeleteAll(mProjects);
 	mObjects.clear();
-	LOG("xxxxxxxxx******2: "+QString::number(o.referenceCount()));
-}
+
 	mUi->tracksLabel->hide();
 	mUi->tracksComboBox->hide();
 	mUi->processLabel->hide();

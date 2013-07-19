@@ -135,12 +135,6 @@ void ViMainWaveWidget::drawWave()
 
 void ViMainWaveWidget::clear()
 {
-	//LOG("xxxxxxxxx1");
-	/*if(mUi->alignWidget->isVisible())
-	{
-		mUi->projectLoader->object()->clearWaves();
-	}*/
-
 	mUi->alignCheckBox->disconnect();
 	mUi->projectLoader->disconnect();
 

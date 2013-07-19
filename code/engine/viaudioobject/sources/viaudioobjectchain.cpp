@@ -32,11 +32,12 @@ void ViAudioObjectChain::progressNext()
 void ViAudioObjectChain::executeNext()
 {
     if(mObjects.isEmpty() && (mCurrentIndex == mFunctions.size() || mCurrentIndex == 0))
-    {
+	{
 		clear();
         mProgress = 100;
         emit finished();
         disconnect();
+
 		return;
 	}
     else if(mCurrentIndex == 0)
@@ -81,6 +82,7 @@ void ViAudioObjectChain::add(ViProject &project)
 
 void ViAudioObjectChain::clear()
 {
+	mCurrentObject.setNull();
 	mObjects.clear();
 	mFunctions.clear();
 	mWeights.clear();
