@@ -1,8 +1,7 @@
 #ifndef VIPLAYBACKWIDGET_H
 #define VIPLAYBACKWIDGET_H
 
-#include "viwidget.h"
-#include "vithememanager.h"
+#include <viwidget.h>
 
 namespace Ui
 {
@@ -11,29 +10,33 @@ namespace Ui
 
 class ViPlaybackWidget : public ViWidget
 {
+
 	Q_OBJECT
 
 	signals:
 
-		void clicked();
+		void played();
+		void paused();
+		void unpaused();
+		void stopped();
 
-	private slots:
+	public slots:
 		
-		void record(bool checked);
-		void play(bool checked);
-		void pause(bool checked);
-		void stop(bool checked);
-		void inputChanged(ViAudio::Input input);
+		void play();
+		void pause();
+		void stop();
 
 	public:
+
 		ViPlaybackWidget(QWidget *parent = 0);
 		~ViPlaybackWidget();
 
+		void clear();
+
 	private:
+
 		Ui::ViPlaybackWidget *mUi;
-		bool mIsRecording;
-		bool mIsPlaying;
-		bool mIsPausing;
+
 };
 
 #endif

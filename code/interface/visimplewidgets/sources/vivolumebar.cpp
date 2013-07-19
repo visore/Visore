@@ -1,4 +1,6 @@
-#include "vivolumebar.h"
+#include <vivolumebar.h>
+
+#define PEN_WIDTH 2
 
 ViVolumeBar::ViVolumeBar(QWidget *parent, ViVolumeBar::ViVolumeBarType type)
 	: QWidget(parent)
@@ -15,7 +17,7 @@ void ViVolumeBar::setType(ViVolumeBar::ViVolumeBarType type)
 	mType = type;
 }
 
-void ViVolumeBar::paintEvent(QPaintEvent *event)
+void ViVolumeBar::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
@@ -23,7 +25,7 @@ void ViVolumeBar::paintEvent(QPaintEvent *event)
 	qint16 theWidth = width() - (PEN_WIDTH - 1);
 	qint16 theHeight = height() - (PEN_WIDTH - 1);
 
-	QPen pen(ViThemeManager::color(ViThemeColors::BorderColor1));
+	QPen pen(ViThemeManager::color(ViThemeColors::BorderColor2));
 	pen.setWidth(PEN_WIDTH);
 
 	QLinearGradient linearGradient(QPoint(0, theHeight / 2), QPoint(theWidth, theHeight / 2));
@@ -73,7 +75,6 @@ void ViVolumeBar::paintEvent(QPaintEvent *event)
 		{
 			mValue = (PEN_WIDTH - 1) * 2;
 		}
-		qint16 newHeight = mValue * (theHeight / qreal(theWidth));
 		qint16 halfHeight = theHeight / 2;
 		qint16 newPosition = ((mValue / qreal(theWidth)) * halfHeight);
 		point4 = QPoint((PEN_WIDTH - 1) * 2, halfHeight);
@@ -95,13 +96,13 @@ void ViVolumeBar::paintEvent(QPaintEvent *event)
 	painter.drawPolyline(border, 4);
 }
 
-void ViVolumeBar::enterEvent(QEvent *event)
+void ViVolumeBar::enterEvent(QEvent*)
 {
 	mIsHover = true;
 	repaint();
 }
 
-void ViVolumeBar::leaveEvent(QEvent *event)
+void ViVolumeBar::leaveEvent(QEvent*)
 {
 	mIsHover = false;
 	repaint();
@@ -117,7 +118,7 @@ void ViVolumeBar::mousePressEvent(QMouseEvent *event)
 	}
 }
 
-void ViVolumeBar::mouseReleaseEvent(QMouseEvent *event)
+void ViVolumeBar::mouseReleaseEvent(QMouseEvent*)
 {
 	mIsPressed = false;
 }

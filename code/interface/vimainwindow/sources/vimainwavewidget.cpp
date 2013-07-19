@@ -22,7 +22,16 @@ ViMainWaveWidget::~ViMainWaveWidget()
 
 void ViMainWaveWidget::clearProject()
 {
-	clear();
+	mAlignments.clear();
+	mUi->targetWaveForm->clear();
+	mUi->corruptedWaveForm->clear();
+	mUi->correctedWaveForm->clear();
+	mUi->targetGroupBox->hide();
+	mUi->corruptedGroupBox->hide();
+	mUi->correctedGroupBox->hide();
+	mUi->scrollArea->hide();
+	mUi->alignWidget->hide();
+	mUi->alignCheckBox->setChecked(false);
 }
 
 void ViMainWaveWidget::generateWave()
@@ -137,20 +146,8 @@ void ViMainWaveWidget::clear()
 {
 	mUi->alignCheckBox->disconnect();
 	mUi->projectLoader->disconnect();
-
-	mAlignments.clear();
-
-	mUi->targetWaveForm->clear();
-	mUi->corruptedWaveForm->clear();
-	mUi->correctedWaveForm->clear();
-	mUi->targetGroupBox->hide();
-	mUi->corruptedGroupBox->hide();
-	mUi->correctedGroupBox->hide();
-	mUi->scrollArea->hide();
-	mUi->alignWidget->hide();
-	mUi->alignCheckBox->setChecked(false);
 	mUi->projectLoader->clear();
-
+	clearProject();
 	QObject::connect(mUi->alignCheckBox, SIGNAL(stateChanged(int)), this, SLOT(generateWave()));
 	QObject::connect(mUi->projectLoader, SIGNAL(trackChanged()), this, SLOT(generateWave()));
 	QObject::connect(mUi->projectLoader, SIGNAL(typesChanged()), this, SLOT(generateWave()));

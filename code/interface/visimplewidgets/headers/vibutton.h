@@ -16,7 +16,10 @@ class ViButton : public QToolButton
 		{
 			Normal,
 			Hovered,
-			Selected
+			Selected,
+			Checked,
+			Enabled,
+			Disabled
 		};
 
 	private slots:
@@ -57,6 +60,7 @@ class ViButton : public QToolButton
 
 	protected:
 
+		void changeEvent(QEvent *event);
 		void enterEvent(QEvent*);
 		void leaveEvent(QEvent*);
 		void initialize();

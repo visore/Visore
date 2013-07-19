@@ -28,6 +28,8 @@ class ViThemeColors
 			ButtonSelectedColor2,
 			ButtonHoveredColor1,
 			ButtonHoveredColor2,
+			ButtonDisbaledColor1,
+			ButtonDisbaledColor2,
 
 			ButtonGlowColor1,
 

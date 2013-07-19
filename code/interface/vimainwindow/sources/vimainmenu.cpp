@@ -6,6 +6,7 @@
 #include <vimainwavewidget.h>
 #include <vimaincorrectionwidget.h>
 #include <vimainmetadatawidget.h>
+#include <vimainplaybackwidget.h>
 
 ViMainMenu::ViMainMenu(QWidget *parent)
     : ViWidget(parent)
@@ -39,6 +40,9 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	mUi->projectPlaybackButton->setIcon(ViThemeManager::icon("playback"), 80);
 	mUi->projectPlaybackButton->setText("Playback Project", textColor, font);
 	mUi->projectPlaybackButton->setSize(250, 100);
+	index = ViStackedWidget::addWidget(new ViMainPlaybackWidget(), false);
+	mUi->projectPlaybackButton->setProperty("index", index);
+	QObject::connect(mUi->projectPlaybackButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->analyseWaveButton->setIcon(ViThemeManager::icon("soundwave"), 80);
 	mUi->analyseWaveButton->setText("Sound Wave", textColor, font);

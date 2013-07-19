@@ -7,124 +7,64 @@ ViPlaybackWidget::ViPlaybackWidget(QWidget *parent)
 	mUi = new Ui::ViPlaybackWidget();
 	mUi->setupUi(this);
 
-	mIsRecording = false;
-	mIsPlaying = false;
-	mIsPausing = false;
+	clear();
 
-	/*mUi->recordButton->setIcon(ViThemeManager::image("record.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
-	mUi->recordButton->setCheckable(true);
-
-	mUi->playButton->setIcon(ViThemeManager::image("play.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 	mUi->playButton->setCheckable(true);
-
-	mUi->pauseButton->setIcon(ViThemeManager::image("pause.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);
 	mUi->pauseButton->setCheckable(true);
 
-	mUi->stopButton->setIcon(ViThemeManager::image("stop.png", ViThemeImage::Normal, ViThemeManager::Icon), ViThemeImage::Normal);*/
+	mUi->playButton->setIcon(ViThemeManager::icon("play"), 36);
+	mUi->pauseButton->setIcon(ViThemeManager::icon("pause"), 36);
+	mUi->stopButton->setIcon(ViThemeManager::icon("stop"), 36);
 
-	QObject::connect(mUi->recordButton, SIGNAL(clicked(bool)), this, SLOT(record(bool)));
-	QObject::connect(mUi->playButton, SIGNAL(clicked(bool)), this, SLOT(play(bool)));
-	QObject::connect(mUi->pauseButton, SIGNAL(clicked(bool)), this, SLOT(pause(bool)));
-	QObject::connect(mUi->stopButton, SIGNAL(clicked(bool)), this, SLOT(stop(bool)));
-
-	QObject::connect(mUi->recordButton, SIGNAL(clicked(bool)), this, SIGNAL(clicked()));
-	QObject::connect(mUi->playButton, SIGNAL(clicked(bool)), this, SIGNAL(clicked()));
-	QObject::connect(mUi->pauseButton, SIGNAL(clicked(bool)), this, SIGNAL(clicked()));
-	QObject::connect(mUi->stopButton, SIGNAL(clicked(bool)), this, SIGNAL(clicked()));
-
-	mUi->recordButton->disable();
-	mUi->playButton->disable();
-	mUi->pauseButton->disable();
-	mUi->stopButton->disable();
-
-	QObject::connect(engine().data(), SIGNAL(inputChanged(ViAudio::Input)), this, SLOT(inputChanged(ViAudio::Input)));
+	QObject::connect(mUi->playButton, SIGNAL(clicked(bool)), this, SLOT(play()));
+	QObject::connect(mUi->pauseButton, SIGNAL(clicked(bool)), this, SLOT(pause()));
+	QObject::connect(mUi->stopButton, SIGNAL(clicked(bool)), this, SLOT(stop()));
 }
 
 ViPlaybackWidget::~ViPlaybackWidget()
 {
+	clear();
 	delete mUi;
 }
 
-void ViPlaybackWidget::inputChanged(ViAudio::Input input)
+void ViPlaybackWidget::clear()
 {
-	stop(true);
-	if(input == ViAudio::File)
+	mUi->playButton->setChecked(false);
+	mUi->pauseButton->setChecked(false);
+
+	mUi->playButton->enable();
+	mUi->pauseButton->disable();
+	mUi->stopButton->disable();
+}
+
+void ViPlaybackWidget::play()
+{
+	if(mUi->playButton->isChecked())
 	{
-		mUi->recordButton->disable();
-		mUi->playButton->enable();
-		mUi->pauseButton->disable();
-		mUi->stopButton->disable();
-	}
-	else if(input == ViAudio::Line)
-	{
-		mUi->recordButton->enable();
-		mUi->playButton->disable();
-		mUi->pauseButton->disable();
-		mUi->stopButton->disable();
+		mUi->pauseButton->setChecked(false);
+		mUi->pauseButton->enable();
+		mUi->stopButton->enable();
+		emit played();
 	}
 }
 
-void ViPlaybackWidget::record(bool checked)
+void ViPlaybackWidget::pause()
 {
-	mIsRecording = checked;
-	if(mIsRecording)
+	if(mUi->pauseButton->isChecked())
 	{
-        engine()->startRecording();
-		mUi->playButton->enable();
-	}
-	else
-	{
-        engine()->stopRecording();
-	}
-}
-
-void ViPlaybackWidget::play(bool checked)
-{
-	if(!mIsPlaying)
-	{
-		mIsPlaying = checked;
+		mUi->playButton->setChecked(false);
+		emit paused();
 	}
 	else
 	{
 		mUi->playButton->setChecked(true);
+		emit unpaused();
+		emit played();
 	}
-	if(checked)
-	{
-        engine()->startPlayback();
-		mUi->pauseButton->enable();
-		mUi->stopButton->enable();
-	}
-	mUi->pauseButton->setChecked(false);
 }
 
-void ViPlaybackWidget::pause(bool checked)
+void ViPlaybackWidget::stop()
 {
-	if(mIsPlaying || mIsPausing)
-	{
-		mIsPausing = checked;
-		mIsPlaying = !mIsPausing;
-		if(checked)
-		{
-			mUi->playButton->setChecked(false);
-            engine()->pausePlayback();
-		}
-		else
-		{
-			mUi->playButton->setChecked(mIsPlaying);
-            engine()->startPlayback();
-		}
-	}
-	mUi->pauseButton->setChecked(mIsPausing);
-}
-
-void ViPlaybackWidget::stop(bool checked)
-{
-	if(mIsPlaying || mIsPausing)
-	{
-        engine()->stopPlayback();
-	}
-	play(false);
-	mIsPlaying = false;
-	mIsPausing = false;
-	mUi->playButton->setChecked(mIsPlaying);
+	clear();
+	emit stopped();
 }

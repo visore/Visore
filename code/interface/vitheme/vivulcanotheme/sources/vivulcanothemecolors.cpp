@@ -18,8 +18,10 @@ ViVulcanoThemeColors::ViVulcanoThemeColors()
 	addColor(QColor(255, 130, 0), ViThemeColors::ButtonNormalColor2);
 	addColor(QColor(230, 90, 0), ViThemeColors::ButtonSelectedColor1);
 	addColor(QColor(125, 50, 0), ViThemeColors::ButtonSelectedColor2);
-	addColor(QColor(223, 223, 223), ViThemeColors::ButtonHoveredColor1);
-	addColor(QColor(131, 131, 131), ViThemeColors::ButtonHoveredColor2);
+	addColor(QColor(94, 47, 0), ViThemeColors::ButtonHoveredColor1);
+	addColor(QColor(255, 130, 0), ViThemeColors::ButtonHoveredColor2);
+	addColor(QColor(223, 223, 223), ViThemeColors::ButtonDisbaledColor1);
+	addColor(QColor(131, 131, 131), ViThemeColors::ButtonDisbaledColor2);
 
 	addColor(QColor(255, 130, 0), ViThemeColors::ButtonGlowColor1);
 

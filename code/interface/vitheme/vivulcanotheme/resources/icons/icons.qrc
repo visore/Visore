@@ -2,8 +2,6 @@
     <qresource prefix="/icons">
         <file>add/add_normal.png</file>
         <file>fileinput/fileinput_normal.png</file>
-        <file>mute/mute_normal.png</file>
-        <file>mute/mute_selected.png</file>
         <file>pause/pause_normal.png</file>
         <file>play/play_normal.png</file>
         <file>record/record_normal.png</file>
@@ -12,8 +10,6 @@
         <file>star/star_normal.png</file>
         <file>startprocess/startprocess_normal.png</file>
         <file>stop/stop_normal.png</file>
-        <file>unmute/unmute_normal.png</file>
-        <file>unmute/unmute_selected.png</file>
         <file>vinylinput/vinylinput_normal.png</file>
         <file>zoomin/zoomin_normal.png</file>
         <file>zoomout/zoomout_normal.png</file>
@@ -34,5 +30,7 @@
         <file>playback/playback_normal.png</file>
         <file>switch/switch_normal.png</file>
         <file>switch/switch_selected.png</file>
+        <file>mute/mute_normal.png</file>
+        <file>mute/mute_selected.png</file>
     </qresource>
 </RCC>

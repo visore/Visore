@@ -1,5 +1,6 @@
 #include <vibutton.h>
 #include <vithememanager.h>
+#include <QEvent>
 
 ViButton::ViButton(QWidget *parent)
 	: QToolButton(parent)
@@ -50,13 +51,43 @@ void ViButton::addStyleSheet(QString style, ViButton::Mode mode)
 	{
 		addStyleSheet("QToolButton:pressed{" + style + "}");
 	}
+	else if(mode == ViButton::Checked)
+	{
+		addStyleSheet("QToolButton:checked{" + style + "}");
+	}
+	else if(mode == ViButton::Enabled)
+	{
+		addStyleSheet("QToolButton:enabled{" + style + "}");
+	}
+	else if(mode == ViButton::Disabled)
+	{
+		addStyleSheet("QToolButton:disabled{" + style + "}");
+	}
 }
 
 void ViButton::changeIcon(const bool &hover)
 {
-	if(hover && mIcon.contains(ViThemeIcon::Hovered))
+	if(!isEnabled())
 	{
-		QToolButton::setIcon(mIcon.icon(ViThemeIcon::Hovered));
+		QToolButton::setIcon(mIcon.icon(ViThemeIcon::Disabled));
+	}
+	else if(hover)
+	{
+		if(isCheckable())
+		{
+			if(isChecked())
+			{
+				QToolButton::setIcon(mIcon.icon(ViThemeIcon::Normal));
+			}
+			else
+			{
+				QToolButton::setIcon(mIcon.icon(ViThemeIcon::Selected));
+			}
+		}
+		else
+		{
+			QToolButton::setIcon(mIcon.icon(ViThemeIcon::Hovered));
+		}
 	}
 	else if(isCheckable() && isChecked())
 	{
@@ -65,6 +96,14 @@ void ViButton::changeIcon(const bool &hover)
 	else
 	{
 		QToolButton::setIcon(mIcon.icon(ViThemeIcon::Normal));
+	}
+}
+
+void ViButton::changeEvent(QEvent *event)
+{
+	if(event->type() == QEvent::EnabledChange)
+	{
+		changeIcon();
 	}
 }
 
@@ -91,22 +130,30 @@ void ViButton::initialize()
 
 	if(mEnableBorder)
 	{
-		QString borderColor1 = ViThemeManager::color(ViThemeColors::BorderColor1).name();
-		QString borderColor2 = ViThemeManager::color(ViThemeColors::BorderColor2).name();
-		addStyleSheet("border: 2px solid  " + borderColor2 + "; border-radius: 10px;", ViButton::Normal);
-		addStyleSheet("border-color: " + borderColor1 + ";", ViButton::Hovered);
+		addStyleSheet("border: 2px solid  " + ViThemeManager::color(ViThemeColors::BorderColor2).name() + "; border-radius: 10px;", ViButton::Normal);
+		addStyleSheet("border-color: " + ViThemeManager::color(ViThemeColors::BorderColor1).name() + ";", ViButton::Hovered);
+		addStyleSheet("border-color: " + ViThemeManager::color(ViThemeColors::BorderColor1).name() + ";", ViButton::Checked);
+		addStyleSheet("border-color: " + ViThemeManager::color(ViThemeColors::BorderColor3).name() + ";", ViButton::Disabled);
 	}
 	else
 	{
 		addStyleSheet("border: 0px;", ViButton::Normal);
 	}
 
-	if(mEnableBorder)
+	if(mEnableBackground)
 	{
 		QString backgroundColor1 = ViThemeManager::color(ViThemeColors::ButtonNormalColor1).name();
 		QString backgroundColor2 = ViThemeManager::color(ViThemeColors::ButtonNormalColor2).name();
 		addStyleSheet("padding: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 " + backgroundColor1 + ", stop: 0.05 " + backgroundColor1 + ", stop: 0.5 " + backgroundColor2 + ", stop: 0.95 " + backgroundColor1 + ", stop: 1.0 " + backgroundColor1 + ");", ViButton::Normal);
+
+		backgroundColor1 = ViThemeManager::color(ViThemeColors::ButtonHoveredColor1).name();
+		backgroundColor2 = ViThemeManager::color(ViThemeColors::ButtonHoveredColor2).name();
 		addStyleSheet("background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 " + backgroundColor1 + ", stop: 0.4 " + backgroundColor2 + ", stop: 0.6 " + backgroundColor2 + ", stop: 1.0 " + backgroundColor1 + ");", ViButton::Hovered);
+		addStyleSheet("background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 " + backgroundColor1 + ", stop: 0.4 " + backgroundColor2 + ", stop: 0.6 " + backgroundColor2 + ", stop: 1.0 " + backgroundColor1 + ");", ViButton::Checked);
+
+		backgroundColor1 = ViThemeManager::color(ViThemeColors::ButtonDisbaledColor1).name();
+		backgroundColor2 = ViThemeManager::color(ViThemeColors::ButtonDisbaledColor2).name();
+		addStyleSheet("background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 " + backgroundColor1 + ", stop: 0.4 " + backgroundColor2 + ", stop: 0.6 " + backgroundColor2 + ", stop: 1.0 " + backgroundColor1 + ");", ViButton::Disabled);
 	}
 	else
 	{
