@@ -40,6 +40,13 @@ class ViManager : public ViSingleton<ViManager>
 		static ViVersion version();
 		static QString name();
 		static QUrl url();
+		static QUrl gitUrl();
+		static QString email();
+		static QString license();
+		static QString developer();
+		static QString copyright();
+		static QString shortDescription();
+		static QString longDescription();
 		static QString projectExtension();
 		static QString projectName();
 		static QString projectFilter();
@@ -82,6 +89,13 @@ class ViManager : public ViSingleton<ViManager>
 		ViVersion mVersion;
 		QString mName;
 		QUrl mUrl;
+		QUrl mGitUrl;
+		QString mEmail;
+		QString mDeveloper;
+		QString mCopyright;
+		QString mLicense;
+		QString mShortDescription;
+		QString mLongDescription;
 		QString mProjectExtension;
 		QString mProjectName;
 

@@ -3,6 +3,7 @@
 #include <vistackedwidget.h>
 #include <vimainmenu.h>
 #include <viloadingwidget.h>
+#include <viaboutdialog.h>
 
 ViMainWindow* ViMainWindow::mWindow = NULL;
 
@@ -80,8 +81,13 @@ void ViMainWindow::initialize()
     mUi->stack->layout()->addWidget(ViStackedWidget::widget());
     mUi->stack->setStyleSheet(".QWidget{background:transparent;border:0px;}");
 
-    int index = ViStackedWidget::addWidget(new ViMainMenu(), false);
-    ViStackedWidget::setCurrentIndex(index);
+	mUi->aboutButton->disableBackground();
+	mUi->aboutButton->disableBorder();
+	mUi->aboutButton->setIcon(ViThemeManager::icon("about"), 24);
+	QObject::connect(mUi->aboutButton, SIGNAL(clicked()), this, SLOT(showAbout()));
+
+	int index = ViStackedWidget::addWidget(new ViMainMenu(), false);
+	ViStackedWidget::setCurrentIndex(index);
 	mUi->logoButton->setProperty("index", index);
 	QObject::connect(mUi->logoButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
@@ -96,4 +102,10 @@ void ViMainWindow::initialize()
 	font.setLetterSpacing(QFont::PercentageSpacing, 105);
 	mUi->logoLabel->setFont(font);
     mUi->logoLabel->setStyleSheet("color: " + ViThemeManager::color(ViThemeColors::MainColor6).name());
+}
+
+void ViMainWindow::showAbout()
+{
+	ViAboutDialog dialog(this);
+	dialog.exec();
 }

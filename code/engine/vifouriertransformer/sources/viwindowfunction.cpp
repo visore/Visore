@@ -53,7 +53,7 @@ ViWindowFunction<T>* ViWindowFunctionManager<T>::createFunction(QString function
 	}
 	else if(functionName == "hann")
 	{
-		return new ViHannFunction<T>;
+		return new ViHanningFunction<T>;
 	}
 	return NULL;
 }
@@ -62,7 +62,7 @@ template <typename T>
 QStringList ViWindowFunctionManager<T>::functions()
 {
 	QStringList result;
-	result << "Rectangular" << "Hamming" << "Hann";
+	result << "Rectangular" << "Hamming" << "Hanning";
 	return result;
 }
 
@@ -105,17 +105,17 @@ template class ViHammingFunction<float>;
 template class ViHammingFunction<double>;
 
 /**********************************************************
-ViHannFunction
+ViHanningFunction
 **********************************************************/
 
 template <typename T>
-T ViHannFunction<T>::calculate(const int currentSample, const int totalSamples)
+T ViHanningFunction<T>::calculate(const int currentSample, const int totalSamples)
 {
 	return 0.5 * (1 - qCos((2 * M_PI * currentSample) / (totalSamples - 1)));
 }
 
-template class ViHannFunction<short>;
-template class ViHannFunction<int>;
-template class ViHannFunction<long>;
-template class ViHannFunction<float>;
-template class ViHannFunction<double>;
+template class ViHanningFunction<short>;
+template class ViHanningFunction<int>;
+template class ViHanningFunction<long>;
+template class ViHanningFunction<float>;
+template class ViHanningFunction<double>;

@@ -17,7 +17,7 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 
     QFont font;
 	font.setFamily("Harabara");
-	font.setPointSize(16);
+	font.setPointSize(18);
 	font.setBold(true);
 	font.setLetterSpacing(QFont::PercentageSpacing, 105);
 
@@ -25,49 +25,49 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	int index;
 
 	mUi->createProjectButton->setIcon(ViThemeManager::icon("microphone"), 80);
-	mUi->createProjectButton->setText("Record Project", textColor, font);
+	mUi->createProjectButton->setText("   Record\n   Project", textColor, font);
 	mUi->createProjectButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViMainRecordingWidget(), false);
 	mUi->createProjectButton->setProperty("index", index);
 	QObject::connect(mUi->createProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->metadataButton->setIcon(ViThemeManager::icon("metadata"), 80);
-	mUi->metadataButton->setText("Update Metadata", textColor, font);
+	mUi->metadataButton->setText("   Update\n   Metadata", textColor, font);
 	mUi->metadataButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViMainMetadataWidget(), false);
 	mUi->metadataButton->setProperty("index", index);
 	QObject::connect(mUi->metadataButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->projectPlaybackButton->setIcon(ViThemeManager::icon("playback"), 80);
-	mUi->projectPlaybackButton->setText("Playback Project", textColor, font);
+	mUi->projectPlaybackButton->setText("   Playback\n   Project", textColor, font);
 	mUi->projectPlaybackButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViMainPlaybackWidget(), false);
 	mUi->projectPlaybackButton->setProperty("index", index);
 	QObject::connect(mUi->projectPlaybackButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->analyseWaveButton->setIcon(ViThemeManager::icon("soundwave"), 80);
-	mUi->analyseWaveButton->setText("Sound Wave", textColor, font);
+	mUi->analyseWaveButton->setText("   Soundwave", textColor, font);
 	mUi->analyseWaveButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViMainWaveWidget(), false);
 	mUi->analyseWaveButton->setProperty("index", index);
 	QObject::connect(mUi->analyseWaveButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->spectrumButton->setIcon(ViThemeManager::icon("spectrum"), 80);
-	mUi->spectrumButton->setText("Frequency\nSpectrum", textColor, font);
+	mUi->spectrumButton->setText("   Frequency\n   Spectrum", textColor, font);
 	mUi->spectrumButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViMainSpectrumWidget(), false);
 	mUi->spectrumButton->setProperty("index", index);
 	QObject::connect(mUi->spectrumButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->correlateProjectButton->setIcon(ViThemeManager::icon("correlation"), 80);
-	mUi->correlateProjectButton->setText("Correlate Project", textColor, font);
+	mUi->correlateProjectButton->setText("   Correlate\n   Project", textColor, font);
 	mUi->correlateProjectButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViMainCorrelationWidget());
 	mUi->correlateProjectButton->setProperty("index", index);
 	QObject::connect(mUi->correlateProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->correctProjectButton->setIcon(ViThemeManager::icon("correction"), 80);
-	mUi->correctProjectButton->setText("Correct Project", textColor, font);
+	mUi->correctProjectButton->setText("   Correct\n   Project", textColor, font);
 	mUi->correctProjectButton->setSize(250, 100);
 	index = ViStackedWidget::addWidget(new ViMainCorrectionWidget());
 	mUi->correctProjectButton->setProperty("index", index);

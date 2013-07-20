@@ -15,6 +15,10 @@ class ViMainWindow : public QMainWindow
 
 	Q_OBJECT
 
+	private slots:
+
+		void showAbout();
+
 	public:
 
 		virtual ~ViMainWindow();

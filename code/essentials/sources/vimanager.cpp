@@ -35,7 +35,14 @@ ViManager::ViManager()
 	//Universal
 	mVersion = ViVersion(QString(VERSION_MAJOR).toInt(), QString(VERSION_MINOR).toInt(), QString(VERSION_PATCH).toInt());
 	mName = QString(NAME);
-	mUrl = QUrl(QString(HOMEPAGE).replace("http://", ""));
+	mUrl = QUrl(QString(HOMEPAGE));
+	mGitUrl = QUrl("https://github.com/visore/Visore");
+	mEmail = QString(EMAIL);
+	mLicense = QString(LICENSE);
+	mCopyright = QString(COPYRIGHT);
+	mDeveloper = QString(MAINTAINER);
+	mShortDescription = QString(SHORT_DESCRIPTION);
+	mLongDescription = QString(LONG_DESCRIPTION);
 	mProjectExtension = "vip";
 	mProjectName = "Visore Projects";
 
@@ -147,6 +154,41 @@ QString ViManager::name()
 QUrl ViManager::url()
 {
 	return instance()->mUrl;
+}
+
+QUrl ViManager::gitUrl()
+{
+	return instance()->mGitUrl;
+}
+
+QString ViManager::email()
+{
+	return instance()->mEmail;
+}
+
+QString ViManager::license()
+{
+	return instance()->mLicense;
+}
+
+QString ViManager::developer()
+{
+	return instance()->mDeveloper;
+}
+
+QString ViManager::copyright()
+{
+	return instance()->mCopyright;
+}
+
+QString ViManager::shortDescription()
+{
+	return instance()->mShortDescription;
+}
+
+QString ViManager::longDescription()
+{
+	return instance()->mLongDescription;
 }
 
 QString ViManager::projectExtension()

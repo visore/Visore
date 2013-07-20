@@ -81,6 +81,9 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
+       <item row="0" column="0">
+        <widget class="ViButton" name="logoButton"/>
+       </item>
        <item row="0" column="2">
         <spacer name="horizontalSpacer">
          <property name="orientation">
@@ -94,13 +97,17 @@
          </property>
         </spacer>
        </item>
-       <item row="0" column="0">
-        <widget class="ViButton" name="logoButton" native="true"/>
-       </item>
        <item row="0" column="1">
         <widget class="QLabel" name="logoLabel">
          <property name="text">
           <string>Visore</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="ViButton" name="aboutButton">
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>
@@ -123,7 +130,7 @@
  <customwidgets>
   <customwidget>
    <class>ViButton</class>
-   <extends>QWidget</extends>
+   <extends>QToolButton</extends>
    <header>vibutton.h</header>
    <container>1</container>
   </customwidget>

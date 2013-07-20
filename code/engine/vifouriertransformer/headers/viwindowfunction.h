@@ -76,11 +76,11 @@ class ViHammingFunction : public ViWindowFunction<T>
 };
 
 /**********************************************************
-ViHannFunction
+ViHanningFunction
 **********************************************************/
 
 template <typename T>
-class ViHannFunction : public ViWindowFunction<T>
+class ViHanningFunction : public ViWindowFunction<T>
 {
 
 	protected:
