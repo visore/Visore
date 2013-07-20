@@ -72,6 +72,11 @@ void ViAudioData::setSampleCount(int samples)
     update();
 }
 
+bool ViAudioData::setWindowFunction(QString function)
+{
+	return mTransformer.setWindowFunction(function);
+}
+
 int ViAudioData::sampleCount()
 {
 	QMutexLocker locker(&mMutex);

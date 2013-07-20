@@ -61,7 +61,6 @@ void ViProcessor::clear()
 	mTotalChannels = 0;
 	mTotalSize = 0;
 	mProcessedSize = 0;
-
 }
 
 void ViProcessor::run()
@@ -264,6 +263,16 @@ ViProcessor::ProcessMode ViProcessor::processMode()
 {
 	QMutexLocker locker(&mMutex);
 	return mProcessMode;
+}
+
+void ViProcessor::setWindowSize(int samples)
+{
+	mData.setSampleCount(samples);
+}
+
+bool ViProcessor::setWindowFunction(QString function)
+{
+	return mData.setWindowFunction(function);
 }
 
 int ViProcessor::sampleCount()
@@ -480,6 +489,18 @@ void ViDualProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type ty
 	}
 }
 
+void ViDualProcessor::setWindowSize(int samples)
+{
+	ViProcessor::setWindowSize(samples);
+	mData2.setSampleCount(samples);
+}
+
+bool ViDualProcessor::setWindowFunction(QString function)
+{
+	ViProcessor::setWindowFunction(function);
+	mData2.setWindowFunction(function);
+}
+
 ViAudio::Type ViDualProcessor::type2()
 {
 	QMutexLocker locker(&mMutex);
@@ -592,6 +613,19 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
 			emit finished();
 		}
 	}
+}
+
+void ViModifyProcessor::setWindowSize(int samples)
+{
+	ViProcessor::setWindowSize(samples);
+	mData2.setSampleCount(samples);
+}
+
+bool ViModifyProcessor::setWindowFunction(QString function)
+{
+	LOG("Inverse window function still has to be implemented in the fourier transformer.", QtFatalMsg);
+	ViProcessor::setWindowFunction(function);
+	mData2.setWindowFunction(function);
 }
 
 void ViModifyProcessor::setModifyMode(ViModifyProcessor::ModifyMode mode)

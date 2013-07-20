@@ -18,12 +18,17 @@ void ViWaveFormer::clear()
 		delete mForm;
 		mForm = NULL;
 	}
+	ViProcessor::clear();
 }
 
 void ViWaveFormer::initialize()
 {
 	setChannelMode(ViProcessor::Combined);
-	clear();
+	setProcessMode(ViProcessor::All);
+	if(mForm != NULL)
+	{
+		delete mForm;
+	}
 	mForm = new ViWaveForm();
 }
 

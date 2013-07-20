@@ -78,6 +78,9 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
         void setProcessMode(ViProcessor::ProcessMode mode);
 		ViProcessor::ProcessMode processMode();
 
+		virtual void setWindowSize(int samples);
+		virtual bool setWindowFunction(QString function); // Function for the frequency spectrum
+
 		int sampleCount();
 		int channelCount();
 		int usedChannelCount(); // Returns how many channels are actually used. 1 if ChannelMode == Combined, channelCount() if ChannelMode == Separated
@@ -168,6 +171,9 @@ class ViDualProcessor : public ViProcessor
 		virtual ~ViDualProcessor();
         void process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2);
 
+		void setWindowSize(int samples);
+		bool setWindowFunction(QString function);
+
 		ViAudio::Type type2();
 		ViAudioFormat format2();
 		ViAudioReadData& data2();
@@ -239,6 +245,9 @@ class ViModifyProcessor : public ViProcessor
 		ViModifyProcessor(bool autoWrite = true);
 		virtual ~ViModifyProcessor();
         void process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2);
+
+		void setWindowSize(int samples);
+		bool setWindowFunction(QString function);
 
         void setModifyMode(ViModifyProcessor::ModifyMode mode);
 

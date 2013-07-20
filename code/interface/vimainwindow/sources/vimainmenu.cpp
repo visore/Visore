@@ -7,6 +7,7 @@
 #include <vimaincorrectionwidget.h>
 #include <vimainmetadatawidget.h>
 #include <vimainplaybackwidget.h>
+#include <vimainspectrumwidget.h>
 
 ViMainMenu::ViMainMenu(QWidget *parent)
     : ViWidget(parent)
@@ -50,6 +51,13 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	index = ViStackedWidget::addWidget(new ViMainWaveWidget(), false);
 	mUi->analyseWaveButton->setProperty("index", index);
 	QObject::connect(mUi->analyseWaveButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
+
+	mUi->spectrumButton->setIcon(ViThemeManager::icon("spectrum"), 80);
+	mUi->spectrumButton->setText("Frequency\nSpectrum", textColor, font);
+	mUi->spectrumButton->setSize(250, 100);
+	index = ViStackedWidget::addWidget(new ViMainSpectrumWidget(), false);
+	mUi->spectrumButton->setProperty("index", index);
+	QObject::connect(mUi->spectrumButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->correlateProjectButton->setIcon(ViThemeManager::icon("correlation"), 80);
 	mUi->correlateProjectButton->setText("Correlate Project", textColor, font);

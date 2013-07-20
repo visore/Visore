@@ -12,11 +12,17 @@ namespace Ui
 
 class ViSpectrumAnalysisWidget : public ViWidget
 {
+
 	Q_OBJECT
 
-	public slots:
+	signals:
 
-		void recalculate();
+		void windowSizeChanged();
+		void windowFunctionChanged();
+
+	private slots:
+
+		void checkNotation();
 		void replot();
 
 	public:
@@ -24,14 +30,17 @@ class ViSpectrumAnalysisWidget : public ViWidget
 		ViSpectrumAnalysisWidget(QWidget *parent = 0);
 		~ViSpectrumAnalysisWidget();
 
-	protected:
+		void clear();
 
-		void showEvent(QShowEvent *event);
+		int windowSize();
+		QString windowFunction();
+
+		void setSpectrum(ViRealSpectrum *spectrum);
 
 	private:
 
 		Ui::ViSpectrumAnalysisWidget *mUi;
-		bool mWasInitialized;
+		ViRealSpectrum *mSpectrum;
 
 };
 

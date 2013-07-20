@@ -1,8 +1,8 @@
-#include "vispectrumanalysiswidget.h"
-#include "ui_vispectrumanalysiswidget.h"
-#include "vimainwindow.h"
+#include <vispectrumanalysiswidget.h>
+#include <ui_vispectrumanalysiswidget.h>
+#include <vifouriertransformer.h>
 
-#define EXTRA_SPACE 0.05
+#define EXTRA_SPACE 0.1
 
 ViSpectrumAnalysisWidget::ViSpectrumAnalysisWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -10,138 +10,164 @@ ViSpectrumAnalysisWidget::ViSpectrumAnalysisWidget(QWidget *parent)
 	mUi = new Ui::ViSpectrumAnalysisWidget();
 	mUi->setupUi(this);
 
-	/*mWasInitialized = false;
+	mUi->windowBox->addItems(ViFourierTransformer().windowFunctions());
 
-	QObject::connect(mUi->sizeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
-	QObject::connect(mUi->windowBox, SIGNAL(currentIndexChanged(int)), this, SLOT(recalculate()));
+	clear();
 
-	QObject::connect(mUi->frequencyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
-	QObject::connect(mUi->valueBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
-	QObject::connect(mUi->notationBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
+	checkNotation();
 
-	QObject::connect(mEngine, SIGNAL(spectrumFinished()), this, SLOT(replot()));
-	QObject::connect(mEngine, SIGNAL(spectrumProgressed(short)), ViMainWindow::instance(), SLOT(progress(short)));*/
+	QObject::connect(mUi->sizeBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(windowSizeChanged()));
+	QObject::connect(mUi->windowBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(windowFunctionChanged()));
+	QObject::connect(mUi->notationBox, SIGNAL(currentIndexChanged(int)), this, SLOT(checkNotation()));
 }
 
 ViSpectrumAnalysisWidget::~ViSpectrumAnalysisWidget()
 {
-	//delete mUi;
+	clear();
+	delete mUi;
 }
 
-void ViSpectrumAnalysisWidget::showEvent(QShowEvent *event)
+void ViSpectrumAnalysisWidget::clear()
 {
-	if(!mWasInitialized)
+	mSpectrum = NULL;
+	mUi->sizeBox->setCurrentIndex(9);
+	mUi->windowBox->setCurrentIndex(0);
+	mUi->notationBox->setCurrentIndex(0);
+	mUi->yBox->setCurrentIndex(1);
+	mUi->xBox->setCurrentIndex(1);
+	mUi->plot->clear();
+}
+
+int ViSpectrumAnalysisWidget::windowSize()
+{
+	return mUi->sizeBox->currentText().toInt();
+}
+
+QString ViSpectrumAnalysisWidget::windowFunction()
+{
+	return mUi->windowBox->currentText();
+}
+
+void ViSpectrumAnalysisWidget::setSpectrum(ViRealSpectrum *spectrum)
+{
+	mUi->plot->clear();
+	mSpectrum = spectrum;
+	replot();
+}
+
+void ViSpectrumAnalysisWidget::checkNotation()
+{
+	QObject::disconnect(mUi->xBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
+	QObject::disconnect(mUi->yBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
+
+	mUi->yBox->clear();
+	mUi->yBox->addItem("Amplitude");
+	if(mUi->notationBox->currentIndex() == 0)
 	{
-		mWasInitialized = true;
-		recalculate();
+		mUi->yBox->addItem("Decibel");
 	}
-	ViWidget::showEvent(event);
-}
+	replot();
 
-void ViSpectrumAnalysisWidget::recalculate()
-{
-	//ViMainWindow::instance()->showLoading(true, false, ViLoadingWidget::Text, "Calculating Spectrum");
-    engine()->calculateSpectrum(mUi->sizeBox->currentText().toInt(), mUi->windowBox->currentText());
+	QObject::connect(mUi->xBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
+	QObject::connect(mUi->yBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replot()));
 }
 
 void ViSpectrumAnalysisWidget::replot()
 {
-	/*ViRealSpectrum plot = mEngine->spectrum();
-	qint32 size = plot.size();
-
-	if(size > 0)
+	if(mSpectrum != NULL)
 	{
-		QVector<qreal> x(size);
-		QVector<qreal> y(size);
-
-		QString labelX = "Frequency";
-		QString labelY = "Amplitude";
-		QString unitX = "";
-		QString unitY = "";
-
-		bool fill = false;
-		bool drawImaginary = true;
-
-		qreal xMaximum, yMinimum, yMaximum;
-		if(mUi->frequencyBox->currentIndex() == 0)
+		qint32 size = mSpectrum->size() / 2; // Devide by 2 to remove the mirrored spectrum
+		if(size > 0)
 		{
-			xMaximum = plot[size - 1].frequencyRange();
-			for(int i = 0; i < size; ++i)
-			{
-				x[i] = plot[i].frequencyRange();
-			}
-			unitX = "";
-		}
-		else
-		{
-			xMaximum = plot[size - 1].frequencyHertz();
-			for(int i = 0; i < size; ++i)
-			{
-				x[i] = plot[i].frequencyHertz();
-			}
-			unitX = "Hz";
-		}
+			QVector<qreal> x(size);
+			QVector<qreal> y(size);
 
-		if(mUi->notationBox->currentIndex() == 0)
-		{
-			fill = true;
-			if(mUi->valueBox->currentIndex() == 0)
+			QString labelX = "Frequency";
+			QString labelY = "Amplitude";
+			QString unitX = "";
+			QString unitY = "";
+
+			bool fill = false;
+
+			qreal xMaximum, yMinimum, yMaximum;
+			if(mUi->xBox->currentIndex() == 0)
 			{
-				yMinimum = plot.minimum().polar().amplitude().real() * (1 + EXTRA_SPACE);
-				yMaximum = plot.maximum().polar().amplitude().real() * (1 + EXTRA_SPACE);
+				xMaximum = mSpectrum->at(mSpectrum->size() - 1).frequencyRange() / 2;
 				for(int i = 0; i < size; ++i)
 				{
-					y[i] = plot[i].polar().amplitude().real();
+					x[i] = mSpectrum->at(i).frequencyRange();
 				}
-				unitY = "";
+				unitX = "";
 			}
 			else
 			{
-			
-				yMinimum = plot.minimum().polar().decibel().real() * (1 + EXTRA_SPACE);
-				yMaximum = plot.maximum().polar().decibel().real() * (1 + EXTRA_SPACE);
+				xMaximum = mSpectrum->at(mSpectrum->size() - 1).frequencyHertz() / 2;
 				for(int i = 0; i < size; ++i)
 				{
-					y[i] = plot[i].polar().decibel().real();
+					x[i] = mSpectrum->at(i).frequencyHertz();
 				}
-				unitY = "dB";
+				unitX = "Hz";
 			}
-		}
-		else
-		{
-			if(mUi->valueBox->currentIndex() == 0)
+			if(mUi->notationBox->currentIndex() == 0)
 			{
-				yMinimum = plot.minimum().rectangular().amplitude().real() * (1 + EXTRA_SPACE);
-				yMaximum = plot.maximum().rectangular().amplitude().real() * (1 + EXTRA_SPACE);
-				for(int i = 0; i < size; ++i)
+				fill = true;
+				if(mUi->yBox->currentIndex() == 0)
 				{
-					y[i] = plot[i].rectangular().amplitude().real();
+					yMinimum = mSpectrum->minimum().polar().amplitude().real() * (1 + EXTRA_SPACE);
+					yMaximum = mSpectrum->maximum().polar().amplitude().real() * (1 + EXTRA_SPACE);
+					for(int i = 0; i < size; ++i)
+					{
+						y[i] = mSpectrum->at(i).polar().amplitude().real();
+					}
+					unitY = "";
 				}
-				unitY = "";
+				else
+				{
+
+					yMinimum = mSpectrum->minimum().polar().decibel().real() * (1 + EXTRA_SPACE);
+					yMaximum = mSpectrum->maximum().polar().decibel().real() * (1 + EXTRA_SPACE);
+					for(int i = 0; i < size; ++i)
+					{
+						y[i] = mSpectrum->at(i).polar().decibel().real();
+					}
+					unitY = "dB";
+				}
 			}
 			else
 			{
-				yMinimum = plot.minimum().rectangular().decibel().real() * (1 + EXTRA_SPACE);
-				yMaximum = plot.maximum().rectangular().decibel().real() * (1 + EXTRA_SPACE);
-				for(int i = 0; i < size; ++i)
+				if(mUi->yBox->currentIndex() == 0)
 				{
-					y[i] = plot[i].rectangular().decibel().real();
+					yMinimum = mSpectrum->minimum().rectangular().amplitude().real() * (1 + EXTRA_SPACE);
+					yMaximum = mSpectrum->maximum().rectangular().amplitude().real() * (1 + EXTRA_SPACE);
+					for(int i = 0; i < size; ++i)
+					{
+						y[i] = mSpectrum->at(i).rectangular().amplitude().real();
+					}
+					unitY = "";
 				}
-				unitY = "dB";
+				else
+				{
+					yMinimum = mSpectrum->minimum().rectangular().decibel().real() * (1 + EXTRA_SPACE);
+					yMaximum = mSpectrum->maximum().rectangular().decibel().real() * (1 + EXTRA_SPACE);
+					for(int i = 0; i < size; ++i)
+					{
+						y[i] = mSpectrum->at(i).rectangular().decibel().real();
+					}
+					unitY = "dB";
+				}
 			}
+
+			mUi->plot->setScale(ViSpectrumPlot::X, 0, xMaximum);
+			mUi->plot->setScale(ViSpectrumPlot::Y, yMinimum, yMaximum);
+			mUi->plot->setLabel(ViSpectrumPlot::X, labelX);
+			mUi->plot->setLabel(ViSpectrumPlot::Y, labelY);
+			mUi->plot->setUnit(ViSpectrumPlot::X, unitX);
+			mUi->plot->setUnit(ViSpectrumPlot::Y, unitY);
+			mUi->plot->fill(fill);
+			mUi->plot->setData(x, y);
+			mUi->plot->zoomToExtent();
 		}
-
-		mUi->plot->setScale(ViSpectrumPlot::X, 0, xMaximum);
-		mUi->plot->setScale(ViSpectrumPlot::Y, yMinimum, yMaximum);
-		mUi->plot->setLabel(ViSpectrumPlot::X, labelX);
-		mUi->plot->setLabel(ViSpectrumPlot::Y, labelY);
-		mUi->plot->setUnit(ViSpectrumPlot::X, unitX);
-		mUi->plot->setUnit(ViSpectrumPlot::Y, unitY);
-		mUi->plot->fill(fill);
-		mUi->plot->setData(x, y);
-
 	}
-	ViMainWindow::instance()->hideLoading();*/
 }
 
 

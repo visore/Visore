@@ -10,7 +10,6 @@ ViMainPlaybackWidget::ViMainPlaybackWidget(QWidget *parent)
 	mUi->projectLoader->setProjectMode(ViProjectLoader::SingleTrack);
 	mUi->projectLoader->setTypeMode(ViProjectLoader::SingleType);
 
-	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), mUi->playbackWidget, SLOT(show()));
 	QObject::connect(mUi->projectLoader, SIGNAL(typesChanged()), this, SLOT(loadTrack()));
 
 	QObject::connect(mUi->playbackWidget, SIGNAL(played()), engine().data(), SLOT(startPlayback()));
@@ -36,6 +35,9 @@ void ViMainPlaybackWidget::loadTrack()
 	mUi->playbackWidget->stop();
 	mUi->playbackWidget->clear();
 	engine()->clearPlayback();
+
+	mUi->playbackWidget->show();
+	mUi->metadataWidget->show();
 
 	ViAudioObjectQueue objects = mUi->projectLoader->objects();
 	for(int i = 0; i < objects.size(); ++i)
@@ -68,5 +70,6 @@ void ViMainPlaybackWidget::clear()
 	mUi->playbackWidget->clear();
 	mUi->playbackWidget->hide();
 	mUi->metadataWidget->clear();
+	mUi->metadataWidget->hide();
 	engine()->clearPlayback();
 }

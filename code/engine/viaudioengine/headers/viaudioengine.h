@@ -28,9 +28,6 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		void setPlaybackPosition(ViAudioPosition position);
 		void setPlaybackVolume(int volume);
 
-		//Spectrum
-		void calculateSpectrum(qint32 size, QString windowFunction);
-
 		//Correlation
 		void calculateCorrelation(ViAudioObjectPointer object);
 
@@ -45,6 +42,7 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 
 		//Analyse
 		void generateWave(ViAudioObjectPointer object, ViAudio::Type type = ViAudio::All, const bool &align = false);
+		void generateSpectrum(ViAudioObjectPointer object, ViAudio::Type type, qint32 windowSizeSamples, QString windowFunction);
 
 		//Align
 		void align(ViProject &project);

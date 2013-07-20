@@ -19,8 +19,11 @@ class ViSpectrumElementForm
 		void setAmplitude(ViComplexNumber<T> amplitude);
 		void setDecibel(ViComplexNumber<T> decibel);
 
-		ViComplexNumber<T>& amplitude();
-		ViComplexNumber<T>& decibel();
+		const ViComplexNumber<T>& amplitude() const;
+		const ViComplexNumber<T>& decibel() const;
+
+		ViComplexNumber<T>& amplitudeReference();
+		ViComplexNumber<T>& decibelReference();
 
 	private:
 
@@ -42,14 +45,17 @@ class ViSpectrumElement
 		void setFrequencyHertz(T frequencyHertz);
 		void set(T frequencyRange, T frequencyHertz);
 
-		T frequencyRange();
-		T frequencyHertz();
+		T frequencyRange() const;
+		T frequencyHertz() const;
 
 		void setRectangular(ViSpectrumElementForm<T> rectangular);
 		void setPolar(ViSpectrumElementForm<T> polar);
 		
-		ViSpectrumElementForm<T>& rectangular();
-		ViSpectrumElementForm<T>& polar();
+		const ViSpectrumElementForm<T>& rectangular() const;
+		const ViSpectrumElementForm<T>& polar() const;
+
+		ViSpectrumElementForm<T>& rectangularReference();
+		ViSpectrumElementForm<T>& polarReference();
 
 		static ViComplexNumber<T> toDecibel(ViComplexNumber<T> complex);
 		static ViComplexNumber<T> toPolar(ViComplexNumber<T> complex);

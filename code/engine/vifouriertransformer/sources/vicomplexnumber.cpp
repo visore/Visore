@@ -15,64 +15,64 @@ ViComplexNumber<T>::ViComplexNumber(const ViComplexNumber<T> &other)
 }
 
 template <typename T>
-ViComplexNumber<T>::ViComplexNumber(T real, T imaginary)
+ViComplexNumber<T>::ViComplexNumber(const T &real, const T &imaginary)
 {
 	mReal = real;
 	mImaginary = imaginary;
 }
 
 template <typename T>
-void ViComplexNumber<T>::setReal(T real)
+void ViComplexNumber<T>::setReal(const T &real)
 {
 	mReal = real;
 }
 
 template <typename T>
-void ViComplexNumber<T>::setImaginary(T imaginary)
+void ViComplexNumber<T>::setImaginary(const T &imaginary)
 {
 	mImaginary = imaginary;
 }
 
 template <typename T>
-void ViComplexNumber<T>::set(T real, T imaginary)
+void ViComplexNumber<T>::set(const T &real, const T &imaginary)
 {
 	mReal = real;
 	mImaginary = imaginary;
 }
 
 template <typename T>
-void ViComplexNumber<T>::set(ViComplexNumber complex)
+void ViComplexNumber<T>::set(const ViComplexNumber &complex)
 {
 	mReal = complex.real();
 	mImaginary = complex.imaginary();
 }
 
 template <typename T>
-T ViComplexNumber<T>::real()
+const T& ViComplexNumber<T>::real() const
 {
 	return mReal;
 }
 
 template <typename T>
-T ViComplexNumber<T>::imaginary()
+const T& ViComplexNumber<T>::imaginary() const
 {
 	return mImaginary;
 }
 
 template <typename T>
-bool ViComplexNumber<T>::operator==(const ViComplexNumber<T> &complex) const
+bool ViComplexNumber<T>::operator == (const ViComplexNumber<T> &complex) const
 {
 	return (mReal == complex.mReal) && (mImaginary == complex.mImaginary);
 }
 
 template <typename T>
-bool ViComplexNumber<T>::operator!=(const ViComplexNumber<T> &complex) const
+bool ViComplexNumber<T>::operator != (const ViComplexNumber<T> &complex) const
 {
 	return !(*this == complex);
 }
 
 template <typename T>
-ViComplexNumber<T>& ViComplexNumber<T>::operator+=(const ViComplexNumber<T> &complex)
+const ViComplexNumber<T>& ViComplexNumber<T>::operator += (const ViComplexNumber<T> &complex)
 {
 	mReal += complex.mReal;
 	mImaginary += complex.mImaginary;
@@ -80,7 +80,7 @@ ViComplexNumber<T>& ViComplexNumber<T>::operator+=(const ViComplexNumber<T> &com
 }
 
 template <typename T>
-ViComplexNumber<T>& ViComplexNumber<T>::operator-=(const ViComplexNumber<T> &complex)
+const ViComplexNumber<T>& ViComplexNumber<T>::operator -= (const ViComplexNumber<T> &complex)
 {
 	mReal -= complex.mReal;
 	mImaginary -= complex.mImaginary;
@@ -88,7 +88,7 @@ ViComplexNumber<T>& ViComplexNumber<T>::operator-=(const ViComplexNumber<T> &com
 }
 
 template <typename T>
-ViComplexNumber<T>& ViComplexNumber<T>::operator/=(const T &value)
+const ViComplexNumber<T>& ViComplexNumber<T>::operator /= (const T &value)
 {
 	mReal /= value;
 	mImaginary /= value;
@@ -96,7 +96,7 @@ ViComplexNumber<T>& ViComplexNumber<T>::operator/=(const T &value)
 }
 
 template <typename T>
-ViComplexNumber<T>& ViComplexNumber<T>::operator*=(const T &value)
+const ViComplexNumber<T>& ViComplexNumber<T>::operator *= (const T &value)
 {
 	mReal *= value;
 	mImaginary *= value;
@@ -104,14 +104,14 @@ ViComplexNumber<T>& ViComplexNumber<T>::operator*=(const T &value)
 }
 
 template <typename T>
-ViComplexNumber<T> ViComplexNumber<T>::operator/(const T &value) const
+ViComplexNumber<T> ViComplexNumber<T>::operator / (const T &value) const
 {
 	ViComplexNumber<T> result(mReal / value, mImaginary / value);
 	return result;
 }
 
 template <typename T>
-ViComplexNumber<T> ViComplexNumber<T>::operator*(const T &value) const
+ViComplexNumber<T> ViComplexNumber<T>::operator * (const T &value) const
 {
 	ViComplexNumber<T> result(mReal * value, mImaginary * value);
 	return result;

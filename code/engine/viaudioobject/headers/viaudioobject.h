@@ -8,6 +8,7 @@
 #include <viaudiocoder.h>
 #include <vilogger.h>
 #include <vialigner.h>
+#include <vispectrum.h>
 #include <visongidentifier.h>
 #include <vicorrelationgroup.h>
 #include <QQueue>
@@ -21,6 +22,7 @@ class ViAudioObject;
 class ViModifyProcessor;
 class ViDualProcessor;
 class ViCorrelator;
+class ViSpectrumAnalyzer;
 
 typedef ViPointer<ViAudioObject> ViAudioObjectPointer;
 typedef QList<QList<ViAudioObjectPointer> > ViAudioObjectMatrix;
@@ -64,6 +66,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void aligned();
 
 		void waved();
+
+		void spectrumed();
 
         void correctorChanged();
 		void corrected();
@@ -130,6 +134,14 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		*******************************************************************************************************************/
 
 		void generateNextWave();
+
+		/*******************************************************************************************************************
+
+			FREQUENCY SPECTRUM
+
+		*******************************************************************************************************************/
+
+		void generateNextSpectrum();
 
 		/*******************************************************************************************************************
 
@@ -299,6 +311,18 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		bool hasWave(ViAudio::Type type);
 		void clearWaves(ViAudio::Type types = ViAudio::All);
 
+		/*******************************************************************************************************************
+
+			FREQUENCY SPECTRUM
+
+		*******************************************************************************************************************/
+
+		Q_INVOKABLE bool generateSpectrum(ViAudio::Type types, const bool &force = false);
+		Q_INVOKABLE bool generateSpectrum(ViAudio::Type types, const int &windowSizeSamples, const QString &windowFunction, const bool &force = false);
+		ViRealSpectrum* spectrum(ViAudio::Type type);
+		bool hasSpectrum(ViAudio::Type type);
+		void clearSpectrums(ViAudio::Type types = ViAudio::All);
+
         /*******************************************************************************************************************
 
             CORRECTION
@@ -458,6 +482,16 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViWaveFormer *mWaveFormer;
 		QQueue<ViAudio::Type> mWaveInstructions;
 		QMap<ViAudio::Type, ViWaveForm*> mWaveForms;
+
+		/*******************************************************************************************************************
+
+			WAVEFORM
+
+		*******************************************************************************************************************/
+
+		ViSpectrumAnalyzer *mSpectrumAnalyzer;
+		QQueue<ViAudio::Type> mSpectrumInstructions;
+		QMap<ViAudio::Type, ViRealSpectrum*> mSpectrums;
 
 		/*******************************************************************************************************************
 

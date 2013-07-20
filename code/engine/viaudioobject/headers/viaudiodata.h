@@ -21,6 +21,8 @@ class ViAudioData
         int bufferSize();
 
         void setSampleCount(int samples);
+		bool setWindowFunction(QString function);
+
         int sampleCount();
         int windowSize();
         int channelCount();

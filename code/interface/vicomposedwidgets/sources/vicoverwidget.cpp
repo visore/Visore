@@ -52,7 +52,7 @@ void ViCoverWidget::paintEvent(QPaintEvent *event)
 		int border = calculateBorder();
 		QBrush brush(mImage.scaled(width(), height(), Qt::KeepAspectRatioByExpanding));
 		QPainter painter(this);
-		painter.setRenderHint(QPainter::Antialiasing);
+		painter.setRenderHint(QPainter::SmoothPixmapTransform);
 		painter.setBrush(brush);
 		painter.drawRoundedRect(0, 0, width(), height(), border, border);
 	}

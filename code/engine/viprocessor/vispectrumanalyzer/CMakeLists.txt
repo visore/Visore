@@ -1,0 +1,22 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Setup install paths
+SET(VI_SPECTRUM_ANALYZER_INSTALL_PATH engine/processors/spectrumanalyzer)
+
+#Add definitions
+ADD_DEFINITIONS(-DSPECTRUM_ANALYZER_PATH="${VI_SPECTRUM_ANALYZER_INSTALL_PATH}")
+
+#Initiate source files
+FILE(GLOB VI_SPECTRUM_ANALYZER_HEADERS ${HEADERS}/*.h)
+FILE(GLOB VI_SPECTRUM_ANALYZER_SOURCES ${SOURCES}/*.cpp)
+
+#Create library
+ADD_LIBRARY(vispectrumanalyzer SHARED ${VI_SPECTRUM_ANALYZER_HEADERS} ${VI_SPECTRUM_ANALYZER_SOURCES})
+TARGET_LINK_LIBRARIES(vispectrumanalyzer viessentials)
+QT5_USE_MODULES(vispectrumanalyzer Multimedia Xml)
+
+#Install file
+INSTALL(TARGETS vispectrumanalyzer DESTINATION ${VI_SPECTRUM_ANALYZER_INSTALL_PATH})

@@ -28,16 +28,15 @@ class ViSpectrumPlot : public QwtPlot
 		void setUnit(ViSpectrumPlot::Axis axis, QString unit);
 		void fill(bool fill);
 
+		void zoomToExtent();
 		QRectF extent();
 		qreal valueAt(qreal x);
-
-	private:
 
 		void clear();
 
 	private:
 
-		/*qreal *mDataX;
+		qreal *mDataX;
 		qreal *mDataY;
 		qint32 mDataCount;
 		qreal mLength;
@@ -45,12 +44,12 @@ class ViSpectrumPlot : public QwtPlot
 		QString mLabelX;
 		QString mLabelY;
 		QString mUnitX;
-		QString mUnitY;*/
+		QString mUnitY;
 
-		//ViSpectrumPlotPicker *mPicker;
-		//QwtPointSeriesData mData;
-		//QwtPlotCurve mCurve;
-		//QwtPlotGrid mGrid;
+		ViSpectrumPlotPicker *mPicker;
+		QwtPointSeriesData mData;
+		QwtPlotCurve mCurve;
+		QwtPlotGrid mGrid;
 		
 
 };

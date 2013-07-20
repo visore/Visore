@@ -33,7 +33,6 @@ class ViSpectrumWidget : public ViWidget
 
 		void resizeEvent(QResizeEvent *event);
 		void paintEvent(QPaintEvent *event);
-
 		
 		QVector<qbyte16u> summarizeSpectrum(QVector<qbyte16u> &spectrum);
 		void addAmplitudeData(ViRealSpectrum &spectrum);

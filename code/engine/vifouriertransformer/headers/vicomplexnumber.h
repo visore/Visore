@@ -9,27 +9,27 @@ class ViComplexNumber
 
 		ViComplexNumber();
 		ViComplexNumber(const ViComplexNumber<T> &other);
-		ViComplexNumber(T real, T imaginary);
+		ViComplexNumber(const T &real, const T &imaginary);
 
-		void setReal(T real);
-		void setImaginary(T imaginary);
-		void set(T real, T imaginary);
-		void set(ViComplexNumber complex);
+		void setReal(const T &real);
+		void setImaginary(const T &imaginary);
+		void set(const T &real, const T &imaginary);
+		void set(const ViComplexNumber &complex);
 
-		T real();
-		T imaginary();
+		const T& real() const;
+		const T& imaginary() const;
 
-		bool operator==(const ViComplexNumber<T> &complex) const;
-		bool operator!=(const ViComplexNumber<T> &complex) const;
+		bool operator == (const ViComplexNumber<T> &complex) const;
+		bool operator != (const ViComplexNumber<T> &complex) const;
 
-		ViComplexNumber<T>& operator+=(const ViComplexNumber<T> &complex);
-		ViComplexNumber<T>& operator-=(const ViComplexNumber<T> &complex);
+		const ViComplexNumber<T>& operator += (const ViComplexNumber<T> &complex);
+		const ViComplexNumber<T>& operator -= (const ViComplexNumber<T> &complex);
 
-		ViComplexNumber<T>& operator/=(const T &value);
-		ViComplexNumber<T>& operator*=(const T &value);
+		const ViComplexNumber<T>& operator /= (const T &value);
+		const ViComplexNumber<T>& operator *= (const T &value);
 
-		ViComplexNumber<T> operator/(const T &value) const;
-		ViComplexNumber<T> operator*(const T &value) const;
+		ViComplexNumber<T> operator / (const T &value) const;
+		ViComplexNumber<T> operator * (const T &value) const;
 
 	private:
 

@@ -1,5 +1,6 @@
 #include <viaudioobject.h>
 #include <viwaveformer.h>
+#include <vispectrumanalyzer.h>
 #include <vimetadataer.h>
 #include <vifouriercrossaligner.h>
 #include <viacoustididentifier.h>
@@ -33,6 +34,7 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	mDecoder = NULL;
 	mAligner = NULL;
 	mWaveFormer = NULL;
+	mSpectrumAnalyzer = NULL;
 	mMetadataer = NULL;
 	mCorrector = NULL;
 
@@ -50,6 +52,7 @@ ViAudioObject::~ViAudioObject()
 {
     clearBuffers(mDestructType);
 	clearWaves();
+	clearSpectrums();
 
 	if(mEncoder != NULL)
 	{
@@ -72,6 +75,12 @@ ViAudioObject::~ViAudioObject()
 	{
 		delete mWaveFormer;
 		mWaveFormer = NULL;
+	}
+
+	if(mSpectrumAnalyzer != NULL)
+	{
+		delete mSpectrumAnalyzer;
+		mSpectrumAnalyzer = NULL;
 	}
 
 	if(mMetadataer != NULL)
@@ -1148,6 +1157,145 @@ void ViAudioObject::clearWaves(ViAudio::Type types)
 		if(hasTheWave)
 		{
 			delete mWaveForms.take(instructions[i]);
+		}
+	}
+}
+
+/*******************************************************************************************************************
+
+	FREQUENCY SPECTRUM
+
+*******************************************************************************************************************/
+
+bool ViAudioObject::generateSpectrum(ViAudio::Type types, const bool &force)
+{
+
+}
+
+bool ViAudioObject::generateSpectrum(ViAudio::Type types, const int &windowSizeSamples, const QString &windowFunction, const bool &force)
+{
+	setStarted();
+	QMutexLocker locker(&mMutex);
+
+	mSpectrumInstructions.clear();
+	QQueue<ViAudio::Type> instructions;
+	QQueue<ViAudio::Type> decomposeInstructions = decomposeTypes(types);
+
+	for(int i = 0; i < decomposeInstructions.size(); ++i)
+	{
+		locker.unlock();
+		bool hasTheBuffer = hasBuffer(decomposeInstructions[i]);
+		locker.relock();
+		if(hasTheBuffer) instructions.append(decomposeInstructions[i]);
+	}
+
+	if(instructions.size() == 0)
+	{
+		log("No data available to generate the frequency spectrum.");
+		locker.unlock();
+		setFinished();
+		emit spectrumed();
+		return false;
+	}
+
+	if(!force)
+	{
+		for(int i = 0; i < instructions.size(); ++i)
+		{
+			locker.unlock();
+			bool hasTheSpectrum = hasSpectrum(instructions[i]);
+			locker.relock();
+			if(!hasTheSpectrum) mSpectrumInstructions.append(instructions[i]);
+		}
+		if(mSpectrumInstructions.size() == 0)
+		{
+			locker.unlock();
+			setFinished();
+			emit spectrumed();
+			return false;
+		}
+	}
+	else
+	{
+		mSpectrumInstructions = instructions;
+	}
+	setProgress(mSpectrumInstructions.size());
+
+	if(mSpectrumAnalyzer != NULL)
+	{
+		delete mSpectrumAnalyzer;
+	}
+	mSpectrumAnalyzer = new ViSpectrumAnalyzer();
+	mSpectrumAnalyzer->setWindowSize(windowSizeSamples);
+	mSpectrumAnalyzer->setWindowFunction(windowFunction);
+	QObject::connect(mSpectrumAnalyzer, SIGNAL(finished()), this, SLOT(generateNextSpectrum()));
+	QObject::connect(mSpectrumAnalyzer, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+	log("Generating frequency spectrums.");
+	locker.unlock();
+	generateNextSpectrum();
+	return true;
+}
+
+void ViAudioObject::generateNextSpectrum()
+{
+	QMutexLocker locker(&mMutex);
+
+	ViAudio::Type type = mSpectrumAnalyzer->type();
+	if(type != ViAudio::Undefined)
+	{
+		locker.unlock();
+		clearSpectrums(type);
+		locker.relock();
+		mSpectrums[mSpectrumAnalyzer->type()] = mSpectrumAnalyzer->takeSpectrum();
+		mSpectrumAnalyzer->clear();
+	}
+
+	if(mSpectrumInstructions.isEmpty())
+	{
+		log("Frequency spectrums generated.");
+		if(mSpectrumAnalyzer != NULL)
+		{
+			QObject::disconnect(mSpectrumAnalyzer, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+			QObject::disconnect(mSpectrumAnalyzer, SIGNAL(finished()), this, SLOT(generateNextSpectrum()));
+			delete mSpectrumAnalyzer;
+			mSpectrumAnalyzer = NULL;
+		}
+		locker.unlock();
+		setFinished();
+		emit spectrumed();
+	}
+	else
+	{
+		ViAudio::Type type = mSpectrumInstructions.dequeue();
+		locker.unlock();
+		mSpectrumAnalyzer->process(thisPointer, type);
+	}
+}
+
+ViRealSpectrum* ViAudioObject::spectrum(ViAudio::Type type)
+{
+	QMutexLocker locker(&mMutex);
+	return mSpectrums.value(type, NULL);
+}
+
+bool ViAudioObject::hasSpectrum(ViAudio::Type type)
+{
+	QMutexLocker locker(&mMutex);
+	return mSpectrums.contains(type);
+}
+
+void ViAudioObject::clearSpectrums(ViAudio::Type types)
+{
+	QMutexLocker locker(&mMutex);
+	QQueue<ViAudio::Type> instructions = decomposeTypes(types);
+	for(int i = 0; i < instructions.size(); ++i)
+	{
+		locker.unlock();
+		bool hasTheSpectrum = hasSpectrum(instructions[i]);
+		locker.relock();
+		if(hasTheSpectrum)
+		{
+			delete mSpectrums.take(instructions[i]);
 		}
 	}
 }

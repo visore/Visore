@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>797</width>
-    <height>311</height>
+    <height>321</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,6 +23,9 @@
    <string notr="true"/>
   </property>
   <layout class="QFormLayout" name="formLayout">
+   <property name="horizontalSpacing">
+    <number>15</number>
+   </property>
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -164,6 +167,9 @@
       </item>
       <item row="3" column="0">
        <widget class="Line" name="line2">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -193,6 +199,9 @@
          </property>
          <item row="0" column="0">
           <widget class="QLabel" name="durationLabel">
+           <property name="styleSheet">
+            <string notr="true">background:red;</string>
+           </property>
            <property name="text">
             <string>Duration:</string>
            </property>

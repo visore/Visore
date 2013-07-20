@@ -36,8 +36,6 @@ void ViAudioObjectChain::executeNext()
 		clear();
         mProgress = 100;
         emit finished();
-        disconnect();
-
 		return;
 	}
     else if(mCurrentIndex == 0)

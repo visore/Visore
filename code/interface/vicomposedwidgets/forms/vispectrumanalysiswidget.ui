@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>627</width>
-    <height>593</height>
+    <width>729</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -23,7 +23,16 @@
    <string/>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>5</number>
+   </property>
+   <property name="topMargin">
+    <number>5</number>
+   </property>
+   <property name="rightMargin">
+    <number>5</number>
+   </property>
+   <property name="bottomMargin">
     <number>5</number>
    </property>
    <property name="spacing">
@@ -60,6 +69,9 @@
       <string>Calculation</string>
      </property>
      <layout class="QFormLayout" name="formLayout_2">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
       <item row="0" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
@@ -144,23 +156,8 @@
       <item row="1" column="1">
        <widget class="QComboBox" name="windowBox">
         <property name="currentIndex">
-         <number>0</number>
+         <number>-1</number>
         </property>
-        <item>
-         <property name="text">
-          <string>Rectangular</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Hamming</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Hann</string>
-         </property>
-        </item>
        </widget>
       </item>
      </layout>
@@ -197,14 +194,31 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Value:</string>
+         <string>X-Axis:</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QComboBox" name="valueBox">
+       <widget class="QComboBox" name="xBox">
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>Fraction</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Hertz</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="yBox">
         <property name="currentIndex">
          <number>1</number>
         </property>
@@ -221,27 +235,10 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>Frequency:</string>
+         <string>Y-Axis:</string>
         </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="frequencyBox">
-        <property name="currentIndex">
-         <number>1</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>Fraction</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Hertz</string>
-         </property>
-        </item>
        </widget>
       </item>
      </layout>

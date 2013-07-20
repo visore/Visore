@@ -850,18 +850,26 @@ bool ViProject::loadTracks()
 			metadata.setArtist(tracks[i].child("artist").toString());
 			metadata.setTitle(tracks[i].child("title").toString());
 			metadata.setAlbum(tracks[i].child("album").toString());
+
             ViElement data = tracks[i].child("data");
             object->setTargetFilePath(absolutePath(data.child("target").toString()));
             object->setCorruptedFilePath(absolutePath(data.child("corrupted").toString()));
             object->setCorrectedFilePath(absolutePath(data.child("corrected").toString()));
-			metadata.setCover(absolutePath(data.child("cover").toString()));
+
+			QString coverPath = absolutePath(data.child("cover").toString());
+			QFile file(coverPath);
+			if(!file.exists()) coverPath = "";
+			metadata.setCover(coverPath);
+
 			object->setId(tracks[i].child("globalid").toString());
 			object->setMetadata(metadata);
 			object->setSideNumber(sides[j].attribute("number").toInt());
 			object->setTrackNumber(tracks[i].attribute("number").toInt());
+
             mObjectsMutex.lock();
             mObjects.append(object);
             mObjectsMutex.unlock();
+
             QObject::connect(object.data(), SIGNAL(changed()), this, SLOT(save()), Qt::DirectConnection);
             QObject::connect(object.data(), SIGNAL(correctorChanged()), this, SLOT(infoCorrector()), Qt::DirectConnection);
 			QObject::connect(object.data(), SIGNAL(started()), this, SLOT(setBusy()), Qt::UniqueConnection);

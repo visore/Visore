@@ -12,7 +12,7 @@ using namespace std;
 ViSpectrumPlot::ViSpectrumPlot(QWidget *parent)
 	: QwtPlot(parent)
 {
-	/*mDataX = NULL;
+	mDataX = NULL;
 	mDataY = NULL;
 	mDataCount = 0;
 	mLength = 0;
@@ -22,38 +22,34 @@ ViSpectrumPlot::ViSpectrumPlot(QWidget *parent)
 	mUnitX = "";
 	mUnitY = "";
 
-	mCurve.setPen(QPen(ViThemeManager::color(14)));
-	mCurve.attach(this);*/
+	mCurve.setPen(QPen(ViThemeManager::color(ViThemeColors::MainColor5)));
+	mCurve.attach(this);
 
-	//mGrid.setPen(QPen(ViThemeManager::color(6)));
-	//mGrid.attach(this);
+	mGrid.setPen(QPen(ViThemeManager::color(ViThemeColors::BorderColor2)));
+	mGrid.attach(this);
 
-	//mPicker = new ViSpectrumPlotPicker(this);
+	mPicker = new ViSpectrumPlotPicker(this);
 
-    /*canvas()->setFrameStyle(QFrame::Plain);
+	canvas()->setFrameStyle(QFrame::Plain);
     canvas()->setBorderRadius(1); // Canvas turns black on values < 1
 
-    QPalette canvasPalette(ViThemeManager::color(1));
-    canvasPalette.setColor(QPalette::Foreground, ViThemeManager::color(14));
-    canvas()->setPalette(canvasPalette);
-
-    QPalette scalePalette(ViThemeManager::color(6));
-    scalePalette.setColor(QPalette::Foreground, ViThemeManager::color(6));
-	scalePalette.setColor(QPalette::WindowText, ViThemeManager::color(6));
-	scalePalette.setColor(QPalette::Text, ViThemeManager::color(6));
+	QPalette scalePalette(ViThemeManager::color(ViThemeColors::BorderColor2));
+	scalePalette.setColor(QPalette::Foreground, ViThemeManager::color(ViThemeColors::BorderColor2));
+	scalePalette.setColor(QPalette::WindowText, ViThemeManager::color(ViThemeColors::BorderColor2));
+	scalePalette.setColor(QPalette::Text, ViThemeManager::color(ViThemeColors::BorderColor2));
 	axisWidget(xBottom)->setPalette(scalePalette);
-	axisWidget(yLeft)->setPalette(scalePalette);*/
+	axisWidget(yLeft)->setPalette(scalePalette);
 }
 
 ViSpectrumPlot::~ViSpectrumPlot()
 {
 	clear();
-	//delete mPicker;
+	delete mPicker;
 }
 
 void ViSpectrumPlot::clear()
 {
-	/*if(mDataX != NULL)
+	if(mDataX != NULL)
 	{
 		delete [] mDataX;
 		mDataX = NULL;
@@ -63,12 +59,12 @@ void ViSpectrumPlot::clear()
 		delete [] mDataY;
 		mDataY = NULL;
 	}
-	mDataCount = 0;*/
+	mDataCount = 0;
 }
 
 void ViSpectrumPlot::setData(QVector<qreal> dataX, QVector<qreal> dataY)
 {
-	/*clear();
+	clear();
 	mDataCount = qMin(dataX.size(), dataY.size());
 	mDataX = new qreal[mDataCount];
 	mDataY = new qreal[mDataCount];
@@ -78,13 +74,13 @@ void ViSpectrumPlot::setData(QVector<qreal> dataX, QVector<qreal> dataY)
 		mDataY[i] = dataY[i];
 	}
 	mCurve.setRawSamples(mDataX, mDataY, mDataCount);
-	replot();*/
-	//mPicker->zoomToExtent();
+	replot();
+	mPicker->zoomToExtent();
 }
 
 void ViSpectrumPlot::setScale(ViSpectrumPlot::Axis axis, qreal minimum, qreal maximum)
 {
-	/*if(axis == ViSpectrumPlot::X)
+	if(axis == ViSpectrumPlot::X)
 	{
 		setAxisScale(xBottom, minimum, maximum);
 		mLength = maximum - minimum;
@@ -93,12 +89,12 @@ void ViSpectrumPlot::setScale(ViSpectrumPlot::Axis axis, qreal minimum, qreal ma
 	{
 		setAxisScale(yLeft, minimum, maximum);
 		mCurve.setBaseline(minimum);
-	}*/
+	}
 }
 
 void ViSpectrumPlot::setLabel(ViSpectrumPlot::Axis axis, QString label)
 {
-	/*if(axis == ViSpectrumPlot::X)
+	if(axis == ViSpectrumPlot::X)
 	{
 		setAxisTitle(xBottom, label);
 		mLabelX = label;
@@ -107,13 +103,13 @@ void ViSpectrumPlot::setLabel(ViSpectrumPlot::Axis axis, QString label)
 	{
 		setAxisTitle(yLeft, label);
 		mLabelY = label;
-	}*/
-	//mPicker->setLabel(axis, label);
+	}
+	mPicker->setLabel(axis, label);
 }
 
 void ViSpectrumPlot::setUnit(ViSpectrumPlot::Axis axis, QString unit)
 {
-	/*if(unit == "")
+	if(unit == "")
 	{
 		mPicker->setUnit(axis, "  ");
 	}
@@ -130,12 +126,12 @@ void ViSpectrumPlot::setUnit(ViSpectrumPlot::Axis axis, QString unit)
 			mUnitY = unit;
 		}
 		mPicker->setUnit(axis, unit);
-	}*/
+	}
 }
 
 void ViSpectrumPlot::fill(bool fill)
 {
-	/*if(fill)
+	if(fill)
 	{
 		QColor color = mCurve.pen().color();
 		color.setAlpha(150);
@@ -144,17 +140,22 @@ void ViSpectrumPlot::fill(bool fill)
 	else
 	{
 		mCurve.setBrush(Qt::NoBrush);
-	}*/
+	}
+}
+
+void ViSpectrumPlot::zoomToExtent()
+{
+	mPicker->zoomToExtent();
 }
 
 QRectF ViSpectrumPlot::extent()
 {
-	//return mCurve.boundingRect();
+	return mCurve.boundingRect();
 }
 
 qreal ViSpectrumPlot::valueAt(qreal x)
 {
-	/*if(mLength != 0)
+	if(mLength != 0)
 	{
 		qint32 size = mCurve.data()->size();
 		qint32 index = qFloor((x * size) / mLength - 0.5);
@@ -163,5 +164,5 @@ qreal ViSpectrumPlot::valueAt(qreal x)
 			return mCurve.data()->sample(index).y();
 		}
 	}
-	return 0;*/
+	return 0;
 }

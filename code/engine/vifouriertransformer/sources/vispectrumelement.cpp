@@ -32,13 +32,25 @@ void ViSpectrumElementForm<T>::setDecibel(ViComplexNumber<T> decibel)
 }
 
 template <typename T>
-ViComplexNumber<T>& ViSpectrumElementForm<T>::amplitude()
+const ViComplexNumber<T>& ViSpectrumElementForm<T>::amplitude() const
 {
 	return mAmplitude;
 }
 
 template <typename T>
-ViComplexNumber<T>& ViSpectrumElementForm<T>::decibel()
+const ViComplexNumber<T>& ViSpectrumElementForm<T>::decibel() const
+{
+	return mDecibel;
+}
+
+template <typename T>
+ViComplexNumber<T>& ViSpectrumElementForm<T>::amplitudeReference()
+{
+	return mAmplitude;
+}
+
+template <typename T>
+ViComplexNumber<T>& ViSpectrumElementForm<T>::decibelReference()
 {
 	return mDecibel;
 }
@@ -88,25 +100,37 @@ void ViSpectrumElement<T>::set(T frequencyRange, T frequencyHertz)
 }
 
 template <typename T>
-T ViSpectrumElement<T>::frequencyRange()
+T ViSpectrumElement<T>::frequencyRange() const
 {
 	return mFrequencyRange;
 }
 
 template <typename T>
-T ViSpectrumElement<T>::frequencyHertz()
+T ViSpectrumElement<T>::frequencyHertz() const
 {
 	return mFrequencyHertz;
 }
 
 template <typename T>
-ViSpectrumElementForm<T>& ViSpectrumElement<T>::rectangular()
+const ViSpectrumElementForm<T>& ViSpectrumElement<T>::rectangular() const
 {
 	return mRectangular;
 }
 
 template <typename T>
-ViSpectrumElementForm<T>& ViSpectrumElement<T>::polar()
+const ViSpectrumElementForm<T>& ViSpectrumElement<T>::polar() const
+{
+	return mPolar;
+}
+
+template <typename T>
+ViSpectrumElementForm<T>& ViSpectrumElement<T>::rectangularReference()
+{
+	return mRectangular;
+}
+
+template <typename T>
+ViSpectrumElementForm<T>& ViSpectrumElement<T>::polarReference()
 {
 	return mPolar;
 }

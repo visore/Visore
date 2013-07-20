@@ -32,8 +32,8 @@ class ViWidget : public QWidget, public ViId, public ViName
 		virtual void clear();
 
 		// Will call clear once the widgetis hidden
-		void enableClearOnHide(bool enable);
-		void disableClearOnHide(bool disable);
+		void enableClearOnHide(bool enable = true);
+		void disableClearOnHide(bool disable = true);
 
 		ViAudioEnginePointer engine();
 

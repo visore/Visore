@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ViMainPlaybackWidget</class>
- <widget class="QWidget" name="ViMainPlaybackWidget">
+ <class>ViMainSpectrumWidget</class>
+ <widget class="QWidget" name="ViMainSpectrumWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>714</width>
-    <height>62</height>
+    <height>356</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -22,10 +22,7 @@
   <property name="styleSheet">
    <string/>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <property name="fieldGrowthPolicy">
-    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-   </property>
+  <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -36,7 +33,7 @@
     <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>10</number>
+    <number>0</number>
    </property>
    <item row="0" column="0" colspan="2">
     <widget class="ViProjectLoader" name="projectLoader" native="true">
@@ -52,30 +49,26 @@
     </widget>
    </item>
    <item row="1" column="0" colspan="2">
-    <widget class="ViPlaybackWidget" name="playbackWidget" native="true"/>
-   </item>
-   <item row="2" column="0">
-    <widget class="ViMetadataWidget" name="metadataWidget" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>10</width>
-       <height>10</height>
-      </size>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>712</width>
+        <height>338</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="ViSpectrumAnalysisWidget" name="spectrumWidget" native="true"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
-   </item>
-   <item row="2" column="1">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>
@@ -87,15 +80,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ViPlaybackWidget</class>
+   <class>ViSpectrumAnalysisWidget</class>
    <extends>QWidget</extends>
-   <header>viplaybackwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ViMetadataWidget</class>
-   <extends>QWidget</extends>
-   <header>vimetadatawidget.h</header>
+   <header>vispectrumanalysiswidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

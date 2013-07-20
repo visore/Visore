@@ -10,9 +10,21 @@ ViMetadataWidget::ViMetadataWidget(QWidget *parent)
 	mUi = new Ui::ViMetadataWidget();
 	mUi->setupUi(this);
 
-	setStyleSheet("QLabel { min-height: 10px; }");
+	setStyleSheet("QLabel { min-height: 15px; }");
 
 	mUi->coverWidget->setSize(300);
+
+	mUi->titleLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
+	mUi->artistLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
+	mUi->albumLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
+	mUi->durationLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
+	mUi->fileSizeLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
+	mUi->codecLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
+	mUi->bitrateLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
+	mUi->qualityLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
+	mUi->sampleSizeLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
+	mUi->sampleRateLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
+	mUi->channelsLabel->setStyleSheet("min-width: 120px; max-width: 120px;");
 
 	clear();
 }
@@ -99,7 +111,7 @@ void ViMetadataWidget::setFormat(const ViAudioFormat &format)
 		mUi->quality->setText(ViAudioFormat::toString(format.quality()) + "Quality");
 	}
 
-	mUi->sampleSize->setText(QString::number(format.sampleSize()) + "bits (" + ViAudioFormat::toString(format.sampleType()) + " Type)");
+	mUi->sampleSize->setText(QString::number(format.sampleSize()) + "bits (" + ViAudioFormat::toString(format.sampleType()) + ")");
 
 	mUi->sampleRate->setText(QString::number(format.sampleRate()) + "Hz");
 

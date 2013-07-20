@@ -3,40 +3,46 @@
 #include <float.h>
 
 template <typename T>
-ViSpectrum<T>::ViSpectrum()
+ViSpectrum<T>::ViSpectrum(const bool &autoUpdate)
 {
+	enableAutoUpdate(autoUpdate);
 	initialize(0, 0);
 }
 
 template <typename T>
-ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const ViAudioFormat &format)
+ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const ViAudioFormat &format, const bool &autoUpdate)
 {
-	initialize((windowSize / 2) + 1, format.sampleRate() / 2);
+	enableAutoUpdate(autoUpdate);
+	initialize(windowSize + 1, format.sampleRate());
 }
 
 template <typename T>
-ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const qint32 &sampleRate)
+ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const qint32 &sampleRate, const bool &autoUpdate)
 {
-	initialize((windowSize / 2) + 1, sampleRate / 2);
+	enableAutoUpdate(autoUpdate);
+	initialize(windowSize + 1, sampleRate);
 }
 
 template <typename T>
-ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const ViAudioFormat &format, const ViFrequencyChunk &chunk)
+ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const ViAudioFormat &format, const ViFrequencyChunk &chunk, const bool &autoUpdate)
 {
-    initialize((windowSize / 2) + 1, format.sampleRate() / 2);
+	enableAutoUpdate(autoUpdate);
+	initialize(windowSize + 1, format.sampleRate());
     add(chunk);
 }
 
 template <typename T>
-ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const qint32 &sampleRate, const ViFrequencyChunk &chunk)
+ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const qint32 &sampleRate, const ViFrequencyChunk &chunk, const bool &autoUpdate)
 {
-	initialize((windowSize / 2) + 1, sampleRate / 2);
+	enableAutoUpdate(autoUpdate);
+	initialize(windowSize + 1, sampleRate);
 	add(chunk);
 }
 
 template <typename T>
 ViSpectrum<T>::ViSpectrum(const ViSpectrum<T> &other)
 {
+	mAutoUpdate = other.mAutoUpdate;
 	for(int i = 0; i < other.mRawValues.size(); ++i)
 	{
 		mRawValues.push_back(ViSpectrumElement<T>(other.mRawValues[i]));
@@ -52,13 +58,25 @@ ViSpectrum<T>::ViSpectrum(const ViSpectrum<T> &other)
 }
 
 template <typename T>
-ViSpectrumElement<T> ViSpectrum<T>::at(const qint32 index) const
+void ViSpectrum<T>::enableAutoUpdate(const bool &enable)
+{
+	mAutoUpdate = enable;
+}
+
+template <typename T>
+void ViSpectrum<T>::disableAutoUpdate(const bool &disable)
+{
+	enableAutoUpdate(!disable);
+}
+
+template <typename T>
+const ViSpectrumElement<T>& ViSpectrum<T>::at(const qint32 index) const
 {
 	return mValues[index];
 }
 
 template <typename T>
-ViSpectrumElement<T> ViSpectrum<T>::operator[](const qint32 index) const
+const ViSpectrumElement<T>& ViSpectrum<T>::operator[](const qint32 index) const
 {
 	return mValues[index];
 }
@@ -67,26 +85,26 @@ template <typename T>
 void ViSpectrum<T>::add(const qint32 index, ViComplexNumber<T> complex)
 {
     addValue(index, complex);
-    finalize();
+	if(mAutoUpdate) update();
 }
 
 template <typename T>
 void ViSpectrum<T>::add(const ViFrequencyChunk &chunk)
 {
-    qint32 windowSize = size() - 1;
+	qint32 windowSize = size() - 1;
 	addValue(0, ViRealComplex(chunk[0], 0));
     for(int i = 1; i < windowSize; ++i)
     {
 		addValue(i, ViRealComplex(chunk[i], -chunk[i + windowSize]));
     }
 	addValue(windowSize, ViRealComplex(chunk[windowSize], 0));
-    finalize();
+	if(mAutoUpdate) update();
 }
 
 template <typename T>
 void ViSpectrum<T>::add(const ViFrequencyChunks &chunks)
 {
-    qint32 windowSize = size() - 1;
+	qint32 windowSize = size() - 1;
     for(int c = 0; c < chunks.size(); ++c)
     {
         const ViFrequencyChunk &chunk = chunks[c];
@@ -97,7 +115,7 @@ void ViSpectrum<T>::add(const ViFrequencyChunks &chunks)
         }
 		addValue(windowSize, ViRealComplex(chunk[windowSize], 0));
     }
-    finalize();
+	if(mAutoUpdate) update();
 }
 
 template <typename T>
@@ -107,13 +125,13 @@ qint32 ViSpectrum<T>::size() const
 }
 
 template <typename T>
-ViSpectrumElement<T> ViSpectrum<T>::maximum() const
+const ViSpectrumElement<T>& ViSpectrum<T>::maximum() const
 {
 	return mMaximum;
 }
 
 template <typename T>
-ViSpectrumElement<T> ViSpectrum<T>::minimum() const
+const ViSpectrumElement<T>& ViSpectrum<T>::minimum() const
 {
 	return mMinimum;
 }
@@ -122,8 +140,8 @@ template <typename T>
 void ViSpectrum<T>::addValue(const qint32 index, ViComplexNumber<T> complex)
 {
     ++mAdditionCounter;
-    mRawValues[index].rectangular().amplitude() += complex;
-    mRawValues[index].polar().amplitude() += ViSpectrumElement<T>::toPolar(complex);
+	mRawValues[index].rectangularReference().amplitudeReference() += complex;
+	mRawValues[index].polarReference().amplitudeReference() += ViSpectrumElement<T>::toPolar(complex);
 }
 
 template <typename T>
@@ -134,17 +152,17 @@ void ViSpectrum<T>::initialize(qint32 size, qint32 frequency)
 	mRawValues.clear();
 	mRawValues.resize(size);
 	mValues.clear();
-	mValues.resize(size / 2); // Since we use real FFT, we'll have a mirror image, hence we only need half of the N/2 spectrum
+	mValues.resize(size / 2); // Half real, half imaginary
 	qint32 valueSize = mValues.size();
 	for(int i = 0; i < valueSize; ++i)
 	{
 		mValues[i].setFrequencyHertz(frequency * ((i + 1) / T(valueSize)));
-		mValues[i].setFrequencyRange(0.5 * ((i + 1) / T(valueSize)));
+		mValues[i].setFrequencyRange(((i + 1) / T(valueSize)));
 	}
 }
 
 template <typename T>
-void ViSpectrum<T>::finalize()
+void ViSpectrum<T>::update()
 {
 	if(mPreviousAdditionCounter != mAdditionCounter && mAdditionCounter != 0)
 	{
@@ -176,17 +194,29 @@ void ViSpectrum<T>::clear()
 template <typename T>
 void ViSpectrum<T>::findRanges()
 {
-	mMaximum.setPolar(ViSpectrumElementForm<T>(ViComplexNumber<T>(-FLT_MAX, -FLT_MAX), ViComplexNumber<T>(-FLT_MAX, -FLT_MAX)));
-	mMaximum.setRectangular(ViSpectrumElementForm<T>(ViComplexNumber<T>(-FLT_MAX, -FLT_MAX), ViComplexNumber<T>(-FLT_MAX, -FLT_MAX)));
-	mMinimum.setPolar(ViSpectrumElementForm<T>(ViComplexNumber<T>(FLT_MAX, FLT_MAX), ViComplexNumber<T>(FLT_MAX, FLT_MAX)));
-	mMinimum.setRectangular(ViSpectrumElementForm<T>(ViComplexNumber<T>(FLT_MAX, FLT_MAX), ViComplexNumber<T>(FLT_MAX, FLT_MAX)));
+	ViComplexNumber<T> valueRectangularAmplitude = mValues[0].rectangular().amplitude();
+	ViComplexNumber<T> valuePolarAmplitude = mValues[0].polar().amplitude();
+	ViComplexNumber<T> valueRectangularDecibel = mValues[0].rectangular().decibel();
+	ViComplexNumber<T> valuePolarDecibel = mValues[0].polar().decibel();
 
-	ViComplexNumber<T> valueRectangularAmplitude;
-	ViComplexNumber<T> valuePolarAmplitude;
-	ViComplexNumber<T> valueRectangularDecibel;
-	ViComplexNumber<T> valuePolarDecibel;
+	mMaximum.rectangularReference().amplitudeReference().setReal(valueRectangularAmplitude.real());
+	mMinimum.rectangularReference().amplitudeReference().setReal(valueRectangularAmplitude.real());
+	mMaximum.rectangularReference().amplitudeReference().setImaginary(valueRectangularAmplitude.imaginary());
+	mMinimum.rectangularReference().amplitudeReference().setImaginary(valueRectangularAmplitude.imaginary());
+	mMaximum.rectangularReference().decibelReference().setReal(valueRectangularDecibel.real());
+	mMinimum.rectangularReference().decibelReference().setReal(valueRectangularDecibel.real());
+	mMaximum.rectangularReference().decibelReference().setImaginary(valueRectangularDecibel.imaginary());
+	mMinimum.rectangularReference().decibelReference().setImaginary(valueRectangularDecibel.imaginary());
+	mMaximum.polarReference().amplitudeReference().setReal(valuePolarAmplitude.real());
+	mMinimum.polarReference().amplitudeReference().setReal(valuePolarAmplitude.real());
+	mMaximum.polarReference().amplitudeReference().setImaginary(valuePolarAmplitude.imaginary());
+	mMinimum.polarReference().amplitudeReference().setImaginary(valuePolarAmplitude.imaginary());
+	mMaximum.polarReference().decibelReference().setReal(valuePolarDecibel.real());
+	mMinimum.polarReference().decibelReference().setReal(valuePolarDecibel.real());
+	mMaximum.polarReference().decibelReference().setImaginary(valuePolarDecibel.imaginary());
+	mMinimum.polarReference().decibelReference().setImaginary(valuePolarDecibel.imaginary());
 
-	for(int i = 0; i < mValues.size(); ++i)
+	for(int i = 1; i < mValues.size(); ++i)
 	{
 		valueRectangularAmplitude = mValues[i].rectangular().amplitude();
 		valuePolarAmplitude = mValues[i].polar().amplitude();
@@ -195,75 +225,81 @@ void ViSpectrum<T>::findRanges()
 
 		if(valueRectangularAmplitude.real() > mMaximum.rectangular().amplitude().real())
 		{
-			mMaximum.rectangular().amplitude().setReal(valueRectangularAmplitude.real());
+			mMaximum.rectangularReference().amplitudeReference().setReal(valueRectangularAmplitude.real());
 		}
 		else if(valueRectangularAmplitude.real() < mMinimum.rectangular().amplitude().real())
 		{
-			mMinimum.rectangular().amplitude().setReal(valueRectangularAmplitude.real());
+			mMinimum.rectangularReference().amplitudeReference().setReal(valueRectangularAmplitude.real());
 		}
 
 		if(valueRectangularAmplitude.imaginary() > mMaximum.rectangular().amplitude().imaginary())
 		{
-			mMaximum.rectangular().amplitude().setImaginary(valueRectangularAmplitude.imaginary());
+			mMaximum.rectangularReference().amplitudeReference().setImaginary(valueRectangularAmplitude.imaginary());
 		}
 		else if(valueRectangularAmplitude.imaginary() < mMinimum.rectangular().amplitude().imaginary())
 		{
-			mMinimum.rectangular().amplitude().setImaginary(valueRectangularAmplitude.imaginary());
+			mMinimum.rectangularReference().amplitudeReference().setImaginary(valueRectangularAmplitude.imaginary());
 		}
 
 		if(valueRectangularDecibel.real() > mMaximum.rectangular().decibel().real())
 		{
-			mMaximum.rectangular().decibel().setReal(valueRectangularDecibel.real());
+			mMaximum.rectangularReference().decibelReference().setReal(valueRectangularDecibel.real());
 		}
 		else if(valueRectangularDecibel.real() < mMinimum.rectangular().decibel().real())
 		{
-			mMinimum.rectangular().decibel().setReal(valueRectangularDecibel.real());
+			mMinimum.rectangularReference().decibelReference().setReal(valueRectangularDecibel.real());
 		}
 
 		if(valueRectangularDecibel.imaginary() > mMaximum.rectangular().decibel().imaginary())
 		{
-			mMaximum.rectangular().decibel().setImaginary(valueRectangularDecibel.imaginary());
+			mMaximum.rectangularReference().decibelReference().setImaginary(valueRectangularDecibel.imaginary());
 		}
 		else if(valueRectangularDecibel.imaginary() < mMinimum.rectangular().decibel().imaginary())
 		{
-			mMinimum.rectangular().decibel().setImaginary(valueRectangularDecibel.imaginary());
+			mMinimum.rectangularReference().decibelReference().setImaginary(valueRectangularDecibel.imaginary());
 		}
 
 		if(valuePolarAmplitude.real() > mMaximum.polar().amplitude().real())
 		{
-			mMaximum.polar().amplitude().setReal(valuePolarAmplitude.real());
+			mMaximum.polarReference().amplitudeReference().setReal(valuePolarAmplitude.real());
 		}
 		else if(valuePolarAmplitude.real() < mMinimum.polar().amplitude().real())
 		{
-			mMinimum.polar().amplitude().setReal(valuePolarAmplitude.real());
+			mMinimum.polarReference().amplitudeReference().setReal(valuePolarAmplitude.real());
 		}
 
 		if(valuePolarAmplitude.imaginary() > mMaximum.polar().amplitude().imaginary())
 		{
-			mMaximum.polar().amplitude().setImaginary(valuePolarAmplitude.imaginary());
+			mMaximum.polarReference().amplitudeReference().setImaginary(valuePolarAmplitude.imaginary());
 		}
 		else if(valuePolarAmplitude.imaginary() < mMinimum.polar().amplitude().imaginary())
 		{
-			mMinimum.polar().amplitude().setImaginary(valuePolarAmplitude.imaginary());
+			mMinimum.polarReference().amplitudeReference().setImaginary(valuePolarAmplitude.imaginary());
 		}
 
 		if(valuePolarDecibel.real() > mMaximum.polar().decibel().real())
 		{
-			mMaximum.polar().decibel().setReal(valuePolarDecibel.real());
+			mMaximum.polarReference().decibelReference().setReal(valuePolarDecibel.real());
 		}
 		else if(valuePolarDecibel.real() < mMinimum.polar().decibel().real())
 		{
-			mMinimum.polar().decibel().setReal(valuePolarDecibel.real());
+			mMinimum.polarReference().decibelReference().setReal(valuePolarDecibel.real());
 		}
 
 		if(valuePolarDecibel.imaginary() > mMaximum.polar().decibel().imaginary())
 		{
-			mMaximum.polar().decibel().setImaginary(valuePolarDecibel.imaginary());
+			mMaximum.polarReference().decibelReference().setImaginary(valuePolarDecibel.imaginary());
 		}
 		else if(valuePolarDecibel.imaginary() < mMinimum.polar().decibel().imaginary())
 		{
-			mMinimum.polar().decibel().setImaginary(valuePolarDecibel.imaginary());
+			mMinimum.polarReference().decibelReference().setImaginary(valuePolarDecibel.imaginary());
 		}
+
+
+		valueRectangularAmplitude = mValues[i].rectangular().amplitude();
+		valuePolarAmplitude = mValues[i].polar().amplitude();
+		valueRectangularDecibel = mValues[i].rectangular().decibel();
+		valuePolarDecibel = mValues[i].polar().decibel();
 	}
 }
 
