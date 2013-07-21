@@ -3,18 +3,23 @@
 
 QString ViName::name(QString replace, bool spaced)
 {
-	QString result = CLASSNAME.remove(0, 2);
-	result.replace(replace, "");
+	return formatName(CLASSNAME, replace, spaced);
+}
+
+QString ViName::formatName(QString name, QString replace, bool spaced)
+{
+	name = name.remove(0, 2);
+	name.replace(replace, "");
 	if(spaced)
 	{
-		for(int i = 0; i < result.size(); ++i)
+		for(int i = 0; i < name.size(); ++i)
 		{
-			if(result[i].isUpper())
+			if(name[i].isUpper())
 			{
-				result.insert(i, " ");
+				name.insert(i, " ");
 				++i;
 			}
 		}
 	}
-	return result.trimmed();
+	return name.trimmed();
 }

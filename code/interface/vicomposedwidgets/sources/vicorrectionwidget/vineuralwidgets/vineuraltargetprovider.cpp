@@ -11,18 +11,18 @@ ViNeuralTargetProviderWidget::ViNeuralTargetProviderWidget(QWidget *parent)
     mUi->setupUi(this);
 
 	QObject::connect(mUi->providerComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(toggleProvider()));
-	QList<ViTargetProvider*> targetProviders = ViTargetProviderManager::libraries();
+	QStringList targetProviders = ViTargetProviderManager::names();
 	for(int i = 0; i < targetProviders.size(); ++i)
 	{
-		mUi->providerComboBox->addItem(targetProviders[i]->name("TargetProvider", true), targetProviders[i]->name());
+		mUi->providerComboBox->addItem(ViName::formatName(targetProviders[i], "TargetProvider", true), targetProviders[i]);
 	}
 	mDefaultProvider = ViTargetProviderManager::defaultName("TargetProvider", true);
 	mUi->providerComboBox->setCurrentText(mDefaultProvider);
 
-	QList<ViInterpolator*> interpolators = ViInterpolatorManager::libraries();
+	QStringList interpolators = ViInterpolatorManager::names();
 	for(int i = 0; i < interpolators.size(); ++i)
 	{
-		mUi->interpolatorComboBox->addItem(interpolators[i]->name("Interpolator", true), interpolators[i]->name());
+		mUi->interpolatorComboBox->addItem(ViName::formatName(interpolators[i], "Interpolator", true), interpolators[i]);
 	}
 	mDefaultInterpolator = ViInterpolatorManager::defaultName("Interpolator", true);
 	mUi->interpolatorComboBox->setCurrentText(mDefaultInterpolator);

@@ -86,6 +86,23 @@ LIBRARY_TYPE* ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::createDefault(QStrin
 }
 
 template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
+QList<LIBRARY_TYPE*> ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::createAll(QString functionName)
+{
+	ViLibraryManagerPointer manager = ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::instance();
+	if(!manager->mWasLoaded)
+	{
+		manager->mWasLoaded = true;
+		manager->load(manager->libraryPath(), functionName);
+	}
+	QList<LIBRARY_TYPE*> result;
+	for(int i = 0; i < manager->mLibraries.size(); ++i)
+	{
+		result.append((LIBRARY_TYPE*) manager->mLibraries[i]->clone());
+	}
+	return result;
+}
+
+template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
 LIBRARY_TYPE* ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::createLibrary(QString name)
 {
     name = name.toLower();
@@ -97,23 +114,6 @@ LIBRARY_TYPE* ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::createLibrary(QStrin
 		}
 	}
 	return NULL;
-}
-
-template<typename MANAGER_TYPE, typename LIBRARY_TYPE>
-QList<LIBRARY_TYPE*> ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::libraries(QString functionName)
-{
-	ViLibraryManagerPointer manager = ViLibraryManager<MANAGER_TYPE, LIBRARY_TYPE>::instance();
-	if(!manager->mWasLoaded)
-	{
-		manager->mWasLoaded = true;
-		manager->load(manager->libraryPath(), functionName);
-	}
-	QList<LIBRARY_TYPE*> result;
-	for(int i = 0; i < manager->mLibraries.size(); ++i)
-	{
-        result.append((LIBRARY_TYPE*) manager->mLibraries[i]->clone());
-	}
-	return result;
 }
 
 template<typename MANAGER_TYPE, typename LIBRARY_TYPE>

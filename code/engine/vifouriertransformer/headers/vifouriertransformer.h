@@ -5,10 +5,11 @@
 #include "viwindowfunction.h"
 #include "vicomplexnumber.h"
 #include <QMap>
+#include <viid.h>
 
 typedef QVector<ViDoubleComplex> ViComplexVector;
 
-class ViFourierTransformer
+class ViFourierTransformer : public ViId
 {
 
 	public:
@@ -29,7 +30,7 @@ class ViFourierTransformer
 	public:
 
 		ViFourierTransformer(const int size = 0, const QString functionName = "");
-		~ViFourierTransformer();
+		virtual ~ViFourierTransformer();
 
 		Initialization setSize(const int size);
 		bool setWindowFunction(const QString functionName);

@@ -29,7 +29,8 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		void setPlaybackVolume(int volume);
 
 		//Correlation
-		void calculateCorrelation(ViAudioObjectPointer object);
+		void correlate(ViAudioObjectPointer object);
+		void correlate(ViAudioObjectQueue objects);
 
 		//Correction
 		void correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector);

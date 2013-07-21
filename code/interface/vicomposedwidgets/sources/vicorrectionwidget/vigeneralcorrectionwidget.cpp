@@ -13,10 +13,10 @@ ViGeneralCorrectionWidget::ViGeneralCorrectionWidget(QWidget *parent)
 	QObject::connect(mUi->correctAllRadioButton, SIGNAL(toggled(bool)), this, SLOT(toggleDetector()));
 	QObject::connect(mUi->correctNoisyRadioButton, SIGNAL(toggled(bool)), this, SLOT(toggleDetector()));
 
-	QList<ViNoiseDetector*> noiseDetectors = ViNoiseDetectorManager::libraries();
+	QStringList noiseDetectors = ViNoiseDetectorManager::names();
 	for(int i = 0; i < noiseDetectors.size(); ++i)
 	{
-		mUi->detectorComboBox->addItem(noiseDetectors[i]->name("", true), noiseDetectors[i]->name());
+		mUi->detectorComboBox->addItem(ViName::formatName(noiseDetectors[i], "", true), noiseDetectors[i]);
 	}
 	mDefaultDetector = ViNoiseDetectorManager::defaultName("", true);
 	mUi->detectorComboBox->setCurrentText(mDefaultDetector);

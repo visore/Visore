@@ -26,7 +26,9 @@ class ViCorrelationWidget : public ViWidget
 
         void clear();
 
-        void setProject(ViProject *project);
+		void setObject(ViAudioObjectPointer object);
+		void setObjects(ViAudioObjectQueue objects);
+		void setProject(ViProject *project);
 
 	protected:
 
@@ -36,7 +38,8 @@ class ViCorrelationWidget : public ViWidget
 	private:
 
 		Ui::ViCorrelationWidget *mUi;
-        ViProject *mProject;
+		ViAudioObjectQueue mObjects;
+		ViProject *mProject;
 
 };
 

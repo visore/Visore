@@ -13,10 +13,10 @@ ViNeuralErrorFunctionWidget::ViNeuralErrorFunctionWidget(QWidget *parent)
 	mUi->addButton->setIcon(ViThemeManager::icon("add"), 14);
 	mUi->removeButton->setIcon(ViThemeManager::icon("remove"), 14);
 
-	QList<ViErrorFunction*> errorFunctions = ViErrorFunctionManager::libraries();
+	QStringList errorFunctions = ViErrorFunctionManager::names();
 	for(int i = 0; i < errorFunctions.size(); ++i)
 	{
-		mUi->comboBox->addItem(errorFunctions[i]->name("Function", true), errorFunctions[i]->name());
+		mUi->comboBox->addItem(ViName::formatName(errorFunctions[i], "Function", true), errorFunctions[i]);
 	}
 	mDefaultFunction = ViErrorFunctionManager::defaultName("Function", true);
 	mUi->comboBox->setCurrentText(mDefaultFunction);

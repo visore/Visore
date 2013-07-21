@@ -1,101 +1,67 @@
 #include <vimaincorrelationwidget.h>
 #include <ui_vimaincorrelationwidget.h>
 
-ViRemoveWidget::ViRemoveWidget(int row)
-{
-	mRow = row;
-	mButton = new ViButton();
-	mButton->setIcon(ViThemeManager::icon("remove"), 30);
-	mButton->setSize(30, 30);
-	QHBoxLayout *layout = new QHBoxLayout(this);
-	layout->addWidget(mButton);
-	layout->setContentsMargins(0, 0, 0, 0);
-	setLayout(layout);
-	QObject::connect(mButton, SIGNAL(clicked()), this, SLOT(click()));
-}
-
-ViRemoveWidget::~ViRemoveWidget()
-{
-	delete mButton;
-}
-
-int ViRemoveWidget::row()
-{
-	return mRow;
-}
-
-void ViRemoveWidget::setRow(int row)
-{
-	mRow = row;
-}
-
-void ViRemoveWidget::click()
-{
-	emit clicked(mRow);
-}
-
 ViMainCorrelationWidget::ViMainCorrelationWidget(QWidget *parent)
 	: ViWidget(parent)
 {
 	mUi = new Ui::ViMainCorrelationWidget();
 	mUi->setupUi(this);
 
-	//QObject::connect(mUi->projectLoader, SIGNAL(started()), this, SLOT(correlateTracks()));
+	clear();
 
-	mUi->tableWidget->setColumnCount(4);
-	mUi->tableWidget->setHorizontalHeaderItem(0, new QTableWidgetItem("File Name"));
-	mUi->tableWidget->setHorizontalHeaderItem(1, new QTableWidgetItem("Project Name"));
-	mUi->tableWidget->setHorizontalHeaderItem(2, new QTableWidgetItem("Project Size"));
-	mUi->tableWidget->setHorizontalHeaderItem(3, new QTableWidgetItem("Remove"));
+	mUi->projectLoader->setTypeMode(ViProjectLoader::NoTypes);
+	QObject::connect(mUi->projectLoader, SIGNAL(typesChanged()), this, SLOT(correlate()));
+	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), this, SLOT(checkCorrelate()));
+	QObject::connect(mUi->projectLoader, SIGNAL(projectModeChanged()), this, SLOT(checkCorrelate()));
 }
 
 ViMainCorrelationWidget::~ViMainCorrelationWidget()
 {
+	clear();
 	delete mUi;
 }
 
-void ViMainCorrelationWidget::addProjects()
+void ViMainCorrelationWidget::clear()
 {
-	/*QStringList projects = mUi->fileBrowser->fileNames();
-	int row = mUi->tableWidget->rowCount();
-	mUi->tableWidget->setRowCount(mUi->tableWidget->rowCount() + projects.size());
-	int invalidProjects = 0;
-	for(int i = 0; i < projects.size(); ++i)
-	{
-		QEventLoop loop;
-		ViProject project(projects[i]);
-		QObject::connect(&project, SIGNAL(finished()), &loop, SLOT(quit()));
-		if(project.load(true))
-		{
-			loop.exec(); // Wait until the archive in the project was extracted
-			mUi->tableWidget->setItem(row + i, 0, new QTableWidgetItem(project.fileName()));
-			mUi->tableWidget->setItem(row + i, 1, new QTableWidgetItem(project.projectName()));
-			mUi->tableWidget->setItem(row + i, 2, new QTableWidgetItem(QString::number(project.size())));
-			ViRemoveWidget *remove = new ViRemoveWidget(row + i);
-			mButtons.append(remove);
-			QObject::connect(remove, SIGNAL(clicked(int)), this, SLOT(remove(int)));
-			mUi->tableWidget->setCellWidget(row + i, 3, remove);
-		}
-		else
-		{
-			++invalidProjects;
-		}
-	}
-	mUi->tableWidget->setRowCount(mUi->tableWidget->rowCount() - invalidProjects);*/
+	mUi->projectLoader->clear();
+	mUi->correlationWidget->clear();
+	mUi->scrollArea->hide();
 }
 
-void ViMainCorrelationWidget::remove(int row)
+void ViMainCorrelationWidget::checkCorrelate()
 {
-	for(int i = row + 1; i < mButtons.size(); ++i)
+	mUi->correlationWidget->clear();
+	mUi->scrollArea->hide();
+	if(mUi->projectLoader->projectMode() != ViProjectLoader::SingleTrack)
 	{
-		mButtons[i]->setRow(i - 1);
+		correlate();
 	}
-	mButtons.removeAt(row);
-	mUi->tableWidget->removeRow(row);
 }
 
-void ViMainCorrelationWidget::correlateTracks()
+void ViMainCorrelationWidget::correlate()
 {
-	//engine()->calculateCorrelation(mUi->projectLoader->currentObject());
-	//engine()->align(*mUi->projectLoader->project());
+	mUi->correlationWidget->clear();
+	mUi->scrollArea->hide();
+	if(!mUi->projectLoader->objects().isEmpty())
+	{
+		QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(changeCorrelation()));
+		engine()->correlate(mUi->projectLoader->objects());
+	}
+}
+
+void ViMainCorrelationWidget::changeCorrelation()
+{
+	QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(changeCorrelation()));
+
+	ViProjectLoader::ProjectMode mode = mUi->projectLoader->projectMode();
+	if(mode == ViProjectLoader::SingleProject)
+	{
+		mUi->correlationWidget->setProject(mUi->projectLoader->project());
+	}
+	else
+	{
+		mUi->correlationWidget->setObjects(mUi->projectLoader->objects());
+	}
+	LOG("wwwwwwwww: "+QString::number(mUi->projectLoader->objects().size()));
+	mUi->scrollArea->show();
 }

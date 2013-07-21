@@ -17,6 +17,7 @@ ViCorrelator::~ViCorrelator()
 void ViCorrelator::initialize()
 {
 	setChannelMode(ViProcessor::Combined);
+	setProcessMode(ViProcessor::All);
     mCorrelation.clear();
 }
 

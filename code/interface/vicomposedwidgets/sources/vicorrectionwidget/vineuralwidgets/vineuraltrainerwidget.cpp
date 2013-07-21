@@ -8,10 +8,10 @@ ViNeuralTrainerWidget::ViNeuralTrainerWidget(QWidget *parent)
 	mUi = new Ui::ViNeuralTrainerWidget();
     mUi->setupUi(this);
 
-	QList<ViTrainer*> trainers = ViTrainerManager::libraries();
+	QStringList trainers = ViTrainerManager::names();
 	for(int i = 0; i < trainers.size(); ++i)
 	{
-		mUi->comboBox->addItem(trainers[i]->name("Trainer", true), trainers[i]->name());
+		mUi->comboBox->addItem(ViName::formatName(trainers[i], "Trainer", true), trainers[i]);
 	}
 	mDefaultTrainer = ViTrainerManager::defaultName();
 	mUi->comboBox->setCurrentText(mDefaultTrainer);

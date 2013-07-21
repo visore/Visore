@@ -28,8 +28,8 @@ class ViLibraryManager : public ViSingleton<MANAGER_TYPE>
 		static LIBRARY_TYPE* create(QString name, QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
 		static LIBRARY_TYPE* create(ViElement element, QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
 		static LIBRARY_TYPE* createDefault(QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
+		static QList<LIBRARY_TYPE*> createAll(QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
 
-		static QList<LIBRARY_TYPE*> libraries(QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
         static QStringList names(QString replace = "", bool spaced = false, QString functionName = VI_DEFAULT_LIBRARY_FUNCTION);
         static QString defaultName(QString replace = "", bool spaced = false);
 

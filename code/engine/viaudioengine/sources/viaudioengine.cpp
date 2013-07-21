@@ -55,25 +55,22 @@ void ViAudioEngine::setPlaybackVolume(int volume)
 	mPlayer.changeVolume(volume);
 }
 
-void ViAudioEngine::calculateCorrelation(ViAudioObjectPointer object)
+void ViAudioEngine::correlate(ViAudioObjectPointer object)
 {
-	/*ViSingleExecutor *executor = singleExecutor();
-	executor->setMessage("Correlating tracks");
-	mCrossCorrelator.setWindowSize(4096);
-	executor->execute(object, &mCrossCorrelator, ViAudio::Target, ViAudio::Corrupted);
-*/
+	correlate({object});
+}
 
-	
-	QObject::connect(object.data(), SIGNAL(progressed(qreal)), this, SIGNAL(progressed(qreal)));
-	QObject::connect(object.data(), SIGNAL(statused(QString)), this, SIGNAL(statusChanged(QString)));
-	object->align();
+void ViAudioEngine::correlate(ViAudioObjectQueue objects)
+{
+	mObjectChain.clear();
+	mObjectChain.add(objects);
 
+	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted | ViAudio::Corrected)), 0.1);
+	mObjectChain.addFunction(ViFunctionCall("align"), 0.04);
+	mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(ViCorrelatorManager::createAll())), 0.85);
+	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
 
-	/*mExecutor.setWindowSize(ViExecutor::defaultWindowSize());
-	if(!mExecutor.execute(mProcessingChain.buffer(ViAudio::AudioInput), mProcessingChain.buffer(ViAudio::AudioOutput), &mCorrelator))
-	{
-		emit correlationFinished();
-	}*/
+	mObjectChain.execute("Correlating");
 }
 
 void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector)
@@ -84,8 +81,6 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted)), 0.01);
 	mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.91);
 	mObjectChain.addFunction(ViFunctionCall("encode", QVariant(ViAudio::Corrected)), 0.01);
-	mObjectChain.addFunction(ViFunctionCall("align"), 0.01);
-	mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(ViCorrelatorManager::libraries())), 0.05);
 	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
 
 	mObjectChain.execute();

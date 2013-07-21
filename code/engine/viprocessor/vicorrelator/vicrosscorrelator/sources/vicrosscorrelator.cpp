@@ -13,7 +13,7 @@ ViCrossCorrelator::ViCrossCorrelator()
 ViCrossCorrelator::ViCrossCorrelator(const ViCrossCorrelator &other)
     : ViCorrelator(other)
 {
-    mTransformer = other.mTransformer;
+	// Do not copy the transformer
     mRealData = NULL;
 	mFirstFourierData = NULL;
 	mSecondFourierData = NULL;
@@ -44,7 +44,6 @@ void ViCrossCorrelator::execute(const int &channel)
 {
 	ViSampleChunk &theSamples1 = currentSamples();
 	ViSampleChunk &theSamples2 = currentSamples2();
-
     qreal firstNorm, secondNorm, multipliedNorm;
     int count = sampleCount();
 

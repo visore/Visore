@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>745</width>
-    <height>529</height>
+    <height>104</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -22,63 +22,54 @@
   <property name="styleSheet">
    <string/>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QFormLayout" name="formLayout">
    <property name="leftMargin">
-    <number>10</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>10</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>10</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>10</number>
+    <number>0</number>
    </property>
-   <item row="2" column="0">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="1" column="0" colspan="2">
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
-     <property name="sizeHint" stdset="0">
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>743</width>
+        <height>76</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="ViCorrelationWidget" name="correlationWidget" native="true"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="ViProjectLoader" name="projectLoader" native="true">
+     <property name="minimumSize">
       <size>
-       <width>40</width>
-       <height>20</height>
+       <width>0</width>
+       <height>0</height>
       </size>
      </property>
-    </spacer>
-   </item>
-   <item row="1" column="0" colspan="3">
-    <widget class="ViTableWidget" name="tableWidget"/>
-   </item>
-   <item row="3" column="0" colspan="3">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="2" column="1" colspan="2">
-    <widget class="ViButton" name="processButton"/>
-   </item>
-   <item row="0" column="0" colspan="3">
-    <widget class="ViProjectLoader" name="projectLoader" native="true"/>
+    </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>ViButton</class>
-   <extends>QToolButton</extends>
-   <header>vibutton.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>ViProjectLoader</class>
    <extends>QWidget</extends>
@@ -86,9 +77,10 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ViTableWidget</class>
-   <extends>QTableWidget</extends>
-   <header>vitablewidget.h</header>
+   <class>ViCorrelationWidget</class>
+   <extends>QWidget</extends>
+   <header>vicorrelationwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

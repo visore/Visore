@@ -10,6 +10,8 @@ class ViName
 
 		virtual QString name(QString replace = "", bool spaced = false);
 
+		static QString formatName(QString name, QString replace = "", bool spaced = false);
+
 };
 
 #endif

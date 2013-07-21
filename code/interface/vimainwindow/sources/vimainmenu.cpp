@@ -62,14 +62,14 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	mUi->correlateProjectButton->setIcon(ViThemeManager::icon("correlation"), 80);
 	mUi->correlateProjectButton->setText("   Correlate\n   Project", textColor, font);
 	mUi->correlateProjectButton->setSize(250, 100);
-	index = ViStackedWidget::addWidget(new ViMainCorrelationWidget());
+	index = ViStackedWidget::addWidget(new ViMainCorrelationWidget(), false);
 	mUi->correlateProjectButton->setProperty("index", index);
 	QObject::connect(mUi->correlateProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
 	mUi->correctProjectButton->setIcon(ViThemeManager::icon("correction"), 80);
 	mUi->correctProjectButton->setText("   Correct\n   Project", textColor, font);
 	mUi->correctProjectButton->setSize(250, 100);
-	index = ViStackedWidget::addWidget(new ViMainCorrectionWidget());
+	index = ViStackedWidget::addWidget(new ViMainCorrectionWidget(), false);
 	mUi->correctProjectButton->setProperty("index", index);
 	QObject::connect(mUi->correctProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 

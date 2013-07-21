@@ -8,10 +8,10 @@ ViNeuralActivationFunctionWidget::ViNeuralActivationFunctionWidget(QWidget *pare
 	mUi = new Ui::ViNeuralActivationFunctionWidget();
     mUi->setupUi(this);
 
-	QList<ViActivationFunction*> activationFunctions = ViActivationFunctionManager::libraries();
+	QStringList activationFunctions = ViActivationFunctionManager::names();
 	for(int i = 0; i < activationFunctions.size(); ++i)
 	{
-		mUi->comboBox->addItem(activationFunctions[i]->name("ActivationFunction", true), activationFunctions[i]->name());
+		mUi->comboBox->addItem(ViName::formatName(activationFunctions[i], "ActivationFunction", true), activationFunctions[i]);
 	}
 
 	mDefaultFunction = "";

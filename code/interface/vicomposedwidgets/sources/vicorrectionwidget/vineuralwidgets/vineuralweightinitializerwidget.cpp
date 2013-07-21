@@ -8,10 +8,10 @@ ViNeuralWeightInitializerWidget::ViNeuralWeightInitializerWidget(QWidget *parent
 	mUi = new Ui::ViNeuralWeightInitializerWidget();
     mUi->setupUi(this);
 
-	QList<ViWeightInitializer*> weightInitializers = ViWeightInitializerManager::libraries();
+	QStringList weightInitializers = ViWeightInitializerManager::names();
 	for(int i = 0; i < weightInitializers.size(); ++i)
 	{
-		mUi->comboBox->addItem(weightInitializers[i]->name("WeightInitializer", true), weightInitializers[i]->name());
+		mUi->comboBox->addItem(ViName::formatName(weightInitializers[i], "WeightInitializer", true), weightInitializers[i]);
 	}
 	mDefaultInitializer = ViWeightInitializerManager::defaultName("WeightInitializer", true);
 	mUi->comboBox->setCurrentText(mDefaultInitializer);

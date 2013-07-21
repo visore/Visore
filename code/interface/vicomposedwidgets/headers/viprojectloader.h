@@ -32,6 +32,7 @@ class ViProjectLoader : public ViWidget
 
 	signals:
 
+		void projectModeChanged();
 		void trackChanged();
 		void projectChanged();
 		void typesChanged();
@@ -61,7 +62,9 @@ class ViProjectLoader : public ViWidget
 		ViAudio::Type types();
 
 		void setProjectMode(ViProjectLoader::ProjectMode mode);
+		ViProjectLoader::ProjectMode projectMode();
 		void setTypeMode(ViProjectLoader::TypeMode mode);
+		ViProjectLoader::TypeMode typeMode();
 
 	private:
 

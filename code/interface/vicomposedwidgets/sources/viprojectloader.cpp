@@ -52,6 +52,12 @@ ViProject* ViProjectLoader::project()
 
 ViAudioObjectQueue ViProjectLoader::objects()
 {
+	if(mSelectedObject >= 0)
+	{
+		ViAudioObjectQueue queue;
+		queue.enqueue(mObjects[mSelectedObject]);
+		return queue;
+	}
 	return mObjects;
 }
 
@@ -280,6 +286,7 @@ void ViProjectLoader::changeProjectMode(int mode)
 	}
 
 	clear();
+	emit projectModeChanged(); // Must come after clear
 }
 
 void ViProjectLoader::changeRadioTypes(bool checked)
@@ -328,8 +335,17 @@ void ViProjectLoader::setProjectMode(ViProjectLoader::ProjectMode mode)
 	mUi->modeLabel->hide();
 	mUi->modeComboBox->hide();
 }
+ViProjectLoader::ProjectMode ViProjectLoader::projectMode()
+{
+	return mProjectMode;
+}
 
 void ViProjectLoader::setTypeMode(ViProjectLoader::TypeMode mode)
 {
 	mTypeMode = mode;
+}
+
+ViProjectLoader::TypeMode ViProjectLoader::typeMode()
+{
+	return mTypeMode;
 }
