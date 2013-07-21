@@ -14,10 +14,9 @@ class ViCorrelationWidget : public ViWidget
 {
 	Q_OBJECT
 
-    private slots:
+	public slots:
 
-        void updateCorrelators();
-        void changeCorrelator();
+		void changeCorrelator(QString correlator);
 
 	public:
 

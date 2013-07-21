@@ -1,5 +1,6 @@
 #include <vimaincorrelationwidget.h>
 #include <ui_vimaincorrelationwidget.h>
+#include <vicorrelatormanager.h>
 
 ViMainCorrelationWidget::ViMainCorrelationWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -8,6 +9,10 @@ ViMainCorrelationWidget::ViMainCorrelationWidget(QWidget *parent)
 	mUi->setupUi(this);
 
 	clear();
+
+	QString style = "QLabel { min-width: 80px; }";
+	mUi->projectLoader->setStyleSheet(style);
+	mUi->correlatorContainer->setStyleSheet(style);
 
 	mUi->projectLoader->setTypeMode(ViProjectLoader::NoTypes);
 	QObject::connect(mUi->projectLoader, SIGNAL(typesChanged()), this, SLOT(correlate()));
@@ -26,12 +31,14 @@ void ViMainCorrelationWidget::clear()
 	mUi->projectLoader->clear();
 	mUi->correlationWidget->clear();
 	mUi->scrollArea->hide();
+	mUi->correlatorContainer->hide();
 }
 
 void ViMainCorrelationWidget::checkCorrelate()
 {
 	mUi->correlationWidget->clear();
 	mUi->scrollArea->hide();
+	mUi->correlatorContainer->hide();
 	if(mUi->projectLoader->projectMode() != ViProjectLoader::SingleTrack)
 	{
 		correlate();
@@ -42,6 +49,7 @@ void ViMainCorrelationWidget::correlate()
 {
 	mUi->correlationWidget->clear();
 	mUi->scrollArea->hide();
+	mUi->correlatorContainer->hide();
 	if(!mUi->projectLoader->objects().isEmpty())
 	{
 		QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(changeCorrelation()));
@@ -52,7 +60,7 @@ void ViMainCorrelationWidget::correlate()
 void ViMainCorrelationWidget::changeCorrelation()
 {
 	QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(changeCorrelation()));
-
+	mUi->scrollArea->show(); // Table must be visible before setting the data, in order to resize properly
 	ViProjectLoader::ProjectMode mode = mUi->projectLoader->projectMode();
 	if(mode == ViProjectLoader::SingleProject)
 	{
@@ -62,6 +70,44 @@ void ViMainCorrelationWidget::changeCorrelation()
 	{
 		mUi->correlationWidget->setObjects(mUi->projectLoader->objects());
 	}
-	LOG("wwwwwwwww: "+QString::number(mUi->projectLoader->objects().size()));
-	mUi->scrollArea->show();
+	updateCorrelators();
+}
+
+void ViMainCorrelationWidget::updateCorrelators()
+{
+	QObject::disconnect(mUi->correlatorComboBox, SIGNAL(currentTextChanged(QString)), mUi->correlationWidget, SLOT(changeCorrelator(QString)));
+	mUi->correlatorContainer->show();
+
+	ViAudioObjectQueue objects = mUi->projectLoader->objects();
+	QSet<QString> correlators;
+	ViCorrelationGroups correlations;
+	QStringList keys;
+	for(int i = 0; i < objects.size(); ++i)
+	{
+		correlations = objects[i]->correlations();
+		for(int j = 0; j < correlations.size(); ++j)
+		{
+			keys = correlations[j].correlators();
+			for(int k = 0; k < keys.size(); ++k)
+			{
+				correlators.insert(keys[k]);
+			}
+		}
+	}
+
+	QString correlator;
+	 for(int i = 0; i < mUi->correlatorComboBox->count(); ++i)
+	 {
+		 correlator = mUi->correlatorComboBox->itemText(i);
+		 if(correlators.contains(correlator))
+		 {
+			 correlators.remove(correlator);
+		 }
+	 }
+
+	 mUi->correlatorComboBox->clear();
+	 mUi->correlatorComboBox->addItems(correlators.toList());
+	 mUi->correlatorComboBox->setCurrentText(ViCorrelatorManager::defaultName());
+	 QObject::connect(mUi->correlatorComboBox, SIGNAL(currentTextChanged(QString)), mUi->correlationWidget, SLOT(changeCorrelator(QString)));
+	 mUi->correlationWidget->changeCorrelator(mUi->correlatorComboBox->currentText());
 }

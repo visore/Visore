@@ -18,6 +18,7 @@ class ViMainCorrelationWidget : public ViWidget
 		void checkCorrelate();
 		void correlate();
 		void changeCorrelation();
+		void updateCorrelators();
 
 	public:
 

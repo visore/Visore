@@ -1,7 +1,6 @@
-#include "vicorrelationwidget.h"
-#include "ui_vicorrelationwidget.h"
+#include <vicorrelationwidget.h>
+#include <ui_vicorrelationwidget.h>
 #include <viglobalcorrelation.h>
-#include <vicorrelatormanager.h>
 
 ViCorrelationWidget::ViCorrelationWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -10,20 +9,18 @@ ViCorrelationWidget::ViCorrelationWidget(QWidget *parent)
 	mUi->setupUi(this);
     mProject = NULL;
 
-    mUi->correctedTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    mUi->correctedTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	mUi->correctedTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	mUi->correctedTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	mUi->correctedTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
 
 	mUi->corruptedTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	mUi->corruptedTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-	//mUi->corruptedTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-
-
-
-    QObject::connect(mUi->correlatorComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeCorrelator()));
+	mUi->corruptedTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
 
     ViFont font;
     font.setPointSize(16);
     font.setBold(true);
+	font.setColor(ViThemeManager::color(ViThemeColors::BorderColor2));
 
     mUi->currentMean->setStyleSheet(font.styleSheet());
     mUi->currentMinimum->setStyleSheet(font.styleSheet());
@@ -55,8 +52,6 @@ void ViCorrelationWidget::clear()
     mUi->correctedTable->clearContents();
     mUi->corruptedTable->clearContents();
 
-    mUi->correlatorComboBox->clear();
-
     mUi->currentImprovement->setText(percentage(0));
     mUi->currentMean->setText(percentage(0));
     mUi->currentMinimum->setText(percentage(0));
@@ -77,14 +72,12 @@ void ViCorrelationWidget::setObject(ViAudioObjectPointer object)
 {
 	clear();
 	mObjects.append(object);
-	updateCorrelators();
 }
 
 void ViCorrelationWidget::setObjects(ViAudioObjectQueue objects)
 {
 	clear();
 	mObjects = objects;
-	updateCorrelators();
 }
 
 void ViCorrelationWidget::setProject(ViProject *project)
@@ -93,45 +86,10 @@ void ViCorrelationWidget::setProject(ViProject *project)
 	mProject = project;
 }
 
-void ViCorrelationWidget::updateCorrelators()
-{
-    ViCorrelationGroups correlations;
-
-    QSet<QString> correlators;
-    QStringList keys;
-	for(int i = 0; i < mObjects.size(); ++i)
-    {
-		correlations = mObjects[i]->correlations();
-		for(int j = 0; j < correlations.size(); ++j)
-        {
-            keys = correlations[j].correlators();
-            for(int k = 0; k < keys.size(); ++k)
-            {
-                correlators.insert(keys[k]);
-            }
-        }
-    }
-
-    QString correlator;
-    for(int i = 0; i < mUi->correlatorComboBox->count(); ++i)
-    {
-        correlator = mUi->correlatorComboBox->itemText(i);
-        if(correlators.contains(correlator))
-        {
-            correlators.remove(correlator);
-        }
-    }
-
-    mUi->correlatorComboBox->addItems(correlators.toList());
-    mUi->correlatorComboBox->setCurrentText(ViCorrelatorManager::defaultName());
-}
-
-void ViCorrelationWidget::changeCorrelator()
+void ViCorrelationWidget::changeCorrelator(QString correlator)
 {
 	if(!mObjects.isEmpty())
     {
-        QString correlator = mUi->correlatorComboBox->currentText();
-
         ViCorrelation correctedCorrelation, corruptedCorrelation;
         ViGlobalCorrelation globalCorrelation;
         ViAudioObjectPointer object;
@@ -147,9 +105,9 @@ void ViCorrelationWidget::changeCorrelator()
             if(correctedCorrelation.isValid())
             {
 				hasCorrectedCorrelation = true;
-                mUi->correctedTable->setItem(correctedCount, 0, QString::number(object->sideNumber()), Qt::AlignVCenter);
-                mUi->correctedTable->setItem(correctedCount, 1, QString::number(object->trackNumber()), Qt::AlignVCenter);
-                mUi->correctedTable->setItem(correctedCount, 2, object->fileName(false), Qt::AlignVCenter);
+				mUi->correctedTable->setItem(correctedCount, 0, QString::number(object->sideNumber()));
+				mUi->correctedTable->setItem(correctedCount, 1, QString::number(object->trackNumber()));
+				mUi->correctedTable->setItem(correctedCount, 2, object->fileName(false));
                 mUi->correctedTable->setItem(correctedCount, 3, percentage(correctedCorrelation.minimum()), Qt::AlignRight | Qt::AlignVCenter);
                 mUi->correctedTable->setItem(correctedCount, 4, percentage(correctedCorrelation.maximum()), Qt::AlignRight | Qt::AlignVCenter);
                 mUi->correctedTable->setItem(correctedCount, 5, percentage(correctedCorrelation.mean()), Qt::AlignRight | Qt::AlignVCenter);
@@ -161,12 +119,12 @@ void ViCorrelationWidget::changeCorrelator()
             if(corruptedCorrelation.isValid())
             {
 				hasCorruptedCorrelation = true;
-                mUi->corruptedTable->setItem(corruptedCount, 0, QString::number(object->sideNumber()), Qt::AlignVCenter);
-                mUi->corruptedTable->setItem(corruptedCount, 1, QString::number(object->trackNumber()), Qt::AlignVCenter);
-                mUi->corruptedTable->setItem(corruptedCount, 2, object->fileName(false), Qt::AlignVCenter);
-                mUi->corruptedTable->setItem(corruptedCount, 3, percentage(corruptedCorrelation.minimum()), Qt::AlignRight | Qt::AlignVCenter);
-                mUi->corruptedTable->setItem(corruptedCount, 4, percentage(corruptedCorrelation.maximum()), Qt::AlignRight | Qt::AlignVCenter);
-                mUi->corruptedTable->setItem(corruptedCount, 5, percentage(corruptedCorrelation.mean()), Qt::AlignRight | Qt::AlignVCenter);
+				mUi->corruptedTable->setItem(corruptedCount, 0, QString::number(object->sideNumber()));
+				mUi->corruptedTable->setItem(corruptedCount, 1, QString::number(object->trackNumber()));
+				mUi->corruptedTable->setItem(corruptedCount, 2, object->fileName(false));
+				mUi->corruptedTable->setItem(corruptedCount, 3, percentage(corruptedCorrelation.minimum()), Qt::AlignRight | Qt::AlignVCenter);
+				mUi->corruptedTable->setItem(corruptedCount, 4, percentage(corruptedCorrelation.maximum()), Qt::AlignRight | Qt::AlignVCenter);
+				mUi->corruptedTable->setItem(corruptedCount, 5, percentage(corruptedCorrelation.mean()), Qt::AlignRight | Qt::AlignVCenter);
                 ++corruptedCount;
                 globalCorrelation.add(object->correlation(ViAudio::Target, ViAudio::Corrupted));
             }

@@ -23,6 +23,9 @@
    <string/>
   </property>
   <layout class="QFormLayout" name="formLayout">
+   <property name="fieldGrowthPolicy">
+    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+   </property>
    <property name="horizontalSpacing">
     <number>5</number>
    </property>
@@ -41,214 +44,7 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Correlator:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QComboBox" name="correlatorComboBox">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QGroupBox" name="correctedGroupBox">
-     <property name="title">
-      <string>Corrected Correlation</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="1">
-       <widget class="QLabel" name="correctedLabel">
-        <property name="text">
-         <string>0.0000%</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="ViTableWidget" name="correctedTable">
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
-        </property>
-        <property name="showDropIndicator" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="dragDropOverwriteMode">
-         <bool>false</bool>
-        </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::SingleSelection</enum>
-        </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
-        </property>
-        <property name="sortingEnabled">
-         <bool>true</bool>
-        </property>
-        <attribute name="horizontalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderCascadingSectionResizes">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderDefaultSectionSize">
-         <number>100</number>
-        </attribute>
-        <attribute name="horizontalHeaderMinimumSectionSize">
-         <number>56</number>
-        </attribute>
-        <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-         <bool>true</bool>
-        </attribute>
-        <attribute name="horizontalHeaderStretchLastSection">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderDefaultSectionSize">
-         <number>30</number>
-        </attribute>
-        <attribute name="verticalHeaderMinimumSectionSize">
-         <number>21</number>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Side Number</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Track Number</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Track Name</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Lowest Correlation</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Highest Correlation</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Mean Correlation</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QGroupBox" name="corruptedGroupBox">
-     <property name="title">
-      <string>Corrupted Correlation</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="1">
-       <widget class="QLabel" name="corruptedLabel">
-        <property name="text">
-         <string>0.0000%</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="ViTableWidget" name="corruptedTable">
-        <attribute name="horizontalHeaderStretchLastSection">
-         <bool>false</bool>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Side Number</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Track Number</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Track Name</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Lowest Correlation</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Highest Correlation</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Mean Correaltion</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="0" colspan="2">
+   <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="globalGroupBox">
      <property name="title">
       <string>Global Correlation</string>
@@ -554,6 +350,205 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QGroupBox" name="correctedGroupBox">
+     <property name="title">
+      <string>Corrected Correlation</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="1">
+       <widget class="QLabel" name="correctedLabel">
+        <property name="text">
+         <string>0.0000%</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="ViTableWidget" name="correctedTable">
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="showDropIndicator" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="dragDropOverwriteMode">
+         <bool>false</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+        <attribute name="horizontalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="horizontalHeaderCascadingSectionResizes">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>100</number>
+        </attribute>
+        <attribute name="horizontalHeaderMinimumSectionSize">
+         <number>56</number>
+        </attribute>
+        <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+         <bool>true</bool>
+        </attribute>
+        <attribute name="horizontalHeaderStretchLastSection">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="verticalHeaderDefaultSectionSize">
+         <number>30</number>
+        </attribute>
+        <attribute name="verticalHeaderMinimumSectionSize">
+         <number>21</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Side Number</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Track Number</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Track Name</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Lowest Correlation</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Highest Correlation</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Mean Correlation</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QGroupBox" name="corruptedGroupBox">
+     <property name="title">
+      <string>Corrupted Correlation</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="1">
+       <widget class="QLabel" name="corruptedLabel">
+        <property name="text">
+         <string>0.0000%</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="ViTableWidget" name="corruptedTable">
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <attribute name="horizontalHeaderStretchLastSection">
+         <bool>false</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Side Number</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Track Number</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Track Name</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Lowest Correlation</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Highest Correlation</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Mean Correaltion</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

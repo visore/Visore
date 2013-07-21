@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>745</width>
-    <height>119</height>
+    <height>268</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -32,12 +32,12 @@
    <property name="bottomMargin">
     <number>10</number>
    </property>
-   <item row="2" column="1" colspan="2">
-    <widget class="ViButton" name="button">
+   <item row="0" column="0" colspan="3">
+    <widget class="ViProjectLoader" name="projectLoader" native="true">
      <property name="minimumSize">
       <size>
-       <width>10</width>
-       <height>10</height>
+       <width>0</width>
+       <height>0</height>
       </size>
      </property>
     </widget>
@@ -55,12 +55,12 @@
      </property>
     </spacer>
    </item>
-   <item row="0" column="0" colspan="3">
-    <widget class="ViProjectLoader" name="projectLoader" native="true">
+   <item row="2" column="1" colspan="2">
+    <widget class="ViButton" name="button">
      <property name="minimumSize">
       <size>
-       <width>0</width>
-       <height>0</height>
+       <width>10</width>
+       <height>10</height>
       </size>
      </property>
     </widget>

@@ -58,23 +58,23 @@ ViTableWidget::ViTableWidget(QWidget *parent)
 	: QTableWidget(parent)
 {
 	QString gradient1 = "qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + ViThemeManager::color(ViThemeColors::ButtonNormalColor1).name() + ", stop: 0.5 " + ViThemeManager::color(ViThemeColors::ButtonNormalColor2).name() + ", stop: 1 " + ViThemeManager::color(ViThemeColors::ButtonNormalColor1).name() + ")";
-
 	QString gradient2 = "qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + ViThemeManager::color(ViThemeColors::ButtonSelectedColor1).name() + ", stop: 0.5 " + ViThemeManager::color(ViThemeColors::ButtonSelectedColor2).name() + ", stop: 1 " + ViThemeManager::color(ViThemeColors::ButtonSelectedColor1).name() + ")";
 
 	setStyleSheet("\
 		QTableView{\
 			gridline-color: " + ViThemeManager::color(ViThemeColors::BorderColor2).name() + ";\
-			color: " + ViThemeManager::color(ViThemeColors::ButtonTextColor2).name() + ";\
 			background-color: transparent;\
 		}\
 		\
 		QHeaderView::section{\
-			background: " + gradient1 + ";\
 			color: " + ViThemeManager::color(ViThemeColors::ButtonTextColor1).name() + ";\
+			background: " + gradient1 + ";\
 			border: 0px solid black;\
+			padding: 5px;\
 		}\
 		QHeaderView{\
 			background-color: transparent;\
+			font-weight: bold;\
 		}\
 		\
 		QTableCornerButton::section{\
@@ -83,7 +83,13 @@ ViTableWidget::ViTableWidget(QWidget *parent)
 		\
 		QTableWidget{\
 			border: 0px solid black;\
-			selection-background-color: " + gradient2 + ";\
+		}\
+		QTableWidget::item{\
+			padding: 5px;\
+		}\
+		QTableWidget::item:selected{\
+			background: " + gradient2 + ";\
+			color: " + ViThemeManager::color(ViThemeColors::ButtonTextColor1).name() + ";\
 		}\
 	");
 
