@@ -14,7 +14,7 @@ ViMainCorrectionWidget::ViMainCorrectionWidget(QWidget *parent)
 	QObject::connect(mUi->projectLoader, SIGNAL(trackChanged()), this, SLOT(hideCorrector()));
 	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), this, SLOT(hideCorrector()));
 	hideCorrector();
-
+/*
     //Font
     QFont font;
     font.setFamily("Harabara");
@@ -22,21 +22,50 @@ ViMainCorrectionWidget::ViMainCorrectionWidget(QWidget *parent)
     font.setBold(true);
     font.setLetterSpacing(QFont::PercentageSpacing, 105);
     QColor color = ViThemeManager::color(ViThemeColors::TextColor1);
-
+*/
 	//Button
 	QObject::connect(mUi->button, SIGNAL(clicked()), this, SLOT(correct()));
 	mUi->button->setIcon(ViThemeManager::icon("startprocess"), 40);
-	mUi->button->setText("Process", color, font);
+	mUi->button->setText("Process");
 	mUi->button->setSize(140, 60);
 
 	//Label width
-	mUi->projectLoader->setStyleSheet(mUi->projectLoader->styleSheet() + "QLabel { width: 150px; min-width: 150px; }");
-	mUi->correctionWidget->setStyleSheet(mUi->correctionWidget->styleSheet() + "QLabel { width: 150px; min-width: 150px; }");
+	QString style = "QLabel { width: 150px; min-width: 150px; }";
+	mUi->projectLoader->setStyleSheet(style);
+	mUi->container->setStyleSheet(style);
+
+	// Correctors
+	mUi->correctorComboBox->addItems(mUi->correctionWidget->correctors());
+	QObject::connect(mUi->correctorComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeCorrector()));
+
+	// Mode
+	mUi->modeComboBox->addItems(ViCorrectionMode::modes());
+	mUi->modeComboBox->setCurrentText(ViCorrectionMode::defaultMode());
+	QObject::connect(mUi->modeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeMode()));
 }
 
 ViMainCorrectionWidget::~ViMainCorrectionWidget()
 {
+	clear();
     delete mUi;
+}
+
+void ViMainCorrectionWidget::clear()
+{
+	mUi->projectLoader->clear();
+	mUi->correctionWidget->clear();
+	mUi->scrollArea->hide();
+	mUi->container->hide();
+}
+
+void ViMainCorrectionWidget::changeCorrector()
+{
+	mUi->correctionWidget->changeCorrector(mUi->correctorComboBox->currentText());
+}
+
+void ViMainCorrectionWidget::changeMode()
+{
+	mUi->correctionWidget->changeMode(ViCorrectionMode::stringToMode(mUi->modeComboBox->currentText()));
 }
 
 void ViMainCorrectionWidget::correct()

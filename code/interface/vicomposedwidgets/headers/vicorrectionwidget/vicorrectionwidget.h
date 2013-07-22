@@ -3,6 +3,7 @@
 
 #include <viwidget.h>
 #include <QTableWidget>
+#include <vicorrectionmode.h>
 
 namespace Ui
 {
@@ -14,16 +15,19 @@ class ViCorrectionWidget : public ViWidget
 
 	Q_OBJECT
 
-	private slots:
+	public slots:
 
-		void selectCorrector();
-		void selectMode();
+		void changeCorrector(QString name);
+		void changeMode(ViCorrectionMode::Mode mode);
 
 	public:
 
 		ViCorrectionWidget(QWidget *parent = 0);
 		~ViCorrectionWidget();
 
+		void clear();
+
+		QStringList correctors();
 		ViModifyProcessor* corrector();
 
 	private:
@@ -35,6 +39,9 @@ class ViCorrectionWidget : public ViWidget
 	private:
 
 		Ui::ViCorrectionWidget *mUi;
+		QStringList mCorrectors;
+		int mCurrentCorrector;
+		ViCorrectionMode::Mode mMode;
 
 };
 

@@ -14,6 +14,9 @@ class ViMainCorrectionWidget : public ViWidget
 
 	private slots:
 
+		void changeCorrector();
+		void changeMode();
+
 		void correct();
 		void showCorrector();
 		void hideCorrector();
@@ -23,6 +26,8 @@ class ViMainCorrectionWidget : public ViWidget
 
 		ViMainCorrectionWidget(QWidget *parent = 0);
 		~ViMainCorrectionWidget();
+
+		void clear();
 
     protected:
 

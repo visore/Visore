@@ -17,12 +17,8 @@ ViCorrectionWidget::ViCorrectionWidget(QWidget *parent)
 	mUi = new Ui::ViCorrectionWidget();
 	mUi->setupUi(this);
 
-	// Mode
-	mUi->modeComboBox->addItems(ViCorrectionMode::modes());
-	mUi->modeComboBox->setCurrentText(ViCorrectionMode::defaultMode());
-
 	// Neural Corrector
-	mUi->correctorComboBox->addItem("Neural Corrector");
+	mCorrectors.append("Neural Corrector");
 	QTabWidget *neuralTabWidget = new QTabWidget();
 	addTab(neuralTabWidget, "General", new ViGeneralCorrectionWidget());
 	addTab(neuralTabWidget, "Structure", new ViNeuralStructureWidget());
@@ -32,16 +28,18 @@ ViCorrectionWidget::ViCorrectionWidget(QWidget *parent)
 	addTab(neuralTabWidget, "Target Provider", new ViNeuralTargetProviderWidget());
 	addTab(neuralTabWidget, "Error Functions", new ViNeuralErrorFunctionWidget());
 	mUi->stackedWidget->addWidget(neuralTabWidget);
-
-	QObject::connect(mUi->correctorComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(selectCorrector()));
-	QObject::connect(mUi->modeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(selectMode()));
-
-	selectCorrector();
 }
 
 ViCorrectionWidget::~ViCorrectionWidget()
 {
+	clear();
 	delete mUi;
+}
+
+void ViCorrectionWidget::clear()
+{
+	mCurrentCorrector = -1;
+	mMode = ViCorrectionMode::Quick;
 }
 
 void ViCorrectionWidget::addTab(QTabWidget *tabWidget, const QString &text, QWidget *widget)
@@ -50,23 +48,23 @@ void ViCorrectionWidget::addTab(QTabWidget *tabWidget, const QString &text, QWid
 	tabWidget->addTab(widget, text);
 }
 
-void ViCorrectionWidget::selectCorrector()
+void ViCorrectionWidget::changeCorrector(QString name)
 {
-	QString corrector = mUi->correctorComboBox->currentText();
-	if(corrector == "Neural Corrector")
+	if(mCorrectors.contains(name))
 	{
-		mUi->stackedWidget->setCurrentIndex(0);
+		mCurrentCorrector = mCorrectors.indexOf(name);
+		mUi->stackedWidget->setCurrentIndex(mCurrentCorrector);
 	}
 	else
 	{
 		LOG("Invalid corrector selected.", QtCriticalMsg);
 	}
-	selectMode();
+	changeMode(mMode);
 }
 
-void ViCorrectionWidget::selectMode()
+void ViCorrectionWidget::changeMode(ViCorrectionMode::Mode mode)
 {
-	ViCorrectionMode::Mode mode = ViCorrectionMode::stringToMode(mUi->modeComboBox->currentText());
+	mMode = mode;
 	int count1 = mUi->stackedWidget->count(), count2;
 	QTabWidget *tabWidget;
 	ViCorrectionMode *modeWidget;
@@ -81,21 +79,26 @@ void ViCorrectionWidget::selectMode()
 				modeWidget = dynamic_cast<ViCorrectionMode*>(tabWidget->widget(j));
 				if(modeWidget != NULL)
 				{
-					modeWidget->setMode(mode);
+					modeWidget->setMode(mMode);
 				}
 			}
 		}
 	}
 }
 
+QStringList ViCorrectionWidget::correctors()
+{
+	return mCorrectors;
+}
+
 ViModifyProcessor* ViCorrectionWidget::corrector()
 {
-	QTabWidget *tabWidget = dynamic_cast<QTabWidget*>(mUi->stackedWidget->widget(mUi->correctorComboBox->currentIndex()));
+	QTabWidget *tabWidget = dynamic_cast<QTabWidget*>(mUi->stackedWidget->widget(mCurrentCorrector));
 	if(tabWidget == NULL)
 	{
 		LOG("Invalid widget used to retrieve the corrector.", QtCriticalMsg);
 	}
-	else if(mUi->correctorComboBox->currentText() == "Neural Corrector")
+	else if(mCurrentCorrector == 0)
 	{
 		return neuralCorrector(tabWidget);
 	}

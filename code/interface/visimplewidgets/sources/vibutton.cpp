@@ -21,7 +21,7 @@ ViButton::ViButton(QWidget *parent)
 	font.setPointSize(16);
 	font.setBold(true);
 	font.setLetterSpacing(QFont::PercentageSpacing, 105);
-	font.setColor(ViThemeManager::color(ViThemeColors::ButtonTextColor2));
+	font.setColor(ViThemeManager::color(ViThemeColors::ButtonTextColor1));
 	setFont(font);
 
 	initialize();

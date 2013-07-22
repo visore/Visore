@@ -8,7 +8,10 @@ QString ViName::name(QString replace, bool spaced)
 
 QString ViName::formatName(QString name, QString replace, bool spaced)
 {
-	name = name.remove(0, 2);
+	if(name.startsWith("vi", Qt::CaseInsensitive))
+	{
+		name = name.remove(0, 2);
+	}
 	name.replace(replace, "");
 	if(spaced)
 	{
