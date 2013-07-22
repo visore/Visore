@@ -74,6 +74,50 @@ ViAudioObjectPointer ViProjectLoader::object()
 	return mObjects[0];
 }
 
+ViProjectQueue ViProjectLoader::takeProjects()
+{
+	ViProjectQueue projects = mProjects;
+	mProjects.clear();
+	return projects;
+}
+
+ViProject* ViProjectLoader::takeProject()
+{
+	if(mProjects.isEmpty())
+	{
+		return NULL;
+	}
+	return mProjects.takeFirst();
+}
+
+ViAudioObjectQueue ViProjectLoader::takeObjects()
+{
+	ViAudioObjectQueue queue;
+	if(mSelectedObject >= 0)
+	{
+		queue.enqueue(mObjects.takeAt((mSelectedObject)));
+	}
+	else
+	{
+		queue = mObjects;
+		mObjects.clear();
+	}
+	return queue;;
+}
+
+ViAudioObjectPointer ViProjectLoader::takeObject()
+{
+	if(mObjects.isEmpty())
+	{
+		return ViAudioObject::createNull();
+	}
+	else if(mSelectedObject >= 0)
+	{
+		return mObjects.takeAt(mSelectedObject);
+	}
+	return mObjects.takeFirst();
+}
+
 void ViProjectLoader::clear()
 {
 	mSelectedObject = -1;
@@ -162,7 +206,7 @@ void ViProjectLoader::loadProjects(QList<ViProject*> projects)
 	}
 	else
 	{
-		message += "was";
+		message += " was";
 	}
 	LOG(message + " loaded.");
 	if(projects.size() > 0)

@@ -33,7 +33,7 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 		void correlate(ViAudioObjectQueue objects);
 
 		//Correction
-		void correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector);
+		void correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector, const bool &correlate = false);
 
 		//Project
 		void recordProject(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectInfo);

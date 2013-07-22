@@ -8,6 +8,7 @@ ViMainCorrelationWidget::ViMainCorrelationWidget(QWidget *parent)
 	mUi = new Ui::ViMainCorrelationWidget();
 	mUi->setupUi(this);
 
+	mProject = NULL;
 	clear();
 
 	QString style = "QLabel { min-width: 80px; }";
@@ -29,9 +30,33 @@ ViMainCorrelationWidget::~ViMainCorrelationWidget()
 void ViMainCorrelationWidget::clear()
 {
 	mUi->projectLoader->clear();
+	mUi->projectLoader->show();
 	mUi->correlationWidget->clear();
 	mUi->scrollArea->hide();
 	mUi->correlatorContainer->hide();
+
+	if(mProject != NULL)
+	{
+		delete mProject;
+		mProject = NULL;
+	}
+	mObjects.clear();
+}
+
+void ViMainCorrelationWidget::setProject(ViProject *project)
+{
+	clear();
+	mProject = project;
+	mUi->projectLoader->hide();
+	changeCorrelation();
+}
+
+void ViMainCorrelationWidget::setObjects(ViAudioObjectQueue objects)
+{
+	clear();
+	mObjects = objects;
+	mUi->projectLoader->hide();
+	changeCorrelation();
 }
 
 void ViMainCorrelationWidget::checkCorrelate()
@@ -61,14 +86,28 @@ void ViMainCorrelationWidget::changeCorrelation()
 {
 	QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(changeCorrelation()));
 	mUi->scrollArea->show(); // Table must be visible before setting the data, in order to resize properly
-	ViProjectLoader::ProjectMode mode = mUi->projectLoader->projectMode();
-	if(mode == ViProjectLoader::SingleProject)
+	if(mObjects.isEmpty())
 	{
-		mUi->correlationWidget->setProject(mUi->projectLoader->project());
+		ViProjectLoader::ProjectMode mode = mUi->projectLoader->projectMode();
+		if(mode == ViProjectLoader::SingleProject)
+		{
+			mUi->correlationWidget->setProject(mUi->projectLoader->project());
+		}
+		else
+		{
+			mUi->correlationWidget->setObjects(mUi->projectLoader->objects());
+		}
 	}
 	else
 	{
-		mUi->correlationWidget->setObjects(mUi->projectLoader->objects());
+		if(mProject == NULL)
+		{
+			mUi->correlationWidget->setObjects(mObjects);
+		}
+		else
+		{
+			mUi->correlationWidget->setProject(mProject);
+		}
 	}
 	updateCorrelators();
 }

@@ -70,20 +70,33 @@ void ViAudioEngine::correlate(ViAudioObjectQueue objects)
 	mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(ViCorrelatorManager::createAll())), 0.85);
 	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
 
-	mObjectChain.execute("Correlating");
+	QString tracks = "Track";
+	if(objects.size() > 1) tracks += "s";
+	mObjectChain.execute("Correlating " + tracks);
 }
 
-void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector)
+void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector, const bool &correlate)
 {
 	mObjectChain.clear();
 	mObjectChain.add(objects);
 
-	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted)), 0.01);
-	mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), 0.91);
+	qreal percentage = 0.97;
+	if(correlate) percentage = 0.91;
+
+	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Corrupted)), 0.01);
+	mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), percentage); // THIS ONE CAUSE ERROR IN CORRELATION
 	mObjectChain.addFunction(ViFunctionCall("encode", QVariant(ViAudio::Corrected)), 0.01);
+	if(correlate)
+	{
+		mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target)), 0.01);
+		mObjectChain.addFunction(ViFunctionCall("align"), 0.01);
+		mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(ViCorrelatorManager::createAll())), 0.04);
+	}
 	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
 
-	mObjectChain.execute();
+	QString tracks = "Track";
+	if(objects.size() > 1) tracks += "s";
+	mObjectChain.execute("Correcting " + tracks);
 }
 
 void ViAudioEngine::recordProject(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectInfo)

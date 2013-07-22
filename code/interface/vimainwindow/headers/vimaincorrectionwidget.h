@@ -18,8 +18,6 @@ class ViMainCorrectionWidget : public ViWidget
 		void changeMode();
 
 		void correct();
-		void showCorrector();
-		void hideCorrector();
         void showCorrelation();
 
 	public:
@@ -28,10 +26,6 @@ class ViMainCorrectionWidget : public ViWidget
 		~ViMainCorrectionWidget();
 
 		void clear();
-
-    protected:
-
-        void hideEvent(QHideEvent *event);
 
 	private:
 

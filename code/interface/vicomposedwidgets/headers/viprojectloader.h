@@ -52,10 +52,17 @@ class ViProjectLoader : public ViWidget
 		ViProjectLoader(QWidget *parent = 0);
 		~ViProjectLoader();
 
+		// Ownership stays at ViProjectLoader
 		ViProjectQueue projects();
 		ViProject* project();
 		ViAudioObjectQueue objects();
 		ViAudioObjectPointer object();
+
+		// Ownership transfered to caller
+		ViProjectQueue takeProjects();
+		ViProject* takeProject();
+		ViAudioObjectQueue takeObjects();
+		ViAudioObjectPointer takeObject();
 
 		void clear();
 		ViAudio::Type type();
