@@ -128,6 +128,7 @@ void ViMainCorrelationWidget::changeCorrelation()
 void ViMainCorrelationWidget::updateCorrelators()
 {
 	QObject::disconnect(mUi->correlatorComboBox, SIGNAL(currentTextChanged(QString)), mUi->correlationWidget, SLOT(changeCorrelator(QString)));
+	mUi->correlatorContainer->show();
 
 	ViAudioObjectQueue objects = mObjects;
 	if(objects.isEmpty()) objects = mUi->projectLoader->objects();
@@ -153,5 +154,5 @@ void ViMainCorrelationWidget::updateCorrelators()
 	mUi->correlatorComboBox->setCurrentText(ViCorrelatorManager::defaultName());
 	QObject::connect(mUi->correlatorComboBox, SIGNAL(currentTextChanged(QString)), mUi->correlationWidget, SLOT(changeCorrelator(QString)));
 	mUi->correlationWidget->changeCorrelator(mUi->correlatorComboBox->currentText());
-	mUi->correlatorContainer->show();
+
 }

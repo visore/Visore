@@ -87,7 +87,8 @@ ViVulcanoTheme::ViVulcanoTheme()
 
 	// QGroupBox
 	font.setColor(borderColor2);
-	mGlobalStyleSheet += "QGroupBox::title { " + font.styleSheet() + "; }";
+	mGlobalStyleSheet += "QGroupBox { margin-top: 1ex; border: 1px solid " + borderColor2 + "; border-radius: 4px; font-weight: bold; }";
+	mGlobalStyleSheet += "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top center; padding: 0px 3px; " + font.styleSheet() + "; }";
 
 }
 

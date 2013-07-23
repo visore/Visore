@@ -902,16 +902,12 @@ bool ViProject::loadCorrections()
 		QStringList correlators = group1.correlators();
         QString correlator;
         for(int j = 0; j < correlators.size(); ++j)
-        {
+		{
             correlator = correlators[j];
 			if(correlator != "")
 			{
-				if(!bestImprovement.contains(correlator))
-				{
-					bestImprovement[correlator] = -1;
-				}
 				qreal improvement = (group1.correlation(correlator).mean() - group2.correlation(correlator).mean()) / (1 - group2.correlation(correlator).mean());
-				if(improvement > bestImprovement[correlator])
+				if(!bestImprovement.contains(correlator) || improvement >= bestImprovement[correlator])
 				{
 					bestImprovement[correlator] = improvement;
 					bestId[correlator] = id;

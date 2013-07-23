@@ -183,9 +183,9 @@ void ViCorrelationWidget::changeCorrelator(QString correlator)
 
 				correctedCorrelation = mProject->bestCorrelation(correlator);
 				ViCorrelation best = mProject->bestCorrelation(correlator);
-				LOG("ppppppppppp: "+QString::number(best.mean()));
+
 				if(correctedCorrelation.isValid() && best.isValid())
-				{LOG("pppppppppp****");
+				{
 					mUi->globalContainer->show();
 					qreal improvement = mProject->bestImprovement(correlator);
 					if(improvement < 0) font.setColor(Qt::red);
