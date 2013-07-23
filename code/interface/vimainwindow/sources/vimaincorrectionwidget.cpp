@@ -79,15 +79,7 @@ void ViMainCorrectionWidget::showCorrelation()
 		ViMainCorrelationWidget *widget = dynamic_cast<ViMainCorrelationWidget*>(ViStackedWidget::widget("ViMainCorrelationWidget"));
 		if(widget != NULL)
 		{
-			ViProject *project = mUi->projectLoader->takeProject();
-			if(project == NULL)
-			{
-				widget->setProject(project);
-			}
-			else
-			{
-				widget->setObjects(mUi->projectLoader->objects());
-			}
+			widget->setData(mUi->projectLoader->takeProject(), mUi->projectLoader->objects());
 			clear();
 			ViStackedWidget::setCurrentWidget(widget);
 		}

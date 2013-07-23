@@ -27,8 +27,9 @@ class ViMainCorrelationWidget : public ViWidget
 
 		void clear();
 
-		void setProject(ViProject *project); // Takes ownership
-		void setObjects(ViAudioObjectQueue objects); // Takes ownership
+		void setData(ViProject *project); // Takes ownership
+		void setData(ViProject *project, ViAudioObjectQueue objects); // Takes ownership
+		void setData(ViAudioObjectQueue objects); // Takes ownership
 
 	private:
 

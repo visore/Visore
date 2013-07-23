@@ -38,7 +38,7 @@ ViCorrectionWidget::~ViCorrectionWidget()
 
 void ViCorrectionWidget::clear()
 {
-	mCurrentCorrector = -1;
+	mCurrentCorrector = 0;
 	mMode = ViCorrectionMode::Quick;
 }
 

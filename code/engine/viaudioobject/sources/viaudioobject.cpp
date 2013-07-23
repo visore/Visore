@@ -450,9 +450,9 @@ void ViAudioObject::encodeNext()
 		delete mEncoder;
 		mEncoder = NULL;
 		locker.unlock();
+		emit changed();
 		setFinished();
 		emit encoded();
-        emit changed();
 	}
 	else
 	{
@@ -1454,11 +1454,11 @@ bool ViAudioObject::correlate()
     mCorrelations.clear();
     mCorrelationTypes.clear();
     if(hasBuffer(ViAudio::Target) && hasBuffer(ViAudio::Corrected))
-    {
+	{
         mCorrelationTypes.enqueue(QPair<ViAudio::Type, ViAudio::Type>(ViAudio::Target, ViAudio::Corrected));
     }
     if(hasBuffer(ViAudio::Target) && hasBuffer(ViAudio::Corrupted))
-    {
+	{
         mCorrelationTypes.enqueue(QPair<ViAudio::Type, ViAudio::Type>(ViAudio::Target, ViAudio::Corrupted));
     }
 
@@ -1482,36 +1482,38 @@ bool ViAudioObject::correlate()
 void ViAudioObject::correlateNext()
 {
     if(mCurrentCorrelator > 0 || mCurrentCorrelation > 0)
-    {
+	{
         int correlator = mCurrentCorrelator - 1;
         if(correlator < 0) correlator = correlatorCount() - 1;
-        ViCorrelation correlation = mCorrelators[correlator]->correlation();
-        mCorrelations.last().add(mCorrelators[correlator], correlation);
-        emit changed();
+		ViCorrelation correlation = mCorrelators[correlator]->correlation();
+		mCorrelations.last().add(mCorrelators[correlator], correlation);
     }
 
     if(mCurrentCorrelation >= mCorrelationTypes.size())
     {
         log("The track was correlated.");
+		emit changed();
 		setFinished();
         emit correlated();
         return;
     }
 
     QPair<ViAudio::Type, ViAudio::Type> types = mCorrelationTypes[mCurrentCorrelation];
-    mCorrelators[mCurrentCorrelator]->process(thisPointer, types.first, types.second);
+	ViCorrelator *correlator = mCorrelators[mCurrentCorrelator];
 
-    if(mCurrentCorrelator == 0)
-    {
-        mCorrelations.append(ViCorrelationGroup(types));
-    }
+	if(mCurrentCorrelator == 0)
+	{
+		mCorrelations.append(ViCorrelationGroup(types));
+	}
 
-    ++mCurrentCorrelator;
-    if(mCurrentCorrelator >= correlatorCount())
-    {
-        mCurrentCorrelator = 0;
-        ++mCurrentCorrelation;
-    }
+	++mCurrentCorrelator;
+	if(mCurrentCorrelator >= correlatorCount())
+	{
+		mCurrentCorrelator = 0;
+		++mCurrentCorrelation;
+	}
+
+	correlator->process(thisPointer, types.first, types.second);
 }
 
 /*******************************************************************************************************************

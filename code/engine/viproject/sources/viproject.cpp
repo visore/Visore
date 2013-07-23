@@ -1,6 +1,6 @@
 #include "viproject.h"
 #include "viaudiocodec.h"
-#include "vilogger.h"
+#include <vilogger.h>
 #include <viprocessor.h>
 #include <viglobalcorrelation.h>
 #include <QDateTime>
@@ -618,11 +618,11 @@ QString ViProject::nextCorrectionId()
 {
     QDir dir(path(ViProject::CorrectionInfo));
     QFileInfoList list = dir.entryInfoList(QDir::Files);
-    if(list.isEmpty())
-    {
-        return "000001";
-    }
-    int id = list.last().baseName().replace("correction", "").toInt();
+	int id = 0;
+	if(!list.isEmpty())
+	{
+		id = list.last().baseName().replace("correction", "").toInt();
+	}
     ++id;
     mCurrentCorrectionId = QString::number(id).rightJustified(6, '0');
     return mCurrentCorrectionId;
@@ -641,11 +641,11 @@ QString ViProject::correctionPath(QString id)
 {
     QString result = path(ViProject::CorrectionInfo) + "correction";
     if(id == "")
-    {
+	{
         result += nextCorrectionId();
     }
     else
-    {
+	{
         result += id.rightJustified(6, '0');
     }
     return result + ".vml";
@@ -783,14 +783,14 @@ bool ViProject::saveCorrections()
 
             ViElement correction("correction");
             correction.addChild("track", theObject->fileName());
-            ViCorrelationGroups correlationObjects = theObject->correlations();
-            globalCorrelation.add(correlationObjects);
+			ViCorrelationGroups correlationObjects = theObject->correlations();
+			globalCorrelation.add(correlationObjects);
 
             ViElement correlations("correltions");
             for(int j = 0; j < correlationObjects.size(); ++j)
             {
                 correlations.addChild(correlationObjects[i].exportData());
-            }
+			}
             correction.addChild(correlations);
 
             correction.addChild(corrector(theObject));
@@ -799,19 +799,16 @@ bool ViProject::saveCorrections()
         }
     }
 
-    root.prependChild(globalCorrelation.exportData());
-
-    QDateTime dateTime = QDateTime::currentDateTime();
-    root.prependChild("time", dateTime.time().toString("HH:mm:ss"));
-    root.prependChild("date", dateTime.date().toString("dd-MM-yyyy"));
-
-    bool success;
-    if(save)
+	bool success = false;
+	if(save && !globalCorrelation.correlations().isEmpty())
     {
+		root.prependChild(globalCorrelation.exportData());
+		QDateTime dateTime = QDateTime::currentDateTime();
+		root.prependChild("time", dateTime.time().toString("HH:mm:ss"));
+		root.prependChild("date", dateTime.date().toString("dd-MM-yyyy"));
         success = root.saveToFile(correctionPath(mCurrentCorrectionId));
     }
-    success = false;
-    loadCorrections(); //Ensures that the current correlation is included
+	loadCorrections(); //Ensures that the current correlation is included
     return success;
 }
 
@@ -899,26 +896,28 @@ bool ViProject::loadCorrections()
         ViGlobalCorrelation global;
         success &= global.importData(root);
 
-        ViCorrelationGroup group1 = global.correlation(ViAudio::Target, ViAudio::Corrected);
-        ViCorrelationGroup group2 = global.correlation(ViAudio::Target, ViAudio::Corrupted);
-        QStringList correlators = group1.correlators();
+		ViCorrelationGroup group1 = global.correlation(ViAudio::Target, ViAudio::Corrected);
+		ViCorrelationGroup group2 = global.correlation(ViAudio::Target, ViAudio::Corrupted);
+
+		QStringList correlators = group1.correlators();
         QString correlator;
         for(int j = 0; j < correlators.size(); ++j)
         {
             correlator = correlators[j];
-
-            if(!bestImprovement.contains(correlator))
-            {
-                bestImprovement[correlator] = -1;
-            }
-
-			qreal improvement = (group1.correlation(correlator).mean() - group2.correlation(correlator).mean()) / (1 - group2.correlation(correlator).mean());
-            if(improvement > bestImprovement[correlator])
-            {
-                bestImprovement[correlator] = improvement;
-                bestId[correlator] = id;
-                bestCorrelation[correlator] = group1.correlation(correlator);
-            }
+			if(correlator != "")
+			{
+				if(!bestImprovement.contains(correlator))
+				{
+					bestImprovement[correlator] = -1;
+				}
+				qreal improvement = (group1.correlation(correlator).mean() - group2.correlation(correlator).mean()) / (1 - group2.correlation(correlator).mean());
+				if(improvement > bestImprovement[correlator])
+				{
+					bestImprovement[correlator] = improvement;
+					bestId[correlator] = id;
+					bestCorrelation[correlator] = group1.correlation(correlator);
+				}
+			}
         }
     }
 

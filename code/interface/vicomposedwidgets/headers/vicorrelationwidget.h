@@ -25,14 +25,14 @@ class ViCorrelationWidget : public ViWidget
 
         void clear();
 
-		void setObject(ViAudioObjectPointer object);
-		void setObjects(ViAudioObjectQueue objects);
-		void setProject(ViProject *project);
+		void setData(ViAudioObjectPointer object);
+		void setData(ViAudioObjectQueue objects);
+		void setData(ViProject *project);
+		void setData(ViProject *project, ViAudioObjectQueue objects);
 
 	protected:
 
         QString percentage(qreal value);
-        void adjustTables();
 
 	private:
 

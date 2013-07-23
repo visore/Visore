@@ -373,10 +373,10 @@
          <set>QAbstractItemView::NoEditTriggers</set>
         </property>
         <property name="showDropIndicator" stdset="0">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="dragDropOverwriteMode">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="selectionMode">
          <enum>QAbstractItemView::SingleSelection</enum>
@@ -388,7 +388,7 @@
          <bool>true</bool>
         </property>
         <attribute name="horizontalHeaderVisible">
-         <bool>false</bool>
+         <bool>true</bool>
         </attribute>
         <attribute name="horizontalHeaderCascadingSectionResizes">
          <bool>false</bool>
@@ -397,7 +397,7 @@
          <number>100</number>
         </attribute>
         <attribute name="horizontalHeaderMinimumSectionSize">
-         <number>56</number>
+         <number>57</number>
         </attribute>
         <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
          <bool>true</bool>
@@ -498,6 +498,9 @@
         </property>
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
         </property>
         <attribute name="horizontalHeaderStretchLastSection">
          <bool>false</bool>

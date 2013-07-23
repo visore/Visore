@@ -97,7 +97,10 @@ ViCorrelation& ViCorrelationGroup::correlation(QString correlator)
     {
         LOG("The correlator is not present in the group.", QtCriticalMsg);
     }
-    return mCorrelations[correlator];
+	else
+	{
+		return mCorrelations[correlator];
+	}
 }
 
 ViCorrelation& ViCorrelationGroup::correlation(ViCorrelator *correlator)
@@ -149,7 +152,7 @@ ViElement ViCorrelationGroup::exportData()
     root.addChild("type2", viTypeToString(type2()));
     QString key;
     foreach(key, mCorrelations.keys())
-    {
+	{
         ViElement correlator("correlator");
         correlator.addChild("name", key);
         correlator.addChild(mCorrelations[key].exportData());

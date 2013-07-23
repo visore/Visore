@@ -43,15 +43,38 @@ void ViMainCorrelationWidget::clear()
 	mObjects.clear();
 }
 
-void ViMainCorrelationWidget::setProject(ViProject *project)
+void ViMainCorrelationWidget::setData(ViProject *project)
 {
 	clear();
 	mProject = project;
 	mUi->projectLoader->hide();
-	changeCorrelation();
+	if(!mProject->isFinished())
+	{
+		QObject::connect(mProject, SIGNAL(finished()), this, SLOT(changeCorrelation()));
+	}
+	else
+	{
+		changeCorrelation();
+	}
 }
 
-void ViMainCorrelationWidget::setObjects(ViAudioObjectQueue objects)
+void ViMainCorrelationWidget::setData(ViProject *project, ViAudioObjectQueue objects)
+{
+	clear();
+	mProject = project;
+	mObjects = objects;
+	mUi->projectLoader->hide();
+	if(!mProject->isFinished())
+	{
+		QObject::connect(mProject, SIGNAL(finished()), this, SLOT(changeCorrelation()));
+	}
+	else
+	{
+		changeCorrelation();
+	}
+}
+
+void ViMainCorrelationWidget::setData(ViAudioObjectQueue objects)
 {
 	clear();
 	mObjects = objects;
@@ -84,30 +107,20 @@ void ViMainCorrelationWidget::correlate()
 
 void ViMainCorrelationWidget::changeCorrelation()
 {
+	if(mProject != NULL) QObject::disconnect(mProject, SIGNAL(finished()), this, SLOT(changeCorrelation()));
 	QObject::disconnect(engine().data(), SIGNAL(progressFinished()), this, SLOT(changeCorrelation()));
 	mUi->scrollArea->show(); // Table must be visible before setting the data, in order to resize properly
 	if(mObjects.isEmpty())
 	{
-		ViProjectLoader::ProjectMode mode = mUi->projectLoader->projectMode();
-		if(mode == ViProjectLoader::SingleProject)
-		{
-			mUi->correlationWidget->setProject(mUi->projectLoader->project());
-		}
-		else
-		{
-			mUi->correlationWidget->setObjects(mUi->projectLoader->objects());
-		}
+		mUi->correlationWidget->setData(mUi->projectLoader->project(), mUi->projectLoader->objects());
+	}
+	else if(mProject == NULL)
+	{
+		mUi->correlationWidget->setData(mObjects);
 	}
 	else
 	{
-		if(mProject == NULL)
-		{
-			mUi->correlationWidget->setObjects(mObjects);
-		}
-		else
-		{
-			mUi->correlationWidget->setProject(mProject);
-		}
+		mUi->correlationWidget->setData(mProject, mObjects);
 	}
 	updateCorrelators();
 }
@@ -115,9 +128,10 @@ void ViMainCorrelationWidget::changeCorrelation()
 void ViMainCorrelationWidget::updateCorrelators()
 {
 	QObject::disconnect(mUi->correlatorComboBox, SIGNAL(currentTextChanged(QString)), mUi->correlationWidget, SLOT(changeCorrelator(QString)));
-	mUi->correlatorContainer->show();
 
-	ViAudioObjectQueue objects = mUi->projectLoader->objects();
+	ViAudioObjectQueue objects = mObjects;
+	if(objects.isEmpty()) objects = mUi->projectLoader->objects();
+
 	QSet<QString> correlators;
 	ViCorrelationGroups correlations;
 	QStringList keys;
@@ -134,19 +148,10 @@ void ViMainCorrelationWidget::updateCorrelators()
 		}
 	}
 
-	QString correlator;
-	 for(int i = 0; i < mUi->correlatorComboBox->count(); ++i)
-	 {
-		 correlator = mUi->correlatorComboBox->itemText(i);
-		 if(correlators.contains(correlator))
-		 {
-			 correlators.remove(correlator);
-		 }
-	 }
-
-	 mUi->correlatorComboBox->clear();
-	 mUi->correlatorComboBox->addItems(correlators.toList());
-	 mUi->correlatorComboBox->setCurrentText(ViCorrelatorManager::defaultName());
-	 QObject::connect(mUi->correlatorComboBox, SIGNAL(currentTextChanged(QString)), mUi->correlationWidget, SLOT(changeCorrelator(QString)));
-	 mUi->correlationWidget->changeCorrelator(mUi->correlatorComboBox->currentText());
+	mUi->correlatorComboBox->clear();
+	mUi->correlatorComboBox->addItems(correlators.toList());
+	mUi->correlatorComboBox->setCurrentText(ViCorrelatorManager::defaultName());
+	QObject::connect(mUi->correlatorComboBox, SIGNAL(currentTextChanged(QString)), mUi->correlationWidget, SLOT(changeCorrelator(QString)));
+	mUi->correlationWidget->changeCorrelator(mUi->correlatorComboBox->currentText());
+	mUi->correlatorContainer->show();
 }

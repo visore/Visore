@@ -112,6 +112,7 @@ void ViTableWidget::adjustHeight()
 void ViTableWidget::addRow(ViTableRow *row)
 {
 	row->addToTable(this);
+	adjustHeight();
 }
 
 void ViTableWidget::addRow(QString text)
@@ -164,6 +165,7 @@ int ViTableWidget::widgetRow(QWidget *widget)
 void ViTableWidget::removeRow(int row)
 {
 	QTableWidget::removeRow(row);
+	adjustHeight();
 }
 
 void ViTableWidget::removeRow(QWidget *widget)

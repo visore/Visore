@@ -27,8 +27,8 @@ class ViCorrelationGroup : public ViSerializer
         void add(QString correlator, ViCorrelation correlation);
         void add(ViCorrelator *correlator, ViCorrelation correlation);
 
-        void set(QString correlator, ViCorrelation correlation);
-        void set(ViCorrelator *correlator, ViCorrelation correlation);
+		void set(QString correlator, ViCorrelation correlation);
+		void set(ViCorrelator *correlator, ViCorrelation correlation);
 
         ViCorrelation& correlation(QString correlator);
         ViCorrelation& correlation(ViCorrelator *correlator);
