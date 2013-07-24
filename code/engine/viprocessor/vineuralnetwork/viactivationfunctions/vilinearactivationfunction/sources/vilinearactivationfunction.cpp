@@ -53,7 +53,7 @@ double ViLinearActivationFunction::setGradient(double gradient)
 ViElement ViLinearActivationFunction::exportData()
 {
 	ViElement element = ViActivationFunction::exportData();
-	element.addChild("Gradient", gradient());
+	element.addChild("gradient", gradient());
 	return element;
 }
 
@@ -61,7 +61,7 @@ bool ViLinearActivationFunction::importData(ViElement element)
 {
 	if(ViActivationFunction::importData(element))
 	{
-		ViElement gradient = element.child("Gradient");
+		ViElement gradient = element.child("gradient");
 		if(gradient.isNull())
 		{
 			LOG("The gradient could not be imported", QtCriticalMsg);

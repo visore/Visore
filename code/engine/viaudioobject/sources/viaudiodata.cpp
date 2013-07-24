@@ -38,7 +38,7 @@ void ViAudioData::setDefaults()
 void ViAudioData::clear()
 {
 	QMutexLocker locker(&mMutex);
-    setDefaults();
+	mBuffer = NULL;
     clearOther();
 }
 

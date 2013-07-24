@@ -12,8 +12,9 @@ ViMainCorrectionWidget::ViMainCorrectionWidget(QWidget *parent)
 	clear();
 
 	mUi->projectLoader->setTypeMode(ViProjectLoader::NoTypes);
-	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), mUi->container, SLOT(show()));
-	QObject::connect(mUi->projectLoader, SIGNAL(projectModeChanged()), mUi->container, SLOT(show()));
+	QObject::connect(mUi->projectLoader, SIGNAL(finished()), this, SLOT(showContainer()));
+	QObject::connect(mUi->projectLoader, SIGNAL(projectChanged()), this, SLOT(showContainer()));
+	QObject::connect(mUi->projectLoader, SIGNAL(projectModeChanged()), this, SLOT(showContainer()));
 
 	//Button
 	QObject::connect(mUi->button, SIGNAL(clicked()), this, SLOT(correct()));
@@ -49,6 +50,11 @@ void ViMainCorrectionWidget::clear()
 	mUi->projectLoader->clear();
 	mUi->correctionWidget->clear();
 	mUi->container->hide();
+}
+
+void ViMainCorrectionWidget::showContainer()
+{
+	mUi->container->setVisible(!mUi->projectLoader->objects().isEmpty());
 }
 
 void ViMainCorrectionWidget::changeCorrector()

@@ -199,11 +199,7 @@ void ViNeuralCorrector::execute(const int &channel)
 
 		// Run training
 		trainer->setTargetValues({provider->calculate()});
-		//for(int i = 0; i < 1; ++i)
-		//{
-		//	trainer->trainSingle();
-		//}
-		trainer->trainSingle();
+		trainer->train();
 
 		// Get output
 		writeBuffer[position] = network->output();

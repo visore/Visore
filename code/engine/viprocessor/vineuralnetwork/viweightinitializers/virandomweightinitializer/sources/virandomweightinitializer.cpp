@@ -50,8 +50,8 @@ qreal ViRandomWeightInitializer::upperLimit()
 ViElement ViRandomWeightInitializer::exportData()
 {
 	ViElement element = ViWeightInitializer::exportData();
-	element.addChild("LowerLimit", lowerLimit());
-	element.addChild("UpperLimit", upperLimit());
+	element.addChild("lowerlimit", lowerLimit());
+	element.addChild("upperlimit", upperLimit());
 	return element;
 }
 
@@ -59,7 +59,7 @@ bool ViRandomWeightInitializer::importData(ViElement element)
 {
 	if(ViWeightInitializer::importData(element))
 	{
-		ViElement limit = element.child("LowerLimit");
+		ViElement limit = element.child("lowerlimit");
 		if(limit.isNull())
 		{
 			LOG("Could not retrieve the lower limit.", QtCriticalMsg);
@@ -68,7 +68,7 @@ bool ViRandomWeightInitializer::importData(ViElement element)
 		{
 			setLowerLimit(limit.toReal());
 		}
-		limit = element.child("UpperLimit");
+		limit = element.child("upperlimit");
 		if(limit.isNull())
 		{
 			LOG("Could not retrieve the upper limit.", QtCriticalMsg);

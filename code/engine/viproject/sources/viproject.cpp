@@ -45,7 +45,6 @@ ViProject::ViProject(const ViProject &other)
 {
     mFinished = true;
 
-    mCorrectors = other.mCorrectors;
     mCurrentCorrectionId = other.mCurrentCorrectionId;
 
     mPaths = other.mPaths;
@@ -107,8 +106,6 @@ ViAudioObjectPointer ViProject::object(int side, int track)
 void ViProject::add(ViAudioObjectPointer object)
 {
     QObject::connect(object.data(), SIGNAL(changed()), this, SLOT(save()), Qt::DirectConnection);
-	QObject::connect(object.data(), SIGNAL(correctorChanged()), this, SLOT(infoCorrector()), Qt::DirectConnection);
-
 	QObject::connect(object.data(), SIGNAL(started()), this, SLOT(setBusy()), Qt::UniqueConnection);
 	QObject::connect(object.data(), SIGNAL(finished()), this, SLOT(setFinished()), Qt::UniqueConnection);
 
@@ -267,7 +264,6 @@ void ViProject::clearFiles()
 
 void ViProject::clearCorrections()
 {
-    mCorrectors.clear();
     mCurrentCorrectionId = "";
 }
 
@@ -651,47 +647,6 @@ QString ViProject::correctionPath(QString id)
     return result + ".vml";
 }
 
-void ViProject::infoCorrector()
-{
-    for(int i = 0; i < objectCount(); ++i)
-    {
-        ViAudioObjectPointer theObject = object(i);
-        if(theObject.data() == sender())
-        {
-            if(hasCorrector(theObject))
-            {
-                clearCorrections();
-            }
-            mCorrectors.append(QPair<ViAudioObjectPointer, ViElement>(theObject, theObject->corrector()->exportData()));
-            break;
-        }
-    }
-}
-
-bool ViProject::hasCorrector(ViAudioObjectPointer object)
-{
-    for(int i = 0; i < mCorrectors.size(); ++i)
-    {
-        if(mCorrectors[i].first == object)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-ViElement ViProject::corrector(ViAudioObjectPointer object)
-{
-    for(int i = 0; i < mCorrectors.size(); ++i)
-    {
-        if(mCorrectors[i].first == object)
-        {
-            return mCorrectors[i].second;
-        }
-    }
-    return ViElement();
-}
-
 /*******************************************************************************************************************
 
     SAVE & LOAD INFORMATION
@@ -744,7 +699,7 @@ bool ViProject::saveTracks()
 
         ViElement track("track");
 		track.addAttribute("number", object->trackNumber());
-		track.addChild("globalid", object->id());
+		track.addChild("id", object->id());
 		track.addChild("artist", metadata.artist(false));
 		track.addChild("title", metadata.title(false));
 		track.addChild("album", metadata.album(false));
@@ -774,34 +729,43 @@ bool ViProject::saveCorrections()
     ViGlobalCorrelation globalCorrelation;
     ViElement root("corrections");
 
+	ViAudioObjectPointer theObject;
+	ViElement corrector;
     for(int i = 0; i < objectCount(); ++i)
     {
-        ViAudioObjectPointer theObject = object(i);
-        if(hasCorrector(theObject))
+		theObject = object(i);
+		if(theObject->hasCorrector())
         {
-            save = true;
+			if(!save)
+			{
+				corrector = theObject->corrector()->exportData();
+				save = true;
+			}
 
             ViElement correction("correction");
-            correction.addChild("track", theObject->fileName());
+
+			ViElement track("track");
+			track.addChild("id", theObject->id());
+			track.addChild("name", theObject->fileName());
+			correction.addChild(track);
+
 			ViCorrelationGroups correlationObjects = theObject->correlations();
 			globalCorrelation.add(correlationObjects);
 
             ViElement correlations("correltions");
             for(int j = 0; j < correlationObjects.size(); ++j)
             {
-                correlations.addChild(correlationObjects[i].exportData());
+				correlations.addChild(correlationObjects[j].exportData());
 			}
             correction.addChild(correlations);
-
-            correction.addChild(corrector(theObject));
-
-            root.addChild(correction);
+			root.addChild(correction);
         }
     }
 
 	bool success = false;
 	if(save && !globalCorrelation.correlations().isEmpty())
     {
+		root.addChild(corrector);
 		root.prependChild(globalCorrelation.exportData());
 		QDateTime dateTime = QDateTime::currentDateTime();
 		root.prependChild("time", dateTime.time().toString("HH:mm:ss"));
@@ -858,7 +822,7 @@ bool ViProject::loadTracks()
 			if(!file.exists()) coverPath = "";
 			metadata.setCover(coverPath);
 
-			object->setId(tracks[i].child("globalid").toString());
+			object->setId(tracks[i].child("id").toString());
 			object->setMetadata(metadata);
 			object->setSideNumber(sides[j].attribute("number").toInt());
 			object->setTrackNumber(tracks[i].attribute("number").toInt());
@@ -868,7 +832,6 @@ bool ViProject::loadTracks()
             mObjectsMutex.unlock();
 
             QObject::connect(object.data(), SIGNAL(changed()), this, SLOT(save()), Qt::DirectConnection);
-            QObject::connect(object.data(), SIGNAL(correctorChanged()), this, SLOT(infoCorrector()), Qt::DirectConnection);
 			QObject::connect(object.data(), SIGNAL(started()), this, SLOT(setBusy()), Qt::UniqueConnection);
 			QObject::connect(object.data(), SIGNAL(finished()), this, SLOT(setFinished()), Qt::UniqueConnection);
         }

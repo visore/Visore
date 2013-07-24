@@ -29,5 +29,8 @@ void ViNeuralTrainerWidget::setMode(ViCorrectionMode::Mode mode)
 
 ViTrainer* ViNeuralTrainerWidget::trainer()
 {
-	return ViTrainerManager::create(mUi->comboBox->itemData(mUi->comboBox->currentIndex()).toString());
+	ViTrainer *trainer = ViTrainerManager::create(mUi->comboBox->itemData(mUi->comboBox->currentIndex()).toString());
+	trainer->setLearningRate(mUi->rateSpinBox->value());
+	trainer->setIterationLimit(mUi->iterationSpinBox->value());
+	return trainer;
 }

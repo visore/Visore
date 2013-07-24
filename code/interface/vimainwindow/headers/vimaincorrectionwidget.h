@@ -14,6 +14,8 @@ class ViMainCorrectionWidget : public ViWidget
 
 	private slots:
 
+		void showContainer();
+
 		void changeCorrector();
 		void changeMode();
 

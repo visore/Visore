@@ -80,19 +80,19 @@ double ViActivationFunction::calculateDerivative(const double &output)
 
 ViElement ViActivationFunction::exportData()
 {
-	ViElement element("ActivationFunction");
-	element.addChild("Name", name());
-	element.addChild("Minimum", minimum());
-	element.addChild("Maximum", maximum());
+	ViElement element("activationfunction");
+	element.addChild("name", name("ActivationFunction"));
+	element.addChild("minimum", minimum());
+	element.addChild("maximum", maximum());
 	return element;
 }
 
 bool ViActivationFunction::importData(ViElement element)
 {
-	if(element.name() != "ActivationFunction")
+	if(element.name() != "activationfunction")
 	{
-		element = element.child("ActivationFunction");
-		if(element.name() != "ActivationFunction")
+		element = element.child("activationfunction");
+		if(element.name() != "activationfunction")
 		{
 			return false;
 		}
@@ -103,12 +103,12 @@ bool ViActivationFunction::importData(ViElement element)
 	{
 		return false;
 	}
-	if(theName.toString() != name())
+	if(theName.toString() != name("ActivationFunction"))
 	{
 		return false;
 	}
 
-	ViElement minimum = element.child("Minimum");
+	ViElement minimum = element.child("minimum");
 	if(minimum.isNull())
 	{
 		LOG("The minimum could not be imported", QtCriticalMsg);
@@ -117,7 +117,7 @@ bool ViActivationFunction::importData(ViElement element)
 	{
 		setMinimum(minimum.toReal());
 	}
-	ViElement maximum = element.child("Maximum");
+	ViElement maximum = element.child("maximum");
 	if(maximum.isNull())
 	{
 		LOG("The maximum could not be imported", QtCriticalMsg);

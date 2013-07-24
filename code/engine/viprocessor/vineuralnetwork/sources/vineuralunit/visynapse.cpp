@@ -75,20 +75,20 @@ bool ViSynapse::operator == (const ViSynapse &other) const
 
 ViElement ViSynapse::exportData()
 {
-	ViElement element("Synapse");
-	element.addChild("InputNeuron", input()->id());
-	element.addChild("OutputNeuron", output()->id());
-	element.addChild("Weight", weight());
+	ViElement element("synapse");
+	element.addChild("inputneuron", input()->id());
+	element.addChild("outputneuron", output()->id());
+	element.addChild("weight", weight());
 	return element;
 }
 
 bool ViSynapse::importData(ViElement element)
 {
-	if(element.name() != "Synapse")
+	if(element.name() != "synapse")
 	{
 		return false;
 	}
-	ViElement weight = element.child("Weight");
+	ViElement weight = element.child("weight");
 	if(weight.isNull())
 	{
 		LOG("The weight for the synapse could not be retrieved. Setting the default weight of " + QString::number(DEFAULT_SYNAPSE_WEIGHT) + ".");

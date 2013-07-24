@@ -58,12 +58,12 @@ void ViTargetProvider::setRightData(ViSampleChunk *data)
 
 ViElement ViTargetProvider::exportData()
 {
-    ViElement root("TargetProvider");
-    root.addChild(ViElement("name", name()));
+	ViElement root("targetprovider");
+	root.addChild(ViElement("name", name("TargetProvider")));
     return root;
 }
 
 bool ViTargetProvider::importData(ViElement element)
 {
-	return element.name() == "TargetProvider" && element.value().toString() == name();
+	return element.name() == "targetprovider" && element.value().toString() == name("TargetProvider");
 }

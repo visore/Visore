@@ -78,7 +78,6 @@ class ViProject : public QObject, public ViId
 		void saveAll();
 		void setFinished();
 		void setBusy();
-        void infoCorrector();
 
 	public:
 
@@ -195,8 +194,6 @@ class ViProject : public QObject, public ViId
         QString nextCorrectionId();
         QString correctionId(QString path = "");
         QString correctionPath(QString id = "");
-        bool hasCorrector(ViAudioObjectPointer object);
-        ViElement corrector(ViAudioObjectPointer object);
 
 		/*******************************************************************************************************************
 
@@ -223,9 +220,6 @@ class ViProject : public QObject, public ViId
 
 		ViAudioObjectQueue mObjects;
 
-        QList<QPair<ViAudioObjectPointer, ViElement>> mCorrectors;
-        QString mCurrentCorrectionId;
-
         QMutex mObjectsMutex;
 
         /*******************************************************************************************************************
@@ -234,6 +228,7 @@ class ViProject : public QObject, public ViId
 
         *******************************************************************************************************************/
 
+		QString mCurrentCorrectionId;
         ViCorrelationGroup mBestCorrelation;
         QHash<QString, qreal> mBestImprovement;
         QHash<QString, QString> mBestCorrectionId;

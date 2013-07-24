@@ -297,9 +297,9 @@ bool ViNeuralNetwork::operator == (const ViNeuralNetwork &other) const
 
 ViElement ViNeuralNetwork::exportData()
 {
-	ViElement element("NeuralNetwork");
+	ViElement element("neuralnetwork");
 	
-	ViElement neuronLayers("NeuronLayers");
+	ViElement neuronLayers("neuronlayers");
 	neuronLayers.addAttribute("count", mLayers.size());
 	for(int i = 0; i < mLayers.size(); ++i)
 	{
@@ -307,11 +307,11 @@ ViElement ViNeuralNetwork::exportData()
 	}
 	element.addChild(neuronLayers);
 
-	ViElement synapseLayers("SynapseLayers");
+	ViElement synapseLayers("synapselayers");
 	synapseLayers.addAttribute("count", mLayers.size() - 1);
 	for(int i = 1; i < mLayers.size(); ++i)
 	{
-		ViElement synapseLayer("SynapseLayer");
+		ViElement synapseLayer("synapselayer");
 		synapseLayer.addAttribute("count", mLayers[i]->inputSize());
 		for(int j = 0; j < mLayers[i]->size(); ++j)
 		{
@@ -329,7 +329,7 @@ ViElement ViNeuralNetwork::exportData()
 
 bool ViNeuralNetwork::importData(ViElement element)
 {
-    if(element.name() != "NeuralNetwork" || element.hasChild("NeuralNetwork"))
+	if(element.name() != "neuralnetwork" || element.hasChild("neuralnetwork"))
 	{
 		return false;
 	}

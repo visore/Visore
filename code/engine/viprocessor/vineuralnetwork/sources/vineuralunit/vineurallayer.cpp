@@ -233,7 +233,7 @@ bool ViNeuralLayer::operator == (const ViNeuralLayer &other) const
 
 ViElement ViNeuralLayer::exportData()
 {
-	ViElement element("NeuronLayer");
+	ViElement element("neuronlayer");
 	element.addAttribute("count", mNeurons.size());
 	for(int i = 0; i < mNeurons.size(); ++i)
 	{
@@ -248,7 +248,7 @@ ViElement ViNeuralLayer::exportData()
 
 bool ViNeuralLayer::importData(ViElement element)
 {
-	if(element.name() != "NeuronLayer")
+	if(element.name() != "neuronlayer")
 	{
 		return false;
 	}

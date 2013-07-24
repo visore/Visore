@@ -231,14 +231,14 @@ bool ViNeuron::operator == (const ViNeuron &other) const
 
 ViElement ViNeuron::exportData()
 {
-	ViElement element("Neuron");
-	element.addChild("Id", id());
+	ViElement element("neuron");
+	element.addChild("id", id());
 
 	if(type() == ViNeuron::UnknownNeuron)
 	{
 		LOG("An unknown neuron (id: " + id() + ") was detected.", QtCriticalMsg);
 	}
-	element.addChild("Type", typeToString(type()));
+	element.addChild("type", typeToString(type()));
 
 	if(activationFunction() != NULL)
 	{
@@ -247,7 +247,7 @@ ViElement ViNeuron::exportData()
 
 	if(type() == ViNeuron::BiasNeuron)
 	{
-		element.addChild("Value", value());
+		element.addChild("value", value());
 	}
 
 	return element;
@@ -255,14 +255,14 @@ ViElement ViNeuron::exportData()
 
 bool ViNeuron::importData(ViElement element)
 {
-	if(element.name() != "Neuron")
+	if(element.name() != "neuron")
 	{
 		return false;
 	}
 
 	bool success = true;
 
-	ViElement id = element.child("Id");
+	ViElement id = element.child("id");
 	if(id.isNull())
 	{
 		success = false;
@@ -272,7 +272,7 @@ bool ViNeuron::importData(ViElement element)
 		setId(id.toString());
 	}
 
-	ViElement theType = element.child("Type");
+	ViElement theType = element.child("type");
 	if(theType.isNull())
 	{
 		success = false;

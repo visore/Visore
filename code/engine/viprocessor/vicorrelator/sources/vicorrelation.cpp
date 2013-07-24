@@ -3,7 +3,7 @@
 
 ViCorrelation::ViCorrelation()
 {
-    clear();
+	clear();
 }
 
 ViCorrelation::ViCorrelation(const ViCorrelation &other)
@@ -17,11 +17,11 @@ ViCorrelation::ViCorrelation(const ViCorrelation &other)
 
 void ViCorrelation::clear()
 {
-    mMean = 0;
+	mMean = 0;
     mMinimum = DBL_MAX;
     mMaximum = -DBL_MAX;
     mTotal = 0;
-    mCounter = 0;
+	mCounter = 0;
 }
 
 bool ViCorrelation::isValid()
@@ -68,7 +68,7 @@ void ViCorrelation::addMean(qreal mean)
 {
     mTotal += mean;
     ++mCounter;
-    mMean = mTotal / mCounter;
+	mMean = mTotal / mCounter;
 }
 
 void ViCorrelation::setCorrelation(ViCorrelation::Type type, qreal correlation)

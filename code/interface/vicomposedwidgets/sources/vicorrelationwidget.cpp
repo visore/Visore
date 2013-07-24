@@ -36,6 +36,8 @@ ViCorrelationWidget::ViCorrelationWidget(QWidget *parent)
     font.setPointSize(20);
     mUi->currentImprovement->setStyleSheet(font.styleSheet());
     mUi->globalImprovement->setStyleSheet(font.styleSheet());
+
+	setStyleSheet("QLabel { min-height: 20px; }");
 }
 
 ViCorrelationWidget::~ViCorrelationWidget()
@@ -93,6 +95,7 @@ void ViCorrelationWidget::setData(ViProject *project, ViAudioObjectQueue objects
 
 void ViCorrelationWidget::changeCorrelator(QString correlator)
 {
+	correlator.replace(" ", "");
 	if(!mObjects.isEmpty())
     {
         ViCorrelation correctedCorrelation, corruptedCorrelation;
@@ -117,7 +120,9 @@ void ViCorrelationWidget::changeCorrelator(QString correlator)
                 mUi->correctedTable->setItem(correctedCount, 4, percentage(correctedCorrelation.maximum()), Qt::AlignRight | Qt::AlignVCenter);
 				mUi->correctedTable->setItem(correctedCount, 5, percentage(correctedCorrelation.mean()), Qt::AlignRight | Qt::AlignVCenter);
                 ++correctedCount;
+				LOG("++++++++++++++: "+QString::number(globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrected).correlation("SampleCorrelator").mean()));
                 globalCorrelation.add(object->correlation(ViAudio::Target, ViAudio::Corrected));
+				LOG("++++++++++++++2: "+QString::number(globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrected).correlation("SampleCorrelator").mean()));
             }
 
             corruptedCorrelation = object->correlation(correlator, ViAudio::Target, ViAudio::Corrupted);
@@ -131,12 +136,23 @@ void ViCorrelationWidget::changeCorrelator(QString correlator)
 				mUi->corruptedTable->setItem(corruptedCount, 4, percentage(corruptedCorrelation.maximum()), Qt::AlignRight | Qt::AlignVCenter);
 				mUi->corruptedTable->setItem(corruptedCount, 5, percentage(corruptedCorrelation.mean()), Qt::AlignRight | Qt::AlignVCenter);
                 ++corruptedCount;
+				LOG("++++++++++++++: "+QString::number(globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrupted).correlation("SampleCorrelator").mean(), 'f', 10));
                 globalCorrelation.add(object->correlation(ViAudio::Target, ViAudio::Corrupted));
+				LOG("++++++++++++++2: "+QString::number(globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrupted).correlation("SampleCorrelator").mean(), 'f', 10));
             }
         }
 
 		mUi->correctedGroupBox->setVisible(hasCorrectedCorrelation);
 		mUi->corruptedGroupBox->setVisible(hasCorruptedCorrelation);
+
+		if(corruptedCorrelation.isValid())
+		{
+			mUi->corruptedLabel->setText(percentage(corruptedCorrelation.mean()));
+		}
+		if(correctedCorrelation.isValid())
+		{
+			mUi->correctedLabel->setText(percentage(correctedCorrelation.mean()));
+		}
 
 		if(hasCorrectedCorrelation && hasCorruptedCorrelation)
 		{
@@ -144,14 +160,8 @@ void ViCorrelationWidget::changeCorrelator(QString correlator)
 			correctedCorrelation = globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrected).correlation(correlator);
 			corruptedCorrelation = globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrupted).correlation(correlator);
 
-			if(corruptedCorrelation.isValid())
-			{
-				mUi->corruptedLabel->setText(percentage(corruptedCorrelation.mean()));
-			}
-
 			if(correctedCorrelation.isValid())
 			{
-				mUi->correctedLabel->setText(percentage(correctedCorrelation.mean()));
 				mUi->currentMean->setText(percentage(correctedCorrelation.mean()));
 				mUi->currentMinimum->setText(percentage(correctedCorrelation.minimum()));
 				mUi->currentMaximum->setText(percentage(correctedCorrelation.maximum()));

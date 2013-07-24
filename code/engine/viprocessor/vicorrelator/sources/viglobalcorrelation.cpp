@@ -50,7 +50,7 @@ void ViGlobalCorrelation::add(ViCorrelationGroup correlation)
         {
             keys = correlation.correlators();
             foreach(key, keys)
-            {
+			{
                 ViCorrelation &currentCorrelation = correlation.correlation(key);
                 globalCorrelation.correlation(key).addCorrelation(currentCorrelation.mean(), currentCorrelation.minimum(), currentCorrelation.maximum());
             }

@@ -33,7 +33,7 @@ qreal ViKimRaWeightInitializer::upperLimit()
 ViElement ViKimRaWeightInitializer::exportData()
 {
 	ViElement element = ViWeightInitializer::exportData();
-	element.addChild("UpperLimit", upperLimit());
+	element.addChild("upperlimit", upperLimit());
 	return element;
 }
 
@@ -41,7 +41,7 @@ bool ViKimRaWeightInitializer::importData(ViElement element)
 {
 	if(ViWeightInitializer::importData(element))
 	{
-		ViElement limit = element.child("UpperLimit");
+		ViElement limit = element.child("upperlimit");
 		if(limit.isNull())
 		{
 			LOG("Could not retrieve the upper limit.", QtCriticalMsg);

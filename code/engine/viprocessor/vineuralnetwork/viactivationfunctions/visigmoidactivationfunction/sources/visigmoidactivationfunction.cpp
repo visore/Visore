@@ -127,7 +127,7 @@ ViSigmoidActivationFunction* ViSigmoidActivationFunction::clone()
 ViElement ViSigmoidActivationFunction::exportData()
 {
 	ViElement element = ViActivationFunction::exportData();
-	element.addChild("Shape", shape());
+	element.addChild("shape", shape());
 	return element;
 }
 
@@ -135,7 +135,7 @@ bool ViSigmoidActivationFunction::importData(ViElement element)
 {
 	if(ViActivationFunction::importData(element))
 	{
-		ViElement shape = element.child("Shape");
+		ViElement shape = element.child("shape");
 		if(shape.isNull())
 		{
 			LOG("The shape could not be imported", QtCriticalMsg);

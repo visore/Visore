@@ -52,13 +52,13 @@ void ViFixedWeightInitializer::clear()
 ViElement ViFixedWeightInitializer::exportData()
 {
 	ViElement element = ViWeightInitializer::exportData();
-	element.addChild("DefaultValue", mDefaultValue);
+	element.addChild("defaultvalue", mDefaultValue);
 	if(mValues.size() > 0)
 	{
-		ViElement values("Values");
+		ViElement values("values");
 		for(int i = 0; i < mValues.size(); ++i)
 		{
-			values.addChild("Value", mValues[i]);
+			values.addChild("value", mValues[i]);
 		}
 		element.addChild(values);
 	}
@@ -70,7 +70,7 @@ bool ViFixedWeightInitializer::importData(ViElement element)
 	if(ViWeightInitializer::importData(element))
 	{
 		clear();
-		ViElement value = element.child("DefaultValue");
+		ViElement value = element.child("defaultvalue");
 		if(value.isNull())
 		{
 			LOG("Could not retrieve the default value.", QtCriticalMsg);
@@ -79,10 +79,10 @@ bool ViFixedWeightInitializer::importData(ViElement element)
 		{
 			setValues(value.toReal());
 		}
-		value = element.child("Values");
+		value = element.child("values");
 		if(!value.isNull())
 		{
-			ViElementList values = value.children("Values");
+			ViElementList values = value.children("values");
 			ViRealList realValues;
 			for(int i = 0; i < values.size(); ++i)
 			{

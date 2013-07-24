@@ -231,7 +231,10 @@ void ViProjectLoader::loadTracks()
 		if(resources != ViAudio::Undefined)
 		{
 			mObjects.enqueue(objects[i]);
-			mUi->tracksComboBox->addItem(objects[i]->fileName(true, true));
+			if(mProjectMode == ViProjectLoader::SingleTrack)
+			{
+				mUi->tracksComboBox->addItem(objects[i]->fileName(true, true));
+			}
 		}
 		else
 		{

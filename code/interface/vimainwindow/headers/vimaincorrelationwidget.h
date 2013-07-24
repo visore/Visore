@@ -15,7 +15,7 @@ class ViMainCorrelationWidget : public ViWidget
 
 	private slots:
 
-		void checkCorrelate();
+		void hideCorrelation();
 		void correlate();
 		void changeCorrelation();
 		void updateCorrelators();

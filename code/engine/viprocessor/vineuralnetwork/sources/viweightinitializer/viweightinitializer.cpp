@@ -172,14 +172,14 @@ void ViWeightInitializer::initialize(ViNeuralNetwork *network, ViNeuralLayer *in
 
 ViElement ViWeightInitializer::exportData()
 {
-	ViElement element("WeightInitializer");
-	element.addChild("Name", name());
+	ViElement element("weightinitializer");
+	element.addChild("name", name("WeightInitializer"));
 	return element;
 }
 
 bool ViWeightInitializer::importData(ViElement element)
 {
-	if(element.name() == "WeightInitializer" && element.child("Name").toString() == name())
+	if(element.name() == "weightinitializer" && element.child("name").toString() == name("WeightInitializer"))
 	{
 		return true;
 	}

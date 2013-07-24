@@ -32,7 +32,7 @@ void ViTrainer::clear()
 {
 	setNetwork(NULL);
 	setLearningRate(DEFAULT_LEARNING_RATE);
-	setIterationLimit(-1); //Unlimited
+	setIterationLimit(0); //Unlimited
 	setErrorLimit(0);
 	mCurrentIteration = -1;
 	mCurrentError = 1;
@@ -155,7 +155,7 @@ void ViTrainer::train()
 	{
 		mErrorFunctions[i]->clear();
 	}
-	if(mIterationLimit < 0)
+	if(mIterationLimit == 0)
 	{
 		mCurrentIteration = 0;
 		while(mCurrentError > mErrorLimit)
@@ -168,7 +168,7 @@ void ViTrainer::train()
 	}
 	else
 	{
-		for(mCurrentIteration = 0; mCurrentIteration < mIterationLimit; ++mCurrentIteration)
+		for(mCurrentIteration = 0; mCurrentIteration <= mIterationLimit; ++mCurrentIteration)
 		{
 			mNetwork->run();
 			calculateError();
@@ -208,13 +208,13 @@ void ViTrainer::trainSingle(ViNeuralNetwork *network)
 
 ViElement ViTrainer::exportData()
 {
-	ViElement element("Trainer");
-	element.addChild("Name", name());
-	element.addChild("IterationLimit", iterationLimit());
-	element.addChild("ErrorLimit", errorLimit());
-	element.addChild("LearningRate", learningRate());
+	ViElement element("trainer");
+	element.addChild("name", name("Trainer"));
+	element.addChild("iterationlimit", iterationLimit());
+	element.addChild("errorlimit", errorLimit());
+	element.addChild("learningrate", learningRate());
 
-	ViElement errorFunctions("ErrorFunctions");
+	ViElement errorFunctions("errorfunctions");
 	for(int i = 0; i < mErrorFunctions.size(); ++i)
 	{
 		errorFunctions.addChild(mErrorFunctions[i]->exportData());
@@ -226,10 +226,10 @@ ViElement ViTrainer::exportData()
 
 bool ViTrainer::importData(ViElement element)
 {
-	if(element.name() != "Trainer")
+	if(element.name() != "trainer")
 	{
-		element = element.child("Trainer");
-		if(element.name() != "Trainer")
+		element = element.child("trainer");
+		if(element.name() != "trainer")
 		{
 			return false;
 		}
@@ -240,12 +240,12 @@ bool ViTrainer::importData(ViElement element)
 	{
 		return false;
 	}
-	if(theName.toString() != name())
+	if(theName.toString() != name("Trainer"))
 	{
 		return false;
 	}
 
-	ViElement limit = element.child("IterationLimit");
+	ViElement limit = element.child("iterationlimit");
 	if(limit.isNull())
 	{
 		LOG("The iteration limit could not be imported", QtCriticalMsg);
@@ -255,7 +255,7 @@ bool ViTrainer::importData(ViElement element)
 		setIterationLimit(limit.toInt());
 	}
 
-	limit = element.child("ErrorLimit");
+	limit = element.child("errorlimit");
 	if(limit.isNull())
 	{
 		LOG("The error limit could not be imported", QtCriticalMsg);
@@ -265,7 +265,7 @@ bool ViTrainer::importData(ViElement element)
 		setErrorLimit(limit.toReal());
 	}
 
-	limit = element.child("LearningRate");
+	limit = element.child("learningrate");
 	if(limit.isNull())
 	{
 		LOG("The learning could not be imported", QtCriticalMsg);
