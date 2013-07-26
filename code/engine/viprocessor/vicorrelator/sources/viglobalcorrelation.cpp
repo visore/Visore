@@ -24,8 +24,6 @@ void ViGlobalCorrelation::add(ViCorrelationGroups correlations)
 
 void ViGlobalCorrelation::add(ViCorrelationGroup correlation)
 {
-    mCorrelations.append(correlation);
-
     bool contains = false;
     for(int i = 0; i < mCorrelations.size(); ++i)
     {
@@ -35,7 +33,6 @@ void ViGlobalCorrelation::add(ViCorrelationGroup correlation)
             break;
         }
     }
-
     if(!contains)
     {
         mCorrelations.append(ViCorrelationGroup(correlation.type1(), correlation.type2()));
@@ -47,11 +44,15 @@ void ViGlobalCorrelation::add(ViCorrelationGroup correlation)
     {
         ViCorrelationGroup &globalCorrelation = mCorrelations[i];
         if(globalCorrelation.hasEqualTypes(correlation))
-        {
+		{
             keys = correlation.correlators();
             foreach(key, keys)
 			{
                 ViCorrelation &currentCorrelation = correlation.correlation(key);
+				if(!globalCorrelation.correlators().contains(key))
+				{
+					globalCorrelation.add(key, ViCorrelation());
+				}
                 globalCorrelation.correlation(key).addCorrelation(currentCorrelation.mean(), currentCorrelation.minimum(), currentCorrelation.maximum());
             }
             break;

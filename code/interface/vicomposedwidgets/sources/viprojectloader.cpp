@@ -18,6 +18,10 @@ ViProjectLoader::ViProjectLoader(QWidget *parent)
 	QObject::connect(mUi->modeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeProjectMode(int)));
 	QObject::connect(mUi->tracksComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(analyseTrack(int)));
 
+	QObject::connect(mUi->targetCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(changed()));
+	QObject::connect(mUi->correctedCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(changed()));
+	QObject::connect(mUi->corruptedCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(changed()));
+
 	QObject::connect(mUi->targetCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(typesChanged()));
 	QObject::connect(mUi->correctedCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(typesChanged()));
 	QObject::connect(mUi->corruptedCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(typesChanged()));
@@ -253,6 +257,7 @@ void ViProjectLoader::loadTracks()
 	{
 		emit finished();
 	}
+	if(mProjectMode != ViProjectLoader::SingleTrack) emit changed();
 }
 
 void ViProjectLoader::analyseTrack(int index)
@@ -315,6 +320,7 @@ void ViProjectLoader::analyseTrack(int index)
 
 		emit trackChanged();
 		emit typesChanged();
+		if(mTypeMode == ViProjectLoader::NoTypes) emit changed();
 	}
 }
 
@@ -334,6 +340,7 @@ void ViProjectLoader::changeProjectMode(int mode)
 
 	clear();
 	emit projectModeChanged(); // Must come after clear
+	emit changed();
 }
 
 void ViProjectLoader::changeRadioTypes(bool checked)
@@ -341,6 +348,7 @@ void ViProjectLoader::changeRadioTypes(bool checked)
 	if(checked)
 	{
 		emit typesChanged();
+		emit changed();
 	}
 }
 

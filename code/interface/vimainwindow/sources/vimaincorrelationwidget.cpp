@@ -16,8 +16,7 @@ ViMainCorrelationWidget::ViMainCorrelationWidget(QWidget *parent)
 	mUi->correlatorContainer->setStyleSheet(style);
 
 	mUi->projectLoader->setTypeMode(ViProjectLoader::NoTypes);
-	QObject::connect(mUi->projectLoader, SIGNAL(finished()), this, SLOT(correlate()));
-	QObject::connect(mUi->projectLoader, SIGNAL(typesChanged()), this, SLOT(hideCorrelation()));
+	QObject::connect(mUi->projectLoader, SIGNAL(changed()), this, SLOT(correlate()));
 }
 
 ViMainCorrelationWidget::~ViMainCorrelationWidget()
@@ -81,16 +80,11 @@ void ViMainCorrelationWidget::setData(ViAudioObjectQueue objects)
 	changeCorrelation();
 }
 
-void ViMainCorrelationWidget::hideCorrelation()
+void ViMainCorrelationWidget::correlate()
 {
 	mUi->correlationWidget->clear();
 	mUi->scrollArea->hide();
 	mUi->correlatorContainer->hide();
-}
-
-void ViMainCorrelationWidget::correlate()
-{
-	hideCorrelation();
 	if(!mUi->projectLoader->objects().isEmpty())
 	{
 		QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(changeCorrelation()));

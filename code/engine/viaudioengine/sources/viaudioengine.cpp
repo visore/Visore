@@ -63,11 +63,16 @@ void ViAudioEngine::correlate(ViAudioObjectPointer object)
 void ViAudioEngine::correlate(ViAudioObjectQueue objects)
 {
 	mObjectChain.clear();
+	//Can't pass it as parameter for correlate(), because the object takes ownership
+	for(int i = 0; i < objects.size(); ++i)
+	{
+		objects[i]->addCorrelators(ViCorrelatorManager::createAll());
+	}
 	mObjectChain.add(objects);
 
 	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted | ViAudio::Corrected)), 0.1);
 	mObjectChain.addFunction(ViFunctionCall("align"), 0.04);
-	mObjectChain.addFunction(ViFunctionCall("correlate", QVariant::fromValue(ViCorrelatorManager::createAll())), 0.85);
+	mObjectChain.addFunction(ViFunctionCall("correlate"), 0.85);
 	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
 
 	QString tracks = "Track";

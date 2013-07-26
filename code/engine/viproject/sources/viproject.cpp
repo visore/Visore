@@ -69,6 +69,23 @@ ViProject::~ViProject()
 
 *******************************************************************************************************************/
 
+int ViProject::objectIndex(const QString &id)
+{
+	for(int i = 0; i < mObjects.size(); ++i)
+	{
+		if(id == mObjects[i]->id())
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+int ViProject::objectIndex(ViAudioObjectPointer object)
+{
+	return objectIndex(object->id());
+}
+
 int ViProject::objectCount()
 {
     return mObjects.size();
@@ -143,30 +160,70 @@ QString ViProject::fileName() const
     return info.fileName();
 }
 
-bool ViProject::isFinished()
-{
-    return mFinished;
-}
-
 /*******************************************************************************************************************
 
     CORRELATIONS
 
 *******************************************************************************************************************/
 
-ViCorrelation ViProject::bestCorrelation(QString correlator)
+
+void ViProject::bestCorrection(const QString &fileId, const ViCorrelationGroup &group1, const ViCorrelationGroup &group2, QHash<QString, ViCorrelation> &bestCorrelation, QHash<QString, QString> &bestId, QHash<QString, qreal> &bestImprovement)
 {
-    return mBestCorrelation.correlation(correlator);
+	QStringList correlators = group1.correlators();
+	QString correlator;
+	for(int i = 0; i < correlators.size(); ++i)
+	{
+		correlator = correlators[i];
+		if(correlator != "")
+		{
+			qreal improvement = (group1.correlation(correlator).mean() - group2.correlation(correlator).mean()) / (1 - group2.correlation(correlator).mean());
+			if(!bestImprovement.contains(correlator) || improvement >= bestImprovement[correlator])
+			{
+				bestImprovement[correlator] = improvement;
+				bestId[correlator] = fileId;
+				bestCorrelation[correlator] = group1.correlation(correlator);
+			}
+		}
+	}
 }
 
-qreal ViProject::bestImprovement(QString correlator)
+ViCorrelation ViProject::bestCorrelation(QString correlator, int songIndex)
 {
-    return mBestImprovement[correlator];
+	if(songIndex < 0)
+	{
+		return mBestCorrelation.correlation(correlator);
+	}
+	else if(mBestTrackCorrelation.contains(songIndex))
+	{
+		return mBestTrackCorrelation[songIndex].correlation(correlator);
+	}
+	return ViCorrelation();
 }
 
-QString ViProject::bestCorrectionId(QString correlator)
+qreal ViProject::bestImprovement(QString correlator, int songIndex)
 {
-    return mBestCorrectionId[correlator];
+	if(songIndex < 0)
+	{
+		return mBestImprovement[correlator];
+	}
+	else if(mBestTrackImprovement.contains(songIndex))
+	{
+		return mBestTrackImprovement[songIndex][correlator];
+	}
+	return 0;
+}
+
+QString ViProject::bestCorrectionId(QString correlator, int songIndex)
+{
+	if(songIndex < 0)
+	{
+		return mBestCorrectionId[correlator];
+	}
+	else if(mBestTrackCorrectionId.contains(songIndex))
+	{
+		return mBestTrackCorrectionId[songIndex][correlator];
+	}
+	return "";
 }
 
 QString ViProject::currentCorrectionId()
@@ -243,6 +300,7 @@ ViVersion ViProject::editedVersion()
 
 void ViProject::clear()
 {
+	while(!isFinished());
     LOG("Clearing project.");
     clearObjects();
     clearFiles();
@@ -333,6 +391,7 @@ void ViProject::saveAll()
 
 void ViProject::setFinished()
 {
+	QMutexLocker locker(&mFinishedMutex);
 	mFinished = true;
 	for(int i = 0; i < mObjects.size(); ++i)
 	{
@@ -344,14 +403,23 @@ void ViProject::setFinished()
 	}
 	if(mFinished)
 	{
+		locker.unlock();
 		emit finished();
 	}
 }
 
 void ViProject::setBusy()
 {
+	QMutexLocker locker(&mFinishedMutex);
 	mFinished = false;
 }
+
+bool ViProject::isFinished()
+{
+	QMutexLocker locker(&mFinishedMutex);
+	return mFinished;
+}
+
 
 /*******************************************************************************************************************
 
@@ -752,7 +820,7 @@ bool ViProject::saveCorrections()
 			ViCorrelationGroups correlationObjects = theObject->correlations();
 			globalCorrelation.add(correlationObjects);
 
-            ViElement correlations("correltions");
+			ViElement correlations("correlations");
             for(int j = 0; j < correlationObjects.size(); ++j)
             {
 				correlations.addChild(correlationObjects[j].exportData());
@@ -846,47 +914,86 @@ bool ViProject::loadCorrections()
 
     QFileInfoList files = QDir(path(ViProject::CorrectionInfo)).entryInfoList(QDir::Files);
 
-    QHash<QString, ViCorrelation> bestCorrelation;
-    QHash<QString, QString> bestId;
-    QHash<QString, qreal> bestImprovement;
+	QHash<QString, ViCorrelation> bestCorrelation;
+	QHash<QString, QString> bestId;
+	QHash<QString, qreal> bestImprovement;
+
+	QHash<int, QHash<QString, ViCorrelation>> bestTrackCorrelation;
+	QHash<int, QHash<QString, QString>> bestTrackId;
+	QHash<int, QHash<QString, qreal>> bestTrackImprovement;
 
     for(int i = 0; i < files.size(); ++i)
     {
-        QString id = files[i].baseName().replace("correction", "");
-
-        ViElement root;
+		QString fileId = files[i].baseName().replace("correction", "");
+		ViElement root;
         success &= root.loadFromFile(files[i].absoluteFilePath());
-        ViGlobalCorrelation global;
-        success &= global.importData(root);
 
+		//Global correlation
+		ViGlobalCorrelation global;
+        success &= global.importData(root);
 		ViCorrelationGroup group1 = global.correlation(ViAudio::Target, ViAudio::Corrected);
 		ViCorrelationGroup group2 = global.correlation(ViAudio::Target, ViAudio::Corrupted);
+		bestCorrection(fileId, group1, group2, bestCorrelation, bestId, bestImprovement);
 
-		QStringList correlators = group1.correlators();
-        QString correlator;
-        for(int j = 0; j < correlators.size(); ++j)
+		//Track correlation
+		ViElementList corrections = root.children("correction");
+		int index;
+		QString id;
+		for(int j = 0; j < corrections.size(); ++j)
 		{
-            correlator = correlators[j];
-			if(correlator != "")
+			index = -1;
+			id = corrections[j].child("track").child("id").toString();
+			for(int k = 0; k < mObjects.size(); ++k)
 			{
-				qreal improvement = (group1.correlation(correlator).mean() - group2.correlation(correlator).mean()) / (1 - group2.correlation(correlator).mean());
-				if(!bestImprovement.contains(correlator) || improvement >= bestImprovement[correlator])
+				if(id == mObjects[k]->id())
 				{
-					bestImprovement[correlator] = improvement;
-					bestId[correlator] = id;
-					bestCorrelation[correlator] = group1.correlation(correlator);
+					index = k;
+					break;
 				}
 			}
-        }
+			if(index >= 0)
+			{
+				ViElementList correlations = corrections[j].child("correlations").children("correlationgroup");
+				if(correlations.size() == 2)
+				{
+					group1.clear();
+					success &= group1.importData(correlations[0]);
+					group2.clear();
+					success &= group2.importData(correlations[1]);
+					bestCorrection(fileId, group1, group2, bestTrackCorrelation[index], bestTrackId[index], bestTrackImprovement[index]);
+				}
+			}
+			else
+			{
+				success = false;
+				LOG("Can't find the object for the specified correlation.", QtCriticalMsg);
+			}
+		}
     }
 
     QString key;
-    foreach(key, bestCorrelation.keys())
-    {
-        mBestCorrelation.set(key, bestCorrelation[key]);
-        mBestCorrectionId[key] = bestId[key];
-        mBestImprovement[key] = bestImprovement[key];
-    }
+
+	foreach(key, bestCorrelation.keys())
+	{
+		mBestCorrelation.set(key, bestCorrelation[key]);
+		mBestCorrectionId[key] = bestId[key];
+		mBestImprovement[key] = bestImprovement[key];
+	}
+
+	int trackKey;
+	foreach(trackKey, bestTrackCorrelation.keys())
+	{
+		QHash<QString, ViCorrelation> &correlations = bestTrackCorrelation[trackKey];
+		QHash<QString, QString> &ids = bestTrackId[trackKey];
+		QHash<QString, qreal> &improvements = bestTrackImprovement[trackKey];
+		foreach(key, correlations.keys())
+		{
+			mBestTrackCorrelation[trackKey].set(key, correlations[key]);
+			mBestTrackCorrectionId[trackKey][key] = ids[key];
+			mBestTrackImprovement[trackKey][key] = improvements[key];
+		}
+	}
 
     return success;
 }
+

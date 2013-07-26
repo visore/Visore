@@ -24,12 +24,12 @@ void ViCorrelation::clear()
 	mCounter = 0;
 }
 
-bool ViCorrelation::isValid()
+bool ViCorrelation::isValid() const
 {
     return mMean != 0 && mMinimum != DBL_MAX && mMaximum != -DBL_MAX;
 }
 
-qreal ViCorrelation::correlation(ViCorrelation::Type type)
+qreal ViCorrelation::correlation(ViCorrelation::Type type) const
 {
     if(type == ViCorrelation::Mean) return mean();
     else if(type == ViCorrelation::Minimum) return minimum();
@@ -37,17 +37,17 @@ qreal ViCorrelation::correlation(ViCorrelation::Type type)
     else return 0;
 }
 
-qreal ViCorrelation::mean()
+qreal ViCorrelation::mean() const
 {
     return mMean;
 }
 
-qreal ViCorrelation::minimum()
+qreal ViCorrelation::minimum() const
 {
     return mMinimum;
 }
 
-qreal ViCorrelation::maximum()
+qreal ViCorrelation::maximum() const
 {
     return mMaximum;
 }
@@ -61,7 +61,7 @@ void ViCorrelation::addCorrelation(qreal mean, qreal minimum, qreal maximum)
 {
     addMean(mean);
     if(minimum < mMinimum) mMinimum = minimum;
-    else if(maximum > mMaximum) mMaximum = maximum;
+	if(maximum > mMaximum) mMaximum = maximum;
 }
 
 void ViCorrelation::addMean(qreal mean)
@@ -93,7 +93,7 @@ void ViCorrelation::setMaximum(qreal correlation)
     mMaximum = correlation;
 }
 
-QString ViCorrelation::toString()
+QString ViCorrelation::toString() const
 {
     return "mean: " + QString::number(mean() * 100, 'f', 2) + "%, minimum: " + QString::number(minimum() * 100, 'f', 2) + "%, maximum: " + QString::number(maximum() * 100, 'f', 2) + "%";
 }

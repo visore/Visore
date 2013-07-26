@@ -48,8 +48,8 @@ ViCorrelationWidget::~ViCorrelationWidget()
 
 void ViCorrelationWidget::clear()
 {
-	mObjects.clear();
 	mProject = NULL;
+	mObjects.clear();
 
     mUi->correctedTable->clearContents();
     mUi->corruptedTable->clearContents();
@@ -120,11 +120,8 @@ void ViCorrelationWidget::changeCorrelator(QString correlator)
                 mUi->correctedTable->setItem(correctedCount, 4, percentage(correctedCorrelation.maximum()), Qt::AlignRight | Qt::AlignVCenter);
 				mUi->correctedTable->setItem(correctedCount, 5, percentage(correctedCorrelation.mean()), Qt::AlignRight | Qt::AlignVCenter);
                 ++correctedCount;
-				LOG("++++++++++++++: "+QString::number(globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrected).correlation("SampleCorrelator").mean()));
-                globalCorrelation.add(object->correlation(ViAudio::Target, ViAudio::Corrected));
-				LOG("++++++++++++++2: "+QString::number(globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrected).correlation("SampleCorrelator").mean()));
+				globalCorrelation.add(object->correlation(ViAudio::Target, ViAudio::Corrected));
             }
-
             corruptedCorrelation = object->correlation(correlator, ViAudio::Target, ViAudio::Corrupted);
             if(corruptedCorrelation.isValid())
             {
@@ -136,35 +133,48 @@ void ViCorrelationWidget::changeCorrelator(QString correlator)
 				mUi->corruptedTable->setItem(corruptedCount, 4, percentage(corruptedCorrelation.maximum()), Qt::AlignRight | Qt::AlignVCenter);
 				mUi->corruptedTable->setItem(corruptedCount, 5, percentage(corruptedCorrelation.mean()), Qt::AlignRight | Qt::AlignVCenter);
                 ++corruptedCount;
-				LOG("++++++++++++++: "+QString::number(globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrupted).correlation("SampleCorrelator").mean(), 'f', 10));
-                globalCorrelation.add(object->correlation(ViAudio::Target, ViAudio::Corrupted));
-				LOG("++++++++++++++2: "+QString::number(globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrupted).correlation("SampleCorrelator").mean(), 'f', 10));
-            }
+				globalCorrelation.add(object->correlation(ViAudio::Target, ViAudio::Corrupted));
+			}
         }
 
 		mUi->correctedGroupBox->setVisible(hasCorrectedCorrelation);
 		mUi->corruptedGroupBox->setVisible(hasCorruptedCorrelation);
 
-		if(corruptedCorrelation.isValid())
+		correctedCorrelation = globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrected).correlation(correlator);
+		corruptedCorrelation = globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrupted).correlation(correlator);
+		if(hasCorruptedCorrelation)
 		{
-			mUi->corruptedLabel->setText(percentage(corruptedCorrelation.mean()));
+			mUi->corruptedLabel->setText(percentage(globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrupted).correlation(correlator).mean()));
 		}
-		if(correctedCorrelation.isValid())
+		if(hasCorrectedCorrelation)
 		{
-			mUi->correctedLabel->setText(percentage(correctedCorrelation.mean()));
+			mUi->correctedLabel->setText(percentage(globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrected).correlation(correlator).mean()));
 		}
 
 		if(hasCorrectedCorrelation && hasCorruptedCorrelation)
 		{
 			mUi->globalGroupBox->show();
-			correctedCorrelation = globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrected).correlation(correlator);
-			corruptedCorrelation = globalCorrelation.correlation(ViAudio::Target, ViAudio::Corrupted).correlation(correlator);
+
+			ViFont font;
+			font.setPointSize(20);
+			font.setBold(true);
 
 			if(correctedCorrelation.isValid())
 			{
 				mUi->currentMean->setText(percentage(correctedCorrelation.mean()));
 				mUi->currentMinimum->setText(percentage(correctedCorrelation.minimum()));
 				mUi->currentMaximum->setText(percentage(correctedCorrelation.maximum()));
+			}
+			if(correctedCorrelation.isValid() && corruptedCorrelation.isValid())
+			{
+				qreal improvement = (correctedCorrelation.mean() - corruptedCorrelation.mean()) / (1 - corruptedCorrelation.mean());
+				if(improvement < 0) font.setColor(Qt::red);
+				else if(improvement > 0) font.setColor(Qt::green);
+				else font.setColor(ViThemeManager::color(ViThemeColors::BorderColor2));
+
+				mUi->currentImprovement->setStyleSheet(font.styleSheet());
+				mUi->currentImprovement->setText(percentage(improvement));
+				mUi->currentId->setText(mProject->currentCorrectionId());
 			}
 
 			if(mProject == NULL)
@@ -175,29 +185,29 @@ void ViCorrelationWidget::changeCorrelator(QString correlator)
 			{
 				mUi->globalContainer->show();
 
-				ViFont font;
-				font.setPointSize(20);
-				font.setBold(true);
-
-				if(correctedCorrelation.isValid() && corruptedCorrelation.isValid())
-				{
-					qreal improvement = (correctedCorrelation.mean() - corruptedCorrelation.mean()) / (1 - corruptedCorrelation.mean());
-					if(improvement < 0) font.setColor(Qt::red);
-					else if(improvement > 0) font.setColor(Qt::green);
-					else font.setColor(ViThemeManager::color(ViThemeColors::BorderColor2));
-
-					mUi->currentImprovement->setStyleSheet(font.styleSheet());
-					mUi->currentImprovement->setText(percentage(improvement));
-					mUi->currentId->setText(mProject->currentCorrectionId());
-				}
-
 				correctedCorrelation = mProject->bestCorrelation(correlator);
-				ViCorrelation best = mProject->bestCorrelation(correlator);
+
+				ViCorrelation best;
+				qreal improvement;
+				QString bestId;
+				if(mObjects.size() == 1)
+				{
+					int index = mProject->objectIndex(mObjects[0]);
+					best = mProject->bestCorrelation(correlator, index);
+					improvement = mProject->bestImprovement(correlator, index);
+					bestId = mProject->bestCorrectionId(correlator, index);
+				}
+				else
+				{
+					best = mProject->bestCorrelation(correlator);
+					improvement = mProject->bestImprovement(correlator);
+					bestId = mProject->bestCorrectionId(correlator);
+				}
 
 				if(correctedCorrelation.isValid() && best.isValid())
 				{
 					mUi->globalContainer->show();
-					qreal improvement = mProject->bestImprovement(correlator);
+
 					if(improvement < 0) font.setColor(Qt::red);
 					else if(improvement > 0) font.setColor(Qt::green);
 					else font.setColor(ViThemeManager::color(ViThemeColors::BorderColor2));
@@ -208,7 +218,7 @@ void ViCorrelationWidget::changeCorrelator(QString correlator)
 					mUi->globalMean->setText(percentage(best.mean()));
 					mUi->globalMinimum->setText(percentage(best.minimum()));
 					mUi->globalMaximum->setText(percentage(best.maximum()));
-					mUi->globalId->setText(mProject->bestCorrectionId(correlator));
+					mUi->globalId->setText(bestId);
 				}
 				else
 				{

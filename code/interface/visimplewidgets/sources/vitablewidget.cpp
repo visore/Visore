@@ -70,7 +70,7 @@ ViTableWidget::ViTableWidget(QWidget *parent)
 			color: " + ViThemeManager::color(ViThemeColors::ButtonTextColor1).name() + ";\
 			background: " + gradient1 + ";\
 			border: 0px solid black;\
-			padding: 5px;\
+			padding: 5px 2px 5px 2px;\
 		}\
 		QHeaderView{\
 			background-color: transparent;\
@@ -85,7 +85,7 @@ ViTableWidget::ViTableWidget(QWidget *parent)
 			border: 0px solid black;\
 		}\
 		QTableWidget::item{\
-			padding: 5px;\
+			padding: 5px 2px 5px 2px;\
 		}\
 		QTableWidget::item:selected{\
 			background: " + gradient2 + ";\

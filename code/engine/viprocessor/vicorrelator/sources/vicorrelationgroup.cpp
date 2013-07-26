@@ -26,12 +26,12 @@ ViCorrelationGroup::ViCorrelationGroup(const ViCorrelationGroup &other)
     mCorrelations = other.mCorrelations;
 }
 
-ViAudio::Type ViCorrelationGroup::type1()
+ViAudio::Type ViCorrelationGroup::type1() const
 {
     return mType1;
 }
 
-ViAudio::Type ViCorrelationGroup::type2()
+ViAudio::Type ViCorrelationGroup::type2() const
 {
     return mType2;
 }
@@ -59,7 +59,7 @@ void ViCorrelationGroup::clear()
     mCorrelations.clear();
 }
 
-int ViCorrelationGroup::count()
+int ViCorrelationGroup::count() const
 {
     return mCorrelations.size();
 }
@@ -93,10 +93,10 @@ void ViCorrelationGroup::set(ViCorrelator *correlator, ViCorrelation correlation
 
 ViCorrelation& ViCorrelationGroup::correlation(QString correlator)
 {
-    if(!mCorrelations.contains(correlator))
-    {
-        LOG("The correlator is not present in the group.", QtCriticalMsg);
-    }
+	if(!mCorrelations.contains(correlator))
+	{
+		LOG("The correlator is not present in the group.", QtCriticalMsg);
+	}
 	else
 	{
 		return mCorrelations[correlator];
@@ -105,10 +105,27 @@ ViCorrelation& ViCorrelationGroup::correlation(QString correlator)
 
 ViCorrelation& ViCorrelationGroup::correlation(ViCorrelator *correlator)
 {
-    return correlation(correlator->name());
+	return correlation(correlator->name());
 }
 
-ViCorrelations ViCorrelationGroup::correlations()
+const ViCorrelation ViCorrelationGroup::correlation(QString correlator) const
+{
+	if(!mCorrelations.contains(correlator))
+	{
+		LOG("The correlator is not present in the group.", QtCriticalMsg);
+	}
+	else
+	{
+		return mCorrelations[correlator];
+	}
+}
+
+const ViCorrelation ViCorrelationGroup::correlation(ViCorrelator *correlator) const
+{
+	return correlation(correlator->name());
+}
+
+ViCorrelations ViCorrelationGroup::correlations() const
 {
     ViCorrelations result;
     QString key;
@@ -119,12 +136,12 @@ ViCorrelations ViCorrelationGroup::correlations()
     return result;
 }
 
-QStringList ViCorrelationGroup::correlators()
+QStringList ViCorrelationGroup::correlators() const
 {
     return mCorrelations.keys();
 }
 
-QString ViCorrelationGroup::toString()
+QString ViCorrelationGroup::toString() const
 {
     QString result = "";
     QString key;
@@ -136,7 +153,7 @@ QString ViCorrelationGroup::toString()
     return result;
 }
 
-QString ViCorrelationGroup::toString(QString correlator)
+QString ViCorrelationGroup::toString(QString correlator) const
 {
     if(mCorrelations.contains(correlator))
     {

@@ -22,12 +22,12 @@ class ViCorrelation : public ViSerializer
         ViCorrelation(const ViCorrelation &other);
 
         void clear();
-        bool isValid();
+		bool isValid() const;
 
-        qreal correlation(ViCorrelation::Type type);
-        qreal mean();
-        qreal minimum();
-        qreal maximum();
+		qreal correlation(ViCorrelation::Type type) const;
+		qreal mean() const;
+		qreal minimum() const;
+		qreal maximum() const;
 
         void addCorrelation(qreal value);
         void addCorrelation(qreal mean, qreal minimum, qreal maximum);
@@ -38,7 +38,7 @@ class ViCorrelation : public ViSerializer
         void setMinimum(qreal correlation);
         void setMaximum(qreal correlation);
 
-        QString toString();
+		QString toString() const;
 
         ViElement exportData();
         bool importData(ViElement element);

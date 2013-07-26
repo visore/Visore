@@ -345,7 +345,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
         ViCorrelationGroups correlations();
 
         void clearCorrelators();
-        void addCorrelator(ViCorrelator *correlator); //Takes ownership
+		void addCorrelator(ViCorrelator *correlator); //Takes ownership
+		void addCorrelators(QList<ViCorrelator*> correlators); //Takes ownership
         bool hasCorrelator();
         int correlatorCount();
 

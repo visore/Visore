@@ -15,14 +15,14 @@ class ViCorrelationGroup : public ViSerializer
         ViCorrelationGroup(ViAudio::Type type1, ViAudio::Type type2);
         ViCorrelationGroup(const ViCorrelationGroup &other);
 
-        ViAudio::Type type1();
-        ViAudio::Type type2();
+		ViAudio::Type type1() const;
+		ViAudio::Type type2() const;
         void setTypes(ViAudio::Type type1, ViAudio::Type type2);
         void setType1(ViAudio::Type type);
         void setType2(ViAudio::Type type);
 
         void clear();
-        int count();
+		int count() const;
 
         void add(QString correlator, ViCorrelation correlation);
         void add(ViCorrelator *correlator, ViCorrelation correlation);
@@ -30,14 +30,16 @@ class ViCorrelationGroup : public ViSerializer
 		void set(QString correlator, ViCorrelation correlation);
 		void set(ViCorrelator *correlator, ViCorrelation correlation);
 
-        ViCorrelation& correlation(QString correlator);
-        ViCorrelation& correlation(ViCorrelator *correlator);
+		ViCorrelation& correlation(QString correlator);
+		ViCorrelation& correlation(ViCorrelator *correlator);
+		const ViCorrelation correlation(QString correlator) const;
+		const ViCorrelation correlation(ViCorrelator *correlator) const;
 
-        ViCorrelations correlations();
-        QStringList correlators();
+		ViCorrelations correlations() const;
+		QStringList correlators() const;
 
-        QString toString();
-        QString toString(QString correlator);
+		QString toString() const;
+		QString toString(QString correlator) const;
 
         ViElement exportData();
         bool importData(ViElement element);

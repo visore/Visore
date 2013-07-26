@@ -98,6 +98,8 @@ class ViProject : public QObject, public ViId
 
 		*******************************************************************************************************************/
 
+		int objectIndex(const QString &id);
+		int objectIndex(ViAudioObjectPointer object);
 		int objectCount();
 		ViAudioObjectQueue objects();
 		ViAudioObjectPointer object(int index);	
@@ -124,10 +126,9 @@ class ViProject : public QObject, public ViId
 
         *******************************************************************************************************************/
 
-        ViCorrelation bestCorrelation(QString correlator);
-        qreal bestImprovement(QString correlator);
-
-        QString bestCorrectionId(QString correlator);
+		ViCorrelation bestCorrelation(QString correlator, int songIndex = -1);
+		qreal bestImprovement(QString correlator, int songIndex = -1);
+		QString bestCorrectionId(QString correlator, int songIndex = -1);
         QString currentCorrectionId();
 
         /*******************************************************************************************************************
@@ -191,6 +192,7 @@ class ViProject : public QObject, public ViId
 
         *******************************************************************************************************************/
 
+		void bestCorrection(const QString &fileId, const ViCorrelationGroup &group1, const ViCorrelationGroup &group2, QHash<QString, ViCorrelation> &bestCorrelation, QHash<QString, QString> &bestId, QHash<QString, qreal> &bestImprovement);
         QString nextCorrectionId();
         QString correctionId(QString path = "");
         QString correctionPath(QString id = "");
@@ -220,6 +222,7 @@ class ViProject : public QObject, public ViId
 
 		ViAudioObjectQueue mObjects;
 
+		QMutex mFinishedMutex;
         QMutex mObjectsMutex;
 
         /*******************************************************************************************************************
@@ -229,9 +232,14 @@ class ViProject : public QObject, public ViId
         *******************************************************************************************************************/
 
 		QString mCurrentCorrectionId;
-        ViCorrelationGroup mBestCorrelation;
+
+		ViCorrelationGroup mBestCorrelation;
         QHash<QString, qreal> mBestImprovement;
         QHash<QString, QString> mBestCorrectionId;
+
+		QHash<int, ViCorrelationGroup> mBestTrackCorrelation;
+		QHash<int, QHash<QString, qreal>> mBestTrackImprovement;
+		QHash<int, QHash<QString, QString>> mBestTrackCorrectionId;
 
 		/*******************************************************************************************************************
 

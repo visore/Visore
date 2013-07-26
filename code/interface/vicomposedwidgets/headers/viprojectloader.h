@@ -38,6 +38,10 @@ class ViProjectLoader : public ViWidget
 		void typesChanged();
 		void finished();
 
+		// Will be emited everytime something changes that will require a recalculation
+		// Check that there is at least one object
+		void changed();
+
 	private slots:
 
 		void loadProjects();

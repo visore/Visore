@@ -53,6 +53,7 @@ ViAudioObject::~ViAudioObject()
     clearBuffers(mDestructType);
 	clearWaves();
 	clearSpectrums();
+	clearCorrelators();
 
 	if(mEncoder != NULL)
 	{
@@ -94,8 +95,6 @@ ViAudioObject::~ViAudioObject()
 		delete mCorrector;
 		mCorrector = NULL;
     }
-
-    clearCorrelators();
 }
 
 ViAudioObjectPointer ViAudioObject::create(ViAudioObject *object)
@@ -1411,6 +1410,14 @@ void ViAudioObject::addCorrelator(ViCorrelator *correlator)
     mCorrelators.append(correlator);
     QObject::connect(correlator, SIGNAL(finished()), this, SLOT(correlateNext()));
     QObject::connect(correlator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+}
+
+void ViAudioObject::addCorrelators(QList<ViCorrelator*> correlators)
+{
+	for(int i = 0; i < correlators.size(); ++i)
+	{
+		addCorrelator(correlators[i]);
+	}
 }
 
 bool ViAudioObject::hasCorrelator()
