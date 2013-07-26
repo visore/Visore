@@ -124,7 +124,8 @@ void ViAudioRecorder::endSong()
 	if(mObject->length(ViAudioPosition::Seconds) > LENGTH_CUTOFF)
 	{
 		mQueue.enqueue(mObject);
-		if(mDetectMetadata && !mObject->hasMetadata())
+		ViAudioObjectPointer object = mProject->object(mObject->sideNumber(), mObject->trackNumber());
+		if(mDetectMetadata && !object.isNull() && (!object->hasMetadata() || !object->hasCover()))
 		{
 			QObject::connect(mObject.data(), SIGNAL(metadataDetected(bool)), this, SLOT(serialize()));
 			mObject->detectMetadata();
@@ -183,16 +184,19 @@ void ViAudioRecorder::serialize()
 	QObject::disconnect(object.data(), SIGNAL(metadataDetected(bool)), this, SLOT(serialize()));
 	if(mProject != NULL)
 	{
-        int objectIndex = object->trackNumber() - 1;
-        if(mExistingProject && mProject->objectCount() > objectIndex)
-        {
-			ViAudioObjectPointer exisitngObject = mProject->object(objectIndex);
-			exisitngObject->transferBuffer(object, mType);
-			if(object->hasMetadata() && !exisitngObject->hasMetadata())
+		if(mExistingProject)
+		{
+			ViAudioObjectPointer existingObject = mProject->object(object->sideNumber(), object->trackNumber());
+			existingObject->transferBuffer(object, mType);
+			if(!existingObject->hasMetadata() && object->hasMetadata())
 			{
-				exisitngObject->setMetadata(object->metadata());
+				existingObject->setMetadata(object->metadata());
 			}
-			object = exisitngObject;
+			if(!existingObject->hasCover() && object->hasCover())
+			{
+				existingObject->metadata().setCover(object->metadata().cover());
+			}
+			object = existingObject;
         }
         else
         {

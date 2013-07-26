@@ -37,8 +37,6 @@ class ViProjectMetadataEditor : public ViWidget
 		Ui::ViProjectMetadataEditor *mUi;
 		bool mTakeOwnership;
 		ViProject *mProject;
-		QString mGlobalArtist;
-		QString mGlobalAlbum;
 
 };
 

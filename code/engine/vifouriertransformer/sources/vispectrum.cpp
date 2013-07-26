@@ -29,6 +29,7 @@ ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const ViAudioFormat &format,
 	enableAutoUpdate(autoUpdate);
 	initialize(windowSize + 1, format.sampleRate());
     add(chunk);
+	if(!autoUpdate) update();
 }
 
 template <typename T>
@@ -37,6 +38,7 @@ ViSpectrum<T>::ViSpectrum(const qint32 &windowSize, const qint32 &sampleRate, co
 	enableAutoUpdate(autoUpdate);
 	initialize(windowSize + 1, sampleRate);
 	add(chunk);
+	if(!autoUpdate) update();
 }
 
 template <typename T>

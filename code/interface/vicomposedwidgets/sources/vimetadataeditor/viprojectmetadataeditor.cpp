@@ -43,8 +43,6 @@ void ViProjectMetadataEditor::clear()
 	mUi->trackEditor->hide();
 
 	mTakeOwnership = false;
-	mGlobalArtist = "";
-	mGlobalAlbum = "";
 
 	mUi->trackEditor->clear();
 	mUi->projectEdit->clear();
@@ -64,23 +62,24 @@ void ViProjectMetadataEditor::setProject(ViProject *project, bool takeOwnership)
 	updateTracks();
 	changeTrack();
 
-	QString artist = "";
-	bool same = true;
+	QString artist = "", album = "";
+	bool sameArtist = true, sameAlbum = true;
 	for(int i = 0; i < mProject->objectCount(); ++i)
 	{
-		if(artist == "")
-		{
-			artist = mProject->object(i)->metadata().artist();
-		}
-		else if(artist != mProject->object(i)->metadata().artist())
-		{
-			same = false;
-			break;
-		}
+		if(artist == "") artist = mProject->object(i)->metadata().artist();
+		else if(artist != mProject->object(i)->metadata().artist()) sameArtist = false;
+
+		if(album == "") album = mProject->object(i)->metadata().album();
+		else if(album != mProject->object(i)->metadata().album()) sameAlbum = false;
 	}
+
 	if(artist == ViMetadata::unknownArtist()) artist = "";
-	if(same) mUi->artistEdit->setText(artist);
+	if(sameArtist) mUi->artistEdit->setText(artist);
 	else mUi->artistEdit->setText("Various Artists");
+
+	if(album == ViMetadata::unknownAlbum()) album = "";
+	if(sameAlbum) mUi->albumEdit->setText(album);
+	else mUi->albumEdit->setText("Various Albums");
 }
 
 bool ViProjectMetadataEditor::hasProject()
@@ -102,8 +101,6 @@ void ViProjectMetadataEditor::changeTrack()
 	if(index >= 0 && index < mProject->objectCount())
 	{
 		mUi->trackEditor->setMetadata(&mProject->object(index)->metadata());
-		if(mGlobalArtist != "") mUi->trackEditor->setArtist(mGlobalArtist);
-		if(mGlobalAlbum != "") mUi->trackEditor->setAlbum(mGlobalAlbum);
 	}
 }
 
@@ -141,12 +138,22 @@ void ViProjectMetadataEditor::changeProjectName()
 
 void ViProjectMetadataEditor::setGlobalArtist()
 {
-	mGlobalArtist = mUi->artistEdit->text();
-	if(mGlobalArtist != "") mUi->trackEditor->setArtist(mGlobalArtist);
+	QString artist = mUi->artistEdit->text();
+	ViAudioObjectQueue objects = mProject->objects();
+	for(int i = 0; i < objects.size(); ++i)
+	{
+		objects[i]->metadata().setArtist(artist);
+	}
+	changeTrack();
 }
 
 void ViProjectMetadataEditor::setGlobalAlbum()
 {
-	mGlobalAlbum = mUi->albumEdit->text();
-	if(mGlobalAlbum != "") mUi->trackEditor->setAlbum(mGlobalAlbum);
+	QString album = mUi->albumEdit->text();
+	ViAudioObjectQueue objects = mProject->objects();
+	for(int i = 0; i < objects.size(); ++i)
+	{
+		objects[i]->metadata().setAlbum(album);
+	}
+	changeTrack();
 }

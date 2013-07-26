@@ -116,7 +116,6 @@ ViAudioObjectPointer ViAudioObject::create(bool autoDestruct)
 ViAudioObjectPointer ViAudioObject::createNull()
 {
 	ViAudioObjectPointer pointer = ViAudioObjectPointer(NULL);
-	pointer->thisPointer = pointer;
     pointer.setUnusedLimit(1);
 	return pointer;
 }
@@ -427,7 +426,7 @@ bool ViAudioObject::encode(ViAudio::Type type, bool clearWhenFinished)
 	
 	setProgress(mCodingInstructions.size());
 	locker.unlock();
-	logStatus("Encoding track.");
+	log("Starting encoding.");
 	encodeNext();
 	return true;
 }
@@ -460,6 +459,7 @@ void ViAudioObject::encodeNext()
 		QString thePath = filePath(mPreviousEncodedType);
 		ViBuffer *theBuffer = buffer(mPreviousEncodedType, true);
 		locker.relock();
+		log("Encoding track: " + thePath);
 		mEncoder->encode(theBuffer, thePath, theBuffer->format(), mMetadata);
 	}
 }
@@ -515,9 +515,9 @@ bool ViAudioObject::decode(ViAudio::Type type)
 	}
 
 	setDecoder(new ViAudioCoder());
-	
 	setProgress(mCodingInstructions.size());
 	locker.unlock();
+	log("Starting decoding.");
 	decodeNext();
 	return true;
 }
@@ -536,13 +536,13 @@ void ViAudioObject::decodeNext()
 	}
 	else
 	{
-		logStatus("Decoding track.");
 		ViAudio::Type type = mCodingInstructions.dequeue();
 		locker.unlock();
 		QString thePath = filePath(type);
 		clearBuffer(type);
 		ViBuffer *theBuffer = buffer(type);
 		locker.relock();
+		log("Decoding track: " + thePath);
 		mDecoder->decode(thePath, theBuffer);
 	}
 }
@@ -1609,6 +1609,12 @@ bool ViAudioObject::hasMetadata()
 {
     QMutexLocker locker(&mMutex);
 	return mMetadata.isValid();
+}
+
+bool ViAudioObject::hasCover()
+{
+	QMutexLocker locker(&mMutex);
+	return mMetadata.hasCover();
 }
 
 void ViAudioObject::setSideNumber(int side)

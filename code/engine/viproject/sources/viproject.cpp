@@ -659,13 +659,14 @@ void ViProject::moveToProject(ViAudioObjectPointer object, ViAudio::Type type)
 {
     QString oldPath = object->filePath(type);
     if(!oldPath.startsWith(mPaths[ViProject::Root]))
-    {
+	{
         QString newPath = path(type, object->sideNumber()) + object->fileName();
         ViAudioCodec *codec = object->format(type).codec();
         if(codec != NULL)
         {
             newPath += codec->extension(".");
         }
+		LOG("Moving file to project: " + oldPath + " -> " + newPath);
 		QFile::remove(newPath); // Make sure the old file is removed first
 		QFile::rename(oldPath, newPath);
         object->setFilePath(type, newPath);

@@ -13,7 +13,7 @@ ViFrequencySegmentDetector::ViFrequencySegmentDetector()
 	setThreshold(ViSegmentDetector::RecordEnd, ViRange(0.05, 0.3), ViRange(0.0, 0.00005), 10000);*/
 
 	setThreshold(ViSegmentDetector::SongStart, ViRange(0.02, 0.05), ViRange(0.0001, 1.0), 500);
-	setThreshold(ViSegmentDetector::SongEnd, ViRange(0.02, 0.1), ViRange(0.0, 0.0001), 2000);
+	setThreshold(ViSegmentDetector::SongEnd, ViRange(0.02, 0.1), ViRange(0.0, 0.00012), 2000);
 	setThreshold(ViSegmentDetector::RecordStart, ViRange(0, 0.01), ViRange(0.0015, 1.0), 500);
 	setThreshold(ViSegmentDetector::RecordEnd, ViRange(0.02, 0.1), ViRange(0.0, 0.0001), 10000);
 }
@@ -63,7 +63,7 @@ void ViFrequencySegmentDetector::initialize()
 void ViFrequencySegmentDetector::execute(const int &channel)
 {
 	int sampleCount = data().sampleCount();
-	ViRealSpectrum spectrum(sampleCount, format(), currentFrequencies());
+	ViRealSpectrum spectrum(sampleCount, format(), currentFrequencies(), true);
 	mTotalSamples += sampleCount;
 	int milliseconds = ViAudioPosition::convertPosition(sampleCount, ViAudioPosition::Samples, ViAudioPosition::Milliseconds, format());
 

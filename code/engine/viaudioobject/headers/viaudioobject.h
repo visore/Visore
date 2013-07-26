@@ -365,6 +365,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		bool isDetectingMetadata();
 		bool hasMetadata();
+		bool hasCover();
 
 		Q_INVOKABLE void detectMetadata(bool force = false); // If force is false, it will only detect if it wasn't detected before
 
