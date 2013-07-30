@@ -1,5 +1,5 @@
 #include <vifingerprinter.h>
-#include <vilogger.h>
+
 ViBufferOffsets::ViBufferOffsets()
 {
 	clear();

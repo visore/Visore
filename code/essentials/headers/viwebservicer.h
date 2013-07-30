@@ -71,6 +71,7 @@ class ViWebServicer : public QObject
 		QString url();
 
 		QNetworkReply::NetworkError error();
+		QString errorString();
 
 		void clear();
 
@@ -87,6 +88,7 @@ class ViWebServicer : public QObject
 		QByteArray mData;
 		QString mUrl;
 		QNetworkReply::NetworkError mError;
+		QString mErrorString;
 
 };
 

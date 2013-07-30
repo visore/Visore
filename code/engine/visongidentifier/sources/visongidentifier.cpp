@@ -80,6 +80,11 @@ QNetworkReply::NetworkError ViSongIdentifier::networkError()
 	return mServicer.error();
 }
 
+QString ViSongIdentifier::errorString()
+{
+	return mServicer.errorString();
+}
+
 void ViSongIdentifier::setKey(QString key)
 {
 	mKey = key;

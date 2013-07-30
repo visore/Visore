@@ -38,6 +38,7 @@ void ViAcoustidFingerprinterThread::run()
 
 	setDuration(ViAudioPosition(mBufferOffset.buffer()->size(), ViAudioPosition::Bytes, format)); // AcoustId works better with the duration of the full song, even if the fingerprint wasn't generate with the entire track.
 	setFingerprint(calculator.finish());
+	mBufferOffset.clear();
 }
 
 ViAcoustidFingerprinter::ViAcoustidFingerprinter()

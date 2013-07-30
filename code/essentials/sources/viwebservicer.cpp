@@ -54,6 +54,7 @@ void ViWebParameters::append(QString name, QString value)
 ViWebServicer::ViWebServicer()
 {
 	QObject::connect(&mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processReply(QNetworkReply*)));
+	clear();
 }
 
 void ViWebServicer::setProxy(QNetworkProxy::ProxyType type, QString host, quint16 port, QString username, QString password)
@@ -103,6 +104,7 @@ void ViWebServicer::retrieve(QString url, ViWebParameters parameters)
 void ViWebServicer::processReply(QNetworkReply *reply)
 {
 	mError = reply->error();
+	mErrorString = reply->errorString();
 	if(mError == QNetworkReply::NoError)
 	{
 		QString url = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl().toString();
@@ -152,6 +154,11 @@ QNetworkReply::NetworkError ViWebServicer::error()
 	return mError;
 }
 
+QString ViWebServicer::errorString()
+{
+	return mErrorString;
+}
+
 QNetworkRequest ViWebServicer::createGetRequest(QUrl url)
 {
 	return createRequest(url, "text/plain");
@@ -180,4 +187,5 @@ void ViWebServicer::clear()
 	mData.clear();
 	mUrl = "";
 	mError = QNetworkReply::NoError;
+	mErrorString = "";
 }

@@ -1,5 +1,6 @@
 #include <vienmfpfingerprinter.h>
 #include <vipcmconverter.h>
+#include <vilogger.h>
 #include <CodegenENMFP.h>
 
 ViEnmfpFingerprinterThread::ViEnmfpFingerprinterThread()
@@ -9,16 +10,24 @@ ViEnmfpFingerprinterThread::ViEnmfpFingerprinterThread()
 
 void ViEnmfpFingerprinterThread::run()
 {
+	ViAudioFormat format = mBufferOffset.buffer()->format();
+	if(format.sampleSize() != 16)
+	{
+		LOG("The fingerprint calculator works only with 16bit samples.", QtCriticalMsg);
+		return;
+	}
 	int size = mStream->size();
-	setDuration(ViAudioPosition(size, ViAudioPosition::Bytes, mBufferOffset.buffer()->format()));
+	setDuration(ViAudioPosition(size, ViAudioPosition::Bytes, format));
 	if(size > 0)
 	{
-		ViRawChunk chunk(size);
-		size = mStream->read(chunk);
-		ViChunk<qfloat> sampleChunk(size / 2);
-		size = ViPcmConverter<float>::pcmToReal16(chunk.data(), sampleChunk.data(), size);
-		Codegen codegen(sampleChunk.data(), size / 2, 0);
+		char *chunk = new char[size];
+		size = mStream->read(chunk, size);
+		float *samples = new float[size / 2];
+		size = ViPcmConverter<float>::pcmToReal16(chunk, samples, size);
+		delete chunk;
+		Codegen codegen(samples, size, 0);
 		setFingerprint(QString::fromStdString(codegen.getCodeString()));
+		delete samples;
 	}
 	mBufferOffset.clear();
 }
@@ -29,7 +38,12 @@ ViEnmfpFingerprinter::ViEnmfpFingerprinter()
 	float dummy[2];
 	mVersion = QString::number(Codegen(dummy, 2, 0).getVersion());
 	setThread(new ViEnmfpFingerprinterThread());
-	QObject::connect(&mCoder, SIGNAL(finished()), this, SLOT(generate()));
+	mCoder = NULL;
+}
+
+ViEnmfpFingerprinter::~ViEnmfpFingerprinter()
+{
+	clean();
 }
 
 void ViEnmfpFingerprinter::generate()
@@ -46,8 +60,20 @@ QString ViEnmfpFingerprinter::version()
 
 void ViEnmfpFingerprinter::generate(ViBufferOffsets bufferOffset)
 {
+	clean();
+	mCoder = new ViAudioCoder();
+	QObject::connect(mCoder, SIGNAL(finished()), this, SLOT(generate()));
+	mCoder->encode(bufferOffset.buffer(), &mOutput, encodingFormat(), bufferOffset.from(), bufferOffset.to());
+}
+
+void ViEnmfpFingerprinter::clean()
+{
 	mOutput.clear();
-	mCoder.encode(bufferOffset.buffer(), &mOutput, encodingFormat(), bufferOffset.from(), bufferOffset.to());
+	if(mCoder != NULL)
+	{
+		delete mCoder;
+		mCoder = NULL;
+	}
 }
 
 ViAudioFormat ViEnmfpFingerprinter::encodingFormat()

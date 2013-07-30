@@ -38,52 +38,48 @@ void ViMetadataer::processIdentification(bool success)
 	++mCurrentIdentifier;
 	if(mCurrentIdentifier == mTotalIdentifiers)
 	{
-		mMutex.unlock();
 		mMetadata = ViSongIdentifier::metadata(mIdentifiers);
 		if(mMetadata.isValid())
 		{
 			if(!startNextRetriever())
 			{
+				mMutex.unlock();
 				finish();
+			}
+			else
+			{
+				mMutex.unlock();
 			}
 		}
 		else
 		{
+			mMutex.unlock();
 			processNextBuffer();
 		}
 	}
-	mMutex.unlock();
-
-
-	/*if(!startNextIdentifier())
+	else
 	{
-		mMetadata = ViSongIdentifier::metadata(mIdentifiers);
-		if(mMetadata.isValid())
-		{
-			LOG("Metadata detected as \"" + mMetadata.toShortString() + "\" (" + mCurrentDescription + ").");
-			if(!startNextRetriever())
-			{
-				finish(true);
-			}
-		}
-		else
-		{
-			LOG("No metadata detected (" + mCurrentDescription + ").");
-			processNextBuffer();
-		}
-	}*/
+		mMutex.unlock();
+	}
 }
 
 void ViMetadataer::processRetrieval(bool success)
 {
+	mMutex.lock();
 	if(success)
 	{
 		mMetadata = mRetrievers[mCurrentRetriever]->metadata();
+		mMutex.unlock();
 		finish();
 	}
 	else if(!startNextRetriever())
 	{
+		mMutex.unlock();
 		finish();
+	}
+	else
+	{
+		mMutex.unlock();
 	}
 }
 
@@ -113,6 +109,10 @@ bool ViMetadataer::startIdentifiers()
 			}
 			message += mIdentifiers[i]->name();
 		}
+		else
+		{
+			LOG(mIdentifiers[i]->name() + " has an error: " + mIdentifiers[i]->errorString(), QtCriticalMsg);
+		}
 	}
 
 	mTotalIdentifiers = identifiers.size();
@@ -128,25 +128,6 @@ bool ViMetadataer::startIdentifiers()
 		identifiers[i]->identify(mCurrentBufferOffset);
 	}
 	return true;
-
-	/*bool success = false;
-	do
-	{
-		++mCurrentIdentifier;
-		if(	mCurrentIdentifier < mIdentifiers.size() &&
-			mIdentifiers[mCurrentIdentifier]->networkError() == QNetworkReply::NoError) // Connection error to the server
-		{
-			success = true;
-			break;
-		}
-	}
-	while(mCurrentIdentifier < mIdentifiers.size());
-
-	if(success)
-	{
-		mIdentifiers[mCurrentIdentifier]->identify(mCurrentBufferOffset);
-	}
-	return success;*/
 }
 
 bool ViMetadataer::startNextRetriever()
@@ -244,8 +225,10 @@ bool ViMetadataer::detect(QList<ViBuffer*> buffers)
 
 void ViMetadataer::processNextBuffer()
 {
+	mMutex.lock();
 	if(mBufferOffsets.isEmpty())
 	{
+		mMutex.unlock();
 		finish();
 		return;
 	}
@@ -260,8 +243,10 @@ void ViMetadataer::processNextBuffer()
 
 	if(!startIdentifiers())
 	{
+		mMutex.unlock();
 		finish();
 	}
+	mMutex.unlock();
 }
 
 void ViMetadataer::reset()
@@ -282,6 +267,7 @@ void ViMetadataer::reset()
 
 void ViMetadataer::finish()
 {
+	mMutex.lock();
 	mDetected = mMetadata.isValid();
 	if(mDetected)
 	{
@@ -299,7 +285,9 @@ void ViMetadataer::finish()
 		LOG("No metadata detected.");
 	}
 	mBufferOffsets.clear();
-	emit finished(mDetected);
+	bool detected = mDetected;
+	mMutex.unlock(); // Make sure it is unlocked before emitting the signal - indirectly called from processIdentification
+	emit finished(detected);
 }
 
 bool ViMetadataer::detected()

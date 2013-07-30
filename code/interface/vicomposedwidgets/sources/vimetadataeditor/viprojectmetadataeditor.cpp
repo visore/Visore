@@ -61,25 +61,6 @@ void ViProjectMetadataEditor::setProject(ViProject *project, bool takeOwnership)
 	mUi->projectEdit->setText(mProject->projectName());
 	updateTracks();
 	changeTrack();
-
-	QString artist = "", album = "";
-	bool sameArtist = true, sameAlbum = true;
-	for(int i = 0; i < mProject->objectCount(); ++i)
-	{
-		if(artist == "") artist = mProject->object(i)->metadata().artist();
-		else if(artist != mProject->object(i)->metadata().artist()) sameArtist = false;
-
-		if(album == "") album = mProject->object(i)->metadata().album();
-		else if(album != mProject->object(i)->metadata().album()) sameAlbum = false;
-	}
-
-	if(artist == ViMetadata::unknownArtist()) artist = "";
-	if(sameArtist) mUi->artistEdit->setText(artist);
-	else mUi->artistEdit->setText("Various Artists");
-
-	if(album == ViMetadata::unknownAlbum()) album = "";
-	if(sameAlbum) mUi->albumEdit->setText(album);
-	else mUi->albumEdit->setText("Various Albums");
 }
 
 bool ViProjectMetadataEditor::hasProject()
@@ -107,6 +88,8 @@ void ViProjectMetadataEditor::changeTrack()
 void ViProjectMetadataEditor::updateTracks()
 {
 	QObject::disconnect(mUi->trackComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTrack()));
+	changeArtist();
+	changeAlbum();
 	if(hasProject())
 	{
 		int currentIndex = mUi->trackComboBox->currentIndex();
@@ -134,6 +117,41 @@ void ViProjectMetadataEditor::changeProjectName()
 	{
 		mProject->setProjectName(mUi->projectEdit->text());
 	}
+}
+
+void ViProjectMetadataEditor::changeAlbum()
+{
+	QString album = "";
+	bool sameAlbum = true;
+	if(hasProject())
+	{
+		for(int i = 0; i < mProject->objectCount(); ++i)
+		{
+			if(album == "") album = mProject->object(i)->metadata().album();
+			else if(album != mProject->object(i)->metadata().album()) sameAlbum = false;
+		}
+	}
+	if(album == ViMetadata::unknownAlbum()) album = "";
+	if(sameAlbum) mUi->albumEdit->setText(album);
+	else mUi->albumEdit->setText("Various Albums");
+}
+
+void ViProjectMetadataEditor::changeArtist()
+{
+
+	QString artist = "";
+	bool sameArtist = true;
+	if(hasProject())
+	{
+		for(int i = 0; i < mProject->objectCount(); ++i)
+		{
+			if(artist == "") artist = mProject->object(i)->metadata().artist();
+			else if(artist != mProject->object(i)->metadata().artist()) sameArtist = false;
+		}
+	}
+	if(artist == ViMetadata::unknownArtist()) artist = "";
+	if(sameArtist) mUi->artistEdit->setText(artist);
+	else mUi->artistEdit->setText("Various Artists");
 }
 
 void ViProjectMetadataEditor::setGlobalArtist()

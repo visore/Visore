@@ -32,6 +32,7 @@ class ViSongIdentifier : public QObject, public ViName
 
 		void setProxy(QNetworkProxy::ProxyType type, QString host, quint16 port, QString username, QString password);
 		QNetworkReply::NetworkError networkError();
+		QString errorString();
 
 		void setKey(QString key);
 		QString key();

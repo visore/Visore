@@ -19,6 +19,8 @@ class ViProjectMetadataEditor : public ViWidget
 		void changeTrack();
 		void updateTracks();
 		void changeProjectName();
+		void changeAlbum();
+		void changeArtist();
 		void setGlobalArtist();
 		void setGlobalAlbum();
 

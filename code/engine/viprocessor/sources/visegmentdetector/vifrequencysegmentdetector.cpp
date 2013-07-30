@@ -12,7 +12,7 @@ ViFrequencySegmentDetector::ViFrequencySegmentDetector()
 	setThreshold(ViSegmentDetector::RecordStart, ViRange(0.0, 0.4), ViRange(0.0001, 1.0), 500);
 	setThreshold(ViSegmentDetector::RecordEnd, ViRange(0.05, 0.3), ViRange(0.0, 0.00005), 10000);*/
 
-	setThreshold(ViSegmentDetector::SongStart, ViRange(0.02, 0.05), ViRange(0.0001, 1.0), 500);
+	setThreshold(ViSegmentDetector::SongStart, ViRange(0.02, 0.05), ViRange(0.00012, 1.0), 500);
 	setThreshold(ViSegmentDetector::SongEnd, ViRange(0.02, 0.1), ViRange(0.0, 0.00012), 2000);
 	setThreshold(ViSegmentDetector::RecordStart, ViRange(0, 0.01), ViRange(0.0015, 1.0), 500);
 	setThreshold(ViSegmentDetector::RecordEnd, ViRange(0.02, 0.1), ViRange(0.0, 0.0001), 10000);

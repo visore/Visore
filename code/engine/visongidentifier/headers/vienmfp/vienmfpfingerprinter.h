@@ -22,10 +22,12 @@ class ViEnmfpFingerprinter : public ViFingerprinter
 	private slots:
 
 		void generate();
+		void clean();
 
 	public:
 
 		ViEnmfpFingerprinter();
+		~ViEnmfpFingerprinter();
 		void generate(ViBufferOffsets bufferOffset);
 		QString version();
 
@@ -36,7 +38,7 @@ class ViEnmfpFingerprinter : public ViFingerprinter
 	private:
 
 		QString mVersion;
-		ViAudioCoder mCoder;
+		ViAudioCoder *mCoder;
 		ViBuffer mOutput;
 
 };

@@ -125,7 +125,12 @@ void ViAudioRecorder::endSong()
 	{
 		mQueue.enqueue(mObject);
 		ViAudioObjectPointer object = mProject->object(mObject->sideNumber(), mObject->trackNumber());
-		if(mDetectMetadata && !object.isNull() && (!object->hasMetadata() || !object->hasCover()))
+		bool detect = true;
+		if(!object.isNull() && object->hasMetadata()  && object->hasCover())
+		{
+			detect = false;
+		}
+		if(mDetectMetadata && detect)
 		{
 			QObject::connect(mObject.data(), SIGNAL(metadataDetected(bool)), this, SLOT(serialize()));
 			mObject->detectMetadata();
@@ -134,6 +139,10 @@ void ViAudioRecorder::endSong()
 		{
 			serialize();
 		}
+	}
+	else
+	{
+		--mCurrentTrack;
 	}
 	nextObject();
 	emit statused("Waiting for track to start");
@@ -154,6 +163,7 @@ void ViAudioRecorder::endRecord()
 
 	if(mCurrentTrack == 0) // If there wasn't a song start yet. Eg: record takes very long to start
 	{
+		--mCurrentSide;
 		nextObject();
 	}
 	else
