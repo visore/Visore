@@ -70,6 +70,7 @@ bool ViAudioRecorder::record(ViProject *project, ViAudio::Type type, ViAudioForm
 void ViAudioRecorder::nextObject(bool startTimer)
 {
 	mIdleTimer.stop();
+	mSegmentDetector.stop();
 
 	mObject = ViAudioObject::create();
     mObject->setSideNumber(mCurrentSide);
@@ -79,10 +80,7 @@ void ViAudioRecorder::nextObject(bool startTimer)
 	mSegmentDetector.process(mObject, mType); // Important: The preious statment will create a buffer and set the format. Must be done before this is executed
 	mInput.start();
 
-	if(startTimer)
-	{
-		mIdleTimer.start();
-	}
+	if(startTimer) mIdleTimer.start();
 }
 
 void ViAudioRecorder::finish()
@@ -158,7 +156,6 @@ void ViAudioRecorder::startRecord()
 void ViAudioRecorder::endRecord()
 {
 	mIdleTimer.stop();
-	mSegmentDetector.stop();
 	mInput.stop();
 
 	if(mCurrentTrack == 0) // If there wasn't a song start yet. Eg: record takes very long to start
@@ -170,7 +167,8 @@ void ViAudioRecorder::endRecord()
 	{
 		mCurrentTrack = 0;
 		if(mCurrentSide == mSides)
-		{	
+		{
+			mSegmentDetector.stop();
 			finishProject();
 		}
 		else

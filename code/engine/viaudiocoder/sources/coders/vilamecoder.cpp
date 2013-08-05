@@ -2,9 +2,6 @@
 #include <vichannelconverter.h>
 #include <vimp3codec.h>
 
-#include <iostream>
-using namespace std;
-
 #define MINIMUM_HEADER_FRAMES 5
 
 #define LAME_XING_BITRATE1 128
@@ -532,11 +529,11 @@ ViCoder::Error ViLameCoder::initializeLibrary()
 			++success;
 		}
 		else
-		{cout<<"*"<<i<<endl;
+		{
 			++failure;
 		}
 	}
-cout<<failure<<endl;
+
 	if(success == loaded.size())
 	{
 		return ViCoder::NoError;

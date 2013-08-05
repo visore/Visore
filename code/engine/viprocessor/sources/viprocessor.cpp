@@ -77,7 +77,6 @@ void ViProcessor::run()
 
 void ViProcessor::exit()
 {
-	QObject::disconnect(&mThread, SIGNAL(finished()), this, SLOT(exit()));
 	handleExit();
 	if(mData.buffer() != NULL)
 	{
@@ -106,7 +105,7 @@ void ViProcessor::executeThread()
 	{
 		if(mStopped)
 		{
-			stop();
+			exit();
 		}
 		else
 		{
@@ -134,7 +133,7 @@ void ViProcessor::executeThread()
 			}
 			if(mStopped || !mMultiShot)
 			{
-				stop();
+				exit();
 			}
 		}
 		mThreadMutex.unlock();
@@ -380,15 +379,11 @@ bool ViProcessor::isMultiShot()
 
 void ViProcessor::stop()
 {
-	if(mThread.isRunning())
-	{
-		QObject::connect(&mThread, SIGNAL(finished()), this, SLOT(exit()), Qt::UniqueConnection);
-		mStopped = true;
-	}
-	else
-	{
-		exit();
-	}
+	mThreadMutex.lock();
+	mStopped = true;
+	mThreadMutex.unlock();
+	while(mThread.isRunning());
+	exit();
 }
 
 ViElement ViProcessor::exportData()
