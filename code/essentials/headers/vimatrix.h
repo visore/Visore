@@ -30,12 +30,12 @@ class ViMatrix
 
 		void swapRows(const int &first, const int &second);
 
-		//ViMatrix scalarMultiply(const ViMatrix &matrix) const;
-		//ViMatrix matrixMultiply(const ViMatrix &matrix) const;
+		ViMatrix scalarMultiply(const ViMatrix &matrix) const;
+		ViMatrix matrixMultiply(const ViMatrix &matrix) const;
 
-		//ViMatrix subset(const int &startRow, const int &rowCount, const int &startColumn, const int &columnCount) const;
+		ViMatrix subset(const int &startRow, const int &rowCount, const int &startColumn, const int &columnCount) const;
 
-		//ViMatrix concatenateColums(const ViMatrix &matrix) const;
+		ViMatrix concatenateColums(const ViMatrix &matrix) const;
 
 		static ViMatrix identityMatrix(const int &size);
 
