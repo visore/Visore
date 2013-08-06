@@ -21,7 +21,7 @@ ELSE()
 ENDIF()
 
 #Link Visore to Qt
-TARGET_LINK_LIBRARIES(visore viaudioengine vimainwindow)
+TARGET_LINK_LIBRARIES(visore viaudioengine vimainwindow viautoregresser vifixedmodelorder)
 QT5_USE_MODULES(visore Widgets Multimedia Xml)
 
 #Install file

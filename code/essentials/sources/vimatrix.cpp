@@ -140,7 +140,8 @@ bool ViMatrix::invert(ViMatrix &inverted)
 		// Eliminate the rest of the column
 		for(j = 0; j < rows; ++j)
 		{
-			if(j == i && qAbs(temp[j][i]) > 0)
+			if(j == i) continue;
+			if(qAbs(temp[j][i]) > 0)
 			{
 				// Subtract a multiple of row i from row j
 				factor = temp[j][i];
@@ -329,4 +330,14 @@ void ViMatrix::copy(const ViMatrix& other)
 			*mVectors[row] = *other.mVectors[row];
 		}
 	}
+}
+
+QString ViMatrix::toString()
+{
+	QString result = "";
+	for(int i = 0; i < mRows; ++i)
+	{
+		result += mVectors[i]->toString() + "\n";
+	}
+	return result.trimmed();
 }

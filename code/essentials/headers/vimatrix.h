@@ -48,6 +48,8 @@ class ViMatrix
 		ViVector& operator [] (const int &index);
 		ViVector& operator [] (const int &index) const;
 
+		QString toString();
+
 	private:
 
 		void copy(const ViMatrix& other);

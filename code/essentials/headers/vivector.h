@@ -2,6 +2,7 @@
 #define VIVECTOR_H
 
 #include <stdlib.h>
+#include <QString>
 
 //Adopted from Audacity - Dominic Mazzoni
 
@@ -48,6 +49,8 @@ class ViVector
 		ViVector operator * (const ViVector &other) const;
 		ViVector operator * (const double &value) const;
 		ViVector operator * (const ViMatrix &matrix) const;
+
+		QString toString();
 
 	private:
 

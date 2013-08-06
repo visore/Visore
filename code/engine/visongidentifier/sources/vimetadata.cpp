@@ -3,7 +3,7 @@
 #include <QFileInfo>
 #include <QBuffer>
 #include <QDir>
-#include<vilogger.h>
+
 ViMetadata::ViMetadata()
 {
 	clear();

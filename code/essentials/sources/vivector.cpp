@@ -258,3 +258,13 @@ void ViVector::copy(const ViVector &other)
 		mData[i] = other.mData[i];
 	}
 }
+
+QString ViVector::toString()
+{
+	QString result = "";
+	for(int i = 0; i < mSize; ++i)
+	{
+		result += QString::number(mData[i], 'f', 5) + " ";
+	}
+	return result.trimmed();
+}
