@@ -1,6 +1,8 @@
 #ifndef VIMODELORDER_H
 #define VIMODELORDER_H
 
+#include <QQueue>
+
 class ViModelOrder
 {
 
@@ -10,9 +12,17 @@ class ViModelOrder
 		ViModelOrder(const ViModelOrder &other);
 		virtual ~ViModelOrder();
 
-		void setParameterCount(int parameters);
+		virtual void clear();
 
-		virtual int order() = 0;
+		void setParameterCount(const int &parameters);
+		void setSampleCount(const int &count);
+
+		virtual int order() const = 0;
+
+	protected:
+
+		int mParameterCount;
+		int mSampleCount;
 
 };
 
@@ -24,24 +34,24 @@ class ViMazzoniModelOrder : public ViModelOrder
 
 		ViMazzoniModelOrder();
 		ViMazzoniModelOrder(const ViMazzoniModelOrder &other);
+		virtual ~ViMazzoniModelOrder();
 
-		void setSampleCount(const int &count);
+		virtual void clear();
+
 		void setBadSampleCount(const int &count);
 		void setFirstBadSample(const int &index);
 
-		int order();
+		int order() const;
 
 		static int order(const int &sampleCount, const int &badSampleCount, const int &firstBadSample);
 
-	private:
+	protected:
 
-		int mSampleCount;
 		int mBadSampleCount;
 		int mFirstBadSample;
 
 };
 
-/*
 // Akaike Information Criterion
 // http://machinelearning102.pbworks.com/w/file/fetch/47699411/aic_reg.pdf
 // http://pages.stern.nyu.edu/~churvich/TimeSeries/Handouts/AICC.pdf
@@ -49,6 +59,7 @@ class ViMazzoniModelOrder : public ViModelOrder
 // http://www.brianomeara.info/tutorials/aic
 // http://www.unc.edu/courses/2008fall/ecol/563/001/docs/lectures/lecture10.htm
 // http://128.118.178.162/eps/comp/papers/0404/0404001.pdf
+
 class ViAicModelOrder : public ViModelOrder
 {
 
@@ -56,22 +67,36 @@ class ViAicModelOrder : public ViModelOrder
 
 		ViAicModelOrder();
 		ViAicModelOrder(const ViAicModelOrder &other);
+		virtual ~ViAicModelOrder();
 
-		void setSampleCount(const int &count);
-		void setBadSampleCount(const int &count);
-		void setFirstBadSample(const int &index);
+		virtual void clear();
 
-		int order();
+		void setRss(const qreal &rss);
+		void addRss(const qreal &predictedValue, const qreal &realValue); //Continuesly adds new values and calculates the RSS. Reset with clear()
 
-		static int order(const int &sampleCount, const int &badSampleCount, const int &firstBadSample);
+		int order() const;
 
-	private:
+		static int order(const int &sampleCount, const int &parameterCount, const qreal &rss);
 
-		int mSampleCount;
-		int mBadSampleCount;
-		int mFirstBadSample;
+	protected:
+
+		qreal mRss;
+		QQueue<qreal> mPredictedValues;
+		QQueue<qreal> mRealValues;
 
 };
 
-*/
+class ViAiccModelOrder : public ViAicModelOrder
+{
+
+	public:
+
+		ViAiccModelOrder();
+		ViAiccModelOrder(const ViAiccModelOrder &other);
+		virtual ~ViAiccModelOrder();
+
+		static int order(const int &sampleCount, const int &parameterCount, const qreal &rss);
+
+};
+
 #endif
