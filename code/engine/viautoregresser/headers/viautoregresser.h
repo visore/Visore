@@ -2,7 +2,7 @@
 #define VIAUTOREGRESSER_H
 
 #include <vimodelorder.h>
-#include <vivector.h>
+#include <vimatrix.h>
 #include <vichunk.h>
 
 // http://paulbourke.net/miscellaneous/ar/
@@ -31,6 +31,7 @@ class ViAutoRegresser
 	private:
 
 		ViModelOrder *mModelOrder;
+		ViMatrix mCacheMatrix;
 		ViVector mCoefficients;
 
 };

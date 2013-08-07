@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
 
 
-	/*ViSampleChunk c(16);
+	ViSampleChunk c(16);
 			c[0] = 0.1;
 			c[1] = 0.15;
 			c[2] = 	0.12;
@@ -38,13 +38,13 @@ int main(int argc, char *argv[])
 			c[12] = 0.12;
 			c[13] = 0.11;
 			c[14] = 0.1;
-			c[15] = 0.11;*/
+			c[15] = 0.11;
 
-	ViSampleChunk c(4);
+	/*ViSampleChunk c(4);
 				c[0] = 1;
 				c[1] = 2;
 				c[2] = 	3;
-				c[3] = 4;
+				c[3] = 4;*/
 
 			ViFixedModelOrder *o = new ViFixedModelOrder();
 			o->setOrder(2);
