@@ -4,7 +4,7 @@
 #include <qmath.h>
 
 ViNeuralCorrector::ViNeuralCorrector()
-	: ViModifyProcessor(false) //Make sure that the processor is not automatically writing the sample again
+	: ViModifyProcessor()
 {
 	mNetwork = NULL;
 	mTrainer = NULL;
@@ -24,7 +24,7 @@ ViNeuralCorrector::ViNeuralCorrector()
 }
 
 ViNeuralCorrector::ViNeuralCorrector(ViNeuralNetwork *network, ViTrainer *trainer, ViTargetProvider *provider)
-	: ViModifyProcessor(false) //Make sure that the processor is not automatically writing the sample again
+	: ViModifyProcessor()
 {
 	mNetwork = network;
 	mTrainer = trainer;

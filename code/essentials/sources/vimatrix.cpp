@@ -195,21 +195,7 @@ ViMatrix ViMatrix::matrixMultiply(const ViMatrix &matrix) const
 
 ViMatrix ViMatrix::scalarMultiply(const ViMatrix &matrix) const
 {
-	if(mColumns != matrix.rows()) return ViMatrix();
-	int row, column, i;
-	ViMatrix newMatrix(mRows, matrix.columns());
-	for(row = 0; row < mRows; ++row)
-	{
-		for(column = 0; column < matrix.columns(); ++column)
-		{
-			newMatrix[row][column] = 0;
-			for(i = 0; i < mColumns; ++i)
-			{
-				newMatrix[row][column] += mVectors[row]->at(i) * matrix[i][column];
-			}
-		}
-	}
-	return newMatrix;
+	return *this * matrix;
 }
 
 ViMatrix ViMatrix::subset(const int &startRow, const int &rowCount, const int &startColumn, const int &columnCount) const
@@ -304,6 +290,26 @@ ViVector ViMatrix::operator * (const ViVector &vector) const
 		}
 	}
 	return newVector;
+}
+
+
+ViMatrix ViMatrix::operator * (const ViMatrix &matrix) const
+{
+	if(mColumns != matrix.rows()) return ViMatrix();
+	int row, column, i;
+	ViMatrix newMatrix(mRows, matrix.columns());
+	for(row = 0; row < mRows; ++row)
+	{
+		for(column = 0; column < matrix.columns(); ++column)
+		{
+			newMatrix[row][column] = 0;
+			for(i = 0; i < mColumns; ++i)
+			{
+				newMatrix[row][column] += mVectors[row]->at(i) * matrix[i][column];
+			}
+		}
+	}
+	return newMatrix;
 }
 
 ViVector& ViMatrix::operator [] (const int &index)

@@ -28,6 +28,7 @@ class ViProject : public QObject, public ViId
 			TargetData,
 			CorruptedData,
 			CorrectedData,
+			NoiseData,
 			CoverData,
 
 			Info,

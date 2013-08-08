@@ -5,7 +5,7 @@
 #include <vicorrelation.h>
 #include <vilibrary.h>
 
-class ViCorrelator : public ViDualProcessor, public ViLibrary
+class ViCorrelator : public ViDualProcessor
 {
 
     Q_OBJECT

@@ -111,7 +111,8 @@ namespace ViAudio
 		Target = 0x2,
 		Corrupted = 0x4,
 		Corrected = 0x8,
-		All = Target | Corrupted | Corrected
+		Noise = 0x16,
+		All = Target | Corrupted | Corrected | Noise
     };
 
     enum Mode

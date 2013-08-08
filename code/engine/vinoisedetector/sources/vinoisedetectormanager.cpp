@@ -7,5 +7,5 @@ QString ViNoiseDetectorManager::libraryPath()
 
 QString ViNoiseDetectorManager::defaultLibrary()
 {
-    return "SampleJumpNoiseDetector";
+	return "MahalanobisNoiseDetector";
 }

@@ -6,7 +6,7 @@
 #include <vitrainermanager.h>
 #include <vitargetprovidermanager.h>
 
-class ViNeuralCorrector : public ViModifyProcessor, public ViLibrary
+class ViNeuralCorrector : public ViModifyProcessor
 {
 
 	public:

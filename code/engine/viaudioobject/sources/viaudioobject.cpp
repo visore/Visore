@@ -25,10 +25,12 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	mTargetBuffer = NULL;
 	mCorruptedBuffer = NULL;
 	mCorrectedBuffer = NULL;
+	mNoiseBuffer = NULL;
 
 	mTargetFile = "";
 	mCorruptedFile = "";
 	mCorrectedFile = "";
+	mNoiseFile = "";
 
 	mEncoder = NULL;
 	mDecoder = NULL;
@@ -135,6 +137,10 @@ QQueue<ViAudio::Type> ViAudioObject::decomposeTypes(ViAudio::Type type, ViAudio:
 	{
 		result.enqueue(ViAudio::Corrected);
 	}
+	if(type & ViAudio::Noise && !(exclude & ViAudio::Noise))
+	{
+		result.enqueue(ViAudio::Noise);
+	}
 	return result;
 }
 
@@ -191,6 +197,10 @@ ViAudio::Type ViAudioObject::availableResources(ViAudioObject::Resource resource
 	{
 		result |= ViAudio::Corrected;
 	}
+	if(resourceAvailable(ViAudio::Noise) & resource)
+	{
+		result |= ViAudio::Noise;
+	}
 	if(result == 0)
 	{
 		return ViAudio::Undefined;
@@ -212,6 +222,10 @@ qreal ViAudioObject::length(ViAudioPosition::Unit unit)
 	if(hasBuffer(ViAudio::Corrected) && buffer(ViAudio::Corrected)->size() > maximum)
 	{
 		maximum = length(ViAudio::Corrected, unit);
+	}
+	if(hasBuffer(ViAudio::Noise) && buffer(ViAudio::Noise)->size() > maximum)
+	{
+		maximum = length(ViAudio::Noise, unit);
 	}
 	return maximum;
 }
@@ -252,6 +266,7 @@ void ViAudioObject::addDestructRule(ViAudio::Type type, bool destruct)
 	values.insert(ViAudio::Target);
 	values.insert(ViAudio::Corrupted);
 	values.insert(ViAudio::Corrected);
+	values.insert(ViAudio::Noise);
 
 	//Old Values
 	foreach(const ViAudio::Type &value, values)
@@ -310,10 +325,14 @@ void ViAudioObject::setFormat(ViAudio::Type type, ViAudioFormat format)
     {
         return setCorruptedFormat(format);
     }
-    else if(type == ViAudio::Corrected)
-    {
-        return setCorrectedFormat(format);
-    }
+	else if(type == ViAudio::Corrected)
+	{
+		return setCorrectedFormat(format);
+	}
+	else if(type == ViAudio::Noise)
+	{
+		return setNoiseFormat(format);
+	}
 }
 
 void ViAudioObject::setTargetFormat(ViAudioFormat format)
@@ -328,7 +347,12 @@ void ViAudioObject::setCorruptedFormat(ViAudioFormat format)
 
 void ViAudioObject::setCorrectedFormat(ViAudioFormat format)
 {
-    mCorrectedFormat = format;
+	mCorrectedFormat = format;
+}
+
+void ViAudioObject::setNoiseFormat(ViAudioFormat format)
+{
+	mNoiseFormat = format;
 }
 
 ViAudioFormat ViAudioObject::format(ViAudio::Type type)
@@ -345,6 +369,10 @@ ViAudioFormat ViAudioObject::format(ViAudio::Type type)
 	{
 		return correctedFormat();
 	}
+	else if(type == ViAudio::Noise)
+	{
+		return noiseFormat();
+	}
 	return ViAudioFormat();
 }
 
@@ -360,7 +388,12 @@ ViAudioFormat ViAudioObject::corruptedFormat()
 
 ViAudioFormat ViAudioObject::correctedFormat()
 {
-    return mCorrectedFormat;
+	return mCorrectedFormat;
+}
+
+ViAudioFormat ViAudioObject::noiseFormat()
+{
+	return mNoiseFormat;
 }
 
 /*******************************************************************************************************************
@@ -720,6 +753,10 @@ ViBuffer* ViAudioObject::buffer(ViAudio::Type type, bool dontCreate)
 	{
 		return correctedBuffer(dontCreate);
 	}
+	else if(type == ViAudio::Noise)
+	{
+		return noiseBuffer(dontCreate);
+	}
 	return NULL;
 }
 
@@ -751,9 +788,20 @@ ViBuffer* ViAudioObject::correctedBuffer(bool dontCreate)
 	if(!dontCreate && mCorrectedBuffer == NULL)
 	{
 		mCorrectedBuffer = new ViBuffer();
-        QObject::connect(mCorrectedBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setCorrectedFormat(ViAudioFormat)));
+		QObject::connect(mCorrectedBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setCorrectedFormat(ViAudioFormat)));
 	}
 	return mCorrectedBuffer;
+}
+
+ViBuffer* ViAudioObject::noiseBuffer(bool dontCreate)
+{
+	QMutexLocker locker(&mMutex);
+	if(!dontCreate && mNoiseBuffer == NULL)
+	{
+		mNoiseBuffer = new ViBuffer();
+		QObject::connect(mNoiseBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setNoiseFormat(ViAudioFormat)));
+	}
+	return mNoiseBuffer;
 }
 
 void ViAudioObject::setBuffer(ViAudio::Type type, ViBuffer *buffer)
@@ -769,6 +817,10 @@ void ViAudioObject::setBuffer(ViAudio::Type type, ViBuffer *buffer)
 	else if(type == ViAudio::Corrected)
 	{
 		setCorrectedBuffer(buffer);
+	}
+	else if(type == ViAudio::Noise)
+	{
+		setNoiseBuffer(buffer);
 	}
 }
 
@@ -801,11 +853,23 @@ void ViAudioObject::setCorrectedBuffer(ViBuffer *buffer)
 	clearCorrectedBuffer();
 	QMutexLocker locker(&mMutex);
 	mCorrectedBuffer = buffer;
-    if(buffer->format().isValid())
-    {
-        setCorrectedFormat(buffer->format());
-    }
-    QObject::connect(mCorrectedBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setCorrectedFormat(ViAudioFormat)));
+	if(buffer->format().isValid())
+	{
+		setCorrectedFormat(buffer->format());
+	}
+	QObject::connect(mCorrectedBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setCorrectedFormat(ViAudioFormat)));
+}
+
+void ViAudioObject::setNoiseBuffer(ViBuffer *buffer)
+{
+	clearNoiseBuffer();
+	QMutexLocker locker(&mMutex);
+	mNoiseBuffer = buffer;
+	if(buffer->format().isValid())
+	{
+		setNoiseFormat(buffer->format());
+	}
+	QObject::connect(mNoiseBuffer, SIGNAL(formatChanged(ViAudioFormat)), this, SLOT(setNoiseFormat(ViAudioFormat)));
 }
 
 void ViAudioObject::clearBuffers(ViAudio::Type type)
@@ -819,8 +883,12 @@ void ViAudioObject::clearBuffers(ViAudio::Type type)
 		clearCorruptedBuffer();
 	}
 	if(type & ViAudio::Corrected)
-    {
+	{
 		clearCorrectedBuffer();
+	}
+	if(type & ViAudio::Noise)
+	{
+		clearNoiseBuffer();
 	}
 }
 
@@ -837,6 +905,10 @@ void ViAudioObject::clearBuffer(ViAudio::Type type)
 	else if(type == ViAudio::Corrected)
 	{
 		clearCorrectedBuffer();
+	}
+	else if(type == ViAudio::Noise)
+	{
+		clearNoiseBuffer();
 	}
 }
 
@@ -867,6 +939,16 @@ void ViAudioObject::clearCorrectedBuffer()
 	{
 		delete mCorrectedBuffer;
 		mCorrectedBuffer = NULL;
+	}
+}
+
+void ViAudioObject::clearNoiseBuffer()
+{
+	QMutexLocker locker(&mMutex);
+	if(mNoiseBuffer != NULL)
+	{
+		delete mNoiseBuffer;
+		mNoiseBuffer = NULL;
 	}
 }
 
@@ -901,6 +983,10 @@ QString ViAudioObject::filePath(ViAudio::Type type)
 	{
 		return correctedFilePath();
 	}
+	else if(type == ViAudio::Noise)
+	{
+		return noiseFilePath();
+	}
 	return "";
 }
 
@@ -922,6 +1008,12 @@ QString ViAudioObject::correctedFilePath()
 	return mCorrectedFile;
 }
 
+QString ViAudioObject::noiseFilePath()
+{
+	QMutexLocker locker(&mMutex);
+	return mNoiseFile;
+}
+
 void ViAudioObject::setFilePath(ViAudio::Type type, QString path)
 {
 	if(type == ViAudio::Target)
@@ -935,6 +1027,10 @@ void ViAudioObject::setFilePath(ViAudio::Type type, QString path)
 	else if(type == ViAudio::Corrected)
 	{
 		setCorrectedFilePath(path);
+	}
+	else if(type == ViAudio::Noise)
+	{
+		setNoiseFilePath(path);
 	}
 }
 
@@ -954,6 +1050,12 @@ void ViAudioObject::setCorrectedFilePath(QString path)
 {
 	QMutexLocker locker(&mMutex);
 	mCorrectedFile = path;
+}
+
+void ViAudioObject::setNoiseFilePath(QString path)
+{
+	QMutexLocker locker(&mMutex);
+	mNoiseFile = path;
 }
 
 bool ViAudioObject::hasFile(ViAudio::Type type)
@@ -1015,6 +1117,10 @@ QString ViAudioObject::temporaryFilePath(ViAudio::Type type)
 	else if(type == ViAudio::Corrected)
 	{
 		result += "_corrected";
+	}
+	else if(type == ViAudio::Noise)
+	{
+		result += "_noise";
 	}
 	ViAudioCodec *codec = format(type).codec();
 	if(codec == NULL)
@@ -1354,6 +1460,7 @@ bool ViAudioObject::correct(ViModifyProcessor *corrector)
 
 	logStatus("Correcting track.");
 	correctedBuffer()->setFormat(corruptedFormat());
+	noiseBuffer()->setFormat(corruptedFormat());
 	mCorrector->process(thisPointer, ViAudio::Corrupted, ViAudio::Corrected);
 	return true;
 }
@@ -1669,5 +1776,6 @@ bool ViAudioObject::isUsed(QIODevice::OpenMode mode)
 	QMutexLocker locker(&mMutex);
 	return	(mTargetBuffer != NULL && mTargetBuffer->streamCount(mode) > 0) ||
 			(mCorruptedBuffer != NULL && mCorruptedBuffer->streamCount(mode) > 0) ||
-			(mCorrectedBuffer != NULL && mCorrectedBuffer->streamCount(mode) > 0);
+			(mCorrectedBuffer != NULL && mCorrectedBuffer->streamCount(mode) > 0) ||
+			(mNoiseBuffer != NULL && mNoiseBuffer->streamCount(mode) > 0);
 }

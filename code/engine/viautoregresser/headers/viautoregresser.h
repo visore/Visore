@@ -1,7 +1,6 @@
 #ifndef VIAUTOREGRESSER_H
 #define VIAUTOREGRESSER_H
 
-#include <vimodelorder.h>
 #include <vimatrix.h>
 #include <vichunk.h>
 
@@ -20,19 +19,23 @@ class ViAutoRegresser
 
 		void clear();
 
-		void setModelOrder(ViModelOrder *modelOrder); //Takes ownership
-		ViModelOrder* modelOrder();
+		void setOrder(const int &order);
+		int order() const;
 
 		ViVector& coefficients();
 		const ViVector& coefficients() const;
+
+		qreal rss() const;
 
 		bool calculate(const ViSampleChunk &samples);
 
 	private:
 
-		ViModelOrder *mModelOrder;
+		int mOrder;
 		ViMatrix mCacheMatrix;
+		ViMatrix mCacheCalculatedMatrix;
 		ViVector mCoefficients;
+		qreal mRss;
 
 };
 

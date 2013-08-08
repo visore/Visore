@@ -117,6 +117,16 @@ ViVector ViVector::subset(const int &start, const int &size) const
 	return vector;
 }
 
+ViMatrix ViVector::transpose()
+{
+	ViMatrix matrix(1, mSize);
+	for(int i = 0; i < mSize; ++i)
+	{
+		matrix[0][i] = mData[i];
+	}
+	return matrix;
+}
+
 double& ViVector::at(const int &index)
 {
 	return mData[index];

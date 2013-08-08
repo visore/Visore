@@ -44,6 +44,7 @@ class ViMatrix
 		ViMatrix operator + (const ViMatrix &matrix) const;
 		ViMatrix operator * (const double &value) const;
 		ViVector operator * (const ViVector &vector) const;
+		ViMatrix operator * (const ViMatrix &matrix) const; // Scalar multiplication
 
 		ViVector& operator [] (const int &index);
 		ViVector& operator [] (const int &index) const;

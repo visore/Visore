@@ -5,6 +5,7 @@
 #include <viaudioobject.h>
 #include <viaudiodata.h>
 #include <viprocessor.h>
+#include <vilibrary.h>
 #include <QThreadPool>
 
 class ViProcessor;
@@ -26,7 +27,7 @@ class ViProcessorThread : public QThread
 
 };
 
-class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable
+class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable, public ViLibrary
 {
 
 	Q_OBJECT
@@ -242,7 +243,7 @@ class ViModifyProcessor : public ViProcessor
 
 	public:
 
-		ViModifyProcessor(bool autoWrite = true);
+		ViModifyProcessor();
 		virtual ~ViModifyProcessor();
         void process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2);
 
@@ -268,7 +269,7 @@ class ViModifyProcessor : public ViProcessor
 	private:
 
 		ViAudioWriteData mData2;
-		bool mAutoWrite;
+		ViAudioWriteData mNoiseData;
 		ViAudio::Type mType2;
         ViModifyProcessor::ModifyMode mModifyMode;
 		ViModifyData mOriginalData;

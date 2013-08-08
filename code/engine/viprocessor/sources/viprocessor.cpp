@@ -176,10 +176,6 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::T
 
 	if(mType != ViAudio::Undefined && mObject->hasBuffer(mType))
 	{
-		if(mNoiseDetector != NULL)
-		{
-			mNoiseDetector->setFormat(mObject->format(mType));
-		}
         mData.setBuffer(mObject->buffer(mType));
 		QObject::connect(mData.buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
 		return true;
@@ -546,10 +542,9 @@ ViFrequencyChunk& ViDualProcessor::currentFrequencies2(int channel)
 	return mData2.splitFrequencies(channel);
 }
 
-ViModifyProcessor::ViModifyProcessor(bool autoWrite)
+ViModifyProcessor::ViModifyProcessor()
 	: ViProcessor()
 {
-	mAutoWrite = autoWrite;
 	mType2 = ViAudio::Undefined;
     mModifyMode = ViModifyProcessor::All;
 }
@@ -567,16 +562,21 @@ int ViModifyProcessor::readNext()
 		int size = mData.read().size();
         if(mModifyMode == ViModifyProcessor::Noise)
         {
+			bool noisy;
 			if(mChannelMode == ViProcessor::Separated)
 			{
 				for(int i = 0; i < mTotalChannels; ++i)
 				{
-					mOriginalData.enqueue(isNoisy(i), mData.splitSamples(i), i);
+					noisy = isNoisy(i);
+					mNoiseData.enqueueSplitScaledSamples(mNoiseDetector->noise().data(), i);
+					mOriginalData.enqueue(noisy, mData.splitSamples(i), i);
 				}
 			}
 			else
 			{
-				mOriginalData.enqueue(isNoisy(), mData.samples());
+				noisy = isNoisy();
+				mNoiseData.writeScaled(mNoiseDetector->noise().data());
+				mOriginalData.enqueue(noisy, mData.samples());
 			}
         }
 		return size;
@@ -598,6 +598,10 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
             mData2.setBuffer(mObject->buffer(mType2));
             mOriginalData.clear();
 			mOriginalData.setChannels(mTotalChannels);
+
+			mNoiseData.setBuffer(mObject->noiseBuffer());
+			mNoiseData.setScaleRange(0, 1);
+
 			initialize();
 			startThread();
 		}

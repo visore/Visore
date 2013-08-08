@@ -1,17 +1,20 @@
 #include <viautoregresser.h>
 #include <vilogger.h>
 
+#define DEFAULT_ORDER 8
+
 ViAutoRegresser::ViAutoRegresser()
 {
-	mModelOrder = NULL;
+	clear();
 }
 
 ViAutoRegresser::ViAutoRegresser(const ViAutoRegresser &other)
 {
-	if(other.mModelOrder != NULL)
-	{
-		mModelOrder = other.mModelOrder->clone();
-	}
+	mOrder = other.mOrder;
+	mCacheMatrix = other.mCacheMatrix;
+	mCacheCalculatedMatrix = other.mCacheCalculatedMatrix;
+	mCoefficients = other.mCoefficients;
+	mRss = other.mRss;
 }
 
 ViAutoRegresser::~ViAutoRegresser()
@@ -21,24 +24,21 @@ ViAutoRegresser::~ViAutoRegresser()
 
 void ViAutoRegresser::clear()
 {
-	if(mModelOrder != NULL)
-	{
-		delete mModelOrder;
-		mModelOrder = NULL;
-	}
+	mOrder = DEFAULT_ORDER;
 	mCoefficients.clear();
 	mCacheMatrix.clear();
+	mCacheCalculatedMatrix.clear();
+	mRss = 0;
 }
 
-void ViAutoRegresser::setModelOrder(ViModelOrder *modelOrder)
+void ViAutoRegresser::setOrder(const int &order)
 {
-	clear();
-	mModelOrder = modelOrder;
+	mOrder = order;
 }
 
-ViModelOrder* ViAutoRegresser::modelOrder()
+int ViAutoRegresser::order() const
 {
-	return mModelOrder;
+	return mOrder;
 }
 
 ViVector& ViAutoRegresser::coefficients()
@@ -51,43 +51,60 @@ const ViVector& ViAutoRegresser::coefficients() const
 	return mCoefficients;
 }
 
+qreal ViAutoRegresser::rss() const
+{
+	return mRss;
+}
+
 bool ViAutoRegresser::calculate(const ViSampleChunk &samples)
 {
-	int sampleCount = samples.size();
-	mModelOrder->setSampleCount(sampleCount);
-
-	if(mModelOrder == NULL) return false;
-	int order = mModelOrder->order();
+	if(mOrder < 3) return false;
 
 	// http://mathworld.wolfram.com/LeastSquaresFittingPolynomial.html
 
+	int i, j, sampleCount = samples.size();
 	ViVector vector(sampleCount);
 
-	if(mCacheMatrix.rows() != sampleCount || mCacheMatrix.columns() != order + 1)
+	// Only create a new matrix if the previously cached one isn't the same
+	if(mCacheMatrix.rows() != sampleCount || mCacheMatrix.columns() != mOrder + 1)
 	{
-		// Only create the matrix if it wasn't previously created
-		mCacheMatrix = ViMatrix(sampleCount, order + 1);
-		for(int i = 0; i < sampleCount; ++i)
+		mCacheMatrix = ViMatrix(sampleCount, mOrder + 1);
+		for(i = 0; i < sampleCount; ++i)
 		{
 			vector[i] = samples[i];
 			mCacheMatrix[i][0] = 1;
-			for(int j = 1; j <= order; ++j)
+			for(j = 1; j <= mOrder; ++j)
 			{
 				mCacheMatrix[i][j] = qPow(i, j);
 			}
 		}
+		ViMatrix transpose = mCacheMatrix.transpose();
+		ViMatrix inverted;
+		if(!transpose.scalarMultiply(mCacheMatrix).invert(inverted)) return false;
+		mCacheCalculatedMatrix = inverted.scalarMultiply(transpose);
 	}
 	else
 	{
-		for(int i = 0; i < sampleCount; ++i)
+		for(i = 0; i < sampleCount; ++i)
 		{
 			vector[i] = samples[i];
 		}
 	}
 
-	ViMatrix transpose = mCacheMatrix.transpose();
-	ViMatrix inverted;
-	if(!transpose.scalarMultiply(mCacheMatrix).invert(inverted)) return false;
-	mCoefficients = inverted.scalarMultiply(transpose) * vector;
+	mCoefficients = mCacheCalculatedMatrix * vector;
+
+	// Calculate the RSS
+	qreal real;
+	mRss = 0.0;
+	for(i = 0; i < sampleCount; ++i)
+	{
+		real = 0;
+		for(j = 0; j <= mOrder; ++j)
+		{
+			real += mCoefficients[j] * mCacheMatrix[i][j];
+		}
+		mRss += qPow(vector[i] - real, 2);
+	}
+
 	return true;
 }

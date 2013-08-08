@@ -87,7 +87,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
         void setFormat(ViAudio::Type type, ViAudioFormat format);
         void setTargetFormat(ViAudioFormat format);
         void setCorruptedFormat(ViAudioFormat format);
-        void setCorrectedFormat(ViAudioFormat format);
+		void setCorrectedFormat(ViAudioFormat format);
+		void setNoiseFormat(ViAudioFormat format);
 
 	private slots:
 
@@ -249,17 +250,20 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViBuffer* targetBuffer(bool dontCreate = false);
 		ViBuffer* corruptedBuffer(bool dontCreate = false);
 		ViBuffer* correctedBuffer(bool dontCreate = false);
+		ViBuffer* noiseBuffer(bool dontCreate = false);
 
 		void setBuffer(ViAudio::Type type, ViBuffer *buffer);
 		void setTargetBuffer(ViBuffer *buffer);
 		void setCorruptedBuffer(ViBuffer *buffer);
 		void setCorrectedBuffer(ViBuffer *buffer);
+		void setNoiseBuffer(ViBuffer *buffer);
 
 		Q_INVOKABLE void clearBuffers(ViAudio::Type type = ViAudio::All);
 		Q_INVOKABLE void clearBuffer(ViAudio::Type type);
 		Q_INVOKABLE void clearTargetBuffer();
 		Q_INVOKABLE void clearCorruptedBuffer();
 		Q_INVOKABLE void clearCorrectedBuffer();
+		Q_INVOKABLE void clearNoiseBuffer();
 
 		bool hasBuffer(ViAudio::Type type);
 
@@ -275,11 +279,13 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		QString targetFilePath();
 		QString corruptedFilePath();
 		QString correctedFilePath();
+		QString noiseFilePath();
 
 		void setFilePath(ViAudio::Type type, QString path);
 		void setTargetFilePath(QString path);
 		void setCorruptedFilePath(QString path);
 		void setCorrectedFilePath(QString path);
+		void setNoiseFilePath(QString path);
 
 		bool hasFile(ViAudio::Type type);
 
@@ -298,7 +304,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViAudioFormat targetFormat();
 		ViAudioFormat corruptedFormat();
 		ViAudioFormat correctedFormat();
-		ViAudioFormat inputFormat();
+		ViAudioFormat noiseFormat();
 
 		/*******************************************************************************************************************
 
@@ -423,10 +429,12 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		ViBuffer *mTargetBuffer;
 		ViBuffer *mCorruptedBuffer;
 		ViBuffer *mCorrectedBuffer;
+		ViBuffer *mNoiseBuffer;
 
 		QString mTargetFile;
 		QString mCorruptedFile;
 		QString mCorrectedFile;
+		QString mNoiseFile;
 
 		QMutex mMutex;
 		bool mIsSong;
@@ -449,7 +457,8 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
         ViAudioFormat mTargetFormat;
         ViAudioFormat mCorruptedFormat;
-        ViAudioFormat mCorrectedFormat;
+		ViAudioFormat mCorrectedFormat;
+		ViAudioFormat mNoiseFormat;
 
 		/*******************************************************************************************************************
 

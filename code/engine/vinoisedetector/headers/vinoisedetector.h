@@ -1,12 +1,11 @@
 #ifndef VINOISEDETECTOR_H
 #define VINOISEDETECTOR_H
 
-#include <viserializer.h>
 #include <vilibrary.h>
 #include <viprocessor.h>
-#include <vinoiselist.h>
+#include <vinoise.h>
 
-class ViNoiseDetector : public ViSerializer, public ViLibrary
+class ViNoiseDetector : public ViLibrary
 {
 
 	public:
@@ -15,8 +14,6 @@ class ViNoiseDetector : public ViSerializer, public ViLibrary
 		ViNoiseDetector(ViProcessor::ChannelMode mode);
         ViNoiseDetector(const ViNoiseDetector &other);
         virtual ~ViNoiseDetector();
-
-		void setFormat(const ViAudioFormat &format);
 
 		void setMode(ViProcessor::ChannelMode mode);
 		ViProcessor::ChannelMode mode();
@@ -32,29 +29,22 @@ class ViNoiseDetector : public ViSerializer, public ViLibrary
 		bool isNoisy(ViAudioReadData &data, int channel);
 		bool isNoisy();
 
-		ViNoiseList noisyWindows();
+		ViNoise& noise();
 
         void clear();
-
-        ViElement exportData();
-        bool importData(ViElement element);
 
         virtual ViNoiseDetector* clone() = 0;
 
 	protected:
 
-		virtual bool calculateNoise() = 0;
-
-		ViSampleChunk& samples();
-		ViFrequencyChunk& frequencies();
+		virtual void calculateNoise(ViNoise &noise, const ViSampleChunk &samples) = 0;
 
     private:
 
 		ViProcessor::ChannelMode mMode;
 		int mChannel;
 		ViAudioReadData *mData;
-        int mCounter;
-		ViNoiseList mNoise;
+		ViNoise mNoise;
 
 };
 

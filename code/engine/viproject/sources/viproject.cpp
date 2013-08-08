@@ -442,7 +442,8 @@ bool ViProject::createStructure()
     mPaths[ViProject::Data] = mPaths[ViProject::Root] + "data" + QDir::separator();
     mPaths[ViProject::TargetData] = mPaths[ViProject::Data] + "target" + QDir::separator();
     mPaths[ViProject::CorruptedData] = mPaths[ViProject::Data] + "corrupted" + QDir::separator();
-    mPaths[ViProject::CorrectedData] = mPaths[ViProject::Data] + "corrected" + QDir::separator();
+	mPaths[ViProject::CorrectedData] = mPaths[ViProject::Data] + "corrected" + QDir::separator();
+	mPaths[ViProject::NoiseData] = mPaths[ViProject::Data] + "noise" + QDir::separator();
     mPaths[ViProject::CoverData] = mPaths[ViProject::Data] + "covers" + QDir::separator();
 
     //Create paths
@@ -481,7 +482,8 @@ bool ViProject::createDirectory(int side)
     bool result = true;
     result &= createDirectory(ViProject::TargetData, side);
     result &= createDirectory(ViProject::CorruptedData, side);
-    result &= createDirectory(ViProject::CorrectedData, side);
+	result &= createDirectory(ViProject::CorrectedData, side);
+	result &= createDirectory(ViProject::NoiseData, side);
     result &= createDirectory(ViProject::CoverData, side);
     return result;
 }
@@ -568,10 +570,14 @@ QString ViProject::path(ViAudio::Type type, int side)
     {
         return path(ViProject::CorruptedData, side);
     }
-    else if(type == ViAudio::Corrected)
-    {
-        return path(ViProject::CorrectedData, side);
-    }
+	else if(type == ViAudio::Corrected)
+	{
+		return path(ViProject::CorrectedData, side);
+	}
+	else if(type == ViAudio::Noise)
+	{
+		return path(ViProject::NoiseData, side);
+	}
     return "";
 }
 
@@ -589,8 +595,8 @@ QStringList ViProject::fileNames(bool track, bool side)
 
 void ViProject::cleanProject()
 {
-	QList<ViProject::Directory> types = {ViProject::TargetData, ViProject::CorruptedData, ViProject::CorrectedData, ViProject::CoverData};
-	QList<ViAudio::Type> audioTypes = {ViAudio::Target, ViAudio::Corrupted, ViAudio::Corrected};
+	QList<ViProject::Directory> types = {ViProject::TargetData, ViProject::CorruptedData, ViProject::CorrectedData, ViProject::NoiseData, ViProject::CoverData};
+	QList<ViAudio::Type> audioTypes = {ViAudio::Target, ViAudio::Corrupted, ViAudio::Corrected, ViAudio::Noise};
 	QDir dir;
 	QFileInfoList files;
 	bool found;
@@ -637,9 +643,13 @@ void ViProject::moveToProject()
         {
             moveToProject(object, ViAudio::Corrupted);
         }
-        if(object->hasFile(ViAudio::Corrected))
-        {
-            moveToProject(object, ViAudio::Corrected);
+		if(object->hasFile(ViAudio::Corrected))
+		{
+			moveToProject(object, ViAudio::Corrected);
+		}
+		if(object->hasFile(ViAudio::Noise))
+		{
+			//moveToProject(object, ViAudio::Noise);
 		}
 
 		ViMetadata &metadata = object->metadata();
@@ -777,7 +787,8 @@ bool ViProject::saveTracks()
 		data.addChild("cover", relativePath(metadata.cover()));
         data.addChild("target", relativePath(object->targetFilePath()));
         data.addChild("corrupted", relativePath(object->corruptedFilePath()));
-        data.addChild("corrected", relativePath(object->correctedFilePath()));
+		data.addChild("corrected", relativePath(object->correctedFilePath()));
+		data.addChild("noise", relativePath(object->noiseFilePath()));
         track.addChild(data);
 
         sides[object->sideNumber()].addChild(track);
@@ -884,7 +895,8 @@ bool ViProject::loadTracks()
             ViElement data = tracks[i].child("data");
             object->setTargetFilePath(absolutePath(data.child("target").toString()));
             object->setCorruptedFilePath(absolutePath(data.child("corrupted").toString()));
-            object->setCorrectedFilePath(absolutePath(data.child("corrected").toString()));
+			object->setCorrectedFilePath(absolutePath(data.child("corrected").toString()));
+			object->setNoiseFilePath(absolutePath(data.child("noise").toString()));
 
 			QString coverPath = absolutePath(data.child("cover").toString());
 			QFile file(coverPath);

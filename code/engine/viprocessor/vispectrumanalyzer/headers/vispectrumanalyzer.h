@@ -5,7 +5,7 @@
 #include <vispectrum.h>
 #include <vilibrary.h>
 
-class ViSpectrumAnalyzer : public ViProcessor, public ViLibrary
+class ViSpectrumAnalyzer : public ViProcessor
 {
 
     Q_OBJECT

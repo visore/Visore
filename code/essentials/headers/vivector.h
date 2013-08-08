@@ -30,6 +30,8 @@ class ViVector
 
 		ViVector subset(const int &start, const int &size) const;
 
+		ViMatrix transpose();
+
 		double& at(const int &index);
 		double at(const int &index) const;
 
