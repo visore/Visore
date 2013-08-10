@@ -569,6 +569,7 @@ int ViModifyProcessor::readNext()
 				{
 					noisy = isNoisy(i);
 					mNoiseData.enqueueSplitScaledSamples(mNoiseDetector->noise().data(), i);
+					mNoiseMaskData.enqueueSplitScaledSamples(mNoiseDetector->noise().mask(), i);
 					mOriginalData.enqueue(noisy, mData.splitSamples(i), i);
 				}
 			}
@@ -576,6 +577,7 @@ int ViModifyProcessor::readNext()
 			{
 				noisy = isNoisy();
 				mNoiseData.writeScaled(mNoiseDetector->noise().data());
+				mNoiseMaskData.writeScaled(mNoiseDetector->noise().mask());
 				mOriginalData.enqueue(noisy, mData.samples());
 			}
         }
@@ -601,6 +603,9 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
 
 			mNoiseData.setBuffer(mObject->buffer(ViAudio::Noise));
 			mNoiseData.setScaleRange(0, 1);
+
+			mNoiseMaskData.setBuffer(mObject->buffer(ViAudio::NoiseMask));
+			mNoiseMaskData.setScaleRange(0, 1);
 
 			initialize();
 			startThread();

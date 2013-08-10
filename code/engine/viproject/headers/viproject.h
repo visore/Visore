@@ -183,6 +183,7 @@ class ViProject : public QObject, public ViId
 
 		QStringList fileNames(bool track = true, bool side = false);
 
+		QStringList files(const QString &directory) const;
 		void cleanProject();
 		void moveToProject();
 		void moveToProject(ViAudioObjectPointer object, ViAudio::Type type);

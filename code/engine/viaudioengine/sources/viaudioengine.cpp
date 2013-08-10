@@ -90,7 +90,7 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 
 	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Corrupted)), 0.01);
 	mObjectChain.addFunction(ViFunctionCall("correct", QVariant::fromValue(corrector)), percentage); // THIS ONE CAUSE ERROR IN CORRELATION
-	mObjectChain.addFunction(ViFunctionCall("encode", QVariant(ViAudio::Corrected | ViAudio::Noise)), 0.01);
+	mObjectChain.addFunction(ViFunctionCall("encode", QVariant(ViAudio::Corrected | ViAudio::Noise | ViAudio::NoiseMask)), 0.01);
 	if(correlate)
 	{
 		mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target)), 0.01);

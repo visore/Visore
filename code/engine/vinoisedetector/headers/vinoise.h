@@ -27,6 +27,7 @@ class ViNoise
 		void minimize();
 
 		ViSampleChunk& data();
+		ViSampleChunk& mask();
 
 		void set(const int &index, const qreal &value);
 		void set(const int &index, const ViNoise &other);
@@ -36,7 +37,7 @@ class ViNoise
 
 	private:
 
-		QVector<bool> mNoise;
+		ViSampleChunk mMask;
 		ViSampleChunk mData;
 
 };

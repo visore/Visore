@@ -562,19 +562,19 @@ QString ViProject::path(ViProject::Directory directory, int side)
 
 QString ViProject::path(ViAudio::Type type, int side)
 {
-    if(type == ViAudio::Target)
-    {
-        return path(ViProject::TargetData, side);
-    }
-    else if(type == ViAudio::Corrupted)
-    {
-        return path(ViProject::CorruptedData, side);
-    }
+	if(type == ViAudio::Target)
+	{
+		return path(ViProject::TargetData, side);
+	}
+	else if(type == ViAudio::Corrupted)
+	{
+		return path(ViProject::CorruptedData, side);
+	}
 	else if(type == ViAudio::Corrected)
 	{
 		return path(ViProject::CorrectedData, side);
 	}
-	else if(type == ViAudio::Noise)
+	else if(type == ViAudio::Noise || ViAudio::NoiseMask)
 	{
 		return path(ViProject::NoiseData, side);
 	}
@@ -593,37 +593,46 @@ QStringList ViProject::fileNames(bool track, bool side)
     return result;
 }
 
+QStringList ViProject::files(const QString &directory) const
+{
+	QStringList result;
+	QDir dir(directory);
+
+	QFileInfoList entries = dir.entryInfoList(QDir::Files);
+	for(int i = 0; i < entries.size(); ++i)
+	{
+		result.append(entries[i].absoluteFilePath());
+	}
+
+	// Scan sub directories
+	entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for(int i = 0; i < entries.size(); ++i)
+	{
+		result.append(files(entries[i].absoluteFilePath()));
+	}
+
+	result.removeDuplicates();
+	return result;
+}
+
 void ViProject::cleanProject()
 {
-	QList<ViProject::Directory> types = {ViProject::TargetData, ViProject::CorruptedData, ViProject::CorrectedData, ViProject::NoiseData, ViProject::CoverData};
-	QList<ViAudio::Type> audioTypes = {ViAudio::Target, ViAudio::Corrupted, ViAudio::Corrected, ViAudio::Noise};
-	QDir dir;
-	QFileInfoList files;
-	bool found;
-	int sides = sideCount() + 1;
-	for(int i = 1; i < sides; ++i)
+	QStringList existingFiles = files(path(ViProject::Data));
+
+	QList<ViAudio::Type> types = ViAudio::types();
+	for(int i = 0; i < objectCount(); ++i)
 	{
-		for(int t = 0; t < types.size(); ++t)
+		for(int j = 0; j < types.size(); ++j)
 		{
-			dir.setPath(path(types[t], i));
-			files = dir.entryInfoList(QDir::Files);
-			for(int j = 0; j < files.size(); ++j)
-			{
-				found = false;
-				for(int k = 0; k < objectCount(); ++k)
-				{
-					if(types[t] == ViProject::CoverData)
-					{
-						if(files[j].absoluteFilePath() == mObjects[k]->metadata().cover()) found = true;
-					}
-					else
-					{
-						if(files[j].absoluteFilePath() == mObjects[k]->filePath(audioTypes[t])) found = true;
-					}
-				}
-				if(!found) QFile::remove(files[j].absoluteFilePath());
-			}
+			existingFiles.removeAll(mObjects[i]->filePath(types[j]));
 		}
+		existingFiles.removeAll(mObjects[i]->metadata().cover());
+	}
+
+	// Remove the rest
+	for(int i = 0; i < existingFiles.size(); ++i)
+	{
+		QFile::remove(existingFiles[i]);
 	}
 }
 
@@ -649,7 +658,11 @@ void ViProject::moveToProject()
 		}
 		if(object->hasFile(ViAudio::Noise))
 		{
-			//moveToProject(object, ViAudio::Noise);
+			moveToProject(object, ViAudio::Noise);
+		}
+		if(object->hasFile(ViAudio::NoiseMask))
+		{
+			moveToProject(object, ViAudio::NoiseMask);
 		}
 
 		ViMetadata &metadata = object->metadata();
@@ -671,6 +684,7 @@ void ViProject::moveToProject(ViAudioObjectPointer object, ViAudio::Type type)
     if(!oldPath.startsWith(mPaths[ViProject::Root]))
 	{
         QString newPath = path(type, object->sideNumber()) + object->fileName();
+		if(type == ViAudio::NoiseMask) newPath += ".mask";
         ViAudioCodec *codec = object->format(type).codec();
         if(codec != NULL)
         {

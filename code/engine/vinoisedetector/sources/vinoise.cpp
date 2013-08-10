@@ -13,7 +13,7 @@ ViNoise::ViNoise(const int &size)
 
 ViNoise::ViNoise(const ViNoise &other)
 {
-	mNoise = other.mNoise;
+	mMask = other.mMask;
 	mData = other.mData;
 }
 
@@ -23,31 +23,31 @@ ViNoise::~ViNoise()
 
 void ViNoise::resize(const int &size)
 {
-	mNoise.resize(size);
+	mMask.resize(size);
 	mData.resize(size);
 	for(int i = 0; i < size; ++i)
 	{
-		mNoise[i] = false;
+		mMask[i] = 0;
 		mData[i] = 0;
 	}
 }
 
 void ViNoise::clear()
 {
-	resize(mNoise.size());
+	resize(mMask.size());
 }
 
 int ViNoise::size() const
 {
-	return mNoise.size();
+	return mMask.size();
 }
 
 qreal ViNoise::snr() const
 {
 	int signal = 0, noise = 0;
-	for(int i = 0; i < mNoise.size(); ++i)
+	for(int i = 0; i < mMask.size(); ++i)
 	{
-		if(mNoise[i]) ++noise;
+		if(mMask[i]) ++noise;
 		else ++signal;
 	}
 	return signal / qreal(noise);
@@ -63,9 +63,9 @@ void ViNoise::minimize()
 	int i, j, end, counter = 0;
 	qreal first, last;
 	bool noiseStarted = false;
-	for(i = 0; i < mNoise.size(); ++i)
+	for(i = 0; i < mMask.size(); ++i)
 	{
-		if(mNoise[i])
+		if(mMask[i])
 		{
 			if(noiseStarted && counter > 0)
 			{
@@ -73,7 +73,7 @@ void ViNoise::minimize()
 				end = i - counter;
 				for(j = i - 1; j >= end; --j)
 				{
-					mNoise[j] = true;
+					mMask[j] = 1;
 					mData[j] = (first + last) / 2;
 				}
 				first = last;
@@ -102,6 +102,11 @@ ViSampleChunk& ViNoise::data()
 	return mData;
 }
 
+ViSampleChunk& ViNoise::mask()
+{
+	return mMask;
+}
+
 void ViNoise::set(const int &index, const qreal &value)
 {
 	if(value > 1)
@@ -115,29 +120,27 @@ void ViNoise::set(const int &index, const qreal &value)
 
 	if(value > NOISE_THRESHOLD)
 	{
-		mNoise[index] = true;
+		mMask[index] = 1;
 	}
 }
 
 void ViNoise::set(const int &index, const ViNoise &other)
 {
-	QVector<bool> noise = other.mNoise;
-	ViSampleChunk data = other.mData;
 	int newIndex;
 	for(int i = 0; i < other.size(); ++i)
 	{
 		newIndex = index + i;
-		mData[newIndex] = data[i];
-		mNoise[newIndex] = noise[i];
+		mData[newIndex] = other.mData[i];
+		mMask[newIndex] = other.mMask[i];
 	}
 }
 
 bool ViNoise::at(const int &index) const
 {
-	return mNoise[index];
+	return mMask[index];
 }
 
 bool ViNoise::operator [] (const int &index) const
 {
-	return mNoise[index];
+	return mMask[index];
 }

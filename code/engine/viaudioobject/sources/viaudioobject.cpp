@@ -729,32 +729,10 @@ QString ViAudioObject::fileName(bool track, bool side)
 
 QString ViAudioObject::temporaryFilePath(ViAudio::Type type)
 {
-	QString result = ViManager::tempDataPath() + id();
-	if(type == ViAudio::Target)
-	{
-		result += "_target";
-	}
-	else if(type == ViAudio::Corrupted)
-	{
-		result += "_corrupted";
-	}
-	else if(type == ViAudio::Corrected)
-	{
-		result += "_corrected";
-	}
-	else if(type == ViAudio::Noise)
-	{
-		result += "_noise";
-	}
+	QString result = ViManager::tempDataPath() + id() + "_" + ViAudio::toString(type).toLower();
 	ViAudioCodec *codec = format(type).codec();
-	if(codec == NULL)
-	{
-		result += ".data";
-	}
-	else
-	{
-		result += codec->extension(".");
-	}
+	if(codec == NULL) result += ".data";
+	else result += codec->extension(".");
 	return result;
 }
 
@@ -1087,7 +1065,6 @@ bool ViAudioObject::correct(ViModifyProcessor *corrector)
 	ViAudioFormat theFormat = format(ViAudio::Corrupted);
 	buffer(ViAudio::Corrected)->setFormat(theFormat);
 	buffer(ViAudio::Noise)->setFormat(theFormat);
-	theFormat.setSampleSize(8);
 	buffer(ViAudio::NoiseMask)->setFormat(theFormat);
 
 	mCorrector->process(thisPointer, ViAudio::Corrupted, ViAudio::Corrected);

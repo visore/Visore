@@ -270,6 +270,7 @@ class ViModifyProcessor : public ViProcessor
 
 		ViAudioWriteData mData2;
 		ViAudioWriteData mNoiseData;
+		ViAudioWriteData mNoiseMaskData;
 		ViAudio::Type mType2;
         ViModifyProcessor::ModifyMode mModifyMode;
 		ViModifyData mOriginalData;
