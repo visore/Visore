@@ -599,7 +599,7 @@ void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type 
             mOriginalData.clear();
 			mOriginalData.setChannels(mTotalChannels);
 
-			mNoiseData.setBuffer(mObject->noiseBuffer());
+			mNoiseData.setBuffer(mObject->buffer(ViAudio::Noise));
 			mNoiseData.setScaleRange(0, 1);
 
 			initialize();

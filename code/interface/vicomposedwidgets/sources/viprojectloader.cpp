@@ -354,7 +354,7 @@ void ViProjectLoader::changeRadioTypes(bool checked)
 
 ViAudio::Type ViProjectLoader::type()
 {
-	QQueue<ViAudio::Type> theTypes = ViAudioObject::decomposeTypes(types());
+	QList<ViAudio::Type> theTypes = ViAudio::types(types());
 	if(theTypes.isEmpty()) return ViAudio::Undefined;
 	return theTypes[0];
 }

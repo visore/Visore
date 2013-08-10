@@ -1,18 +1,23 @@
 #include <vinoisedetector.h>
 
-ViNoiseDetector::ViNoiseDetector()
+#define DEFAULT_WINDOW_SIZE 512
+
+ViNoiseDetector::ViNoiseDetector(const int &windowSize)
 {
     clear();
+	setWindowSize(windowSize);
 }
 
-ViNoiseDetector::ViNoiseDetector(ViProcessor::ChannelMode mode)
+ViNoiseDetector::ViNoiseDetector(ViProcessor::ChannelMode mode, const int &windowSize)
 {
 	clear();
 	setMode(mMode);
+	setWindowSize(windowSize);
 }
 
 ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 {
+	mWindowSize = other.mWindowSize;
 	mMode = other.mMode;
 	mChannel = other.mChannel;
 	mData = other.mData;
@@ -21,6 +26,17 @@ ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 
 ViNoiseDetector::~ViNoiseDetector()
 {
+}
+
+void ViNoiseDetector::setWindowSize(const int &size)
+{
+	if(size < 0) mWindowSize = DEFAULT_WINDOW_SIZE;
+	else mWindowSize = size;
+}
+
+int ViNoiseDetector::windowSize() const
+{
+	return mWindowSize;
 }
 
 void ViNoiseDetector::setMode(ViProcessor::ChannelMode mode)
@@ -76,19 +92,28 @@ bool ViNoiseDetector::isNoisy()
 {
 	if(mMode == ViProcessor::Separated)
 	{
-		ViSampleChunk &samples = mData->splitSamples(mChannel);
-		mNoise.resize(samples.size());
-		calculateNoise(mNoise, samples);
+		calculateNoise(mData->splitSamples(mChannel));
 	}
 	else
 	{
-		ViSampleChunk &samples = mData->samples();
-		mNoise.resize(samples.size());
-		calculateNoise(mNoise, samples);
+		calculateNoise(mData->samples());
 	}
 
 	//mNoise.minimize();
 	return mNoise.isNoisy();
+}
+
+void ViNoiseDetector::calculateNoise(const ViSampleChunk &samples)
+{
+	mNoise.resize(samples.size());
+	QList<ViSampleChunk> chunks = samples.subsets(mWindowSize);
+	ViNoise noise;
+	for(int i = 0; i < chunks.size(); ++i)
+	{
+		noise.resize(chunks[i].size());
+		calculateNoise(noise, chunks[i]);
+		mNoise.set(i * mWindowSize, noise);
+	}
 }
 
 ViNoise& ViNoiseDetector::noise()

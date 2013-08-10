@@ -5,27 +5,24 @@
 #include <algorithm> //fill
 
 template<typename T>
-ViChunk<T>::ViChunk(bool autoDelete)
+ViChunk<T>::ViChunk()
 {
 	mData = 0;
 	mSize = 0;
-	mAutoDelete = autoDelete;
 }
 
 template<typename T>
-ViChunk<T>::ViChunk(T *data, int size, bool autoDelete)
+ViChunk<T>::ViChunk(T *data, int size)
 {
 	mData = data;
 	mSize = size;
-	mAutoDelete = autoDelete;
 }
 
 template<typename T>
-ViChunk<T>::ViChunk(int size, bool autoDelete)
+ViChunk<T>::ViChunk(int size)
 {
 	mData = 0;
 	mSize = 0;
-	mAutoDelete = autoDelete;
 	resize(size);
 }
 
@@ -34,7 +31,6 @@ ViChunk<T>::ViChunk(const ViChunk &other)
 {
 	mData = 0;
 	mSize = 0;
-	mAutoDelete = other.mAutoDelete;
 	resize(other.mSize);
 	copy(other, *this);
 }
@@ -42,17 +38,11 @@ ViChunk<T>::ViChunk(const ViChunk &other)
 template<typename T>
 ViChunk<T>::~ViChunk()
 {
-	if(mAutoDelete && mData != 0)
+	if(mData != 0)
 	{
 		delete [] mData;
 		mData = 0;
 	}
-}
-
-template<typename T>
-void ViChunk<T>::setAutoDelete(bool autoDelete)
-{
-	mAutoDelete = autoDelete;
 }
 
 template<typename T>
@@ -98,7 +88,7 @@ void ViChunk<T>::resize(int size)
 		if(mData != 0)
 		{
 			T *temp = new T[size];
-			memcpy(mData, temp, sizeof(T) * qMin(size, mSize));
+			memcpy(temp, mData, sizeof(T) * qMin(size, mSize));
 			delete [] mData;
 			mData = temp;
 		}
@@ -150,6 +140,14 @@ void ViChunk<T>::append(T value, int repeatValue)
 }
 
 template<typename T>
+void ViChunk<T>::append(const ViChunk<T> &other)
+{
+	int oldSize = mSize;
+	resize(oldSize + other.size());
+	memcpy(mData + oldSize, other.data(), sizeof(T) * other.size());
+}
+
+template<typename T>
 void ViChunk<T>::clear()
 {
 	mSize = 0;
@@ -158,6 +156,48 @@ void ViChunk<T>::clear()
 		delete [] mData;
 		mData = 0;
 	}
+}
+
+template<typename T>
+ViChunk<T> ViChunk<T>::subset(const int &startIndex, const int &size) const
+{
+	ViChunk<T> subsetData;
+	subset(subsetData, startIndex, size);
+	return subsetData;
+}
+
+template<typename T>
+bool ViChunk<T>::subset(ViChunk<T> &subsetData, const int &startIndex, const int &size) const
+{
+	if(startIndex >= mSize)
+	{
+		subsetData.clear();
+		return false;
+	}
+
+	int newSize = size;
+	bool success = true;
+	if(startIndex + size > mSize)
+	{
+		newSize = mSize - startIndex;
+		success = false;
+	}
+
+	subsetData.resize(newSize);
+	memcpy(subsetData.data(), mData + startIndex, sizeof(T) * newSize);
+	return success;
+}
+
+template<typename T>
+QList<ViChunk<T>> ViChunk<T>::subsets(const int &size) const
+{
+	QList<ViChunk<T>> result;
+	int sets = qCeil(mSize / float(size));
+	for(int i = 0; i < sets; ++i)
+	{
+		result.append(subset(i * size, size));
+	}
+	return result;
 }
 
 template<typename T>

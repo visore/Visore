@@ -29,6 +29,7 @@ class ViNoise
 		ViSampleChunk& data();
 
 		void set(const int &index, const qreal &value);
+		void set(const int &index, const ViNoise &other);
 
 		bool at(const int &index) const;
 		bool operator [] (const int &index) const;

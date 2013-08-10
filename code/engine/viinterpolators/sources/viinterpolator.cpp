@@ -18,7 +18,7 @@ ViInterpolator::ViInterpolator(const ViInterpolator &other)
 	if(other.mDeleteLeft)
 	{
 		mDeleteLeft = true;
-		mLeftData = new ViSampleChunk(other.mLeftData);
+		mLeftData = new ViSampleChunk(*other.mLeftData);
 	}
 	else
 	{
@@ -29,7 +29,7 @@ ViInterpolator::ViInterpolator(const ViInterpolator &other)
 	if(other.mDeleteRight)
 	{
 		mDeleteRight = true;
-		mRightData = new ViSampleChunk(other.mRightData);
+		mRightData = new ViSampleChunk(*other.mRightData);
 	}
 	else
 	{

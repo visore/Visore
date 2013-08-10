@@ -9,26 +9,29 @@ class ViChunk
 
 	public:
 
-		ViChunk(bool autoDelete = true);
-		ViChunk(T *data, int size, bool autoDelete = true);
-		ViChunk(int size, bool autoDelete = true);
+		ViChunk();
+		ViChunk(T *data, int size); //Takes ownership
+		ViChunk(int size);
 		ViChunk(const ViChunk &other);
 		~ViChunk();
-
-		void setAutoDelete(bool autoDelete);
 
 		T* data() const;
 		const T* constData() const;
 		int size() const;
 
-		void setData(T *data, int size);
+		void setData(T *data, int size); //Takes ownership
 		void setSize(int size);
 		void resize(int size);
 
 		void insert(T value, int repeatValue = 1); // Insert value repeatValue number of times at the front
 		void append(T value, int repeatValue = 1); // Append value repeatValue number of times at the end
+		void append(const ViChunk<T> &other);
 
 		void clear();
+
+		ViChunk<T> subset(const int &startIndex, const int &size) const;
+		bool subset(ViChunk<T> &subsetData, const int &startIndex, const int &size) const;
+		QList<ViChunk<T>> subsets(const int &size) const;
 
 		const T& first() const;
 		const T& first(int offset) const;
@@ -45,7 +48,7 @@ class ViChunk
 		const T& operator[](const int index) const;
 		T& operator[] (const int index);
 
-		void operator= (const ViChunk &other);
+		void operator = (const ViChunk &other);
 
         // Copies the data from source to destination and sets the size of source to the destination size.
         // If the destination is smaller than the source, only the maximum number of values that destination can hold will be copied.
@@ -57,7 +60,6 @@ class ViChunk
 
 	private:
 
-		bool mAutoDelete;
 		T *mData;
 		int mSize;
 

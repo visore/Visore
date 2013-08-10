@@ -157,7 +157,7 @@ QString ViCorrelationGroup::toString(QString correlator) const
 {
     if(mCorrelations.contains(correlator))
     {
-        return correlator + "[" +  viTypeToString(type1()) + " - " + viTypeToString(type2()) + "] (" + mCorrelations[correlator].toString() + ")";
+		return correlator + "[" +  ViAudio::toString(type1()) + " - " + ViAudio::toString(type2()) + "] (" + mCorrelations[correlator].toString() + ")";
     }
     return "";
 }
@@ -165,8 +165,8 @@ QString ViCorrelationGroup::toString(QString correlator) const
 ViElement ViCorrelationGroup::exportData()
 {
     ViElement root("correlationgroup");
-    root.addChild("type1", viTypeToString(type1()));
-    root.addChild("type2", viTypeToString(type2()));
+	root.addChild("type1", ViAudio::toString(type1()));
+	root.addChild("type2", ViAudio::toString(type2()));
     QString key;
     foreach(key, mCorrelations.keys())
 	{
@@ -186,8 +186,8 @@ bool ViCorrelationGroup::importData(ViElement element)
     }
     clear();
 
-    setType1(viStringToType(element.child("type1").toString()));
-    setType2(viStringToType(element.child("type2").toString()));
+	setType1(ViAudio::toType(element.child("type1").toString()));
+	setType2(ViAudio::toType(element.child("type2").toString()));
 
     ViElementList children = element.children("correlator");
     for(int i = 0; i < children.size(); ++i)

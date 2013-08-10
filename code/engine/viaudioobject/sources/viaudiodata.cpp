@@ -3,7 +3,7 @@
 #include <viscaler.h>
 #include <QQueue>
 
-#define DEFAULT_SAMPLE_COUNT 64
+#define DEFAULT_SAMPLE_COUNT 2048
 #define DEFAULT_SCALE_FROM -1
 #define DEFAULT_SCALE_TO 1
 

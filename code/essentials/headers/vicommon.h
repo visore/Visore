@@ -104,16 +104,22 @@ namespace Vi
 namespace ViAudio
 {
 
-	// Values are important for combining types
+	// Values are important for combining types (bit wise)
     enum Type
     {
 		Undefined = 0x1,
 		Target = 0x2,
 		Corrupted = 0x4,
 		Corrected = 0x8,
-		Noise = 0x16,
-		All = Target | Corrupted | Corrected | Noise
+		Noise = 0x10,
+		NoiseMask = 0x20,
+		All = Target | Corrupted | Corrected | Noise | NoiseMask
     };
+	inline QList<Type> types();
+	inline QList<Type> types(const Type &type, const Type &exclude = Undefined);
+	inline Type types(const QList<Type> &types, const Type &exclude = Undefined);
+	inline QString toString(Type type);
+	inline Type toType(QString type);
 
     enum Mode
     {
@@ -138,9 +144,6 @@ Q_DECLARE_METATYPE(ViAudio::Mode)
 Q_DECLARE_METATYPE(ViAudio::Input)
 
 typedef QPair<ViAudio::Type, ViAudio::Type> ViAudioTypePair;
-
-inline QString viTypeToString(ViAudio::Type type);
-inline ViAudio::Type viStringToType(QString type);
 
 #include <vicommon.cpp>
 

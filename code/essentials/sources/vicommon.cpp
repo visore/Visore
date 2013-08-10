@@ -64,23 +64,6 @@ inline QList<To> viConvertList(QList<From> list)
     return result;
 }
 
-inline QString viTypeToString(ViAudio::Type type)
-{
-    if(type == ViAudio::Target) return "Target";
-    else if(type == ViAudio::Corrupted) return "Corrupted";
-    else if(type == ViAudio::Corrected) return "Corrected";
-    else return "Undefinied";
-}
-
-inline ViAudio::Type viStringToType(QString type)
-{
-    type = type.toLower().trimmed();
-    if(type == "target") return ViAudio::Target;
-    else if(type == "corrupted") return ViAudio::Corrupted;
-    else if(type == "corrected") return ViAudio::Corrected;
-    else return ViAudio::Undefined;
-}
-
 QString viBoolToString(bool value, Vi::BoolType type, bool lowerCase)
 {
     QString result = "";
@@ -117,6 +100,71 @@ bool viStringToBool(QString value)
         return true;
     }
     return false;
+}
+
+inline QList<ViAudio::Type> ViAudio::types()
+{
+	return {ViAudio::Target, ViAudio::Corrupted, ViAudio::Corrected, ViAudio::Noise, ViAudio::NoiseMask};
+}
+
+inline QList<ViAudio::Type> ViAudio::types(const ViAudio::Type &type, const ViAudio::Type &exclude)
+{
+	QList<ViAudio::Type> result;
+	if(type & ViAudio::Target && !(exclude & ViAudio::Target))
+	{
+		result.append(ViAudio::Target);
+	}
+	if(type & ViAudio::Corrupted && !(exclude & ViAudio::Corrupted))
+	{
+		result.append(ViAudio::Corrupted);
+	}
+	if(type & ViAudio::Corrected && !(exclude & ViAudio::Corrected))
+	{
+		result.append(ViAudio::Corrected);
+	}
+	if(type & ViAudio::Noise && !(exclude & ViAudio::Noise))
+	{
+		result.append(ViAudio::Noise);
+	}
+	if(type & ViAudio::NoiseMask && !(exclude & ViAudio::NoiseMask))
+	{
+		result.append(ViAudio::NoiseMask);
+	}
+	return result;
+}
+
+inline ViAudio::Type ViAudio::types(const QList<ViAudio::Type> &types, const ViAudio::Type &exclude)
+{
+	int result = 0;
+	for(int i = 0; i < types.size(); ++i)
+	{
+		if(!(types[i] & exclude))
+		{
+			result |= types[i];
+		}
+	}
+	return (ViAudio::Type) result;
+}
+
+inline QString ViAudio::toString(ViAudio::Type type)
+{
+	if(type == ViAudio::Target) return "Target";
+	else if(type == ViAudio::Corrupted) return "Corrupted";
+	else if(type == ViAudio::Corrected) return "Corrected";
+	else if(type == ViAudio::Noise) return "Noise";
+	else if(type == ViAudio::NoiseMask) return "NoiseMask";
+	else return "Undefinied";
+}
+
+inline ViAudio::Type ViAudio::toType(QString type)
+{
+	type = type.toLower().trimmed();
+	if(type == "target") return ViAudio::Target;
+	else if(type == "corrupted") return ViAudio::Corrupted;
+	else if(type == "corrected") return ViAudio::Corrected;
+	else if(type == "noise") return ViAudio::Noise;
+	else if(type == "noisemask") return ViAudio::NoiseMask;
+	else return ViAudio::Undefined;
 }
 
 #endif

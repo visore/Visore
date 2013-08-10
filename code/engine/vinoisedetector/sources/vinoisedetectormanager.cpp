@@ -8,4 +8,5 @@ QString ViNoiseDetectorManager::libraryPath()
 QString ViNoiseDetectorManager::defaultLibrary()
 {
 	return "MahalanobisNoiseDetector";
+	//return "ZscoreNoiseDetector";
 }

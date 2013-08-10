@@ -10,10 +10,13 @@ class ViNoiseDetector : public ViLibrary
 
 	public:
 		
-        ViNoiseDetector();
-		ViNoiseDetector(ViProcessor::ChannelMode mode);
+		ViNoiseDetector(const int &windowSize = -1);
+		ViNoiseDetector(ViProcessor::ChannelMode mode, const int &windowSize = -1);
         ViNoiseDetector(const ViNoiseDetector &other);
         virtual ~ViNoiseDetector();
+
+		void setWindowSize(const int &size);
+		int windowSize() const;
 
 		void setMode(ViProcessor::ChannelMode mode);
 		ViProcessor::ChannelMode mode();
@@ -37,10 +40,12 @@ class ViNoiseDetector : public ViLibrary
 
 	protected:
 
+		void calculateNoise(const ViSampleChunk &samples);
 		virtual void calculateNoise(ViNoise &noise, const ViSampleChunk &samples) = 0;
 
     private:
 
+		int mWindowSize;
 		ViProcessor::ChannelMode mMode;
 		int mChannel;
 		ViAudioReadData *mData;

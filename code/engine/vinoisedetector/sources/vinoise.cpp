@@ -104,11 +104,31 @@ ViSampleChunk& ViNoise::data()
 
 void ViNoise::set(const int &index, const qreal &value)
 {
-	if(value > 1) mData[index] = 1;
-	else mData[index] = value;
+	if(value > 1)
+	{
+		mData[index] = 1;
+	}
+	else
+	{
+		mData[index] = value;
+	}
+
 	if(value > NOISE_THRESHOLD)
 	{
 		mNoise[index] = true;
+	}
+}
+
+void ViNoise::set(const int &index, const ViNoise &other)
+{
+	QVector<bool> noise = other.mNoise;
+	ViSampleChunk data = other.mData;
+	int newIndex;
+	for(int i = 0; i < other.size(); ++i)
+	{
+		newIndex = index + i;
+		mData[newIndex] = data[i];
+		mNoise[newIndex] = noise[i];
 	}
 }
 

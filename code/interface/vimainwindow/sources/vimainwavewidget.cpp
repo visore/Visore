@@ -41,8 +41,8 @@ void ViMainWaveWidget::generateWave()
 	mUi->correctedWaveForm->clear();
 
 	ViAudioObjectPointer object = mUi->projectLoader->object();
-	QQueue<ViAudio::Type> instructions = ViAudioObject::decomposeTypes(mUi->projectLoader->types());
-	QQueue<ViAudio::Type> newInstructions;
+	QList<ViAudio::Type> instructions = ViAudio::types(mUi->projectLoader->types());
+	QList<ViAudio::Type> newInstructions;
 
 	if(!instructions.empty())
 	{
@@ -85,7 +85,7 @@ void ViMainWaveWidget::generateWave()
 	{
 		ViAudio::Type type;
 		if(regenerate) type = mUi->projectLoader->types();
-		else type = ViAudioObject::composeTypes(newInstructions);
+		else type = ViAudio::types(newInstructions);
 
 		QObject::connect(engine().data(), SIGNAL(progressFinished()), this, SLOT(drawWave()));
 		engine()->generateWave(object, type, mUi->alignCheckBox->isChecked());
@@ -106,7 +106,7 @@ void ViMainWaveWidget::drawWave()
 	if(form != NULL && !form->isEmpty() && (ViAudio::Target & types))
 	{
 		mUi->targetGroupBox->show();
-		mUi->targetWaveForm->setWaveForm(form, object->targetFormat());
+		mUi->targetWaveForm->setWaveForm(form, object->format(ViAudio::Target));
 		mWaveGroup.addWidget(mUi->targetWaveForm);
 	}
 	else
@@ -119,7 +119,7 @@ void ViMainWaveWidget::drawWave()
 	if(form != NULL && !form->isEmpty() && (ViAudio::Corrupted & types))
 	{
 		mUi->corruptedGroupBox->show();
-		mUi->corruptedWaveForm->setWaveForm(form, object->corruptedFormat());
+		mUi->corruptedWaveForm->setWaveForm(form, object->format(ViAudio::Corrupted));
 		mWaveGroup.addWidget(mUi->corruptedWaveForm);
 	}
 	else
@@ -132,7 +132,7 @@ void ViMainWaveWidget::drawWave()
 	if(form != NULL && !form->isEmpty() && (ViAudio::Corrected & types))
 	{
 		mUi->correctedGroupBox->show();
-		mUi->correctedWaveForm->setWaveForm(form, object->correctedFormat());
+		mUi->correctedWaveForm->setWaveForm(form, object->format(ViAudio::Corrected));
 		mWaveGroup.addWidget(mUi->correctedWaveForm);
 	}
 	else

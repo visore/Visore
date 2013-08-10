@@ -785,10 +785,12 @@ bool ViProject::saveTracks()
 
         ViElement data("data");
 		data.addChild("cover", relativePath(metadata.cover()));
-        data.addChild("target", relativePath(object->targetFilePath()));
-        data.addChild("corrupted", relativePath(object->corruptedFilePath()));
-		data.addChild("corrected", relativePath(object->correctedFilePath()));
-		data.addChild("noise", relativePath(object->noiseFilePath()));
+
+		ViAudio::Type type;
+		foreach(type, ViAudio::types())
+		{
+			data.addChild(ViAudio::toString(type).toLower(), relativePath(object->filePath(type)));
+		}
         track.addChild(data);
 
         sides[object->sideNumber()].addChild(track);
@@ -893,10 +895,13 @@ bool ViProject::loadTracks()
 			metadata.setAlbum(tracks[i].child("album").toString());
 
             ViElement data = tracks[i].child("data");
-            object->setTargetFilePath(absolutePath(data.child("target").toString()));
-            object->setCorruptedFilePath(absolutePath(data.child("corrupted").toString()));
-			object->setCorrectedFilePath(absolutePath(data.child("corrected").toString()));
-			object->setNoiseFilePath(absolutePath(data.child("noise").toString()));
+
+			ViElementList files = data.children();
+			for(int j = 0; j < files.size(); ++j)
+			{
+				ViAudio::Type type = ViAudio::toType(files[j].name());
+				object->setFilePath(type, absolutePath(files[j].toString()));
+			}
 
 			QString coverPath = absolutePath(data.child("cover").toString());
 			QFile file(coverPath);
