@@ -60,62 +60,40 @@ bool ViNoise::isNoisy() const
 
 void ViNoise::minimize()
 {
-	int counter = 0;
-	bool started = false;
-	for(int i = 0; i < mNoise.size(); ++i)
+	int i, j, end, counter = 0;
+	qreal first, last;
+	bool noiseStarted = false;
+	for(i = 0; i < mNoise.size(); ++i)
 	{
-		if(started)
+		if(mNoise[i])
 		{
-			if(mData[i] >= NOISE_THRESHOLD)
+			if(noiseStarted && counter > 0)
 			{
-				int end = i - counter;
-				for(int j = i - 1; j >= end; --j)
+				last = mData[i];
+				end = i - counter;
+				for(j = i - 1; j >= end; --j)
 				{
 					mNoise[j] = true;
-					mData[i] = 1;
-					//LOG("xxx3");
+					mData[j] = (first + last) / 2;
 				}
-				counter == 0;
+				first = last;
+				counter = 0;
 			}
 			else
 			{
-				++counter;
-				if(counter > MINIMIZE_THRESHOLD)
-				{
-					counter = 0;
-					started = false;
-				}
+				first = mData[i];
+				noiseStarted = true;
 			}
 		}
-		else
-		{
-			if(mData[i] >= NOISE_THRESHOLD)
-			{
-				started = true;
-				counter == 0;
-			}
-		}
-
-
-
-
-		/*if(mNoise[i])
-		{
-			if(counter <= MINIMIZE_THRESHOLD)
-			{
-				int end = i - counter;
-				for(int j = i - 1; j >= end; --j)
-				{
-					mNoise[j] = true;
-					mData[i] = 1;
-				}
-			}
-			counter = 0;
-		}
-		else
+		else if(noiseStarted)
 		{
 			++counter;
-		}*/
+			if(counter > MINIMIZE_THRESHOLD)
+			{
+				noiseStarted = false;
+				counter = 0;
+			}
+		}
 	}
 }
 
@@ -126,12 +104,11 @@ ViSampleChunk& ViNoise::data()
 
 void ViNoise::set(const int &index, const qreal &value)
 {
-	//mData[index] = value;
-	mData[index] = 0;
+	if(value > 1) mData[index] = 1;
+	else mData[index] = value;
 	if(value > NOISE_THRESHOLD)
-	{LOG("xxx3");
+	{
 		mNoise[index] = true;
-		mData[index] = 1;
 	}
 }
 

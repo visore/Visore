@@ -87,7 +87,7 @@ bool ViNoiseDetector::isNoisy()
 		calculateNoise(mNoise, samples);
 	}
 
-	mNoise.minimize();
+	//mNoise.minimize();
 	return mNoise.isNoisy();
 }
 
