@@ -77,6 +77,9 @@ class ViAudioReadData : public ViAudioData
 		ViSampleChunk& scaledSamples();
 		ViSampleChunks& scaledSplitSamples();
 		ViSampleChunk& scaledSplitSamples(int index);
+		ViSampleChunk& scaledSamples(const int &scaleFrom, const int &scaleTo);
+		ViSampleChunks& scaledSplitSamples(const int &scaleFrom, const int &scaleTo);
+		ViSampleChunk& scaledSplitSamples(int index, const int &scaleFrom, const int &scaleTo);
 
         ViFrequencyChunk& frequencies();
         ViFrequencyChunks& splitFrequencies();

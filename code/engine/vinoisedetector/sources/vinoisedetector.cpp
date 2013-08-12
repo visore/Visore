@@ -1,5 +1,7 @@
 #include <vinoisedetector.h>
 
+#include <viscaler.h>
+
 #define DEFAULT_WINDOW_SIZE 512
 
 ViNoiseDetector::ViNoiseDetector(const int &windowSize)
@@ -90,14 +92,29 @@ bool ViNoiseDetector::isNoisy(ViAudioReadData &data, int channel)
 
 bool ViNoiseDetector::isNoisy()
 {
-	if(mMode == ViProcessor::Separated)
+	/*if(mMode == ViProcessor::Separated)
 	{
-		calculateNoise(mData->splitSamples(mChannel));
+		calculateNoise(mData->scaledSplitSamples(mChannel, 0, 1));
 	}
 	else
 	{
-		calculateNoise(mData->samples());
+		calculateNoise(mData->scaledSamples(0, 1));
+	}*/
+
+	ViSampleChunk c1;
+	if(mMode == ViProcessor::Separated)
+	{
+		c1 = mData->splitSamples(mChannel);
 	}
+	else
+	{
+		c1 = mData->samples();
+	}
+	for(int i = 0; i < c1.size();++i)
+	{
+		//c1[i] = ViScaler<qreal>::scale(c1[i], -1, 1, 0, 1);
+	}
+	calculateNoise(c1);
 
 	//mNoise.minimize();
 	return mNoise.isNoisy();
