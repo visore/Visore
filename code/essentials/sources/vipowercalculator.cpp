@@ -32,3 +32,9 @@ int ViPowerCalculator::previousPower(int value, int power)
 {
 	return ViPowerCalculator::power(qFloor(ViPowerCalculator::exponent(value, power)), power);
 }
+
+bool ViPowerCalculator::isPower(int value, int power)
+{
+	double exponent = ViPowerCalculator::exponent(value, power);
+	return exponent == (int) exponent;
+}

@@ -13,6 +13,9 @@ ViGeneralCorrectionWidget::ViGeneralCorrectionWidget(QWidget *parent)
 	QObject::connect(mUi->correctAllRadioButton, SIGNAL(toggled(bool)), this, SLOT(toggleDetector()));
 	QObject::connect(mUi->correctNoisyRadioButton, SIGNAL(toggled(bool)), this, SLOT(toggleDetector()));
 
+	QObject::connect(mUi->sizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeNoiseSize(int)));
+	changeNoiseSize(mUi->sizeSpinBox->value());
+
 	QStringList noiseDetectors = ViNoiseDetectorManager::names();
 	for(int i = 0; i < noiseDetectors.size(); ++i)
 	{
@@ -20,6 +23,9 @@ ViGeneralCorrectionWidget::ViGeneralCorrectionWidget(QWidget *parent)
 	}
 	mDefaultDetector = ViNoiseDetectorManager::defaultName("", true);
 	mUi->detectorComboBox->setCurrentText(mDefaultDetector);
+
+	QObject::connect(mUi->detectorComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeNoiseDetector()));
+	changeNoiseDetector();
 }
 
 ViGeneralCorrectionWidget::~ViGeneralCorrectionWidget()
@@ -32,6 +38,11 @@ void ViGeneralCorrectionWidget::setMode(ViCorrectionMode::Mode mode)
 	mUi->processAllRadioButton->setChecked(true);
 	mUi->correctNoisyRadioButton->setChecked(true);
 	mUi->detectorComboBox->setCurrentText(mDefaultDetector);
+}
+
+int ViGeneralCorrectionWidget::windowSize()
+{
+	return mUi->sizeSpinBox->value();
 }
 
 ViProcessor::ChannelMode ViGeneralCorrectionWidget::channelMode()
@@ -63,7 +74,9 @@ ViModifyProcessor::ModifyMode ViGeneralCorrectionWidget::modifyMode()
 
 ViNoiseDetector* ViGeneralCorrectionWidget::noiseDetector()
 {
-	return ViNoiseDetectorManager::create(mUi->detectorComboBox->itemData(mUi->detectorComboBox->currentIndex()).toString());
+	ViNoiseDetector *detector = ViNoiseDetectorManager::create(mUi->detectorComboBox->itemData(mUi->detectorComboBox->currentIndex()).toString());
+	detector->setWindowSize(mUi->noiseSpinBox->value());
+	return detector;
 }
 
 void ViGeneralCorrectionWidget::toggleDetector()
@@ -78,4 +91,16 @@ void ViGeneralCorrectionWidget::toggleDetector()
 		mUi->detectorLabel->hide();
 		mUi->detectorComboBox->hide();
 	}
+}
+
+void ViGeneralCorrectionWidget::changeNoiseDetector()
+{
+	ViNoiseDetector *detector = ViNoiseDetectorManager::create(mUi->detectorComboBox->itemData(mUi->detectorComboBox->currentIndex()).toString());
+	mUi->noiseSpinBox->setValue(detector->windowSize());
+	delete detector;
+}
+
+void ViGeneralCorrectionWidget::changeNoiseSize(int size)
+{
+	mUi->noiseSpinBox->setMaximum(size);
 }

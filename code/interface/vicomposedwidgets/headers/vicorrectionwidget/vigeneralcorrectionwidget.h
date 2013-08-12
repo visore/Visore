@@ -17,6 +17,8 @@ class ViGeneralCorrectionWidget : public ViWidget, public ViCorrectionMode
 	private slots:
 
 		void toggleDetector();
+		void changeNoiseDetector();
+		void changeNoiseSize(int size);
 
 	public:
 
@@ -25,6 +27,7 @@ class ViGeneralCorrectionWidget : public ViWidget, public ViCorrectionMode
 
 		void setMode(ViCorrectionMode::Mode mode);
 
+		int windowSize();
 		ViProcessor::ChannelMode channelMode();
 		ViProcessor::ProcessMode processMode();
 		ViModifyProcessor::ModifyMode modifyMode();

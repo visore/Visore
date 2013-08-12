@@ -12,6 +12,8 @@ class ViPowerCalculator
 		static int nextPower(int value, int power = 2);
 		static int previousPower(int value, int power = 2);
 
+		static bool isPower(int value, int power = 2);
+
 };
 
 #endif

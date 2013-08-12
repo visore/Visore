@@ -93,6 +93,8 @@ QStringList ViCorrectionWidget::correctors()
 
 ViModifyProcessor* ViCorrectionWidget::corrector()
 {
+	ViModifyProcessor *corrector = NULL;
+
 	QTabWidget *tabWidget = dynamic_cast<QTabWidget*>(mUi->stackedWidget->widget(mCurrentCorrector));
 	if(tabWidget == NULL)
 	{
@@ -100,10 +102,24 @@ ViModifyProcessor* ViCorrectionWidget::corrector()
 	}
 	else if(mCurrentCorrector == 0)
 	{
-		return neuralCorrector(tabWidget);
+		corrector = neuralCorrector(tabWidget);
 	}
 
-	return NULL;
+	ViGeneralCorrectionWidget *generalWidget = dynamic_cast<ViGeneralCorrectionWidget*>(tabWidget->widget(0));
+	if(generalWidget == NULL)
+	{
+		LOG("Can't access the general settings.", QtCriticalMsg);
+	}
+	else if(corrector != NULL)
+	{
+		corrector->setWindowSize(generalWidget->windowSize());
+		corrector->setChannelMode(generalWidget->channelMode());
+		corrector->setProcessMode(generalWidget->processMode());
+		corrector->setModifyMode(generalWidget->modifyMode());
+		corrector->setNoiseDetector(generalWidget->noiseDetector());
+	}
+
+	return corrector;
 }
 
 ViModifyProcessor* ViCorrectionWidget::neuralCorrector(QTabWidget *tabWidget)
@@ -189,23 +205,7 @@ ViModifyProcessor* ViCorrectionWidget::neuralCorrector(QTabWidget *tabWidget)
 	}
 	else
 	{
-		ViNeuralCorrector *corrector = new ViNeuralCorrector(network, trainer, provider);
-
-		// General
-		ViGeneralCorrectionWidget *generalWidget = dynamic_cast<ViGeneralCorrectionWidget*>(tabWidget->widget(0));
-		if(generalWidget == NULL)
-		{
-			LOG("Can't access the general settings.", QtCriticalMsg);
-		}
-		else
-		{
-			corrector->setChannelMode(generalWidget->channelMode());
-			corrector->setProcessMode(generalWidget->processMode());
-			corrector->setModifyMode(generalWidget->modifyMode());
-			corrector->setNoiseDetector(generalWidget->noiseDetector());
-		}
-
-		return corrector;
+		return new ViNeuralCorrector(network, trainer, provider);
 	}
 
 	return NULL;
