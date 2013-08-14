@@ -10,9 +10,6 @@ class ViCosineInterpolator : public ViInterpolator
 
 		ViCosineInterpolator();
 
-		qreal calculate();
-		ViSampleChunk calculate(int samples);
-
 		ViCosineInterpolator* clone();
 
 };

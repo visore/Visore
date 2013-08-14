@@ -1,10 +1,10 @@
 #include <vicosineinterpolator.h>
 
 ViCosineInterpolator::ViCosineInterpolator()
-	: ViInterpolator(1, 1)
+	: ViInterpolator(/*1, 1*/)
 {
 }
-
+/*
 qreal ViCosineInterpolator::calculate()
 {
 	static qreal currentRatio = (1 - qCos(M_PI / 2)) / 2;
@@ -23,10 +23,10 @@ ViSampleChunk ViCosineInterpolator::calculate(int samples)
 	}
 	return result;
 }
-
+*/
 ViCosineInterpolator* ViCosineInterpolator::clone()
 {
-	return new ViCosineInterpolator(*this);
+//	return new ViCosineInterpolator(*this);
 }
 
 #ifdef __cplusplus
@@ -36,7 +36,7 @@ extern "C"
 
 ViCosineInterpolator* create()
 {
-	return new ViCosineInterpolator();
+//	return new ViCosineInterpolator();
 }
 
 #ifdef __cplusplus

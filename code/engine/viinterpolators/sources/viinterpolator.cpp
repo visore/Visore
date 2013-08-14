@@ -1,145 +1,57 @@
 #include <viinterpolator.h>
-
-ViInterpolator::ViInterpolator(int leftSamples, int rightSamples)
+#include<vilogger.h>
+ViInterpolator::ViInterpolator()
 	: ViLibrary()
 {
-	mLeftData = NULL;
-	mRightData = NULL;
-	mRatio = 0;
-	mDeleteLeft = false;
-	mDeleteRight = false;
-	setLeftSamples(leftSamples);
-	setRightSamples(rightSamples);
 }
 
 ViInterpolator::ViInterpolator(const ViInterpolator &other)
 	: ViLibrary(other)
 {
-	if(other.mDeleteLeft)
-	{
-		mDeleteLeft = true;
-		mLeftData = new ViSampleChunk(*other.mLeftData);
-	}
-	else
-	{
-		mDeleteLeft = false;
-		mLeftData = other.mLeftData;
-	}
-
-	if(other.mDeleteRight)
-	{
-		mDeleteRight = true;
-		mRightData = new ViSampleChunk(*other.mRightData);
-	}
-	else
-	{
-		mDeleteRight = false;
-		mRightData = other.mRightData;
-	}
-	
-	mRatio = other.mRatio;
-
-	mLeftSamples = other.mLeftSamples;
-	mRightSamples = other.mRightSamples;
 }
 
 ViInterpolator::~ViInterpolator()
 {
-	clear();
 }
 
-int ViInterpolator::leftSamples()
+bool ViInterpolator::interpolate(ViSampleChunk &samples, const ViNoise &noise)
 {
-	return mLeftSamples;
-}
+	bool signalStarted = false, success = true;
+	int end, noiseLength = 0, noiseStart = -1;
 
-int ViInterpolator::rightSamples()
-{
-	return mRightSamples;
-}
-
-void ViInterpolator::setLeftSamples(int samples)
-{
-	mLeftSamples = samples;
-}
-
-void ViInterpolator::setRightSamples(int samples)
-{
-	mRightSamples = samples;
-}
-
-void ViInterpolator::clear()
-{
-	clearLeft();
-	clearRight();
-}
-
-void ViInterpolator::clearLeft()
-{
-	if(mDeleteLeft && mLeftData != NULL)
+	for(int i = 0; i < noise.size(); ++i)
 	{
-		delete mLeftData;
-		mLeftData = NULL;
-		mDeleteLeft = false;
-	}
-}
+		if(noise[i])
+		{
+			if(signalStarted)
+			{
+				end = noiseStart + noiseLength;
+				success &= interpolateSamples(samples.data(), noiseStart, samples.data() + end, noise.size() - end, samples.data() + noiseStart, noiseLength);
 
-void ViInterpolator::clearRight()
-{
-	if(mDeleteRight && mRightData != NULL)
+				noiseStart = i;
+				noiseLength = 1;
+				signalStarted = false;
+			}
+			else
+			{
+				if(noiseStart < 0)
+				{
+					noiseStart = i;
+				}
+				++noiseLength;
+			}
+		}
+		else if(noiseStart >= 0)
+		{
+			signalStarted = true;
+		}
+	}
+
+	if(noiseStart >= 0)
 	{
-		delete mRightData;
-		mRightData = NULL;
-		mDeleteRight = false;
+		end = noiseStart + noiseLength;
+		success &= interpolateSamples(samples.data(), noiseStart, samples.data() + end, noise.size() - end, samples.data() + noiseStart, noiseLength);
 	}
-}
 
-void ViInterpolator::setData(ViSampleChunk *left, ViSampleChunk *right)
-{
-	setLeftData(left);
-	setRightData(right);
-}
-
-void ViInterpolator::setLeftData(ViSampleChunk *data)
-{
-	clearLeft();
-	mLeftData = data;
-}
-
-void ViInterpolator::setRightData(ViSampleChunk *data)
-{
-	clearRight();
-	mRightData = data;
-}
-
-void ViInterpolator::setData(qreal left, qreal right)
-{
-	setLeftData(left);
-	setRightData(right);
-}
-
-void ViInterpolator::setLeftData(qreal data)
-{
-	clearLeft();
-	mLeftData = new ViSampleChunk(1);
-	(*mLeftData)[0] = data;
-	mDeleteLeft = true;
-}
-
-void ViInterpolator::setRightData(qreal data)
-{
-	clearRight();
-	mRightData = new ViSampleChunk(1);
-	(*mRightData)[0] = data;
-	mDeleteRight = true;
-}
-
-void ViInterpolator::setRatioSamples(const int &samples)
-{
-	mRatio = 1.0 / (samples + 1);
-}
-
-qreal ViInterpolator::ratio(const int &index) const
-{
-	return mRatio * (index + 1);
+	return success;
 }

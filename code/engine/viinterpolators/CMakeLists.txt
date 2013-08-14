@@ -10,6 +10,7 @@ SET(VI_INTERPOLATORS_INSTALL_PATH engine/interpolators)
 ADD_DEFINITIONS(-DINTERPOLATORS_PATH="${VI_INTERPOLATORS_INSTALL_PATH}")
 
 #Add sub libraries
+ADD_SUBDIRECTORY(${ROOT}/viadvancedlinearinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/vilinearinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/vicosineinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/vicubicinterpolator)

@@ -1,10 +1,10 @@
 #include <vicubicinterpolator.h>
 
 ViCubicInterpolator::ViCubicInterpolator()
-	: ViInterpolator(2, 2)
+	: ViInterpolator(/*2, 2*/)
 {
 }
-
+/*
 qreal ViCubicInterpolator::calculate()
 {
 	static qreal theRatio = 0.5;
@@ -35,10 +35,10 @@ ViSampleChunk ViCubicInterpolator::calculate(int samples)
 	}
 	return result;
 }
-
+*/
 ViCubicInterpolator* ViCubicInterpolator::clone()
 {
-	return new ViCubicInterpolator(*this);
+//	return new ViCubicInterpolator(*this);
 }
 
 #ifdef __cplusplus
@@ -48,7 +48,7 @@ extern "C"
 
 ViCubicInterpolator* create()
 {
-	return new ViCubicInterpolator();
+//	return new ViCubicInterpolator();
 }
 
 #ifdef __cplusplus

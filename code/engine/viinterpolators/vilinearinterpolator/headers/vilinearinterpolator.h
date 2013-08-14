@@ -4,7 +4,7 @@
 #include <viinterpolator.h>
 
 /*
-	http://paulbourke.net/miscellaneous/interpolation/
+	Adopted from Audacity - InterpolateAudio.cpp
 */
 
 class ViLinearInterpolator : public ViInterpolator
@@ -12,12 +12,21 @@ class ViLinearInterpolator : public ViInterpolator
 
 	public:
 
-		ViLinearInterpolator();
+		virtual ~ViLinearInterpolator();
 
-		qreal calculate();
-		ViSampleChunk calculate(int samples);
+		virtual ViLinearInterpolator* clone();
 
-		ViLinearInterpolator* clone();
+	protected:
+
+		virtual bool interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+
+		virtual qreal leftValue(const qreal *leftSamples, const int &leftSize);
+		virtual qreal rightValue(const qreal *rightSamples, const int &rightSize);
+		virtual qreal middleValue(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize);
+
+		virtual qreal leftDelta(const qreal *leftSamples, const int &leftSize);
+		virtual qreal rightDelta(const qreal *rightSamples, const int &rightSize);
+		virtual qreal middleDelta(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize);
 
 };
 

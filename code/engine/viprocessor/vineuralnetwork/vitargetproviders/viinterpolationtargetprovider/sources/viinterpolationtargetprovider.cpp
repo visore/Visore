@@ -30,7 +30,7 @@ ViInterpolationTargetProvider::~ViInterpolationTargetProvider()
 
 void ViInterpolationTargetProvider::setInterpolator(ViInterpolator *interpolator)
 {
-	if(mInterpolator != NULL)
+	/*if(mInterpolator != NULL)
 	{
 		delete mInterpolator;
 	}
@@ -39,13 +39,13 @@ void ViInterpolationTargetProvider::setInterpolator(ViInterpolator *interpolator
 	{
 		setLeftSamples(mInterpolator->leftSamples());
 		setRightSamples(mInterpolator->rightSamples());
-	}
+	}*/
 }
 
 qreal ViInterpolationTargetProvider::calculate()
 {
-	mInterpolator->setData(mLeftData, mRightData);
-	return mInterpolator->calculate();
+	/*mInterpolator->setData(mLeftData, mRightData);
+	return mInterpolator->calculate();*/
 }
 
 ViElement ViInterpolationTargetProvider::exportData()
