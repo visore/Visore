@@ -6,7 +6,7 @@
 /*
 	http://paulbourke.net/miscellaneous/interpolation/
 */
-
+/*
 class ViCubicInterpolator : public ViInterpolator
 {
 
@@ -14,11 +14,8 @@ class ViCubicInterpolator : public ViInterpolator
 
 		ViCubicInterpolator();
 
-		/*qreal calculate();
-		ViSampleChunk calculate(int samples);*/
-
 		ViCubicInterpolator* clone();
 
-};
+};*/
 
 #endif

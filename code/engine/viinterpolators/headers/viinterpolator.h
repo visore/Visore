@@ -2,9 +2,10 @@
 #define VIINTERPOLATOR_H
 
 #include <vilibrary.h>
+#include <viserializer.h>
 #include <vinoise.h>
 
-class ViInterpolator : public ViLibrary
+class ViInterpolator : public ViLibrary, public ViSerializer
 {
 
 	public:
@@ -16,6 +17,9 @@ class ViInterpolator : public ViLibrary
 		bool interpolate(ViSampleChunk &samples, const ViNoise &noise);
 
 		virtual ViInterpolator* clone() = 0;
+
+		virtual ViElement exportData();
+		virtual bool importData(ViElement element);
 
 	protected:
 

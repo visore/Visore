@@ -1,9 +1,7 @@
 #include <vinoise.h>
 
-#include<vilogger.h>
-
-#define MINIMIZE_THRESHOLD 8
-#define SNR_THRESHOLD 19 // 5% of the data is noisy (95 / 5)
+#define MINIMIZE_THRESHOLD 2
+#define SNR_THRESHOLD 49 // 2% of the data is noisy (98 / 2)
 #define NOISE_THRESHOLD 0.01 // Values range from 0 to 1. Everything above this threshold is considered noise
 
 ViNoise::ViNoise(const int &size)
@@ -55,7 +53,7 @@ qreal ViNoise::snr() const
 
 bool ViNoise::isNoisy() const
 {
-	return snr() >= SNR_THRESHOLD;
+	return snr() <= SNR_THRESHOLD;
 }
 
 void ViNoise::minimize()
@@ -135,12 +133,14 @@ void ViNoise::set(const int &index, const ViNoise &other)
 	}
 }
 
-bool ViNoise::at(const int &index) const
+const bool& ViNoise::at(const int &index) const
 {
-	return mMask[index];
+	const bool& value = mMask[index];
+	return value;
 }
 
-bool ViNoise::operator [] (const int &index) const
+const bool& ViNoise::operator [] (const int &index) const
 {
-	return mMask[index];
+	const bool& value = mMask[index];
+	return value;
 }

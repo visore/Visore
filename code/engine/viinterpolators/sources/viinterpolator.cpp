@@ -1,5 +1,5 @@
 #include <viinterpolator.h>
-#include<vilogger.h>
+
 ViInterpolator::ViInterpolator()
 	: ViLibrary()
 {
@@ -54,4 +54,16 @@ bool ViInterpolator::interpolate(ViSampleChunk &samples, const ViNoise &noise)
 	}
 
 	return success;
+}
+
+ViElement ViInterpolator::exportData()
+{
+	ViElement root("interpolator");
+	root.addChild("name", name());
+	return root;
+}
+
+bool ViInterpolator::importData(ViElement element)
+{
+	return element.name() == "interpolator" && element.child("name").toString() == name();
 }

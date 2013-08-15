@@ -162,6 +162,7 @@ class ViProject : public QObject, public ViId
 
 		*******************************************************************************************************************/
 
+		bool initializeStructure();
 		bool createStructure();
 		bool removeStructure();
 

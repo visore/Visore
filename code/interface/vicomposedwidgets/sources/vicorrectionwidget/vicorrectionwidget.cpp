@@ -2,6 +2,7 @@
 #include <ui_vicorrectionwidget.h>
 
 #include <vineuralcorrector.h>
+#include <viinterpolationcorrector.h>
 
 #include <vigeneralcorrectionwidget.h>
 #include <vineuralstructurewidget.h>
@@ -10,6 +11,7 @@
 #include <vineuralerrorfunctionwidget.h>
 #include <vineuralactivationfunctionwidget.h>
 #include <vineuraltargetproviderwidget.h>
+#include <viinterpolatorselectionwidget.h>
 
 ViCorrectionWidget::ViCorrectionWidget(QWidget *parent)
 	: ViWidget(parent)
@@ -28,6 +30,13 @@ ViCorrectionWidget::ViCorrectionWidget(QWidget *parent)
 	addTab(neuralTabWidget, "Target Provider", new ViNeuralTargetProviderWidget());
 	addTab(neuralTabWidget, "Error Functions", new ViNeuralErrorFunctionWidget());
 	mUi->stackedWidget->addWidget(neuralTabWidget);
+
+	// Interpolation Corrector
+	mCorrectors.append("Interpolation Corrector");
+	QTabWidget *interpolationTabWidget = new QTabWidget();
+	addTab(interpolationTabWidget, "General", new ViGeneralCorrectionWidget());
+	addTab(interpolationTabWidget, "Interpolator", new ViInterpolatorSelectionWidget());
+	mUi->stackedWidget->addWidget(interpolationTabWidget);
 }
 
 ViCorrectionWidget::~ViCorrectionWidget()
@@ -38,7 +47,8 @@ ViCorrectionWidget::~ViCorrectionWidget()
 
 void ViCorrectionWidget::clear()
 {
-	mCurrentCorrector = 0;
+	//mCurrentCorrector = 0;
+	//mUi->stackedWidget->setCurrentIndex(mCurrentCorrector);
 	mMode = ViCorrectionMode::Quick;
 }
 
@@ -103,6 +113,10 @@ ViModifyProcessor* ViCorrectionWidget::corrector()
 	else if(mCurrentCorrector == 0)
 	{
 		corrector = neuralCorrector(tabWidget);
+	}
+	else if(mCurrentCorrector == 1)
+	{
+		corrector = interpolationCorrector(tabWidget);
 	}
 
 	ViGeneralCorrectionWidget *generalWidget = dynamic_cast<ViGeneralCorrectionWidget*>(tabWidget->widget(0));
@@ -206,6 +220,21 @@ ViModifyProcessor* ViCorrectionWidget::neuralCorrector(QTabWidget *tabWidget)
 	else
 	{
 		return new ViNeuralCorrector(network, trainer, provider);
+	}
+
+	return NULL;
+}
+
+ViModifyProcessor* ViCorrectionWidget::interpolationCorrector(QTabWidget *tabWidget)
+{
+	ViInterpolatorSelectionWidget *selectionWidget = dynamic_cast<ViInterpolatorSelectionWidget*>(tabWidget->widget(1));
+	if(selectionWidget == NULL)
+	{
+		LOG("Can't access the interpolator selection settings.", QtCriticalMsg);
+	}
+	else
+	{
+		return new ViInterpolationCorrector(selectionWidget->interpolator());
 	}
 
 	return NULL;

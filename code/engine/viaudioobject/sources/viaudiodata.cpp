@@ -1,6 +1,7 @@
 #include <viaudiodata.h>
 #include <visamplechanneler.h>
 #include <viscaler.h>
+#include <viaudioposition.h>
 #include <QQueue>
 
 #define DEFAULT_SAMPLE_COUNT 2048
@@ -55,14 +56,24 @@ ViBuffer* ViAudioData::buffer()
     return mBuffer;
 }
 
-int ViAudioData::bufferSize()
+qint64 ViAudioData::bufferSize()
 {
 	QMutexLocker locker(&mMutex);
-    if(mBuffer == NULL)
-    {
-        return 0;
-    }
-    return mBuffer->size();
+	if(mBuffer == NULL)
+	{
+		return 0;
+	}
+	return mBuffer->size();
+}
+
+qint64 ViAudioData::bufferSamples()
+{
+	QMutexLocker locker(&mMutex);
+	if(mBuffer == NULL)
+	{
+		return 0;
+	}
+	return ViAudioPosition::convertPosition(mBuffer->size(), ViAudioPosition::Bytes, ViAudioPosition::Samples, mBuffer->format());
 }
 
 void ViAudioData::setSampleCount(int samples)
@@ -140,6 +151,16 @@ void ViAudioData::updateOther()
 /*****************************************
     READ
 *****************************************/
+
+ViAudioReadData::ViAudioReadData()
+	: ViAudioData()
+{
+}
+
+ViAudioReadData::ViAudioReadData(ViBuffer *buffer)
+	: ViAudioData(buffer)
+{
+}
 
 bool ViAudioReadData::hasData()
 {
@@ -292,6 +313,16 @@ void ViAudioReadData::updateOther()
 /*****************************************
     WRITE
 *****************************************/
+
+ViAudioWriteData::ViAudioWriteData()
+	: ViAudioData()
+{
+}
+
+ViAudioWriteData::ViAudioWriteData(ViBuffer *buffer)
+	: ViAudioData(buffer)
+{
+}
 
 void ViAudioWriteData::enqueueSplitSamples(ViSampleChunk &samples, const int &channel)
 {

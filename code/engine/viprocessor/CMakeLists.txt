@@ -4,15 +4,14 @@ SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 SET(HEADERS ${ROOT}/headers)
 SET(SOURCES ${ROOT}/sources)
 
+#Add definitions
+SET(VI_PROCESSOR_INSTALL_PATH engine/processors)
+
 #Libraries
-SET(VI_NEURAL_NETWORK ${ROOT}/vineuralnetwork)
-SET(VI_CORRELATOR ${ROOT}/vicorrelator)
-SET(VI_SPECTRUM_ANALYZER ${ROOT}/vispectrumanalyzer)
-SET(VI_REGRESSION_CORRECTOR ${ROOT}/viregressioncorrector)
-ADD_SUBDIRECTORY(${VI_NEURAL_NETWORK})
-ADD_SUBDIRECTORY(${VI_CORRELATOR})
-ADD_SUBDIRECTORY(${VI_SPECTRUM_ANALYZER})
-ADD_SUBDIRECTORY(${VI_REGRESSION_CORRECTOR})
+ADD_SUBDIRECTORY(${ROOT}/vineuralnetwork)
+ADD_SUBDIRECTORY(${ROOT}/vicorrelator)
+ADD_SUBDIRECTORY(${ROOT}/vispectrumanalyzer)
+ADD_SUBDIRECTORY(${ROOT}/viinterpolationcorrector)
 
 #Initiate source files
 FILE(GLOB VI_PROCESSOR_SOURCES ${SOURCES}/*.cpp ${SOURCES}/*/*.cpp ${SOURCES}/*/*/*.cpp)
@@ -24,4 +23,4 @@ TARGET_LINK_LIBRARIES(viprocessor viaudioconnection vifouriertransformer visongi
 QT5_USE_MODULES(viprocessor Multimedia Xml)
 
 #Install file
-INSTALL(TARGETS viprocessor DESTINATION engine)
+INSTALL(TARGETS viprocessor DESTINATION ${VI_PROCESSOR_INSTALL_PATH})

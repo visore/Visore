@@ -3,7 +3,9 @@
 #include "vicoder.h"
 #include <QApplication>
 
-#include<viadvancedlinearinterpolator.h>
+#include<vibenchmarker.h>
+#include <vilinearinterpolator.h>
+#include <viadvancedlinearinterpolator.h>
 
 int main(int argc, char *argv[])
 {
@@ -19,51 +21,80 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<ViAudioPosition>("ViAudioPosition");
 	qRegisterMetaType<ViRealSpectrum>("ViRealSpectrum");
 
-	ViSampleChunk s(8);
+	ViBenchMarker bench;
+	bench.benchmark("/home/visore/Visore Projects/a.flac");
+
+	/*
+	s[0] = 0.5;
+	s[1] = 0.4;
+	s[2] = 0.3;
+	s[3] = 1;
+	s[4] = 1;
+	s[5] = 1;
+	s[6] = 0.3;
+	s[7] = 0.4;
+	s[8] = 0.5;
+	*/
+
+	/*
 	s[0] = 0.1;
 	s[1] = 0.2;
 	s[2] = 0.3;
 	s[3] = 1;
 	s[4] = 1;
-	s[5] = 0.4;
+	s[5] = 1;
 	s[6] = 0.3;
 	s[7] = 0.2;
+	s[8] = 0.1;
+	*/
 
-	ViLinearInterpolator p;
-
-	ViNoise n1(8);
-	n1.set(3, 1);
-	n1.set(4, 1);
-
-	p.interpolate(s, n1);
-
-	cout<<"**************"<<endl;
-	for(int i = 0; i<8;++i) cout<<s[i]<<endl;
-
-
-
-
-	s[0] = 0.1;
-	s[1] = 0.2;
-	s[2] = 0.3;
+	ViSampleChunk s(9);
+	s[0] = -0.3;
+	s[1] = -0.2;
+	s[2] = -0.1;
 	s[3] = 1;
 	s[4] = 1;
-	s[5] = 0.4;
-	s[6] = 0.3;
-	s[7] = 0.2;
-	ViAdvancedLinearInterpolator p2;
+	s[5] = 1;
+	s[6] = -0.7;
+	s[7] = -0.8;
+	s[8] = -0.9;
 
-	p2.interpolate(s, n1);
+	ViNoise n(9);
+	n.set(3,1);
+	n.set(4,1);
+	n.set(5,1);
 
-	cout<<"**************"<<endl;
-	for(int i = 0; i<8;++i) cout<<s[i]<<endl;
+	ViAdvancedLinearInterpolator al;
+	al.interpolate(s, n);
+	for(int i = 0; i<s.size();++i)cout<<s[i]<<" ";
+	cout<<endl;
+
+	s[0] = -0.1;
+	s[1] = -0.2;
+	s[2] = -0.3;
+	s[3] = 1;
+	s[4] = 1;
+	s[5] = 1;
+	s[6] = -0.3;
+	s[7] = -0.2;
+	s[8] = -0.1;
 
 
-    ViMainWindow *window = ViMainWindow::instance();
+
+	ViLinearInterpolator l;
+	l.interpolate(s, n);
+	for(int i = 0; i<s.size();++i)cout<<s[i]<<" ";
+	cout<<endl;
+
+	int x = 0;
+	//int y = 1/x;
+
+
+	ViMainWindow *window = ViMainWindow::instance();
 	window->setWindowIcon(logo);
-    window->show();
+	//window->show();
 	
-    application.exec();
+	application.exec();
 
 	return 0;
 }

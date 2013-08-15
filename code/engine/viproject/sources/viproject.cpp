@@ -24,7 +24,7 @@ ViProject::ViProject(QString filePath)
     mCreatedVersion = ViManager::version();
     mEditedVersion = ViManager::version();
 
-    createStructure();
+	initializeStructure();
 }
 
 ViProject::ViProject(QString projectName, QString filePath, int sides)
@@ -38,7 +38,7 @@ ViProject::ViProject(QString projectName, QString filePath, int sides)
     mCreatedVersion = ViManager::version();
     mEditedVersion = ViManager::version();
 
-    createStructure();
+	initializeStructure();
 }
 
 ViProject::ViProject(const ViProject &other)
@@ -55,7 +55,7 @@ ViProject::ViProject(const ViProject &other)
     mEditedVersion = other.mEditedVersion;
 
     setFilePath(other.filePath());
-    createStructure();
+	initializeStructure();
 }
 
 ViProject::~ViProject()
@@ -377,6 +377,7 @@ bool ViProject::loadAll()
         return false;
     }
     bool success = loadProperties() & loadTracks() & loadCorrections();
+	createDirectory(sideCount());
     emit loaded();
 	setFinished();
     return success;
@@ -427,34 +428,39 @@ bool ViProject::isFinished()
 
 *******************************************************************************************************************/
 
+bool ViProject::initializeStructure()
+{
+	//Declare paths
+	mPaths[ViProject::Root] = ViManager::tempPath() + "projects" + QDir::separator() + id() + QDir::separator();
+
+	mPaths[ViProject::Info] = mPaths[ViProject::Root] + "info" + QDir::separator();
+	mPaths[ViProject::GeneralInfo] = mPaths[ViProject::Info] + "general" + QDir::separator();
+	mPaths[ViProject::TrackInfo] = mPaths[ViProject::Info] + "tracks" + QDir::separator();
+	mPaths[ViProject::CorrectionInfo] = mPaths[ViProject::Info] + "correction" + QDir::separator();
+
+	mPaths[ViProject::Data] = mPaths[ViProject::Root] + "data" + QDir::separator();
+	mPaths[ViProject::TargetData] = mPaths[ViProject::Data] + "target" + QDir::separator();
+	mPaths[ViProject::CorruptedData] = mPaths[ViProject::Data] + "corrupted" + QDir::separator();
+	mPaths[ViProject::CorrectedData] = mPaths[ViProject::Data] + "corrected" + QDir::separator();
+	mPaths[ViProject::NoiseData] = mPaths[ViProject::Data] + "noise" + QDir::separator();
+	mPaths[ViProject::CoverData] = mPaths[ViProject::Data] + "covers" + QDir::separator();
+
+	//Declare files
+	mFiles[ViProject::Properties] = mPaths[ViProject::GeneralInfo] + "properties.vml";
+	mFiles[ViProject::Tracks] = mPaths[ViProject::TrackInfo] + "tracks.vml";
+
+	createStructure();
+}
+
 bool ViProject::createStructure()
 {
     bool success = true;
-
-    //Declare paths
-    mPaths[ViProject::Root] = ViManager::tempPath() + "projects" + QDir::separator() + id() + QDir::separator();
-
-    mPaths[ViProject::Info] = mPaths[ViProject::Root] + "info" + QDir::separator();
-    mPaths[ViProject::GeneralInfo] = mPaths[ViProject::Info] + "general" + QDir::separator();
-    mPaths[ViProject::TrackInfo] = mPaths[ViProject::Info] + "tracks" + QDir::separator();
-    mPaths[ViProject::CorrectionInfo] = mPaths[ViProject::Info] + "correction" + QDir::separator();
-
-    mPaths[ViProject::Data] = mPaths[ViProject::Root] + "data" + QDir::separator();
-    mPaths[ViProject::TargetData] = mPaths[ViProject::Data] + "target" + QDir::separator();
-    mPaths[ViProject::CorruptedData] = mPaths[ViProject::Data] + "corrupted" + QDir::separator();
-	mPaths[ViProject::CorrectedData] = mPaths[ViProject::Data] + "corrected" + QDir::separator();
-	mPaths[ViProject::NoiseData] = mPaths[ViProject::Data] + "noise" + QDir::separator();
-    mPaths[ViProject::CoverData] = mPaths[ViProject::Data] + "covers" + QDir::separator();
 
     //Create paths
     for(QMap<ViProject::Directory, QString>::iterator iterator = mPaths.begin(); iterator != mPaths.end(); ++iterator)
     {
         success &= createDirectory(iterator.value());
     }
-
-    //Declare files
-    mFiles[ViProject::Properties] = mPaths[ViProject::GeneralInfo] + "properties.vml";
-    mFiles[ViProject::Tracks] = mPaths[ViProject::TrackInfo] + "tracks.vml";
 
     //Create files
     for(QMap<ViProject::File, QString>::iterator iterator = mFiles.begin(); iterator != mFiles.end(); ++iterator)
@@ -479,6 +485,7 @@ bool ViProject::createDirectory(QString directoryPath)
 
 bool ViProject::createDirectory(int side)
 {
+	if(side < 1) return false;
     bool result = true;
     result &= createDirectory(ViProject::TargetData, side);
     result &= createDirectory(ViProject::CorruptedData, side);

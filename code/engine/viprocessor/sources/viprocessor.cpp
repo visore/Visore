@@ -67,8 +67,9 @@ void ViProcessor::run()
 {
 	QMutexLocker locker(&mMutex);
 	int channel = mCurrentChannel;
+	bool noise = isNoisy();
 	++mCurrentChannel;
-	if(mProcessMode == ViProcessor::All || isNoisy())
+	if(mProcessMode == ViProcessor::All || noise)
 	{
 		locker.unlock();
 		execute(channel);
@@ -361,6 +362,11 @@ ViFrequencyChunk& ViProcessor::currentFrequencies(int channel)
 	return mData.splitFrequencies(channel);
 }
 
+ViNoise& ViProcessor::currentNoise(const int &channel)
+{
+	return mNoiseDetector->noise(channel);
+}
+
 void ViProcessor::setMultiShot(bool multishot)
 {
 	QMutexLocker locker(&mMutex);
@@ -553,6 +559,24 @@ ViModifyProcessor::~ViModifyProcessor()
 {
 }
 
+void ViModifyProcessor::run()
+{
+	QMutexLocker locker(&mMutex);
+	int channel = mCurrentChannel;
+	bool noise = isNoisy();
+	++mCurrentChannel;
+	if(mProcessMode == ViProcessor::All || noise)
+	{
+		locker.unlock();
+		execute(channel);
+	}
+	else
+	{
+		locker.unlock();
+		write(currentSamples(channel), channel);
+	}
+}
+
 int ViModifyProcessor::readNext()
 {
 	QMutexLocker locker(&mMutex);
@@ -560,7 +584,7 @@ int ViModifyProcessor::readNext()
     if(mData.hasData())
     {
 		int size = mData.read().size();
-        if(mModifyMode == ViModifyProcessor::Noise)
+		if(mModifyMode == ViModifyProcessor::Noise)
         {
 			bool noisy;
 			if(mChannelMode == ViProcessor::Separated)

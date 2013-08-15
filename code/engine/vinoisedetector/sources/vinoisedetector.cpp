@@ -54,6 +54,10 @@ ViProcessor::ChannelMode ViNoiseDetector::mode()
 void ViNoiseDetector::setChannel(int channel)
 {
 	mChannel = channel;
+	if(mNoise.size() <= mChannel)
+	{
+		mNoise.append(ViNoise());
+	}
 }
 
 int ViNoiseDetector::channel()
@@ -92,16 +96,16 @@ bool ViNoiseDetector::isNoisy(ViAudioReadData &data, int channel)
 
 bool ViNoiseDetector::isNoisy()
 {
-	/*if(mMode == ViProcessor::Separated)
+	if(mMode == ViProcessor::Separated)
 	{
 		calculateNoise(mData->scaledSplitSamples(mChannel, 0, 1));
 	}
 	else
 	{
 		calculateNoise(mData->scaledSamples(0, 1));
-	}*/
+	}
 
-	ViSampleChunk c1;
+	/*ViSampleChunk c1;
 	if(mMode == ViProcessor::Separated)
 	{
 		c1 = mData->splitSamples(mChannel);
@@ -114,28 +118,38 @@ bool ViNoiseDetector::isNoisy()
 	{
 		//c1[i] = ViScaler<qreal>::scale(c1[i], -1, 1, 0, 1);
 	}
-	calculateNoise(c1);
+	calculateNoise(c1);*/
 
-	//mNoise.minimize();
-	return mNoise.isNoisy();
+	//mNoise[mChannel].minimize();
+	return mNoise[mChannel].isNoisy();
 }
 
 void ViNoiseDetector::calculateNoise(const ViSampleChunk &samples)
 {
-	mNoise.resize(samples.size());
+	/*mNoise[mChannel].resize(samples.size());
 	QList<ViSampleChunk> chunks = samples.subsets(mWindowSize);
 	ViNoise noise;
 	for(int i = 0; i < chunks.size(); ++i)
 	{
 		noise.resize(chunks[i].size());
 		calculateNoise(noise, chunks[i]);
-		mNoise.set(i * mWindowSize, noise);
+		mNoise[mChannel].set(i * mWindowSize, noise);
+	}*/
+	mNoise[mChannel].resize(samples.size());
+	for(int i = 0; i < 5; ++i)
+	{
+		int h = i*100;
+		int h2 = h +16;
+		for(int j = h; j < h2; ++j)
+		{
+			mNoise[mChannel].set(j, 1);
+		}
 	}
 }
 
-ViNoise& ViNoiseDetector::noise()
+ViNoise& ViNoiseDetector::noise(const int &channel)
 {
-	return mNoise;
+	return mNoise[channel];
 }
 
 void ViNoiseDetector::clear()
@@ -143,5 +157,8 @@ void ViNoiseDetector::clear()
 	mData = NULL;
 	mChannel = 0;
 	setMode(ViProcessor::Combined);
-    mNoise.clear();
+	for(int i = 0; i < mNoise.size(); ++i)
+	{
+		mNoise[i].clear();
+	}
 }

@@ -18,7 +18,8 @@ class ViAudioData
 
         void setBuffer(ViBuffer *buffer);
         ViBuffer* buffer();
-        int bufferSize();
+		qint64 bufferSize();
+		qint64 bufferSamples();
 
         void setSampleCount(int samples);
 		bool setWindowFunction(QString function);
@@ -65,6 +66,9 @@ class ViAudioReadData : public ViAudioData
 {
 
     public:
+
+		ViAudioReadData();
+		ViAudioReadData(ViBuffer *buffer);
 
         bool hasData();
 
@@ -113,6 +117,9 @@ class ViAudioWriteData : public ViAudioData
 {
 
 	public:
+
+		ViAudioWriteData();
+		ViAudioWriteData(ViBuffer *buffer);
 
 		//Enqueues samples. Once a chunk is available for each channel, they are written.
 		void enqueueSplitSamples(ViSampleChunk &samples, const int &channel);

@@ -2,7 +2,7 @@
 #define VICOSINEINTERPOLATOR_H
 
 #include <viinterpolator.h>
-
+/*
 class ViCosineInterpolator : public ViInterpolator
 {
 
@@ -12,6 +12,6 @@ class ViCosineInterpolator : public ViInterpolator
 
 		ViCosineInterpolator* clone();
 
-};
+};*/
 
 #endif

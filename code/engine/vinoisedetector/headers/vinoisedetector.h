@@ -32,7 +32,7 @@ class ViNoiseDetector : public ViLibrary
 		bool isNoisy(ViAudioReadData &data, int channel);
 		bool isNoisy();
 
-		ViNoise& noise();
+		ViNoise& noise(const int &channel = 0);
 
         void clear();
 
@@ -49,7 +49,7 @@ class ViNoiseDetector : public ViLibrary
 		ViProcessor::ChannelMode mMode;
 		int mChannel;
 		ViAudioReadData *mData;
-		ViNoise mNoise;
+		QList<ViNoise> mNoise;
 
 };
 

@@ -6,6 +6,7 @@
 #include <viaudiodata.h>
 #include <viprocessor.h>
 #include <vilibrary.h>
+#include <vinoise.h>
 #include <QThreadPool>
 
 class ViProcessor;
@@ -108,12 +109,14 @@ class ViProcessor : public ViNotifier, public ViSerializer, public QRunnable, pu
 		ViFrequencyChunk& currentFrequencies(int channel);
 		inline ViFrequencyChunk& currentFrequencies1(int channel){ return currentFrequencies(channel); }
 
+		ViNoise& currentNoise(const int &channel = 0);
+
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
 
 	protected:
 
-		void run();
+		virtual void run();
 
 		virtual void initialize();
 		virtual void execute(const int &channel) = 0;
@@ -256,6 +259,8 @@ class ViModifyProcessor : public ViProcessor
 		virtual bool importData(ViElement element);
 
 	protected:
+
+		void run();
 
 		ViAudio::Type type2();
 		ViAudioFormat format2();

@@ -14,6 +14,7 @@ SET(INTERFACE ${ROOT}/interface CACHE INTERNAL "Interface directory")
 SET(EXTERNAL ${ROOT}/external CACHE INTERNAL "External directory")
 SET(ESSENTIALS ${ROOT}/essentials CACHE INTERNAL "Essentials directory")
 SET(COMMON ${ROOT}/common CACHE INTERNAL "Common directory")
+SET(BENCHMARKER ${ROOT}/benchmarker CACHE INTERNAL "Benchmarker directory")
 
 #Setup CMake
 SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
@@ -71,5 +72,6 @@ ADD_SUBDIRECTORY(${ENGINE})
 ADD_SUBDIRECTORY(${INTERFACE})
 ADD_SUBDIRECTORY(${MAIN})
 ADD_SUBDIRECTORY(${LAUNCHER})
+ADD_SUBDIRECTORY(${BENCHMARKER})
 
 INCLUDE(Packaging)

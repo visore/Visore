@@ -33,6 +33,7 @@ class ViCorrectionWidget : public ViWidget
 	private:
 
 		ViModifyProcessor* neuralCorrector(QTabWidget *tabWidget);
+		ViModifyProcessor* interpolationCorrector(QTabWidget *tabWidget);
 
 		void addTab(QTabWidget *tabWidget, const QString &text, QWidget *widget);
 
