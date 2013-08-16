@@ -41,6 +41,22 @@ bool ViLinearInterpolator::interpolateSamples(const qreal *leftSamples, const in
 		int i = 0;
 		qreal value = leftSamples[leftSize - 1];
 		qreal delta = (rightSamples[0] - leftSamples[leftSize - 1]) / (outputSize + 1);
+
+		/*
+		 * Aternativly calculate the delta by:
+		 * y = 0.5x^2 + 0.5x -> least square fit gave this function, where x is the number of output samples
+		 * then use: leftSamples[leftSize - i - 1] * (y * (outputSize - i));
+		 *
+		 * qreal left = leftSamples[leftSize - 1];
+		 * qreal right = rightSamples[0];
+		 * float ratio, devider = outputSize + 1;
+		 * for(int i = 0; i < outputSize; ++i)
+		 * {
+		 *   ratio = ((outputSize - i) / devider);
+		 *   outputSamples[i] = (left * ratio) + (right * (1 - ratio));
+		 * }
+		*/
+
 		while(i < outputSize)
 		{
 			value += delta;

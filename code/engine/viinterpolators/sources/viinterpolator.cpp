@@ -26,7 +26,7 @@ bool ViInterpolator::interpolate(ViSampleChunk &samples, const ViNoise &noise)
 			if(signalStarted)
 			{
 				end = noiseStart + noiseLength;
-				success &= interpolateSamples(samples.data(), noiseStart, samples.data() + end, noise.size() - end, samples.data() + noiseStart, noiseLength);
+				success &= interpolateSamples(samples.data(), noiseStart, samples.data() + end, i - end, samples.data() + noiseStart, noiseLength);
 
 				noiseStart = i;
 				noiseLength = 1;
