@@ -1,0 +1,22 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Setup install paths
+SET(VI_INTERPOLATION_CORRECTOR_INSTALL_PATH engine/processors/interpolationcorrector)
+
+#Add definitions
+ADD_DEFINITIONS(-DINTERPOLATION_CORRECTOR_PATH="${VI_INTERPOLATION_CORRECTOR_INSTALL_PATH}")
+
+#Initiate source files
+FILE(GLOB VI_INTERPOLATION_CORRECTOR_HEADERS ${HEADERS}/*.h)
+FILE(GLOB VI_INTERPOLATION_CORRECTOR_SOURCES ${SOURCES}/*.cpp)
+
+#Create library
+ADD_LIBRARY(viinterpolationcorrector SHARED ${VI_INTERPOLATION_CORRECTOR_HEADERS} ${VI_INTERPOLATION_CORRECTOR_SOURCES})
+TARGET_LINK_LIBRARIES(viinterpolationcorrector viessentials)
+QT5_USE_MODULES(viinterpolationcorrector Multimedia Xml)
+
+#Install file
+INSTALL(TARGETS viinterpolationcorrector DESTINATION ${VI_INTERPOLATION_CORRECTOR_INSTALL_PATH})

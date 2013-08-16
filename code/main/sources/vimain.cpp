@@ -175,8 +175,17 @@ int main(int argc, char *argv[])
 		n.set(4,1);
 		n.set(5,1);
 
+		/*ViSampleChunk s(4);
+		s[0]=0;
+		s[1]=1;
+		s[2]=0.4;
+		s[3]=0.4;
+
+		ViNoise n(s.size());
+		n.set(1,1);*/
+
 		ViSplineInterpolator al;
-		al.setOrder(2);
+		al.setOrder(3);
 		al.interpolate(s, n);
 		for(int i = 0; i<s.size();++i)
 		{
