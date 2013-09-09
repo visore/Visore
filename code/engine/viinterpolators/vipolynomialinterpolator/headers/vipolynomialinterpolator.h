@@ -1,26 +1,25 @@
-#ifndef VISPLINEINTERPOLATOR_H
-#define VISPLINEINTERPOLATOR_H
+#ifndef VIPOLYNOMIALINTERPOLATOR_H
+#define VIPOLYNOMIALINTERPOLATOR_H
 
 #include <viinterpolator.h>
 
-class ViSplineInterpolator : public ViInterpolator
+class ViPolynomialInterpolator : public ViInterpolator
 {
 
 	public:
 
-		ViSplineInterpolator();
+		ViPolynomialInterpolator();
 
 		// Eg: degree-2 = quadratic
 		// Eg: degree-3 = qubic
 		void setDegree(const int &degree);
 		int degree();
 
-		virtual ViSplineInterpolator* clone();
+		virtual ViPolynomialInterpolator* clone();
 
 	protected:
 
 		virtual bool interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
-		inline qreal calculateMultiplier(const int &derivative, const int &parameterNumber);
 
 	private:
 

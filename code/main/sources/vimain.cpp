@@ -8,6 +8,8 @@
 #include <viadvancedlinearinterpolator.h>
 #include <vipiecewiseconstantinterpolator.h>
 #include <visplineinterpolator.h>
+#include <vipolynomialinterpolator.h>
+#include <vihermiteinterpolator.h>
 
 qreal norm(qreal array[], qint32 size)
 {
@@ -45,14 +47,14 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<ViAudioPosition>("ViAudioPosition");
 	qRegisterMetaType<ViRealSpectrum>("ViRealSpectrum");
 
-	//bool BENCH = true;
-	bool BENCH = false;
+	bool BENCH = true;
+	//bool BENCH = false;
 
 	ViBenchMarker bench;
 	if(BENCH)
 	{
 
-		bench.benchmark("/home/visore/Visore Projects/a.flac");
+		bench.benchmark("/home/visore/Visore Projects/a2.flac");
 	}
 	else
 	{
@@ -160,8 +162,8 @@ int main(int argc, char *argv[])
 		n.set(14,1);
 		n.set(15,1);*/
 
-		ViSampleChunk s(8);
-		s[0]=0;
+		ViSampleChunk s(9);
+		s[0]=0.1;
 		s[1]=0.3;
 		s[2]=0.4;
 		s[3]=1;
@@ -169,11 +171,41 @@ int main(int argc, char *argv[])
 		s[5]=1;
 		s[6]=0.3;
 		s[7]=0.2;
+		s[8]=0;
 
 		ViNoise n(s.size());
 		n.set(3,1);
 		n.set(4,1);
 		n.set(5,1);
+
+		/*ViSampleChunk s(16);
+				s[0]=0;
+				s[1]=0;
+				s[2]=-0.00003;
+				s[3]=-0.00003;
+				s[4]=1;
+				s[5]=1;
+				s[6]=1;
+				s[7]=1;
+				s[8]=1;
+				s[9]=1;
+				s[10]=1;
+				s[11]=1;
+				s[12]=0;
+				s[13]=0;
+				s[14]=-0.00003;
+				s[15]=0;
+
+
+		ViNoise n(s.size());
+		n.set(4,1);
+		n.set(5,1);
+		n.set(6,1);
+		n.set(7,1);
+		n.set(8,1);
+		n.set(9,1);
+		n.set(10,1);
+		n.set(11,1);*/
 
 		/*ViSampleChunk s(4);
 		s[0]=0;
@@ -184,15 +216,56 @@ int main(int argc, char *argv[])
 		ViNoise n(s.size());
 		n.set(1,1);*/
 
-		ViSplineInterpolator al;
-		al.setOrder(3);
+
+
+
+
+
+
+
+
+
+
+
+		/*ViSampleChunk s(10);
+		s[0] = 0.00180;
+		s[1] = -0.04834;
+		s[2] = 0.16000;
+		s[3] = 0.08258;
+		s[4] = 1; // s[16] = -0.60022;
+		s[5] = 1; // s[17] = -0.77640;
+		s[6] = 0.07126;
+		s[7] = -0.13742;
+		s[8] = -0.11526;
+		s[9] = 0.17563;
+
+		ViNoise n(s.size());
+		n.set(4,1);
+		n.set(5,1);
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		ViHermiteInterpolator al;
+		al.setDegree(2);
 		al.interpolate(s, n);
 		for(int i = 0; i<s.size();++i)
 		{
 			/*if(n[i])cout<<"*\t";
 			else cout<<" \t";
 			cout<<s2[i]<<"\t"<<s[i]<<endl;*/
-			cout<<s[i]<<endl;
+			cout<<i<<"\t"<<s[i]<<endl;
 		}
 
 		int x = 0;

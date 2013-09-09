@@ -14,7 +14,9 @@ ADD_SUBDIRECTORY(${ROOT}/viadvancedlinearinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/vilinearinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/vipiecewiseconstantinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/visplineinterpolator)
-#ADD_SUBDIRECTORY(${ROOT}/vicosineinterpolator)
+ADD_SUBDIRECTORY(${ROOT}/vipolynomialinterpolator)
+ADD_SUBDIRECTORY(${ROOT}/vicosineinterpolator)
+ADD_SUBDIRECTORY(${ROOT}/vihermiteinterpolator)
 #ADD_SUBDIRECTORY(${ROOT}/vicubicinterpolator)
 
 #Initiate source files

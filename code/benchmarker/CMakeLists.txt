@@ -9,7 +9,7 @@ FILE(GLOB VI_BENCHMARKER_HEADERS ${HEADERS}/*.h)
 
 #Create library
 ADD_LIBRARY(vibenchmarker SHARED ${VI_BENCHMARKER_HEADERS} ${VI_BENCHMARKER_SOURCES})
-TARGET_LINK_LIBRARIES(vibenchmarker viessentials vilinearinterpolator viadvancedlinearinterpolator vipiecewiseconstantinterpolator visplineinterpolator)
+TARGET_LINK_LIBRARIES(vibenchmarker viessentials vilinearinterpolator viadvancedlinearinterpolator vipiecewiseconstantinterpolator visplineinterpolator vihermiteinterpolator vicosineinterpolator vipolynomialinterpolator)
 QT5_USE_MODULES(vibenchmarker Xml Multimedia)
 
 #Install file
