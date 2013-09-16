@@ -32,7 +32,7 @@ bool ViHermiteInterpolator::interpolateSamples(const qreal *leftSamples, const i
 {
 	if(mDegree < 1) return false;
 
-	static int i, j, x, newLeftSize, newRightSize, sampleCount;
+	static int i, j, x, newLeftSize, newRightSize, sampleCount, exponent;
 	if(leftSize > MAXIMUM_SIZE)
 	{
 		leftSamples += (leftSize - MAXIMUM_SIZE);
@@ -56,59 +56,48 @@ bool ViHermiteInterpolator::interpolateSamples(const qreal *leftSamples, const i
 	--newLeftSize;
 	--newRightSize;
 	++leftSamples;
-	if(leftSize < 2 || rightSize < 2) return false;
+	if(newLeftSize < 2 || newRightSize < 2) return false;
 
 	sampleCount = newLeftSize + newRightSize;
-	ViVector coefficients, vector(sampleCount * 2);
+	ViVector vector(sampleCount * 2);
 	ViMatrix matrix(sampleCount * 2, mDegree + 1);
 
-	// Fill the first half of the vector with the y-values
-	for(i = 0; i < sampleCount; ++i)
-	{
-		vector[i] = (i < newLeftSize) ? leftSamples[i] : rightSamples[i - newLeftSize];
-	}
-
-	// Fill the second half of the vector with the outgoing slopes
 	for(i = 0; i < sampleCount; ++i)
 	{
 		if(i < newLeftSize)
 		{
-			vector[i + sampleCount] = (leftSamples[i] - leftSamples[i - 1]);
+			// Fill the first half of the vector with the y-values
+			vector[i] = leftSamples[i];
+			// Fill the second half of the vector with the outgoing slopes
+			vector[i + sampleCount] = leftSamples[i] - leftSamples[i - 1];
+			// For the matrix
+			x = i;
 		}
 		else
 		{
-			vector[i + sampleCount] = (rightSamples[i - newLeftSize + 1] - rightSamples[i - newLeftSize]);
+			x = i - newLeftSize;
+			// Fill the first half of the vector with the y-values
+			vector[i] = rightSamples[x];
+			// Fill the second half of the vector with the outgoing slopes
+			vector[i + sampleCount] = rightSamples[x + 1] - rightSamples[x];
+			// For the matrix
+			x = i + outputSize;
 		}
-	}
 
-	// Fill the first half of the matrix with the Hermite polynomials constructed from the x-values
-	for(i = 0; i < sampleCount; ++i)
-	{
 		for(j = 0; j < mDegree; ++j)
 		{
-			x = (i < newLeftSize) ? i : i + outputSize;
-			matrix[i][j] = qPow(x, mDegree - j);
+			exponent = mDegree - j;
+			// Fill the first half of the matrix with the Hermite polynomials constructed from the x-values
+			matrix[i][j] = qPow(x, exponent);
+			// Fill the second half of the matrix with the derivitaves
+			matrix[i + sampleCount][j] = exponent * qPow(x, exponent - 1);
 		}
 		matrix[i][mDegree] = 1;
 	}
 
-	// Fill the second half of the matrix with the derivitaves
-	for(i = 0; i < sampleCount; ++i)
-	{
-		for(j = 0; j < mDegree; ++j)
-		{
-			x = (i < newLeftSize) ? i : i + outputSize;
-			matrix[i + sampleCount][j] = (mDegree - j) * qPow(x, mDegree - j - 1);
-		}
-	}
-
+	static ViVector coefficients;
 	if(ViModelSolver::estimate(mDegree, matrix, vector, coefficients))
 	{
-		/*cout<<newLeftSize<<" "<<newRightSize<<endl;
-		cout<<vector.toString().toLatin1().data()<<endl;
-		cout<<"**********************************"<<endl<<matrix.toString().toLatin1().data()<<endl;
-		cout<<"**********************************"<<endl<<coefficients.toString().toLatin1().data()<<endl;
-*/
 		static qreal value;
 		static int count;
 		count = coefficients.size();
@@ -120,7 +109,7 @@ bool ViHermiteInterpolator::interpolateSamples(const qreal *leftSamples, const i
 			{
 				value += coefficients[j] * qPow(x, mDegree - j);
 			}
-			//outputSamples[i] = value;
+			outputSamples[i] = value;
 		}
 		return true;
 	}

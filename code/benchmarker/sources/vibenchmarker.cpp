@@ -1,11 +1,9 @@
 #include <vibenchmarker.h>
 #include <viaudiodata.h>
-#include <vilinearinterpolator.h>
-#include <viadvancedlinearinterpolator.h>
 #include <vipiecewiseconstantinterpolator.h>
 #include <visplineinterpolator.h>
 #include <vipolynomialinterpolator.h>
-#include <vicosineinterpolator.h>
+#include <vitriginterpolator.h>
 #include <vihermiteinterpolator.h>
 #include <vilogger.h>
 
@@ -33,7 +31,7 @@ void ViBenchMarker::process()
 	si->setDegree(3);
 	QList<ViInterpolator*> interpolators = {si};*/
 
-	QList<ViInterpolator*> interpolators = {new ViHermiteInterpolator(3)};
+	QList<ViInterpolator*> interpolators = {new ViTrigInterpolator(ViTrigInterpolator::Fourier)};
 
 
 
@@ -41,7 +39,7 @@ void ViBenchMarker::process()
 	//QList<ViInterpolator*> interpolators = {new ViLinearInterpolator()/*, new ViAdvancedLinearInterpolator()*/};
 	//QList<ViInterpolator*> interpolators = {/*new ViLinearInterpolator(),*/ new ViAdvancedLinearInterpolator()};
 	//QList<int> noiseLengths = {2, 4, 8, 12, 16, 24, 32};
-	QList<int> noiseLengths = {2};
+	QList<int> noiseLengths = {8};
 
 	//QList<qreal> LI = {97.23405026, 96.8225023, 96.11406245, 95.02905034, 94.10871158, 93.31781528, 92.58554994, 91.15619808};
 	QList<qreal> LI = {	97.23405026,

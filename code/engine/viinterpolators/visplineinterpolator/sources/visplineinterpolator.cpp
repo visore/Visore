@@ -1,53 +1,24 @@
 #include <visplineinterpolator.h>
-#include <vimodelsolver.h>
-
-#include<vilogger.h>
+#include <visystemsolver.h>
 
 #define DEFAULT_DEGREE 3
-#define MAXIMUM_SIZE 16 // Maximum size of matrix. If too big, computation is very slow
+#define MAXIMUM_SAMPLES 16 // Maximum size of matrix. If too big, computation is very slow
 
 ViSplineInterpolator::ViSplineInterpolator()
-	: ViInterpolator()
+	: ViDegreeInterpolator(MAXIMUM_SAMPLES, DEFAULT_DEGREE)
 {
-	mDegree = DEFAULT_DEGREE;
 }
 
-void ViSplineInterpolator::setDegree(const int &degree)
+ViSplineInterpolator::ViSplineInterpolator(const int &degree)
+	: ViDegreeInterpolator(MAXIMUM_SAMPLES, degree)
 {
-	mDegree = degree;
-}
-
-int ViSplineInterpolator::degree()
-{
-	return mDegree;
 }
 
 bool ViSplineInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
-	if(mDegree < 1) return false;
+	static int i, j, index, xIndex, x1, x2, end, end2, indexes, parameterCount, size, derivative, advance, advance2, row, front, exponent;
 
-	static int i, j, index, xIndex, x1, x2, end, end2, indexes, parameterCount, size, newLeftSize, newRightSize, derivative, advance, advance2, row, front, exponent;
-
-	if(leftSize > MAXIMUM_SIZE)
-	{
-		leftSamples += (leftSize - MAXIMUM_SIZE);
-		newLeftSize = MAXIMUM_SIZE;
-	}
-	else
-	{
-		newLeftSize = leftSize;
-	}
-
-	if(rightSize > MAXIMUM_SIZE)
-	{
-		newRightSize = MAXIMUM_SIZE;
-	}
-	else
-	{
-		newRightSize = rightSize;
-	}
-
-	end = newLeftSize + newRightSize;
+	end = leftSize + rightSize;
 	indexes = end - 1;
 	parameterCount = mDegree + 1;
 	size = parameterCount * indexes;
@@ -55,13 +26,13 @@ bool ViSplineInterpolator::interpolateSamples(const qreal *leftSamples, const in
 	ViVector vector(size);
 	ViMatrix matrix(size, size);
 
-	vector[0] = (0 < newLeftSize) ? leftSamples[0] : rightSamples[newLeftSize];
+	vector[0] = (0 < leftSize) ? leftSamples[0] : rightSamples[leftSize];
 	for(i = 1; i < indexes; ++i)
 	{
 		index = i * 2;
-		vector[index] = vector[index - 1] = (i < newLeftSize) ? leftSamples[i] : rightSamples[i - newLeftSize];
+		vector[index] = vector[index - 1] = (i < leftSize) ? leftSamples[i] : rightSamples[i - leftSize];
 	}
-	vector[(indexes * 2) - 1] = (indexes < newLeftSize) ? leftSamples[indexes] : rightSamples[indexes - newLeftSize];
+	vector[(indexes * 2) - 1] = (indexes < leftSize) ? leftSamples[indexes] : rightSamples[indexes - leftSize];
 	// The rest of the vector is 0
 
 	// Add the functions for each spline between two points
@@ -71,9 +42,9 @@ bool ViSplineInterpolator::interpolateSamples(const qreal *leftSamples, const in
 		ViVector &row1 = matrix[index];
 		ViVector &row2 = matrix[index + 1];
 
-		x1 = (i< newLeftSize) ? i : i + outputSize;
+		x1 = (i< leftSize) ? i : i + outputSize;
 		xIndex = i + 1;
-		x2 = (xIndex < newLeftSize) ? xIndex : xIndex + outputSize;
+		x2 = (xIndex < leftSize) ? xIndex : xIndex + outputSize;
 
 		for(j = 0; j < parameterCount; ++j)
 		{
@@ -94,7 +65,7 @@ bool ViSplineInterpolator::interpolateSamples(const qreal *leftSamples, const in
 			advance2 = advance + parameterCount;
 
 			xIndex = i + 1;
-			x1 = (xIndex < newLeftSize) ? xIndex : xIndex + outputSize;
+			x1 = (xIndex < leftSize) ? xIndex : xIndex + outputSize;
 
 			end2 = parameterCount - 1 - derivative;
 			for(j = 0; j < end2; ++j)
@@ -115,8 +86,8 @@ bool ViSplineInterpolator::interpolateSamples(const qreal *leftSamples, const in
 		advance = i * parameterCount;
 		advance2 = size - parameterCount;
 
-		x1 = (0 < newLeftSize) ? 0 : outputSize;
-		x2 = (indexes < newLeftSize) ? indexes : outputSize;
+		x1 = (0 < leftSize) ? 0 : outputSize;
+		x2 = (indexes < leftSize) ? indexes : outputSize;
 
 		end2 = parameterCount - 2;
 		for(j = 0; j < end2; ++j)
@@ -128,18 +99,18 @@ bool ViSplineInterpolator::interpolateSamples(const qreal *leftSamples, const in
 		}
 	}
 
-	ViVector parameters;
-	if(ViModelSolver::estimate(mDegree, matrix, vector, parameters))
+	static ViVector coefficients;
+	if(ViSystemSolver::solve(matrix, vector, coefficients))
 	{
 		qreal value;
-		index = (newLeftSize - 1) * parameterCount;
+		index = (leftSize - 1) * parameterCount;
 		for(i = 0; i < outputSize; ++i)
 		{
-			x1 = newLeftSize + i;
+			x1 = leftSize + i;
 			value = 0;
 			for(j = 0; j < parameterCount; ++j)
 			{
-				value += parameters[index + j] * qPow(x1, mDegree - j);
+				value += coefficients[index + j] * qPow(x1, mDegree - j);
 			}
 			outputSamples[i] = value;
 		}

@@ -4,12 +4,11 @@
 #include <QApplication>
 
 #include<vibenchmarker.h>
-#include <vilinearinterpolator.h>
-#include <viadvancedlinearinterpolator.h>
 #include <vipiecewiseconstantinterpolator.h>
 #include <visplineinterpolator.h>
 #include <vipolynomialinterpolator.h>
 #include <vihermiteinterpolator.h>
+#include <vitriginterpolator.h>
 
 qreal norm(qreal array[], qint32 size)
 {
@@ -117,7 +116,7 @@ int main(int argc, char *argv[])
 		s2[30]=0.56326;
 		s2[30]=0.53146;
 
-
+*/
 		ViSampleChunk s(32);
 		s[0]=0.45474;
 		s[1]=0.46835;
@@ -127,14 +126,14 @@ int main(int argc, char *argv[])
 		s[5]=0.63791;
 		s[6]=0.67032;
 		s[7]=0.76260;
-		s[8]=0.81223;
-		s[9]=0.60416;
-		s[10]=0.58548;
-		s[11]=0.51050;
-		s[12]=0.46307;
-		s[13]=0.49243;
-		s[14]=0.40735;
-		s[15]=0.50650;
+		s[8]=1;
+		s[9]=1;
+		s[10]=1;
+		s[11]=1;
+		s[12]=1;
+		s[13]=1;
+		s[14]=1;
+		s[15]=1;
 		s[16]=0.45303;
 		s[17]=0.54294;
 		s[18]=0.58569;
@@ -146,11 +145,11 @@ int main(int argc, char *argv[])
 		s[24]=0.47104;
 		s[25]=0.58832;
 		s[26]=0.56326;
-		s2[27]=0.47104;
-		s2[28]=0.63431;
-		s2[29]=0.54388;
-		s2[30]=0.56326;
-		s2[30]=0.53146;
+		s[27]=0.47104;
+		s[28]=0.63431;
+		s[29]=0.54388;
+		s[30]=0.56326;
+		s[31]=0.53146;
 
 		ViNoise n(s.size());
 		n.set(8,1);
@@ -160,52 +159,47 @@ int main(int argc, char *argv[])
 		n.set(12,1);
 		n.set(13,1);
 		n.set(14,1);
-		n.set(15,1);*/
-
-		ViSampleChunk s(9);
-		s[0]=0.1;
-		s[1]=0.3;
-		s[2]=0.4;
-		s[3]=1;
-		s[4]=1;
-		s[5]=1;
-		s[6]=0.3;
-		s[7]=0.2;
-		s[8]=0;
-
-		ViNoise n(s.size());
-		n.set(3,1);
-		n.set(4,1);
-		n.set(5,1);
-
-		/*ViSampleChunk s(16);
-				s[0]=0;
-				s[1]=0;
-				s[2]=-0.00003;
-				s[3]=-0.00003;
+		n.set(15,1);
+		/*
+				ViSampleChunk s(8);
+				s[0]=0.1;
+				s[1]=0.3;
+				s[2]=0.4;
+				s[3]=1;
 				s[4]=1;
-				s[5]=1;
-				s[6]=1;
-				s[7]=1;
-				s[8]=1;
-				s[9]=1;
-				s[10]=1;
-				s[11]=1;
-				s[12]=0;
-				s[13]=0;
-				s[14]=-0.00003;
-				s[15]=0;
+				s[5]=0.3;
+				s[6]=0.2;
+				s[7]=0;
+
+				ViNoise n(s.size());
+				n.set(3,1);
+				n.set(4,1);*/
+
+
+				/*ViSampleChunk s(8);
+				s[0]=0.1;
+				s[1]=0.3;
+				s[2]=0.4;
+				s[3]=1;
+				s[4]=1;
+				s[5]=0.3;
+				s[6]=0.2;
+				s[7]=0;
+
+				ViNoise n(s.size());
+				n.set(3,1);
+				n.set(4,1);*/
+
+		/*ViSampleChunk s(5);
+				s[0]=1;
+				s[1]=3;
+				s[2]=1;
+				s[3]=-5;
+				s[4]=2;
 
 
 		ViNoise n(s.size());
-		n.set(4,1);
-		n.set(5,1);
-		n.set(6,1);
-		n.set(7,1);
-		n.set(8,1);
-		n.set(9,1);
-		n.set(10,1);
-		n.set(11,1);*/
+		n.set(2,1);*/
 
 		/*ViSampleChunk s(4);
 		s[0]=0;
@@ -257,8 +251,8 @@ int main(int argc, char *argv[])
 
 
 
-		ViHermiteInterpolator al;
-		al.setDegree(2);
+		ViTrigInterpolator al(ViTrigInterpolator::Fourier);
+		//al.setDegree(2);
 		al.interpolate(s, n);
 		for(int i = 0; i<s.size();++i)
 		{
