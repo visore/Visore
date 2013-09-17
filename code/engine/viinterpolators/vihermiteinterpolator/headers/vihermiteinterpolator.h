@@ -10,26 +10,18 @@
 // http://astro.temple.edu/~dhill001/course/numanalspring2010/Hermite%20Interpolation%20Section%205_7.pdf
 // http://caig.cs.nctu.edu.tw/course/NM07S/slides/chap3_3.pdf
 
-class ViHermiteInterpolator : public ViInterpolator
+class ViHermiteInterpolator : public ViDegreeInterpolator
 {
 
 	public:
 
 		ViHermiteInterpolator();
-		ViHermiteInterpolator(const int &degree);
-
-		void setDegree(const int &degree);
-		int degree();
 
 		ViHermiteInterpolator* clone();
 
 	protected:
 
 		bool interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
-
-	private:
-
-		int mDegree;
 
 };
 

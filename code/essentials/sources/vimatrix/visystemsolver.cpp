@@ -11,12 +11,6 @@ ViVector ViSystemSolver::solve(const ViMatrix &matrix, const ViVector &vector)
 
 bool ViSystemSolver::solve(const ViMatrix &matrix, const ViVector &vector, ViVector &coefficients)
 {
-	if(matrix.columns() >= vector.size())
-	{
-		STATICLOG("The model can not be greater or equal to the sample count.", QtCriticalMsg, "ViSystemSolver");
-		return false;
-	}
-
 	ViMatrix inverted, transpose = matrix.transpose();
 	if(!transpose.scalarMultiply(matrix).invert(inverted))
 	{

@@ -1,64 +1,24 @@
 #include <vihermiteinterpolator.h>
-#include <vimodelsolver.h>
-
-#include<vilogger.h>
+#include <visystemsolver.h>
 
 #define DEFAULT_DEGREE 3
-#define MAXIMUM_SIZE 16 // Maximum size of matrix. If too big, computation is very slow
+#define MAXIMUM_SAMPLES 5
 
 ViHermiteInterpolator::ViHermiteInterpolator()
-	: ViInterpolator()
+	: ViDegreeInterpolator(MAXIMUM_SAMPLES, DEFAULT_DEGREE)
 {
-	mDegree = DEFAULT_DEGREE;
-}
-
-ViHermiteInterpolator::ViHermiteInterpolator(const int &degree)
-	: ViInterpolator()
-{
-	mDegree = degree;
-}
-
-void ViHermiteInterpolator::setDegree(const int &degree)
-{
-	mDegree = degree;
-}
-
-int ViHermiteInterpolator::degree()
-{
-	return mDegree;
 }
 
 bool ViHermiteInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
-	if(mDegree < 1) return false;
-
-	static int i, j, x, newLeftSize, newRightSize, sampleCount, exponent;
-	if(leftSize > MAXIMUM_SIZE)
-	{
-		leftSamples += (leftSize - MAXIMUM_SIZE);
-		newLeftSize = MAXIMUM_SIZE;
-	}
-	else
-	{
-		newLeftSize = leftSize;
-	}
-
-	if(rightSize > MAXIMUM_SIZE)
-	{
-		newRightSize = MAXIMUM_SIZE;
-	}
-	else
-	{
-		newRightSize = rightSize;
-	}
+	static int i, j, x, newLeftSize, sampleCount, exponent;
 
 	// We need outgoing slopes, so we can't use the first or last point (used to calculate the second and second-last slope)
-	--newLeftSize;
-	--newRightSize;
+	newLeftSize = leftSize - 1;
 	++leftSamples;
-	if(newLeftSize < 2 || newRightSize < 2) return false;
+	if(newLeftSize < 2 || rightSize < 2) return false;
 
-	sampleCount = newLeftSize + newRightSize;
+	sampleCount = newLeftSize + rightSize;
 	ViVector vector(sampleCount * 2);
 	ViMatrix matrix(sampleCount * 2, mDegree + 1);
 
@@ -96,7 +56,7 @@ bool ViHermiteInterpolator::interpolateSamples(const qreal *leftSamples, const i
 	}
 
 	static ViVector coefficients;
-	if(ViModelSolver::estimate(mDegree, matrix, vector, coefficients))
+	if(ViSystemSolver::solve(matrix, vector, coefficients))
 	{
 		static qreal value;
 		static int count;

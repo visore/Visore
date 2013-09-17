@@ -1,68 +1,36 @@
 #include <vipolynomialinterpolator.h>
-#include <vimodelsolver.h>
-
-#include<vilogger.h>
+#include <visystemsolver.h>
 
 #define DEFAULT_DEGREE 3
-#define MAXIMUM_SIZE 16 // Maximum size of matrix. If too big, computation is very slow
+#define MAXIMUM_SAMPLES -1
 
 ViPolynomialInterpolator::ViPolynomialInterpolator()
-	: ViInterpolator()
+	: ViDegreeInterpolator(MAXIMUM_SAMPLES, DEFAULT_DEGREE)
 {
-	mDegree = DEFAULT_DEGREE;
-}
-
-void ViPolynomialInterpolator::setDegree(const int &degree)
-{
-	mDegree = degree;
-}
-
-int ViPolynomialInterpolator::degree()
-{
-	return mDegree;
 }
 
 bool ViPolynomialInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
-	if(mDegree < 1) return false;
+	static int i, j, x, index, sampleCount;
 
-	int newLeftSize, newRightSize;
-	if(leftSize > MAXIMUM_SIZE)
-	{
-		leftSamples += (leftSize - MAXIMUM_SIZE);
-		newLeftSize = MAXIMUM_SIZE;
-	}
-	else
-	{
-		newLeftSize = leftSize;
-	}
-
-	if(rightSize > MAXIMUM_SIZE)
-	{
-		newRightSize = MAXIMUM_SIZE;
-	}
-	else
-	{
-		newRightSize = rightSize;
-	}
-
-	int i, j, x, index, sampleCount = newLeftSize + newRightSize;
+	sampleCount = leftSize + rightSize;
 	ViMatrix matrix(sampleCount, mDegree + 1);
-	ViVector coefficients, samples(sampleCount);
-	for(i = 0; i < newLeftSize; ++i)
+	ViVector vector(sampleCount);
+
+	for(i = 0; i < leftSize; ++i)
 	{
-		samples[i] = leftSamples[i];
+		vector[i] = leftSamples[i];
 		matrix[i][0] = 1;
 		for(j = 1; j <= mDegree; ++j)
 		{
 			matrix[i][j] = qPow(i, j);
 		}
 	}
-	for(i = 0; i < newRightSize; ++i)
+	for(i = 0; i < rightSize; ++i)
 	{
-		index = i + newLeftSize;
+		index = i + leftSize;
 		x = index + outputSize;
-		samples[index] = rightSamples[i];
+		vector[index] = rightSamples[i];
 		matrix[index][0] = 1;
 		for(j = 1; j <= mDegree; ++j)
 		{
@@ -70,13 +38,15 @@ bool ViPolynomialInterpolator::interpolateSamples(const qreal *leftSamples, cons
 		}
 	}
 
-	if(ViModelSolver::estimate(mDegree, matrix, samples, coefficients))
+	static ViVector coefficients;
+	if(ViSystemSolver::solve(matrix, vector, coefficients))
 	{
-		qreal value;
-		int count = coefficients.size();
+		static qreal value;
+		static int count;
+		count = coefficients.size();
 		for(i = 0; i < outputSize; ++i)
 		{
-			x = newLeftSize + i;
+			x = leftSize + i;
 			value = 0;
 			for(j = 0; j < count; ++j)
 			{

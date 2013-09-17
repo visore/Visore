@@ -26,12 +26,13 @@ void ViBenchMarker::process()
 	cout << "Benchmarking started" <<endl;
 
 	//QList<ViInterpolator*> interpolators = {new ViPiecewiseConstantInterpolator()};
-	//ViPolynomialInterpolator *si = new ViPolynomialInterpolator();
-	/*ViSplineInterpolator *si = new ViSplineInterpolator();
-	si->setDegree(3);
-	QList<ViInterpolator*> interpolators = {si};*/
 
-	QList<ViInterpolator*> interpolators = {new ViTrigInterpolator(ViTrigInterpolator::Fourier)};
+	//ViSplineInterpolator *si = new ViSplineInterpolator();
+	ViDegreeInterpolator *si = new ViHermiteInterpolator();
+	si->setDegree(6);
+	QList<ViInterpolator*> interpolators = {si};
+
+	//QList<ViInterpolator*> interpolators = {new ViTrigInterpolator(ViTrigInterpolator::Cosine)};
 
 
 

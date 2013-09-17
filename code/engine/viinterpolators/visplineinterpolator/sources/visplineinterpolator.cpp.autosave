@@ -2,7 +2,7 @@
 #include <visystemsolver.h>
 
 #define DEFAULT_DEGREE 3
-#define MAXIMUM_SAMPLES 32 // Maximum size of matrix. If too big, computation is very slow
+#define MAXIMUM_SAMPLES 16 // Maximum size of matrix. If too big, computation is very slow
 
 ViSplineInterpolator::ViSplineInterpolator()
 	: ViDegreeInterpolator(MAXIMUM_SAMPLES, DEFAULT_DEGREE)

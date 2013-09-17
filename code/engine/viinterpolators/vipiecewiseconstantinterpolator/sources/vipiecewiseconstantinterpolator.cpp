@@ -2,18 +2,24 @@
 
 bool ViPiecewiseConstantInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
-	if(leftSize == 0 && rightSize == 0)
+	if(leftSize == 0 && rightSize == 0) return false;
+
+	static int i, half;
+	static qreal left, right;
+
+	half = outputSize / 2;
+	left = leftSamples[leftSize - 1];
+	right = rightSamples[0];
+
+	for(i = 0; i < half; ++i)
 	{
-		return false;
+		outputSamples[i] = left;
 	}
-	int half = outputSize / 2;
-	qreal left = leftSamples[leftSize - 1];
-	qreal right = rightSamples[0];
-	for(int i = 0; i < outputSize; ++i)
+	for(i = half; i < outputSize; ++i)
 	{
-		if(i < half) outputSamples[i] = left;
-		else outputSamples[i] = right;
+		outputSamples[i] = right;
 	}
+
 	return true;
 }
 

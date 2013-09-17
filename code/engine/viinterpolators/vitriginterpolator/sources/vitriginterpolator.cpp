@@ -93,8 +93,9 @@ bool ViTrigInterpolator::interpolateSamplesFourier(const qreal *leftSamples, con
 		a.append((2 * value1) / sampleCount);
 		b.append((2 * value2) / sampleCount);
 	}
-	if(sampleCount % 2 == 0) a[degree - 1] /= 2;
+	//if(sampleCount % 2 == 0) a.last() /= 2;
 
+	// cos(0) = 1, so we can ignore cos
 	a0 = 0;
 	for(i = 0; i < leftSize; ++i)
 	{
@@ -104,6 +105,7 @@ bool ViTrigInterpolator::interpolateSamplesFourier(const qreal *leftSamples, con
 	{
 		a0 += rightSamples[i];
 	}
+	//a0 = a0 / sampleCount;
 	a0 = (2 * a0) / sampleCount;
 
 	for(i = 0; i < outputSize; ++i)
