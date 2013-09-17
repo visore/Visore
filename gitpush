@@ -11,6 +11,11 @@ removeFiles()
 			if [ $len -gt 0 ]; then
 				rm "$i"
 			fi
+			st=$(echo "$i"|grep '.autosave')
+			len=$(echo ${#st})
+			if [ $len -gt 0 ]; then
+				rm "$i"
+			fi
 		fi
 	done
 }
