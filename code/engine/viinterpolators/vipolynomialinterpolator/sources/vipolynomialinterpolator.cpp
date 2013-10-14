@@ -1,11 +1,15 @@
 #include <vipolynomialinterpolator.h>
 #include <visystemsolver.h>
-
+#include<vilogger.h>
 #define DEFAULT_DEGREE 3
-#define MAXIMUM_SAMPLES -1
 
 ViPolynomialInterpolator::ViPolynomialInterpolator()
-	: ViDegreeInterpolator(MAXIMUM_SAMPLES, DEFAULT_DEGREE)
+	: ViAutoDegreeInterpolator(DEFAULT_DEGREE)
+{
+}
+
+ViPolynomialInterpolator::ViPolynomialInterpolator(const int &degree)
+	: ViAutoDegreeInterpolator(degree)
 {
 }
 

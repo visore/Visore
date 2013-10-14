@@ -2,15 +2,14 @@
 #include <visystemsolver.h>
 
 #define DEFAULT_DEGREE 3
-#define MAXIMUM_SAMPLES 32 // Maximum size of matrix. If too big, computation is very slow
 
 ViSplineInterpolator::ViSplineInterpolator()
-	: ViDegreeInterpolator(MAXIMUM_SAMPLES, DEFAULT_DEGREE)
+	: ViAutoDegreeInterpolator(DEFAULT_DEGREE)
 {
 }
 
 ViSplineInterpolator::ViSplineInterpolator(const int &degree)
-	: ViDegreeInterpolator(MAXIMUM_SAMPLES, degree)
+	: ViAutoDegreeInterpolator(degree)
 {
 }
 
@@ -42,7 +41,7 @@ bool ViSplineInterpolator::interpolateSamples(const qreal *leftSamples, const in
 		ViVector &row1 = matrix[index];
 		ViVector &row2 = matrix[index + 1];
 
-		x1 = (i< leftSize) ? i : i + outputSize;
+		x1 = (i < leftSize) ? i : i + outputSize;
 		xIndex = i + 1;
 		x2 = (xIndex < leftSize) ? xIndex : xIndex + outputSize;
 
@@ -121,9 +120,12 @@ bool ViSplineInterpolator::interpolateSamples(const qreal *leftSamples, const in
 
 qreal ViSplineInterpolator::calculateMultiplier(const int &derivative, const int &parameterNumber)
 {
-	qreal result = 1;
-	int multiply = mDegree - parameterNumber;
-	for(int i = 0; i < derivative; ++i)
+	static qreal result;
+	static int multiply, i;
+
+	result = 1;
+	multiply = mDegree - parameterNumber;
+	for(i = 0; i < derivative; ++i)
 	{
 		result *= multiply - i;
 	}

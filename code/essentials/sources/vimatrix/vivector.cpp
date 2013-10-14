@@ -63,6 +63,21 @@ void ViVector::clear()
 	mCopy = false;
 }
 
+void ViVector::resize(const int &size)
+{
+	clear();
+	mSize = size;
+	mData = new double[mSize];
+}
+
+void ViVector::fill(const double &value)
+{
+	for(int i = 0; i < mSize; ++i)
+	{
+		mData[i] = value;
+	}
+}
+
 bool ViVector::isValid() const
 {
 	return mSize > 0;

@@ -9,27 +9,7 @@
 #include <vipolynomialinterpolator.h>
 #include <vihermiteinterpolator.h>
 #include <vitriginterpolator.h>
-
-qreal norm(qreal array[], qint32 size)
-{
-	qreal norm = 0;
-	for(int i = 0; i < size; ++i)
-	{
-		norm += (array[i] * array[i]);
-	}
-	return qSqrt(norm);
-}
-
-void applyNorm(qreal array[], qint32 size, qreal norm)
-{
-	if(norm != 0)
-	{
-		for(int i = 0; i < size; ++i)
-		{
-			array[i] /= norm;
-		}
-	}
-}
+#include <viwarpedburginterpolator.h>
 
 
 int main(int argc, char *argv[])
@@ -52,8 +32,43 @@ int main(int argc, char *argv[])
 	ViBenchMarker bench;
 	if(BENCH)
 	{
+		QStringList paths;
 
-		bench.benchmark("/home/visore/Visore Projects/a2.flac");
+		QDir dir1("/home/visore/Desktop/spin2014_2/classical/");
+		QStringList files1 = dir1.entryList(QDir::Files);
+		for(int i = 0; i < files1.size(); ++i) paths.append(dir1.absoluteFilePath(files1[i]));
+
+		QDir dir2("/home/visore/Desktop/spin2014_2/country/");
+		QStringList files2 = dir2.entryList(QDir::Files);
+		for(int i = 0; i < files2.size(); ++i) paths.append(dir2.absoluteFilePath(files2[i]));
+
+		QDir dir21("/home/visore/Desktop/spin2014_2/jazz/");
+		QStringList files21 = dir21.entryList(QDir::Files);
+		for(int i = 0; i < files21.size(); ++i) paths.append(dir21.absoluteFilePath(files21[i]));
+
+		QDir dir3("/home/visore/Desktop/spin2014_2/metal/");
+		QStringList files3 = dir3.entryList(QDir::Files);
+		for(int i = 0; i < files3.size(); ++i) paths.append(dir3.absoluteFilePath(files3[i]));
+
+		QDir dir4("/home/visore/Desktop/spin2014_2/pop/");
+		QStringList files4 = dir4.entryList(QDir::Files);
+		for(int i = 0; i < files4.size(); ++i) paths.append(dir4.absoluteFilePath(files4[i]));
+
+		QDir dir5("/home/visore/Desktop/spin2014_2/raggae/");
+		QStringList files5 = dir5.entryList(QDir::Files);
+		for(int i = 0; i < files5.size(); ++i) paths.append(dir5.absoluteFilePath(files5[i]));
+
+		QDir dir6("/home/visore/Desktop/spin2014_2/rock/");
+		QStringList files6 = dir6.entryList(QDir::Files);
+		for(int i = 0; i < files6.size(); ++i) paths.append(dir6.absoluteFilePath(files6[i]));
+
+		QDir dir7("/home/visore/Desktop/spin2014_2/trance/");
+		QStringList files7 = dir7.entryList(QDir::Files);
+		for(int i = 0; i < files7.size(); ++i) paths.append(dir7.absoluteFilePath(files7[i]));
+
+		bench.benchmark(paths);
+
+		//bench.benchmark("/home/visore/Visore Projects/a2.flac");
 	}
 	else
 	{
@@ -251,7 +266,8 @@ int main(int argc, char *argv[])
 
 
 
-		ViTrigInterpolator al(ViTrigInterpolator::Fourier);
+		//ViTrigInterpolator al(ViTrigInterpolator::Fourier);
+		ViWarpedBurgInterpolator al;
 		//al.setDegree(2);
 		al.interpolate(s, n);
 		for(int i = 0; i<s.size();++i)

@@ -21,6 +21,9 @@ class ViVector
 
 		void clear();
 
+		void resize(const int &size);
+		void fill(const double &value);
+
 		bool isValid() const; //at least 1 entry
 		int size() const;
 		double sum() const;

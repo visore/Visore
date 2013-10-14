@@ -18,7 +18,7 @@ class ViInterpolator : public ViLibrary, public ViSerializer
 		// The maximum number of samples that will be used for the interpolation on both sides
 		// If set to 10, not more than 10 left and 10 right samples will be used
 		// If set to 0 or negative: will use as many samples as available
-		void setMaximumSamples(const int &count);
+		virtual void setMaximumSamples(const int &count);
 		int maximumSamples() const;
 
 		bool interpolate(ViSampleChunk &samples, const ViNoise &noise);
@@ -56,6 +56,22 @@ class ViDegreeInterpolator : public ViInterpolator
 	protected:
 
 		int mDegree;
+
+};
+
+class ViAutoDegreeInterpolator : public ViDegreeInterpolator
+{
+
+	public:
+
+		ViAutoDegreeInterpolator();
+		ViAutoDegreeInterpolator(const int &degree);
+		ViAutoDegreeInterpolator(const ViDegreeInterpolator &other);
+		virtual ~ViAutoDegreeInterpolator();
+
+	private:
+
+		void setMaximumSamples(const int &count = 0);
 
 };
 

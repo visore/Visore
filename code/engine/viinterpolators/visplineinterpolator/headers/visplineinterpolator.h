@@ -3,7 +3,7 @@
 
 #include <viinterpolator.h>
 
-class ViSplineInterpolator : public ViDegreeInterpolator
+class ViSplineInterpolator : public ViAutoDegreeInterpolator
 {
 
 	public:

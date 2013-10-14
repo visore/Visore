@@ -3,12 +3,13 @@
 
 #include <viinterpolator.h>
 
-class ViPolynomialInterpolator : public ViDegreeInterpolator
+class ViPolynomialInterpolator : public ViAutoDegreeInterpolator
 {
 
 	public:
 
 		ViPolynomialInterpolator();
+		ViPolynomialInterpolator(const int &degree);
 
 		virtual ViPolynomialInterpolator* clone();
 

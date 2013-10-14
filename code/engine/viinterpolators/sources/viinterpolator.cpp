@@ -162,3 +162,37 @@ int ViDegreeInterpolator::degree() const
 {
 	return mDegree;
 }
+
+ViAutoDegreeInterpolator::ViAutoDegreeInterpolator()
+	: ViDegreeInterpolator()
+{
+	setMaximumSamples();
+}
+
+ViAutoDegreeInterpolator::ViAutoDegreeInterpolator(const int &degree)
+	: ViDegreeInterpolator(degree)
+{
+	setMaximumSamples();
+}
+
+ViAutoDegreeInterpolator::ViAutoDegreeInterpolator(const ViDegreeInterpolator &other)
+	: ViDegreeInterpolator(other)
+{
+	setMaximumSamples();
+}
+
+ViAutoDegreeInterpolator::~ViAutoDegreeInterpolator()
+{
+}
+
+void ViAutoDegreeInterpolator::setMaximumSamples(const int &count)
+{
+	if(mDegree % 2)
+	{
+		ViInterpolator::setMaximumSamples(qCeil(mDegree / 2.0));
+	}
+	else
+	{
+		ViInterpolator::setMaximumSamples((mDegree / 2) + 1);
+	}
+}
