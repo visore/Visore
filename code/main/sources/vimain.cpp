@@ -8,8 +8,9 @@
 #include <visplineinterpolator.h>
 #include <vipolynomialinterpolator.h>
 #include <vihermiteinterpolator.h>
-#include <vitriginterpolator.h>
-#include <viwarpedburginterpolator.h>
+#include <vifourierinterpolator.h>
+#include <vicosineinterpolator.h>
+#include<vicrosscorrelator.h>
 
 
 int main(int argc, char *argv[])
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
 		s2[30]=0.53146;
 
 */
-		ViSampleChunk s(32);
+		/*ViSampleChunk s(32);
 		s[0]=0.45474;
 		s[1]=0.46835;
 		s[2]=0.45020;
@@ -166,6 +167,8 @@ int main(int argc, char *argv[])
 		s[30]=0.56326;
 		s[31]=0.53146;
 
+		ViSampleChunk s2 = s;
+
 		ViNoise n(s.size());
 		n.set(8,1);
 		n.set(9,1);
@@ -174,109 +177,197 @@ int main(int argc, char *argv[])
 		n.set(12,1);
 		n.set(13,1);
 		n.set(14,1);
-		n.set(15,1);
-		/*
-				ViSampleChunk s(8);
-				s[0]=0.1;
-				s[1]=0.3;
-				s[2]=0.4;
-				s[3]=1;
-				s[4]=1;
-				s[5]=0.3;
-				s[6]=0.2;
-				s[7]=0;
+		n.set(15,1);*/
 
-				ViNoise n(s.size());
-				n.set(3,1);
-				n.set(4,1);*/
+		ViSampleChunk s(64);
+		s[0]=	0.22629	;
+		s[1]=	0.242	;
+		s[2]=	0.26132	;
+		s[3]=	0.28867	;
+		s[4]=	0.31772	;
+		s[5]=	0.34045	;
+		s[6]=	0.34818	;
+		s[7]=	0.34348	;
+		s[8]=	0.33554	;
+		s[9]=	0.32773	;
+		s[10]=	0.31982	;
+		s[11]=	0.31943	;
+		s[12]=	0.32886	;
+		s[13]=	0.341	;
+		s[14]=	0.35687	;
+		s[15]=	0.37149	;
+		s[16]=	0	;
+		s[17]=	-0.5	;
+		s[18]=	-0.95	;
+		s[19]=	1	;
+		s[20]=	0.95	;
+		s[21]=	0.98	;
+		s[22]=	0.99	;
+		s[23]=	1	;
+		s[24]=	0.98	;
+		s[25]=	0.99	;
+		s[26]=	1	;
+		s[27]=	0.98	;
+		s[28]=	0.99	;
+		s[29]=	1	;
+		s[30]=	0.99	;
+		s[31]=	0.98	;
+		s[32]=	1	;
+		s[33]=	0.99	;
+		s[34]=	1	;
+		s[35]=	1	;
+		s[36]=	1	;
+		s[37]=	0.99	;
+		s[38]=	1	;
+		s[39]=	0.5	;
+		s[40]=	0	;
+		s[41]=	-1	;
+		s[42]=	0.68948	;
+		s[43]=	0.66052	;
+		s[44]=	0.63129	;
+		s[45]=	0.61633	;
+		s[46]=	0.62006	;
+		s[47]=	0.63742	;
+		s[48]=	0.65607	;
+		s[49]=	0.66574	;
+		s[50]=	0.664	;
+		s[51]=	0.65933	;
+		s[52]=	0.65866	;
+		s[53]=	0.65784	;
+		s[54]=	0.65317	;
+		s[55]=	0.64435	;
+		s[56]=	0.6268	;
+		s[57]=	0.60355	;
+		s[58]=	0.65933	;
+		s[59]=	0.65866	;
+		s[60]=	0.65784	;
+		s[61]=	0.65317	;
+		s[62]=	0.64435	;
+		s[63]=	0.6268	;
 
+		ViSampleChunk s2(64);
+				s2[0]=	0.22629	;
+				s2[1]=	0.242	;
+				s2[2]=	0.26132	;
+				s2[3]=	0.28867	;
+				s2[4]=	0.31772	;
+				s2[5]=	0.34045	;
+				s2[6]=	0.34818	;
+				s2[7]=	0.34348	;
+				s2[8]=	0.33554	;
+				s2[9]=	0.32773	;
+				s2[10]=	0.31982	;
+				s2[11]=	0.31943	;
+				s2[12]=	0.32886	;
+				s2[13]=	0.341	;
+				s2[14]=	0.35687	;
+				s2[15]=	0.37149	;
+				s2[16]=	0.38007	;
+				s2[17]=	0.3894	;
+				s2[18]=	0.40787;
+				s2[19]=	0.42075	;
+				s2[20]=	0.4223	;
+				s2[21]=	0.42343	;
+				s2[22]=	0.42261	;
+				s2[23]=	0.42282	;
+				s2[24]=	0.4346	;
+				s2[25]=	0.45703	;
+				s2[26]=	0.48315	;
+				s2[27]=	0.50418	;
+				s2[28]=	0.5123	;
+				s2[29]=	0.51309	;
+				s2[30]=	0.52084;
+				s2[31]=	0.54398	;
+				s2[32]=	0.58112	;
+				s2[33]=	0.62308	;
+				s2[34]=	0.66165	;
+				s2[35]=	0.68634	;
+				s2[36]=	0.69403	;
+				s2[37]=	0.6969	;
+				s2[38]=	0.70367	;
+				s2[39]=	0.71017	;
+				s2[40]=	0.70956;
+				s2[41]=	0.70456	;
+				s2[42]=	0.68948	;
+				s2[43]=	0.66052	;
+				s2[44]=	0.63129	;
+				s2[45]=	0.61633	;
+				s2[46]=	0.62006	;
+				s2[47]=	0.63742	;
+				s2[48]=	0.65607	;
+				s2[49]=	0.66574	;
+				s2[50]=	0.664	;
+				s2[51]=	0.65933	;
+				s2[52]=	0.65866	;
+				s2[53]=	0.65784	;
+				s2[54]=	0.65317	;
+				s2[55]=	0.64435	;
+				s2[56]=	0.6268	;
+				s2[57]=	0.60355	;
+				s2[58]=	0.65933	;
+				s2[59]=	0.65866	;
+				s2[60]=	0.65784	;
+				s2[61]=	0.65317	;
+				s2[62]=	0.64435	;
+				s2[63]=	0.6268	;
 
-				/*ViSampleChunk s(8);
-				s[0]=0.1;
-				s[1]=0.3;
-				s[2]=0.4;
-				s[3]=1;
-				s[4]=1;
-				s[5]=0.3;
-				s[6]=0.2;
-				s[7]=0;
-
-				ViNoise n(s.size());
-				n.set(3,1);
-				n.set(4,1);*/
-
-		/*ViSampleChunk s(5);
-				s[0]=1;
-				s[1]=3;
-				s[2]=1;
-				s[3]=-5;
-				s[4]=2;
 
 
 		ViNoise n(s.size());
-		n.set(2,1);*/
-
-		/*ViSampleChunk s(4);
-		s[0]=0;
-		s[1]=1;
-		s[2]=0.4;
-		s[3]=0.4;
-
-		ViNoise n(s.size());
-		n.set(1,1);*/
+		for(int i = 16; i < 42; ++i)
+		{
+			n.set(i,1);
+		}
 
 
-
-
-
-
-
-
-
-
-
-
-		/*ViSampleChunk s(10);
-		s[0] = 0.00180;
-		s[1] = -0.04834;
-		s[2] = 0.16000;
-		s[3] = 0.08258;
-		s[4] = 1; // s[16] = -0.60022;
-		s[5] = 1; // s[17] = -0.77640;
-		s[6] = 0.07126;
-		s[7] = -0.13742;
-		s[8] = -0.11526;
-		s[9] = 0.17563;
-
-		ViNoise n(s.size());
-		n.set(4,1);
-		n.set(5,1);
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		//ViTrigInterpolator al(ViTrigInterpolator::Fourier);
-		ViWarpedBurgInterpolator al;
-		//al.setDegree(2);
+		//ViPiecewiseConstantInterpolator al;
+		//ViCosineInterpolator al;
+		//ViPolynomialInterpolator al(6);
+		ViSplineInterpolator al(5);
+		//ViFourierInterpolator al(1);
+		//ViHermiteInterpolator al(1);
 		al.interpolate(s, n);
 		for(int i = 0; i<s.size();++i)
 		{
-			/*if(n[i])cout<<"*\t";
-			else cout<<" \t";
-			cout<<s2[i]<<"\t"<<s[i]<<endl;*/
-			cout<<i<<"\t"<<s[i]<<endl;
+			//cout<<s2[i]<<"\t"<<s[i]<<endl;
+			cout<<s[i]<<endl;
 		}
+
+		ViCrossCorrelator c;
+		cout<<"++: "<<c.execute(s,s2)<<endl;
+
+		/*qreal t = 0;
+		qreal t2 = 0;
+		for(int i = 0; i<s2.size();++i)
+		{
+			t += qPow(s2[i]-s[i],2);
+			t2 += qPow(s2[i],2);
+		}
+		cout<<"***: "<<t/t2<<endl;*/
+
+		/*qreal avg = 0;
+		for(int i = 0; i<s2.size();++i)
+		{
+			avg += s2[i];
+		}
+		avg /= s2.size();
+
+		qreal a1 = 0;
+		for(int i = 0; i<s2.size();++i)
+		{
+			a1 += qPow(s2[i]-avg,2);
+		}
+
+		qreal a2 = 0;
+		for(int i = 0; i<s2.size();++i)
+		{
+			a2 += qPow(s[i]-s2[i],2);
+		}
+
+		cout<<a1<<" "<<a2<<endl;
+
+		cout<<"SNR: "<<(10*log10(a1/a2))<<endl;*/
+
 
 		int x = 0;
 		int y = 1/x;

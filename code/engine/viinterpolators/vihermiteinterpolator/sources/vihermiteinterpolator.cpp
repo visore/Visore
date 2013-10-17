@@ -2,11 +2,16 @@
 #include <visystemsolver.h>
 
 #define DEFAULT_DEGREE 3
-#define MAXIMUM_SAMPLES 5
 
 ViHermiteInterpolator::ViHermiteInterpolator()
-	: ViDegreeInterpolator(MAXIMUM_SAMPLES, DEFAULT_DEGREE)
+	: ViAutoDegreeInterpolator(DEFAULT_DEGREE)
 {
+}
+
+ViHermiteInterpolator::ViHermiteInterpolator(const int &degree)
+	: ViAutoDegreeInterpolator(degree)
+{
+
 }
 
 bool ViHermiteInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
@@ -16,7 +21,7 @@ bool ViHermiteInterpolator::interpolateSamples(const qreal *leftSamples, const i
 	// We need outgoing slopes, so we can't use the first or last point (used to calculate the second and second-last slope)
 	newLeftSize = leftSize - 1;
 	++leftSamples;
-	if(newLeftSize < 2 || rightSize < 2) return false;
+	if(newLeftSize < 1 || rightSize < 2) return false;
 
 	sampleCount = newLeftSize + rightSize;
 	ViVector vector(sampleCount * 2);

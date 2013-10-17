@@ -41,7 +41,7 @@ void ViCrossCorrelator::finalize()
 }
 
 void ViCrossCorrelator::execute(const int &channel)
-{
+{	
 	ViSampleChunk &theSamples1 = currentSamples();
 	ViSampleChunk &theSamples2 = currentSamples2();
     qreal firstNorm, secondNorm, multipliedNorm;
@@ -76,6 +76,48 @@ void ViCrossCorrelator::execute(const int &channel)
 	{
        addCorrelation(1 - (qAbs(mRealData[i] - mAutocorrelationData[i]) / 2));
 	}
+}
+
+qreal ViCrossCorrelator::execute(const ViSampleChunk &theSamples1, const ViSampleChunk &theSamples2)
+{
+	mTransformer.setSize(theSamples1.size());
+	deallocateData();
+	allocateData();
+
+	qreal firstNorm, secondNorm, multipliedNorm;
+	int count = sampleCount();
+
+	memcpy(mRealData, theSamples1.data(), theSamples1.size() * sizeof(qreal));
+	firstNorm = norm(mRealData, theSamples1.size());
+	multipliedNorm = firstNorm * firstNorm;
+	mTransformer.pad(mRealData, theSamples1.size());
+	mTransformer.forwardTransform(mRealData, mFirstFourierData);
+
+	//Auto-correlation
+	memcpy(mRealData, mFirstFourierData, count * sizeof(qreal));
+	mTransformer.conjugate(mFirstFourierData);
+	mTransformer.multiply(mFirstFourierData, mRealData, mMultiplyData);
+	mTransformer.inverseTransform(mMultiplyData, mAutocorrelationData);
+	mTransformer.rescale(mAutocorrelationData);
+	applyNorm(mAutocorrelationData, count, multipliedNorm);
+
+	//Cross-correlation
+	memcpy(mRealData, theSamples2.data(), theSamples2.size() * sizeof(qreal));
+	secondNorm = norm(mRealData, theSamples2.size());
+	multipliedNorm = firstNorm * secondNorm;
+	mTransformer.pad(mRealData, theSamples2.size());
+	mTransformer.forwardTransform(mRealData, mSecondFourierData);
+	mTransformer.multiply(mFirstFourierData, mSecondFourierData, mMultiplyData);
+	mTransformer.inverseTransform(mMultiplyData, mRealData);
+	mTransformer.rescale(mRealData);
+	applyNorm(mRealData, count, multipliedNorm);
+
+	qreal result = 0;
+	for(int i = 0; i < count; ++i)
+	{
+	   result += (1 - (qAbs(mRealData[i] - mAutocorrelationData[i]) / 2));
+	}
+	return result / count;
 }
 
 ViCrossCorrelator* ViCrossCorrelator::clone()

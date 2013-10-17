@@ -82,7 +82,7 @@ bool ViInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, 
 		return interpolateSamples(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize);
 	}
 
-	static int newLeftSize, newRightSize;
+	static int newLeftSize, newRightSize, i;
 	if(leftSize > mMaximumSamples)
 	{
 		leftSamples += (leftSize - mMaximumSamples);
@@ -102,7 +102,14 @@ bool ViInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, 
 		newRightSize = rightSize;
 	}
 
-	return interpolateSamples(leftSamples, newLeftSize, rightSamples, newRightSize, outputSamples, outputSize);
+	bool result = interpolateSamples(leftSamples, newLeftSize, rightSamples, newRightSize, outputSamples, outputSize);
+	for(i = 0; i < outputSize; ++i)
+	{
+		qreal &value = outputSamples[i];
+		if(value > 1) value = 1;
+		else if(value < -1) value = -1;
+	}
+	return result;
 }
 
 ViElement ViInterpolator::exportData()

@@ -19,6 +19,8 @@ class ViCrossCorrelator : public ViCorrelator
 		void finalize();
 		void execute(const int &channel);
 
+		qreal execute(const ViSampleChunk &s1, const ViSampleChunk &s2);
+
         ViCrossCorrelator* clone();
 
 	protected:

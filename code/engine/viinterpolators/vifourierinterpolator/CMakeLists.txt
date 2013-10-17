@@ -1,0 +1,16 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Initiate source files
+FILE(GLOB VI_FOURIER_INTERPOLATOR_SOURCES ${SOURCES}/*.cpp)
+FILE(GLOB VI_FOURIER_INTERPOLATOR_HEADERS ${HEADERS}/*.h)
+
+#Create library
+ADD_LIBRARY(vifourierinterpolator SHARED ${VI_FOURIER_INTERPOLATOR_HEADERS} ${VI_FOURIER_INTERPOLATOR_SOURCES})
+TARGET_LINK_LIBRARIES(vifourierinterpolator viinterpolator)
+QT5_USE_MODULES(vifourierinterpolator Xml Multimedia)
+
+#Install file
+INSTALL(TARGETS vifourierinterpolator DESTINATION ${VI_INTERPOLATORS_INSTALL_PATH})

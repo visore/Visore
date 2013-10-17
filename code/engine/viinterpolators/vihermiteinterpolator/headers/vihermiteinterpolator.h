@@ -10,12 +10,13 @@
 // http://astro.temple.edu/~dhill001/course/numanalspring2010/Hermite%20Interpolation%20Section%205_7.pdf
 // http://caig.cs.nctu.edu.tw/course/NM07S/slides/chap3_3.pdf
 
-class ViHermiteInterpolator : public ViDegreeInterpolator
+class ViHermiteInterpolator : public ViAutoDegreeInterpolator
 {
 
 	public:
 
 		ViHermiteInterpolator();
+		ViHermiteInterpolator(const int &degree);
 
 		ViHermiteInterpolator* clone();
 
