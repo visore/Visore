@@ -179,6 +179,10 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::T
 	{
         mData.setBuffer(mObject->buffer(mType));
 		QObject::connect(mData.buffer(), SIGNAL(changed()), this, SLOT(startThread()), Qt::UniqueConnection);
+		if(mNoiseDetector != NULL)
+		{
+			mNoiseDetector->initialize(mData.channelCount(), mData.bufferSamples());
+		}
 		return true;
 	}
 	else

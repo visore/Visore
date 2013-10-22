@@ -9,9 +9,22 @@ class ViNoise
 
 	public:
 
+		// ftp://cs.uku.fi/franti/papers/Hautamaki/P2.pdf
+		enum MaskType
+		{
+			Direct,
+			Mean,
+			Maximum
+		};
+
+	public:
+
 		ViNoise(const int &size = 0);
 		ViNoise(const ViNoise &other);
 		virtual ~ViNoise();
+
+		void setMaskType(const MaskType &type);
+		void setThreshold(const qreal &threshold);
 
 		void resize(const int &size);
 
@@ -37,6 +50,16 @@ class ViNoise
 
 	private:
 
+		void (ViNoise::*setPointer)(const int &index, const qreal &value);
+		void setDirect(const int &index, const qreal &value);
+		void setMean(const int &index, const qreal &value);
+		void setMaximum(const int &index, const qreal &value);
+
+		void generateMask();
+
+	private:
+
+		qreal mThreshold;
 		ViSampleChunk mMask;
 		ViSampleChunk mData;
 

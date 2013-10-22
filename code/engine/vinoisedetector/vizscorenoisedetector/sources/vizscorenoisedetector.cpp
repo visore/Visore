@@ -3,11 +3,11 @@
 #include <viscaler.h>
 
 ViZscoreNoiseDetector::ViZscoreNoiseDetector()
-	: ViNoiseDetector(64)
+	: ViNoiseDetector()
 {
 }
 
-void ViZscoreNoiseDetector::calculateNoise(ViNoise &noise, const ViSampleChunk &samples)
+void ViZscoreNoiseDetector::calculateNoise(const ViSampleChunk &samples)
 {
 	int i, size = samples.size();
 
@@ -51,7 +51,7 @@ void ViZscoreNoiseDetector::calculateNoise(ViNoise &noise, const ViSampleChunk &
 if(value < 0)value = 0;
 if(value>1)value = 1;*/
 		//value = ViScaler<qreal>::scale(value, 0, 2, 0, 1);
-		noise.set(i, value);
+		setNoise(value);
 	}
 
 

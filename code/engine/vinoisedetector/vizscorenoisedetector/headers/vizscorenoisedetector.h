@@ -18,7 +18,7 @@ class ViZscoreNoiseDetector : public ViNoiseDetector
 
 	protected:
 
-		void calculateNoise(ViNoise &noise, const ViSampleChunk &samples);
+		void calculateNoise(const ViSampleChunk &samples);
 
 };
 

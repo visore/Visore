@@ -10,13 +10,6 @@
 
 ViAudioData::ViAudioData()
 {
-    setDefaults();
-}
-
-ViAudioData::ViAudioData(ViBuffer *buffer)
-{
-    setDefaults();
-    setBuffer(buffer);
 }
 
 ViAudioData::~ViAudioData()
@@ -155,11 +148,14 @@ void ViAudioData::updateOther()
 ViAudioReadData::ViAudioReadData()
 	: ViAudioData()
 {
+	setDefaults();
 }
 
 ViAudioReadData::ViAudioReadData(ViBuffer *buffer)
-	: ViAudioData(buffer)
+	: ViAudioData()
 {
+	setDefaults();
+	setBuffer(buffer);
 }
 
 bool ViAudioReadData::hasData()
@@ -317,11 +313,14 @@ void ViAudioReadData::updateOther()
 ViAudioWriteData::ViAudioWriteData()
 	: ViAudioData()
 {
+	setDefaults();
 }
 
 ViAudioWriteData::ViAudioWriteData(ViBuffer *buffer)
-	: ViAudioData(buffer)
+	: ViAudioData()
 {
+	setDefaults();
+	setBuffer(buffer);
 }
 
 void ViAudioWriteData::enqueueSplitSamples(ViSampleChunk &samples, const int &channel)
@@ -425,5 +424,9 @@ void ViAudioWriteData::updateOther()
 {
     mStream = mBuffer->createWriteStream();
 	mChannelSamples.clear();
-	mChannelSamples.resize(mChannelCount);
+	for(int i = 0; i < mChannelCount; ++i)
+	{
+		mChannelSamples.append(QQueue<ViSampleChunk>());
+	}
+	//mChannelSamples.resize(mChannelCount);
 }

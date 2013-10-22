@@ -14,11 +14,13 @@ class ViBenchMarker : public QObject
 
 	private slots:
 
-	void processNext();
-	void process();
+		void processNext();
+		void process();
 
-	void processNext2();
-	void process2();
+		void processNext2();
+		void process2();
+
+		void processNoise();
 
 		void quit();
 
@@ -34,6 +36,7 @@ class ViBenchMarker : public QObject
 
 		void clear();
 		void benchmark();
+		void benchmarkNoise();
 		ViNoise createNoise(int length);
 
 	private:
@@ -65,7 +68,9 @@ class ViBenchMarker : public QObject
 
 		QTime mTime;
 
+		qint64 mTotalTime;
 
+		ViNoiseDetector *mDetector;
 
 
 

@@ -11,7 +11,6 @@ class ViAudioData
     public:
 
         ViAudioData();
-        ViAudioData(ViBuffer *buffer);
         virtual ~ViAudioData();
 
         void clear();

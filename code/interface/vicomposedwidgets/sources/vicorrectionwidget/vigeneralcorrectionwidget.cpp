@@ -75,7 +75,6 @@ ViModifyProcessor::ModifyMode ViGeneralCorrectionWidget::modifyMode()
 ViNoiseDetector* ViGeneralCorrectionWidget::noiseDetector()
 {
 	ViNoiseDetector *detector = ViNoiseDetectorManager::create(mUi->detectorComboBox->itemData(mUi->detectorComboBox->currentIndex()).toString());
-	detector->setWindowSize(mUi->noiseSpinBox->value());
 	return detector;
 }
 
@@ -96,7 +95,6 @@ void ViGeneralCorrectionWidget::toggleDetector()
 void ViGeneralCorrectionWidget::changeNoiseDetector()
 {
 	ViNoiseDetector *detector = ViNoiseDetectorManager::create(mUi->detectorComboBox->itemData(mUi->detectorComboBox->currentIndex()).toString());
-	mUi->noiseSpinBox->setValue(detector->windowSize());
 	delete detector;
 }
 

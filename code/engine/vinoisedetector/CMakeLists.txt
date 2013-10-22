@@ -12,6 +12,7 @@ ADD_DEFINITIONS(-DNOISE_DETECTOR_PATH="${VI_NOISE_DETECTOR_INSTALL_PATH}")
 #Add sub libraries
 ADD_SUBDIRECTORY(${ROOT}/vizscorenoisedetector)
 ADD_SUBDIRECTORY(${ROOT}/vimahalanobisnoisedetector)
+ADD_SUBDIRECTORY(${ROOT}/vinearestneighbournoisedetector)
 
 #Initiate source files
 FILE(GLOB VI_NOISE_DETECTOR_HEADERS ${HEADERS}/*.h)

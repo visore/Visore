@@ -1,15 +1,14 @@
 #include <vimahalanobisnoisedetector.h>
 #include <vimatrix.h>
 
-#define DEFAULT_WINDOW_SIZE 128
 #define AMPLIFIER 10
 
 ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector()
-	: ViNoiseDetector(DEFAULT_WINDOW_SIZE)
+	: ViNoiseDetector()
 {
 }
 
-void ViMahalanobisNoiseDetector::calculateNoise(ViNoise &noise, const ViSampleChunk &samples)
+void ViMahalanobisNoiseDetector::calculateNoise(const ViSampleChunk &samples)
 {
 	int i, size = samples.size();
 
@@ -51,7 +50,7 @@ void ViMahalanobisNoiseDetector::calculateNoise(ViNoise &noise, const ViSampleCh
 		//distance = (vector.transpose() * covariance.invert() * vector)[0];
 		distance = (vectorY[i] * covariance * vectorY[i]);
 		//noise.set(i, qAbs(distance));
-		noise.set(i, qAbs(distance) * AMPLIFIER);
+		setNoise(qAbs(distance) * AMPLIFIER);
 	}
 }
 
