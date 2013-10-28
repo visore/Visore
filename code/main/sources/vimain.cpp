@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
 		bench.benchmark(paths);*/
 
-		bench.benchmark("/home/visore/Visore Projects/Noise1.flac");
+		//bench.benchmark("/home/visore/Visore Projects/Noise1.flac");
 	}
 	else
 	{
@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
 		ViNearestNeighbourNoiseDetector d;
 		d.initialize(1, 16);
 		d.calculateNoise(s2);
-		ViSampleChunk &n = d.noise(0).data();
-		ViSampleChunk &n2 = d.noise(0).mask();
+		ViSampleChunk &n = *d.noise(0).data();
+		ViSampleChunk &n2 = *d.noise(0).mask();
 
 
 		for(int i = 0; i < s2.size(); ++i)
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
 	ViMainWindow *window = ViMainWindow::instance();
 	window->setWindowIcon(logo);
-	//window->show();
+	window->show();
 	
 	application.exec();
 

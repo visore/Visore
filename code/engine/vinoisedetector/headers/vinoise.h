@@ -23,7 +23,6 @@ class ViNoise
 		ViNoise(const ViNoise &other);
 		virtual ~ViNoise();
 
-		void setMaskType(const MaskType &type);
 		void setThreshold(const qreal &threshold);
 
 		void resize(const int &size);
@@ -39,8 +38,9 @@ class ViNoise
 		// This depends on the minimize threshold
 		void minimize();
 
-		ViSampleChunk& data();
-		ViSampleChunk& mask();
+		ViSampleChunk* data();
+		ViSampleChunk* mask();
+		void generateMask(const MaskType &type = Direct);
 
 		void set(const int &index, const qreal &value);
 		void set(const int &index, const ViNoise &other);
@@ -50,18 +50,15 @@ class ViNoise
 
 	private:
 
-		void (ViNoise::*setPointer)(const int &index, const qreal &value);
-		void setDirect(const int &index, const qreal &value);
-		void setMean(const int &index, const qreal &value);
-		void setMaximum(const int &index, const qreal &value);
-
-		void generateMask();
+		void generateDirectMask();
+		void generateMeanMask();
+		void generateMaximumMask();
 
 	private:
 
 		qreal mThreshold;
-		ViSampleChunk mMask;
-		ViSampleChunk mData;
+		ViSampleChunk *mMask;
+		ViSampleChunk *mData;
 
 };
 

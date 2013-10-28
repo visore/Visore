@@ -9,36 +9,16 @@
 class ViNearestNeighbourNoiseDetector : public ViNoiseDetector
 {
 
-	public:
-
-		enum OutlierMode
-		{
-			ODIN,
-			MDIST,
-			KDIST
-		};
-
     public:
 
 		ViNearestNeighbourNoiseDetector();
 		ViNearestNeighbourNoiseDetector* clone();
-
-		void setOutlierMode(const OutlierMode &mode);
 
 		void setK(const int &k); // k nearest neighbours
 
 	//protected:
 
 		void calculateNoise(const ViSampleChunk &samples);
-
-	private:
-
-		void generateGraph(const ViSampleChunk &samples, QList<qreal> &vectors);
-
-		void calculateOdin(const ViSampleChunk &samples);
-		void calculateMdist(const ViSampleChunk &samples);
-		void calculateKdist(const ViSampleChunk &samples);
-		void (ViNearestNeighbourNoiseDetector::*calculatePointer)(const ViSampleChunk &samples);
 
 	private:
 

@@ -14,8 +14,15 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="1" colspan="7">
-    <spacer name="verticalSpacer_2">
+   <item row="3" column="5">
+    <widget class="ViButton" name="spectrumButton">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1" colspan="7">
+    <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -26,6 +33,72 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="2" column="5">
+    <widget class="ViButton" name="analyseWaveButton"/>
+   </item>
+   <item row="2" column="2" rowspan="4">
+    <widget class="Line" name="line1">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="7">
+    <widget class="ViButton" name="correctProjectButton"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="ViButton" name="createProjectButton"/>
+   </item>
+   <item row="1" column="3">
+    <widget class="QLabel" name="playbackHeading">
+     <property name="text">
+      <string>Playback</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="6" rowspan="4">
+    <widget class="Line" name="line3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="7">
+    <widget class="ViButton" name="correlateProjectButton"/>
+   </item>
+   <item row="1" column="7">
+    <widget class="QLabel" name="correctionHeading">
+     <property name="text">
+      <string>Correction</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4" rowspan="4">
+    <widget class="Line" name="line2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="ViButton" name="projectPlaybackButton"/>
+   </item>
+   <item row="1" column="5">
+    <widget class="QLabel" name="analysisHeading">
+     <property name="text">
+      <string>Analysis</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </item>
    <item row="1" column="1">
     <widget class="QLabel" name="creationHeading">
@@ -40,11 +113,8 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="ViButton" name="createProjectButton"/>
-   </item>
-   <item row="5" column="1" colspan="7">
-    <spacer name="verticalSpacer">
+   <item row="0" column="1" colspan="7">
+    <spacer name="verticalSpacer_2">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -56,69 +126,6 @@
      </property>
     </spacer>
    </item>
-   <item row="2" column="3">
-    <widget class="ViButton" name="projectPlaybackButton"/>
-   </item>
-   <item row="2" column="4" rowspan="3">
-    <widget class="Line" name="line2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="2" rowspan="3">
-    <widget class="Line" name="line1">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="5">
-    <widget class="ViButton" name="analyseWaveButton"/>
-   </item>
-   <item row="2" column="7">
-    <widget class="ViButton" name="correlateProjectButton"/>
-   </item>
-   <item row="2" column="6" rowspan="3">
-    <widget class="Line" name="line3">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
-    <widget class="QLabel" name="playbackHeading">
-     <property name="text">
-      <string>Playback</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="5">
-    <widget class="QLabel" name="analysisHeading">
-     <property name="text">
-      <string>Analysis</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="7">
-    <widget class="QLabel" name="correctionHeading">
-     <property name="text">
-      <string>Correction</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="7">
-    <widget class="ViButton" name="correctProjectButton"/>
-   </item>
    <item row="3" column="1">
     <widget class="ViButton" name="metadataButton">
      <property name="text">
@@ -126,8 +133,8 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="5">
-    <widget class="ViButton" name="spectrumButton">
+   <item row="4" column="7">
+    <widget class="ViButton" name="noiseDetectionButton">
      <property name="text">
       <string/>
      </property>

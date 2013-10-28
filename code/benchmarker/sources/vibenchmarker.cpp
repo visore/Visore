@@ -79,47 +79,65 @@ void ViBenchMarker::benchmarkNoise()
 	mDetector = new ViNearestNeighbourNoiseDetector();
 	//mDetector = new ViMahalanobisNoiseDetector();
 
-	mFile = mFiles.takeFirst();
-	mBuffer.clear();
-	QObject::connect(&mCoder, SIGNAL(finished()), this, SLOT(processNoise()));
-	mCoder.decode(mFile, &mBuffer);
+	mProject.setFilePath("/home/visore/Visore Projects/NoiseTests.vip");
+	QObject::connect(&mProject, SIGNAL(finished()), this, SLOT(decodeNoise1()));
+	mProject.load();
+}
+
+void ViBenchMarker::decodeNoise1()
+{
+	QObject::disconnect(&mProject, SIGNAL(finished()), this, SLOT(decodeNoise1()));
+	mObject = mProject.object(0);
+	QObject::connect(mObject.data(), SIGNAL(finished()), this, SLOT(decodeNoise2()));
+	mObject->decode(ViAudio::Target | ViAudio::Corrupted);
+}
+
+void ViBenchMarker::decodeNoise2()
+{
+	QObject::disconnect(mObject.data(), SIGNAL(finished()), this, SLOT(decodeNoise2()));
+	QObject::connect(mObject.data(), SIGNAL(aligned()), this, SLOT(decodeNoise3()));
+	mObject->align();
+}
+
+void ViBenchMarker::decodeNoise3()
+{
+	QObject::disconnect(mObject.data(), SIGNAL(aligned()), this, SLOT(decodeNoise3()));
+	QObject::connect(mObject.data(), SIGNAL(finished()), this, SLOT(processNoise()));
+	mObject->generateCustomMask();
 }
 
 void ViBenchMarker::processNoise()
 {
-	QObject::disconnect(&mCoder, SIGNAL(finished()), this, SLOT(processNoise()));
+	QObject::disconnect(mObject.data(), SIGNAL(finished()), this, SLOT(processNoise()));
 
-	ViAudioReadData data(&mBuffer);
+	ViAudioReadData data(mObject->buffer(ViAudio::Corrupted));
 	data.setSampleCount(WINDOW_SIZE);
-
-	mBuffer2.setFormat(mBuffer.format());
-	ViAudioWriteData data2(&mBuffer2);
-	data2.setSampleCount(WINDOW_SIZE);
 
 	mDetector->initialize(data.channelCount(), data.bufferSamples());
 
-	int current = 0, total = data.bufferSamples();
+	int i, current = 0, total = data.bufferSamples();
 	qreal progress = 0, oldProgress = 0;
 
-	qint64 currentSamples = 0;
+	qint64 truePositives = 0, falsePositives = 0, trueNegatives = 0, falseNegatives = 0;
+	qint64 currentSamples = 0, channelSamples = 0, offset;
+
 	while(data.hasData())
 	{
 		data.read();
-		currentSamples += data.sampleCount();
 
 		ViSampleChunk &read1 = data.splitSamples(0);
-		//ViSampleChunk &read2 = data.splitSamples(1);
+		ViSampleChunk &read2 = data.splitSamples(1);
 
 		mDetector->setChannel(0);
 		mDetector->calculateNoise(read1);
+		mDetector->setChannel(1);
+		mDetector->calculateNoise(read2);
 
-		//mDetector->setChannel(1);
-		//mDetector->calculateNoise(read2);
-
-		current += (read1.size() /*+ read2.size()*/);
+		currentSamples += data.sampleCount();
+		current += (read1.size() + read2.size());
 		progress = (current / float(total));
-		progress /= mOriginalFiles.size();
-		progress += (mOriginalFiles.size() - mFiles.size() - 1) / qreal(mOriginalFiles.size());
+		//progress /= mOriginalFiles.size();
+		//progress += (mOriginalFiles.size() - mFiles.size() - 1) / qreal(mOriginalFiles.size());
 		progress *= 100;
 		if(progress - oldProgress > 0.05)
 		{
@@ -128,17 +146,62 @@ void ViBenchMarker::processNoise()
 		}
 	}
 
-	ViSampleChunk &d = mDetector->noise(0).mask();
-	cout<<"++++++++++++++++++++++++: "<<d.size()<<" "<<data.bufferSamples()<<endl;
-	for(int i = 0; i < d.size(); i += WINDOW_SIZE)
-	{
-		ViSampleChunk d2 = d.subset(i, WINDOW_SIZE);
-		data2.enqueueSplitSamples(d2, 0);
-	}
-	//data2.enqueueSplitSamples(mDetector->noise(1).data(), 1);
+	cout << "Calculating the noise" << endl;
+	ViAudioReadData dataCustom(mObject->buffer(ViAudio::CustomMask));
+	dataCustom.setSampleCount(WINDOW_SIZE);
+	ViSampleChunk &noise1 = *mDetector->noise(0).mask();
+	ViSampleChunk &noise2 = *mDetector->noise(1).mask();
+	currentSamples = 0;
 
-	QObject::connect(&mCoder, SIGNAL(finished()), this, SLOT(quit()));
-	mCoder.encode(&mBuffer2, mFile + "_MASK.flac", mBuffer2.format());
+	while(dataCustom.hasData())
+	{
+		dataCustom.read();
+		ViSampleChunk &readCustom1 = dataCustom.splitSamples(0);
+		ViSampleChunk &readCustom2 = dataCustom.splitSamples(1);
+
+		channelSamples = (currentSamples / 2);
+
+		for(i = 0; i < readCustom1.size(); ++i)
+		{
+			offset = i + channelSamples;
+			if(readCustom1[i] == 1)
+			{
+				if(noise1[offset] == 1) ++truePositives;
+				else if(noise1[offset] == 0) ++falseNegatives;
+			}
+			else if(readCustom1[i] == 0)
+			{
+				if(noise1[offset] == 1) ++falsePositives;
+				else if(noise1[offset] == 0) ++trueNegatives;
+			}
+		}
+
+		for(i = 0; i < readCustom2.size(); ++i)
+		{
+			offset = i + channelSamples;
+			if(readCustom2[i] == 1)
+			{
+				if(noise2[offset] == 1) ++truePositives;
+				else if(noise2[offset] == 0) ++falseNegatives;
+			}
+			else if(readCustom2[i] == 0)
+			{
+				if(noise2[offset] == 1) ++falsePositives;
+				else if(noise2[offset] == 0) ++trueNegatives;
+			}
+		}
+
+		currentSamples += readCustom1.size() + readCustom2.size();
+	}
+
+	cout << "TP:\t" << truePositives << endl;
+	cout << "TN:\t" << trueNegatives << endl;
+	cout << "FP:\t" << falsePositives << endl;
+	cout << "FN:\t" << falseNegatives << endl;
+	cout << "Sensitivity:\t" << setprecision(10) << truePositives / qreal(truePositives + falseNegatives) << endl;
+	cout << "Specificity:\t" << setprecision(10) << trueNegatives / qreal(trueNegatives + falsePositives) << endl;
+
+	quit();
 }
 
 void ViBenchMarker::benchmark()

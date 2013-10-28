@@ -11,6 +11,7 @@
 #include <vispectrum.h>
 #include <visongidentifier.h>
 #include <vicorrelationgroup.h>
+#include <vicustommaskcreator.h>
 #include <QQueue>
 #include <QMutex>
 #include <QMutexLocker>
@@ -23,6 +24,7 @@ class ViModifyProcessor;
 class ViDualProcessor;
 class ViCorrelator;
 class ViSpectrumAnalyzer;
+class ViNoiseDetector;
 
 typedef ViPointer<ViAudioObject> ViAudioObjectPointer;
 typedef QList<QList<ViAudioObjectPointer> > ViAudioObjectMatrix;
@@ -73,6 +75,9 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void corrected();
 
         void correlated();
+
+		void customGenerated();
+		void noiseGenerated();
 
 		void metadataDetected(bool success);
 
@@ -295,25 +300,41 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
         ViModifyProcessor* corrector();
         Q_INVOKABLE bool correct(ViModifyProcessor *corrector = NULL); //Takes ownership
 
-        /*******************************************************************************************************************
+		/*******************************************************************************************************************
 
-            CORRELATE
+			CORRELATE
 
-        *******************************************************************************************************************/
+		*******************************************************************************************************************/
 
-        ViCorrelation correlation(QString correlator, ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
-        ViCorrelationGroup correlation(ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
-        ViCorrelationGroups correlations();
+		ViCorrelation correlation(QString correlator, ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
+		ViCorrelationGroup correlation(ViAudio::Type type1 = ViAudio::Target, ViAudio::Type type2 = ViAudio::Corrected);
+		ViCorrelationGroups correlations();
 
-        void clearCorrelators();
+		void clearCorrelators();
 		void addCorrelator(ViCorrelator *correlator); //Takes ownership
 		void addCorrelators(QList<ViCorrelator*> correlators); //Takes ownership
-        bool hasCorrelator();
-        int correlatorCount();
+		bool hasCorrelator();
+		int correlatorCount();
 
-        Q_INVOKABLE bool correlate(ViCorrelator *correlator); //Takes ownership
-        Q_INVOKABLE bool correlate(QList<ViCorrelator*> correlators); //Takes ownership
-        Q_INVOKABLE bool correlate();
+		Q_INVOKABLE bool correlate(ViCorrelator *correlator); //Takes ownership
+		Q_INVOKABLE bool correlate(QList<ViCorrelator*> correlators); //Takes ownership
+		Q_INVOKABLE bool correlate();
+
+		/*******************************************************************************************************************
+
+			NOISE MASK
+
+		*******************************************************************************************************************/
+
+		Q_INVOKABLE bool generateNoiseMask(ViNoiseDetector *detector);
+
+		/*******************************************************************************************************************
+
+			CUSTOM MASK
+
+		*******************************************************************************************************************/
+
+		Q_INVOKABLE bool generateCustomMask();
 
 		/*******************************************************************************************************************
 
@@ -459,6 +480,22 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
         int mCurrentCorrelator;
         int mCurrentCorrelation;
         ViCorrelationGroups mCorrelations;
+
+		/*******************************************************************************************************************
+
+			NOISE MASK
+
+		*******************************************************************************************************************/
+
+		ViNoiseDetector *mNoiseDetector;
+
+		/*******************************************************************************************************************
+
+			CUSTOM MASK
+
+		*******************************************************************************************************************/
+
+		ViCustomMaskCreator *mCustomMaskCreator;
 
 		/*******************************************************************************************************************
 

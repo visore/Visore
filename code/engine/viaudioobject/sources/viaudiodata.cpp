@@ -39,7 +39,7 @@ void ViAudioData::clear()
 void ViAudioData::setBuffer(ViBuffer *buffer)
 {
 	QMutexLocker locker(&mMutex);
-    mBuffer = buffer;
+	mBuffer = buffer;
     update();
 }
 
@@ -108,7 +108,7 @@ int ViAudioData::windowSize()
 void ViAudioData::update()
 {
     if(mBuffer == NULL)
-    {
+	{
         return;
     }
 

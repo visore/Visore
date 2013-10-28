@@ -67,9 +67,8 @@ void ViProcessor::run()
 {
 	QMutexLocker locker(&mMutex);
 	int channel = mCurrentChannel;
-	bool noise = isNoisy();
 	++mCurrentChannel;
-	if(mProcessMode == ViProcessor::All || noise)
+	if(mProcessMode == ViProcessor::All || isNoisy())
 	{
 		locker.unlock();
 		execute(channel);
@@ -596,16 +595,16 @@ int ViModifyProcessor::readNext()
 				for(int i = 0; i < mTotalChannels; ++i)
 				{
 					noisy = isNoisy(i);
-					mNoiseData.enqueueSplitScaledSamples(mNoiseDetector->noise().data(), i);
-					mNoiseMaskData.enqueueSplitScaledSamples(mNoiseDetector->noise().mask(), i);
+					mNoiseData.enqueueSplitScaledSamples(*mNoiseDetector->noise().data(), i);
+					mNoiseMaskData.enqueueSplitScaledSamples(*mNoiseDetector->noise().mask(), i);
 					mOriginalData.enqueue(noisy, mData.splitSamples(i), i);
 				}
 			}
 			else
 			{
 				noisy = isNoisy();
-				mNoiseData.writeScaled(mNoiseDetector->noise().data());
-				mNoiseMaskData.writeScaled(mNoiseDetector->noise().mask());
+				mNoiseData.writeScaled(*mNoiseDetector->noise().data());
+				mNoiseMaskData.writeScaled(*mNoiseDetector->noise().mask());
 				mOriginalData.enqueue(noisy, mData.samples());
 			}
         }

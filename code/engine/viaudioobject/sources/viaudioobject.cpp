@@ -8,6 +8,7 @@
 #include <vimanager.h>
 #include <viaudiocodec.h>
 #include <vicorrelator.h>
+#include <vinoisedetector.h>
 #include <QSet>
 
 /*******************************************************************************************************************
@@ -43,6 +44,13 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 
 	mSideNumber = 0;
 	mTrackNumber = 0;
+
+	mNoiseDetector = NULL;
+
+	mCustomMaskCreator = new ViCustomMaskCreator();
+	QObject::connect(mCustomMaskCreator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+	QObject::connect(mCustomMaskCreator, SIGNAL(finished()), this, SLOT(setFinished()));
+	QObject::connect(mCustomMaskCreator, SIGNAL(finished()), this, SIGNAL(customGenerated()));
 
 	setAligner(new ViFourierCrossAligner());
 }
@@ -93,7 +101,19 @@ ViAudioObject::~ViAudioObject()
 	{
 		delete mCorrector;
 		mCorrector = NULL;
-    }
+	}
+
+	if(mNoiseDetector != NULL)
+	{
+		delete mNoiseDetector;
+		mNoiseDetector = NULL;
+	}
+
+	if(mCustomMaskCreator != NULL)
+	{
+		delete mCustomMaskCreator;
+		mCustomMaskCreator = NULL;
+	}
 }
 
 ViAudioObjectPointer ViAudioObject::create(ViAudioObject *object)
@@ -1234,6 +1254,58 @@ void ViAudioObject::correlateNext()
 	}
 
 	correlator->process(thisPointer, types.first, types.second);
+}
+
+/*******************************************************************************************************************
+
+	Noise MASK
+
+*******************************************************************************************************************/
+
+bool ViAudioObject::generateNoiseMask(ViNoiseDetector *detector)
+{
+	if(!hasBuffer(ViAudio::Corrupted))
+	{
+		log("A noise mask requires a corrupted signal.", QtCriticalMsg);
+		setFinished();
+		return false;
+	}
+
+	if(mNoiseDetector != NULL) delete mNoiseDetector;
+	mNoiseDetector = detector;
+	QObject::connect(mNoiseDetector, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+	QObject::connect(mNoiseDetector, SIGNAL(finished()), this, SLOT(setFinished()));
+	QObject::connect(mNoiseDetector, SIGNAL(finished()), this, SIGNAL(noiseGenerated()));
+
+	log("Creating custom mask");
+	ViAudioFormat theFormat = format(ViAudio::Corrupted);
+	buffer(ViAudio::Noise)->setFormat(theFormat);
+	buffer(ViAudio::NoiseMask)->setFormat(theFormat);
+	mNoiseDetector->setBuffers(buffer(ViAudio::Corrupted), buffer(ViAudio::Noise), buffer(ViAudio::NoiseMask));
+	mNoiseDetector->generate();
+}
+
+/*******************************************************************************************************************
+
+	CUSTOM MASK
+
+*******************************************************************************************************************/
+
+bool ViAudioObject::generateCustomMask()
+{
+	if(!hasBuffer(ViAudio::Target) || !hasBuffer(ViAudio::Corrupted))
+	{
+		log("A custom mask requires a target and corrupted signal.", QtCriticalMsg);
+		setFinished();
+		return false;
+	}
+
+	log("Creating custom mask");
+	ViAudioFormat theFormat = format(ViAudio::Target);
+	buffer(ViAudio::Custom)->setFormat(theFormat);
+	buffer(ViAudio::CustomMask)->setFormat(theFormat);
+	mCustomMaskCreator->setBuffers(buffer(ViAudio::Target), buffer(ViAudio::Corrupted), buffer(ViAudio::Custom), buffer(ViAudio::CustomMask));
+	mCustomMaskCreator->create();
 }
 
 /*******************************************************************************************************************

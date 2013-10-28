@@ -2,6 +2,16 @@
 
 #include <viscaler.h>
 
+void ViNoiseDetectorThread::setDetector(ViNoiseDetector *detector)
+{
+	mDetector = detector;
+}
+
+void ViNoiseDetectorThread::run()
+{
+	mDetector->create();
+}
+
 ViNoiseDetector::ViNoiseDetector()
 {
 	clear();
@@ -140,4 +150,101 @@ void ViNoiseDetector::clear()
 	setMode(ViProcessor::Combined);
 	mIndexes.clear();
 	viDeleteAll(mNoise);
+
+	mRead.clear();
+	mWrite1.clear();
+	mWrite2.clear();
+}
+
+void ViNoiseDetector::setBuffers(ViBuffer *read, ViBuffer *write1, ViBuffer *write2)
+{
+	clear();
+
+	mRead.setBuffer(read);
+	mWrite1.setBuffer(write1);
+	mWrite2.setBuffer(write2);
+}
+
+void ViNoiseDetector::generate()
+{
+	mThread.setDetector(this);
+	mThread.start();
+}
+
+void ViNoiseDetector::create()
+{
+	qint64 totalSamples = mRead.bufferSamples();
+	qint64 currentSamples = 0;
+	int i;
+
+	initialize(mRead.channelCount(), totalSamples);
+
+	while(mRead.hasData())
+	{
+		mRead.read();
+		currentSamples += mRead.sampleCount();
+
+		for(i = 0; i < mRead.channelCount(); ++i)
+		{
+			setChannel(i);
+			const ViSampleChunk &samples = mRead.splitSamples(i);
+			calculateNoise(samples);
+		}
+		setProgress((currentSamples * 97.0) / totalSamples);
+	}
+
+	for(i = 0; i < mRead.channelCount(); ++i)
+	{
+		mNoise[i]->generateMask();
+	}
+
+	int size = mWrite1.sampleCount() / 2;
+	qint64 offset = 0;
+	ViSampleChunk chunk(size);
+	ViSampleChunk &s1  =*mNoise[0]->data();
+	ViSampleChunk &s2  =*mNoise[1]->data();
+	ViSampleChunk &m1  =*mNoise[0]->mask();
+	ViSampleChunk &m2  =*mNoise[1]->mask();
+
+	while(offset < (totalSamples / 2))
+	{
+		for(int j = 0; j < size;++j)chunk[j]=s1[j+offset];
+		mWrite1.enqueueSplitSamples(chunk,0);
+
+		for(int j = 0; j < size;++j)chunk[j]=s2[j+offset];
+		mWrite1.enqueueSplitSamples(chunk,1);
+
+		for(int j = 0; j < size;++j)chunk[j]=m1[j+offset];
+		mWrite2.enqueueSplitSamples(chunk,0);
+
+		for(int j = 0; j < size;++j)chunk[j]=m2[j+offset];
+		mWrite2.enqueueSplitSamples(chunk,1);
+
+		/*for(i = 0; i < mRead.channelCount(); ++i)
+		{
+			chunk = mNoise[i]->data()->subset(offset, size);
+			mWrite1.enqueueSplitSamples(chunk, i);
+		}*/
+		offset += size;
+	}
+
+	/*
+	for(i = 0; i < mRead.channelCount(); ++i)
+	{
+		mNoise[i]->generateMask();
+	}
+	offset = 0;
+	while(offset < (totalSamples / 2))
+	{
+		for(i = 0; i < mRead.channelCount(); ++i)
+		{
+			chunk = mNoise[i]->mask()->subset(offset, size);
+			mWrite2.enqueueSplitSamples(chunk, i);
+		}
+		offset += size;
+	}*/
+
+	//clear();
+	setProgress(100);
+	emit finished();
 }

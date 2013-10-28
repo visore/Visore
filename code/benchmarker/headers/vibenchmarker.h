@@ -7,6 +7,8 @@
 #include <viinterpolator.h>
 #include <QTime>
 #include<vicrosscorrelator.h>
+#include <viproject.h>
+
 class ViBenchMarker : public QObject
 {
 
@@ -21,6 +23,9 @@ class ViBenchMarker : public QObject
 		void process2();
 
 		void processNoise();
+		void decodeNoise1();
+		void decodeNoise2();
+		void decodeNoise3();
 
 		void quit();
 
@@ -72,7 +77,8 @@ class ViBenchMarker : public QObject
 
 		ViNoiseDetector *mDetector;
 
-
+		ViProject mProject;
+		ViAudioObjectPointer mObject;
 
 
 

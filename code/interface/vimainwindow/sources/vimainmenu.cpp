@@ -8,6 +8,7 @@
 #include <vimainmetadatawidget.h>
 #include <vimainplaybackwidget.h>
 #include <vimainspectrumwidget.h>
+#include <vimainnoisewidget.h>
 
 ViMainMenu::ViMainMenu(QWidget *parent)
     : ViWidget(parent)
@@ -72,6 +73,13 @@ ViMainMenu::ViMainMenu(QWidget *parent)
 	index = ViStackedWidget::addWidget(new ViMainCorrectionWidget(), false);
 	mUi->correctProjectButton->setProperty("index", index);
 	QObject::connect(mUi->correctProjectButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
+
+	mUi->noiseDetectionButton->setIcon(ViThemeManager::icon("noise"), 80);
+	mUi->noiseDetectionButton->setText("   Detect\n   Noise", textColor, font);
+	mUi->noiseDetectionButton->setSize(250, 100);
+	index = ViStackedWidget::addWidget(new ViMainNoiseWidget(), false);
+	mUi->noiseDetectionButton->setProperty("index", index);
+	QObject::connect(mUi->noiseDetectionButton, SIGNAL(clicked()), ViStackedWidget::instance().data(), SLOT(changeCurrentIndex()));
 
     QFont headingFont;
 	headingFont.setFamily("Harabara");

@@ -1,8 +1,6 @@
 #include <vimahalanobisnoisedetector.h>
 #include <vimatrix.h>
 
-#define AMPLIFIER 10
-
 ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector()
 	: ViNoiseDetector()
 {
@@ -50,7 +48,7 @@ void ViMahalanobisNoiseDetector::calculateNoise(const ViSampleChunk &samples)
 		//distance = (vector.transpose() * covariance.invert() * vector)[0];
 		distance = (vectorY[i] * covariance * vectorY[i]);
 		//noise.set(i, qAbs(distance));
-		setNoise(qAbs(distance) * AMPLIFIER);
+		setNoise(qAbs(distance));
 	}
 }
 

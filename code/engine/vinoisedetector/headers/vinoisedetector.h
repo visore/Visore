@@ -5,8 +5,28 @@
 #include <viprocessor.h>
 #include <vinoise.h>
 
-class ViNoiseDetector : public ViLibrary
+class ViNoiseDetector;
+
+class ViNoiseDetectorThread : public QThread
 {
+
+	public:
+
+		void setDetector(ViNoiseDetector *detector);
+		void run();
+
+	private:
+
+		ViNoiseDetector *mDetector;
+
+};
+
+class ViNoiseDetector : public ViNotifier, public ViLibrary
+{
+
+	Q_OBJECT
+
+	friend class ViNoiseDetectorThread;
 
 	public:
 		
@@ -14,7 +34,7 @@ class ViNoiseDetector : public ViLibrary
 		ViNoiseDetector(const int &channels, const qint64 samples);
 		ViNoiseDetector(const int &channels, const qint64 samples, ViProcessor::ChannelMode mode);
         ViNoiseDetector(const ViNoiseDetector &other);
-        virtual ~ViNoiseDetector();
+		virtual ~ViNoiseDetector();
 
 		void initialize(const int &channels, const qint64 samples);
 
@@ -36,13 +56,22 @@ class ViNoiseDetector : public ViLibrary
 
         void clear();
 
-        virtual ViNoiseDetector* clone() = 0;
+		void setBuffers(ViBuffer *read, ViBuffer *write1, ViBuffer *write2);
+
+		void generate();
+
+		virtual ViNoiseDetector* clone() = 0;
 
 	//protected:
 	public:
 
 		virtual void calculateNoise(const ViSampleChunk &samples) = 0;
+
 		void setNoise(const qreal &value);
+
+	private:
+
+		void create();
 
     private:
 
@@ -51,6 +80,11 @@ class ViNoiseDetector : public ViLibrary
 		ViAudioReadData *mData;
 		QList<ViNoise*> mNoise;
 		QList<qint64> mIndexes;
+
+		ViNoiseDetectorThread mThread;
+		ViAudioReadData mRead;
+		ViAudioWriteData mWrite1;
+		ViAudioWriteData mWrite2;
 
 };
 

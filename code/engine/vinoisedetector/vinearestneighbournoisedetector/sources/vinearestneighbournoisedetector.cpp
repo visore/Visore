@@ -1,29 +1,11 @@
 #include <vinearestneighbournoisedetector.h>
 
 #define DEFAULT_K 32
-#define DEFAULT_MODE ODIN
 
 ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector()
 	: ViNoiseDetector()
 {
-	setOutlierMode(DEFAULT_MODE);
 	setK(DEFAULT_K);
-}
-
-void ViNearestNeighbourNoiseDetector::setOutlierMode(const OutlierMode &mode)
-{
-	if(mode == ODIN)
-	{
-		calculatePointer = &ViNearestNeighbourNoiseDetector::calculateOdin;
-	}
-	else if(mode == MDIST)
-	{
-		calculatePointer = &ViNearestNeighbourNoiseDetector::calculateMdist;
-	}
-	else if(mode == KDIST)
-	{
-		calculatePointer = &ViNearestNeighbourNoiseDetector::calculateKdist;
-	}
 }
 
 void ViNearestNeighbourNoiseDetector::setK(const int &k)
@@ -34,12 +16,6 @@ void ViNearestNeighbourNoiseDetector::setK(const int &k)
 
 void ViNearestNeighbourNoiseDetector::calculateNoise(const ViSampleChunk &samples)
 {
-	(this->*calculatePointer)(samples);
-}
-
-void ViNearestNeighbourNoiseDetector::generateGraph(const ViSampleChunk &samples, QList<qreal> &vectors)
-{
-	vectors.clear();
 	static int end, end2, i, j;
 	static qreal totalDifference;
 
@@ -48,7 +24,7 @@ void ViNearestNeighbourNoiseDetector::generateGraph(const ViSampleChunk &samples
 	{
 		for(i = 0; i < mHalfK; ++i)
 		{
-			vectors.append(0);
+			setNoise(0);
 		}
 	}
 
@@ -78,7 +54,7 @@ void ViNearestNeighbourNoiseDetector::generateGraph(const ViSampleChunk &samples
 
 		// Devide by mK, since we want the mean of all differences
 		// Devide 2, since the maximum distance between samples can be 2
-		vectors.append(totalDifference / (mK * 2));
+		setNoise(totalDifference / (mK * 2));
 	}
 
 	// We don't need the first samples anymore
@@ -86,58 +62,6 @@ void ViNearestNeighbourNoiseDetector::generateGraph(const ViSampleChunk &samples
 	{
 		mCache.removeFirst();
 	}
-}
-
-void ViNearestNeighbourNoiseDetector::calculateOdin(const ViSampleChunk &samples)
-{
-	static QList<qreal> vectors;
-	static int i;
-	generateGraph(samples, vectors);
-
-	for(i = 0; i < vectors.size(); ++i)
-	{
-
-		setNoise(vectors[i]);
-	}
-	vectors.clear();
-}
-
-void ViNearestNeighbourNoiseDetector::calculateMdist(const ViSampleChunk &samples)
-{
-	static QList<qreal> vectors;
-	static int i;
-	generateGraph(samples, vectors);
-
-	for(i = 0; i < vectors.size(); ++i)
-	{
-		// Devide by mK, since we want the mean of all differences
-		// Devide 2, since the maximum distance between samples can be 2
-		setNoise(vectors[i] / (mK * 2));
-	}
-	vectors.clear();
-}
-
-void ViNearestNeighbourNoiseDetector::calculateKdist(const ViSampleChunk &samples)
-{
-	static QList<qreal> vectors;
-	static int i;
-	static qreal maximum;
-
-	maximum = 0;
-	generateGraph(samples, vectors);
-
-	for(i = 0; i < vectors.size(); ++i)
-	{
-		if(vectors[i] > maximum) maximum = vectors[i];
-	}
-
-	for(i = 0; i < vectors.size(); ++i)
-	{
-		// Devide by mK, since we want the mean of all differences
-		// Devide 2, since the maximum distance between samples can be 2
-		setNoise(vectors[i] / (mK * 2));
-	}
-	vectors.clear();
 }
 
 ViNearestNeighbourNoiseDetector* ViNearestNeighbourNoiseDetector::clone()

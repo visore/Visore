@@ -33,5 +33,6 @@
         <file>mute/mute_normal.png</file>
         <file>mute/mute_selected.png</file>
         <file>about/about_normal.png</file>
+        <file>noise/noise_normal.png</file>
     </qresource>
 </RCC>

@@ -443,6 +443,7 @@ bool ViProject::initializeStructure()
 	mPaths[ViProject::CorruptedData] = mPaths[ViProject::Data] + "corrupted" + QDir::separator();
 	mPaths[ViProject::CorrectedData] = mPaths[ViProject::Data] + "corrected" + QDir::separator();
 	mPaths[ViProject::NoiseData] = mPaths[ViProject::Data] + "noise" + QDir::separator();
+	mPaths[ViProject::CustomData] = mPaths[ViProject::Data] + "custom" + QDir::separator();
 	mPaths[ViProject::CoverData] = mPaths[ViProject::Data] + "covers" + QDir::separator();
 
 	//Declare files
@@ -491,6 +492,7 @@ bool ViProject::createDirectory(int side)
     result &= createDirectory(ViProject::CorruptedData, side);
 	result &= createDirectory(ViProject::CorrectedData, side);
 	result &= createDirectory(ViProject::NoiseData, side);
+	result &= createDirectory(ViProject::CustomData, side);
     result &= createDirectory(ViProject::CoverData, side);
     return result;
 }
@@ -581,9 +583,13 @@ QString ViProject::path(ViAudio::Type type, int side)
 	{
 		return path(ViProject::CorrectedData, side);
 	}
-	else if(type == ViAudio::Noise || ViAudio::NoiseMask)
+	else if(type == ViAudio::Noise || type == ViAudio::NoiseMask)
 	{
 		return path(ViProject::NoiseData, side);
+	}
+	else if(type == ViAudio::Custom || type == ViAudio::CustomMask)
+	{
+		return path(ViProject::CustomData, side);
 	}
     return "";
 }
@@ -671,6 +677,14 @@ void ViProject::moveToProject()
 		{
 			moveToProject(object, ViAudio::NoiseMask);
 		}
+		if(object->hasFile(ViAudio::Custom))
+		{
+			moveToProject(object, ViAudio::Custom);
+		}
+		if(object->hasFile(ViAudio::CustomMask))
+		{
+			moveToProject(object, ViAudio::CustomMask);
+		}
 
 		ViMetadata &metadata = object->metadata();
 		if(metadata.hasCover())
@@ -691,7 +705,7 @@ void ViProject::moveToProject(ViAudioObjectPointer object, ViAudio::Type type)
     if(!oldPath.startsWith(mPaths[ViProject::Root]))
 	{
         QString newPath = path(type, object->sideNumber()) + object->fileName();
-		if(type == ViAudio::NoiseMask) newPath += ".mask";
+		if(type == ViAudio::NoiseMask || type == ViAudio::CustomMask) newPath += ".mask";
         ViAudioCodec *codec = object->format(type).codec();
         if(codec != NULL)
         {

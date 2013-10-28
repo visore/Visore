@@ -236,24 +236,24 @@ class ViModifyProcessor : public ViProcessor
 
 		int readNext();
 
-    public:
+	public:
 
-        enum ModifyMode
-        {
-            All,    // All data is modified
-            Noise   // Only noisy windows are modified
-        };
+		enum ModifyMode
+		{
+			All,    // All data is modified
+			Noise   // Only noisy windows are modified
+		};
 
 	public:
 
 		ViModifyProcessor();
 		virtual ~ViModifyProcessor();
-        void process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2);
+		void process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2);
 
 		void setWindowSize(int samples);
 		bool setWindowFunction(QString function);
 
-        void setModifyMode(ViModifyProcessor::ModifyMode mode);
+		void setModifyMode(ViModifyProcessor::ModifyMode mode);
 
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
@@ -277,7 +277,7 @@ class ViModifyProcessor : public ViProcessor
 		ViAudioWriteData mNoiseData;
 		ViAudioWriteData mNoiseMaskData;
 		ViAudio::Type mType2;
-        ViModifyProcessor::ModifyMode mModifyMode;
+		ViModifyProcessor::ModifyMode mModifyMode;
 		ViModifyData mOriginalData;
 
 };

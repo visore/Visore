@@ -107,13 +107,15 @@ namespace ViAudio
 	// Values are important for combining types (bit wise)
     enum Type
     {
-		Undefined = 0x1,
-		Target = 0x2,
-		Corrupted = 0x4,
-		Corrected = 0x8,
-		Noise = 0x10,
-		NoiseMask = 0x20,
-		All = Target | Corrupted | Corrected | Noise | NoiseMask
+		Undefined = 1 << 0,
+		Target = 1 << 1,
+		Corrupted = 1 << 2,
+		Corrected = 1 << 3,
+		Noise = 1 << 4,
+		NoiseMask = 1 << 5,
+		Custom = 1 << 6,
+		CustomMask = 1 << 7,
+		All = Target | Corrupted | Corrected | Noise | NoiseMask | Custom | CustomMask
     };
 	inline QList<Type> types();
 	inline QList<Type> types(const Type &type, const Type &exclude = Undefined);

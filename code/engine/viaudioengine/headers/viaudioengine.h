@@ -9,6 +9,7 @@
 
 #include <viaudiorecorder.h>
 #include <viaudioplayer.h>
+#include <vinoisedetector.h>
 
 class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 {
@@ -34,6 +35,14 @@ class ViAudioEngine : public QObject, public ViSingleton<ViAudioEngine>
 
 		//Correction
 		void correct(ViAudioObjectQueue objects, ViModifyProcessor *corrector, const bool &correlate = false);
+
+		//Noise mask
+		void generateNoiseMask(ViAudioObjectPointer object, ViNoiseDetector *detector);
+		void generateNoiseMask(ViAudioObjectQueue objects, ViNoiseDetector *detector);
+
+		//Custom mask
+		void generateCustomMask(ViAudioObjectPointer object);
+		void generateCustomMask(ViAudioObjectQueue objects);
 
 		//Project
 		void recordProject(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectInfo);

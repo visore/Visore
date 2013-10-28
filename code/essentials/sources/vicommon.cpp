@@ -104,7 +104,7 @@ bool viStringToBool(QString value)
 
 inline QList<ViAudio::Type> ViAudio::types()
 {
-	return {ViAudio::Target, ViAudio::Corrupted, ViAudio::Corrected, ViAudio::Noise, ViAudio::NoiseMask};
+	return {ViAudio::Target, ViAudio::Corrupted, ViAudio::Corrected, ViAudio::Noise, ViAudio::NoiseMask, ViAudio::Custom, ViAudio::CustomMask};
 }
 
 inline QList<ViAudio::Type> ViAudio::types(const ViAudio::Type &type, const ViAudio::Type &exclude)
@@ -130,6 +130,14 @@ inline QList<ViAudio::Type> ViAudio::types(const ViAudio::Type &type, const ViAu
 	{
 		result.append(ViAudio::NoiseMask);
 	}
+	if(type & ViAudio::Custom && !(exclude & ViAudio::Custom))
+	{
+		result.append(ViAudio::Custom);
+	}
+	if(type & ViAudio::CustomMask && !(exclude & ViAudio::CustomMask))
+	{
+		result.append(ViAudio::CustomMask);
+	}
 	return result;
 }
 
@@ -153,6 +161,8 @@ inline QString ViAudio::toString(ViAudio::Type type)
 	else if(type == ViAudio::Corrected) return "Corrected";
 	else if(type == ViAudio::Noise) return "Noise";
 	else if(type == ViAudio::NoiseMask) return "NoiseMask";
+	else if(type == ViAudio::Custom) return "Custom";
+	else if(type == ViAudio::CustomMask) return "CustomMask";
 	else return "Undefinied";
 }
 
@@ -164,6 +174,8 @@ inline ViAudio::Type ViAudio::toType(QString type)
 	else if(type == "corrected") return ViAudio::Corrected;
 	else if(type == "noise") return ViAudio::Noise;
 	else if(type == "noisemask") return ViAudio::NoiseMask;
+	else if(type == "custom") return ViAudio::Custom;
+	else if(type == "custommask") return ViAudio::CustomMask;
 	else return ViAudio::Undefined;
 }
 

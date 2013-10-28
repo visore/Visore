@@ -104,6 +104,47 @@ void ViAudioEngine::correct(ViAudioObjectQueue objects, ViModifyProcessor *corre
 	mObjectChain.execute("Correcting " + tracks);
 }
 
+void ViAudioEngine::generateNoiseMask(ViAudioObjectPointer object, ViNoiseDetector *detector)
+{
+	generateNoiseMask({object}, detector);
+}
+
+void ViAudioEngine::generateNoiseMask(ViAudioObjectQueue objects, ViNoiseDetector *detector)
+{
+	mObjectChain.clear();
+	mObjectChain.add(objects);
+
+	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Corrupted)), 0.1);
+	mObjectChain.addFunction(ViFunctionCall("generateNoiseMask", QVariant::fromValue(detector)), 0.79);
+	mObjectChain.addFunction(ViFunctionCall("encode", QVariant(ViAudio::Noise | ViAudio::NoiseMask)), 0.1);
+	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
+
+	QString mask = "Mask";
+	if(objects.size() > 1) mask += "s";
+	mObjectChain.execute("Generating Noise " + mask);
+}
+
+void ViAudioEngine::generateCustomMask(ViAudioObjectPointer object)
+{
+	generateCustomMask({object});
+}
+
+void ViAudioEngine::generateCustomMask(ViAudioObjectQueue objects)
+{
+	mObjectChain.clear();
+	mObjectChain.add(objects);
+
+	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted)), 0.1);
+	mObjectChain.addFunction(ViFunctionCall("align"), 0.2);
+	mObjectChain.addFunction(ViFunctionCall("generateCustomMask"), 0.59);
+	mObjectChain.addFunction(ViFunctionCall("encode", QVariant(ViAudio::Custom | ViAudio::CustomMask)), 0.1);
+	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
+
+	QString mask = "Mask";
+	if(objects.size() > 1) mask += "s";
+	mObjectChain.execute("Generating Custom " + mask);
+}
+
 void ViAudioEngine::recordProject(ViProject *project, ViAudio::Type type, ViAudioFormat format, int sides, bool detectInfo)
 {
 	mRecorder.record(project, type, format, sides, detectInfo);
