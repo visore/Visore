@@ -6,6 +6,7 @@ ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector()
 	: ViNoiseDetector()
 {
 	setK(DEFAULT_K);
+	setOffset(mHalfK);
 }
 
 void ViNearestNeighbourNoiseDetector::setK(const int &k)
@@ -14,42 +15,28 @@ void ViNearestNeighbourNoiseDetector::setK(const int &k)
 	mHalfK = mK / 2;
 }
 
-void ViNearestNeighbourNoiseDetector::calculateNoise(const ViSampleChunk &samples)
+void ViNearestNeighbourNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
 	static int end, end2, i, j;
 	static qreal totalDifference;
 
-	//First few samples cannot be tested, since no left samples are available
-	if(mCache.isEmpty())
-	{
-		for(i = 0; i < mHalfK; ++i)
-		{
-			setNoise(0);
-		}
-	}
-
-	for(i = 0; i < samples.size(); ++i)
-	{
-		mCache.enqueue(samples[i]);
-	}
-
-	end = mCache.size() - (mK / 2);
+	end = samples.size() - (mK / 2);
 	for(i = mHalfK; i < end; ++i)
 	{
-		const qreal &currentValue = mCache[i];
+		const qreal &currentValue = samples[i];
 		totalDifference = 0;
 
 		// Half mK samples before the current sample
 		for(j = i - mHalfK; j < i; ++j)
 		{
-			totalDifference += qAbs(currentValue - mCache[j]);
+			totalDifference += qAbs(currentValue - samples[j]);
 		}
 
 		// Half mK samples after the current sample
 		end2 = i + mHalfK;
 		for(j = i + 1; j <= end2; ++j)
 		{
-			totalDifference += qAbs(currentValue - mCache[j]);
+			totalDifference += qAbs(currentValue - samples[j]);
 		}
 
 		// Devide by mK, since we want the mean of all differences
@@ -58,9 +45,9 @@ void ViNearestNeighbourNoiseDetector::calculateNoise(const ViSampleChunk &sample
 	}
 
 	// We don't need the first samples anymore
-	while(mCache.size() > mK)
+	while(samples.size() > mK)
 	{
-		mCache.removeFirst();
+		samples.removeFirst();
 	}
 }
 

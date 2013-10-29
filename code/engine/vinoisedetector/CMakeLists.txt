@@ -14,6 +14,7 @@ ADD_SUBDIRECTORY(${ROOT}/vizscorenoisedetector)
 ADD_SUBDIRECTORY(${ROOT}/vimahalanobisnoisedetector)
 ADD_SUBDIRECTORY(${ROOT}/vinearestneighbournoisedetector)
 ADD_SUBDIRECTORY(${ROOT}/vipredictionnoisedetector)
+ADD_SUBDIRECTORY(${ROOT}/vifouriernoisedetector)
 
 #Initiate source files
 FILE(GLOB VI_NOISE_DETECTOR_HEADERS ${HEADERS}/*.h)

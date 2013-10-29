@@ -62,10 +62,14 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 
 		virtual ViNoiseDetector* clone() = 0;
 
+	protected:
+
+		void setOffset(const int &offset); // The first offset samples that can't be used to detect noise
+
 	//protected:
 	public:
 
-		virtual void calculateNoise(const ViSampleChunk &samples) = 0;
+		virtual void calculateNoise(QQueue<qreal> &samples) = 0;
 
 		void setNoise(const qreal &value);
 
@@ -80,6 +84,9 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 		ViAudioReadData *mData;
 		QList<ViNoise*> mNoise;
 		QList<qint64> mIndexes;
+
+		QList<QQueue<qreal>> mCache;
+		int mOffset;
 
 		ViNoiseDetectorThread mThread;
 		ViAudioReadData mRead;

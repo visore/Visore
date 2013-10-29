@@ -1,108 +1,52 @@
 #include <vizscorenoisedetector.h>
 #include <qmath.h>
-#include <viscaler.h>
+
+#define WINDOW_SIZE 128
 
 ViZscoreNoiseDetector::ViZscoreNoiseDetector()
 	: ViNoiseDetector()
 {
+	mHalfWindow = WINDOW_SIZE / 2;
+	setOffset(mHalfWindow);
 }
 
-void ViZscoreNoiseDetector::calculateNoise(const ViSampleChunk &samples)
+void ViZscoreNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
-	int i, size = samples.size();
+	static int i;
+	static qreal mean, standardDeviation, value;
 
-	ViSampleChunk newSamples(size);
-	for(i = 0; i < size; ++i)
+	while(samples.size() >= WINDOW_SIZE + 1)
 	{
-		newSamples[i] = ViScaler<qreal>::scale(samples[i], -1, 1, 0, 100);
-	}
-
-	// Calculate the mean
-	qreal mean = 0;
-	for(i = 0; i < size; ++i)
-	{
-		mean += newSamples[i];
-	}
-	mean /= size;
-
-	// Calculate the standard diviation
-	qreal standardDeviation = 0;
-	for(i = 0; i < size; ++i)
-	{
-		standardDeviation += qPow(newSamples[i] - mean, 2);
-	}
-	standardDeviation = qSqrt(standardDeviation / size);
-
-	// Calculate the z-score
-	qreal value;
-	for(i = 0; i < size; ++i)
-	{
-		value = qAbs((newSamples[i] - mean) / standardDeviation);
-
-
-		//value = qAbs(qAbs(newSamples[i] - mean) - standardDeviation);
-
-
-		//value = qAbs((newSamples[i] - mean));
-		//cout<<newSamples[i]<<"  "<<mean<<"  "<<standardDeviation<<"  "<< value<<"  "<<endl;
-		//value = qAbs((samples[i] - mean) );
-		value /= 3.5;
-/*value = log(value);
-if(value < 0)value = 0;
-if(value>1)value = 1;*/
-		//value = ViScaler<qreal>::scale(value, 0, 2, 0, 1);
-		setNoise(value);
-	}
-
-
-	/*int t = 0;
-	int y = 8/t;*/
-/*
-	int i, size = samples.size();
-
-		ViSampleChunk newSamples(size);
-		QVector<qreal> v(size);
-		for(i = 0; i < size; ++i)
-		{
-			newSamples[i] = ViScaler<qreal>::scale(samples[i], -1, 1, 0, 1);
-			v[i] = newSamples[i];
-		}
-		qSort(v);
-		qreal median = v[v.size()/2];
-
 		// Calculate the mean
-		qreal mean = 0;
-		for(i = 0; i < size; ++i)
+		mean = 0;
+		for(i = 0; i < mHalfWindow; ++i)
 		{
-			mean += newSamples[i];
+			mean += samples[i];
 		}
-		mean /= size;
+		for(i = mHalfWindow + 1; i < WINDOW_SIZE; ++i)
+		{
+			mean += samples[i];
+		}
+		mean /= WINDOW_SIZE;
 
 		// Calculate the standard diviation
-		qreal mad = 0;
-		QVector<qreal> v2(size);
-		for(i = 0; i < size; ++i)
+		standardDeviation = 0;
+		for(i = 0; i < mHalfWindow; ++i)
 		{
-			v2[i] = qAbs(newSamples[i] - median);
-			//standardDeviation += qPow(newSamples[i] - mean, 2);
+			standardDeviation += qPow(samples[i] - mean, 2);
 		}
-		qSort(v2);
-		mad = v2[v2.size()/2];
+		for(i = mHalfWindow + 1; i < WINDOW_SIZE; ++i)
+		{
+			standardDeviation += qPow(samples[i] - mean, 2);
+		}
+		standardDeviation = qSqrt(standardDeviation / WINDOW_SIZE);
 
 		// Calculate the z-score
-		qreal value;
-		for(i = 0; i < size; ++i)
-		{
-			//value = qAbs((newSamples[i] - mean) / standardDeviation);
-			//cout<<newSamples[i]<<"  "<<mean<<"  "<<standardDeviation<<"  "<< value<<"  "<<log(value)<<endl;
-			//value = qAbs((samples[i] - mean) );
-			value = (0.6745 * (newSamples[i] - median)) / mad;
+		value = qAbs((samples[mHalfWindow] - mean) / (1 + standardDeviation));
+		setNoise(value);
 
-			value /= 3.5;
-
-			//value = ViScaler<qreal>::scale(value, 0, 2, 0, 1);
-			noise.set(i, value);
-		}*/
+		samples.removeFirst();
+	}
 }
 
 ViZscoreNoiseDetector* ViZscoreNoiseDetector::clone()

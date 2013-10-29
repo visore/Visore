@@ -18,7 +18,11 @@ class ViZscoreNoiseDetector : public ViNoiseDetector
 
 	protected:
 
-		void calculateNoise(const ViSampleChunk &samples);
+		void calculateNoise(QQueue<qreal> &samples);
+
+	private:
+
+		int mHalfWindow;
 
 };
 

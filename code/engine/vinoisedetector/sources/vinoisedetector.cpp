@@ -15,12 +15,14 @@ void ViNoiseDetectorThread::run()
 ViNoiseDetector::ViNoiseDetector()
 {
 	clear();
+	mOffset = 0;
 }
 
 ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples)
 {
 	clear();
 	initialize(channels, samples);
+	mOffset = 0;
 }
 
 ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples, ViProcessor::ChannelMode mode)
@@ -28,6 +30,7 @@ ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples, ViPr
 	clear();
 	initialize(channels, samples);
 	setMode(mode);
+	mOffset = 0;
 }
 
 ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
@@ -37,10 +40,16 @@ ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 	mData = other.mData;
     mNoise = other.mNoise;
 	mIndexes = other.mIndexes;
+	mOffset = other.mOffset;
 }
 
 ViNoiseDetector::~ViNoiseDetector()
 {
+}
+
+void ViNoiseDetector::setOffset(const int &offset)
+{
+	mOffset = offset;
 }
 
 void ViNoiseDetector::initialize(const int &channels, const qint64 samples)
@@ -104,14 +113,14 @@ bool ViNoiseDetector::isNoisy(ViAudioReadData &data, int channel)
 
 bool ViNoiseDetector::isNoisy()
 {
-	if(mMode == ViProcessor::Separated)
+	/*if(mMode == ViProcessor::Separated)
 	{
 		calculateNoise(mData->scaledSplitSamples(mChannel, 0, 1));
 	}
 	else
 	{
 		calculateNoise(mData->scaledSamples(0, 1));
-	}
+	}*/
 
 	/*ViSampleChunk c1;
 	if(mMode == ViProcessor::Separated)
@@ -175,9 +184,22 @@ void ViNoiseDetector::create()
 {
 	qint64 totalSamples = mRead.bufferSamples();
 	qint64 currentSamples = 0;
-	int i;
+	int i, j;
 
 	initialize(mRead.channelCount(), totalSamples);
+	for(i = 0; i < mRead.channelCount(); ++i)
+	{
+		mCache.append(QQueue<qreal>());
+	}
+
+	for(i = 0; i < mRead.channelCount(); ++i)
+	{
+		setChannel(i);
+		for(j = 0; j < mOffset; ++j)
+		{
+			setNoise(0);
+		}
+	}
 
 	while(mRead.hasData())
 	{
@@ -188,7 +210,11 @@ void ViNoiseDetector::create()
 		{
 			setChannel(i);
 			const ViSampleChunk &samples = mRead.splitSamples(i);
-			calculateNoise(samples);
+			for(j = 0; j < samples.size(); ++j)
+			{
+				mCache[i].append(samples[j]);
+			}
+			calculateNoise(mCache[i]);
 		}
 		setProgress((currentSamples * 97.0) / totalSamples);
 	}
@@ -201,50 +227,21 @@ void ViNoiseDetector::create()
 	int size = mWrite1.sampleCount() / 2;
 	qint64 offset = 0;
 	ViSampleChunk chunk(size);
-	ViSampleChunk &s1  =*mNoise[0]->data();
-	ViSampleChunk &s2  =*mNoise[1]->data();
-	ViSampleChunk &m1  =*mNoise[0]->mask();
-	ViSampleChunk &m2  =*mNoise[1]->mask();
 
-	while(offset < (totalSamples / 2))
-	{
-		for(int j = 0; j < size;++j)chunk[j]=s1[j+offset];
-		mWrite1.enqueueSplitSamples(chunk,0);
-
-		for(int j = 0; j < size;++j)chunk[j]=s2[j+offset];
-		mWrite1.enqueueSplitSamples(chunk,1);
-
-		for(int j = 0; j < size;++j)chunk[j]=m1[j+offset];
-		mWrite2.enqueueSplitSamples(chunk,0);
-
-		for(int j = 0; j < size;++j)chunk[j]=m2[j+offset];
-		mWrite2.enqueueSplitSamples(chunk,1);
-
-		/*for(i = 0; i < mRead.channelCount(); ++i)
-		{
-			chunk = mNoise[i]->data()->subset(offset, size);
-			mWrite1.enqueueSplitSamples(chunk, i);
-		}*/
-		offset += size;
-	}
-
-	/*
-	for(i = 0; i < mRead.channelCount(); ++i)
-	{
-		mNoise[i]->generateMask();
-	}
-	offset = 0;
 	while(offset < (totalSamples / 2))
 	{
 		for(i = 0; i < mRead.channelCount(); ++i)
 		{
+			chunk = mNoise[i]->data()->subset(offset, size);
+			mWrite1.enqueueSplitSamples(chunk,i);
+
 			chunk = mNoise[i]->mask()->subset(offset, size);
-			mWrite2.enqueueSplitSamples(chunk, i);
+			mWrite2.enqueueSplitSamples(chunk,i);
 		}
 		offset += size;
-	}*/
+	}
 
-	//clear();
+	clear();
 	setProgress(100);
 	emit finished();
 }

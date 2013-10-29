@@ -18,13 +18,12 @@ class ViNearestNeighbourNoiseDetector : public ViNoiseDetector
 
 	//protected:
 
-		void calculateNoise(const ViSampleChunk &samples);
+		void calculateNoise(QQueue<qreal> &samples);
 
 	private:
 
 		int mK;
 		int mHalfK;
-		QQueue<qreal> mCache;
 
 };
 

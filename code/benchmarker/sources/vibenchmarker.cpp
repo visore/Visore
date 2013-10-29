@@ -128,10 +128,10 @@ void ViBenchMarker::processNoise()
 		ViSampleChunk &read1 = data.splitSamples(0);
 		ViSampleChunk &read2 = data.splitSamples(1);
 
-		mDetector->setChannel(0);
+		/*mDetector->setChannel(0);
 		mDetector->calculateNoise(read1);
 		mDetector->setChannel(1);
-		mDetector->calculateNoise(read2);
+		mDetector->calculateNoise(read2);*/
 
 		currentSamples += data.sampleCount();
 		current += (read1.size() + read2.size());

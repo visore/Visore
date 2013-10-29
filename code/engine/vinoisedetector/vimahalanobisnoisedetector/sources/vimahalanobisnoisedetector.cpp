@@ -1,54 +1,44 @@
 #include <vimahalanobisnoisedetector.h>
-#include <vimatrix.h>
+#include <vivector.h>
+
+#define WINDOW_SIZE 128
 
 ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector()
 	: ViNoiseDetector()
 {
+	setOffset(WINDOW_SIZE / 2);
 }
 
-void ViMahalanobisNoiseDetector::calculateNoise(const ViSampleChunk &samples)
+void ViMahalanobisNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
-	int i, size = samples.size();
+	static int i;
+	static qreal mean;
 
-	// Calculate the mean
-	qreal meanX = 0, meanY = 0;
-	for(i = 0; i < size; ++i)
+	while(samples.size() >= WINDOW_SIZE)
 	{
-		meanX += i;
-		meanY += samples[i];
-	}
-	meanX /= size;
-	meanY /= size;
+		// Calculate the mean
+		mean = 0;
+		for(i = 0; i < WINDOW_SIZE; ++i)
+		{
+			mean += samples[i];
+		}
+		mean /= WINDOW_SIZE;
 
-	// Create variances
-	ViVector vectorX(size);
-	ViVector vectorY(size);
-	for(i = 0; i < size; ++i)
-	{
-		vectorX[i] = i - meanX;
-		vectorY[i] = samples[i] - meanY;
-	}
+		// Create variances
+		ViVector vector(WINDOW_SIZE);
+		for(i = 0; i < WINDOW_SIZE; ++i)
+		{
+			vector[i] = samples[i] - mean;
+		}
 
-	// Create the covariance matrix
-	int statsSize = size - 1;
-	qreal covariance = ((vectorY * vectorY).sum() / statsSize);
-	/*ViMatrix covariance(2, 2);
-	covariance[0][0] = (vectorX * vectorX).sum() / statsSize;
-	covariance[0][1] = (vectorX * vectorY).sum() / statsSize;
-	covariance[1][0] = covariance[0][1];
-	covariance[1][1] = (vectorY * vectorY).sum() / statsSize;*/
+		qreal covariance = (vector * vector).sum() / (WINDOW_SIZE - 1);
 
-	// Calculate the distance
-	qreal distance;
-	ViVector vector(2);
-	for(i = 0; i < size; ++i)
-	{
-		vector[0] = vectorX[i];
-		vector[1] = vectorY[i];
-		//distance = (vector.transpose() * covariance.invert() * vector)[0];
-		distance = (vectorY[i] * covariance * vectorY[i]);
-		//noise.set(i, qAbs(distance));
+		// Calculate the distance
+		qreal distance = vector[(WINDOW_SIZE / 2) + 1];
+		distance = distance * covariance * distance;
 		setNoise(qAbs(distance));
+
+		samples.removeFirst();
 	}
 }
 

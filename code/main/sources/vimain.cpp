@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
 		ViNearestNeighbourNoiseDetector d;
 		d.initialize(1, 16);
-		d.calculateNoise(s2);
+//		d.calculateNoise(s2);
 		ViSampleChunk &n = *d.noise(0).data();
 		ViSampleChunk &n2 = *d.noise(0).mask();
 

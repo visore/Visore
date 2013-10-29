@@ -5,6 +5,7 @@ ViPredictionNoiseDetector::ViPredictionNoiseDetector(const int &degree)
 	: ViNoiseDetector()
 {
 	setDegree(degree);
+	setOffset(mDegree);
 }
 
 void ViPredictionNoiseDetector::setDegree(const int &degree)
@@ -28,32 +29,19 @@ int ViPredictionNoiseDetector::degree()
 	return mDegree;
 }
 
-void ViPredictionNoiseDetector::calculateNoise(const ViSampleChunk &samples)
+void ViPredictionNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
 	static int i, count, size;
-
-	//First few samples cannot be tested, since no left samples are available
-	if(mCache.isEmpty())
-	{
-		for(i = 0; i < mDegree; ++i)
-		{
-			setNoise(0);
-		}
-	}
-	for(i = 0; i < samples.size(); ++i)
-	{
-		mCache.enqueue(samples[i]);
-	}
 
 	size = mDegree + 1;
 	ViVector vector(size);
 	static ViVector coefficients;
 
-	while(mCache.size() > size)
+	while(samples.size() > size)
 	{
 		for(i = 0; i < size; ++i)
 		{
-			vector[i] = mCache[i];
+			vector[i] = samples[i];
 		}
 
 		if(ViSystemSolver::solve(mMatrix, vector, coefficients))
@@ -65,14 +53,14 @@ void ViPredictionNoiseDetector::calculateNoise(const ViSampleChunk &samples)
 			{
 				value += coefficients[count - i - 1] * mPowers[i];
 			}
-			setNoise(qAbs(value - mCache[size]));
+			setNoise(qAbs(value - samples[size]));
 		}
 		else
 		{
 			setNoise(0);
 		}
 
-		mCache.removeFirst();
+		samples.removeFirst();
 	}
 }
 

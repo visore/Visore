@@ -9,7 +9,7 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 
     public:
 
-		ViPredictionNoiseDetector(const int &degree = 1);
+		ViPredictionNoiseDetector(const int &degree = 6);
 		ViPredictionNoiseDetector* clone();
 
 		void setDegree(const int &degree);
@@ -17,13 +17,11 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 
 	protected:
 
-		void calculateNoise(const ViSampleChunk &samples);
+		void calculateNoise(QQueue<qreal> &samples);
 
 	private:
 
 		int mDegree;
-		QQueue<qreal> mCache;
-
 		ViMatrix mMatrix;
 		QList<qreal> mPowers;
 
