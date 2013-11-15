@@ -8,6 +8,7 @@
 #include <QTime>
 #include<vicrosscorrelator.h>
 #include <viproject.h>
+#include <viaudioobjectchain.h>
 
 class ViBenchMarker : public QObject
 {
@@ -16,6 +17,8 @@ class ViBenchMarker : public QObject
 
 	private slots:
 
+		void printProgress(qreal progress);
+
 		void processNext();
 		void process();
 
@@ -23,9 +26,8 @@ class ViBenchMarker : public QObject
 		void process2();
 
 		void processNoise();
-		void decodeNoise1();
-		void decodeNoise2();
-		void decodeNoise3();
+		void processNoise2();
+		void decodeNoise();
 
 		void quit();
 
@@ -80,11 +82,13 @@ class ViBenchMarker : public QObject
 		ViProject mProject;
 		ViAudioObjectPointer mObject;
 
+		ViAudioObjectChain mObjectChain;
 
-
-
-
-
+		QList<qint64> TP, TN, FP, FN;
+		QList<QList<qint64>>  mTP, mFN;
+		qreal mCurrentThreshold;
+		qreal mOldProgress;
+		qreal mTotalProgress;
 
 
 

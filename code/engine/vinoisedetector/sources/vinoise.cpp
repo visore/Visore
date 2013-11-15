@@ -18,13 +18,21 @@ ViNoise::ViNoise(const ViNoise &other)
 {
 	mMask = other.mMask;
 	mData = other.mData;
-	mThreshold = other.mThreshold;
+	setThreshold(mThreshold = other.mThreshold);
 }
 
 ViNoise::~ViNoise()
 {
-	delete mMask;
-	delete mData;
+	if(mMask != NULL)
+	{
+		delete mMask;
+		mMask = NULL;
+	}
+	if(mData != NULL)
+	{
+		delete mData;
+		mData = NULL;
+	}
 }
 
 void ViNoise::setThreshold(const qreal &threshold)

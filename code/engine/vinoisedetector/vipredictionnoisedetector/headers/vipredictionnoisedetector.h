@@ -9,7 +9,7 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 
     public:
 
-		ViPredictionNoiseDetector(const int &degree = 6);
+		ViPredictionNoiseDetector(const int &degree = 2);
 		ViPredictionNoiseDetector* clone();
 
 		void setDegree(const int &degree);

@@ -1,7 +1,8 @@
 #include <vimahalanobisnoisedetector.h>
 #include <vivector.h>
 
-#define WINDOW_SIZE 128
+#define WINDOW_SIZE 16
+#define AMPLIFIER 10000
 
 ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector()
 	: ViNoiseDetector()
@@ -36,7 +37,7 @@ void ViMahalanobisNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 		// Calculate the distance
 		qreal distance = vector[(WINDOW_SIZE / 2) + 1];
 		distance = distance * covariance * distance;
-		setNoise(qAbs(distance));
+		setNoise(qAbs(distance) * AMPLIFIER);
 
 		samples.removeFirst();
 	}

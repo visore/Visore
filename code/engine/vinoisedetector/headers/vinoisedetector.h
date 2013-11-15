@@ -38,6 +38,8 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 
 		void initialize(const int &channels, const qint64 samples);
 
+		void setThreshold(const qreal &threshold);
+
 		void setMode(ViProcessor::ChannelMode mode);
 		ViProcessor::ChannelMode mode();
 
@@ -84,6 +86,7 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 		ViAudioReadData *mData;
 		QList<ViNoise*> mNoise;
 		QList<qint64> mIndexes;
+		qreal mThreshold;
 
 		QList<QQueue<qreal>> mCache;
 		int mOffset;

@@ -9,15 +9,27 @@
 #include <vilogger.h>
 #include <vinearestneighbournoisedetector.h>
 #include <vimahalanobisnoisedetector.h>
+#include <vizscorenoisedetector.h>
+#include <vimadnoisedetector.h>
+#include <vipredictionnoisedetector.h>
+#include <vifouriernoisedetector.h>
 #include<QTextStream>
 
 #include <iomanip>
 
-#define WINDOW_SIZE 2048
+#define WINDOW_SIZE 8192
 #define NOISE_START 4
 #define NOISE_END 16
 #define MAX_LENGTH 1000000 // Maximum length of song to process, 10000000 samples is about 2 mins
 #define MAX_DEGREE 10
+
+#define MASK_START 0.0
+#define MASK_END 0.1
+#define MASK_INTERVAL 0.00005
+/*#define MASK_END 0.00005
+#define MASK_INTERVAL 0.0000001*/
+
+
 
 ViBenchMarker::ViBenchMarker()
 {
@@ -72,135 +84,292 @@ void ViBenchMarker::clear()
 	mOriginalFiles.clear();
 	mNoises.clear();
 	mTotalTime=0;
+	mOldProgress=0;
+	mTotalProgress = 0;
+}
+
+void ViBenchMarker::printProgress(qreal progress)
+{
+	//progress /= (MASK_END - MASK_START + MASK_INTERVAL) / MASK_INTERVAL;
+	if(progress < mOldProgress)
+	{
+		mTotalProgress += mOldProgress;
+		mOldProgress = 0;
+	}
+	if(progress - mOldProgress > 0.1)
+	{
+		mOldProgress = progress;
+		cout << mTotalProgress + mOldProgress << "%" << endl;
+	}
 }
 
 void ViBenchMarker::benchmarkNoise()
 {
-	mDetector = new ViNearestNeighbourNoiseDetector();
-	//mDetector = new ViMahalanobisNoiseDetector();
+	mCurrentThreshold = MASK_START;
 
-	mProject.setFilePath("/home/visore/Visore Projects/NoiseTests.vip");
-	QObject::connect(&mProject, SIGNAL(finished()), this, SLOT(decodeNoise1()));
+	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SLOT(printProgress(qreal)));
+	QObject::connect(&mObjectChain, SIGNAL(finished()), this, SLOT(processNoise2()));
+
+	mProject.setFilePath("/home/visore/Visore Projects/XY.vip");
+	QObject::connect(&mProject, SIGNAL(finished()), this, SLOT(decodeNoise()));
 	mProject.load();
 }
 
-void ViBenchMarker::decodeNoise1()
+void ViBenchMarker::decodeNoise()
 {
-	QObject::disconnect(&mProject, SIGNAL(finished()), this, SLOT(decodeNoise1()));
-	mObject = mProject.object(0);
-	QObject::connect(mObject.data(), SIGNAL(finished()), this, SLOT(decodeNoise2()));
-	mObject->decode(ViAudio::Target | ViAudio::Corrupted);
-}
+	QObject::disconnect(&mProject, SIGNAL(finished()), this, SLOT(decodeNoise()));
 
-void ViBenchMarker::decodeNoise2()
-{
-	QObject::disconnect(mObject.data(), SIGNAL(finished()), this, SLOT(decodeNoise2()));
-	QObject::connect(mObject.data(), SIGNAL(aligned()), this, SLOT(decodeNoise3()));
-	mObject->align();
-}
+	mCurrentThreshold = 0.0343; //NN
+	//mCurrentThreshold = 0.06885; //Zscore
 
-void ViBenchMarker::decodeNoise3()
-{
-	QObject::disconnect(mObject.data(), SIGNAL(aligned()), this, SLOT(decodeNoise3()));
-	QObject::connect(mObject.data(), SIGNAL(finished()), this, SLOT(processNoise()));
-	mObject->generateCustomMask();
+	mDetector = new ViNearestNeighbourNoiseDetector();
+	//mDetector = new ViZscoreNoiseDetector();
+	//mDetector = new ViFourierNoiseDetector();
+	//mDetector = new ViPredictionNoiseDetector(5);
+	//mDetector = new ViMadNoiseDetector();
+	//mDetector = new ViMahalanobisNoiseDetector();
+
+	mDetector->clear();
+	mDetector->setThreshold(mCurrentThreshold);
+
+	mObjectChain.clear();
+	mObjectChain.add(mProject.objects());
+
+	mObjectChain.addFunction(ViFunctionCall("clearBuffers"), 0.01, false);
+	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted)), 0.04);
+	mObjectChain.addFunction(ViFunctionCall("align"), 0.15);
+	mObjectChain.addFunction(ViFunctionCall("generateCustomMask"), 0.4);
+	mObjectChain.addFunction(ViFunctionCall("generateNoiseMask", QVariant::fromValue(mDetector->clone())), 0.4);
+	//mObjectChain.addFunction(ViFunctionCall("encode", QVariant(ViAudio::Custom | ViAudio::CustomMask | ViAudio::Noise | ViAudio::NoiseMask)), 0.04);
+
+	mObjectChain.execute("Generating Noise");
 }
 
 void ViBenchMarker::processNoise()
 {
-	QObject::disconnect(mObject.data(), SIGNAL(finished()), this, SLOT(processNoise()));
-
-	ViAudioReadData data(mObject->buffer(ViAudio::Corrupted));
-	data.setSampleCount(WINDOW_SIZE);
-
-	mDetector->initialize(data.channelCount(), data.bufferSamples());
-
-	int i, current = 0, total = data.bufferSamples();
-	qreal progress = 0, oldProgress = 0;
-
-	qint64 truePositives = 0, falsePositives = 0, trueNegatives = 0, falseNegatives = 0;
-	qint64 currentSamples = 0, channelSamples = 0, offset;
-
-	while(data.hasData())
+	if(mCurrentThreshold > MASK_END)
 	{
-		data.read();
-
-		ViSampleChunk &read1 = data.splitSamples(0);
-		ViSampleChunk &read2 = data.splitSamples(1);
-
-		/*mDetector->setChannel(0);
-		mDetector->calculateNoise(read1);
-		mDetector->setChannel(1);
-		mDetector->calculateNoise(read2);*/
-
-		currentSamples += data.sampleCount();
-		current += (read1.size() + read2.size());
-		progress = (current / float(total));
-		//progress /= mOriginalFiles.size();
-		//progress += (mOriginalFiles.size() - mFiles.size() - 1) / qreal(mOriginalFiles.size());
-		progress *= 100;
-		if(progress - oldProgress > 0.05)
+		qreal truePositives;
+		qreal trueNegatives;
+		qreal falsePositives;
+		qreal falseNegatives;
+		for(qreal n = MASK_START; n <= MASK_END; n+= MASK_INTERVAL)
 		{
-			oldProgress = progress;
-			cout << "Progress: "<<QString::number(progress, 'f', 2).toLatin1().data()<<"%\t(" <<mTime.elapsed()/1000<<" secs)"  << endl;
+			truePositives = TP.takeFirst();
+			trueNegatives = TN.takeFirst();
+			falsePositives = FP.takeFirst();
+			falseNegatives = FN.takeFirst();
+
+			cout << setprecision(10) << n << "\t" << truePositives << "\t" << trueNegatives << "\t" << falsePositives << "\t" << falseNegatives << "\t" << truePositives / qreal(truePositives + falseNegatives) << "\t" << trueNegatives / qreal(trueNegatives + falsePositives) << endl;
 		}
+		quit();
 	}
 
-	cout << "Calculating the noise" << endl;
-	ViAudioReadData dataCustom(mObject->buffer(ViAudio::CustomMask));
-	dataCustom.setSampleCount(WINDOW_SIZE);
-	ViSampleChunk &noise1 = *mDetector->noise(0).mask();
-	ViSampleChunk &noise2 = *mDetector->noise(1).mask();
-	currentSamples = 0;
-
-	while(dataCustom.hasData())
+	for(int n = 0; n < mProject.objectCount(); ++n)
 	{
-		dataCustom.read();
-		ViSampleChunk &readCustom1 = dataCustom.splitSamples(0);
-		ViSampleChunk &readCustom2 = dataCustom.splitSamples(1);
+		int i;
+		qint64 truePositives = 0, falsePositives = 0, trueNegatives = 0, falseNegatives = 0;
 
-		channelSamples = (currentSamples / 2);
+		cout << "Calculating the noise (threshold: " << mCurrentThreshold << ")" << endl;
 
-		for(i = 0; i < readCustom1.size(); ++i)
+		mObject = mProject.object(n);
+		ViAudioReadData dataCustom(mObject->buffer(ViAudio::CustomMask));
+		dataCustom.setSampleCount(WINDOW_SIZE);
+		ViAudioReadData noise(mObject->buffer(ViAudio::Noise));
+		noise.setSampleCount(WINDOW_SIZE);
+
+		while(dataCustom.hasData())
 		{
-			offset = i + channelSamples;
-			if(readCustom1[i] == 1)
+			dataCustom.read();
+			ViSampleChunk &readCustom1 = dataCustom.splitSamples(0);
+			ViSampleChunk &readCustom2 = dataCustom.splitSamples(1);
+
+			noise.read();
+			ViSampleChunk &noise1 = noise.splitSamples(0);
+			ViSampleChunk &noise2 = noise.splitSamples(1);
+
+			for(i = 0; i < readCustom1.size(); ++i)
 			{
-				if(noise1[offset] == 1) ++truePositives;
-				else if(noise1[offset] == 0) ++falseNegatives;
+				if(readCustom1[i] == 1)
+				{
+					if(noise1[i] >= mCurrentThreshold) ++truePositives;
+					else ++falseNegatives;
+				}
+				else if(readCustom1[i] == 0)
+				{
+					if(noise1[i] >= mCurrentThreshold) ++falsePositives;
+					else ++trueNegatives;
+				}
 			}
-			else if(readCustom1[i] == 0)
+
+			for(i = 0; i < readCustom2.size(); ++i)
 			{
-				if(noise1[offset] == 1) ++falsePositives;
-				else if(noise1[offset] == 0) ++trueNegatives;
+				if(readCustom2[i] == 1)
+				{
+					if(noise2[i] >= mCurrentThreshold) ++truePositives;
+					else ++falseNegatives;
+				}
+				else if(readCustom2[i] == 0)
+				{
+					if(noise2[i] >= mCurrentThreshold) ++falsePositives;
+					else ++trueNegatives;
+				}
 			}
 		}
 
-		for(i = 0; i < readCustom2.size(); ++i)
-		{
-			offset = i + channelSamples;
-			if(readCustom2[i] == 1)
-			{
-				if(noise2[offset] == 1) ++truePositives;
-				else if(noise2[offset] == 0) ++falseNegatives;
-			}
-			else if(readCustom2[i] == 0)
-			{
-				if(noise2[offset] == 1) ++falsePositives;
-				else if(noise2[offset] == 0) ++trueNegatives;
-			}
-		}
+		TP.append(truePositives);
+		TN.append(trueNegatives);
+		FP.append(falsePositives);
+		FN.append(falseNegatives);
 
-		currentSamples += readCustom1.size() + readCustom2.size();
+		cout << "TP:\t" << truePositives << endl;
+		cout << "TN:\t" << trueNegatives << endl;
+		cout << "FP:\t" << falsePositives << endl;
+		cout << "FN:\t" << falseNegatives << endl;
+		cout << "Sensitivity:\t" << setprecision(10) << truePositives / qreal(truePositives + falseNegatives) << endl;
+		cout << "Specificity:\t" << setprecision(10) << trueNegatives / qreal(trueNegatives + falsePositives) << endl;
 	}
 
-	cout << "TP:\t" << truePositives << endl;
-	cout << "TN:\t" << trueNegatives << endl;
-	cout << "FP:\t" << falsePositives << endl;
-	cout << "FN:\t" << falseNegatives << endl;
-	cout << "Sensitivity:\t" << setprecision(10) << truePositives / qreal(truePositives + falseNegatives) << endl;
-	cout << "Specificity:\t" << setprecision(10) << trueNegatives / qreal(trueNegatives + falsePositives) << endl;
+	mCurrentThreshold += MASK_INTERVAL;
+	processNoise();
+}
 
+void ViBenchMarker::processNoise2()
+{
+	for(int n = 0; n < mProject.objectCount(); ++n)
+	{
+		int i, j;
+		qint64 truePositives = 0, falsePositives = 0, trueNegatives = 0, falseNegatives = 0;
+
+		QList<qint64> xTP, xFN;
+		for(i = 0; i < 1024; ++i)
+		{
+			xTP.append(0);
+			xFN.append(0);
+		}
+
+		cout << "Calculating the noise (threshold: " << mCurrentThreshold << ")" << endl;
+
+		mObject = mProject.object(n);
+		ViAudioReadData dataCustom(mObject->buffer(ViAudio::CustomMask));
+		dataCustom.setSampleCount(WINDOW_SIZE);
+		ViAudioReadData noise(mObject->buffer(ViAudio::Noise));
+		noise.setSampleCount(WINDOW_SIZE);
+
+		int noiseSize1 = 0, noiseSize2 = 0;;
+
+		while(dataCustom.hasData())
+		{
+			dataCustom.read();
+			ViSampleChunk &readCustom1 = dataCustom.splitSamples(0);
+			ViSampleChunk &readCustom2 = dataCustom.splitSamples(1);
+
+			noise.read();
+			ViSampleChunk &noise1 = noise.splitSamples(0);
+			ViSampleChunk &noise2 = noise.splitSamples(1);
+
+			for(i = 0; i < readCustom1.size(); ++i)
+			{
+				if(readCustom1[i] == 1)
+				{
+					if(noiseSize1 == 0)
+					{
+						for(j = i; j < readCustom1.size(); ++j)
+						{
+							if(readCustom1[j] == 1) ++noiseSize1;
+							else break;
+						}
+					}
+
+					if(noise1[i] >= mCurrentThreshold)
+					{
+						xTP[noiseSize1] += 1;
+						++truePositives;
+					}
+					else
+					{
+						xFN[noiseSize1] += 1;
+						++falseNegatives;
+					}
+				}
+				else if(readCustom1[i] == 0)
+				{
+					noiseSize1 = 0;
+					if(noise1[i] >= mCurrentThreshold) ++falsePositives;
+					else ++trueNegatives;
+				}
+			}
+
+			for(i = 0; i < readCustom2.size(); ++i)
+			{
+				if(readCustom2[i] == 1)
+				{
+					if(noiseSize2 == 0)
+					{
+						for(j = i; j < readCustom2.size(); ++j)
+						{
+							if(readCustom2[j] == 1) ++noiseSize2;
+							else break;
+						}
+					}
+
+					if(noise2[i] >= mCurrentThreshold)
+					{
+						xTP[noiseSize2] += 1;
+						++truePositives;
+					}
+					else
+					{
+						xFN[noiseSize2] += 1;
+						++falseNegatives;
+					}
+				}
+				else if(readCustom2[i] == 0)
+				{
+					noiseSize2 = 0;
+					if(noise2[i] >= mCurrentThreshold) ++falsePositives;
+					else ++trueNegatives;
+				}
+			}
+		}
+
+		TP.append(truePositives);
+		TN.append(trueNegatives);
+		FP.append(falsePositives);
+		FN.append(falseNegatives);
+		mTP.append(xTP);
+		mFN.append(xFN);
+
+		cout << "TP:\t" << truePositives << endl;
+		cout << "TN:\t" << trueNegatives << endl;
+		cout << "FP:\t" << falsePositives << endl;
+		cout << "FN:\t" << falseNegatives << endl;
+		cout << "Sensitivity:\t" << setprecision(10) << truePositives / qreal(truePositives + falseNegatives) << endl;
+		cout << "Specificity:\t" << setprecision(10) << trueNegatives / qreal(trueNegatives + falsePositives) << endl;
+	}
+
+	qreal truePositives;
+	qreal trueNegatives;
+	qreal falsePositives;
+	qreal falseNegatives;
+	for(int n = 0; n < mProject.objectCount(); ++n)
+	{
+		truePositives = TP.takeFirst();
+		trueNegatives = TN.takeFirst();
+		falsePositives = FP.takeFirst();
+		falseNegatives = FN.takeFirst();
+
+		cout << setprecision(10) << n << "\t" << truePositives << "\t" << trueNegatives << "\t" << falsePositives << "\t" << falseNegatives << "\t" << truePositives / qreal(truePositives + falseNegatives) << "\t" << trueNegatives / qreal(trueNegatives + falsePositives) << "\t";
+
+		QList<qint64> noisesTP = mTP.takeFirst();
+		QList<qint64> noisesFN = mFN.takeFirst();
+		for(int k = 0; k < noisesTP.size(); ++k)
+		{
+			if(noisesTP[k] == 0)cout<<"\t"<<0;
+			else cout<<"\t"<< noisesTP[k] / qreal(noisesTP[k] + noisesFN[k]);
+		}
+		cout << endl;
+	}
 	quit();
 }
 

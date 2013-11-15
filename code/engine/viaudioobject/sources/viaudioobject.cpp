@@ -1277,7 +1277,7 @@ bool ViAudioObject::generateNoiseMask(ViNoiseDetector *detector)
 	QObject::connect(mNoiseDetector, SIGNAL(finished()), this, SLOT(setFinished()));
 	QObject::connect(mNoiseDetector, SIGNAL(finished()), this, SIGNAL(noiseGenerated()));
 
-	log("Creating custom mask");
+	log("Creating noise mask");
 	ViAudioFormat theFormat = format(ViAudio::Corrupted);
 	buffer(ViAudio::Noise)->setFormat(theFormat);
 	buffer(ViAudio::NoiseMask)->setFormat(theFormat);

@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<ViAudioPosition>("ViAudioPosition");
 	qRegisterMetaType<ViRealSpectrum>("ViRealSpectrum");
 
-	bool BENCH = true;
-	//bool BENCH = false;
+	//bool BENCH = true;
+	bool BENCH = false;
 
 	ViBenchMarker bench;
 	if(BENCH)
@@ -71,48 +71,14 @@ int main(int argc, char *argv[])
 
 		bench.benchmark(paths);*/
 
-		//bench.benchmark("/home/visore/Visore Projects/Noise1.flac");
+		bench.benchmark("/home/visore/Visore Projects/Noise1.flac");
 	}
 	else
 	{
-		ViSampleChunk s2(16);
-				s2[0]=	0.22629	;
-				s2[1]=	0.242	;
-				s2[2]=	0.26132	;
-				s2[3]=	0.28867	;
-				s2[4]=	1	;
-				s2[5]=	0.34045	;
-				s2[6]=	0.34818	;
-				s2[7]=	1	;
-				s2[8]=	1	;
-				s2[9]=	0.32773	;
-				s2[10]=	0.31982	;
-				s2[11]=	0.31943	;
-				s2[12]=	1	;
-				s2[13]=	0.37149	;
-				s2[14]=	0.35687	;
-				s2[15]=	0.37149	;
-
-
-		ViNearestNeighbourNoiseDetector d;
-		d.initialize(1, 16);
-//		d.calculateNoise(s2);
-		ViSampleChunk &n = *d.noise(0).data();
-		ViSampleChunk &n2 = *d.noise(0).mask();
-
-
-		for(int i = 0; i < s2.size(); ++i)
-		{
-			cout << QString::number(s2[i], 'f', 4).toLatin1().data() << "\t"<< QString::number(n[i], 'f', 4).toLatin1().data()<<"\t"<<n2[i]<<endl;
-		}
-
-		int x = 0;
-		int y = 1/x;
+		ViMainWindow *window = ViMainWindow::instance();
+		window->setWindowIcon(logo);
+		window->show();
 	}
-
-	ViMainWindow *window = ViMainWindow::instance();
-	window->setWindowIcon(logo);
-	window->show();
 	
 	application.exec();
 

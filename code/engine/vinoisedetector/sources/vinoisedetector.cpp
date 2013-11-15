@@ -16,6 +16,7 @@ ViNoiseDetector::ViNoiseDetector()
 {
 	clear();
 	mOffset = 0;
+	mThreshold = 0.5;
 }
 
 ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples)
@@ -23,6 +24,7 @@ ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples)
 	clear();
 	initialize(channels, samples);
 	mOffset = 0;
+	mThreshold = 0.5;
 }
 
 ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples, ViProcessor::ChannelMode mode)
@@ -31,16 +33,17 @@ ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples, ViPr
 	initialize(channels, samples);
 	setMode(mode);
 	mOffset = 0;
+	mThreshold = 0.5;
 }
 
 ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 {
+	clear();
 	mMode = other.mMode;
 	mChannel = other.mChannel;
-	mData = other.mData;
-    mNoise = other.mNoise;
 	mIndexes = other.mIndexes;
 	mOffset = other.mOffset;
+	mThreshold = other.mThreshold;
 }
 
 ViNoiseDetector::~ViNoiseDetector()
@@ -54,11 +57,23 @@ void ViNoiseDetector::setOffset(const int &offset)
 
 void ViNoiseDetector::initialize(const int &channels, const qint64 samples)
 {
+	viDeleteAll(mNoise);
 	qint64 size = qCeil(samples / qreal(channels));
 	for(int i = 0; i < channels; ++i)
 	{
 		mIndexes.append(0);
-		mNoise.append(new ViNoise(size));
+		ViNoise *noise = new ViNoise(size);
+		noise->setThreshold(mThreshold);
+		mNoise.append(noise);
+	}
+}
+
+void ViNoiseDetector::setThreshold(const qreal &threshold)
+{
+	mThreshold = threshold;
+	for(int i = 0; i < mNoise.size(); ++i)
+	{
+		mNoise[i]->setThreshold(threshold);
 	}
 }
 
@@ -241,6 +256,7 @@ void ViNoiseDetector::create()
 		offset += size;
 	}
 
+	mCache.clear();
 	clear();
 	setProgress(100);
 	emit finished();
