@@ -19,6 +19,7 @@ class ViNoise
 
 	public:
 
+		ViNoise(ViSampleChunk *data, ViSampleChunk *mask, const qreal &threshold);
 		ViNoise(const int &size = 0);
 		ViNoise(const ViNoise &other);
 		virtual ~ViNoise();

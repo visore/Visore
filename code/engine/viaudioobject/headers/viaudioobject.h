@@ -238,6 +238,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		void setBuffer(ViAudio::Type type, ViBuffer *buffer);
 
 		Q_INVOKABLE void clearBuffers(ViAudio::Type type = ViAudio::All);
+		Q_INVOKABLE void clearBuffers(int type);
 		Q_INVOKABLE void clearBuffer(ViAudio::Type type);
 
 		bool hasBuffer(ViAudio::Type type);

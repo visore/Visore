@@ -706,11 +706,16 @@ void ViProject::moveToProject(ViAudioObjectPointer object, ViAudio::Type type)
 	{
         QString newPath = path(type, object->sideNumber()) + object->fileName();
 		if(type == ViAudio::NoiseMask || type == ViAudio::CustomMask) newPath += ".mask";
-        ViAudioCodec *codec = object->format(type).codec();
+		ViAudioCodec *codec = object->format(type).codec();
         if(codec != NULL)
         {
             newPath += codec->extension(".");
         }
+		else
+		{
+			QFileInfo info(oldPath);
+			if(info.suffix() != "") newPath += "." + info.suffix();
+		}
 		LOG("Moving file to project: " + oldPath + " -> " + newPath);
 		QFile::remove(newPath); // Make sure the old file is removed first
 		QFile::rename(oldPath, newPath);

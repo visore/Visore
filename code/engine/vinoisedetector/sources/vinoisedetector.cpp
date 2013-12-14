@@ -175,6 +175,8 @@ void ViNoiseDetector::clear()
 	mIndexes.clear();
 	viDeleteAll(mNoise);
 
+	mCache.clear();
+
 	mRead.clear();
 	mWrite1.clear();
 	mWrite2.clear();

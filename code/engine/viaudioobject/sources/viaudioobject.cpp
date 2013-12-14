@@ -283,10 +283,9 @@ void ViAudioObject::addDestructRule(ViAudio::Type type, bool destruct)
 
 ViAudioFormat ViAudioObject::format(ViAudio::Type type)
 {
-	QMutexLocker locker(&mMutex);
-	if(mBuffers[type] != NULL)
+	if(hasBuffer(type))
 	{
-
+		QMutexLocker locker(&mMutex);
 		return mBuffers[type]->format();
 	}
 	return ViAudioFormat();
@@ -663,6 +662,12 @@ void ViAudioObject::clearBuffers(ViAudio::Type type)
 	{
 		clearBuffer(types[i]);
 	}
+	setFinished();
+}
+
+void ViAudioObject::clearBuffers(int type)
+{
+	clearBuffers((ViAudio::Type) type);
 }
 
 void ViAudioObject::clearBuffer(ViAudio::Type type)
@@ -1272,7 +1277,8 @@ bool ViAudioObject::generateNoiseMask(ViNoiseDetector *detector)
 	}
 
 	if(mNoiseDetector != NULL) delete mNoiseDetector;
-	mNoiseDetector = detector;
+	mNoiseDetector = detector->clone(); // We have to clone because we want to pass the same pointer (this function's paramter) to multiple objects (which can cause problems if we delete it - destructor)
+
 	QObject::connect(mNoiseDetector, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 	QObject::connect(mNoiseDetector, SIGNAL(finished()), this, SLOT(setFinished()));
 	QObject::connect(mNoiseDetector, SIGNAL(finished()), this, SIGNAL(noiseGenerated()));

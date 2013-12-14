@@ -39,7 +39,7 @@ void ViAudioObjectChain::executeNext()
 		return;
 	}
     else if(mCurrentIndex == 0)
-    {
+	{
 		mCurrentObject = mObjects.dequeue();
 		QObject::connect(mCurrentObject.data(), SIGNAL(statused(QString)), this, SIGNAL(statused(QString)));
 		QObject::connect(mCurrentObject.data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
@@ -58,9 +58,9 @@ void ViAudioObjectChain::executeNext()
 	mCurrentFunction.setObject(mCurrentObject.data());
     mCurrentFunction.execute();
     if(!wait)
-    {
+	{
         progressNext();
-    }
+	}
 }
 
 void ViAudioObjectChain::add(ViAudioObjectPointer object)

@@ -6,6 +6,13 @@
 #define WINDOW_SIZE 1024
 #define DEFAULT_THRESHOLD 0.02
 
+ViNoise::ViNoise(ViSampleChunk *data, ViSampleChunk *mask, const qreal &threshold)
+{
+	mMask = mask;
+	mData = data;
+	setThreshold(threshold);
+}
+
 ViNoise::ViNoise(const int &size)
 {
 	mMask = new ViSampleChunk();
