@@ -24,9 +24,9 @@
 #define MAX_DEGREE 10
 
 #define MASK_START 0
-#define MASK_END 0.3
-//#define MASK_INTERVAL 0.0001
-#define MASK_INTERVAL 0.002
+#define MASK_END 0.5
+#define MASK_INTERVAL 0.0001
+#define NOISE_TYPE Direct
 
 /*#define MASK_END 0.00005
 #define MASK_INTERVAL 0.0000001*/
@@ -66,9 +66,14 @@ void ViBenchMarker::benchmark()
 	mDetector = new ViNearestNeighbourNoiseDetector();
 	//mDetector = new ViZscoreNoiseDetector();
 	//mDetector = new ViFourierNoiseDetector();
-	//mDetector = new ViPredictionNoiseDetector(5);
+	//mDetector = new ViPredictionNoiseDetector(2);
 	//mDetector = new ViMadNoiseDetector();
 	//mDetector = new ViMahalanobisNoiseDetector();
+
+	mOutputFile.setFileName("/home/visore/Visore Projects/RESULTS/"+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")+".txt");
+	mOutputFile.open(QIODevice::WriteOnly);
+	mOutputStream.setDevice(&mOutputFile);
+	mOutputStream<<mDetector->name()<<"\n\n\n";
 
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SLOT(printProgress(qreal)), Qt::UniqueConnection);
 	QObject::connect(&mObjectChain, SIGNAL(finished()), this, SLOT(process()), Qt::UniqueConnection);
@@ -87,12 +92,16 @@ void ViBenchMarker::clear()
 
 void ViBenchMarker::loadProject(QString path)
 {
+	mCurrentObject = 0;
 	mCurrentThreshold = MASK_START;
 	mObjectChain.clear();
 	mProject.clear();
 	//mProject = ViProject();
 	mProject.setFilePath(path);
 	cout<<endl<<mProject.fileName().toLatin1().data()<<endl;
+	mOutputStream<<mProject.fileName()<<"\n\n";
+	mOutputStream.setRealNumberPrecision(10);
+
 	QObject::connect(&mProject, SIGNAL(finished()), this, SLOT(processProject()));
 	mProject.load();
 }
@@ -119,8 +128,13 @@ void ViBenchMarker::processProject()
 	mDetector->clear();
 	mDetector->setThreshold(mCurrentThreshold);
 
+	processProject2();
+}
+
+void ViBenchMarker::processProject2()
+{
 	mObjectChain.clear();
-	mObjectChain.add(mProject.objects());
+	mObjectChain.add(mProject.object(mCurrentObject));
 
 	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted)), 0.1);
 	mObjectChain.addFunction(ViFunctionCall("align"), 0.2);
@@ -139,10 +153,12 @@ void ViBenchMarker::process()
 void ViBenchMarker::processTuning()
 {
 	int i, n;
-	for(n = 0; n < mProject.objectCount(); ++n)
+	for(n = 0; n < 1/*mProject.objectCount()*/; ++n)
 	{
-		mObject = mProject.object(n);
+		mObject = mProject.object(mCurrentObject);
 		cout << mObject->fileName().toLatin1().data() << endl;
+		mOutputStream<<mObject->fileName()<<"\n";
+		mOutputStream.flush();
 
 		ViAudioReadData mask(mObject->buffer(ViAudio::Noise));
 		mask.setSampleCount(WINDOW_SIZE);
@@ -170,9 +186,9 @@ void ViBenchMarker::processTuning()
 		for(mCurrentThreshold = MASK_START; mCurrentThreshold <= MASK_END; mCurrentThreshold += MASK_INTERVAL)
 		{
 			noise1.setThreshold(mCurrentThreshold);
-			noise1.generateMask(ViNoise::Direct);
+			noise1.generateMask(ViNoise::NOISE_TYPE);
 			noise2.setThreshold(mCurrentThreshold);
-			noise2.generateMask(ViNoise::Direct);
+			noise2.generateMask(ViNoise::NOISE_TYPE);
 
 			ViAudioReadData custom(mObject->buffer(ViAudio::CustomMask));
 			custom.setSampleCount(WINDOW_SIZE);
@@ -217,6 +233,12 @@ void ViBenchMarker::processTuning()
 				offset2+=custom2.size();
 			}
 
+
+			mOutputStream << "\t" << mCurrentThreshold << "\t" << truePositives << "\t" << trueNegatives << "\t" << falsePositives << "\t" << falseNegatives << "\t";
+			mOutputStream << truePositives / qreal(truePositives + falseNegatives) << "\t";
+			mOutputStream  << trueNegatives / qreal(trueNegatives + falsePositives) << "\n";
+			mOutputStream.flush();
+
 			cout << "\t" << mCurrentThreshold << "\t" << truePositives << "\t" << trueNegatives << "\t" << falsePositives << "\t" << falseNegatives << "\t";
 			cout << setprecision(10) << truePositives / qreal(truePositives + falseNegatives) << "\t";
 			cout << setprecision(10) << trueNegatives / qreal(trueNegatives + falsePositives) << endl;
@@ -227,18 +249,32 @@ void ViBenchMarker::processTuning()
 			FN[mCurrentThreshold] += falseNegatives;
 		}
 		mObject->clearBuffers();
+		mObject.setNull();
+	}
+
+	if(mCurrentObject < mProject.objectCount() - 1)
+	{
+		++mCurrentObject;
+		processProject2();
+		return;
 	}
 
 	if(mProjects.isEmpty())
 	{
 		cout << "THRESHOLD\tTP\tTN\tFP\tFN\tSEN\tSPE" << endl;
+		mOutputStream <<"\n\n\nTHRESHOLD\tTP\tTN\tFP\tFN\tSEN\tSPE\n";
 		foreach(qreal k, TP.keys())
 		{
 			cout << k << "\t" << TP[k] << "\t" << TN[k] << "\t" << FP[k] << "\t" << FN[k];
 			cout << "\t" << setprecision(10) << TP[k] / qreal(TP[k] + FN[k]);
 			cout << "\t" << setprecision(10) <<TN[k] / qreal(TN[k] + FP[k]) << endl;
+
+			mOutputStream << k << "\t" << TP[k] << "\t" << TN[k] << "\t" << FP[k] << "\t" << FN[k];
+			mOutputStream << "\t"  << TP[k] / qreal(TP[k] + FN[k]);
+			mOutputStream << "\t"  <<TN[k] / qreal(TN[k] + FP[k]) << "\n";
 		}
 		//cout << endl << endl << "FINISHED!!"<<endl;
+		mOutputFile.close();
 		quit();
 	}
 	loadProject(mProjects.dequeue());

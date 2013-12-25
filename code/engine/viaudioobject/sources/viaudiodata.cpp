@@ -166,6 +166,7 @@ bool ViAudioReadData::hasData()
 
 ViSampleChunk& ViAudioReadData::read()
 {
+	clear();
 	QMutexLocker locker(&mMutex);
 	mSampleChunk.setSize(mConverter.pcmToReal(mRawChunk.data(), mSampleChunk.data(), mStream->read(mRawChunk)));
     mNeedsSampleSplit = true;

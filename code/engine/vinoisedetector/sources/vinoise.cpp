@@ -157,7 +157,7 @@ void ViNoise::generateMeanMask()
 		mean += (*mData)[i];
 	}
 	mean /= mData->size();
-	mean /= mThreshold;
+	mean /= (1-mThreshold);
 	for(int i = 0; i < mData->size(); ++i)
 	{
 		if((*mData)[i] >= mean) (*mMask)[i] = 1;

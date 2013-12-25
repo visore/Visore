@@ -19,6 +19,7 @@ class ViBenchMarker : public QObject
 
 		void loadProject(QString path);
 		void processProject();
+		void processProject2();
 		void process();
 
 		void processTuning();
@@ -57,6 +58,7 @@ class ViBenchMarker : public QObject
 		QQueue<QString> mProjects;
 		ViProject mProject;
 		ViAudioObjectPointer mObject;
+		int mCurrentObject;
 
 		ViAudioObjectChain mObjectChain;
 
@@ -64,6 +66,9 @@ class ViBenchMarker : public QObject
 		qreal mCurrentThreshold;
 		qreal mOldProgress;
 		qreal mTotalProgress;
+
+		QFile mOutputFile;
+		QTextStream mOutputStream;
 
 };
 

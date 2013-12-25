@@ -5,12 +5,40 @@
 template <typename T>
 void ViSampleChanneler<T>::split(const T *input, const int &samples, const int &channels, QList<ViChunk<T>> &output)
 {
-    output.clear();
+	/*output.clear();
     QList<ViChunk<T>*> splitted = split(input, samples, channels);
     for(int i = 0; i < splitted.size(); ++i)
     {
         output.append(ViSampleChunk(splitted[i]->data(), splitted[i]->size()));
-    }
+	}*/
+
+	output.clear();
+	int samplesPerChannel = qFloor(samples / ((qreal) channels));
+	int realSamples;
+	for(int i = 0; i < channels; ++i)
+	{
+		if(((samplesPerChannel * channels) + i - samples) < 0)
+		{
+			realSamples = samplesPerChannel + 1;
+		}
+		else
+		{
+			realSamples = samplesPerChannel;
+		}
+		output.append(ViChunk<T>(new T[realSamples], realSamples));
+	}
+
+	int counter;
+	for(int i = 0; i < output.size(); ++i)
+	{
+		T *data = output[i].data();
+		counter = 0;
+		for(int j = i; j < samples; j += channels)
+		{
+			data[counter] = input[j];
+			++counter;
+		}
+	}
 }
 
 template <typename T>
@@ -20,9 +48,9 @@ void ViSampleChanneler<T>::split(const T *input, const int &samples, const ViAud
 }
 
 template <typename T>
-QList<ViChunk<T>*> ViSampleChanneler<T>::split(const T *input, const int &samples, const int &channels)
+QList<ViChunk<T>> ViSampleChanneler<T>::split(const T *input, const int &samples, const int &channels)
 {
-	QList<ViChunk<T>*> result;
+	/*QList<ViChunk<T>> result;
 
     int samplesPerChannel = qFloor(samples / ((qreal) channels));
 	int realSamples;
@@ -36,13 +64,13 @@ QList<ViChunk<T>*> ViSampleChanneler<T>::split(const T *input, const int &sample
 		{
 			realSamples = samplesPerChannel;
 		}
-		result.append(new ViChunk<T>(new T[realSamples], realSamples));
+		result.append(ViChunk<T>(new T[realSamples], realSamples));
 	}
 
 	int counter;
 	for(int i = 0; i < result.size(); ++i)
 	{
-		T *data = result[i]->data();
+		T *data = result[i].data();
 		counter = 0;
 		for(int j = i; j < samples; j += channels)
 		{
@@ -51,11 +79,15 @@ QList<ViChunk<T>*> ViSampleChanneler<T>::split(const T *input, const int &sample
 		}
 	}
 
+	return result;*/
+
+	QList<ViChunk<T>> result;
+	split(input, samples, channels, result);
 	return result;
 }
 
 template <typename T>
-QList<ViChunk<T>*> ViSampleChanneler<T>::split(const T *input, const int &samples, const ViAudioFormat &format)
+QList<ViChunk<T>> ViSampleChanneler<T>::split(const T *input, const int &samples, const ViAudioFormat &format)
 {
 	return ViSampleChanneler::split(input, samples, format.channels());
 }
