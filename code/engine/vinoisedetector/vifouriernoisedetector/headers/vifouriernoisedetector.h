@@ -10,6 +10,8 @@ class ViFourierNoiseDetector : public ViNoiseDetector
     public:
 
 		ViFourierNoiseDetector();
+		ViFourierNoiseDetector(const ViFourierNoiseDetector &other);
+		~ViFourierNoiseDetector();
 		ViFourierNoiseDetector* clone();
 
 	protected:
@@ -18,7 +20,7 @@ class ViFourierNoiseDetector : public ViNoiseDetector
 
 	private:
 
-		ViFourierTransformer mTransformer;
+		ViFourierTransformer *mTransformer;
 
 };
 

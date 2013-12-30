@@ -6,8 +6,22 @@
 ViFourierNoiseDetector::ViFourierNoiseDetector()
 	: ViNoiseDetector()
 {
-	mTransformer.setSize(WINDOW_SIZE);
+	mTransformer = new ViFourierTransformer();
+	mTransformer->setSize(WINDOW_SIZE);
 	setOffset(WINDOW_SIZE / 2);
+}
+
+ViFourierNoiseDetector::ViFourierNoiseDetector(const ViFourierNoiseDetector &other)
+	: ViNoiseDetector(other)
+{
+	mTransformer = new ViFourierTransformer();
+	mTransformer->setSize(WINDOW_SIZE);
+	setOffset(WINDOW_SIZE / 2);
+}
+
+ViFourierNoiseDetector::~ViFourierNoiseDetector()
+{
+	delete mTransformer;
 }
 
 void ViFourierNoiseDetector::calculateNoise(QQueue<qreal> &samples)
@@ -23,7 +37,7 @@ void ViFourierNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 		{
 			input[i] = samples[i];
 		}
-		mTransformer.forwardTransform(input, output);
+		mTransformer->forwardTransform(input, output);
 
 		value = 0;
 		for(i = WINDOW_SIZE * (1 - SPECTRUM_USED); i < WINDOW_SIZE; ++i)

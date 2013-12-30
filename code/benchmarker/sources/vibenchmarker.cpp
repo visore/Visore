@@ -63,9 +63,9 @@ void ViBenchMarker::benchmark()
 	//mCurrentThreshold = 0.0343; //NN
 	//mCurrentThreshold = 0.06885; //Zscore
 
-	mDetector = new ViNearestNeighbourNoiseDetector();
+	//mDetector = new ViNearestNeighbourNoiseDetector();
 	//mDetector = new ViZscoreNoiseDetector();
-	//mDetector = new ViFourierNoiseDetector();
+	mDetector = new ViFourierNoiseDetector();
 	//mDetector = new ViPredictionNoiseDetector(2);
 	//mDetector = new ViMadNoiseDetector();
 	//mDetector = new ViMahalanobisNoiseDetector();
@@ -249,7 +249,7 @@ void ViBenchMarker::processTuning()
 			FN[mCurrentThreshold] += falseNegatives;
 		}
 		mObject->clearBuffers();
-		mObject.setNull();
+		//mObject.setNull();
 	}
 
 	if(mCurrentObject < mProject.objectCount() - 1)
