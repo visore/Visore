@@ -2,6 +2,7 @@
 #define VIBUFFER_H
 
 #include "vibufferstream.h"
+#include "vireversebufferstream.h"
 #include "viaudioformat.h"
 #include "vichunk.h"
 #include "viid.h"
@@ -36,9 +37,9 @@ class ViBuffer : public QObject, public ViId, public ViFunctor
 		QByteArray* data();
 		void setData(QByteArray *data);
 
-		ViBufferStreamPointer createReadStream();
-		ViBufferStreamPointer createWriteStream();
-		ViBufferStreamPointer createStream(QIODevice::OpenMode mode);
+		ViBufferStreamPointer createReadStream(bool reversed = false);
+		ViBufferStreamPointer createWriteStream(bool reversed = false);
+		ViBufferStreamPointer createStream(QIODevice::OpenMode mode, bool reversed = false);
 		int streamCount(QIODevice::OpenMode mode = QIODevice::ReadWrite);
 		
 		int size();

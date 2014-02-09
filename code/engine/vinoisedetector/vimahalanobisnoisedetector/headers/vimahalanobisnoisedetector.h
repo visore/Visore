@@ -15,9 +15,15 @@ class ViMahalanobisNoiseDetector : public ViNoiseDetector
 		ViMahalanobisNoiseDetector();
 		ViMahalanobisNoiseDetector* clone();
 
+		void setWindowSize(int size);
+
 	protected:
 
 		void calculateNoise(QQueue<qreal> &samples);
+
+	private:
+
+		int mWindowSize;
 
 };
 

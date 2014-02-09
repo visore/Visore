@@ -29,12 +29,23 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 	friend class ViNoiseDetectorThread;
 
 	public:
+
+		enum Direction
+		{
+			Forward = 1 << 0,
+			Reversed = 1 << 1,
+			Bidirectional = Forward | Reversed
+		};
+
+	public:
 		
 		ViNoiseDetector();
 		ViNoiseDetector(const int &channels, const qint64 samples);
 		ViNoiseDetector(const int &channels, const qint64 samples, ViProcessor::ChannelMode mode);
         ViNoiseDetector(const ViNoiseDetector &other);
 		virtual ~ViNoiseDetector();
+
+		void setDirection(Direction direction);
 
 		void initialize(const int &channels, const qint64 samples);
 
@@ -56,13 +67,15 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 
 		ViNoise& noise(const int &channel = 0);
 
-        void clear();
+		virtual void clear();
 
 		void setBuffers(ViBuffer *read, ViBuffer *write1, ViBuffer *write2);
 
 		void generate();
 
 		virtual ViNoiseDetector* clone() = 0;
+
+		virtual void setWindowSize(int size){}
 
 	protected:
 
@@ -81,11 +94,15 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 
     private:
 
+		Direction mDirection;
 		ViProcessor::ChannelMode mMode;
 		int mChannel;
 		ViAudioReadData *mData;
 		QList<ViNoise*> mNoise;
+		QList<ViNoise*> mReverseNoise;
+		bool mReverse;
 		QList<qint64> mIndexes;
+		QList<qint64> mReverseIndexes;
 		qreal mThreshold;
 
 		QList<QQueue<qreal>> mCache;

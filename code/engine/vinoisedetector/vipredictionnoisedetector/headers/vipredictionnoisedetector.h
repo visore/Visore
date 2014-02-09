@@ -15,6 +15,8 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 		void setDegree(const int &degree);
 		int degree();
 
+		QString name(QString replace = "", bool spaced = false);
+
 	protected:
 
 		void calculateNoise(QQueue<qreal> &samples);

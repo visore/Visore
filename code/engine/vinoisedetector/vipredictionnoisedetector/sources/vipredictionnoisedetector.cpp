@@ -1,17 +1,26 @@
 #include <vipredictionnoisedetector.h>
 #include <visystemsolver.h>
 
+#define WINDOW_SIZE 128
+
 ViPredictionNoiseDetector::ViPredictionNoiseDetector(const int &degree)
 	: ViNoiseDetector()
 {
 	setDegree(degree);
-	setOffset(mDegree);
+	setOffset(WINDOW_SIZE);
+}
+
+QString ViPredictionNoiseDetector::name(QString replace, bool spaced)
+{
+	QString n = ViNoiseDetector::name(replace, spaced);
+	if(spaced) n += " ";
+	return n + QString::number(mDegree);
 }
 
 void ViPredictionNoiseDetector::setDegree(const int &degree)
 {
 	mDegree = degree;
-	int i, j, size = mDegree + 1;
+	int i, j, size = WINDOW_SIZE;
 	mMatrix = ViMatrix(size, mDegree + 1);
 	for(i = 0; i < size; ++i)
 	{
@@ -20,7 +29,7 @@ void ViPredictionNoiseDetector::setDegree(const int &degree)
 		{
 			mMatrix[i][j] = qPow(i, j);
 		}
-		mPowers.append(qPow(mDegree, mDegree - i));
+		mPowers.append(qPow(WINDOW_SIZE, mDegree - i));
 	}
 }
 
@@ -31,15 +40,13 @@ int ViPredictionNoiseDetector::degree()
 
 void ViPredictionNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
-	static int i, count, size;
-
-	size = mDegree + 1;
-	ViVector vector(size);
+	static int i, count;
+	ViVector vector(WINDOW_SIZE);
 	static ViVector coefficients;
 
-	while(samples.size() > size)
+	while(samples.size() > WINDOW_SIZE)
 	{
-		for(i = 0; i < size; ++i)
+		for(i = 0; i < WINDOW_SIZE; ++i)
 		{
 			vector[i] = samples[i];
 		}
@@ -52,8 +59,9 @@ void ViPredictionNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 			for(i = 0; i < count; ++i)
 			{
 				value += coefficients[count - i - 1] * mPowers[i];
+				//value += coefficients[count - i - 1] * qPow(size, mDegree - i);
 			}
-			setNoise(qAbs(value - samples[size]));
+			setNoise(qAbs(value - samples[WINDOW_SIZE]));
 		}
 		else
 		{

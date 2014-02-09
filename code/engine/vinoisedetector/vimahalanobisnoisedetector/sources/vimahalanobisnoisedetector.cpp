@@ -1,13 +1,19 @@
 #include <vimahalanobisnoisedetector.h>
 #include <vivector.h>
 
-#define WINDOW_SIZE 16
-#define AMPLIFIER 10000
+#define DEFAULT_WINDOW_SIZE 64
+#define AMPLIFIER 10
 
 ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector()
 	: ViNoiseDetector()
 {
-	setOffset(WINDOW_SIZE / 2);
+	setWindowSize(DEFAULT_WINDOW_SIZE);
+}
+
+void ViMahalanobisNoiseDetector::setWindowSize(int size)
+{
+	mWindowSize = size;
+	setOffset(mWindowSize / 2);
 }
 
 void ViMahalanobisNoiseDetector::calculateNoise(QQueue<qreal> &samples)
@@ -15,27 +21,27 @@ void ViMahalanobisNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 	static int i;
 	static qreal mean;
 
-	while(samples.size() >= WINDOW_SIZE)
+	while(samples.size() >= mWindowSize)
 	{
 		// Calculate the mean
 		mean = 0;
-		for(i = 0; i < WINDOW_SIZE; ++i)
+		for(i = 0; i < mWindowSize; ++i)
 		{
 			mean += samples[i];
 		}
-		mean /= WINDOW_SIZE;
+		mean /= mWindowSize;
 
 		// Create variances
-		ViVector vector(WINDOW_SIZE);
-		for(i = 0; i < WINDOW_SIZE; ++i)
+		ViVector vector(mWindowSize);
+		for(i = 0; i < mWindowSize; ++i)
 		{
 			vector[i] = samples[i] - mean;
 		}
 
-		qreal covariance = (vector * vector).sum() / (WINDOW_SIZE - 1);
+		qreal covariance = (vector * vector).sum() / (mWindowSize - 1);
 
 		// Calculate the distance
-		qreal distance = vector[(WINDOW_SIZE / 2) + 1];
+		qreal distance = vector[(mWindowSize / 2) + 1];
 		distance = distance * covariance * distance;
 		setNoise(qAbs(distance) * AMPLIFIER);
 

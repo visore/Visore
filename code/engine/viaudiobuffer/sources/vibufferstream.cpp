@@ -22,7 +22,7 @@ ViBufferStream::~ViBufferStream()
 	}
 }
 
-void ViBufferStream::inserted(int pos, int size)
+void ViBufferStream::inserted(qint64 pos, int size)
 {
 	int current = position();
 	if(current >= pos) // Insert in a part that was already read with no overlap
@@ -31,7 +31,7 @@ void ViBufferStream::inserted(int pos, int size)
 	}
 }
 
-void ViBufferStream::removed(int pos, int length)
+void ViBufferStream::removed(qint64 pos, int length)
 {
 	int current = position();
 	if(current >= pos || pos + length > current)
@@ -97,7 +97,7 @@ int ViBufferStream::write(const ViBufferChunk &chunk)
 	return write(chunk.data(), chunk.size());
 }
 
-void ViBufferStream::insert(int position, const char *data, int length)
+void ViBufferStream::insert(qint64 position, const char *data, int length)
 {
 	QMutexLocker streamLocker(&mStreamMutex);
 	mBuffer->insert(position, data, length);
@@ -105,7 +105,7 @@ void ViBufferStream::insert(int position, const char *data, int length)
 	inserted(position, length);
 }
 
-void ViBufferStream::insert(int position, const ViBufferChunk &chunk, int length)
+void ViBufferStream::insert(qint64 position, const ViBufferChunk &chunk, int length)
 {
 	QMutexLocker streamLocker(&mStreamMutex);
 	mBuffer->insert(position, chunk, length);
@@ -113,7 +113,7 @@ void ViBufferStream::insert(int position, const ViBufferChunk &chunk, int length
 	inserted(position, length);
 }
 
-void ViBufferStream::insert(int position, const ViBufferChunk &chunk)
+void ViBufferStream::insert(qint64 position, const ViBufferChunk &chunk)
 {
 	QMutexLocker streamLocker(&mStreamMutex);
 	mBuffer->insert(position, chunk);
@@ -121,7 +121,7 @@ void ViBufferStream::insert(int position, const ViBufferChunk &chunk)
 	inserted(position, chunk.size());
 }
 
-void ViBufferStream::remove(int position, int length)
+void ViBufferStream::remove(qint64 position, int length)
 {
 	QMutexLocker streamLocker(&mStreamMutex);
 	if(mBuffer->remove(position, length))
@@ -147,19 +147,19 @@ QIODevice::OpenMode ViBufferStream::mode()
 	return mMode;
 }
 
-int ViBufferStream::position()
+qint64 ViBufferStream::position()
 {
 	QMutexLocker streamLocker(&mStreamMutex);
 	return mDevice->pos();
 }
 
-bool ViBufferStream::setPosition(int position)
+bool ViBufferStream::setPosition(qint64 position)
 {
 	QMutexLocker streamLocker(&mStreamMutex);
 	return mDevice->seek(position);
 }
 
-bool ViBufferStream::isValidPosition(int position)
+bool ViBufferStream::isValidPosition(qint64 position)
 {
 	return position < mBuffer->size();
 }
@@ -167,7 +167,7 @@ bool ViBufferStream::isValidPosition(int position)
 bool ViBufferStream::atEnd()
 {
 	QMutexLocker streamLocker(&mStreamMutex);
-	int position = mDevice->pos();
+	qint64 position = mDevice->pos();
 	return position >= (mBuffer->size() - 1);
 }
 

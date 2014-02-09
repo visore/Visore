@@ -22,38 +22,38 @@ class ViBufferStream : public QObject, public ViId, public ViFunctorParameter
 
 	friend class ViBuffer;
 
-	private slots:
+	protected slots:
 
-		void inserted(int position, int size);
-		void removed(int position, int length);
+		void inserted(qint64 position, int size);
+		void removed(qint64 position, int length);
 
 	public:
 
 		~ViBufferStream();
 
-		int read(char *data, int length);
-		int read(ViBufferChunk &chunk, int length);
-		int read(ViBufferChunk &chunk);
+		virtual int read(char *data, int length);
+		virtual int read(ViBufferChunk &chunk, int length);
+		virtual int read(ViBufferChunk &chunk);
 
-		int write(const char *data, int length);
-		int write(const ViBufferChunk &chunk, int length);
-		int write(const ViBufferChunk &chunk);
+		virtual int write(const char *data, int length);
+		virtual int write(const ViBufferChunk &chunk, int length);
+		virtual int write(const ViBufferChunk &chunk);
 
 		// TODO: Insert doesn't use QBuffer, very slow.
-		void insert(int position, const char *data, int length);
-		void insert(int position, const ViBufferChunk &chunk, int length);
-		void insert(int position, const ViBufferChunk &chunk);
+		void insert(qint64 position, const char *data, int length);
+		void insert(qint64 position, const ViBufferChunk &chunk, int length);
+		void insert(qint64 position, const ViBufferChunk &chunk);
 
-		void remove(int position, int length);
+		void remove(qint64 position, int length);
 
 		int size();
 		void restart();
 		QIODevice::OpenMode mode();
 
-		int position();
-		bool setPosition(int position);
-		bool isValidPosition(int position);
-		bool atEnd();
+		qint64 position();
+		bool setPosition(qint64 position);
+		bool isValidPosition(qint64 position);
+		virtual bool atEnd();
 		bool hasData();
 		
 		ViBuffer* buffer();
@@ -63,7 +63,7 @@ class ViBufferStream : public QObject, public ViId, public ViFunctorParameter
 		//Protected constructor, to ensure that a QSharePointer is created from within ViBuffer
 		ViBufferStream(QIODevice::OpenMode mode, ViBuffer *buffer, QByteArray *data, QMutex *mutex);
 
-	private:
+	protected:
 
 		QIODevice::OpenMode mMode;
 		ViBuffer *mBuffer;

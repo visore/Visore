@@ -3,7 +3,7 @@
 #include "vicoder.h"
 #include <QApplication>
 
-#include<vibenchmarker.h>
+#include<vibenchmarker3.h>
 #include <vipiecewiseconstantinterpolator.h>
 #include <visplineinterpolator.h>
 #include <vipolynomialinterpolator.h>
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	bool BENCH = true;
 	//bool BENCH = false;
 
-	ViBenchMarker bench;
+	ViBenchMarker3 bench;
 	if(BENCH)
 	{
 		bench.benchmark();

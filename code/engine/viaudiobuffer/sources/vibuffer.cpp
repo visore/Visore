@@ -34,17 +34,17 @@ void ViBuffer::setData(QByteArray *data)
 	mData = data;
 }
 
-ViBufferStreamPointer ViBuffer::createReadStream()
+ViBufferStreamPointer ViBuffer::createReadStream(bool reversed)
 {
-	return createStream(QIODevice::ReadOnly);
+	return createStream(QIODevice::ReadOnly, reversed);
 }
 
-ViBufferStreamPointer ViBuffer::createWriteStream()
+ViBufferStreamPointer ViBuffer::createWriteStream(bool reversed)
 {
-	return createStream(QIODevice::WriteOnly);
+	return createStream(QIODevice::WriteOnly, reversed);
 }
 
-ViBufferStreamPointer ViBuffer::createStream(QIODevice::OpenMode mode)
+ViBufferStreamPointer ViBuffer::createStream(QIODevice::OpenMode mode, bool reversed)
 {
 	QMutexLocker locker(&mMutex);
 	if(mode == QIODevice::ReadOnly)
@@ -60,7 +60,16 @@ ViBufferStreamPointer ViBuffer::createStream(QIODevice::OpenMode mode)
 		LOG("Only ReadOnly and WriteOnly streams allowed");
 		return ViBufferStreamPointer();
 	}
-	ViBufferStreamPointer pointer = ViBufferStreamPointer(new ViBufferStream(mode, this, mData, &mMutex));
+
+	ViBufferStreamPointer pointer;
+	if(reversed)
+	{
+		pointer = ViBufferStreamPointer(new ViReverseBufferStream(mode, this, mData, &mMutex));
+	}
+	else
+	{
+		pointer = ViBufferStreamPointer(new ViBufferStream(mode, this, mData, &mMutex));
+	}
 	mStreams.append(pointer);
 	return pointer;
 }

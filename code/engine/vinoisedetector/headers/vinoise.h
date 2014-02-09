@@ -46,6 +46,8 @@ class ViNoise
 		void set(const int &index, const qreal &value);
 		void set(const int &index, const ViNoise &other);
 
+		qreal get(const int &index);
+
 		const bool& at(const int &index) const;
 		const bool& operator [] (const int &index) const;
 

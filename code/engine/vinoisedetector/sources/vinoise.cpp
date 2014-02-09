@@ -197,6 +197,11 @@ void ViNoise::set(const int &index, const ViNoise &other)
 	}
 }
 
+qreal ViNoise::get(const int &index)
+{
+	return (*mData)[index];
+}
+
 const bool& ViNoise::at(const int &index) const
 {
 	const bool& value = (*mMask)[index];

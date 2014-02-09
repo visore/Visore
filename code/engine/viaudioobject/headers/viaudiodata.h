@@ -27,6 +27,8 @@ class ViAudioData
         int windowSize();
         int channelCount();
 
+		qint64 position();
+
 		void setScaleRange(int from, int to);
 
     protected:
@@ -42,7 +44,7 @@ class ViAudioData
 
 		QMutex mMutex;
         ViBuffer *mBuffer;
-        ViBufferStreamPointer mStream;
+		ViBufferStreamPointer mStream;
 
         ViPcmConverter<qreal> mConverter;
         ViRawChunk mRawChunk;
@@ -68,6 +70,8 @@ class ViAudioReadData : public ViAudioData
 
 		ViAudioReadData();
 		ViAudioReadData(ViBuffer *buffer);
+
+		void setReversed(bool reverse = true); // Read from end to start
 
         bool hasData();
 

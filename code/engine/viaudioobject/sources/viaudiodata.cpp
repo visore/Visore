@@ -2,6 +2,7 @@
 #include <visamplechanneler.h>
 #include <viscaler.h>
 #include <viaudioposition.h>
+#include <vireversebufferstream.h>
 #include <QQueue>
 
 #define DEFAULT_SAMPLE_COUNT 2048
@@ -14,7 +15,7 @@ ViAudioData::ViAudioData()
 
 ViAudioData::~ViAudioData()
 {
-    clear();
+	clear();
 }
 
 void ViAudioData::setDefaults()
@@ -31,8 +32,8 @@ void ViAudioData::setDefaults()
 
 void ViAudioData::clear()
 {
-	QMutexLocker locker(&mMutex);
-	mBuffer = NULL;
+	/*QMutexLocker locker(&mMutex);
+	mBuffer = NULL;*/
     clearOther();
 }
 
@@ -91,6 +92,11 @@ int ViAudioData::channelCount()
 {
 	QMutexLocker locker(&mMutex);
     return mChannelCount;
+}
+
+qint64 ViAudioData::position()
+{
+	return mStream->position();
 }
 
 void ViAudioData::setScaleRange(int from, int to)
@@ -156,6 +162,12 @@ ViAudioReadData::ViAudioReadData(ViBuffer *buffer)
 {
 	setDefaults();
 	setBuffer(buffer);
+}
+
+void ViAudioReadData::setReversed(bool reverse)
+{
+	mStream.setNull();
+	mStream = mBuffer->createReadStream(reverse);
 }
 
 bool ViAudioReadData::hasData()
