@@ -3,7 +3,7 @@
 #include "vicoder.h"
 #include <QApplication>
 
-#include<vibenchmarker3.h>
+#include<vibenchmarker2.h>
 #include <vipiecewiseconstantinterpolator.h>
 #include <visplineinterpolator.h>
 #include <vipolynomialinterpolator.h>
@@ -29,10 +29,10 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<ViAudioPosition>("ViAudioPosition");
 	qRegisterMetaType<ViRealSpectrum>("ViRealSpectrum");
 
-	bool BENCH = true;
-	//bool BENCH = false;
+    bool BENCH = true;
+    //bool BENCH = false;
 
-	ViBenchMarker3 bench;
+    ViBenchMarker2 bench;
 	if(BENCH)
 	{
 		bench.benchmark();

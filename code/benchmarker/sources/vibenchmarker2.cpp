@@ -7,6 +7,7 @@
 #include <vimadnoisedetector.h>
 #include <vipredictionnoisedetector.h>
 #include <vifouriernoisedetector.h>
+#include <viarmanoisedetector.h>
 #include <QTextStream>
 
 #include <iomanip>
@@ -17,8 +18,8 @@
 
 #define WINDOW_SIZE 4096
 #define MASK_START 0
-#define MASK_END 0.7
-#define MASK_INTERVAL 0.0001
+#define MASK_END 0.5
+#define MASK_INTERVAL 0.001
 #define NOISE_TYPE Direct
 
 /*#define MASK_END 0.00005
@@ -34,14 +35,15 @@ ViBenchMarker2::ViBenchMarker2()
 	//		Forward:		PAR()	MAT ()	SEN()	SPE()
 	//		Backward:		PAR()	MAT ()	SEN()	SPE()
 	//		Bidirectional:	PAR()	MAT ()	SEN()	SPE()
-	mDetector = new ViMahalanobisNoiseDetector();
+    //mDetector = new ViMahalanobisNoiseDetector();
 
 
 	//mDetector = new ViMadNoiseDetector(); //
-	//mDetector = new ViFourierNoiseDetector();
+    //mDetector = new ViFourierNoiseDetector();
 	//mDetector = new ViPredictionNoiseDetector(2);
 	//mDetector = new ViZscoreNoiseDetector();
-	//mDetector = new ViNearestNeighbourNoiseDetector();
+    //mDetector = new ViNearestNeighbourNoiseDetector();
+    mDetector = new ViArmaNoiseDetector();
 
 	mDetector->setDirection(ViNoiseDetector::Forward);
 	//mDetector->setDirection(ViNoiseDetector::Reversed);
@@ -55,7 +57,7 @@ ViBenchMarker2::~ViBenchMarker2()
 
 void ViBenchMarker2::benchmark()
 {
-	QDir dir("/home/goomuckel/Visore Projects/Files/");
+    QDir dir("/home/visore/Visore Projects/Files/");
 	QStringList files = dir.entryList(QDir::Files);
 	for(int i = 0; i < files.size(); ++i)
 	{
@@ -67,7 +69,7 @@ void ViBenchMarker2::benchmark()
 	else if(ViNoise::NOISE_TYPE == ViNoise::Mean) name += "Mean";
 	else if(ViNoise::NOISE_TYPE == ViNoise::Maximum) name += "Maximum";
 
-	mOutputFile.setFileName("/home/goomuckel/Visore Projects/Results/"+name+"_"+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")+".txt");
+    mOutputFile.setFileName("/home/visore/Visore Projects/Results/"+name+"_"+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")+".txt");
 	mOutputFile.open(QIODevice::WriteOnly);
 	mOutputStream.setDevice(&mOutputFile);
 
@@ -97,19 +99,23 @@ void ViBenchMarker2::process1()
 {
 	QObject::disconnect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process1()));
 	generateNoise();
-	QObject::connect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
+    QObject::connect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
+    QObject::connect(mCurrentObject.data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 	mCurrentObject->generateNoiseMask(mDetector);
 }
 
 void ViBenchMarker2::process2()
 {
-	QObject::disconnect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
+    QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
+    mCurrentObject->encode(ViAudio::Noise );
+
+    //QObject::disconnect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
 
 	/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
 	mCurrentObject->encode();
 	return;*/
 
-	cout << mCurrentObject->filePath(ViAudio::Target).toLatin1().data() << endl;
+    /*cout << mCurrentObject->filePath(ViAudio::Target).toLatin1().data() << endl;
 	mOutputStream<<"\n"<<mCurrentObject->filePath(ViAudio::Target)<<"\n";
 	mOutputStream.flush();
 
@@ -195,9 +201,9 @@ void ViBenchMarker2::process2()
 		cout << "(" << maxMath << ")" << endl;
 
 	}
-	mCurrentObject->clearBuffers();
+    mCurrentObject->clearBuffers();
 
-	nextFile();
+    nextFile();*/
 }
 
 void ViBenchMarker2::generateNoise()
@@ -209,7 +215,7 @@ void ViBenchMarker2::generateNoise()
 	ViBuffer *buffer = mCurrentObject->buffer(ViAudio::Target);
 	ViAudioReadData data(buffer);
 	mCurrentObject->buffer(ViAudio::Corrupted)->setFormat(mCurrentObject->buffer(ViAudio::Target)->format());
-	ViAudioWriteData data2(mCurrentObject->buffer(ViAudio::Corrupted));
+    ViAudioWriteData data2(mCurrentObject->buffer(ViAudio::Corrupted));
 
 	mNoise1.clear();
 	mNoise2.clear();
@@ -227,6 +233,8 @@ void ViBenchMarker2::generateNoise()
 		data.read();
 
 		ViSampleChunk &c1 = data.splitSamples(0);
+        if(c1.size() < 1024) break;
+
 		int index = 0;
 		while(index < c1.size())
 		{
@@ -372,6 +380,11 @@ void ViBenchMarker2::addNoise3(ViSampleChunk &s, int offset, int length)
 		if(minus) zag -= 0.2;
 		else zag += 0.2;
 	}
+}
+
+void ViBenchMarker2::progress(qreal i)
+{
+    cout<<i<<" %"<<endl;
 }
 
 void ViBenchMarker2::quit()

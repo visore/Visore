@@ -15,7 +15,8 @@ ViAudioData::ViAudioData()
 
 ViAudioData::~ViAudioData()
 {
-	clear();
+    mRawChunk.size();//For some reasons this prevents seg faults in delete mRawChunck
+    clear();
 }
 
 void ViAudioData::setDefaults()
@@ -74,6 +75,7 @@ void ViAudioData::setSampleCount(int samples)
 {
 	QMutexLocker locker(&mMutex);
     mSampleCount = samples;
+    mTransformer.setSize(samples);
     update();
 }
 
@@ -430,7 +432,7 @@ void ViAudioWriteData::writeSplitFrequencies(ViFrequencyChunks &frequencies)
 
 void ViAudioWriteData::clearOther()
 {
-	mChannelSamples.clear();
+    //mChannelSamples.clear();
 }
 
 void ViAudioWriteData::updateOther()

@@ -17,6 +17,8 @@ class ViBenchMarker2 : public QObject
 
 	private slots:
 
+        void progress(qreal i);
+
 		void quit();
 
 		void nextFile();

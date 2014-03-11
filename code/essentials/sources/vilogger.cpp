@@ -81,7 +81,7 @@ QString ViLogEntry::toString()
 
 void ViLogEntry::print()
 {
-	/*if(LOGGER_TYPE == 0)
+    if(LOGGER_TYPE == 0)
 	{
 		printShort();
 	}
@@ -92,7 +92,7 @@ void ViLogEntry::print()
 	else
 	{
 		printLong();
-	}*/
+    }
 }
 
 void ViLogEntry::printShort()

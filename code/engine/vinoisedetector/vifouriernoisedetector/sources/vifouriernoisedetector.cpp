@@ -1,7 +1,6 @@
 #include <vifouriernoisedetector.h>
 
 #define WINDOW_SIZE 64
-#define SPECTRUM_USED 0.25 // The percentage of the last part of the spectrum to use
 
 ViFourierNoiseDetector::ViFourierNoiseDetector()
 	: ViNoiseDetector()
@@ -33,20 +32,20 @@ void ViFourierNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 
 	while(samples.size() >= WINDOW_SIZE)
 	{
-		for(i = 0; i < WINDOW_SIZE; ++i)
-		{
-			input[i] = samples[i];
-		}
-		mTransformer->forwardTransform(input, output);
+        for(i = 0; i < WINDOW_SIZE; ++i)
+        {
+            input[i] = samples[i];
+        }
+        mTransformer->forwardTransform(input, output);
 
-		value = 0;
-		for(i = WINDOW_SIZE * (1 - SPECTRUM_USED); i < WINDOW_SIZE; ++i)
-		{
-			value += qAbs(output[i-1] - output[i]);
-		}
-		value /= WINDOW_SIZE * SPECTRUM_USED;
-		setNoise(value);
-		samples.removeFirst();
+        value = 0;
+        for(i = 1; i < WINDOW_SIZE/2; ++i)
+        {
+            value += qAbs(output[i-1] - output[i]);
+        }
+        value /= ((WINDOW_SIZE/2) - 1);
+        setNoise(value/5);
+        samples.removeFirst();
 	}
 }
 

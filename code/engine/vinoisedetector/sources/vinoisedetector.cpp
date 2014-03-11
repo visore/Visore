@@ -234,6 +234,9 @@ void ViNoiseDetector::create()
 	qint64 newSize, i, j;
 	int c;
 
+    qint64 totalSize = mRead.bufferSamples(), processedSize = 0;
+    if(mDirection == Bidirectional) totalSize *= 2;
+
 	initialize(mRead.channelCount(), totalSamples);
 	for(i = 0; i < mRead.channelCount(); ++i)
 	{
@@ -265,6 +268,9 @@ void ViNoiseDetector::create()
 				}
 				calculateNoise(mCache[i]);
 			}
+
+            processedSize += mRead.sampleCount();
+            setProgress((processedSize * 99.0) / totalSize);
 		}
 
 		for(c = 0; c < mRead.channelCount(); ++c)
@@ -313,6 +319,9 @@ void ViNoiseDetector::create()
 				}
 				calculateNoise(mCache[i]);
 			}
+
+            processedSize += mRead.sampleCount();
+            setProgress((processedSize * 99.0) / totalSize);
 		}
 		for(c = 0; c < mRead.channelCount(); ++c)
 		{
