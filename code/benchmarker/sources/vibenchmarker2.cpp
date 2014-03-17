@@ -17,8 +17,8 @@
 #define AI_NOISE_END_LENGTH 30
 
 #define WINDOW_SIZE 4096
-#define MASK_START 0
-#define MASK_END 0.5
+#define MASK_START 0.1
+#define MASK_END 1
 #define MASK_INTERVAL 0.001
 #define NOISE_TYPE Direct
 
@@ -43,7 +43,7 @@ ViBenchMarker2::ViBenchMarker2()
 	//mDetector = new ViPredictionNoiseDetector(2);
 	//mDetector = new ViZscoreNoiseDetector();
     //mDetector = new ViNearestNeighbourNoiseDetector();
-    mDetector = new ViArmaNoiseDetector();
+	mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA);
 
 	mDetector->setDirection(ViNoiseDetector::Forward);
 	//mDetector->setDirection(ViNoiseDetector::Reversed);
@@ -106,8 +106,8 @@ void ViBenchMarker2::process1()
 
 void ViBenchMarker2::process2()
 {
-    QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-    mCurrentObject->encode(ViAudio::Noise );
+	//QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
+	mCurrentObject->encode(ViAudio::Noise /*| ViAudio::Corrupted*/);
 
     //QObject::disconnect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
 
@@ -115,7 +115,7 @@ void ViBenchMarker2::process2()
 	mCurrentObject->encode();
 	return;*/
 
-    /*cout << mCurrentObject->filePath(ViAudio::Target).toLatin1().data() << endl;
+	cout << mCurrentObject->filePath(ViAudio::Target).toLatin1().data() << endl;
 	mOutputStream<<"\n"<<mCurrentObject->filePath(ViAudio::Target)<<"\n";
 	mOutputStream.flush();
 
@@ -203,7 +203,7 @@ void ViBenchMarker2::process2()
 	}
     mCurrentObject->clearBuffers();
 
-    nextFile();*/
+	nextFile();
 }
 
 void ViBenchMarker2::generateNoise()
@@ -298,7 +298,7 @@ int ViBenchMarker2::addNoise(ViSampleChunk &s, int offset)
 	int oldLength = mNoiseLength;
 
 	--mNoiseCount;
-	if(mNoiseCount == 0)
+	if(mNoiseCount <= 0)
 	{
 		++mNoiseType;
 		if(mNoiseType > 2)

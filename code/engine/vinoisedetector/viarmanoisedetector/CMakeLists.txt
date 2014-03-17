@@ -9,7 +9,7 @@ FILE(GLOB VI_ARMA_NOISE_DETECTOR_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
 ADD_LIBRARY(viarmanoisedetector SHARED ${VI_ARMA_NOISE_DETECTOR_HEADERS} ${VI_ARMA_NOISE_DETECTOR_SOURCES})
-TARGET_LINK_LIBRARIES(viarmanoisedetector vinoisedetector myarma)
+TARGET_LINK_LIBRARIES(viarmanoisedetector vinoisedetector)
 QT5_USE_MODULES(viarmanoisedetector Multimedia Xml)
 
 #Install file

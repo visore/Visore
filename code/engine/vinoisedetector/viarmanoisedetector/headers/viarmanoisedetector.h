@@ -2,9 +2,6 @@
 #define VIARMANOISEDETECTOR_H
 
 #include <vinoisedetector.h>
-#include <vimatrix.h>
-
-class CArma;
 
 class ViArmaNoiseDetector : public ViNoiseDetector
 {
@@ -15,20 +12,24 @@ class ViArmaNoiseDetector : public ViNoiseDetector
         {
             MovingAverage,
             AutoRegression,
-            AutoRegressiveMovingAverage
+			AutoRegressiveMovingAverage,
+			MA = MovingAverage,
+			AR = AutoRegression,
+			ARMA = AutoRegressiveMovingAverage
         };
 
     public:
 
-        ViArmaNoiseDetector(const int &degree = 2);
+		ViArmaNoiseDetector(const Type &type = ARMA);
+		ViArmaNoiseDetector(const ViArmaNoiseDetector &other);
         ~ViArmaNoiseDetector();
         ViArmaNoiseDetector* clone();
 
-      //  void setType(const Type &type);
+		void setType(const Type &type);
 
         void setWindowSize(int size);
-		void setDegree(const int &degree);
-		int degree();
+		void setDegree(const Type &type, const int &degree);
+		void setDegree(const int &maDegree, const int &arDegree);
 
 		QString name(QString replace = "", bool spaced = false);
 
@@ -36,13 +37,28 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 
 		void calculateNoise(QQueue<qreal> &samples);
 
+		/*
+		* Box-Muller transform - was listed above, and is relatively simple to implement. If you need very precise samples however, be aware that the Box-Muller transform combined with some uniform generators suffers from an anomaly called Neave Effect.
+		* H. R. Neave, "On using the Box-Muller transformation with multiplicative congruential pseudorandom number generators," Applied Statistics, 22, 92-97, 1973
+		 */
+		qreal generateNoise(const qreal &variance) const;
+
+		void clear(const Type &type);
+
+		bool leastSquareFit(const qreal *input, const int &degree, qreal *coefficients);
+		bool leastSquareFit(const qreal *input, const int &degree, qreal *coefficients, qreal **matrix);
+		bool solveEquations(double **matrix, double *coefficients, const int &degree);
+
+
 	private:
 
+		Type mType;
         int mWindowSize;
-		int mDegree;
-        Type mType;
-        CArma *mArma;
         double *mWindowData;
+
+		int mMaDegree, mArDegree;
+		qreal **mMaMatrix, **mArMatrix;
+		qreal *mMaCoefficients, *mArCoefficients;
 
 };
 
