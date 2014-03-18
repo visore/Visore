@@ -16,6 +16,11 @@ void ViMahalanobisNoiseDetector::setWindowSize(int size)
 	setOffset(mWindowSize / 2);
 }
 
+void ViMahalanobisNoiseDetector::setParameters(qreal param1)
+{
+	setWindowSize(param1);
+}
+
 void ViMahalanobisNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
 	static int i;

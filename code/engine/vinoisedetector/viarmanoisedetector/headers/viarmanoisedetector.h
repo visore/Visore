@@ -33,6 +33,9 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 
 		QString name(QString replace = "", bool spaced = false);
 
+		void setParameters(qreal param1, qreal param2);
+		void setParameters(qreal param1, qreal param2, qreal param3);
+
 	protected:
 
 		void calculateNoise(QQueue<qreal> &samples);
@@ -48,6 +51,29 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 		bool leastSquareFit(const qreal *input, const int &degree, qreal *coefficients);
 		bool leastSquareFit(const qreal *input, const int &degree, qreal *coefficients, qreal **matrix);
 		bool solveEquations(double **matrix, double *coefficients, const int &degree);
+
+
+		qreal aic(qreal rss, int numberValues, int numberParam)
+		{
+			//http://adorio-research.org/wordpress/?p=1932
+			return 2 * numberParam + numberValues * (log(6.28318530718 * rss/numberValues) + 1);
+
+		}
+
+		qreal aicc(qreal rss, int numberValues, int numberParam)
+		{
+			//http://adorio-research.org/wordpress/?p=1932
+			qreal retval = aic(rss, numberParam, numberValues);
+			   if(numberValues-numberParam-1 != 0)
+				   retval += 2.0 *numberParam* (numberParam+1)/ double(numberValues-numberParam-1);
+			   return retval;
+
+		}
+
+		qreal rss(qreal real, qreal pred)
+		{
+			return qPow(real - pred, 2);
+		}
 
 
 	private:

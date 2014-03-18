@@ -77,6 +77,11 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 
 		virtual void setWindowSize(int size){}
 
+		virtual void setParameters(qreal param1){}
+		virtual void setParameters(qreal param1, qreal param2){}
+		virtual void setParameters(qreal param1, qreal param2, qreal param3){}
+		virtual void setParameters(qreal param1, qreal param2, qreal param3, qreal param4){}
+
 	protected:
 
 		void setOffset(const int &offset); // The first offset samples that can't be used to detect noise

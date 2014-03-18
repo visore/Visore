@@ -7,6 +7,7 @@
 #include <vimadnoisedetector.h>
 #include <vipredictionnoisedetector.h>
 #include <vifouriernoisedetector.h>
+#include <viarmanoisedetector.h>
 #include <QTextStream>
 
 #include <iomanip>
@@ -21,28 +22,34 @@
 #define MASK_INTERVAL 0.0001
 #define NOISE_TYPE Direct
 
-#define PARAM_START 1
-#define PARAM_END 128
-#define PARAM_INCREASE 1
-#define NO_CHANGE 50
-
-/*#define MASK_END 0.00005
-#define MASK_INTERVAL 0.0000001*/
-
-
+#define NO_CHANGE 30
 
 ViBenchMarker3::ViBenchMarker3()
 {
 	mCurrentObject = ViAudioObject::create();
 
-	//	Mahalanobis
-	//		Forward:		PAR()	MAT ()	SEN()	SPE()
-	//		Backward:		PAR()	MAT ()	SEN()	SPE()
-	//		Bidirectional:	PAR()	MAT ()	SEN()	SPE()
-	mDetector = new ViMahalanobisNoiseDetector();
+	mParamsStart.append(5);
+	mParamsEnd.append(20);
+	mParamsIncrease.append(1);
+	mParamsCurrent.append(0);
+
+	mParamsStart.append(5);
+	mParamsEnd.append(20);
+	mParamsIncrease.append(1);
+	mParamsCurrent.append(0);
+
+	mDoneParamIterations = 0;
+	mTotalParamIterations = 1;
+	for(int i = 0; i < mParamsStart.size(); ++i)
+	{
+		mTotalParamIterations *= (mParamsEnd[i] - mParamsStart[i] + mParamsIncrease[i]) / mParamsIncrease[i];
+	}
+	mMainTime.start();
 
 
-	//mDetector = new ViMadNoiseDetector(); //
+	mDetector = new ViArmaNoiseDetector();
+	//mDetector = new ViMahalanobisNoiseDetector();
+	//mDetector = new ViMadNoiseDetector();
 	//mDetector = new ViFourierNoiseDetector();
 	//mDetector = new ViPredictionNoiseDetector(2);
 	//mDetector = new ViZscoreNoiseDetector();
@@ -58,9 +65,46 @@ ViBenchMarker3::~ViBenchMarker3()
 
 }
 
+bool ViBenchMarker3::nextParam()
+{
+	int size = mParamsStart.size();
+
+	bool finished = true;
+	for(int i = 0; i < size; ++i)
+	{
+		if(mParamsCurrent[i] < mParamsEnd[i])
+		{
+			finished = false;
+			break;
+		}
+	}
+	if(finished) return false; //All paramaters were tested
+
+	for(int i = size - 1; i >= 0; --i)
+	{
+		if(mParamsCurrent[i] < mParamsEnd[i])
+		{
+			mParamsCurrent[i] += mParamsIncrease[i];
+			return true;
+		}
+		else if(mParamsCurrent[i] >= mParamsEnd[i])
+		{
+			mParamsCurrent[i] = mParamsStart[i];
+			int pre = 1;
+			while(mParamsCurrent[i-pre] >= mParamsEnd[i-pre])
+			{
+				mParamsCurrent[i-pre] = mParamsStart[i-pre];
+				++pre;
+			}
+			mParamsCurrent[i-pre] += mParamsIncrease[i-pre];
+			return true;
+		}
+	}
+}
+
 void ViBenchMarker3::benchmark()
 {
-	QDir dir("/home/goomuckel/Visore Projects/Files/");
+	QDir dir("/home/visore/Visore Projects/Files/");
 	QStringList files = dir.entryList(QDir::Files);
 	for(int i = 0; i < files.size(); ++i)
 	{
@@ -72,7 +116,7 @@ void ViBenchMarker3::benchmark()
 	else if(ViNoise::NOISE_TYPE == ViNoise::Mean) name += "Mean";
 	else if(ViNoise::NOISE_TYPE == ViNoise::Maximum) name += "Maximum";
 
-	mOutputFile.setFileName("/home/goomuckel/Visore Projects/Results/"+name+"_"+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")+".txt");
+	mOutputFile.setFileName("/home/visore/Visore Projects/Results/"+name+"_"+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")+".txt");
 	mOutputFile.open(QIODevice::WriteOnly);
 	mOutputStream.setDevice(&mOutputFile);
 
@@ -89,7 +133,11 @@ void ViBenchMarker3::nextFile()
 	}
 	else
 	{
-		mCurrentParam = PARAM_START;
+		for(int i = 0; i < mParamsStart.size(); ++i)
+		{
+			mParamsCurrent[i] = mParamsStart[i];
+		}
+
 		mCurrentFile = mFiles.dequeue();
 
 		mCurrentObject->clearBuffers();
@@ -99,12 +147,21 @@ void ViBenchMarker3::nextFile()
 	}
 }
 
-void ViBenchMarker3::process1()
+void ViBenchMarker3::process1(bool generate)
 {
 	QObject::disconnect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process1()));
-	generateNoise();
+	if(generate) generateNoise();
+	mCurrentObject->clearBuffer(ViAudio::Target);
+	mCurrentObject->clearBuffer(ViAudio::Noise);
+	mCurrentObject->clearBuffer(ViAudio::NoiseMask);
 	QObject::connect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
-	mDetector->setWindowSize(mCurrentParam);
+
+	if(mParamsStart.size() == 1) mDetector->setParameters(mParamsCurrent[0]);
+	else if(mParamsStart.size() == 2) mDetector->setParameters(mParamsCurrent[0], mParamsCurrent[1]);
+	else if(mParamsStart.size() == 3) mDetector->setParameters(mParamsCurrent[0], mParamsCurrent[1], mParamsCurrent[2]);
+	else if(mParamsStart.size() == 4) mDetector->setParameters(mParamsCurrent[0], mParamsCurrent[1], mParamsCurrent[2], mParamsCurrent[3]);
+	else { cout << "Invalid parameter count of "<<mParamsStart.size()<<". Min: 1, Max: 4" << endl; quit(); }
+
 	mTime.restart();
 	mCurrentObject->generateNoiseMask(mDetector);
 }
@@ -113,14 +170,6 @@ void ViBenchMarker3::process2()
 {
 	int time = mTime.elapsed();
 	QObject::disconnect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
-
-	/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-	mCurrentObject->encode();
-	return;*/
-
-	/*cout << mCurrentObject->filePath(ViAudio::Target).toLatin1().data() << endl;
-	mOutputStream<<"\n"<<mCurrentObject->filePath(ViAudio::Target)<<"\n";
-	mOutputStream.flush();*/
 
 	mNoChange = 0;
 
@@ -145,6 +194,10 @@ void ViBenchMarker3::process2()
 		for(i = 0; i < mask2.size(); ++i) (*nData2)[i + offset2] = mask2[i];
 		offset2 += mask2.size();
 	}
+
+	mCurrentObject->clearBuffer(ViAudio::Target);
+	mCurrentObject->clearBuffer(ViAudio::Noise);
+	mCurrentObject->clearBuffer(ViAudio::NoiseMask);
 
 	ViNoise noise1(nData1, nMask1, mCurrentThreshold);
 	ViNoise noise2(nData2, nMask2, mCurrentThreshold);
@@ -207,38 +260,44 @@ void ViBenchMarker3::process2()
 		}
 		++mNoChange;
 		if(mNoChange > NO_CHANGE) break;
-
-		/*mOutputStream << "\t" << mCurrentThreshold << "\t" << truePositives << "\t" << trueNegatives << "\t" << falsePositives << "\t" << falseNegatives << "\t";
-		mOutputStream << truePositives / qreal(truePositives + falseNegatives) << "\t";
-		mOutputStream  << trueNegatives / qreal(trueNegatives + falsePositives) << "\t";
-		mOutputStream  << math << "\n";
-		mOutputStream.flush();
-
-		cout << "\t" << mCurrentThreshold << "\t" << truePositives << "\t" << trueNegatives << "\t" << falsePositives << "\t" << falseNegatives << "\t";
-		cout << setprecision(10) << truePositives / qreal(truePositives + falseNegatives) << "\t";
-		cout << setprecision(10) << trueNegatives / qreal(trueNegatives + falsePositives) << "\t";
-		cout << math << "\t";
-		cout << "(" << maxMath << ")" << endl;*/
-
 	}
 
-	mOutputStream << mCurrentParam << "\t" << mCurrentThreshold << "\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t";
+	for(i = 0; i < mParamsStart.size(); ++i)
+	{
+		mOutputStream << (int)mParamsCurrent[i] << "\t";
+	}
+	mOutputStream << "\t" << mCurrentThreshold << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t\t";
 	mOutputStream << maxTP / qreal(maxTP + maxFN) << "\t";
-	mOutputStream << maxTN / qreal(maxTN + maxFP) << "\t";
-	mOutputStream << maxMAT << "\t" << time << "\n";
+	mOutputStream << maxTN / qreal(maxTN + maxFP) << "\t\t";
+	mOutputStream << maxMAT << "\t\t" << time << "\n";
 	mOutputStream.flush();
 
-	cout << mCurrentParam << "\t" << mCurrentThreshold << "\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t";
+	++mDoneParamIterations;
+	qreal percentageDone = mDoneParamIterations / double(mTotalParamIterations);
+	qint64 remaining = mMainTime.elapsed();
+	remaining = ((1.0/percentageDone) * remaining) - remaining;
+	QTime tt = QTime::fromMSecsSinceStartOfDay(remaining);
+	cout << int(percentageDone * 100.0) << "% ("<<tt.toString("hh:mm").toLatin1().data()<<" remaining)"<<endl;
+
+	for(i = 0; i < mParamsStart.size(); ++i)
+	{
+		cout << (int)mParamsCurrent[i] << "\t";
+	}
+	cout << "\t" << mCurrentThreshold << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t";
 	cout << setprecision(10) << maxTP / qreal(maxTP + maxFN) << "\t";
 	cout << setprecision(10) << maxTN / qreal(maxTN + maxFP) << "\t";
 	cout << maxMAT << "\t" << time << endl;
 
 	//mCurrentObject->clearBuffers();
 
-	mCurrentParam += PARAM_INCREASE;
-	if(mCurrentParam > PARAM_END) quit();
-
-	process1();
+	if(nextParam())
+	{
+		process1(false);
+	}
+	else
+	{
+		quit();
+	}
 }
 
 void ViBenchMarker3::generateNoise()
@@ -268,6 +327,7 @@ void ViBenchMarker3::generateNoise()
 		data.read();
 
 		ViSampleChunk &c1 = data.splitSamples(0);
+		if(c1.size() != 1024)break;
 		int index = 0;
 		while(index < c1.size())
 		{
@@ -418,6 +478,5 @@ void ViBenchMarker3::addNoise3(ViSampleChunk &s, int offset, int length)
 void ViBenchMarker3::quit()
 {
 	cout << "QUIT!" << endl;
-	int x = 0;
-	int y = 1 / x;
+	exit(0);
 }

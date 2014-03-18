@@ -43,7 +43,7 @@ ViBenchMarker2::ViBenchMarker2()
 	//mDetector = new ViPredictionNoiseDetector(2);
 	//mDetector = new ViZscoreNoiseDetector();
     //mDetector = new ViNearestNeighbourNoiseDetector();
-	mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA);
+	mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::AR);
 
 	mDetector->setDirection(ViNoiseDetector::Forward);
 	//mDetector->setDirection(ViNoiseDetector::Reversed);

@@ -20,7 +20,7 @@ class ViBenchMarker3 : public QObject
 		void quit();
 
 		void nextFile();
-		void process1();
+		void process1(bool generate = true);
 		void process2();
 
 		void generateNoise();
@@ -28,6 +28,8 @@ class ViBenchMarker3 : public QObject
 		void addNoise1(ViSampleChunk &s, int offset, int length);
 		void addNoise2(ViSampleChunk &s, int offset, int length);
 		void addNoise3(ViSampleChunk &s, int offset, int length);
+
+		bool nextParam();
 
 	public:
 
@@ -37,6 +39,8 @@ class ViBenchMarker3 : public QObject
 		void benchmark();
 
 	private:
+
+		QList<qreal> mParamsStart, mParamsEnd, mParamsIncrease, mParamsCurrent;
 
 		ViNoiseDetector *mDetector;
 
@@ -54,9 +58,12 @@ class ViBenchMarker3 : public QObject
 		QTextStream mOutputStream;
 		qreal mCurrentThreshold;
 
-		int mCurrentParam;
 		int mNoChange;
 		QTime mTime;
+
+		QTime mMainTime;
+		int mTotalParamIterations;
+		int mDoneParamIterations;
 
 };
 

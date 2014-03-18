@@ -4,7 +4,7 @@
 
 #define DEFAULT_MA_DEGREE 6
 #define DEFAULT_AR_DEGREE 15
-#define WINDOW_SIZE 40
+#define WINDOW_SIZE 64
 #define AMPLIFIER 3
 
 ViArmaNoiseDetector::ViArmaNoiseDetector(const Type &type)
@@ -68,6 +68,17 @@ QString ViArmaNoiseDetector::name(QString replace, bool spaced)
 	else n += "_";
 	n += QString::number(mArDegree);
 	return n;
+}
+
+void ViArmaNoiseDetector::setParameters(qreal param1, qreal param2)
+{
+	setDegree(param1, param2);
+}
+
+void ViArmaNoiseDetector::setParameters(qreal param1, qreal param2, qreal param3)
+{
+	setWindowSize(param3);
+	setDegree(param1, param2);
 }
 
 void ViArmaNoiseDetector::setType(const Type &type)
@@ -176,11 +187,11 @@ void ViArmaNoiseDetector::clear(const Type &type)
 void ViArmaNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
 	static int i;
-	static qreal mean, variance, predicition;
+	static qreal mean, variance, prediction;
 
 	while(samples.size() > mWindowSize)
 	{
-		predicition = 0;
+		prediction = 0;
 
 		if(mType == MA || mType == ARMA)
 		{
@@ -205,10 +216,10 @@ void ViArmaNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 
 			if(leastSquareFit(mWindowData, mMaDegree, mMaCoefficients, mMaMatrix))
 			{
-				predicition += generateNoise(variance);
+				//prediction += generateNoise(variance);
 				for(i = 0; i < mMaDegree; ++i)
 				{
-					predicition += mMaCoefficients[i] * mWindowData[mWindowSize - 1 - i];
+					prediction += mMaCoefficients[i] * mWindowData[mWindowSize - 1 - i];
 				}
 			}
 		}
@@ -220,16 +231,44 @@ void ViArmaNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 				mWindowData[i] = samples[i];
 			}
 
+			/*qreal mina = 10000;
+			int minj = 2;
+			for(int j = 10; j < 30; ++j)
+			{
+				setDegree(AR, j);
+
+				prediction = 0;
+				if(leastSquareFit(mWindowData, mArDegree, mArCoefficients, mArMatrix))
+				{
+					for(i = 0; i < mArDegree; ++i)
+					{
+						prediction += (mArCoefficients[i] * mWindowData[mWindowSize - 1 - i]);
+					}
+					qreal r = rss(samples[mWindowSize], prediction);
+					//qreal a = aicc(r, mWindowSize, mArDegree);
+					if(r < mina)
+					{
+						mina = r;
+						minj = j;
+					}
+				}
+			}
+			//cout<<"\t\t"<<minj<<endl;
+			setDegree(AR, minj);*/
+
+			prediction = 0;
 			if(leastSquareFit(mWindowData, mArDegree, mArCoefficients, mArMatrix))
 			{
 				for(i = 0; i < mArDegree; ++i)
 				{
-					predicition += mArCoefficients[i] * mWindowData[mWindowSize - 1 - i];
+					prediction += (mArCoefficients[i] * mWindowData[mWindowSize - 1 - i]);
 				}
 			}
+
 		}
 
-		setNoise(qAbs(samples[mWindowSize] - predicition) / AMPLIFIER);
+		setNoise(qAbs(samples[mWindowSize] - prediction)/* / AMPLIFIER*/);
+		//setNoise(prediction);
 		samples.removeFirst();
 	}
 }

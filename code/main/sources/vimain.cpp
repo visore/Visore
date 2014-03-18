@@ -4,6 +4,9 @@
 #include <QApplication>
 
 #include<vibenchmarker2.h>
+#include<vibenchmarker3.h>
+#include<vibenchmarker4.h>
+
 #include <vipiecewiseconstantinterpolator.h>
 #include <visplineinterpolator.h>
 #include <vipolynomialinterpolator.h>
@@ -32,7 +35,7 @@ int main(int argc, char *argv[])
     bool BENCH = true;
     //bool BENCH = false;
 
-    ViBenchMarker2 bench;
+	ViBenchMarker3 bench;
 	if(BENCH)
 	{
 		bench.benchmark();
