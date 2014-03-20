@@ -33,6 +33,7 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 
 		QString name(QString replace = "", bool spaced = false);
 
+		void setParameters(qreal param1);
 		void setParameters(qreal param1, qreal param2);
 		void setParameters(qreal param1, qreal param2, qreal param3);
 
@@ -45,6 +46,10 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 		* H. R. Neave, "On using the Box-Muller transformation with multiplicative congruential pseudorandom number generators," Applied Statistics, 22, 92-97, 1973
 		 */
 		qreal generateNoise(const qreal &variance) const;
+
+		//Marsaglia polar method
+		//Use with care. Although also Gaussian noise, the distribution is different to Box-Muller, often give worse results
+		qreal generateNoise(const qreal &mean, const qreal &standardDeviation) const;
 
 		void clear(const Type &type);
 
@@ -74,6 +79,7 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 		{
 			return qPow(real - pred, 2);
 		}
+
 
 
 	private:

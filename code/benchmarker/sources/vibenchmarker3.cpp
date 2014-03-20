@@ -19,7 +19,8 @@
 #define WINDOW_SIZE 4096
 #define MASK_START 0
 #define MASK_END 1
-#define MASK_INTERVAL 0.0001
+//#define MASK_INTERVAL 0.0001
+#define MASK_INTERVAL 0.001
 #define NOISE_TYPE Direct
 
 #define NO_CHANGE 30
@@ -28,13 +29,13 @@ ViBenchMarker3::ViBenchMarker3()
 {
 	mCurrentObject = ViAudioObject::create();
 
-	mParamsStart.append(5);
-	mParamsEnd.append(20);
+	mParamsStart.append(1);
+	mParamsEnd.append(9);
 	mParamsIncrease.append(1);
 	mParamsCurrent.append(0);
 
-	mParamsStart.append(5);
-	mParamsEnd.append(20);
+	mParamsStart.append(1);
+	mParamsEnd.append(9);
 	mParamsIncrease.append(1);
 	mParamsCurrent.append(0);
 
@@ -47,7 +48,7 @@ ViBenchMarker3::ViBenchMarker3()
 	mMainTime.start();
 
 
-	mDetector = new ViArmaNoiseDetector();
+	mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA);
 	//mDetector = new ViMahalanobisNoiseDetector();
 	//mDetector = new ViMadNoiseDetector();
 	//mDetector = new ViFourierNoiseDetector();
@@ -391,7 +392,7 @@ int ViBenchMarker3::addNoise(ViSampleChunk &s, int offset)
 	int oldLength = mNoiseLength;
 
 	--mNoiseCount;
-	if(mNoiseCount == 0)
+	if(mNoiseCount <= 0)
 	{
 		++mNoiseType;
 		if(mNoiseType > 2)

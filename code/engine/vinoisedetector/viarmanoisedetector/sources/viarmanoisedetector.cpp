@@ -2,8 +2,8 @@
 
 #define TWO_PI 6.2831853071795864769252866
 
-#define DEFAULT_MA_DEGREE 6
-#define DEFAULT_AR_DEGREE 15
+#define DEFAULT_MA_DEGREE 3
+#define DEFAULT_AR_DEGREE 7
 #define WINDOW_SIZE 64
 #define AMPLIFIER 3
 
@@ -68,6 +68,11 @@ QString ViArmaNoiseDetector::name(QString replace, bool spaced)
 	else n += "_";
 	n += QString::number(mArDegree);
 	return n;
+}
+
+void ViArmaNoiseDetector::setParameters(qreal param1)
+{
+	setDegree(mType, param1);
 }
 
 void ViArmaNoiseDetector::setParameters(qreal param1, qreal param2)
@@ -138,11 +143,49 @@ void ViArmaNoiseDetector::setDegree(const int &maDegree, const int &arDegree)
 
 qreal ViArmaNoiseDetector::generateNoise(const qreal &variance) const
 {
+	static bool hasSpare = false;
 	static qreal rand1, rand2;
+
+	if(hasSpare)
+	{
+		hasSpare = false;
+		return qSqrt(variance * rand1) * qSin(rand2);
+	}
+
+	hasSpare = true;
+
 	rand1 = rand() / ((double) RAND_MAX);
 	if(rand1 < 1e-100) rand1 = 1e-100;
-	rand2 = rand() / ((double) RAND_MAX);
-	return qSqrt(-2 * variance * qLn(rand1)) * qCos(TWO_PI * rand2);
+	rand1 = -2 * qLn(rand1);
+	rand2 = (rand() / ((double) RAND_MAX)) * TWO_PI;
+
+	return qSqrt(variance * rand1) * qCos(rand2);
+}
+
+qreal ViArmaNoiseDetector::generateNoise(const qreal &mean, const qreal &standardDeviation) const
+{
+	static bool hasSpare = false;
+	static qreal spare;
+
+	if(hasSpare)
+	{
+		hasSpare = false;
+		return spare * standardDeviation + mean;
+	}
+
+	hasSpare = true;
+	static qreal u, v, s;
+	do
+	{
+		u = (rand() / ((double) RAND_MAX)) * 2 - 1;
+		v = (rand() / ((double) RAND_MAX)) * 2 - 1;
+		s = u * u + v * v;
+	}
+	while(s >= 1 || s == 0);
+
+	s = qSqrt(-2.0 * qLn(s) / s);
+	spare = v * s;
+	return mean + standardDeviation * u * s;
 }
 
 void ViArmaNoiseDetector::clear(const Type &type)
@@ -187,7 +230,7 @@ void ViArmaNoiseDetector::clear(const Type &type)
 void ViArmaNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
 	static int i;
-	static qreal mean, variance, prediction;
+	static qreal mean, variance, prediction/*, standardDeviation*/;
 
 	while(samples.size() > mWindowSize)
 	{
@@ -208,15 +251,18 @@ void ViArmaNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 				variance += qPow(samples[i] - mean, 2);
 			}
 			variance /= mWindowSize;
+			//standardDeviation = sqrt(variance);
 
 			for(i = 0; i < mWindowSize; ++i)
 			{
 				mWindowData[i] = generateNoise(variance);
+				//mWindowData[i] = generateNoise(mean, standardDeviation);
 			}
 
 			if(leastSquareFit(mWindowData, mMaDegree, mMaCoefficients, mMaMatrix))
 			{
-				//prediction += generateNoise(variance);
+				prediction += generateNoise(variance);
+				//prediction += generateNoise(mean, standardDeviation);
 				for(i = 0; i < mMaDegree; ++i)
 				{
 					prediction += mMaCoefficients[i] * mWindowData[mWindowSize - 1 - i];
@@ -254,9 +300,10 @@ void ViArmaNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 				}
 			}
 			//cout<<"\t\t"<<minj<<endl;
-			setDegree(AR, minj);*/
+			setDegree(AR, minj);
+			prediction = 0;*/
 
-			prediction = 0;
+
 			if(leastSquareFit(mWindowData, mArDegree, mArCoefficients, mArMatrix))
 			{
 				for(i = 0; i < mArDegree; ++i)
@@ -267,7 +314,7 @@ void ViArmaNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 
 		}
 
-		setNoise(qAbs(samples[mWindowSize] - prediction)/* / AMPLIFIER*/);
+		setNoise(qAbs(samples[mWindowSize] - prediction) /*/ AMPLIFIER*/);
 		//setNoise(prediction);
 		samples.removeFirst();
 	}
