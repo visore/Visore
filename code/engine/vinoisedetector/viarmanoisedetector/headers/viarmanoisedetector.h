@@ -45,11 +45,11 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 		* Box-Muller transform - was listed above, and is relatively simple to implement. If you need very precise samples however, be aware that the Box-Muller transform combined with some uniform generators suffers from an anomaly called Neave Effect.
 		* H. R. Neave, "On using the Box-Muller transformation with multiplicative congruential pseudorandom number generators," Applied Statistics, 22, 92-97, 1973
 		 */
-		qreal generateNoise(const qreal &variance) const;
+		//qreal generateNoise(const qreal &variance) const;
 
 		//Marsaglia polar method
 		//Use with care. Although also Gaussian noise, the distribution is different to Box-Muller, often give worse results
-		qreal generateNoise(const qreal &mean, const qreal &standardDeviation) const;
+		qreal generateNoise(const qreal &variance) const;
 
 		void clear(const Type &type);
 

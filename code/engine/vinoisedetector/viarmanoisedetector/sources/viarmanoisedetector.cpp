@@ -140,7 +140,7 @@ void ViArmaNoiseDetector::setDegree(const int &maDegree, const int &arDegree)
 	setDegree(MA, maDegree);
 	setDegree(AR, arDegree);
 }
-
+/*
 qreal ViArmaNoiseDetector::generateNoise(const qreal &variance) const
 {
 	static bool hasSpare = false;
@@ -149,20 +149,20 @@ qreal ViArmaNoiseDetector::generateNoise(const qreal &variance) const
 	if(hasSpare)
 	{
 		hasSpare = false;
-		return qSqrt(variance * rand1) * qSin(rand2);
+		return variance * rand1 * qSin(rand2);
 	}
 
 	hasSpare = true;
 
 	rand1 = rand() / ((double) RAND_MAX);
 	if(rand1 < 1e-100) rand1 = 1e-100;
-	rand1 = -2 * qLn(rand1);
+	rand1 = qSqrt(-2 * qLn(rand1));
 	rand2 = (rand() / ((double) RAND_MAX)) * TWO_PI;
 
-	return qSqrt(variance * rand1) * qCos(rand2);
-}
+	return variance * rand1 * qCos(rand2);
+}*/
 
-qreal ViArmaNoiseDetector::generateNoise(const qreal &mean, const qreal &standardDeviation) const
+qreal ViArmaNoiseDetector::generateNoise(const qreal &variance) const
 {
 	static bool hasSpare = false;
 	static qreal spare;
@@ -170,7 +170,7 @@ qreal ViArmaNoiseDetector::generateNoise(const qreal &mean, const qreal &standar
 	if(hasSpare)
 	{
 		hasSpare = false;
-		return spare * standardDeviation + mean;
+		return spare * variance;
 	}
 
 	hasSpare = true;
@@ -185,7 +185,7 @@ qreal ViArmaNoiseDetector::generateNoise(const qreal &mean, const qreal &standar
 
 	s = qSqrt(-2.0 * qLn(s) / s);
 	spare = v * s;
-	return mean + standardDeviation * u * s;
+	return variance * u * s;
 }
 
 void ViArmaNoiseDetector::clear(const Type &type)
@@ -230,7 +230,7 @@ void ViArmaNoiseDetector::clear(const Type &type)
 void ViArmaNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
 	static int i;
-	static qreal mean, variance, prediction/*, standardDeviation*/;
+	static qreal mean, variance, prediction;
 
 	while(samples.size() > mWindowSize)
 	{
@@ -251,18 +251,15 @@ void ViArmaNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 				variance += qPow(samples[i] - mean, 2);
 			}
 			variance /= mWindowSize;
-			//standardDeviation = sqrt(variance);
 
 			for(i = 0; i < mWindowSize; ++i)
 			{
 				mWindowData[i] = generateNoise(variance);
-				//mWindowData[i] = generateNoise(mean, standardDeviation);
 			}
 
 			if(leastSquareFit(mWindowData, mMaDegree, mMaCoefficients, mMaMatrix))
 			{
-				prediction += generateNoise(variance);
-				//prediction += generateNoise(mean, standardDeviation);
+				//prediction += generateNoise(variance); // This extra error term slightly reduces the accuracy
 				for(i = 0; i < mMaDegree; ++i)
 				{
 					prediction += mMaCoefficients[i] * mWindowData[mWindowSize - 1 - i];
