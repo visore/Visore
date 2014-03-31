@@ -4,6 +4,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9)
 CMAKE_POLICY(SET CMP0012 NEW) #Ensures that TRUE can be used as a boolean
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fpermissive") # -fpermissive for Echonest that includes Boost
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x") # Add C++11 support
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings") # String to char* warnings
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include") # For gretl to use glib. After configureing gretl, type the command (inside config dir): pkg-config --cflags glib-2.0   and use the output
+
 
 #Setup directory paths
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
@@ -53,6 +56,8 @@ FIND_PACKAGE(Qt5Widgets)
 FIND_PACKAGE(Qt5Network)
 FIND_PACKAGE(Qt5Xml)
 FIND_PACKAGE(Qt5Multimedia)
+
+FIND_PACKAGE(Gretl)
 
 #Set flags for Windows and MinGW auto-import
 IF(WIN32)

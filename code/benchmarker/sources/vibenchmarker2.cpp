@@ -17,8 +17,8 @@
 #define AI_NOISE_END_LENGTH 30
 
 #define WINDOW_SIZE 4096
-#define MASK_START 0.1
-#define MASK_END 1
+#define MASK_START 0
+#define MASK_END 1.5
 #define MASK_INTERVAL 0.001
 #define NOISE_TYPE Direct
 
@@ -43,7 +43,7 @@ ViBenchMarker2::ViBenchMarker2()
 	//mDetector = new ViPredictionNoiseDetector(2);
 	//mDetector = new ViZscoreNoiseDetector();
     //mDetector = new ViNearestNeighbourNoiseDetector();
-	mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA);
+	mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::MA, ViArmaNoiseDetector::Gretl, ViArmaNoiseDetector::CML);
 
 	mDetector->setDirection(ViNoiseDetector::Forward);
 	//mDetector->setDirection(ViNoiseDetector::Reversed);
@@ -101,6 +101,7 @@ void ViBenchMarker2::process1()
 	generateNoise();
     QObject::connect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
     QObject::connect(mCurrentObject.data(), SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
+	time.start();
 	mCurrentObject->generateNoiseMask(mDetector);
 }
 
@@ -108,6 +109,9 @@ void ViBenchMarker2::process2()
 {
 	//QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
 	mCurrentObject->encode(ViAudio::Noise /*| ViAudio::Corrupted*/);
+	int e = time.elapsed();
+	cout<<"Elapsed: "<<(e / 1000)<<" s"<<endl;
+	cout<<"Elapsed: "<<((e / 1000) / 60)<<" m"<<endl;
 
     //QObject::disconnect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
 

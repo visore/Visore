@@ -56,6 +56,8 @@ class ViBenchMarker2 : public QObject
 		QTextStream mOutputStream;
 		qreal mCurrentThreshold;
 
+		QTime time;
+
 };
 
 #endif

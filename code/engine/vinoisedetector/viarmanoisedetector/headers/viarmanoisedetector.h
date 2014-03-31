@@ -3,10 +3,33 @@
 
 #include <vinoisedetector.h>
 
+struct DATASET_;
+typedef DATASET_ DATASET;
+struct MODEL_;
+typedef MODEL_ MODEL;
+
 class ViArmaNoiseDetector : public ViNoiseDetector
 {
 
     public:
+
+		enum Mode
+		{
+			Native,	// Use native code to do the calculations
+			Gretl	// Use Gretl code to do the calculations
+		};
+
+		enum GretlEstimation
+		{
+			ExactMaximumLikelihood,
+			ExactMaximumLikelihoodLimited,
+			ConditionalMaximumLikelihood,
+			X12Arma,
+			EML = ExactMaximumLikelihood,
+			EMLL = ExactMaximumLikelihoodLimited,
+			CML = ConditionalMaximumLikelihood,
+			X12 = X12Arma
+		};
 
         enum Type
         {
@@ -20,12 +43,14 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 
     public:
 
-		ViArmaNoiseDetector(const Type &type = ARMA);
+		ViArmaNoiseDetector(const Type &type = ARMA, const Mode &mode = Gretl, const GretlEstimation &estimation = CML);
 		ViArmaNoiseDetector(const ViArmaNoiseDetector &other);
         ~ViArmaNoiseDetector();
         ViArmaNoiseDetector* clone();
 
 		void setType(const Type &type);
+		void setMode(const Mode &mode = Gretl);
+		void setGretlEstimation(const GretlEstimation &estimation);
 
         void setWindowSize(int size);
 		void setDegree(const Type &type, const int &degree);
@@ -40,6 +65,8 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 	protected:
 
 		void calculateNoise(QQueue<qreal> &samples);
+		void calculateNoiseNative(QQueue<qreal> &samples);
+		void calculateNoiseGretl(QQueue<qreal> &samples);
 
 		/*
 		* Box-Muller transform - was listed above, and is relatively simple to implement. If you need very precise samples however, be aware that the Box-Muller transform combined with some uniform generators suffers from an anomaly called Neave Effect.
@@ -51,11 +78,22 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 		//Use with care. Although also Gaussian noise, the distribution is different to Box-Muller, often give worse results
 		qreal generateNoise(const qreal &variance) const;
 
-		void clear(const Type &type);
+		void clear(const Type &type = ARMA);
 
 		bool leastSquareFit(const qreal *input, const int &degree, qreal *coefficients);
 		bool leastSquareFit(const qreal *input, const int &degree, qreal *coefficients, qreal **matrix);
-		bool solveEquations(double **matrix, double *coefficients, const int &degree);
+		bool solveEquations(qreal **matrix, qreal *coefficients, const int &degree);
+
+		qreal mean(const qreal *samples) const;
+		qreal mean(const QQueue<qreal> &samples) const;
+		qreal variance(const qreal *samples, const qreal &mean) const;
+		qreal variance(const QQueue<qreal> &samples, const qreal &mean) const;
+		qreal autocorrelation(const int &lag, const qreal *samples, const qreal &mean, const qreal &variance) const;
+		void partialAutocorrelation(qreal *partials, const qreal *samples, const qreal &mean, const qreal &variance) const;
+
+
+
+
 
 
 		qreal aic(qreal rss, int numberValues, int numberParam)
@@ -70,7 +108,7 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 			//http://adorio-research.org/wordpress/?p=1932
 			qreal retval = aic(rss, numberParam, numberValues);
 			   if(numberValues-numberParam-1 != 0)
-				   retval += 2.0 *numberParam* (numberParam+1)/ double(numberValues-numberParam-1);
+				   retval += 2.0 *numberParam* (numberParam+1)/ qreal(numberValues-numberParam-1);
 			   return retval;
 
 		}
@@ -80,17 +118,25 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 			return qPow(real - pred, 2);
 		}
 
-
-
 	private:
 
+		void (ViArmaNoiseDetector::*calculateNoisePointer)(QQueue<qreal>&);
+
+		Mode mMode;
 		Type mType;
         int mWindowSize;
-        double *mWindowData;
+		qreal *mWindowData;
 
 		int mMaDegree, mArDegree;
 		qreal **mMaMatrix, **mArMatrix;
 		qreal *mMaCoefficients, *mArCoefficients;
+		qreal **mPartialMatrix;
+
+		DATASET *mGretlData;
+		int *mGretlParameters;
+		MODEL *mGretlModel;
+		int mGretlEstimation;
+
 
 };
 
