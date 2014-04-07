@@ -1,43 +1,19 @@
 #include <viarmanoisedetector.h>
 
-#include <gretl/libgretl.h>
-
-// To overcome undefined reference errors in gretl (since we are using g++ and access C and not C++ code)
-extern "C"
-{
-	// forecast
-	void free_fit_resid (FITRESID *fr);
-	FITRESID *get_fit_resid (const MODEL *pmod, const DATASET *dset, int *err);
-	FITRESID *get_forecast (MODEL *pmod, int t1, int t2, int pre_n, DATASET *dset, gretlopt opt, int *err);
-	FITRESID *get_system_forecast (void *p, int ci, int i, int t1, int t2, int pre_n, DATASET *dset, gretlopt opt, int *err);
-	int do_forecast (const char *str, DATASET *dset, gretlopt opt, PRN *prn);
-	void forecast_options_for_model (MODEL *pmod, const DATASET *dset, int *flags, int *dt2max, int *st2max);
-	gretl_matrix *get_forecast_matrix (int idx, int *err);
-	FITRESID *rolling_OLS_k_step_fcast (MODEL *pmod, DATASET *dset, int t1, int t2, int k, int pre_n, int *err);
-	void fcast_get_continuous_range (const FITRESID *fr, int *pt1, int *pt2);
-	void forecast_matrix_cleanup (void);
-
-	// libset
-	int libset_set_int (const char *key, int val);
-}
-#include <gretl/forecast.h>
-#include <gretl/libset.h>
-
 #define TWO_PI 6.2831853071795864769252866
-#define MAXIMUM_ITERATIONS 100
+#define MAXIMUM_ITERATIONS 500
 
-#define GRETL_OUTPUT false
-
-#define DEFAULT_MA_DEGREE 3
+#define DEFAULT_MA_DEGREE 4
 #define DEFAULT_AR_DEGREE 7
-#define WINDOW_SIZE 2048
+#define WINDOW_SIZE 1024
 #define AMPLIFIER 3
-
-bool gretlInitialized = false;
+#define PREDICTION 64
 
 ViArmaNoiseDetector::ViArmaNoiseDetector(const Type &type, const Mode &mode, const GretlEstimation &estimation)
 	: ViNoiseDetector()
 {
+	ViGretl::initialize();
+
 	mWindowData = NULL;
 	mMaMatrix = NULL;
 	mArMatrix = NULL;
@@ -66,6 +42,8 @@ ViArmaNoiseDetector::ViArmaNoiseDetector(const Type &type, const Mode &mode, con
 ViArmaNoiseDetector::ViArmaNoiseDetector(const ViArmaNoiseDetector &other)
 	: ViNoiseDetector(other)
 {
+	ViGretl::initialize();
+
 	mWindowData = NULL;
 	mMaMatrix = NULL;
 	mArMatrix = NULL;
@@ -124,8 +102,6 @@ ViArmaNoiseDetector::~ViArmaNoiseDetector()
 			destroy_dataset(mGretlData);
 			mGretlData = NULL;
 		}
-		//libgretl_cleanup(); // call only once
-		//gretlInitialized = false;
 	}
 }
 
@@ -177,28 +153,12 @@ void ViArmaNoiseDetector::setMode(const Mode &mode)
 	else if (mode == Gretl)
 	{
 		calculateNoisePointer = &ViArmaNoiseDetector::calculateNoiseGretl;
-		if(!gretlInitialized)
-		{
-			libgretl_init();
-			if(!GRETL_OUTPUT) freopen("/dev/null", "w", stderr); // Stop forced gretl error output
-			gretlInitialized = true;
-		}
 
-		//libset_set_int(BFGS_MAXITER, MAXIMUM_ITERATIONS); // ML
-		//libset_set_int(BHHH_MAXITER, MAXIMUM_ITERATIONS); // CML
+		libset_set_int(BFGS_MAXITER, MAXIMUM_ITERATIONS); // ML
+		libset_set_int(BHHH_MAXITER, MAXIMUM_ITERATIONS); // CML
 
 		if(mGretlParameters == NULL)
 		{
-			/*
-			// AR list
-			mGretlParameters = gretl_list_new(4);
-			mGretlParameters[1] = 4;		// AR order
-			mGretlParameters[2] = LISTSEP;	// separator
-			mGretlParameters[3] = 1;		// position of dependent variable in dataset
-			mGretlParameters[4] = 0;
-			*/
-
-			// ARMA list
 			mGretlParameters = gretl_list_new(5);
 			mGretlParameters[1] = 0;        // AR order
 			mGretlParameters[2] = 0;        // order of integration
@@ -206,6 +166,8 @@ void ViArmaNoiseDetector::setMode(const Mode &mode)
 			mGretlParameters[4] = LISTSEP;  // separator
 			mGretlParameters[5] = 1;        // position of dependent variable in dataset - 1 because we have 2 sets in mGretlData and the first one (0) is reserved for gretl
 		}
+
+		mGretlPredictions.resize(PREDICTION);
 
 		if(mGretlModel == NULL) mGretlModel = gretl_model_new();
 	}
@@ -234,7 +196,7 @@ void ViArmaNoiseDetector::setGretlEstimation(const GretlEstimation &estimation)
 			mGretlEstimation = OPT_X;
 			ConfigPaths cp = {0};
 			strcpy(cp.x12a, executable.fileName().toLatin1().data());
-			gretl_set_paths(&cp, OPT_NONE);
+			gretl_set_paths(&cp);
 		}
 	}
 	else mGretlEstimation = OPT_NONE;
@@ -275,9 +237,9 @@ void ViArmaNoiseDetector::setWindowSize(int size)
 			return;
 		}
 		if(mGretlData != NULL) destroy_dataset(mGretlData);
-		mGretlData = create_new_dataset(2, mWindowSize + 1, 0); // +1 for out-of-sample prediction
+		mGretlData = create_new_dataset(2, mWindowSize + PREDICTION, 0); // + PREDICTION for out-of-sample prediction
 		strcpy(mGretlData->varname[1], "visoredata"); // For X12 we need the series to have a name
-		mGretlData->t2 = mGretlData->n - 2; // reserve 1 observations for out-of-sample forecasting
+		mGretlData->t2 = mGretlData->n - PREDICTION - 1; // reserve PREDICTION observations for out-of-sample forecasting
 	}
 }
 
@@ -422,12 +384,14 @@ void ViArmaNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 
 void ViArmaNoiseDetector::calculateNoiseNative(QQueue<qreal> &samples)
 {
+	static bool failedAR, failedMA;
 	static int i;
 	static qreal theMean, theVariance, prediction;
 
 	while(samples.size() > mWindowSize)
 	{
 		prediction = 0;
+		failedAR = failedMA = false;
 
 		if(mType == MA || mType == ARMA)
 		{
@@ -447,6 +411,7 @@ void ViArmaNoiseDetector::calculateNoiseNative(QQueue<qreal> &samples)
 					prediction += mMaCoefficients[i] * mWindowData[mWindowSize - 1 - i];
 				}
 			}
+			else failedMA = true;
 		}
 
 		if(mType == AR || mType == ARMA)
@@ -531,21 +496,27 @@ void ViArmaNoiseDetector::calculateNoiseNative(QQueue<qreal> &samples)
 					prediction += (mArCoefficients[i] * mWindowData[mWindowSize - 1 - i]);
 				}
 			}
+			else failedAR = true;
 
 		}
-		setNoise(qAbs(samples[mWindowSize] - prediction) /*/ AMPLIFIER*/);
+		if(failedAR && failedMA) setNoise(0);
+		else setNoise(qAbs(samples[mWindowSize] - prediction) /*/ AMPLIFIER*/);
 		samples.removeFirst();
 	}
 }
 
 void ViArmaNoiseDetector::calculateNoiseGretl(QQueue<qreal> &samples)
 {
-	static int i, error;
+	static bool failed;
+	static int i, j, error, end, max;
 	static qreal prediction;
 
-	while(samples.size() > mWindowSize)
+	max = mWindowSize + PREDICTION - 1;
+	while(samples.size() > max)
 	{
-		prediction = 0;
+		//prediction = 0;
+		for(i = 0; i < PREDICTION; ++i) mGretlPredictions[i] = 0;
+		failed = false;
 
 		for(i = 0; i < mWindowSize; ++i)
 		{
@@ -553,21 +524,32 @@ void ViArmaNoiseDetector::calculateNoiseGretl(QQueue<qreal> &samples)
 		}
 
 		*mGretlModel = arma(mGretlParameters, NULL, mGretlData, (gretlopt) mGretlEstimation, NULL);
-		//*model = ar_model(list, data, OPT_NONE, NULL);
-		error = mGretlModel->errcode;
 
-		if(!error)
+		if(mGretlModel->errcode) failed = true;
+		else
 		{
 			FITRESID *forecast = get_forecast(mGretlModel, mGretlData->t2 + 1, mGretlData->n - 1, 0, mGretlData, OPT_NONE, &error);
-			if(!error)
+			if(error) failed = true;
+			else
 			{
-				if(forecast->nobs == mWindowSize + 1) prediction =forecast->fitted[mWindowSize];
+				if(forecast->nobs == mWindowSize + PREDICTION)
+				{
+					end = max + 1;
+					for(i = mWindowSize, j = 0; i < end; ++i, ++j) mGretlPredictions[j] = forecast->fitted[i];
+				}
 				free_fit_resid(forecast);
 			}
 		}
-		//setNoise(qAbs(samples[mWindowSize] - prediction) /*/ AMPLIFIER*/);
-		setNoise(prediction);
-		samples.removeFirst();
+		if(failed)
+		{
+			for(i = 0; i < PREDICTION; ++i) setNoise(0);
+		}
+		else
+		{
+			for(i = 0; i < PREDICTION; ++i) setNoise(qAbs(samples[mWindowSize + i] - mGretlPredictions[i]) /*/ AMPLIFIER*/);
+			//setNoise(prediction);
+		}
+		for(i = 0; i < PREDICTION; ++i) samples.removeFirst();
 	}
 }
 

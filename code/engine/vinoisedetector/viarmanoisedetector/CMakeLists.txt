@@ -11,9 +11,8 @@ FILE(GLOB VI_ARMA_NOISE_DETECTOR_HEADERS ${HEADERS}/*.h)
 FILE(GLOB VI_ARMA_NOISE_DETECTOR_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
-INCLUDE_DIRECTORIES(${GRETL_INCLUDE_DIR})
 ADD_LIBRARY(viarmanoisedetector SHARED ${VI_ARMA_NOISE_DETECTOR_HEADERS} ${VI_ARMA_NOISE_DETECTOR_SOURCES})
-TARGET_LINK_LIBRARIES(viarmanoisedetector vinoisedetector ${GRETL_LIBRARY})
+TARGET_LINK_LIBRARIES(viarmanoisedetector vinoisedetector vigretl)
 QT5_USE_MODULES(viarmanoisedetector Multimedia Xml)
 
 #Install file

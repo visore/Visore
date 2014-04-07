@@ -1,5 +1,5 @@
 #include <vimahalanobisnoisedetector.h>
-#include <vivector.h>
+#include <vigretl.h>
 
 #define DEFAULT_WINDOW_SIZE 64
 #define AMPLIFIER 10
@@ -7,13 +7,14 @@
 ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector()
 	: ViNoiseDetector()
 {
+	ViGretl::initialize();
 	setWindowSize(DEFAULT_WINDOW_SIZE);
 }
 
 void ViMahalanobisNoiseDetector::setWindowSize(int size)
 {
 	mWindowSize = size;
-	setOffset(mWindowSize / 2);
+	setOffset((mWindowSize / 2) + 1);
 }
 
 void ViMahalanobisNoiseDetector::setParameters(qreal param1)
@@ -24,31 +25,26 @@ void ViMahalanobisNoiseDetector::setParameters(qreal param1)
 void ViMahalanobisNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
 	static int i;
-	static qreal mean;
 
 	while(samples.size() >= mWindowSize)
 	{
-		// Calculate the mean
-		mean = 0;
+		DATASET *mGretlData;
+		mGretlData = create_new_dataset(2, mWindowSize, 0);
 		for(i = 0; i < mWindowSize; ++i)
 		{
-			mean += samples[i];
-		}
-		mean /= mWindowSize;
-
-		// Create variances
-		ViVector vector(mWindowSize);
-		for(i = 0; i < mWindowSize; ++i)
-		{
-			vector[i] = samples[i] - mean;
+			mGretlData->Z[1][i] = samples[i];
 		}
 
-		qreal covariance = (vector * vector).sum() / (mWindowSize - 1);
+		int *mGretlParameters = gretl_list_new(1);
+		mGretlParameters[1] = 1;
+		int err;
 
-		// Calculate the distance
-		qreal distance = vector[(mWindowSize / 2) + 1];
-		distance = distance * covariance * distance;
-		setNoise(qAbs(distance) * AMPLIFIER);
+		MahalDist *dis = get_mahal_distances(mGretlParameters, mGretlData, OPT_NONE, NULL, &err);
+		setNoise(dis->d[(mWindowSize / 2) + 1] / 5);
+
+		free_mahal_dist(dis);
+		destroy_dataset(mGretlData);
+		free(mGretlParameters);
 
 		samples.removeFirst();
 	}

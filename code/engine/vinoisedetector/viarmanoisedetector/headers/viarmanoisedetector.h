@@ -2,11 +2,7 @@
 #define VIARMANOISEDETECTOR_H
 
 #include <vinoisedetector.h>
-
-struct DATASET_;
-typedef DATASET_ DATASET;
-struct MODEL_;
-typedef MODEL_ MODEL;
+#include <vigretl.h>
 
 class ViArmaNoiseDetector : public ViNoiseDetector
 {
@@ -136,6 +132,7 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 		int *mGretlParameters;
 		MODEL *mGretlModel;
 		int mGretlEstimation;
+		QVector<qreal> mGretlPredictions;
 
 
 };

@@ -9,7 +9,7 @@ FILE(GLOB VI_MAHALANOBIS_NOISE_DETECTOR_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
 ADD_LIBRARY(vimahalanobisnoisedetector SHARED ${VI_MAHALANOBIS_NOISE_DETECTOR_HEADERS} ${VI_MAHALANOBIS_NOISE_DETECTOR_SOURCES})
-TARGET_LINK_LIBRARIES(vimahalanobisnoisedetector vinoisedetector)
+TARGET_LINK_LIBRARIES(vimahalanobisnoisedetector vinoisedetector vigretl)
 QT5_USE_MODULES(vimahalanobisnoisedetector Multimedia Xml)
 
 #Install file
