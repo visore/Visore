@@ -1,20 +1,45 @@
 #include <vimahalanobisnoisedetector.h>
-#include <vigretl.h>
 
 #define DEFAULT_WINDOW_SIZE 64
-#define AMPLIFIER 10
+#define AMPLIFIER 0.2
 
 ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector()
 	: ViNoiseDetector()
 {
 	ViGretl::initialize();
+	mGretlData = NULL;
 	setWindowSize(DEFAULT_WINDOW_SIZE);
+
+	setAmplification(AMPLIFIER);
+
+	mGretlParameters = gretl_list_new(1);
+	mGretlParameters[1] = 1;
+}
+
+ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector(const ViMahalanobisNoiseDetector &other)
+	: ViNoiseDetector(other)
+{
+	ViGretl::initialize();
+	mGretlData = NULL;
+	setWindowSize(other.mWindowSize);
+
+	mGretlParameters = gretl_list_new(1);
+	mGretlParameters[1] = 1;
+}
+
+ViMahalanobisNoiseDetector::~ViMahalanobisNoiseDetector()
+{
+	free(mGretlParameters);
+	destroy_dataset(mGretlData);
 }
 
 void ViMahalanobisNoiseDetector::setWindowSize(int size)
 {
 	mWindowSize = size;
-	setOffset((mWindowSize / 2) + 1);
+	setOffset(mWindowSize / 2);
+
+	if(mGretlData != NULL) destroy_dataset(mGretlData);
+	mGretlData = create_new_dataset(2, mWindowSize, 0);
 }
 
 void ViMahalanobisNoiseDetector::setParameters(qreal param1)
@@ -24,28 +49,21 @@ void ViMahalanobisNoiseDetector::setParameters(qreal param1)
 
 void ViMahalanobisNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
-	static int i;
+	static int i, error;
 
 	while(samples.size() >= mWindowSize)
 	{
-		DATASET *mGretlData;
-		mGretlData = create_new_dataset(2, mWindowSize, 0);
 		for(i = 0; i < mWindowSize; ++i)
 		{
 			mGretlData->Z[1][i] = samples[i];
 		}
 
-		int *mGretlParameters = gretl_list_new(1);
-		mGretlParameters[1] = 1;
-		int err;
+		MahalDist *distance = get_mahal_distances(mGretlParameters, mGretlData, OPT_NONE, NULL, &error);
 
-		MahalDist *dis = get_mahal_distances(mGretlParameters, mGretlData, OPT_NONE, NULL, &err);
-		setNoise(dis->d[(mWindowSize / 2) + 1] / 5);
+		if(error) setNoise(0);
+		else setNoise(distance->d[mWindowSize / 2]);
 
-		free_mahal_dist(dis);
-		destroy_dataset(mGretlData);
-		free(mGretlParameters);
-
+		free_mahal_dist(distance);
 		samples.removeFirst();
 	}
 }

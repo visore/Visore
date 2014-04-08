@@ -46,6 +46,7 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 		virtual ~ViNoiseDetector();
 
 		void setDirection(Direction direction);
+		Direction direction();
 
 		void initialize(const int &channels, const qint64 samples);
 
@@ -77,10 +78,13 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 
 		virtual void setWindowSize(int size){}
 
-		virtual void setParameters(qreal param1){}
-		virtual void setParameters(qreal param1, qreal param2){}
-		virtual void setParameters(qreal param1, qreal param2, qreal param3){}
-		virtual void setParameters(qreal param1, qreal param2, qreal param3, qreal param4){}
+		virtual void setParameters(qreal param1){LOG("Invalid number of parameters given"); exit(-1); }
+		virtual void setParameters(qreal param1, qreal param2){LOG("Invalid number of parameters given"); exit(-1); }
+		virtual void setParameters(qreal param1, qreal param2, qreal param3){LOG("Invalid number of parameters given"); exit(-1); }
+		virtual void setParameters(qreal param1, qreal param2, qreal param3, qreal param4){LOG("Invalid number of parameters given"); exit(-1); }
+
+		virtual void setAmplification(const qreal &amp);
+		virtual qreal amplification();
 
 	protected:
 
@@ -117,6 +121,8 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 		ViAudioReadData mRead;
 		ViAudioWriteData mWrite1;
 		ViAudioWriteData mWrite2;
+
+		qreal mAmplification;
 
 };
 

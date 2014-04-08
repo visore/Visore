@@ -19,7 +19,7 @@
 #define WINDOW_SIZE 4096
 #define MASK_START 0
 #define MASK_END 1
-#define MASK_INTERVAL 0.001
+#define MASK_INTERVAL 0.0001
 #define NOISE_TYPE Direct
 
 /*#define MASK_END 0.00005
@@ -108,7 +108,7 @@ void ViBenchMarker2::process1()
 void ViBenchMarker2::process2()
 {
 	//QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-	mCurrentObject->encode(ViAudio::Noise /*| ViAudio::Corrupted*/);
+	mCurrentObject->encode( ViAudio::Corrupted);
 	int e = time.elapsed();
 	cout<<"Elapsed: "<<(e / 1000)<<" s"<<endl;
 	cout<<"Elapsed: "<<((e / 1000) / 60)<<" m"<<endl;
@@ -133,6 +133,7 @@ void ViBenchMarker2::process2()
 	qint64 i;
 	qint64 offset1 = 0, offset2 = 0;
 	qreal maxMath = 0;
+	qreal amplification = mDetector->amplification();
 	while(mask.hasData())
 	{
 		mask.read();
@@ -192,13 +193,13 @@ void ViBenchMarker2::process2()
 			if(math > maxMath) maxMath = math;
 		}
 
-		mOutputStream << "\t" << mCurrentThreshold << "\t" << truePositives << "\t" << trueNegatives << "\t" << falsePositives << "\t" << falseNegatives << "\t";
+		mOutputStream << "\t" << (mCurrentThreshold / amplification) << "\t" << truePositives << "\t" << trueNegatives << "\t" << falsePositives << "\t" << falseNegatives << "\t";
 		mOutputStream << truePositives / qreal(truePositives + falseNegatives) << "\t";
 		mOutputStream  << trueNegatives / qreal(trueNegatives + falsePositives) << "\t";
 		mOutputStream  << math << "\n";
 		mOutputStream.flush();
 
-		cout << "\t" << mCurrentThreshold << "\t" << truePositives << "\t" << trueNegatives << "\t" << falsePositives << "\t" << falseNegatives << "\t";
+		cout << "\t" << (mCurrentThreshold / amplification) << "\t" << truePositives << "\t" << trueNegatives << "\t" << falsePositives << "\t" << falseNegatives << "\t";
 		cout << setprecision(10) << truePositives / qreal(truePositives + falseNegatives) << "\t";
 		cout << setprecision(10) << trueNegatives / qreal(trueNegatives + falsePositives) << "\t";
 		cout << math << "\t";

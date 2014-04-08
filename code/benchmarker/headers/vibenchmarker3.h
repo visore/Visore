@@ -18,6 +18,7 @@ class ViBenchMarker3 : public QObject
 	private slots:
 
 		void quit();
+		QString timeConversion(int msecs);
 
 		void nextFile();
 		void process1(bool generate = true);
@@ -30,6 +31,7 @@ class ViBenchMarker3 : public QObject
 		void addNoise3(ViSampleChunk &s, int offset, int length);
 
 		bool nextParam();
+		void initParams();
 
 	public:
 
@@ -45,6 +47,7 @@ class ViBenchMarker3 : public QObject
 		ViNoiseDetector *mDetector;
 
 		QQueue<QString> mFiles;
+		QQueue<QString> mResults;
 		QString mCurrentFile;
 		ViAudioObjectPointer mCurrentObject;
 
@@ -64,6 +67,8 @@ class ViBenchMarker3 : public QObject
 		QTime mMainTime;
 		int mTotalParamIterations;
 		int mDoneParamIterations;
+
+		int mTotalFiles;
 
 };
 

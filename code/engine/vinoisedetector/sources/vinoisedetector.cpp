@@ -18,6 +18,7 @@ ViNoiseDetector::ViNoiseDetector()
 	mOffset = 0;
 	mThreshold = 0.5;
 	mDirection = Forward;
+	mAmplification = 1;
 }
 
 ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples)
@@ -27,6 +28,7 @@ ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples)
 	mOffset = 0;
 	mThreshold = 0.5;
 	mDirection = Forward;
+	mAmplification = 1;
 }
 
 ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples, ViProcessor::ChannelMode mode)
@@ -37,6 +39,7 @@ ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples, ViPr
 	mOffset = 0;
 	mThreshold = 0.5;
 	mDirection = Forward;
+	mAmplification = 1;
 }
 
 ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
@@ -49,6 +52,7 @@ ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 	mOffset = other.mOffset;
 	mThreshold = other.mThreshold;
 	mDirection = other.mDirection;
+	mAmplification = other.mAmplification;
 }
 
 ViNoiseDetector::~ViNoiseDetector()
@@ -58,6 +62,11 @@ ViNoiseDetector::~ViNoiseDetector()
 void ViNoiseDetector::setDirection(Direction direction)
 {
 	mDirection = direction;
+}
+
+Direction ViNoiseDetector::direction()
+{
+	return mDirection;
 }
 
 void ViNoiseDetector::setOffset(const int &offset)
@@ -178,12 +187,12 @@ void ViNoiseDetector::setNoise(const qreal &value)
 {
 	if(mReverse)
 	{
-		mReverseNoise[mChannel]->set(mReverseIndexes[mChannel], value);
+		mReverseNoise[mChannel]->set(mReverseIndexes[mChannel], value * mAmplification);
 		mReverseIndexes[mChannel] += 1;
 	}
 	else
 	{
-		mNoise[mChannel]->set(mIndexes[mChannel], value);
+		mNoise[mChannel]->set(mIndexes[mChannel], value * mAmplification);
 		mIndexes[mChannel] += 1;
 	}
 }
@@ -209,6 +218,16 @@ void ViNoiseDetector::clear()
 	mRead.clear();
 	mWrite1.clear();
 	mWrite2.clear();
+}
+
+void ViNoiseDetector::setAmplification(const qreal &amp)
+{
+	mAmplification = amp;
+}
+
+qreal ViNoiseDetector::amplification()
+{
+	return mAmplification;
 }
 
 void ViNoiseDetector::setBuffers(ViBuffer *read, ViBuffer *write1, ViBuffer *write2)

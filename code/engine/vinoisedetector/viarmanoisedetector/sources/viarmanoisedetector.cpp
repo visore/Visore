@@ -6,7 +6,6 @@
 #define DEFAULT_MA_DEGREE 4
 #define DEFAULT_AR_DEGREE 7
 #define WINDOW_SIZE 1024
-#define AMPLIFIER 3
 #define PREDICTION 64
 
 ViArmaNoiseDetector::ViArmaNoiseDetector(const Type &type, const Mode &mode, const GretlEstimation &estimation)
@@ -37,6 +36,8 @@ ViArmaNoiseDetector::ViArmaNoiseDetector(const Type &type, const Mode &mode, con
 	setWindowSize(WINDOW_SIZE);
 	setOffset(mWindowSize);
 	if(mMode == Gretl) setGretlEstimation(estimation);
+
+	//setAmplification(0.3);
 }
 
 ViArmaNoiseDetector::ViArmaNoiseDetector(const ViArmaNoiseDetector &other)
@@ -500,7 +501,7 @@ void ViArmaNoiseDetector::calculateNoiseNative(QQueue<qreal> &samples)
 
 		}
 		if(failedAR && failedMA) setNoise(0);
-		else setNoise(qAbs(samples[mWindowSize] - prediction) /*/ AMPLIFIER*/);
+		else setNoise(qAbs(samples[mWindowSize] - prediction));
 		samples.removeFirst();
 	}
 }
@@ -546,7 +547,7 @@ void ViArmaNoiseDetector::calculateNoiseGretl(QQueue<qreal> &samples)
 		}
 		else
 		{
-			for(i = 0; i < PREDICTION; ++i) setNoise(qAbs(samples[mWindowSize + i] - mGretlPredictions[i]) /*/ AMPLIFIER*/);
+			for(i = 0; i < PREDICTION; ++i) setNoise(qAbs(samples[mWindowSize + i] - mGretlPredictions[i]));
 			//setNoise(prediction);
 		}
 		for(i = 0; i < PREDICTION; ++i) samples.removeFirst();

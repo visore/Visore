@@ -2,6 +2,7 @@
 #define VIMAHALANOBISNOISEDETECTOR_H
 
 #include <vinoisedetector.h>
+#include <vigretl.h>
 
 // http://www.utexas.edu/courses/schwab/sw388r7/SolvingProblems/DetectingOutliers.ppt
 // http://mathworld.wolfram.com/CovarianceMatrix.html
@@ -13,6 +14,8 @@ class ViMahalanobisNoiseDetector : public ViNoiseDetector
     public:
 
 		ViMahalanobisNoiseDetector();
+		ViMahalanobisNoiseDetector(const ViMahalanobisNoiseDetector &other);
+		~ViMahalanobisNoiseDetector();
 		ViMahalanobisNoiseDetector* clone();
 
 		void setWindowSize(int size);
@@ -26,6 +29,8 @@ class ViMahalanobisNoiseDetector : public ViNoiseDetector
 	private:
 
 		int mWindowSize;
+		DATASET *mGretlData;
+		int *mGretlParameters;
 
 };
 

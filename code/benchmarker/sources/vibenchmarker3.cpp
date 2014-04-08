@@ -23,33 +23,17 @@
 #define MASK_INTERVAL 0.001
 #define NOISE_TYPE Direct
 
-#define NO_CHANGE 30
+#define NO_CHANGE 50
 
 ViBenchMarker3::ViBenchMarker3()
 {
 	mCurrentObject = ViAudioObject::create();
 
-	mParamsStart.append(1);
-	mParamsEnd.append(9);
-	mParamsIncrease.append(1);
-	mParamsCurrent.append(0);
-
-	mParamsStart.append(1);
-	mParamsEnd.append(9);
-	mParamsIncrease.append(1);
-	mParamsCurrent.append(0);
-
-	mDoneParamIterations = 0;
-	mTotalParamIterations = 1;
-	for(int i = 0; i < mParamsStart.size(); ++i)
-	{
-		mTotalParamIterations *= (mParamsEnd[i] - mParamsStart[i] + mParamsIncrease[i]) / mParamsIncrease[i];
-	}
 	mMainTime.start();
 
 
-	mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA);
-	//mDetector = new ViMahalanobisNoiseDetector();
+	//mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA);
+	mDetector = new ViMahalanobisNoiseDetector();
 	//mDetector = new ViMadNoiseDetector();
 	//mDetector = new ViFourierNoiseDetector();
 	//mDetector = new ViPredictionNoiseDetector(2);
@@ -63,7 +47,26 @@ ViBenchMarker3::ViBenchMarker3()
 
 ViBenchMarker3::~ViBenchMarker3()
 {
+}
 
+void ViBenchMarker3::initParams()
+{
+	mParamsStart.clear();
+	mParamsEnd.clear();
+	mParamsIncrease.clear();
+	mParamsCurrent.clear();
+
+	mParamsStart.append(15);
+	mParamsEnd.append(16);
+	mParamsIncrease.append(1);
+	mParamsCurrent.append(0);
+
+	mDoneParamIterations = 0;
+	mTotalParamIterations = 1;
+	for(int i = 0; i < mParamsStart.size(); ++i)
+	{
+		mTotalParamIterations *= (mParamsEnd[i] - mParamsStart[i] + mParamsIncrease[i]) / mParamsIncrease[i];
+	}
 }
 
 bool ViBenchMarker3::nextParam()
@@ -106,23 +109,21 @@ bool ViBenchMarker3::nextParam()
 void ViBenchMarker3::benchmark()
 {
 	QDir dir("/home/visore/Visore Projects/Files/");
-	QStringList files = dir.entryList(QDir::Files);
-	for(int i = 0; i < files.size(); ++i)
+	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for(int i = 0; i < dirs.size(); ++i)
 	{
-		mFiles.enqueue(dir.absoluteFilePath(files[i]));
+		QDir dir3("/home/visore/Visore Projects/Results/"+dirs[i]);
+		if(!dir3.exists()) dir3.mkpath(dir3.absolutePath());
+
+		QDir dir2(dir.absoluteFilePath(dirs[i]));
+		QStringList files2 = dir2.entryList(QDir::Files);
+		for(int j = 0; j < files2.size(); ++j)
+		{
+			mFiles.enqueue(dir2.absoluteFilePath(files2[j]));
+			mResults.enqueue(dir3.absoluteFilePath(files2[j])+".txt");
+		}
 	}
-
-	QString name = mDetector->name() + "_";
-	if(ViNoise::NOISE_TYPE == ViNoise::Direct) name += "Direct";
-	else if(ViNoise::NOISE_TYPE == ViNoise::Mean) name += "Mean";
-	else if(ViNoise::NOISE_TYPE == ViNoise::Maximum) name += "Maximum";
-
-	mOutputFile.setFileName("/home/visore/Visore Projects/Results/"+name+"_"+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")+".txt");
-	mOutputFile.open(QIODevice::WriteOnly);
-	mOutputStream.setDevice(&mOutputFile);
-
-	mOutputStream<<name<<"\n\n\n";
-
+	mTotalFiles = mFiles.size();
 	nextFile();
 }
 
@@ -134,12 +135,28 @@ void ViBenchMarker3::nextFile()
 	}
 	else
 	{
+		initParams();
 		for(int i = 0; i < mParamsStart.size(); ++i)
 		{
 			mParamsCurrent[i] = mParamsStart[i];
 		}
 
 		mCurrentFile = mFiles.dequeue();
+
+		mOutputFile.close();
+		mOutputFile.setFileName(mResults.dequeue());
+		mOutputFile.open(QIODevice::WriteOnly);
+		mOutputStream.setDevice(&mOutputFile);
+
+		mOutputStream<<mDetector->name()<<"\n";
+		if(mDetector->direction() == ViNoiseDetector::Forward) mOutputStream<< "Forward";
+		else if(mDetector->direction() == ViNoiseDetector::Reversed) mOutputStream<< "Reversed";
+		else if(mDetector->direction() == ViNoiseDetector::Bidirectional) mOutputStream<< "Bidirectional";
+		mOutputStream<<"\n";
+		if(ViNoise::NOISE_TYPE == ViNoise::Direct) mOutputStream<< "Direct";
+		else if(ViNoise::NOISE_TYPE == ViNoise::Mean) mOutputStream<< "Mean";
+		else if(ViNoise::NOISE_TYPE == ViNoise::Maximum) mOutputStream<< "Maximum";
+		mOutputStream<<"\n\n";
 
 		mCurrentObject->clearBuffers();
 		mCurrentObject->setFilePath(ViAudio::Target, mCurrentFile);
@@ -267,7 +284,7 @@ void ViBenchMarker3::process2()
 	{
 		mOutputStream << (int)mParamsCurrent[i] << "\t";
 	}
-	mOutputStream << "\t" << mCurrentThreshold << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t\t";
+	mOutputStream << "\t" << (mCurrentThreshold / mDetector->amplification()) << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t\t";
 	mOutputStream << maxTP / qreal(maxTP + maxFN) << "\t";
 	mOutputStream << maxTN / qreal(maxTN + maxFP) << "\t\t";
 	mOutputStream << maxMAT << "\t\t" << time << "\n";
@@ -275,16 +292,18 @@ void ViBenchMarker3::process2()
 
 	++mDoneParamIterations;
 	qreal percentageDone = mDoneParamIterations / double(mTotalParamIterations);
+	percentageDone /= mTotalFiles;
+	percentageDone += (mTotalFiles - mFiles.size() - 1) / qreal(mTotalFiles);
+
 	qint64 remaining = mMainTime.elapsed();
 	remaining = ((1.0/percentageDone) * remaining) - remaining;
-	QTime tt = QTime::fromMSecsSinceStartOfDay(remaining);
-	cout << int(percentageDone * 100.0) << "% ("<<tt.toString("hh:mm").toLatin1().data()<<" remaining)"<<endl;
+	cout << int(percentageDone * 100.0) << "% ("<<timeConversion(remaining).toLatin1().data()<<" remaining)"<<endl;
 
 	for(i = 0; i < mParamsStart.size(); ++i)
 	{
 		cout << (int)mParamsCurrent[i] << "\t";
 	}
-	cout << "\t" << mCurrentThreshold << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t";
+	cout << "\t" << (mCurrentThreshold / mDetector->amplification()) << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t";
 	cout << setprecision(10) << maxTP / qreal(maxTP + maxFN) << "\t";
 	cout << setprecision(10) << maxTN / qreal(maxTN + maxFP) << "\t";
 	cout << maxMAT << "\t" << time << endl;
@@ -297,7 +316,7 @@ void ViBenchMarker3::process2()
 	}
 	else
 	{
-		quit();
+		nextFile();
 	}
 }
 
@@ -475,6 +494,24 @@ void ViBenchMarker3::addNoise3(ViSampleChunk &s, int offset, int length)
 		else zag += 0.2;
 	}
 }
+
+QString ViBenchMarker3::timeConversion(int msecs)
+{
+	QString formattedTime;
+
+	int days = msecs/(1000*60*60*24);
+	int hours = (msecs-(days*1000*60*60*24))/(1000*60*60);
+	int minutes = (msecs-(days*1000*60*60*24)-(hours*1000*60*60))/(1000*60);
+	int seconds = (msecs-(days*1000*60*60*24)-(minutes*1000*60)-(hours*1000*60*60))/1000;
+
+	formattedTime.append(QString("%1").arg(days, 2, 10, QLatin1Char('0')) + ":" +
+						 QString("%1").arg(hours, 2, 10, QLatin1Char('0')) + ":" +
+						 QString( "%1" ).arg(minutes, 2, 10, QLatin1Char('0')) + ":" +
+						 QString( "%1" ).arg(seconds, 2, 10, QLatin1Char('0')));
+
+	return formattedTime;
+}
+
 
 void ViBenchMarker3::quit()
 {
