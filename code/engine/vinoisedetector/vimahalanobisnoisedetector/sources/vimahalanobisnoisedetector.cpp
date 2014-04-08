@@ -61,9 +61,12 @@ void ViMahalanobisNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 		MahalDist *distance = get_mahal_distances(mGretlParameters, mGretlData, OPT_NONE, NULL, &error);
 
 		if(error) setNoise(0);
-		else setNoise(distance->d[mWindowSize / 2]);
+		else
+		{
+			setNoise(distance->d[mWindowSize / 2]);
+			free_mahal_dist(distance);
+		}
 
-		free_mahal_dist(distance);
 		samples.removeFirst();
 	}
 }

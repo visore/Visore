@@ -159,14 +159,16 @@ void ViBenchMarker3::nextFile()
 		else if(ViNoise::NOISE_TYPE == ViNoise::Mean) mOutputStream<< "Mean";
 		else if(ViNoise::NOISE_TYPE == ViNoise::Maximum) mOutputStream<< "Maximum";
 		mOutputStream<<"\n\n";
+		mOutputStream << QFileInfo(mCurrentFile).fileName();
+		mOutputStream<<"\n\n";
 
 		for(int i = 0; i < mParamsStart.size(); ++i)
 		{
 			mOutputStream << "PARAMETER "<<(i+1) << "\t";
 		}
-		mOutputStream << "\t" << "REAL THRESHOLD" << "\t" << "AMPLIFIED THRESHOLD" << "\t\t" << "TRUE POSITIVES" << "\t" << "TRUE NEGATIVES" << "\t" << "FALSE POSITIVES"<< "\t" << "FALSE NEGATIVES" << "\t\t";
-		mOutputStream << "SENSITIVITY" << "\t" << "SPECIFISITY" << "\t\t";
-		mOutputStream << "MATTHEWS SCORE" << "\t\t" << "TIME" << "\n";
+		mOutputStream << "REAL THRESHOLD" << "\t" << "AMPLIFIED THRESHOLD" << "\t" << "TRUE POSITIVES" << "\t" << "TRUE NEGATIVES" << "\t" << "FALSE POSITIVES"<< "\t" << "FALSE NEGATIVES" << "\t";
+		mOutputStream << "SENSITIVITY" << "\t" << "SPECIFISITY" << "\t";
+		mOutputStream << "MATTHEWS SCORE" << "\t" << "TIME" << "\n";
 
 		mCurrentObject->clearBuffers();
 		mCurrentObject->setFilePath(ViAudio::Target, mCurrentFile);
@@ -294,10 +296,12 @@ void ViBenchMarker3::process2()
 	{
 		mOutputStream << (int)mParamsCurrent[i] << "\t";
 	}
-	mOutputStream << "\t" << (mCurrentThreshold / mDetector->amplification()) << "\t" << mCurrentThreshold << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t\t";
-	mOutputStream << maxTP / qreal(maxTP + maxFN) << "\t";
-	mOutputStream << maxTN / qreal(maxTN + maxFP) << "\t\t";
-	mOutputStream << maxMAT << "\t\t" << time << "\n";
+	mOutputStream << (mCurrentThreshold / mDetector->amplification()) << "\t" << mCurrentThreshold << "\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t";
+	if((maxTP + maxFN) == 0) mOutputStream << 0 << "\t";
+	else mOutputStream << maxTP / qreal(maxTP + maxFN) << "\t";
+	if((maxTN + maxFP) == 0) mOutputStream << 0 << "\t";
+	else mOutputStream << maxTN / qreal(maxTN + maxFP) << "\t";
+	mOutputStream << maxMAT << "\t" << time << "\n";
 	mOutputStream.flush();
 
 	++mDoneParamIterations;
