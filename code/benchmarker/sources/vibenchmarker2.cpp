@@ -395,6 +395,5 @@ void ViBenchMarker2::progress(qreal i)
 void ViBenchMarker2::quit()
 {
 	cout << "QUIT!" << endl;
-	int x = 0;
-	int y = 1 / x;
+	exit(0);
 }

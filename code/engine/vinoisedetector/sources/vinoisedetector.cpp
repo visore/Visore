@@ -64,7 +64,7 @@ void ViNoiseDetector::setDirection(Direction direction)
 	mDirection = direction;
 }
 
-Direction ViNoiseDetector::direction()
+ViNoiseDetector::Direction ViNoiseDetector::direction()
 {
 	return mDirection;
 }

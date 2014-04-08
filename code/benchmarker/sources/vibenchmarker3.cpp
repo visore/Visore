@@ -19,14 +19,16 @@
 #define WINDOW_SIZE 4096
 #define MASK_START 0
 #define MASK_END 1
-//#define MASK_INTERVAL 0.0001
-#define MASK_INTERVAL 0.001
+#define MASK_INTERVAL 0.0001
+//#define MASK_INTERVAL 0.001
 #define NOISE_TYPE Direct
 
-#define NO_CHANGE 50
+#define NO_CHANGE 100
 
 ViBenchMarker3::ViBenchMarker3()
 {
+
+
 	mCurrentObject = ViAudioObject::create();
 
 	mMainTime.start();
@@ -56,8 +58,8 @@ void ViBenchMarker3::initParams()
 	mParamsIncrease.clear();
 	mParamsCurrent.clear();
 
-	mParamsStart.append(15);
-	mParamsEnd.append(16);
+	mParamsStart.append(1);
+	mParamsEnd.append(250);
 	mParamsIncrease.append(1);
 	mParamsCurrent.append(0);
 
@@ -157,6 +159,14 @@ void ViBenchMarker3::nextFile()
 		else if(ViNoise::NOISE_TYPE == ViNoise::Mean) mOutputStream<< "Mean";
 		else if(ViNoise::NOISE_TYPE == ViNoise::Maximum) mOutputStream<< "Maximum";
 		mOutputStream<<"\n\n";
+
+		for(int i = 0; i < mParamsStart.size(); ++i)
+		{
+			mOutputStream << "PARAMETER "<<(i+1) << "\t";
+		}
+		mOutputStream << "\t" << "REAL THRESHOLD" << "\t" << "AMPLIFIED THRESHOLD" << "\t\t" << "TRUE POSITIVES" << "\t" << "TRUE NEGATIVES" << "\t" << "FALSE POSITIVES"<< "\t" << "FALSE NEGATIVES" << "\t\t";
+		mOutputStream << "SENSITIVITY" << "\t" << "SPECIFISITY" << "\t\t";
+		mOutputStream << "MATTHEWS SCORE" << "\t\t" << "TIME" << "\n";
 
 		mCurrentObject->clearBuffers();
 		mCurrentObject->setFilePath(ViAudio::Target, mCurrentFile);
@@ -284,7 +294,7 @@ void ViBenchMarker3::process2()
 	{
 		mOutputStream << (int)mParamsCurrent[i] << "\t";
 	}
-	mOutputStream << "\t" << (mCurrentThreshold / mDetector->amplification()) << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t\t";
+	mOutputStream << "\t" << (mCurrentThreshold / mDetector->amplification()) << "\t" << mCurrentThreshold << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t\t";
 	mOutputStream << maxTP / qreal(maxTP + maxFN) << "\t";
 	mOutputStream << maxTN / qreal(maxTN + maxFP) << "\t\t";
 	mOutputStream << maxMAT << "\t\t" << time << "\n";
@@ -303,7 +313,7 @@ void ViBenchMarker3::process2()
 	{
 		cout << (int)mParamsCurrent[i] << "\t";
 	}
-	cout << "\t" << (mCurrentThreshold / mDetector->amplification()) << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t";
+	cout << "\t" << (mCurrentThreshold / mDetector->amplification())<< "\t" << mCurrentThreshold << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t";
 	cout << setprecision(10) << maxTP / qreal(maxTP + maxFN) << "\t";
 	cout << setprecision(10) << maxTN / qreal(maxTN + maxFP) << "\t";
 	cout << maxMAT << "\t" << time << endl;
