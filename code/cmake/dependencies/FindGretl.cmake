@@ -17,6 +17,7 @@ set(GRETL_INCLUDE_PATHS
 	/usr/include
 	/usr/local/include
 	/usr/include/gretl 
+	/usr/local/include/gretl 
 )
 
 set(GRETL_LIBRARY_PATHS
@@ -24,6 +25,7 @@ set(GRETL_LIBRARY_PATHS
 	/usr/lib
 	/usr/local/lib
 	/usr/lib/gretl-gtk2
+	/usr/local/lib/gretl-gtk2
 )
 
 find_path(GRETL_INCLUDE_DIR libgretl.h PATHS ${GRETL_INCLUDE_PATHS} )
