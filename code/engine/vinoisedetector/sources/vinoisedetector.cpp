@@ -57,6 +57,8 @@ ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 
 ViNoiseDetector::~ViNoiseDetector()
 {
+	viDeleteAll(mNoise);
+	viDeleteAll(mReverseNoise);
 }
 
 void ViNoiseDetector::setDirection(Direction direction)

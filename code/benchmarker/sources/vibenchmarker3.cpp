@@ -171,6 +171,9 @@ void ViBenchMarker3::nextFile()
 		mOutputStream << "MATTHEWS SCORE" << "\t" << "TIME" << "\n";
 
 		mCurrentObject->clearBuffers();
+		mCurrentObject.setNull();
+		mCurrentObject = ViAudioObject::create();
+
 		mCurrentObject->setFilePath(ViAudio::Target, mCurrentFile);
 		QObject::connect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process1()));
 		mCurrentObject->decode();

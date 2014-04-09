@@ -1,15 +1,3 @@
-# Copyright (c) 2008-2010 Kent State University
-# Copyright (c) 2011-2012 Texas A&M University
-#
-# This file is distributed under the MIT License. See the accompanying file
-# LICENSE.txt or http://www.opensource.org/licenses/mit-license.php for terms
-# and conditions.
-
-# FIXME: How do I find the version of GRETL that I want to use?
-# What versions are available?
-
-# NOTE: GRETL prefix is understood to be the path to the root of the GRETL
-# installation library.
 set(GRETL_PREFIX "" CACHE PATH "The path to the prefix of a GRETL installation")
 
 set(GRETL_INCLUDE_PATHS
