@@ -19,11 +19,11 @@
 #define WINDOW_SIZE 4096
 #define MASK_START 0
 #define MASK_END 1
-#define MASK_INTERVAL 0.0001
-//#define MASK_INTERVAL 0.001
+//#define MASK_INTERVAL 0.0001
+#define MASK_INTERVAL 0.001
 #define NOISE_TYPE Direct
 
-#define NO_CHANGE 100
+#define NO_CHANGE 50
 
 ViBenchMarker3::ViBenchMarker3()
 {
