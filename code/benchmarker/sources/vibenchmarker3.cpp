@@ -34,7 +34,7 @@ ViBenchMarker3::ViBenchMarker3()
 	mMainTime.start();
 
 
-	//mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA);
+	//mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::MA, ViArmaNoiseDetector::Gretl);
 	mDetector = new ViMahalanobisNoiseDetector();
 	//mDetector = new ViMadNoiseDetector();
 	//mDetector = new ViFourierNoiseDetector();

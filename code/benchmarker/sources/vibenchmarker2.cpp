@@ -19,7 +19,7 @@
 #define WINDOW_SIZE 4096
 #define MASK_START 0
 #define MASK_END 1
-#define MASK_INTERVAL 0.0001
+#define MASK_INTERVAL 0.001
 #define NOISE_TYPE Direct
 
 /*#define MASK_END 0.00005
@@ -35,7 +35,7 @@ ViBenchMarker2::ViBenchMarker2()
 	//		Forward:		PAR()	MAT ()	SEN()	SPE()
 	//		Backward:		PAR()	MAT ()	SEN()	SPE()
 	//		Bidirectional:	PAR()	MAT ()	SEN()	SPE()
-	mDetector = new ViMahalanobisNoiseDetector();
+	//mDetector = new ViMahalanobisNoiseDetector();
 
 
 	//mDetector = new ViMadNoiseDetector(); //
@@ -44,6 +44,7 @@ ViBenchMarker2::ViBenchMarker2()
 	//mDetector = new ViZscoreNoiseDetector();
     //mDetector = new ViNearestNeighbourNoiseDetector();
 	//mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA, ViArmaNoiseDetector::Gretl, ViArmaNoiseDetector::CML);
+	mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA, ViArmaNoiseDetector::Gretl, ViArmaNoiseDetector::CML);
 
 	mDetector->setDirection(ViNoiseDetector::Forward);
 	//mDetector->setDirection(ViNoiseDetector::Reversed);
@@ -108,7 +109,7 @@ void ViBenchMarker2::process1()
 void ViBenchMarker2::process2()
 {
 	//QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-	mCurrentObject->encode( ViAudio::Corrupted);
+	mCurrentObject->encode( ViAudio::Noise/*ViAudio::Corrupted*/);
 	int e = time.elapsed();
 	cout<<"Elapsed: "<<(e / 1000)<<" s"<<endl;
 	cout<<"Elapsed: "<<((e / 1000) / 60)<<" m"<<endl;

@@ -27,6 +27,32 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 			X12 = X12Arma
 		};
 
+		enum GretlCriteria
+		{
+			None,					// Will use fixed order
+
+			AutoCorrelation,		// Uses ACF and PACF
+			AC = AutoCorrelation,
+			ACF = AutoCorrelation,
+			PACF = AutoCorrelation,
+
+			RSquared,				// Only for AR
+			AdjustedRSquared,		// Only for AR
+			R2 = RSquared,			// Only for AR
+			AR2 = AdjustedRSquared,	// Only for AR
+
+			AkaikeInformationCriterion,
+			AkaikeInformationCriterionCorrection,
+			BayesianInformationCriterion,
+			HannanQuinnInformationCriterion,
+
+			AIC = AkaikeInformationCriterion,
+			AICC = AkaikeInformationCriterionCorrection,
+			BIC = BayesianInformationCriterion,
+			HQIC = HannanQuinnInformationCriterion,
+			HQC = HannanQuinnInformationCriterion
+		};
+
         enum Type
         {
             MovingAverage,
@@ -47,6 +73,7 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 		void setType(const Type &type);
 		void setMode(const Mode &mode = Gretl);
 		void setGretlEstimation(const GretlEstimation &estimation);
+		void setGretlCriteria(const GretlCriteria &criteria);
 
         void setWindowSize(int size);
 		void setDegree(const Type &type, const int &degree);
@@ -87,36 +114,21 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 		qreal autocorrelation(const int &lag, const qreal *samples, const qreal &mean, const qreal &variance) const;
 		void partialAutocorrelation(qreal *partials, const qreal *samples, const qreal &mean, const qreal &variance) const;
 
-
-
-
-
-
-		qreal aic(qreal rss, int numberValues, int numberParam)
-		{
-			//http://adorio-research.org/wordpress/?p=1932
-			return 2 * numberParam + numberValues * (log(6.28318530718 * rss/numberValues) + 1);
-
-		}
-
-		qreal aicc(qreal rss, int numberValues, int numberParam)
-		{
-			//http://adorio-research.org/wordpress/?p=1932
-			qreal retval = aic(rss, numberParam, numberValues);
-			   if(numberValues-numberParam-1 != 0)
-				   retval += 2.0 *numberParam* (numberParam+1)/ qreal(numberValues-numberParam-1);
-			   return retval;
-
-		}
-
-		qreal rss(qreal real, qreal pred)
-		{
-			return qPow(real - pred, 2);
-		}
+		void gretlFixedModel(MODEL *model);
+		void gretlAutocorrelationModel(MODEL *model);
+		void gretlBestModel(MODEL *model);
+		qreal gretlR2(MODEL *model);
+		qreal gretlAR2(MODEL *model);
+		qreal gretlAIC(MODEL *model);
+		qreal gretlAICC(MODEL *model);
+		qreal gretlBIC(MODEL *model);
+		qreal gretlHQC(MODEL *model);
 
 	private:
 
 		void (ViArmaNoiseDetector::*calculateNoisePointer)(QQueue<qreal>&);
+		void (ViArmaNoiseDetector::*gretlModelPointer)(MODEL *model);
+		qreal (ViArmaNoiseDetector::*gretlOrderPointer)(MODEL *model);
 
 		Mode mMode;
 		Type mType;
@@ -130,9 +142,10 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 
 		DATASET *mGretlData;
 		int *mGretlParameters;
-		MODEL *mGretlModel;
 		int mGretlEstimation;
 		QVector<qreal> mGretlPredictions;
+		GretlCriteria mGretlCriteria;
+		qreal mConfidenceLevel;
 
 
 };

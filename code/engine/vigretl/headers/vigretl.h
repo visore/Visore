@@ -15,6 +15,8 @@ struct MahalDist_ {
 extern "C" int libset_set_int (const char *key, int val); // Not defined as extern in gretl. We have to do it manually
 #include <gretl/libset.h>
 
+extern "C" MODEL arma_model (const int *list, const int *pqspec, const DATASET *dset, gretlopt opt, PRN *prn);
+
 class ViGretl
 {
 

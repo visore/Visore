@@ -19,6 +19,7 @@ set(GRETL_LIBRARY_PATHS
 find_path(GRETL_INCLUDE_DIR libgretl.h PATHS ${GRETL_INCLUDE_PATHS} )
 
 find_library(GRETL_LIBRARY NAMES libgretl.so libgretl-1.0.so PATHS ${GRETL_LIBRARY_PATHS} )
+find_library(GRETL_ARMA_LIBRARY NAMES arma.so PATHS ${GRETL_LIBRARY_PATHS} ) # Manually link to arma.so, otherwise we constantly load and unload the library dynamically (done through libgretl)
 
 if(GRETL_INCLUDE_DIR AND GRETL_LIBRARY)
 	set(GRETL_FOUND TRUE)
