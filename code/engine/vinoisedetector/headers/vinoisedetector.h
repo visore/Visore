@@ -76,12 +76,12 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 
 		virtual ViNoiseDetector* clone() = 0;
 
-		virtual void setWindowSize(int size){}
+		virtual void setWindowSize(const int &size){ LOG("Window size not implemented."); exit(-1); }
 
-		virtual void setParameters(qreal param1){LOG("Invalid number of parameters given"); exit(-1); }
-		virtual void setParameters(qreal param1, qreal param2){LOG("Invalid number of parameters given"); exit(-1); }
-		virtual void setParameters(qreal param1, qreal param2, qreal param3){LOG("Invalid number of parameters given"); exit(-1); }
-		virtual void setParameters(qreal param1, qreal param2, qreal param3, qreal param4){LOG("Invalid number of parameters given"); exit(-1); }
+		virtual void setParameters(const qreal &param1){ LOG("Invalid number of parameters given"); exit(-1); }
+		virtual void setParameters(const qreal &param1, qreal &param2){ LOG("Invalid number of parameters given"); exit(-1); }
+		virtual void setParameters(const qreal &param1, qreal &param2, qreal &param3){ LOG("Invalid number of parameters given"); exit(-1); }
+		virtual void setParameters(const qreal &param1, qreal &param2, qreal &param3, qreal &param4){ LOG("Invalid number of parameters given"); exit(-1); }
 
 		virtual void setAmplification(const qreal &amp);
 		virtual qreal amplification();

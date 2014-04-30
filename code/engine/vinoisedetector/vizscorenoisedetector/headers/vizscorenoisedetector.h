@@ -16,12 +16,16 @@ class ViZscoreNoiseDetector : public ViNoiseDetector
 		ViZscoreNoiseDetector();
 		ViZscoreNoiseDetector* clone();
 
+		void setWindowSize(const int &size);
+		void setParameters(const qreal &param1);
+
 	protected:
 
 		void calculateNoise(QQueue<qreal> &samples);
 
 	private:
 
+		int mWindowSize;
 		int mHalfWindow;
 
 };

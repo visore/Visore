@@ -1,21 +1,35 @@
 #include <vizscorenoisedetector.h>
 #include <qmath.h>
 
-#define WINDOW_SIZE 128
+#define DEFAULT_WINDOW_SIZE 128
+#define DEFAULT_AMPLIFIER 0.05
 
 ViZscoreNoiseDetector::ViZscoreNoiseDetector()
 	: ViNoiseDetector()
 {
-	mHalfWindow = WINDOW_SIZE / 2;
+	setWindowSize(DEFAULT_WINDOW_SIZE);
+	setAmplification(DEFAULT_AMPLIFIER);
+}
+
+void ViZscoreNoiseDetector::setWindowSize(const int &size)
+{
+	mWindowSize = size;
+	mHalfWindow = size / 2;
 	setOffset(mHalfWindow);
+}
+
+void ViZscoreNoiseDetector::setParameters(const qreal &param1)
+{
+	setWindowSize(param1);
 }
 
 void ViZscoreNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
-	static int i;
-	static qreal mean, standardDeviation, value;
+	static int i, end;
+	static qreal mean, standardDeviation;
 
-	while(samples.size() >= WINDOW_SIZE + 1)
+	end = mWindowSize + 1;
+	while(samples.size() >= end)
 	{
 		// Calculate the mean
 		mean = 0;
@@ -23,11 +37,11 @@ void ViZscoreNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 		{
 			mean += samples[i];
 		}
-		for(i = mHalfWindow + 1; i < WINDOW_SIZE; ++i)
+		for(i = mHalfWindow + 1; i < mWindowSize; ++i)
 		{
 			mean += samples[i];
 		}
-		mean /= WINDOW_SIZE;
+		mean /= mWindowSize;
 
 		// Calculate the standard diviation
 		standardDeviation = 0;
@@ -35,15 +49,14 @@ void ViZscoreNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 		{
 			standardDeviation += qPow(samples[i] - mean, 2);
 		}
-		for(i = mHalfWindow + 1; i < WINDOW_SIZE; ++i)
+		for(i = mHalfWindow + 1; i < mWindowSize; ++i)
 		{
 			standardDeviation += qPow(samples[i] - mean, 2);
 		}
-		standardDeviation = qSqrt(standardDeviation / WINDOW_SIZE);
+		standardDeviation = qSqrt(standardDeviation / (mWindowSize + 1)); // Corrected STD
 
 		// Calculate the z-score
-		value = qAbs((samples[mHalfWindow] - mean) / (1 + standardDeviation));
-		setNoise(value);
+		setNoise(qAbs((samples[mHalfWindow] - mean) / standardDeviation));
 
 		samples.removeFirst();
 	}

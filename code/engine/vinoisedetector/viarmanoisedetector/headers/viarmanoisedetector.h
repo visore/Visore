@@ -143,10 +143,11 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 		DATASET *mGretlData;
 		int *mGretlParameters;
 		int mGretlEstimation;
-		QVector<qreal> mGretlPredictions;
 		GretlCriteria mGretlCriteria;
-		qreal mConfidenceLevel;
 
+		bool mHasNoise;
+		qreal mPrediction;
+		qreal mPacfConfidenceLevel;
 
 };
 

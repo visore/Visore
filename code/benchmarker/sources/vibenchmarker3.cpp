@@ -35,11 +35,11 @@ ViBenchMarker3::ViBenchMarker3()
 
 
 	//mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::MA, ViArmaNoiseDetector::Gretl);
-	mDetector = new ViMahalanobisNoiseDetector();
+	//mDetector = new ViMahalanobisNoiseDetector();
 	//mDetector = new ViMadNoiseDetector();
 	//mDetector = new ViFourierNoiseDetector();
 	//mDetector = new ViPredictionNoiseDetector(2);
-	//mDetector = new ViZscoreNoiseDetector();
+	mDetector = new ViZscoreNoiseDetector();
 	//mDetector = new ViNearestNeighbourNoiseDetector();
 
 	mDetector->setDirection(ViNoiseDetector::Forward);
