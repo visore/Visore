@@ -392,7 +392,7 @@ void ViBenchMarker3::generateNoise()
 			offset2 += AI_NOISE_SEPERATION;
 			if(offset2+length <= mNoise2.size())
 			{
-				for(int i = 0; i < length; ++i) mNoise1[offset2+i] = 1;
+				for(int i = 0; i < length; ++i) mNoise2[offset2+i] = 1;
 				offset2 += AI_NOISE_SEPERATION;
 			}
 

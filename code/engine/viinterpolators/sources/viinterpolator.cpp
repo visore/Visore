@@ -75,6 +75,48 @@ bool ViInterpolator::interpolate(ViSampleChunk &samples, const ViNoise &noise)
 	return success;
 }
 
+bool ViInterpolator::interpolate(ViSampleChunk &samples, const ViSampleChunk &noiseMask)
+{
+	bool signalStarted = false, success = true;
+	int end, noiseLength = 0, noiseStart = -1;
+
+	for(int i = 0; i < noiseMask.size(); ++i)
+	{
+		if(noiseMask[i])
+		{
+			if(signalStarted)
+			{
+				end = noiseStart + noiseLength;
+				success &= interpolate(samples.data(), noiseStart, samples.data() + end, i - end, samples.data() + noiseStart, noiseLength);
+
+				noiseStart = i;
+				noiseLength = 1;
+				signalStarted = false;
+			}
+			else
+			{
+				if(noiseStart < 0)
+				{
+					noiseStart = i;
+				}
+				++noiseLength;
+			}
+		}
+		else if(noiseStart >= 0)
+		{
+			signalStarted = true;
+		}
+	}
+
+	if(noiseStart >= 0)
+	{
+		end = noiseStart + noiseLength;
+		success &= interpolate(samples.data(), noiseStart, samples.data() + end, noiseMask.size() - end, samples.data() + noiseStart, noiseLength);
+	}
+
+	return success;
+}
+
 bool ViInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
 	if(mMaximumSamples < 1)

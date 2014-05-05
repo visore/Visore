@@ -18,16 +18,18 @@ class ViBenchMarker4 : public QObject
 	private slots:
 
 		void quit();
+		QString timeConversion(int msecs);
 
 		void nextFile();
-		void process1();
+		void process1(bool generate = true);
 		void process2();
 
-        void generateNoise();
-        int addNoise(ViSampleChunk &s, int offset);
-        void addNoise1(ViSampleChunk &s, int offset, int length);
-        void addNoise2(ViSampleChunk &s, int offset, int length);
-        void addNoise3(ViSampleChunk &s, int offset, int length);
+		void generateNoise();
+
+		bool nextParam();
+		void initParams();
+
+		void write(ViSampleChunk &data1, ViSampleChunk &data2, QString path);
 
 	public:
 
@@ -38,21 +40,32 @@ class ViBenchMarker4 : public QObject
 
 	private:
 
-        QString TYPE;
+		QList<qreal> mParamsStart, mParamsEnd, mParamsIncrease, mParamsCurrent;
+
+		ViInterpolator *mInterpolator;
 
 		QQueue<QString> mFiles;
+		QQueue<QString> mResults;
 		QString mCurrentFile;
 		ViAudioObjectPointer mCurrentObject;
+
+		ViSampleChunk mNoise1;
+		ViSampleChunk mNoise2;
+		int mNoiseLength;
+		int mNoiseCount;
 
 		QFile mOutputFile;
 		QTextStream mOutputStream;
 		qreal mCurrentThreshold;
 
-        ViSampleChunk mNoise1;
-        ViSampleChunk mNoise2;
-        int mNoiseType;
-        int mNoiseLength;
-        int mNoiseCount;
+		int mNoChange;
+		QTime mTime;
+
+		QTime mMainTime;
+		int mTotalParamIterations;
+		int mDoneParamIterations;
+
+		int mTotalFiles;
 
 };
 

@@ -17,6 +17,7 @@ ADD_SUBDIRECTORY(${ROOT}/vipolynomialinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/vifourierinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/vihermiteinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/viwarpedburginterpolator)
+ADD_SUBDIRECTORY(${ROOT}/viarmainterpolator)
 
 #Initiate source files
 FILE(GLOB VI_INTERPOLATOR_SOURCES ${SOURCES}/*.cpp)

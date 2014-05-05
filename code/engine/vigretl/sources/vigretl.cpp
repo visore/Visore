@@ -7,7 +7,7 @@ bool ViGretl::initialize(const bool &enableOutput)
 	if(mInitialized) return false;
 	mInitialized = true;
 	libgretl_init();
-	//if(!enableOutput) freopen("/dev/null", "w", stderr); // Stop forced gretl error output
+	if(!enableOutput) freopen("/dev/null", "w", stderr); // Stop forced gretl error output
 	return mInitialized;
 }
 

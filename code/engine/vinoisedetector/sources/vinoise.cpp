@@ -13,6 +13,13 @@ ViNoise::ViNoise(ViSampleChunk *data, ViSampleChunk *mask, const qreal &threshol
 	setThreshold(threshold);
 }
 
+ViNoise::ViNoise(ViSampleChunk *mask)
+{
+	mMask = mask;
+	mData = NULL;
+	setThreshold(0);
+}
+
 ViNoise::ViNoise(const int &size)
 {
 	mMask = new ViSampleChunk();

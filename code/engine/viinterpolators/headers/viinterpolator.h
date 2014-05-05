@@ -22,6 +22,7 @@ class ViInterpolator : public ViLibrary, public ViSerializer
 		int maximumSamples() const;
 
 		bool interpolate(ViSampleChunk &samples, const ViNoise &noise);
+		bool interpolate(ViSampleChunk &samples, const ViSampleChunk &noiseMask);
 
 		virtual ViInterpolator* clone() = 0;
 
