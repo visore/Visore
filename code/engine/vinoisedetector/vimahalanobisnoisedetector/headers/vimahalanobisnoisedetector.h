@@ -20,7 +20,7 @@ class ViMahalanobisNoiseDetector : public ViNoiseDetector
 
 		void setWindowSize(int size);
 
-		void setParameters(qreal param1);
+		void setParameters(const qreal &param1);
 
 	protected:
 

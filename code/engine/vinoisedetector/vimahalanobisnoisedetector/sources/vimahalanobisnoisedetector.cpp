@@ -42,7 +42,7 @@ void ViMahalanobisNoiseDetector::setWindowSize(int size)
 	mGretlData = create_new_dataset(2, mWindowSize, 0);
 }
 
-void ViMahalanobisNoiseDetector::setParameters(qreal param1)
+void ViMahalanobisNoiseDetector::setParameters(const qreal &param1)
 {
 	setWindowSize(param1);
 }
