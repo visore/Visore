@@ -1,6 +1,6 @@
 #include <visystemsolver.h>
 #include <vilogger.h>
-
+#include <float.h>
 
 ViVector ViSystemSolver::solve(const ViMatrix &matrix, const ViVector &vector)
 {
@@ -11,11 +11,32 @@ ViVector ViSystemSolver::solve(const ViMatrix &matrix, const ViVector &vector)
 
 bool ViSystemSolver::solve(const ViMatrix &matrix, const ViVector &vector, ViVector &coefficients)
 {
-	ViMatrix inverted, transpose = matrix.transpose();
-	if(!transpose.scalarMultiply(matrix).invert(inverted))
+	ViMatrix inverted;
+	ViMatrix transpose = matrix.transpose();
+	ViMatrix scalar = transpose.scalarMultiply(matrix);
+	int row = 0, col = 0;
+	if(!scalar.invert(inverted))
 	{
-		STATICLOG("The matrix cannot be inverted.", QtCriticalMsg, "ViSystemSolver");
-		return false;
+
+		STATICLOG("\n\n"+matrix.toString(), QtCriticalMsg, "ViSystemSolver");
+		STATICLOG("\n\n"+transpose.toString(), QtCriticalMsg, "ViSystemSolver");
+		STATICLOG("\n\n"+scalar.toString(), QtCriticalMsg, "ViSystemSolver");
+		exit(-1);
+
+
+		scalar[row][col] += DBL_EPSILON; // We increase with the smallest possible value if matrix is not invertible
+
+		if(col < scalar.columns() - 1) ++col;
+		else if(row < scalar.rows() - 1)
+		{
+			col = 0;
+			++row;
+		}
+		else
+		{
+			STATICLOG("The matrix cannot be inverted.", QtCriticalMsg, "ViSystemSolver");
+			return false;
+		}
 	}
 	coefficients = inverted.scalarMultiply(transpose) * vector;
 	return true;

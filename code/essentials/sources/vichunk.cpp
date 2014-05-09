@@ -12,14 +12,14 @@ ViChunk<T>::ViChunk()
 }
 
 template<typename T>
-ViChunk<T>::ViChunk(T *data, int size)
+ViChunk<T>::ViChunk(T *data, qint64 size)
 {
 	mData = data;
 	mSize = size;
 }
 
 template<typename T>
-ViChunk<T>::ViChunk(int size)
+ViChunk<T>::ViChunk(qint64 size)
 {
 	mData = 0;
 	mSize = 0;
@@ -27,7 +27,7 @@ ViChunk<T>::ViChunk(int size)
 }
 
 template<typename T>
-ViChunk<T>::ViChunk(const ViChunk &other)
+ViChunk<T>::ViChunk(const ViChunk<T> &other)
 {
 	mData = 0;
 	mSize = 0;
@@ -58,13 +58,13 @@ const T* ViChunk<T>::constData() const
 }
 
 template<typename T>
-int ViChunk<T>::size() const
+qint64 ViChunk<T>::size() const
 {
 	return mSize;
 }
 
 template<typename T>
-void ViChunk<T>::setData(T *data, int size)
+void ViChunk<T>::setData(T *data, qint64 size)
 {
 	if(mData != 0)
 	{
@@ -75,13 +75,13 @@ void ViChunk<T>::setData(T *data, int size)
 }
 
 template<typename T>
-void ViChunk<T>::setSize(int size)
+void ViChunk<T>::setSize(qint64 size)
 {
 	mSize = size;
 }
 
 template<typename T>
-void ViChunk<T>::resize(int size)
+void ViChunk<T>::resize(qint64 size)
 {
 	if(size != mSize)
 	{
@@ -129,7 +129,7 @@ void ViChunk<T>::append(T value, int repeatValue)
 	}
 	else
 	{
-		int oldSize = mSize;
+		qint64 oldSize = mSize;
 		T *temp = new T[oldSize];
 		memcpy(temp, mData, sizeof(T) * oldSize);
 		resize(mSize + repeatValue);
@@ -142,7 +142,7 @@ void ViChunk<T>::append(T value, int repeatValue)
 template<typename T>
 void ViChunk<T>::append(const ViChunk<T> &other)
 {
-	int oldSize = mSize;
+	qint64 oldSize = mSize;
 	resize(oldSize + other.size());
 	memcpy(mData + oldSize, other.data(), sizeof(T) * other.size());
 }
@@ -159,7 +159,7 @@ void ViChunk<T>::clear()
 }
 
 template<typename T>
-ViChunk<T> ViChunk<T>::subset(const int &startIndex, const int &size) const
+ViChunk<T> ViChunk<T>::subset(const qint64 &startIndex, const qint64 &size) const
 {
 	ViChunk<T> subsetData;
 	subset(subsetData, startIndex, size);
@@ -167,7 +167,7 @@ ViChunk<T> ViChunk<T>::subset(const int &startIndex, const int &size) const
 }
 
 template<typename T>
-bool ViChunk<T>::subset(ViChunk<T> &subsetData, const int &startIndex, const int &size) const
+bool ViChunk<T>::subset(ViChunk<T> &subsetData, const qint64 &startIndex, const qint64 &size) const
 {
 	if(startIndex >= mSize)
 	{
@@ -175,7 +175,7 @@ bool ViChunk<T>::subset(ViChunk<T> &subsetData, const int &startIndex, const int
 		return false;
 	}
 
-	int newSize = size;
+	qint64 newSize = size;
 	bool success = true;
 	if(startIndex + size > mSize)
 	{
@@ -189,10 +189,10 @@ bool ViChunk<T>::subset(ViChunk<T> &subsetData, const int &startIndex, const int
 }
 
 template<typename T>
-QList<ViChunk<T>> ViChunk<T>::subsets(const int &size) const
+QList<ViChunk<T>> ViChunk<T>::subsets(const qint64 &size) const
 {
 	QList<ViChunk<T>> result;
-	int sets = qCeil(mSize / float(size));
+	int sets = qCeil(mSize / qreal(size));
 	for(int i = 0; i < sets; ++i)
 	{
 		result.append(subset(i * size, size));
@@ -207,7 +207,7 @@ const T& ViChunk<T>::first() const
 }
 
 template<typename T>
-const T& ViChunk<T>::first(int offset) const
+const T& ViChunk<T>::first(qint64 offset) const
 {
 	return mData[offset];
 }
@@ -219,7 +219,7 @@ T& ViChunk<T>::first()
 }
 
 template<typename T>
-T& ViChunk<T>::first(int offset)
+T& ViChunk<T>::first(qint64 offset)
 {
 	return mData[offset];
 }
@@ -231,7 +231,7 @@ const T& ViChunk<T>::last() const
 }
 
 template<typename T>
-const T& ViChunk<T>::last(int offset) const
+const T& ViChunk<T>::last(qint64 offset) const
 {
 	return mData[mSize - 1 - offset];
 }
@@ -243,31 +243,31 @@ T& ViChunk<T>::last()
 }
 
 template<typename T>
-T& ViChunk<T>::last(int offset)
+T& ViChunk<T>::last(qint64 offset)
 {
 	return mData[mSize - 1 - offset];
 }
 
 template<typename T>
-const T& ViChunk<T>::at(int index) const
+const T& ViChunk<T>::at(qint64 index) const
 {
 	return mData[index];
 }
 
 template<typename T>
-T& ViChunk<T>::at(int index)
+T& ViChunk<T>::at(qint64 index)
 {
 	return mData[index];
 }
 
 template<typename T>
-const T& ViChunk<T>::operator[](const int index) const
+const T& ViChunk<T>::operator[](const qint64 index) const
 {
 	return mData[index];
 }
 
 template<typename T>
-T& ViChunk<T>::operator[] (const int index)
+T& ViChunk<T>::operator[] (const qint64 index)
 {
 	return mData[index];
 }

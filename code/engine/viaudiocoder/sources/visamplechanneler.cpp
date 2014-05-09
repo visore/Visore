@@ -109,7 +109,7 @@ void ViSampleChanneler<T>::merge(QList<ViChunk<T>> &input, ViChunk<T> &output)
     {
         ViChunk<T> &channel = input[i];
         channelData = channel.data();
-        for(int j = 0; j < channel.size(); ++j)
+		for(int j = 0; j < channel.size(); ++j)
         {
             data[(j * channelCount) + i] = channelData[j];
         }

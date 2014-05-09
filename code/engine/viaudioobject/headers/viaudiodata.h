@@ -47,7 +47,7 @@ class ViAudioData
 		ViBufferStreamPointer mStream;
 
         ViPcmConverter<qreal> mConverter;
-        ViRawChunk mRawChunk;
+		ViRawChunk mRawChunk;
         ViSampleChunk mSampleChunk;
         ViFrequencyChunk mFrequencyChunk;
 		ViSampleChunk mChannleChunk;
@@ -112,7 +112,7 @@ class ViAudioReadData : public ViAudioData
 		bool mNeedsSampleScale;
 		bool mNeedsSampleScaleSplit;
 
-        ViFrequencyChunk mTemporaryChunk;
+		ViFrequencyChunk mTemporaryChunk;
 
 };
 

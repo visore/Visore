@@ -4,6 +4,7 @@
 #include <vilibrary.h>
 #include <viserializer.h>
 #include <vinoise.h>
+#include <vilogger.h>
 
 class ViInterpolator : public ViLibrary, public ViSerializer
 {
@@ -28,6 +29,11 @@ class ViInterpolator : public ViLibrary, public ViSerializer
 
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
+
+		virtual void setParameters(const qreal &param1){ LOG("Invalid number of parameters given: 1"); exit(-1); }
+		virtual void setParameters(const qreal &param1, const qreal &param2){ LOG("Invalid number of parameters given: 2"); exit(-1); }
+		virtual void setParameters(const qreal &param1, const qreal &param2, const qreal &param3){ LOG("Invalid number of parameters given: 3"); exit(-1); }
+		virtual void setParameters(const qreal &param1, const qreal &param2, const qreal &param3, const qreal &param4){ LOG("Invalid number of parameters given: 4"); exit(-1); }
 
 	protected:
 

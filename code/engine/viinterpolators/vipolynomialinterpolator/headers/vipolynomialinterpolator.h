@@ -3,7 +3,7 @@
 
 #include <viinterpolator.h>
 
-class ViPolynomialInterpolator : public ViAutoDegreeInterpolator
+class ViPolynomialInterpolator : public ViDegreeInterpolator
 {
 
 	public:
@@ -13,9 +13,13 @@ class ViPolynomialInterpolator : public ViAutoDegreeInterpolator
 
 		virtual ViPolynomialInterpolator* clone();
 
+		void setParameters(const qreal &param1, const qreal &param2); // param1 = window size, param2 = degree
+
 	protected:
 
 		virtual bool interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+
+		bool solveEquations(double **matrix, double *coefficients, const int &degree);
 
 };
 

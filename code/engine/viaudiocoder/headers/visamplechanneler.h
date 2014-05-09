@@ -11,8 +11,8 @@ class ViSampleChanneler
 
 	public:
 
-        static void split(const T *input, const int &samples, const int &channels, QList<ViChunk<T>> &output);
-        static void split(const T *input, const int &samples, const ViAudioFormat &format, QList<ViChunk<T>> &output);
+		static void split(const T *input, const int &samples, const int &channels, QList<ViChunk<T>> &output);
+		static void split(const T *input, const int &samples, const ViAudioFormat &format, QList<ViChunk<T>> &output);
 
 		static QList<ViChunk<T>> split(const T *input, const int &samples, const int &channels);
 		static QList<ViChunk<T>> split(const T *input, const int &samples, const ViAudioFormat &format);

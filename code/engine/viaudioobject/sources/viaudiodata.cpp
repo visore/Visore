@@ -400,18 +400,18 @@ void ViAudioWriteData::writeScaled(ViSampleChunk &chunk)
 void ViAudioWriteData::writeFrequencies(ViFrequencyChunk &frequencies)
 {
 	QMutexLocker locker(&mMutex);
-    mTransformer.inverseTransform(frequencies.data(), mSampleChunk.data());
-    mTransformer.rescale(mSampleChunk.data());
+	mTransformer.inverseTransform(frequencies.data(), mSampleChunk.data());
+	mTransformer.rescale(mSampleChunk.data());
 	locker.unlock();
-    write(mSampleChunk);
+	write(mSampleChunk);
 }
 
 void ViAudioWriteData::writeSplitSamples(ViSampleChunks &samples)
 {
 	QMutexLocker locker(&mMutex);
-    ViSampleChanneler<qreal>::merge(samples, mSampleChunk);
+	ViSampleChanneler<qreal>::merge(samples, mSampleChunk);
 	locker.unlock();
-    write(mSampleChunk);
+	write(mSampleChunk);
 }
 
 void ViAudioWriteData::writeSplitScaledSamples(ViSampleChunks &samples)
@@ -425,9 +425,9 @@ void ViAudioWriteData::writeSplitScaledSamples(ViSampleChunks &samples)
 void ViAudioWriteData::writeSplitFrequencies(ViFrequencyChunks &frequencies)
 {
 	QMutexLocker locker(&mMutex);
-    ViSampleChanneler<qreal>::merge(frequencies, mFrequencyChunk);
+	ViSampleChanneler<qreal>::merge(frequencies, mFrequencyChunk);
 	locker.unlock();
-    writeFrequencies(mFrequencyChunk);
+	writeFrequencies(mFrequencyChunk);
 }
 
 void ViAudioWriteData::clearOther()

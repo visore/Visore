@@ -10,18 +10,18 @@ class ViChunk
 	public:
 
 		ViChunk();
-		ViChunk(T *data, int size); //Takes ownership
-		ViChunk(int size);
-		ViChunk(const ViChunk &other);
+		ViChunk(T *data, qint64 size); //Takes ownership
+		ViChunk(qint64 size);
+		ViChunk(const ViChunk<T> &other);
 		~ViChunk();
 
 		T* data() const;
 		const T* constData() const;
-		int size() const;
+		qint64 size() const;
 
-		void setData(T *data, int size); //Takes ownership
-		void setSize(int size);
-		void resize(int size);
+		void setData(T *data, qint64 size); //Takes ownership
+		void setSize(qint64 size);
+		void resize(qint64 size);
 
 		void insert(T value, int repeatValue = 1); // Insert value repeatValue number of times at the front
 		void append(T value, int repeatValue = 1); // Append value repeatValue number of times at the end
@@ -29,24 +29,24 @@ class ViChunk
 
 		void clear();
 
-		ViChunk<T> subset(const int &startIndex, const int &size) const;
-		bool subset(ViChunk<T> &subsetData, const int &startIndex, const int &size) const;
-		QList<ViChunk<T>> subsets(const int &size) const;
+		ViChunk<T> subset(const qint64 &startIndex, const qint64 &size) const;
+		bool subset(ViChunk<T> &subsetData, const qint64 &startIndex, const qint64 &size) const;
+		QList<ViChunk<T>> subsets(const qint64 &size) const;
 
 		const T& first() const;
-		const T& first(int offset) const;
+		const T& first(qint64 offset) const;
 		T& first();
-		T& first(int offset);
+		T& first(qint64 offset);
 
 		const T& last() const;
-		const T& last(int offset) const;
+		const T& last(qint64 offset) const;
 		T& last();
-		T& last(int offset);
+		T& last(qint64 offset);
 
-		const T& at(int index) const;
-		T& at(int index);
-		const T& operator[](const int index) const;
-		T& operator[] (const int index);
+		const T& at(qint64 index) const;
+		T& at(qint64 index);
+		const T& operator[](const qint64 index) const;
+		T& operator[] (const qint64 index);
 
 		void operator = (const ViChunk &other);
 
@@ -61,7 +61,7 @@ class ViChunk
 	private:
 
 		T *mData;
-		int mSize;
+		qint64 mSize;
 
 };
 

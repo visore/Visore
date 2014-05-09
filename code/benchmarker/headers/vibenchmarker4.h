@@ -25,7 +25,12 @@ class ViBenchMarker4 : public QObject
 		void process2();
 
 		void generateNoise();
+		int addNoise(ViSampleChunk &s, int offset);
+		void addNoise1(ViSampleChunk &s, int offset, int length);
+		void addNoise2(ViSampleChunk &s, int offset, int length);
+		void addNoise3(ViSampleChunk &s, int offset, int length);
 
+		void addParam(QString name, qreal start, qreal end, qreal increase);
 		bool nextParam();
 		void initParams();
 
@@ -40,6 +45,7 @@ class ViBenchMarker4 : public QObject
 
 	private:
 
+		QList<QString> mParamsName;
 		QList<qreal> mParamsStart, mParamsEnd, mParamsIncrease, mParamsCurrent;
 
 		ViInterpolator *mInterpolator;
@@ -51,6 +57,7 @@ class ViBenchMarker4 : public QObject
 
 		ViSampleChunk mNoise1;
 		ViSampleChunk mNoise2;
+		int mNoiseType;
 		int mNoiseLength;
 		int mNoiseCount;
 
