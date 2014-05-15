@@ -24,7 +24,7 @@ FILE(GLOB VI_NOISE_DETECTOR_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
 ADD_LIBRARY(vinoisedetector SHARED ${VI_NOISE_DETECTOR_HEADERS} ${VI_NOISE_DETECTOR_SOURCES})
-TARGET_LINK_LIBRARIES(vinoisedetector viessentials)
+TARGET_LINK_LIBRARIES(vinoisedetector viaudiobuffer)
 QT5_USE_MODULES(vinoisedetector Multimedia Xml)
 
 #Install file

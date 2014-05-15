@@ -7,17 +7,6 @@
 #include<vibenchmarker3.h>
 #include<vibenchmarker4.h>
 
-#include <vipiecewiseconstantinterpolator.h>
-#include <visplineinterpolator.h>
-#include <vipolynomialinterpolator.h>
-#include <vihermiteinterpolator.h>
-#include <vifourierinterpolator.h>
-#include <vicosineinterpolator.h>
-#include<vicrosscorrelator.h>
-
-#include<vinearestneighbournoisedetector.h>
-
-
 int main(int argc, char *argv[])
 {
 	QApplication application(argc, argv);
