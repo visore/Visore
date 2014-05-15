@@ -7,7 +7,7 @@
 #define MAXIMUM_SAMPLES -1
 
 ViWarpedBurgInterpolator::ViWarpedBurgInterpolator()
-	: ViDegreeInterpolator(MAXIMUM_SAMPLES, DEFAULT_DEGREE)
+	: ViDegreeInterpolator(DEFAULT_DEGREE)
 {
 }
 

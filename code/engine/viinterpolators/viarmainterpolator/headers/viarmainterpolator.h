@@ -64,9 +64,11 @@ class ViArmaInterpolator : public ViInterpolator
 		void setEstimation(const Estimation &estimation);
 		void setCriteria(const Criteria &criteria);
 
-		void setWindowSize(int size);
+		void setWindowSize(const int &size);
 		void setDegree(const Type &type, const int &degree);
 		void setDegree(const int &arDegree, const int &maDegree);
+
+		void setParameters(const qreal &param1, const qreal &param2, const qreal &param3); // Window size, AR order, MA order
 
 		virtual ViArmaInterpolator* clone();
 
@@ -96,7 +98,6 @@ class ViArmaInterpolator : public ViInterpolator
 		int mGretlEstimation;
 
 		int mMaDegree, mArDegree;
-		int mWindowSize;
 		Type mType;
 		Criteria mCriteria;
 

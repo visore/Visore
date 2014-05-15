@@ -4,14 +4,20 @@
 #define DEFAULT_DEGREE 3
 
 ViHermiteInterpolator::ViHermiteInterpolator()
-	: ViAutoDegreeInterpolator(DEFAULT_DEGREE)
+	: ViDegreeInterpolator(DEFAULT_DEGREE)
 {
 }
 
 ViHermiteInterpolator::ViHermiteInterpolator(const int &degree)
-	: ViAutoDegreeInterpolator(degree)
+	: ViDegreeInterpolator(degree)
 {
 
+}
+
+void ViHermiteInterpolator::setParameters(const qreal &param1, const qreal &param2)
+{
+	setWindowSize(param1);
+	setDegree(param2);
 }
 
 bool ViHermiteInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)

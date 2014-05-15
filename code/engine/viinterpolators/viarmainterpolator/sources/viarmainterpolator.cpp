@@ -6,7 +6,7 @@
 #define DEFAULT_WINDOW_SIZE 1024
 #define DEFAULT_TYPE ARMA
 #define DEFAULT_ESTIMATION CML
-#define DEFAULT_CRITERIA BIC
+#define DEFAULT_CRITERIA None
 
 #define DEFAULT_AR_DEGREE 5
 #define DEFAULT_MA_DEGREE 0
@@ -112,18 +112,17 @@ void ViArmaInterpolator::setCriteria(const Criteria &criteria)
 	}
 }
 
-void ViArmaInterpolator::setWindowSize(int size)
+void ViArmaInterpolator::setWindowSize(const int &size)
 {
-	mWindowSize = size;
-
-	if(mGretlEstimation == OPT_X && mWindowSize > 600)
+	if(mGretlEstimation == OPT_X && size > 600)
 	{
 		LOG("X12Arima can have a maximum window size of 600. Resetting it 600.", QtCriticalMsg);
-		setWindowSize(600);
-		return;
+		ViInterpolator::setWindowSize(600);
 	}
-
-	setMaximumSamples(mWindowSize);
+	else
+	{
+		ViInterpolator::setWindowSize(size);
+	}
 }
 
 void ViArmaInterpolator::setDegree(const Type &type, const int &degree)
@@ -138,6 +137,12 @@ void ViArmaInterpolator::setDegree(const int &arDegree, const int &maDegree)
 	setDegree(MA, maDegree);
 }
 
+void ViArmaInterpolator::setParameters(const qreal &param1, const qreal &param2, const qreal &param3)
+{
+	setWindowSize(param1);
+	setDegree(param2, param3);
+}
+
 void ViArmaInterpolator::initialize()
 {
 	ViGretl::initialize();
@@ -145,12 +150,21 @@ void ViArmaInterpolator::initialize()
 	libset_set_int(BFGS_MAXITER, MAXIMUM_ITERATIONS); // ML
 	libset_set_int(BHHH_MAXITER, MAXIMUM_ITERATIONS); // CML
 
-	mGretlParameters = gretl_list_new(5);
+	/*mGretlParameters = gretl_list_new(5);
 	mGretlParameters[1] = 0;        // AR order
 	mGretlParameters[2] = 0;        // order of integration
 	mGretlParameters[3] = 0;        // MA order
 	mGretlParameters[4] = LISTSEP;  // separator
-	mGretlParameters[5] = 1;
+	mGretlParameters[5] = 1;*/
+
+	mGretlParameters = gretl_list_new(7);
+	mGretlParameters[1] = 0;        // AR order
+	mGretlParameters[2] = 0;        // order of integration
+	mGretlParameters[3] = 0;        // MA order
+	mGretlParameters[4] = LISTSEP;  // separator
+	mGretlParameters[5] = 1;		// Position of dependent variable
+	mGretlParameters[6] = 0;		// Add a constant
+	mGretlParameters[7] = 2;		// Position of independent variable
 }
 
 void ViArmaInterpolator::clear()
@@ -165,6 +179,81 @@ void ViArmaInterpolator::clear()
 bool ViArmaInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
 	static bool failed;
+		static int i, error, realSize;
+
+		int realLeftSize = qMin(leftSize, mWindowSize);
+		int realRightSize = qMin(rightSize, mWindowSize);
+		int realTotalSize = realLeftSize + outputSize + realRightSize;
+
+		DATASET *gretlData = create_new_dataset(2, realTotalSize, 0);
+		strcpy(gretlData->varname[1], "visoredata"); // For X12 we need the series to have a name
+		//gretlData->t2 = gretlData->n - 1 - outputSize;
+
+		// Dependent variable
+		for(i = realLeftSize - 1; i >= 0; --i) gretlData->Z[1][i] = leftSamples[i];
+		for(i = 0; i < realRightSize; ++i) gretlData->Z[1][realLeftSize + outputSize + i] = rightSamples[i];
+		// Independent variable
+		//for(i = 0; i < realTotalSize; i++) gretlData->Z[2][i] = i;
+
+		//MODEL *model = (this->*modelPointer)(gretlData);
+
+		mGretlParameters[1] = 5;
+		mGretlParameters[3] = 0;
+		MODEL *model = gretl_model_new();
+		*model = arma_model(mGretlParameters, NULL, gretlData, (gretlopt) mGretlEstimation, NULL);
+
+		if(model->errcode) failed = true;
+		else
+		{
+			FITRESID *forecast = get_forecast(model, realLeftSize, realRightSize - 1, 0, gretlData, OPT_NONE, &error);
+			if(error) failed = true;
+			else
+			{cout<<"******"<<endl;
+				for(i = 0; i < outputSize; ++i)
+				{
+					outputSamples[i] = forecast->fitted[realLeftSize + i];
+				}
+				free_fit_resid(forecast);
+			}
+		}
+
+		gretl_model_free(model);
+		destroy_dataset(gretlData);
+
+		if(failed)
+		{cout<<"kak"<<endl;
+			int count = 0;
+			qreal mean = 0;
+			while(count < outputSize)
+			{
+				for(i = realSize - 1; i >= 0; --i) mean += leftSamples[i];
+				for(i = 0; i < count; ++i) mean += outputSamples[i];
+				mean /= realSize + count;
+				outputSamples[count] = mean;
+				++count;
+			}
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*static bool failed;
 	static int i, error, realSize;
 
 	realSize = qMin(leftSize, mWindowSize);
@@ -207,7 +296,7 @@ bool ViArmaInterpolator::interpolateSamples(const qreal *leftSamples, const int 
 			outputSamples[count] = mean;
 			++count;
 		}
-	}
+	}*/
 }
 
 MODEL* ViArmaInterpolator::fixedModel(DATASET *data)

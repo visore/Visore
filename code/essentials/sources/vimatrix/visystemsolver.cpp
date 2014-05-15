@@ -17,13 +17,6 @@ bool ViSystemSolver::solve(const ViMatrix &matrix, const ViVector &vector, ViVec
 	int row = 0, col = 0;
 	if(!scalar.invert(inverted))
 	{
-
-		STATICLOG("\n\n"+matrix.toString(), QtCriticalMsg, "ViSystemSolver");
-		STATICLOG("\n\n"+transpose.toString(), QtCriticalMsg, "ViSystemSolver");
-		STATICLOG("\n\n"+scalar.toString(), QtCriticalMsg, "ViSystemSolver");
-		exit(-1);
-
-
 		scalar[row][col] += DBL_EPSILON; // We increase with the smallest possible value if matrix is not invertible
 
 		if(col < scalar.columns() - 1) ++col;

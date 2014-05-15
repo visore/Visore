@@ -65,7 +65,6 @@ class ViBenchMarker4 : public QObject
 		QTextStream mOutputStream;
 		qreal mCurrentThreshold;
 
-		int mNoChange;
 		QTime mTime;
 
 		QTime mMainTime;

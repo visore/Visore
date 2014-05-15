@@ -16,7 +16,7 @@ ViPolynomialInterpolator::ViPolynomialInterpolator(const int &degree)
 
 void ViPolynomialInterpolator::setParameters(const qreal &param1, const qreal &param2)
 {
-	setMaximumSamples(param1);
+	setWindowSize(param1);
 	setDegree(param2);
 }
 
@@ -67,6 +67,15 @@ bool ViPolynomialInterpolator::interpolateSamples(const qreal *leftSamples, cons
 		}
 		return false;*/
 
+	/*if(leftSize + rightSize <= mDegree) // Not enough samples
+	{
+		for(i = 0; i < outputSize; ++i)
+		{
+			outputSamples[i] = -99;
+		}
+		return false;
+	}*/
+
 	static int i, j, x, index, sampleCount;
 
 	sampleCount = leftSize + rightSize;
@@ -111,13 +120,6 @@ bool ViPolynomialInterpolator::interpolateSamples(const qreal *leftSamples, cons
 			outputSamples[i] = value;
 		}
 		return true;
-	}
-	else
-	{
-		for(i = 0; i < outputSize; ++i)
-		{
-			outputSamples[i] = 0;
-		}
 	}
 
 	return false;

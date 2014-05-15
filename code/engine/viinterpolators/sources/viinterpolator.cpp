@@ -1,36 +1,34 @@
 #include <viinterpolator.h>
 #include <vilogger.h>
 
+#define DEFAULT_WINDOW_SIZE 0	// Will use all available samples
+
 ViInterpolator::ViInterpolator()
 	: ViLibrary()
 {
-	mMaximumSamples = -1;
-}
-
-ViInterpolator::ViInterpolator(const int &maximumSamples)
-	: ViLibrary()
-{
-	mMaximumSamples = maximumSamples;
+	setWindowSize(0);
 }
 
 ViInterpolator::ViInterpolator(const ViInterpolator &other)
 	: ViLibrary(other)
 {
-	mMaximumSamples = other.mMaximumSamples;
+	mHalfWindowSize = other.mHalfWindowSize;
+	mWindowSize = other.mWindowSize;
 }
 
 ViInterpolator::~ViInterpolator()
 {
 }
 
-void ViInterpolator::setMaximumSamples(const int &count)
+void ViInterpolator::setWindowSize(const int &size)
 {
-	mMaximumSamples = count;
+	mHalfWindowSize = qFloor(size / 2);
+	mWindowSize = mHalfWindowSize * 2;
 }
 
-int ViInterpolator::maximumSamples() const
+int ViInterpolator::windowSize()
 {
-	return mMaximumSamples;
+	return mWindowSize;
 }
 
 bool ViInterpolator::interpolate(ViSampleChunk &samples, const ViNoise &noise)
@@ -119,25 +117,25 @@ bool ViInterpolator::interpolate(ViSampleChunk &samples, const ViSampleChunk &no
 
 bool ViInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
-	if(mMaximumSamples < 1)
+	if(mHalfWindowSize < 1)
 	{
 		return interpolateSamples(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize);
 	}
 
 	static int newLeftSize, newRightSize, i;
-	if(leftSize > mMaximumSamples)
+	if(leftSize > mHalfWindowSize)
 	{
-		leftSamples += (leftSize - mMaximumSamples);
-		newLeftSize = mMaximumSamples;
+		leftSamples += (leftSize - mHalfWindowSize);
+		newLeftSize = mHalfWindowSize;
 	}
 	else
 	{
 		newLeftSize = leftSize;
 	}
 
-	if(rightSize > mMaximumSamples)
+	if(rightSize > mHalfWindowSize)
 	{
-		newRightSize = mMaximumSamples;
+		newRightSize = mHalfWindowSize;
 	}
 	else
 	{
@@ -178,12 +176,6 @@ ViDegreeInterpolator::ViDegreeInterpolator(const int &degree)
 	setDegree(degree);
 }
 
-ViDegreeInterpolator::ViDegreeInterpolator(const int &maximumSamples, const int &degree)
-	: ViInterpolator(maximumSamples)
-{
-	setDegree(degree);
-}
-
 ViDegreeInterpolator::ViDegreeInterpolator(const ViDegreeInterpolator &other)
 	: ViInterpolator(other)
 {
@@ -210,38 +202,4 @@ void ViDegreeInterpolator::setDegree(const int &degree)
 int ViDegreeInterpolator::degree() const
 {
 	return mDegree;
-}
-
-ViAutoDegreeInterpolator::ViAutoDegreeInterpolator()
-	: ViDegreeInterpolator()
-{
-	setMaximumSamples();
-}
-
-ViAutoDegreeInterpolator::ViAutoDegreeInterpolator(const int &degree)
-	: ViDegreeInterpolator(degree)
-{
-	setMaximumSamples();
-}
-
-ViAutoDegreeInterpolator::ViAutoDegreeInterpolator(const ViDegreeInterpolator &other)
-	: ViDegreeInterpolator(other)
-{
-	setMaximumSamples();
-}
-
-ViAutoDegreeInterpolator::~ViAutoDegreeInterpolator()
-{
-}
-
-void ViAutoDegreeInterpolator::setMaximumSamples(const int &count)
-{
-	if(mDegree % 2)
-	{
-		ViInterpolator::setMaximumSamples(qCeil(mDegree / 2.0));
-	}
-	else
-	{
-		ViInterpolator::setMaximumSamples((mDegree / 2) + 1);
-	}
 }

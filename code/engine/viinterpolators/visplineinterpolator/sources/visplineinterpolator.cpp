@@ -4,13 +4,19 @@
 #define DEFAULT_DEGREE 3
 
 ViSplineInterpolator::ViSplineInterpolator()
-	: ViAutoDegreeInterpolator(DEFAULT_DEGREE)
+	: ViDegreeInterpolator(DEFAULT_DEGREE)
 {
 }
 
 ViSplineInterpolator::ViSplineInterpolator(const int &degree)
-	: ViAutoDegreeInterpolator(degree)
+	: ViDegreeInterpolator(degree)
 {
+}
+
+void ViSplineInterpolator::setParameters(const qreal &param1, const qreal &param2)
+{
+	setWindowSize(param1);
+	setDegree(param2);
 }
 
 bool ViSplineInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)

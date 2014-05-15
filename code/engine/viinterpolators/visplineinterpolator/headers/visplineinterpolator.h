@@ -3,7 +3,7 @@
 
 #include <viinterpolator.h>
 
-class ViSplineInterpolator : public ViAutoDegreeInterpolator
+class ViSplineInterpolator : public ViDegreeInterpolator
 {
 
 	public:
@@ -12,6 +12,8 @@ class ViSplineInterpolator : public ViAutoDegreeInterpolator
 		ViSplineInterpolator(const int &degree);
 
 		virtual ViSplineInterpolator* clone();
+
+		void setParameters(const qreal &param1, const qreal &param2);
 
 	protected:
 
