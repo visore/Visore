@@ -21,20 +21,11 @@ class ViBenchMarker4 : public QObject
 		QString timeConversion(int msecs);
 
 		void nextFile();
-		void process1(bool generate = true);
-		void process2();
-
-		void generateNoise();
-		int addNoise(ViSampleChunk &s, int offset);
-		void addNoise1(ViSampleChunk &s, int offset, int length);
-		void addNoise2(ViSampleChunk &s, int offset, int length);
-		void addNoise3(ViSampleChunk &s, int offset, int length);
+		void process();
 
 		void addParam(QString name, qreal start, qreal end, qreal increase);
 		bool nextParam();
 		void initParams();
-
-		void write(ViSampleChunk &data1, ViSampleChunk &data2, QString path);
 
 	public:
 
@@ -54,12 +45,6 @@ class ViBenchMarker4 : public QObject
 		QQueue<QString> mResults;
 		QString mCurrentFile;
 		ViAudioObjectPointer mCurrentObject;
-
-		ViSampleChunk mNoise1;
-		ViSampleChunk mNoise2;
-		int mNoiseType;
-		int mNoiseLength;
-		int mNoiseCount;
 
 		QFile mOutputFile;
 		QTextStream mOutputStream;

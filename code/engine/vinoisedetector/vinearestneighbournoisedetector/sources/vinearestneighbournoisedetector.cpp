@@ -6,47 +6,46 @@ ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector()
 	: ViNoiseDetector()
 {
 	setK(DEFAULT_K);
-	setOffset(mHalfK);
+}
+
+ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector(const ViNearestNeighbourNoiseDetector &other)
+	: ViNoiseDetector(other)
+{
+	mK = other.mK;
+	mHalfK = other.mHalfK;
+	mTotal = other.mTotal;
 }
 
 void ViNearestNeighbourNoiseDetector::setK(const int &k)
 {
 	mK = k;
 	mHalfK = mK / 2;
+	mTotal = mK + 1;
+	setOffset(mHalfK);
+}
+
+void ViNearestNeighbourNoiseDetector::setParameters(const qreal &param1)
+{
+	setK(param1);
 }
 
 void ViNearestNeighbourNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 {
-	static int end, end2, i, j;
+	static int i;
 	static qreal totalDifference;
 
-	end = samples.size() - (mK / 2);
-	for(i = mHalfK; i < end; ++i)
+	while(samples.size() > mTotal)
 	{
-		const qreal &currentValue = samples[i];
+		const qreal &currentValue = samples[mHalfK];
 		totalDifference = 0;
 
-		// Half mK samples before the current sample
-		for(j = i - mHalfK; j < i; ++j)
-		{
-			totalDifference += qAbs(currentValue - samples[j]);
-		}
-
-		// Half mK samples after the current sample
-		end2 = i + mHalfK;
-		for(j = i + 1; j <= end2; ++j)
-		{
-			totalDifference += qAbs(currentValue - samples[j]);
-		}
+		for(i = 0; i < mHalfK; ++i) totalDifference += qAbs(currentValue - samples[i]);
+		for(i = mHalfK + 1; i < mK; ++i) totalDifference += qAbs(currentValue - samples[i]);
 
 		// Devide by mK, since we want the mean of all differences
 		// Devide 2, since the maximum distance between samples can be 2
 		setNoise(totalDifference / (mK * 2));
-	}
 
-	// We don't need the first samples anymore
-	while(samples.size() > mK)
-	{
 		samples.removeFirst();
 	}
 }

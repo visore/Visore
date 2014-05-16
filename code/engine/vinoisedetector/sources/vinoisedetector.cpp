@@ -2,6 +2,8 @@
 
 #include <viscaler.h>
 
+#define WINDOW_SIZE 8096
+
 void ViNoiseDetectorThread::setDetector(ViNoiseDetector *detector)
 {
 	mDetector = detector;
@@ -237,6 +239,7 @@ void ViNoiseDetector::setBuffers(ViBuffer *read, ViBuffer *write1, ViBuffer *wri
 	clear();
 
 	mRead.setBuffer(read);
+	mRead.setSampleCount(WINDOW_SIZE);
 	mWrite1.setBuffer(write1);
 	mWrite2.setBuffer(write2);
 }

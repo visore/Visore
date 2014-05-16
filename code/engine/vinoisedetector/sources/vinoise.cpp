@@ -30,8 +30,8 @@ ViNoise::ViNoise(const int &size)
 
 ViNoise::ViNoise(const ViNoise &other)
 {
-	mMask = other.mMask;
-	mData = other.mData;
+	mMask = new ViSampleChunk(*other.mMask);
+	mData = new ViSampleChunk(*other.mData);
 	setThreshold(mThreshold = other.mThreshold);
 }
 

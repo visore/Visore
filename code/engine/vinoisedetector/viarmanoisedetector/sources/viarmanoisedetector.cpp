@@ -3,8 +3,8 @@
 #define TWO_PI 6.2831853071795864769252866
 #define LN2PI1 2.837877066409345 // log(2*pi) + 1
 
-#define DEFAULT_MA_DEGREE 0
 #define DEFAULT_AR_DEGREE 5
+#define DEFAULT_MA_DEGREE 0
 
 #define WINDOW_SIZE 2048
 
@@ -121,20 +121,21 @@ QString ViArmaNoiseDetector::name(QString replace, bool spaced)
 	return n;
 }
 
-void ViArmaNoiseDetector::setParameters(qreal param1)
+void ViArmaNoiseDetector::setParameters(const qreal &param1)
 {
-	setDegree(mType, param1);
+	setWindowSize(param1);
 }
 
-void ViArmaNoiseDetector::setParameters(qreal param1, qreal param2)
+void ViArmaNoiseDetector::setParameters(const qreal &param1, const qreal &param2)
 {
-	setDegree(param1, param2);
+	setWindowSize(param1);
+	setDegree(mType, param2);
 }
 
-void ViArmaNoiseDetector::setParameters(qreal param1, qreal param2, qreal param3)
+void ViArmaNoiseDetector::setParameters(const qreal &param1, const qreal &param2, const qreal &param3)
 {
-	setWindowSize(param3);
-	setDegree(param1, param2);
+	setWindowSize(param1);
+	setDegree(param2, param3);
 }
 
 void ViArmaNoiseDetector::setType(const Type &type)
@@ -321,10 +322,10 @@ void ViArmaNoiseDetector::setDegree(const Type &type, const int &degree)
 	}
 }
 
-void ViArmaNoiseDetector::setDegree(const int &maDegree, const int &arDegree)
+void ViArmaNoiseDetector::setDegree(const int &arDegree, const int &maDegree)
 {
-	setDegree(MA, maDegree);
 	setDegree(AR, arDegree);
+	setDegree(MA, maDegree);
 }
 /*
 qreal ViArmaNoiseDetector::generateNoise(const qreal &variance) const

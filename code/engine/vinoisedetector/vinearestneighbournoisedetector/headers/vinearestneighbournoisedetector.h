@@ -14,9 +14,12 @@ class ViNearestNeighbourNoiseDetector : public ViNoiseDetector
     public:
 
 		ViNearestNeighbourNoiseDetector();
+		ViNearestNeighbourNoiseDetector(const ViNearestNeighbourNoiseDetector &other);
 		ViNearestNeighbourNoiseDetector* clone();
 
 		void setK(const int &k); // k nearest neighbours
+
+		void setParameters(const qreal &param1); // k-nearest neighbours
 
 	//protected:
 
@@ -26,6 +29,7 @@ class ViNearestNeighbourNoiseDetector : public ViNoiseDetector
 
 		int mK;
 		int mHalfK;
+		int mTotal;
 
 };
 

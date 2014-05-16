@@ -77,13 +77,13 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 
         void setWindowSize(int size);
 		void setDegree(const Type &type, const int &degree);
-		void setDegree(const int &maDegree, const int &arDegree);
+		void setDegree(const int &arDegree, const int &maDegree);
 
 		QString name(QString replace = "", bool spaced = false);
 
-		void setParameters(qreal param1);
-		void setParameters(qreal param1, qreal param2);
-		void setParameters(qreal param1, qreal param2, qreal param3);
+		void setParameters(const qreal &param1);
+		void setParameters(const qreal &param1, const qreal &param2);
+		void setParameters(const qreal &param1, const qreal &param2, const qreal &param3);
 
 	protected:
 
