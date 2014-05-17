@@ -11,15 +11,24 @@ class ViMadNoiseDetector : public ViNoiseDetector
     public:
 
 		ViMadNoiseDetector();
+		ViMadNoiseDetector(const ViMadNoiseDetector &other);
+		~ViMadNoiseDetector();
 		ViMadNoiseDetector* clone();
+
+		void setWindowSize(const int &size);
+		void setParameters(const qreal &param1);
 
 	protected:
 
 		void calculateNoise(QQueue<qreal> &samples);
 
+		qreal quickMedian(qreal *samples, const int &size, const int &position);
+
 	private:
 
-		int mHalfWindow;
+		int mWindowSize;
+		int mHalfWindowSize;
+		qreal *mWindow;
 
 };
 

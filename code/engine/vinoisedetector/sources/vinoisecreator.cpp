@@ -91,9 +91,6 @@ void ViNoiseCreator::createNoise(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 	output->setFormat(input->format());
 	mask->setFormat(input->format());
 
-	ViSampleChunk mask1(WINDOW_SIZE);
-	ViSampleChunk mask2(WINDOW_SIZE);
-
 	ViAudioReadData inputData(input);
 	inputData.setSampleCount(WINDOW_SIZE * 2); // Times 2 so that every channel has a size of WINDOW_SIZE
 	ViAudioWriteData outputData(output);
@@ -110,6 +107,8 @@ void ViNoiseCreator::createNoise(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 		inputData.read();
 		ViSampleChunk &data1 = inputData.splitSamples(0);
 		ViSampleChunk &data2 = inputData.splitSamples(1);
+		ViSampleChunk mask1(data1.size());
+		ViSampleChunk mask2(data2.size());
 
 		addNoise(data1, data2, mask1, mask2);
 
@@ -123,11 +122,8 @@ void ViNoiseCreator::createNoise(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 void ViNoiseCreator::addNoise(ViSampleChunk &samples1, ViSampleChunk &samples2, ViSampleChunk &mask1, ViSampleChunk &mask2)
 {
 	int i, currentOffset, halfWidth;
-	for(i = 0; i < WINDOW_SIZE; ++i)
-	{
-		mask1[i] = 0;
-		mask2[i] = 0;
-	}
+	for(i = 0; i < mask1.size(); ++i) mask1[i] = 0;
+	for(i = 0; i < mask2.size(); ++i) mask2[i] = 0;
 
 	currentOffset = 0;
 	while(currentOffset + MAX_NOISE_LENGTH + NOISE_OFFSET <= samples1.size())

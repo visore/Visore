@@ -55,6 +55,7 @@ ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 	mThreshold = other.mThreshold;
 	mDirection = other.mDirection;
 	mAmplification = other.mAmplification;
+	initialize(mChannel, 512);
 }
 
 ViNoiseDetector::~ViNoiseDetector()

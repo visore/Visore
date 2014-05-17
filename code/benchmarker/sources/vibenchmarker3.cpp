@@ -39,7 +39,7 @@ ViBenchMarker3::ViBenchMarker3()
 	//mDetector->setDirection(ViNoiseDetector::Reversed);
 	//mDetector->setDirection(ViNoiseDetector::Bidirectional);
 
-	//addParam("WINDOW SIZE", 2048, 5000, 1);
+	addParam("WINDOW SIZE", 1, 500, 1);
 	//addParam("K", 65, 300, 1);
 }
 
