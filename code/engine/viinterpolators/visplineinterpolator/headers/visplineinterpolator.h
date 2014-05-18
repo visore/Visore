@@ -17,7 +17,7 @@ class ViSplineInterpolator : public ViDegreeInterpolator
 
 	protected:
 
-		virtual bool interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+		virtual bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
 		inline qreal calculateMultiplier(const int &derivative, const int &parameterNumber);
 
 };

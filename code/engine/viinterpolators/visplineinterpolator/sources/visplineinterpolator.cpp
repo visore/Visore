@@ -19,7 +19,7 @@ void ViSplineInterpolator::setParameters(const qreal &param1, const qreal &param
 	setDegree(param2);
 }
 
-bool ViSplineInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
+bool ViSplineInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
 	static int i, j, index, xIndex, x1, x2, end, end2, indexes, parameterCount, size, derivative, advance, advance2, row, front, exponent;
 

@@ -4,6 +4,7 @@
 #include <vilibrary.h>
 #include <viserializer.h>
 #include <vinoise.h>
+#include <vibuffer.h>
 #include <vilogger.h>
 
 class ViInterpolator : public ViLibrary, public ViSerializer
@@ -19,8 +20,8 @@ class ViInterpolator : public ViLibrary, public ViSerializer
 		virtual void setWindowSize(const int &size);
 		int windowSize();
 
-		bool interpolate(ViSampleChunk &samples, const ViNoise &noise);
-		bool interpolate(ViSampleChunk &samples, const ViSampleChunk &noiseMask);
+		bool interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *mask);
+		bool interpolate(ViSampleChunk &samples, const ViSampleChunk &noiseMask, const int &channel);
 
 		virtual ViInterpolator* clone() = 0;
 
@@ -34,8 +35,9 @@ class ViInterpolator : public ViLibrary, public ViSerializer
 
 	protected:
 
-		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
-		virtual bool interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize) = 0;
+		void process(const ViSampleChunk &samples, ViSampleChunk &output, const ViSampleChunk &noise, int &noiseSize, QVector<qreal> &noiseCache, QVector<qreal> &leftCache, QVector<qreal> &rightCache); // Returns the writable samples
+		void interpolate(ViSampleChunk &output, const int &noiseSize, QVector<qreal> &noiseCache, QVector<qreal> &leftCache, QVector<qreal> &rightCache);
+		virtual bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize) = 0;
 
 	protected:
 

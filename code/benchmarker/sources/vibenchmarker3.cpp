@@ -204,9 +204,9 @@ void ViBenchMarker3::process2()
 	int time = mTime.elapsed();
 	QObject::disconnect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
 
-	/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-	mCurrentObject->encode(ViAudio::Noise);
-	return;*/
+	QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
+	mCurrentObject->encode(ViAudio::Corrupted);
+	return;
 
 	qreal maxMAT = 0;
 	qint64 maxTP = 0, maxTN = 0, maxFP = 0, maxFN = 0;

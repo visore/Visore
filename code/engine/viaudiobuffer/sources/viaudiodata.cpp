@@ -22,12 +22,13 @@ ViAudioData::~ViAudioData()
 void ViAudioData::setDefaults()
 {
     mBuffer = NULL;
-    mSampleCount = DEFAULT_SAMPLE_COUNT;
     mWindowSize = 0;
     mChannelCount = 0;
+	mSampleSize = 0;
     mTransformer.setWindowFunction("Hann");
 	mScaleFrom = -1;
 	mScaleTo = 1;
+	setSampleCount(DEFAULT_SAMPLE_COUNT);
 	defaultOther();
 }
 
@@ -123,10 +124,10 @@ void ViAudioData::update()
     ViAudioFormat format = mBuffer->format();
     mChannelCount = format.channelCount();
 
-    int sampleSize = format.sampleSize();
-    mWindowSize = mSampleCount * (sampleSize / 8);
+	mSampleSize = format.sampleSize();
+	mWindowSize = mSampleCount * (mSampleSize / 8);
 
-    mConverter.setSize(sampleSize);
+	mConverter.setSize(mSampleSize);
     mTransformer.setSize(mSampleCount);
 
 	mSampleChunk = ViSampleChunk(mSampleCount);
@@ -341,7 +342,7 @@ ViAudioWriteData::ViAudioWriteData(ViBuffer *buffer)
 void ViAudioWriteData::enqueueSplitSamples(ViSampleChunk &samples, const int &channel)
 {
 	QMutexLocker locker(&mMutex);
-	mChannelSamples[channel].enqueue(samples);
+	mChannelSamples[channel].append(samples);
 	locker.unlock();
 	dequeueSamples();
 }
@@ -350,7 +351,7 @@ void ViAudioWriteData::enqueueSplitScaledSamples(ViSampleChunk &samples, const i
 {
 	QMutexLocker locker(&mMutex);
 	ViScaler<qreal>::scale(samples, mChannleChunk, mScaleFrom, mScaleTo, DEFAULT_SCALE_FROM, DEFAULT_SCALE_TO);
-	mChannelSamples[channel].enqueue(mChannleChunk);
+	mChannelSamples[channel].append(mChannleChunk);
 	locker.unlock();
 	dequeueSamples();
 }
@@ -364,20 +365,37 @@ void ViAudioWriteData::enqueueSplitFrequencies(ViFrequencyChunk &frequencies, co
 	enqueueSplitSamples(mChannleChunk, channel);
 }
 
-void ViAudioWriteData::dequeueSamples()
+qint64 ViAudioWriteData::writableSize()
 {
 	QMutexLocker locker(&mMutex);
+	qint64 minSize = LONG_MAX;
 	for(int i = 0; i < mChannelCount; ++i)
 	{
-		if(mChannelSamples[i].isEmpty())
-		{
-			return;
-		}
+		if(mChannelSamples[i].size() < minSize) minSize = mChannelSamples[i].size();
 	}
+	if(minSize == LONG_MAX) minSize = 0;
+	return minSize;
+}
+
+void ViAudioWriteData::dequeueSamples()
+{
+	qint64 minSize = writableSize();
+	QMutexLocker locker(&mMutex);
+	if(minSize == 0) return;
+
 	ViSampleChunks temp;
 	for(int i = 0; i < mChannelCount; ++i)
 	{
-		temp.append(mChannelSamples[i].dequeue());
+		if(mChannelSamples[i].size() == minSize)
+		{
+			temp.append(mChannelSamples[i]);
+			mChannelSamples[i].clear();
+		}
+		else
+		{
+			temp.append(mChannelSamples[i].subset(0, minSize));
+			mChannelSamples[i].removeFirst(minSize);
+		}
 	}
 	locker.unlock();
 	writeSplitSamples(temp);
@@ -386,6 +404,7 @@ void ViAudioWriteData::dequeueSamples()
 void ViAudioWriteData::write(ViSampleChunk &chunk)
 {
 	QMutexLocker locker(&mMutex);
+	mRawChunk.resize(chunk.size() * (mSampleSize / 8));
 	mStream->write(mRawChunk.data(), mConverter.realToPcm(chunk.data(), mRawChunk.data(), chunk.size()));
 }
 
@@ -441,7 +460,7 @@ void ViAudioWriteData::updateOther()
 	mChannelSamples.clear();
 	for(int i = 0; i < mChannelCount; ++i)
 	{
-		mChannelSamples.append(QQueue<ViSampleChunk>());
+		mChannelSamples.append(ViSampleChunk());
 	}
 	//mChannelSamples.resize(mChannelCount);
 }

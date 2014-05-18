@@ -1,6 +1,6 @@
 #include <vipiecewiseconstantinterpolator.h>
 
-bool ViPiecewiseConstantInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
+bool ViPiecewiseConstantInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
 	if(leftSize == 0 && rightSize == 0) return false;
 

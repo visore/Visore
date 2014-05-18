@@ -19,8 +19,6 @@
 #define MASK_INTERVAL 0.001
 #define NOISE_TYPE Direct
 
-//#define WRITE_CORRECTED
-
 #define NO_CHANGE 50
 
 ViBenchMarker4::ViBenchMarker4()
@@ -29,18 +27,18 @@ ViBenchMarker4::ViBenchMarker4()
 	mMainTime.start();
 
 	//mInterpolator = new ViCosineInterpolator();
-	mInterpolator = new ViPolynomialInterpolator();
+	//mInterpolator = new ViPolynomialInterpolator();
 	//mInterpolator = new ViSplineInterpolator();
-	//mInterpolator = new ViArmaInterpolator();
+	mInterpolator = new ViArmaInterpolator();
 	//mInterpolator = new ViHermiteInterpolator();
 	//mInterpolator = new ViFourierInterpolator();
 
-	/*addParam("WINDOW SIZE", 5, 5, 1);
+	addParam("WINDOW SIZE", 1024, 1024, 1);
 	addParam("ARDEGREE", 5, 5, 1);
-	addParam("MADEGREE", 0, 0, 1);*/
+	addParam("MADEGREE", 0, 0, 1);
 
-	addParam("WINDOW SIZE", 1, 20, 1);
-	addParam("DEGREE", 1,10, 1);
+	/*addParam("WINDOW SIZE", 128, 128, 1);
+	addParam("DEGREE", 9,9, 1);*/
 }
 
 ViBenchMarker4::~ViBenchMarker4()
@@ -172,12 +170,9 @@ void ViBenchMarker4::process()
 	ViNoiseCreator creator;
 	creator.createNoise(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::NoiseMask));
 
-	int i, halfWindowSize = WINDOW_SIZE / 2;
-	qint64 offset, accuracyCount, time;
+	int i;
+	qint64 accuracyCount, time;
 	qreal totalAccuracy, acc, percentageDone, remaining, best = 0;
-
-	ViSampleChunk data1(halfWindowSize);
-	ViSampleChunk data2(halfWindowSize);
 
 	do
 	{
@@ -186,89 +181,53 @@ void ViBenchMarker4::process()
 		else if(mParamsStart.size() == 2) mInterpolator->setParameters(mParamsCurrent[0], mParamsCurrent[1]);
 		else if(mParamsStart.size() == 3) mInterpolator->setParameters(mParamsCurrent[0], mParamsCurrent[1], mParamsCurrent[2]);
 		else if(mParamsStart.size() == 4) mInterpolator->setParameters(mParamsCurrent[0], mParamsCurrent[1], mParamsCurrent[2], mParamsCurrent[3]);
-		else { cout << "Invalid parameter count of "<<mParamsStart.size()<<". Min: 1, Max: 4" << endl; quit(); }
+		//else { cout << "Invalid parameter count of "<<mParamsStart.size()<<". Min: 1, Max: 4" << endl; quit(); }
 
 		ViAudioReadData target(mCurrentObject->buffer(ViAudio::Target));
-		ViAudioReadData corrupted(mCurrentObject->buffer(ViAudio::Corrupted));
+		ViAudioReadData corrected(mCurrentObject->buffer(ViAudio::Corrected));
 		ViAudioReadData noise(mCurrentObject->buffer(ViAudio::NoiseMask));
 		target.setSampleCount(WINDOW_SIZE);
-		corrupted.setSampleCount(WINDOW_SIZE);
+		corrected.setSampleCount(WINDOW_SIZE);
 		noise.setSampleCount(WINDOW_SIZE);
 
-		offset = 0;
+		mInterpolator->interpolate(mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::Corrected), mCurrentObject->buffer(ViAudio::NoiseMask));
+
 		totalAccuracy = 0;
 		accuracyCount = 0;
 
 		// Write
-		#ifdef WRITE_CORRECTED
-			ViAudio::Type outputType = ViAudio::NoiseMask;
-			mCurrentObject->buffer(outputType)->setFormat(mCurrentObject->buffer(ViAudio::Target)->format());
-			ViAudioWriteData write(mCurrentObject->buffer(outputType));
-			write.setSampleCount(WINDOW_SIZE);
-		#endif
+		/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
+		mCurrentObject->encode(ViAudio::Corrected);
+		return;*/
 
 		mTime.restart();
-		while(corrupted.hasData())
-		{	mParamsStart.clear();
-			mParamsEnd.clear();
-			mParamsIncrease.clear();
-			mParamsCurrent.clear();
-
-
-
+		while(corrected.hasData())
+		{
 			target.read();
 			ViSampleChunk &t1 = target.splitSamples(0);
 			ViSampleChunk &t2 = target.splitSamples(1);
 
-			corrupted.read();
-			ViSampleChunk &c1 = corrupted.splitSamples(0);
-			ViSampleChunk &c2 = corrupted.splitSamples(1);
+			corrected.read();
+			ViSampleChunk &c1 = corrected.splitSamples(0);
+			ViSampleChunk &c2 = corrected.splitSamples(1);
 
 			noise.read();
 			ViSampleChunk &n1 = noise.splitSamples(0);
 			ViSampleChunk &n2 = noise.splitSamples(1);
 
-			if(c1.size() != halfWindowSize || c2.size() != halfWindowSize) break;
-
-			for(i = 0; i < halfWindowSize; ++i)
-			{
-				data1[i] = c1[i];
-				data2[i] = c2[i];
-			}
-			offset += halfWindowSize;
-
-			mInterpolator->interpolate(data1, n1);
-			mInterpolator->interpolate(data2, n2);
-
-			// Write
-			#ifdef WRITE_CORRECTED
-				if(outputType == ViAudio::Corrected)
-				{
-					write.enqueueSplitSamples(data1, 0);
-					write.enqueueSplitSamples(data2, 1);
-				}
-				else if(outputType == ViAudio::Corrupted)
-				{
-					write.enqueueSplitSamples(c1, 0);
-					write.enqueueSplitSamples(c2, 1);
-				}
-				else if(outputType == ViAudio::NoiseMask)
-				{
-					write.enqueueSplitSamples(n1, 0);
-					write.enqueueSplitSamples(n2, 1);
-				}
-			#endif
-
-			for(i = 0; i < halfWindowSize; ++i)
+			for(i = 0; i < n1.size(); ++i)
 			{
 				if(n1[i])
 				{
-					totalAccuracy += qAbs(data1[i] - t1[i]);
+					totalAccuracy += qAbs(c1[i] - t1[i]);
 					++accuracyCount;
 				}
+			}
+			for(i = 0; i < n2.size(); ++i)
+			{
 				if(n2[i])
 				{
-					totalAccuracy += qAbs(data2[i] - t2[i]);
+					totalAccuracy += qAbs(c2[i] - t2[i]);
 					++accuracyCount;
 				}
 			}
@@ -290,14 +249,6 @@ void ViBenchMarker4::process()
 		}
 		mOutputStream << acc << "\t" << time << "\n";
 		mOutputStream.flush();
-
-		// Write
-		#ifdef WRITE_CORRECTED
-			QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-			mCurrentObject->encode(outputType);
-			return;
-		#endif
-
 	}
 	while(nextParam());
 

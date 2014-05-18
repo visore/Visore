@@ -23,6 +23,8 @@ class ViChunk
 		void setSize(qint64 size);
 		void resize(qint64 size);
 
+		void removeFirst(const qint64 &size); // Removes the first size elements and makes the chunk smaller
+
 		void insert(T value, int repeatValue = 1); // Insert value repeatValue number of times at the front
 		void append(T value, int repeatValue = 1); // Append value repeatValue number of times at the end
 		void append(const ViChunk<T> &other);
@@ -50,7 +52,7 @@ class ViChunk
 
 		void operator = (const ViChunk &other);
 
-        // Copies the data from source to destination and sets the size of source to the destination size.
+		// Copies the data from source to destination and sets the size of destination to the source size.
         // If the destination is smaller than the source, only the maximum number of values that destination can hold will be copied.
         static void copy(const ViChunk<T> &source, ViChunk<T> &destination);
 

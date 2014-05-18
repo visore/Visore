@@ -625,7 +625,9 @@ QString ViAudioFormat::toString()
 
 	result += "Byte Order: " + toString(mByteOrder) + "\n";
 
-	result += "Codec: " + mCodec->toString() + "\n";
+	QString codec = "";
+	if(mCodec != NULL) codec = mCodec->toString();
+	result += "Codec: " + codec + "\n";
 
 	result += "Bitrate: " + mBitrate.toString() + "\n";
 

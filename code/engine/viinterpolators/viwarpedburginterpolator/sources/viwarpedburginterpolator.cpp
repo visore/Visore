@@ -11,7 +11,7 @@ ViWarpedBurgInterpolator::ViWarpedBurgInterpolator()
 {
 }
 
-bool ViWarpedBurgInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
+bool ViWarpedBurgInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
 	//mDegree=4;
 

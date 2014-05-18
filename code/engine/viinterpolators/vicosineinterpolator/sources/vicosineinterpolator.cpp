@@ -5,7 +5,7 @@ ViCosineInterpolator::ViCosineInterpolator()
 {
 }
 
-bool ViCosineInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
+bool ViCosineInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
 	if(leftSize == 0 || rightSize == 0) return false;
 	static qreal currentRatio, ratio;

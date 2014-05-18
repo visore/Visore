@@ -265,7 +265,7 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 
 		*******************************************************************************************************************/
 
-		ViAudioFormat format(ViAudio::Type type);
+		ViAudioFormat format(ViAudio::Type type = ViAudio::All); // If ViAudio::All, the first valid format from all buffers will be returned
 
 		/*******************************************************************************************************************
 

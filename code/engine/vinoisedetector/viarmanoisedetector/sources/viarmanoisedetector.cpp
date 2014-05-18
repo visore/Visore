@@ -532,6 +532,7 @@ void ViArmaNoiseDetector::calculateNoiseGretl(QQueue<qreal> &samples)
 		if(model->errcode) failed = true;
 		else
 		{
+			error = 0; // gretl doesn't do this for us. We manually have to start with "no" error.
 			FITRESID *forecast = get_forecast(model, mGretlData->t2 + 1, mGretlData->n - 1, 0, mGretlData, OPT_NONE, &error);
 			if(error) failed = true;
 			else

@@ -24,7 +24,7 @@ class ViWarpedBurgInterpolator : public ViDegreeInterpolator
 
 	protected:
 
-		bool interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
 
 	private:
 

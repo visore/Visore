@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     bool BENCH = true;
     //bool BENCH = false;
 
-	ViBenchMarker3 bench;
+	ViBenchMarker4 bench;
 	if(BENCH)
 	{
 		bench.benchmark();

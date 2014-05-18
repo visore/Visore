@@ -20,7 +20,7 @@ void ViHermiteInterpolator::setParameters(const qreal &param1, const qreal &para
 	setDegree(param2);
 }
 
-bool ViHermiteInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
+bool ViHermiteInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
 	static int i, j, x, newLeftSize, sampleCount, exponent;
 

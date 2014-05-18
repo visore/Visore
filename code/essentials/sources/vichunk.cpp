@@ -101,6 +101,17 @@ void ViChunk<T>::resize(qint64 size)
 }
 
 template<typename T>
+void ViChunk<T>::removeFirst(const qint64 &size)
+{
+	if(size >= mSize)
+	{
+		clear();
+		return;
+	}
+	copy(subset(size, mSize - size), *this);
+}
+
+template<typename T>
 void ViChunk<T>::insert(T value, int repeatValue)
 {
 	if(mData == 0)

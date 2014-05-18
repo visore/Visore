@@ -56,6 +56,7 @@ class ViAudioData
 
         int mWindowSize;
         int mSampleCount;
+		int mSampleSize;
         int mChannelCount;
 
 		int mScaleFrom;
@@ -138,6 +139,7 @@ class ViAudioWriteData : public ViAudioData
 
     protected:
 
+		qint64 writableSize();
 		void dequeueSamples();
 
 		void clearOther();
@@ -145,7 +147,7 @@ class ViAudioWriteData : public ViAudioData
 
 	private:
 
-		QVector<QQueue<ViSampleChunk>> mChannelSamples;
+		QVector<ViSampleChunk> mChannelSamples;
 
 };
 

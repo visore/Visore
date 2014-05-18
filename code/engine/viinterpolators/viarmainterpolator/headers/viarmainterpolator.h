@@ -77,7 +77,7 @@ class ViArmaInterpolator : public ViInterpolator
 		void initialize();
 		void clear();
 
-		virtual bool interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+		virtual bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
 
 		MODEL* fixedModel(DATASET *data);
 		MODEL* autocorrelationModel(DATASET *data);

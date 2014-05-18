@@ -283,7 +283,16 @@ void ViAudioObject::addDestructRule(ViAudio::Type type, bool destruct)
 
 ViAudioFormat ViAudioObject::format(ViAudio::Type type)
 {
-	if(hasBuffer(type))
+	if(type == ViAudio::All)
+	{
+		QList<ViAudio::Type> types = ViAudio::types(availableResources(ViAudioObject::Buffer));
+		QMutexLocker locker(&mMutex);
+		for(int i = 0; i < types.size(); ++i)
+		{
+			if(mBuffers[types[i]]->format().isValid()) return mBuffers[types[i]]->format();
+		}
+	}
+	else if(hasBuffer(type))
 	{
 		QMutexLocker locker(&mMutex);
 		return mBuffers[type]->format();
@@ -643,7 +652,11 @@ ViBuffer* ViAudioObject::buffer(ViAudio::Type type, bool dontCreate)
 	{
 		if(mBuffers[type] == NULL)
 		{
+			locker.unlock();
+			ViAudioFormat newFormat = format();
+			locker.relock();
 			mBuffers[type] = new ViBuffer();
+			if(newFormat.isValid()) mBuffers[type]->setFormat(newFormat);
 		}
 	}
 	return mBuffers[type];

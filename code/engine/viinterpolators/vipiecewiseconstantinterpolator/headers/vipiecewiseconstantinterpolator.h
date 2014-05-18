@@ -12,7 +12,7 @@ class ViPiecewiseConstantInterpolator : public ViInterpolator
 
 	protected:
 
-		virtual bool interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+		virtual bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
 
 };
 

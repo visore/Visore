@@ -20,7 +20,7 @@ void ViPolynomialInterpolator::setParameters(const qreal &param1, const qreal &p
 	setDegree(param2);
 }
 
-bool ViPolynomialInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
+bool ViPolynomialInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
 
 	/*static int i, j, x, index, sampleCount;

@@ -37,9 +37,9 @@ void ViInterpolationCorrector::initialize()
 
 void ViInterpolationCorrector::execute(const int &channel)
 {
-	ViSampleChunk &chunk = currentSamples(channel);
+	/*ViSampleChunk &chunk = currentSamples(channel);
 	mInterpolator->interpolate(chunk, currentNoise(channel));
-	write(chunk, channel);
+	write(chunk, channel);*/
 }
 
 void ViInterpolationCorrector::finalize()

@@ -40,7 +40,7 @@ void ViFourierInterpolator::setParameters(const qreal &param1, const qreal &para
 	setDegree(param2);
 }
 
-bool ViFourierInterpolator::interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
+bool ViFourierInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
 	// http://cant.ua.ac.be/sites/cant.ua.ac.be/files/courses/cscw/ratint/fourier.fausett.pdf
 	// mathcs.slu.edu/Public/johnson/maths/interpolation.pdf

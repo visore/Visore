@@ -17,7 +17,7 @@ class ViPolynomialInterpolator : public ViDegreeInterpolator
 
 	protected:
 
-		virtual bool interpolateSamples(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+		virtual bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
 
 		bool solveEquations(double **matrix, double *coefficients, const int &degree);
 
