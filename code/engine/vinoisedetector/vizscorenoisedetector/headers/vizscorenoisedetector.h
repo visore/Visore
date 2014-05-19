@@ -27,6 +27,7 @@ class ViZscoreNoiseDetector : public ViNoiseDetector
 
 		int mWindowSize;
 		int mHalfWindow;
+		int mCorrectedWindowSize;
 
 };
 

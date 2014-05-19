@@ -24,7 +24,7 @@ class ViBenchMarker3 : public QObject
 		void process1(bool generate = true);
 		void process2();
 
-		void addParam(QString name, qreal start, qreal end, qreal increase);
+		void addParam(qreal start, qreal end, qreal increase);
 		bool nextParam();
 		void initParams();
 
@@ -45,12 +45,22 @@ class ViBenchMarker3 : public QObject
 
 		void benchmark();
 
+	protected:
+
+		void printFileHeader();
+		void printFileData(const qint64 &time, const qint64 &TP, const qint64 &TN, const qint64 &FP, const qint64 &FN, const QVector<qreal> &lengthTP, const QVector<qreal> &lengthFN);
+		void printTerminal(const qint64 &time, const qint64 &TP, const qint64 &TN, const qint64 &FP, const qint64 &FN, const qreal &bestMatthews);
+
+		qreal sensitivity(const qint64 &TP, const qint64 &FN);
+		qreal specificity(const qint64 &TN, const qint64 &FP);
+		qreal matthews(const qint64 &TP, const qint64 &TN, const qint64 &FP, const qint64 &FN);
+
 	private:
 
-		QList<QString> mParamsName;
 		QList<qreal> mParamsStart, mParamsEnd, mParamsIncrease, mParamsCurrent;
 
 		ViNoiseDetector *mDetector;
+		qreal mBestMatthews;
 
 		QQueue<QString> mFiles;
 		QQueue<QString> mResults;

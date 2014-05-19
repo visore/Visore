@@ -8,7 +8,7 @@
 
 #define WINDOW_SIZE 2048
 
-#define DEFAULT_GRETL_CRITERIA AC
+#define DEFAULT_GRETL_CRITERIA None
 
 #define MAXIMUM_ITERATIONS 1
 #define MAXIMUM_TEST_DEGREE 5
@@ -45,6 +45,10 @@ ViArmaNoiseDetector::ViArmaNoiseDetector(const Type &type, const Mode &mode, con
 
 	setGretlCriteria(DEFAULT_GRETL_CRITERIA);
 	mHasNoise = false;
+
+	addParameterName("Window Size");
+	addParameterName("AR Order");
+	addParameterName("MA Order");
 }
 
 ViArmaNoiseDetector::ViArmaNoiseDetector(const ViArmaNoiseDetector &other)
@@ -279,10 +283,11 @@ void ViArmaNoiseDetector::setWindowSize(int size)
 			setWindowSize(600);
 			return;
 		}
+		int forecast = 50;
 		if(mGretlData != NULL) destroy_dataset(mGretlData);
-		mGretlData = create_new_dataset(2, mWindowSize + 1, 0); // + 1 for out-of-sample prediction
+		mGretlData = create_new_dataset(2, mWindowSize + forecast, 0); // + 1 for out-of-sample prediction
 		strcpy(mGretlData->varname[1], "visoredata"); // For X12 we need the series to have a name
-		mGretlData->t2 = mGretlData->n - 2; // reserve 1 observations for out-of-sample forecasting
+		mGretlData->t2 = mGretlData->n - 1 - forecast; // reserve 1 observations for out-of-sample forecasting
 	}
 
 	mPacfConfidenceLevel = 1.96 / qSqrt(mWindowSize - 1);
@@ -490,6 +495,94 @@ void ViArmaNoiseDetector::calculateNoiseNative(QQueue<qreal> &samples)
 void ViArmaNoiseDetector::calculateNoiseGretl(QQueue<qreal> &samples)
 {
 	static bool failed;
+		static int i, error;
+		static qreal difference;
+
+		while(samples.size() > mWindowSize+49)
+		{
+			failed = false;
+
+			mPrediction = 0;
+
+			for(i = 0; i < mWindowSize; ++i)
+			{
+				mGretlData->Z[1][i] = samples[i];
+			}
+
+			MODEL *model = gretl_model_new();
+			(this->*gretlModelPointer)(model);
+
+			if(model->errcode) failed = true;
+			else
+			{
+				/*error = 0; // gretl doesn't do this for us. We manually have to start with "no" error.
+				FITRESID *forecast = get_forecast(model, mGretlData->t2 + 1, mGretlData->n - 1, 0, mGretlData, OPT_NONE, &error);
+				if(error) failed = true;
+				else
+				{
+					if(forecast->nobs > mWindowSize) mPrediction = forecast->fitted[mWindowSize];
+					free_fit_resid(forecast);
+				}*/
+
+				error = 0; // gretl doesn't do this for us. We manually have to start with "no" error.
+				FITRESID *forecast = get_forecast(model, mGretlData->t2 + 1, mGretlData->n - 1, 0, mGretlData, OPT_NONE, &error);
+				if(error) failed = true;
+				else
+				{
+					int counter = 0;
+					qreal diff = 0.5l;
+
+					do
+					{
+						mPrediction = forecast->fitted[mWindowSize+counter];
+						difference = qAbs(samples[mWindowSize+counter] - mPrediction);
+//cout<<mPrediction<<"\t"<<samples[mWindowSize+counter]<<"\t"<<difference<<endl;
+						setNoise(difference);
+
+if(difference>diff)samples[mWindowSize+counter]=samples[mWindowSize+counter-1];
+						++counter;
+
+
+					}
+					while(difference > diff && counter < 50);
+					for(i=0;i<counter;++i)samples.removeFirst();
+					//for(i=samples.size()-1;i>=0;--i)samples[i]
+
+					free_fit_resid(forecast);
+				}
+			}
+			gretl_model_free(model);
+
+			if(failed)
+			{
+				setNoise(0);
+				samples.removeFirst();
+			}
+			/*else
+			{
+				difference = qAbs(samples[mWindowSize] - mPrediction);
+				if(difference > NOISE_CUTOFF) mHasNoise = true;
+				setNoise(difference);
+				//setNoise(mPrediction);
+			}
+			samples.removeFirst();*/
+
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*static bool failed;
 	static int i, error;
 	static qreal difference;
 
@@ -551,11 +644,11 @@ void ViArmaNoiseDetector::calculateNoiseGretl(QQueue<qreal> &samples)
 		{
 			difference = qAbs(samples[mWindowSize] - mPrediction);
 			if(difference > NOISE_CUTOFF) mHasNoise = true;
-			//setNoise(difference);
-			setNoise(mPrediction);
+			setNoise(difference);
+			//setNoise(mPrediction);
 		}
 		samples.removeFirst();
-	}
+	}*/
 }
 
 void ViArmaNoiseDetector::gretlFixedModel(MODEL *model)

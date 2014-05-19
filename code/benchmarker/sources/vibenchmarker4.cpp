@@ -27,18 +27,18 @@ ViBenchMarker4::ViBenchMarker4()
 	mMainTime.start();
 
 	//mInterpolator = new ViCosineInterpolator();
-	//mInterpolator = new ViPolynomialInterpolator();
+	mInterpolator = new ViPolynomialInterpolator();
 	//mInterpolator = new ViSplineInterpolator();
-	mInterpolator = new ViArmaInterpolator();
+	//mInterpolator = new ViArmaInterpolator();
 	//mInterpolator = new ViHermiteInterpolator();
 	//mInterpolator = new ViFourierInterpolator();
 
-	addParam("WINDOW SIZE", 1024, 1024, 1);
-	addParam("ARDEGREE", 5, 5, 1);
-	addParam("MADEGREE", 0, 0, 1);
+	/*addParam("WINDOW SIZE", 1024*2, 1024*2, 1);
+	addParam("ARDEGREE", 0, 10, 1);
+	addParam("MADEGREE", 0, 3, 1);*/
 
-	/*addParam("WINDOW SIZE", 128, 128, 1);
-	addParam("DEGREE", 9,9, 1);*/
+	addParam("WINDOW SIZE", 438, 438, 1);
+	addParam("DEGREE", 14,14, 1);
 }
 
 ViBenchMarker4::~ViBenchMarker4()
@@ -151,7 +151,12 @@ void ViBenchMarker4::nextFile()
 		{
 			mOutputStream << "PARAMETER "<<(i+1) << " (" << mParamsName[i] << ")\t";
 		}
-		mOutputStream << "ACCURACY" << "\t" << "TIME" << "\n";
+		mOutputStream << "RMSE" << "\t" << "TIME" << "\t\t";
+		for(int i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i)
+		{
+			mOutputStream << "NOISE LENGTH "<< i << "\t";
+		}
+		mOutputStream << "\n";
 
 		mCurrentObject->clearBuffers();
 		mCurrentObject.setNull();
@@ -168,11 +173,11 @@ void ViBenchMarker4::process()
 	QObject::disconnect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
 
 	ViNoiseCreator creator;
-	creator.createNoise(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::NoiseMask));
+	creator.createNoise(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::NoiseMask), mCurrentObject->buffer(ViAudio::Custom));
 
-	int i;
+	int i, lengthIndex;
 	qint64 accuracyCount, time;
-	qreal totalAccuracy, acc, percentageDone, remaining, best = 0;
+	qreal accuraccy, totalAccuracy, acc, percentageDone, remaining, best = DBL_MAX;
 
 	do
 	{
@@ -186,21 +191,28 @@ void ViBenchMarker4::process()
 		ViAudioReadData target(mCurrentObject->buffer(ViAudio::Target));
 		ViAudioReadData corrected(mCurrentObject->buffer(ViAudio::Corrected));
 		ViAudioReadData noise(mCurrentObject->buffer(ViAudio::NoiseMask));
+		ViAudioReadData length(mCurrentObject->buffer(ViAudio::Custom));
 		target.setSampleCount(WINDOW_SIZE);
 		corrected.setSampleCount(WINDOW_SIZE);
 		noise.setSampleCount(WINDOW_SIZE);
+		length.setSampleCount(WINDOW_SIZE);
 
+		mTime.restart();
 		mInterpolator->interpolate(mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::Corrected), mCurrentObject->buffer(ViAudio::NoiseMask));
+		time = mTime.elapsed();
 
 		totalAccuracy = 0;
 		accuracyCount = 0;
+		QVector<qreal> lengthAccuracy(ViNoiseCreator::noiseSizeCount());
+		QVector<qint64> lengthTotal(ViNoiseCreator::noiseSizeCount());
+		lengthAccuracy.fill(0);
+		lengthTotal.fill(0);
 
 		// Write
 		/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
 		mCurrentObject->encode(ViAudio::Corrected);
 		return;*/
 
-		mTime.restart();
 		while(corrected.hasData())
 		{
 			target.read();
@@ -215,44 +227,63 @@ void ViBenchMarker4::process()
 			ViSampleChunk &n1 = noise.splitSamples(0);
 			ViSampleChunk &n2 = noise.splitSamples(1);
 
+			length.read();
+			ViSampleChunk &l1 = length.splitSamples(0);
+			ViSampleChunk &l2 = length.splitSamples(1);
+
 			for(i = 0; i < n1.size(); ++i)
 			{
 				if(n1[i])
 				{
-					totalAccuracy += qAbs(c1[i] - t1[i]);
+					accuraccy = qPow(c1[i] - t1[i], 2);
+					totalAccuracy += accuraccy;
 					++accuracyCount;
+
+					lengthIndex = ViNoiseCreator::fromSizeMask(l1[i]) - 1;
+					lengthAccuracy[lengthIndex] += accuraccy;
+					lengthTotal[lengthIndex] += 1;
 				}
 			}
 			for(i = 0; i < n2.size(); ++i)
 			{
 				if(n2[i])
 				{
-					totalAccuracy += qAbs(c2[i] - t2[i]);
+					accuraccy = qPow(c2[i] - t2[i], 2);
+					totalAccuracy += accuraccy;
 					++accuracyCount;
+
+					lengthIndex = ViNoiseCreator::fromSizeMask(l2[i]) - 1;
+					lengthAccuracy[lengthIndex] += accuraccy;
+					lengthTotal[lengthIndex] += 1;
 				}
 			}
 		}
-		time = mTime.elapsed();
 
 		++mDoneParamIterations;
-		acc = (2 - (totalAccuracy / accuracyCount)) / 2.0;
-		if(acc > best) best = acc;
 		percentageDone = mDoneParamIterations / double(mTotalParamIterations);
 		remaining = mMainTime.elapsed();
-
 		remaining = ((1.0/percentageDone) * remaining) - remaining;
-		cout << int(percentageDone * 100.0) << "%\t("<<timeConversion(remaining).toLatin1().data()<<")\tAccuracy: "<<acc<<" ("<<best<<")\tTime: "<<time<<endl;
 
-		for(i = 0; i < mParamsStart.size(); ++i)
-		{
-			mOutputStream << (int) mParamsCurrent[i] << "\t";
-		}
-		mOutputStream << acc << "\t" << time << "\n";
+		acc = calculateAccuracy(totalAccuracy, accuracyCount);
+		if(acc < best) best = acc;
+		cout << int(percentageDone * 100.0) << "%\t("<<timeConversion(remaining).toLatin1().data()<<")\tRMSE: "<<acc<<" ("<<best<<")\tTime: "<<time<<endl;
+
+		for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << (int) mParamsCurrent[i] << "\t";
+		mOutputStream << acc << "\t" << time << "\t\t";
+		for(i = 0; i < lengthAccuracy.size(); ++i) mOutputStream << calculateAccuracy(lengthAccuracy[i], lengthTotal[i]) << "\t";
+		mOutputStream << "\n";
 		mOutputStream.flush();
 	}
 	while(nextParam());
 
 	nextFile();
+}
+
+qreal ViBenchMarker4::calculateAccuracy(const qreal &totalAccuracy, const qint64 &count)
+{
+	//return (2 - (totalAccuracy / count)) / 2.0;
+
+	return (qSqrt(totalAccuracy / count)) / 2; // Root mean squared error. Devided my 0 to get RMSE between 0 and 1, otherwise it is between 0 and 2
 }
 
 QString ViBenchMarker4::timeConversion(int msecs)

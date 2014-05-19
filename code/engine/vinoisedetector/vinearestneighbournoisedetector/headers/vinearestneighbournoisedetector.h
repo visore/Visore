@@ -29,7 +29,6 @@ class ViNearestNeighbourNoiseDetector : public ViNoiseDetector
 
 		int mK;
 		int mHalfK;
-		int mTotal;
 
 };
 

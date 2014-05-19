@@ -55,6 +55,7 @@ ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 	mThreshold = other.mThreshold;
 	mDirection = other.mDirection;
 	mAmplification = other.mAmplification;
+	mParameterNames = other.mParameterNames;
 	initialize(mChannel, 512);
 }
 
@@ -233,6 +234,47 @@ void ViNoiseDetector::setAmplification(const qreal &amp)
 qreal ViNoiseDetector::amplification()
 {
 	return mAmplification;
+}
+
+void ViNoiseDetector::setParameters(const qreal &param1)
+{
+	LOG("Invalid number of parameters given: 1", QtCriticalMsg);
+	exit(-1);
+}
+
+void ViNoiseDetector::setParameters(const qreal &param1, const qreal &param2)
+{
+	LOG("Invalid number of parameters given: 2", QtCriticalMsg);
+	exit(-1);
+}
+
+void ViNoiseDetector::setParameters(const qreal &param1, const qreal &param2, const qreal &param3)
+{
+	LOG("Invalid number of parameters given: 3", QtCriticalMsg);
+	exit(-1);
+}
+
+void ViNoiseDetector::setParameters(const qreal &param1, const qreal &param2, const qreal &param3, const qreal &param4)
+{
+	LOG("Invalid number of parameters given: 4", QtCriticalMsg);
+	exit(-1);
+}
+
+QString ViNoiseDetector::parameterName(const int &number, const bool &allCaps)
+{
+	if(number >= mParameterNames.size()) return "";
+	if(allCaps) return mParameterNames[number].toUpper();
+	return mParameterNames[number];
+}
+
+int ViNoiseDetector::parameterCount()
+{
+	return mParameterNames.size();
+}
+
+void ViNoiseDetector::addParameterName(const QString &name)
+{
+	mParameterNames.append(name);
 }
 
 void ViNoiseDetector::setBuffers(ViBuffer *read, ViBuffer *write1, ViBuffer *write2)

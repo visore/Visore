@@ -1,38 +1,65 @@
-#ifndef VIPREDICTORS_H
-#define VIPREDICTORS_H
+#ifndef VIPREDICTOR_H
+#define VIPREDICTOR_H
 
-#include <vilibrary.h>
-#include <vichunk.h>
+#include <vibuffer.h>
+#include <viname.h>
 
-class ViPredictor : public ViLibrary
+class ViPredictor : public ViName
 {
 
 	public:
-		
+
 		ViPredictor();
-		ViPredictor(const int &minimumSamples);
 		ViPredictor(const ViPredictor &other);
-		virtual ~ViPredictor();
+		~ViPredictor();
 
-		qreal predict(const ViSampleChunk &samples);
-		qreal predict(const ViSampleChunk &samples, const int &index);
-		QList<qreal> predict(const int &length, const ViSampleChunk &samples);
-		QList<qreal> predict(const int &length, const ViSampleChunk &samples, const int &index);
+		void setWindowSize(const int &size);
+		int windowSize();
 
-		virtual ViPredictor* clone() = 0;
+		void setOffset(const int &offset);
+		int offset();
+
+		void predict(ViBuffer *input, ViBuffer *output);
+		void predict(ViBuffer *input, ViBuffer *output, const int &predictionCount, qreal *rmse);
+
+		virtual void setParameters(const qreal &parameter1);
+		virtual void setParameters(const qreal &parameter1, const qreal &parameter2);
+		virtual void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3);
+		virtual void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4);
+		virtual void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4, const qreal &parameter5);
+
+		QString parameterName(const int &index, const bool &allCaps = true);
 
 	protected:
 
-		virtual qreal predictValue(const qreal *samples, const int &size) = 0;
-		virtual QList<qreal> predictValues(const qreal *samples, const int &size, const int &length) = 0;
+		void addParameterName(const QString &name);
 
-		void setMinimumSamples(const int &samples);
+		virtual void predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount) = 0;
+		void predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal *expectations, qreal *mse);
 
-		bool enoughData(const ViSampleChunk &samples, const int &startIndex) const;
+	protected:
 
-    private:
+		int mWindowSize;
+		int mOffset;
+		QList<QString> mParameterNames;
 
-		int mMinimumSamples;
+};
+
+class ViDegreePredictor : public ViPredictor
+{
+
+	public:
+
+		ViDegreePredictor();
+		ViDegreePredictor(const ViDegreePredictor &other);
+		~ViDegreePredictor();
+
+		void setDegree(const int &degree);
+		int degree();
+
+	protected:
+
+		int mDegree;
 
 };
 

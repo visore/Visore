@@ -76,18 +76,20 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 
 		virtual ViNoiseDetector* clone() = 0;
 
-		virtual void setWindowSize(const int &size){ LOG("Window size not implemented."); exit(-1); }
+		virtual void setParameters(const qreal &param1);
+		virtual void setParameters(const qreal &param1, const qreal &param2);
+		virtual void setParameters(const qreal &param1, const qreal &param2, const qreal &param3);
+		virtual void setParameters(const qreal &param1, const qreal &param2, const qreal &param3, const qreal &param4);
 
-		virtual void setParameters(const qreal &param1){ LOG("Invalid number of parameters given: 1"); exit(-1); }
-		virtual void setParameters(const qreal &param1, const qreal &param2){ LOG("Invalid number of parameters given: 2"); exit(-1); }
-		virtual void setParameters(const qreal &param1, const qreal &param2, const qreal &param3){ LOG("Invalid number of parameters given: 3"); exit(-1); }
-		virtual void setParameters(const qreal &param1, const qreal &param2, const qreal &param3, const qreal &param4){ LOG("Invalid number of parameters given: 4"); exit(-1); }
+		QString parameterName(const int &number, const bool &allCaps = true);
+		int parameterCount();
 
 		virtual void setAmplification(const qreal &amp);
 		virtual qreal amplification();
 
 	protected:
 
+		void addParameterName(const QString &name);
 		void setOffset(const int &offset); // The first offset samples that can't be used to detect noise
 
 	//protected:
@@ -123,6 +125,8 @@ class ViNoiseDetector : public ViNotifier, public ViLibrary
 		ViAudioWriteData mWrite2;
 
 		qreal mAmplification;
+
+		QList<QString> mParameterNames;
 
 };
 

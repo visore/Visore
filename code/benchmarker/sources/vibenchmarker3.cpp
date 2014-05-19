@@ -27,9 +27,9 @@ ViBenchMarker3::ViBenchMarker3()
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	//mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::AR, ViArmaNoiseDetector::Gretl);
+	mDetector = new ViArmaNoiseDetector();
 	//mDetector = new ViMahalanobisNoiseDetector();
-	mDetector = new ViMadNoiseDetector();
+	//mDetector = new ViMadNoiseDetector();
 	//mDetector = new ViFourierNoiseDetector();
 	//mDetector = new ViPredictionNoiseDetector(2);
 	//mDetector = new ViZscoreNoiseDetector();
@@ -39,7 +39,10 @@ ViBenchMarker3::ViBenchMarker3()
 	//mDetector->setDirection(ViNoiseDetector::Reversed);
 	//mDetector->setDirection(ViNoiseDetector::Bidirectional);
 
-	addParam("WINDOW SIZE", 1, 500, 1);
+	addParam(1024, 1024, 1);
+	addParam(5, 5, 1);
+	addParam(0, 0, 1);
+	//addParam("WINDOW SIZE", 64, 64, 1);
 	//addParam("K", 65, 300, 1);
 }
 
@@ -47,9 +50,8 @@ ViBenchMarker3::~ViBenchMarker3()
 {
 }
 
-void ViBenchMarker3::addParam(QString name, qreal start, qreal end, qreal increase)
+void ViBenchMarker3::addParam(qreal start, qreal end, qreal increase)
 {
-	mParamsName.append(name);
 	mParamsStart.append(start);
 	mParamsEnd.append(end);
 	mParamsIncrease.append(increase);
@@ -133,37 +135,12 @@ void ViBenchMarker3::nextFile()
 	else
 	{
 		initParams();
-		for(int i = 0; i < mParamsStart.size(); ++i)
-		{
-			mParamsCurrent[i] = mParamsStart[i];
-		}
+		for(int i = 0; i < mParamsStart.size(); ++i) mParamsCurrent[i] = mParamsStart[i];
 
 		mCurrentFile = mFiles.dequeue();
+		mBestMatthews = 0;
 
-		mOutputFile.close();
-		mOutputFile.setFileName(mResults.dequeue());
-		mOutputFile.open(QIODevice::WriteOnly);
-		mOutputStream.setDevice(&mOutputFile);
-
-		mOutputStream<<mDetector->name()<<"\n";
-		if(mDetector->direction() == ViNoiseDetector::Forward) mOutputStream<< "Forward";
-		else if(mDetector->direction() == ViNoiseDetector::Reversed) mOutputStream<< "Reversed";
-		else if(mDetector->direction() == ViNoiseDetector::Bidirectional) mOutputStream<< "Bidirectional";
-		mOutputStream<<"\n";
-		if(ViNoise::NOISE_TYPE == ViNoise::Direct) mOutputStream<< "Direct";
-		else if(ViNoise::NOISE_TYPE == ViNoise::Mean) mOutputStream<< "Mean";
-		else if(ViNoise::NOISE_TYPE == ViNoise::Maximum) mOutputStream<< "Maximum";
-		mOutputStream<<"\n\n";
-		mOutputStream << QFileInfo(mCurrentFile).fileName();
-		mOutputStream<<"\n\n";
-
-		for(int i = 0; i < mParamsName.size(); ++i)
-		{
-			mOutputStream << "PARAMETER "<<(i+1) << " (" << mParamsName[i] << ")\t";
-		}
-		mOutputStream << "REAL THRESHOLD" << "\t" << "(UN)AMPLIFIED THRESHOLD" << "\t" << "TRUE POSITIVES" << "\t" << "TRUE NEGATIVES" << "\t" << "FALSE POSITIVES"<< "\t" << "FALSE NEGATIVES" << "\t";
-		mOutputStream << "SENSITIVITY" << "\t" << "SPECIFISITY" << "\t";
-		mOutputStream << "MATTHEWS SCORE" << "\t" << "TIME" << "\n";
+		printFileHeader();
 
 		mCurrentObject->clearBuffers();
 		mCurrentObject.setNull();
@@ -182,7 +159,7 @@ void ViBenchMarker3::process1(bool generate)
 	if(generate)
 	{
 		ViNoiseCreator creator;
-		creator.createNoise(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::CustomMask));
+		creator.createNoise(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::CustomMask), mCurrentObject->buffer(ViAudio::Custom));
 	}
 	mCurrentObject->clearBuffer(ViAudio::Target);
 	mCurrentObject->clearBuffer(ViAudio::Noise);
@@ -204,19 +181,21 @@ void ViBenchMarker3::process2()
 	int time = mTime.elapsed();
 	QObject::disconnect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
 
-	QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-	mCurrentObject->encode(ViAudio::Corrupted);
-	return;
+	/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
+	mCurrentObject->encode(ViAudio::Noise);
+	return;*/
 
 	qreal maxMAT = 0;
 	qint64 maxTP = 0, maxTN = 0, maxFP = 0, maxFN = 0;
-	qint64 i, offset1 = 0, offset2 = 0, offset3 = 0, offset4 = 0;
+	qint64 i, lengthIndex, offset1 = 0, offset2 = 0;
 	int noChange = 0;
 
 	ViAudioReadData corrupted(mCurrentObject->buffer(ViAudio::Noise));
 	ViAudioReadData realMask(mCurrentObject->buffer(ViAudio::CustomMask));
+	ViAudioReadData length(mCurrentObject->buffer(ViAudio::Custom));
 	corrupted.setSampleCount(WINDOW_SIZE);
 	realMask.setSampleCount(WINDOW_SIZE);
+	length.setSampleCount(WINDOW_SIZE);
 
 	ViSampleChunk *nData1 = new ViSampleChunk(corrupted.bufferSamples() / 2);
 	ViSampleChunk *nData2 = new ViSampleChunk(corrupted.bufferSamples() / 2);
@@ -224,6 +203,8 @@ void ViBenchMarker3::process2()
 	ViSampleChunk *nMask2 = new ViSampleChunk(corrupted.bufferSamples() / 2);
 	ViSampleChunk *nRealMask1 = new ViSampleChunk(realMask.bufferSamples() / 2);
 	ViSampleChunk *nRealMask2 = new ViSampleChunk(realMask.bufferSamples() / 2);
+	ViSampleChunk *nLength1 = new ViSampleChunk(corrupted.bufferSamples() / 2);
+	ViSampleChunk *nLength2 = new ViSampleChunk(corrupted.bufferSamples() / 2);
 
 	while(corrupted.hasData() && realMask.hasData())
 	{
@@ -231,20 +212,28 @@ void ViBenchMarker3::process2()
 		ViSampleChunk &corrupted1 = corrupted.splitSamples(0);
 		ViSampleChunk &corrupted2 = corrupted.splitSamples(1);
 
-		for(i = 0; i < corrupted1.size(); ++i) (*nData1)[i + offset1] = corrupted1[i];
-		offset1 += corrupted1.size();
-		for(i = 0; i < corrupted2.size(); ++i) (*nData2)[i + offset2] = corrupted2[i];
-		offset2 += corrupted2.size();
-
-
 		realMask.read();
 		ViSampleChunk &realMask1 = realMask.splitSamples(0);
 		ViSampleChunk &realMask2 = realMask.splitSamples(1);
 
-		for(i = 0; i < realMask1.size(); ++i) (*nRealMask1)[i + offset3] = realMask1[i];
-		offset3 += realMask1.size();
-		for(i = 0; i < realMask2.size(); ++i) (*nRealMask2)[i + offset4] = realMask2[i];
-		offset4 += realMask2.size();
+		length.read();
+		ViSampleChunk &length1 = length.splitSamples(0);
+		ViSampleChunk &length2 = length.splitSamples(1);
+
+		for(i = 0; i < corrupted1.size(); ++i)
+		{
+			(*nData1)[i + offset1] = corrupted1[i];
+			(*nRealMask1)[i + offset1] = realMask1[i];
+			(*nLength1)[i + offset1] = length1[i];
+		}
+		offset1 += corrupted1.size();
+		for(i = 0; i < corrupted2.size(); ++i)
+		{
+			(*nData2)[i + offset2] = corrupted2[i];
+			(*nRealMask2)[i + offset2] = realMask2[i];
+			(*nLength2)[i + offset2] = length2[i];
+		}
+		offset2 += corrupted2.size();
 	}
 
 	mCurrentObject->clearBuffer(ViAudio::Target);
@@ -253,6 +242,12 @@ void ViBenchMarker3::process2()
 
 	ViNoise noise1(nData1, nMask1, mCurrentThreshold);
 	ViNoise noise2(nData2, nMask2, mCurrentThreshold);
+
+	QVector<qreal> lengthTP(ViNoiseCreator::noiseSizeCount());
+	QVector<qreal> lengthFN(ViNoiseCreator::noiseSizeCount());
+	lengthTP.fill(0);
+	lengthFN.fill(0);
+	QVector<qreal> maxLengthTP, maxLengthFN;
 
 	for(mCurrentThreshold = MASK_START; mCurrentThreshold <= MASK_END; mCurrentThreshold += MASK_INTERVAL)
 	{
@@ -267,8 +262,17 @@ void ViBenchMarker3::process2()
 		{
 			if((*nRealMask1)[i] == 1)
 			{
-				if((*nMask1)[i] == 1) ++truePositives;
-				else ++falseNegatives;
+				lengthIndex = ViNoiseCreator::fromSizeMask((*nLength1)[i]) - 1;
+				if((*nMask1)[i] == 1)
+				{
+					++truePositives;
+					lengthTP[lengthIndex] += 1;
+				}
+				else
+				{
+					++falseNegatives;
+					lengthFN[lengthIndex] += 1;
+				}
 			}
 			else if((*nRealMask1)[i] == 0)
 			{
@@ -281,8 +285,17 @@ void ViBenchMarker3::process2()
 		{
 			if((*nRealMask2)[i] == 1)
 			{
-				if((*nMask2)[i] == 1) ++truePositives;
-				else ++falseNegatives;
+				lengthIndex = ViNoiseCreator::fromSizeMask((*nLength2)[i]) - 1;
+				if((*nMask2)[i] == 1)
+				{
+					++truePositives;
+					lengthTP[lengthIndex] += 1;
+				}
+				else
+				{
+					++falseNegatives;
+					lengthFN[lengthIndex] += 1;
+				}
 			}
 			else if((*nRealMask2)[i] == 0)
 			{
@@ -291,9 +304,7 @@ void ViBenchMarker3::process2()
 			}
 		}
 
-		qreal math = qSqrt(truePositives + falsePositives) * qSqrt(truePositives + falseNegatives) * qSqrt(trueNegatives + falsePositives) * qSqrt(trueNegatives + falseNegatives);
-		if(math != 0) math = ((truePositives * trueNegatives) - (falsePositives * falseNegatives)) / math;
-
+		qreal math = matthews(truePositives, trueNegatives, falsePositives, falseNegatives);
 		if(math > maxMAT)
 		{
 			maxMAT = math;
@@ -301,6 +312,8 @@ void ViBenchMarker3::process2()
 			maxTN = trueNegatives;
 			maxFP = falsePositives;
 			maxFN = falseNegatives;
+			maxLengthTP = lengthTP;
+			maxLengthFN = lengthFN;
 			noChange = 0;
 		}
 		++noChange;
@@ -309,33 +322,110 @@ void ViBenchMarker3::process2()
 
 	delete nRealMask1;
 	delete nRealMask2;
-
-	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << (int)mParamsCurrent[i] << "\t";
-	mOutputStream << (mCurrentThreshold / mDetector->amplification()) << "\t" << mCurrentThreshold << "\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t";
-	if((maxTP + maxFN) == 0) mOutputStream << 0 << "\t";
-	else mOutputStream << maxTP / qreal(maxTP + maxFN) << "\t";
-	if((maxTN + maxFP) == 0) mOutputStream << 0 << "\t";
-	else mOutputStream << maxTN / qreal(maxTN + maxFP) << "\t";
-	mOutputStream << maxMAT << "\t" << time << "\n";
-	mOutputStream.flush();
+	delete nLength1;
+	delete nLength2;
 
 	++mDoneParamIterations;
-	qreal percentageDone = mDoneParamIterations / double(mTotalParamIterations);
+	if(maxMAT > mBestMatthews) mBestMatthews = maxMAT;
+	printFileData(time, maxTP, maxTN, maxFP, maxFN, maxLengthTP, maxLengthFN);
+	printTerminal(time, maxTP, maxTN, maxFP, maxFN, mBestMatthews);
+
+	if(nextParam()) process1(false);
+	else nextFile();
+}
+
+void ViBenchMarker3::printFileHeader()
+{
+	mOutputFile.close();
+	mOutputFile.setFileName(mResults.dequeue());
+	mOutputFile.open(QIODevice::WriteOnly);
+	mOutputStream.setDevice(&mOutputFile);
+
+	mOutputStream<<mDetector->name()<<"\n";
+
+	if(mDetector->direction() == ViNoiseDetector::Forward) mOutputStream<< "Forward";
+	else if(mDetector->direction() == ViNoiseDetector::Reversed) mOutputStream<< "Reversed";
+	else if(mDetector->direction() == ViNoiseDetector::Bidirectional) mOutputStream<< "Bidirectional";
+	mOutputStream<<"\n";
+
+	if(ViNoise::NOISE_TYPE == ViNoise::Direct) mOutputStream<< "Direct";
+	else if(ViNoise::NOISE_TYPE == ViNoise::Mean) mOutputStream<< "Mean";
+	else if(ViNoise::NOISE_TYPE == ViNoise::Maximum) mOutputStream<< "Maximum";
+	mOutputStream<<"\n\n";
+
+	mOutputStream << QFileInfo(mCurrentFile).fileName();
+	mOutputStream<<"\n\n";
+
+	for(int i = 0; i < mDetector->parameterCount(); ++i) mOutputStream << "PARAMETER "<<(i+1) << " (" << mDetector->parameterName(i) << ")\t";
+	mOutputStream << "REAL THRESHOLD" << "\t" << "(UN)AMPLIFIED THRESHOLD" << "\t" << "TRUE POSITIVES" << "\t" << "TRUE NEGATIVES" << "\t" << "FALSE POSITIVES"<< "\t" << "FALSE NEGATIVES" << "\t";
+	mOutputStream << "SENSITIVITY" << "\t" << "SPECIFISITY" << "\t" << "MATTHEWS SCORE" << "\t" << "TIME" << "\t\t";
+
+	mOutputStream << "TRUE POSITIVES";
+	for(int j = 0; j < ViNoiseCreator::noiseSizeCount(); ++j) mOutputStream << "\t";
+	mOutputStream << "FALSE NEGATIVES";
+	for(int j = 0; j < ViNoiseCreator::noiseSizeCount(); ++j) mOutputStream << "\t";
+	mOutputStream << "SENSITIVITY";
+
+	mOutputStream << "\n";
+	int c = 11 + mDetector->parameterCount();
+	for(int i = 0; i < c; ++i) mOutputStream << "\t";
+	for(int j = 0; j < 3; ++j)
+	{
+		for(int i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i)
+		{
+			mOutputStream << "NOISE LENGTH "<< i << "\t";
+		}
+	}
+	mOutputStream << "\n";
+}
+
+void ViBenchMarker3::printFileData(const qint64 &time, const qint64 &TP, const qint64 &TN, const qint64 &FP, const qint64 &FN, const QVector<qreal> &lengthTP, const QVector<qreal> &lengthFN)
+{
+	int i;
+	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << (int)mParamsCurrent[i] << "\t";
+	mOutputStream << (mCurrentThreshold / mDetector->amplification()) << "\t" << mCurrentThreshold << "\t" << TP << "\t" << TN << "\t" << FP << "\t" << FN << "\t";
+	mOutputStream << sensitivity(TP, FN) << "\t";
+	mOutputStream << specificity(TN, FP) << "\t";
+	mOutputStream << matthews(TP, TN, FP, FN) << "\t" << time << "\t\t";
+	for(i = 0; i < lengthTP.size(); ++i) mOutputStream << lengthTP[i] << "\t";
+	for(i = 0; i < lengthTP.size(); ++i) mOutputStream << lengthFN[i] << "\t";
+	for(i = 0; i < lengthTP.size(); ++i) mOutputStream << sensitivity(lengthTP[i], lengthFN[i]) <<"\t";
+	mOutputStream << "\n";
+	mOutputStream.flush();
+}
+
+void ViBenchMarker3::printTerminal(const qint64 &time, const qint64 &TP, const qint64 &TN, const qint64 &FP, const qint64 &FN, const qreal &bestMatthews)
+{
+	qreal percentageDone = mDoneParamIterations / qreal(mTotalParamIterations);
 	percentageDone /= mTotalFiles;
 	percentageDone += (mTotalFiles - mFiles.size() - 1) / qreal(mTotalFiles);
 
 	qint64 remaining = mMainTime.elapsed();
-	remaining = ((1.0/percentageDone) * remaining) - remaining;
-	cout << int(percentageDone * 100.0) << "% ("<<timeConversion(remaining).toLatin1().data()<<" remaining)"<<endl;
+	remaining = ((1.0 / percentageDone) * remaining) - remaining;
 
-	for(i = 0; i < mParamsStart.size(); ++i) cout << (int)mParamsCurrent[i] << "\t";
-	cout << (mCurrentThreshold / mDetector->amplification())<< "\t" << mCurrentThreshold << "\t\t" << maxTP << "\t" << maxTN << "\t" << maxFP << "\t" << maxFN << "\t";
-	cout << setprecision(10) << maxTP / qreal(maxTP + maxFN) << "\t";
-	cout << setprecision(10) << maxTN / qreal(maxTN + maxFP) << "\t";
-	cout << maxMAT << "\t" << time << endl;
+	cout << setprecision(6);
+	cout << int(percentageDone * 100.0) << "%\t(" << timeConversion(remaining).toLatin1().data()<<")\t";
+	cout << "THRES: " << (mCurrentThreshold / mDetector->amplification()) << "\t";
+	cout << "SEN: " << sensitivity(TP, FN) << "\tSPE: " << specificity(TN, FP) << "\tMAT: " << matthews(TP, TN, FP, FN) << " (" << bestMatthews << ")\tTIME: " << time << endl;
+}
 
-	if(nextParam()) process1(false);
-	else nextFile();
+qreal ViBenchMarker3::sensitivity(const qint64 &TP, const qint64 &FN)
+{
+	if(TP == 0 && FN == 0) return 0;
+	return TP / qreal(TP + FN);
+}
+
+qreal ViBenchMarker3::specificity(const qint64 &TN, const qint64 &FP)
+{
+	if(TN == 0 && FP == 0) return 0;
+	return TN / qreal(TN + FP);
+}
+
+qreal ViBenchMarker3::matthews(const qint64 &TP, const qint64 &TN, const qint64 &FP, const qint64 &FN)
+{
+	qreal math = qSqrt(TP + FP) * qSqrt(TP + FN) * qSqrt(TN + FP) * qSqrt(TN + FN); // Take individual sqrt, otherwise the individual parts will be to big (variable overflow)
+	if(math != 0) math = ((TP * TN) - (FP * FN)) / math;
+	return math;
 }
 
 QString ViBenchMarker3::timeConversion(int msecs)

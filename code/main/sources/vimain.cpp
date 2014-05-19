@@ -6,6 +6,7 @@
 #include<vibenchmarker2.h>
 #include<vibenchmarker3.h>
 #include<vibenchmarker4.h>
+#include <vipredictorbenchmarker.h>
 
 int main(int argc, char *argv[])
 {
@@ -24,7 +25,8 @@ int main(int argc, char *argv[])
     bool BENCH = true;
     //bool BENCH = false;
 
-	ViBenchMarker4 bench;
+	//ViBenchMarker4 bench;
+	ViPredictorBenchmarker bench;
 	if(BENCH)
 	{
 		bench.benchmark();

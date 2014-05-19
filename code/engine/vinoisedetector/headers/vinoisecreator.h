@@ -37,7 +37,13 @@ class ViNoiseCreator
 		ViNoiseCreator();
 		~ViNoiseCreator();
 
-		void createNoise(ViBuffer *input, ViBuffer *output, ViBuffer *mask);
+		void createNoise(ViBuffer *input, ViBuffer *output, ViBuffer *mask, ViBuffer *sizeMask = NULL);
+
+		static int minimumNoiseSize();
+		static int maximumNoiseSize();
+		static int noiseSizeCount();
+		static qreal toSizeMask(const int &length);
+		static int fromSizeMask(const qreal &length);
 
 	protected:
 
@@ -49,7 +55,7 @@ class ViNoiseCreator
 			ZigZag = 3
 		};
 
-		void addNoise(ViSampleChunk &samples1, ViSampleChunk &samples2, ViSampleChunk &mask1, ViSampleChunk &mask2);
+		void addNoise(ViSampleChunk &samples1, ViSampleChunk &samples2, ViSampleChunk &mask1, ViSampleChunk &mask2, ViSampleChunk &sizeMask1, ViSampleChunk &sizeMask2);
 
 		void createNoiseKind();
 		void nextNoiseKind();

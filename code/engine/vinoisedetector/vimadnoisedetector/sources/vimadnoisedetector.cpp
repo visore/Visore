@@ -1,12 +1,9 @@
 #include <vimadnoisedetector.h>
 #include <qmath.h>
 
-#define SWAP(a,b) { temp = a; a = b; b = temp; } // Curly-brackets needed, so that SWAP can be used on a signle-line if-statement
-
 #define MAD 0.6745
 #define MAD_THRESHOLD 3.5
 #define WINDOW_SIZE 128
-
 #define AMPLIFICATION 0.1
 
 ViMadNoiseDetector::ViMadNoiseDetector()
@@ -15,6 +12,7 @@ ViMadNoiseDetector::ViMadNoiseDetector()
 	mWindow = NULL;
 	setWindowSize(WINDOW_SIZE);
 	setAmplification(AMPLIFICATION);
+	addParameterName("Window Size");
 }
 
 ViMadNoiseDetector::ViMadNoiseDetector(const ViMadNoiseDetector &other)
@@ -36,7 +34,7 @@ ViMadNoiseDetector::~ViMadNoiseDetector()
 void ViMadNoiseDetector::setWindowSize(const int &size)
 {
 	mWindowSize = size;
-	mHalfWindowSize = size / 2;
+	mHalfWindowSize = qFloor(size / 2.0);
 	if(mWindow != NULL) delete [] mWindow;
 	mWindow = new qreal[mWindowSize];
 	setOffset(mHalfWindowSize);
@@ -69,6 +67,7 @@ void ViMadNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 	}
 }
 
+#define SWAP(a,b) { temp = a; a = b; b = temp; } // Curly-brackets needed, so that SWAP can be used on a signle-line if-statement
 qreal ViMadNoiseDetector::quickMedian(qreal *samples, const int &size, const int &position)
 {
 	// The quickselect algorithm

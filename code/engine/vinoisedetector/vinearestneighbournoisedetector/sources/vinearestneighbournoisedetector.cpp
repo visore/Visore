@@ -6,6 +6,7 @@ ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector()
 	: ViNoiseDetector()
 {
 	setK(DEFAULT_K);
+	addParameterName("K");
 }
 
 ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector(const ViNearestNeighbourNoiseDetector &other)
@@ -13,14 +14,12 @@ ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector(const ViNearest
 {
 	mK = other.mK;
 	mHalfK = other.mHalfK;
-	mTotal = other.mTotal;
 }
 
 void ViNearestNeighbourNoiseDetector::setK(const int &k)
 {
 	mK = k;
-	mHalfK = mK / 2;
-	mTotal = mK + 1;
+	mHalfK = qFloor(mK / 2.0);
 	setOffset(mHalfK);
 }
 
@@ -34,7 +33,7 @@ void ViNearestNeighbourNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 	static int i;
 	static qreal totalDifference;
 
-	while(samples.size() > mTotal)
+	while(samples.size() >= mK)
 	{
 		const qreal &currentValue = samples[mHalfK];
 		totalDifference = 0;

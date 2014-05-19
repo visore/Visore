@@ -150,19 +150,12 @@ void ViArmaInterpolator::initialize()
 	libset_set_int(BFGS_MAXITER, MAXIMUM_ITERATIONS); // ML
 	libset_set_int(BHHH_MAXITER, MAXIMUM_ITERATIONS); // CML
 
-	/*mGretlParameters = gretl_list_new(5);
-	mGretlParameters[1] = 0;        // AR order
-	mGretlParameters[2] = 0;        // order of integration
-	mGretlParameters[3] = 0;        // MA order
-	mGretlParameters[4] = LISTSEP;  // separator
-	mGretlParameters[5] = 1;*/
-
 	mGretlParameters = gretl_list_new(5);
 	mGretlParameters[1] = 0;        // AR order
 	mGretlParameters[2] = 0;        // order of integration
 	mGretlParameters[3] = 0;        // MA order
 	mGretlParameters[4] = LISTSEP;  // separator
-	mGretlParameters[5] = 1;		// Position of dependent variable
+	mGretlParameters[5] = 1;
 }
 
 void ViArmaInterpolator::clear()
@@ -174,128 +167,46 @@ void ViArmaInterpolator::clear()
 	}
 }
 
+int* ViArmaInterpolator::adjustParameters(int *parameters)
+{
+	//Some parameters cause gretl to segfault
+
+	if(parameters[1] == 19 && parameters[3] == 2) parameters[1];
+
+	return parameters;
+}
+
 bool ViArmaInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
-	static bool failed;
-		static int i, error, realSize;
-for(i = 0; i < outputSize; ++i) outputSamples[i] = 0;
-		int realLeftSize = qMin(leftSize, mWindowSize);
-		int realTotalSize = realLeftSize + outputSize;
-
-		DATASET *gretlData = create_new_dataset(2, realTotalSize, 0);
-		strcpy(gretlData->varname[1], "visoredata"); // For X12 we need the series to have a name
-		gretlData->t2 = gretlData->n - 1 - outputSize;
-
-
-		// Forecast
-		for(i = realLeftSize - 1; i >= 0; --i) gretlData->Z[1][i] = leftSamples[i];
-
-		//MODEL *model = (this->*modelPointer)(gretlData);
-
-		MODEL *model = gretl_model_new();
-		*model = arma_model(mGretlParameters, NULL, gretlData, (gretlopt) mGretlEstimation, NULL);
-
-		if(model->errcode) failed = true;
-		else
-		{//cout<<"+++++++++++:"<<realLeftSize<<endl;
-			error = 0; // gretl doesn't do this for us. We manually have to start with "no" error.
-			FITRESID *forecast = get_forecast(model, gretlData->t2 + 1, gretlData->n - 1, 0, gretlData, OPT_NONE, &error);
-			if(error) failed = true;
-			else
-			{
-				for(i = 0; i < outputSize; ++i)
-				{
-					outputSamples[i] += forecast->fitted[realLeftSize + i]*0.5;
-				}
-				free_fit_resid(forecast);
-			}
-		}
-
-		gretl_model_free(model);
-		destroy_dataset(gretlData);
-
-
-
-
-
-
-
-
-		 realLeftSize = qMin(rightSize, mWindowSize);
-		 realTotalSize = realLeftSize + outputSize;
-
-		DATASET *gretlData2 = create_new_dataset(2, realTotalSize, 0);
-		strcpy(gretlData2->varname[1], "visoredata"); // For X12 we need the series to have a name
-		gretlData2->t2 = gretlData2->n - 1 - outputSize;
-
-		// Forecast
-		for(i = 0; i < realLeftSize; ++i) gretlData2->Z[1][i] = leftSamples[realLeftSize - 1 - i];
-
-		//MODEL *model = (this->*modelPointer)(gretlData);
-
-		MODEL *model2 = gretl_model_new();
-		*model2 = arma_model(mGretlParameters, NULL, gretlData2, (gretlopt) mGretlEstimation, NULL);
-
-		if(model2->errcode) failed = true;
-		else
-		{//cout<<"+++++++++++:"<<realLeftSize<<endl;
-			error = 0; // gretl doesn't do this for us. We manually have to start with "no" error.
-			FITRESID *forecast = get_forecast(model2, gretlData2->t2 + 1, gretlData2->n - 1, 0, gretlData2, OPT_NONE, &error);
-			if(error) failed = true;
-			else
-			{
-				for(i = 0; i < outputSize; ++i)
-				{
-					outputSamples[outputSize-i-1] += forecast->fitted[realLeftSize + i]*0.5;
-				}
-				free_fit_resid(forecast);
-			}
-		}
-
-		gretl_model_free(model2);
-		destroy_dataset(gretlData2);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/*static bool failed;
 	static int i, error, realSize;
 
-	realSize = qMin(leftSize, mWindowSize);
+	DATASET *gretlData;
+	MODEL *model;
 
-	DATASET *gretlData = create_new_dataset(2, realSize + outputSize, 0);
-	strcpy(gretlData->varname[1], "visoredata"); // For X12 we need the series to have a name
+	qreal output[outputSize];
+	for(i = 0; i < outputSize; ++i) output[i] = 0;
+	int count[outputSize];
+
+	// Forecast
+
+	realSize = qMin(leftSize, mWindowSize);
+	gretlData = create_new_dataset(2, realSize + outputSize, 0);
+	//strcpy(gretlData2->varname[1], "visoredata"); // For X12 we need the series to have a name
 	gretlData->t2 = gretlData->n - 1 - outputSize;
 
 	for(i = realSize - 1; i >= 0; --i) gretlData->Z[1][i] = leftSamples[i];
 
-	MODEL *model = (this->*modelPointer)(gretlData);
-
-	if(model->errcode) failed = true;
-	else
+	model = (this->*modelPointer)(gretlData);
+	if(!model->errcode)
 	{
+		error = 0; // gretl doesn't do this for us. We manually have to start with "no" error.
 		FITRESID *forecast = get_forecast(model, gretlData->t2 + 1, gretlData->n - 1, 0, gretlData, OPT_NONE, &error);
-		if(error) failed = true;
-		else
+		if(!error)
 		{
 			for(i = 0; i < outputSize; ++i)
 			{
-				outputSamples[i] = forecast->fitted[realSize + i];
+				output[i] += forecast->fitted[realSize + i];
+				count[i] += 1;
 			}
 			free_fit_resid(forecast);
 		}
@@ -304,19 +215,41 @@ for(i = 0; i < outputSize; ++i) outputSamples[i] = 0;
 	gretl_model_free(model);
 	destroy_dataset(gretlData);
 
-	if(failed)
+	// Backcast
+
+	realSize = qMin(rightSize, mWindowSize);
+	gretlData = create_new_dataset(2, realSize + outputSize, 0);
+	//strcpy(gretlData2->varname[1], "visoredata"); // For X12 we need the series to have a name
+	gretlData->t2 = gretlData->n - 1 - outputSize;
+
+	for(i = 0; i < realSize; ++i) gretlData->Z[1][i] = rightSamples[realSize - 1 - i];
+
+	model = (this->*modelPointer)(gretlData);
+	if(!model->errcode)
 	{
-		int count = 0;
-		qreal mean = 0;
-		while(count < outputSize)
+		error = 0; // gretl doesn't do this for us. We manually have to start with "no" error.
+		FITRESID *forecast = get_forecast(model, gretlData->t2 + 1, gretlData->n - 1, 0, gretlData, OPT_NONE, &error);
+		if(!error)
 		{
-			for(i = realSize - 1; i >= 0; --i) mean += leftSamples[i];
-			for(i = 0; i < count; ++i) mean += outputSamples[i];
-			mean /= realSize + count;
-			outputSamples[count] = mean;
-			++count;
+			for(i = 0; i < outputSize; ++i)
+			{
+				output[outputSize-i-1] += forecast->fitted[realSize + i];
+				count[i] += 1;
+			}
+			free_fit_resid(forecast);
 		}
-	}*/
+	}
+
+	gretl_model_free(model);
+	destroy_dataset(gretlData);
+
+	// Average forecast and backcast
+	for(i = 0; i < outputSize; ++i)
+	{
+		if(count[i]) outputSamples[i] = output[i] / count[i];
+	}
+
+	return true;
 }
 
 MODEL* ViArmaInterpolator::fixedModel(DATASET *data)
@@ -327,7 +260,7 @@ MODEL* ViArmaInterpolator::fixedModel(DATASET *data)
 
 	while(true)
 	{
-		*model = arma_model(mGretlParameters, NULL, data, (gretlopt) mGretlEstimation, NULL);
+		*model = arma_model(adjustParameters(mGretlParameters), NULL, data, (gretlopt) mGretlEstimation, NULL);
 		if(model->errcode)
 		{
 			if(mGretlParameters[3] > 0)
@@ -390,7 +323,7 @@ MODEL* ViArmaInterpolator::autocorrelationModel(DATASET *data)
 
 	while(true)
 	{
-		*model = arma_model(mGretlParameters, NULL, data, (gretlopt) mGretlEstimation, NULL);
+		*model = arma_model(adjustParameters(mGretlParameters), NULL, data, (gretlopt) mGretlEstimation, NULL);
 		if(model->errcode)
 		{
 			if(mGretlParameters[3] > 0)
@@ -433,7 +366,7 @@ MODEL* ViArmaInterpolator::bestModel(DATASET *data)
 		{
 			mGretlParameters[3] = j;
 			MODEL *tempModel = gretl_model_new();
-			*tempModel = arma_model(mGretlParameters, NULL, data, (gretlopt) mGretlEstimation, NULL);
+			*tempModel = arma_model(adjustParameters(mGretlParameters), NULL, data, (gretlopt) mGretlEstimation, NULL);
 			scores[i][j] = (this->*orderPointer)(tempModel);
 			models[i][j] = tempModel;
 		}
@@ -481,7 +414,7 @@ MODEL* ViArmaInterpolator::bestModel(DATASET *data)
 	{
 		mGretlParameters[1] = arOrder;
 		tempModel = gretl_model_new();
-		*tempModel = arma_model(mGretlParameters, NULL, data, (gretlopt) mGretlEstimation, NULL);
+		*tempModel = arma_model(adjustParameters(mGretlParameters), NULL, data, (gretlopt) mGretlEstimation, NULL);
 		current = (this->*orderPointer)(tempModel);
 		gretl_model_free(tempModel);
 		if(current > min)
@@ -500,7 +433,7 @@ MODEL* ViArmaInterpolator::bestModel(DATASET *data)
 	{
 		mGretlParameters[3] = maOrder;
 		tempModel = gretl_model_new();
-		*tempModel = arma_model(mGretlParameters, NULL, data, (gretlopt) mGretlEstimation, NULL);
+		*tempModel = arma_model(adjustParameters(mGretlParameters), NULL, data, (gretlopt) mGretlEstimation, NULL);
 		current = (this->*orderPointer)(tempModel);
 		gretl_model_free(tempModel);
 		if(current > min)
@@ -520,7 +453,7 @@ MODEL* ViArmaInterpolator::bestModel(DATASET *data)
 
 	cout<<"ARMA("<<mGretlParameters[1]<<", "<<mGretlParameters[3]<<")"<<endl;
 
-	*model = arma_model(mGretlParameters, NULL, data, (gretlopt) mGretlEstimation, NULL);*/
+	*model = arma_model(adjustParameters(mGretlParameters), NULL, data, (gretlopt) mGretlEstimation, NULL);*/
 }
 
 qreal ViArmaInterpolator::calculateR2(MODEL *model)

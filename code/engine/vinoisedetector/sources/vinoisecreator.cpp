@@ -86,7 +86,7 @@ ViNoiseCreator::~ViNoiseCreator()
 	delete [] mRandom;
 }
 
-void ViNoiseCreator::createNoise(ViBuffer *input, ViBuffer *output, ViBuffer *mask)
+void ViNoiseCreator::createNoise(ViBuffer *input, ViBuffer *output, ViBuffer *mask, ViBuffer *sizeMask)
 {
 	output->setFormat(input->format());
 	mask->setFormat(input->format());
@@ -97,6 +97,12 @@ void ViNoiseCreator::createNoise(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 	outputData.setSampleCount(WINDOW_SIZE * 2);
 	ViAudioWriteData maskData(mask);
 	maskData.setSampleCount(WINDOW_SIZE * 2);
+	ViAudioWriteData sizeData;
+	if(sizeMask != NULL)
+	{
+		sizeData.setBuffer(sizeMask);
+		sizeData.setSampleCount(WINDOW_SIZE * 2);
+	}
 
 	mNoiseLength = MIN_NOISE_LENGTH;
 	mNoiseType = Hill;
@@ -107,23 +113,66 @@ void ViNoiseCreator::createNoise(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 		inputData.read();
 		ViSampleChunk &data1 = inputData.splitSamples(0);
 		ViSampleChunk &data2 = inputData.splitSamples(1);
+
 		ViSampleChunk mask1(data1.size());
 		ViSampleChunk mask2(data2.size());
 
-		addNoise(data1, data2, mask1, mask2);
+		ViSampleChunk sizeMask1(data1.size());
+		ViSampleChunk sizeMask2(data2.size());
+
+		addNoise(data1, data2, mask1, mask2, sizeMask1, sizeMask2);
 
 		outputData.enqueueSplitSamples(data1, 0);
 		outputData.enqueueSplitSamples(data2, 1);
 		maskData.enqueueSplitSamples(mask1, 0);
 		maskData.enqueueSplitSamples(mask2, 1);
+
+		if(sizeMask != NULL)
+		{
+			sizeData.enqueueSplitSamples(sizeMask1, 0);
+			sizeData.enqueueSplitSamples(sizeMask2, 1);
+		}
 	}
 }
 
-void ViNoiseCreator::addNoise(ViSampleChunk &samples1, ViSampleChunk &samples2, ViSampleChunk &mask1, ViSampleChunk &mask2)
+int ViNoiseCreator::minimumNoiseSize()
+{
+	return MIN_NOISE_LENGTH;
+}
+
+int ViNoiseCreator::maximumNoiseSize()
+{
+	return MAX_NOISE_LENGTH;
+}
+
+int ViNoiseCreator::noiseSizeCount()
+{
+	return maximumNoiseSize() - minimumNoiseSize() + 1;
+}
+
+qreal ViNoiseCreator::toSizeMask(const int &length)
+{
+	return length / 100.0;
+}
+
+int ViNoiseCreator::fromSizeMask(const qreal &length)
+{
+	return round(length * 100);
+}
+
+void ViNoiseCreator::addNoise(ViSampleChunk &samples1, ViSampleChunk &samples2, ViSampleChunk &mask1, ViSampleChunk &mask2, ViSampleChunk &sizeMask1, ViSampleChunk &sizeMask2)
 {
 	int i, currentOffset, halfWidth;
-	for(i = 0; i < mask1.size(); ++i) mask1[i] = 0;
-	for(i = 0; i < mask2.size(); ++i) mask2[i] = 0;
+	for(i = 0; i < mask1.size(); ++i)
+	{
+		mask1[i] = 0;
+		sizeMask1[i] = 0;
+	}
+	for(i = 0; i < mask2.size(); ++i)
+	{
+		mask2[i] = 0;
+		sizeMask2[i] = 0;
+	}
 
 	currentOffset = 0;
 	while(currentOffset + MAX_NOISE_LENGTH + NOISE_OFFSET <= samples1.size())
@@ -136,6 +185,7 @@ void ViNoiseCreator::addNoise(ViSampleChunk &samples1, ViSampleChunk &samples2, 
 			else samples1[i + currentOffset] = mNoise[i];
 
 			mask1[i + currentOffset] = 1;
+			sizeMask1[i + currentOffset] = toSizeMask(mNoiseLength);
 		}
 		currentOffset += MAX_NOISE_LENGTH + NOISE_OFFSET;
 		nextNoiseKind();
@@ -153,6 +203,7 @@ void ViNoiseCreator::addNoise(ViSampleChunk &samples1, ViSampleChunk &samples2, 
 			else samples2[i + currentOffset] = mNoise[i];
 
 			mask2[i + currentOffset] = 1;
+			sizeMask2[i + currentOffset] = toSizeMask(mNoiseLength);
 		}
 		currentOffset += MAX_NOISE_LENGTH + NOISE_OFFSET;
 		nextNoiseKind();

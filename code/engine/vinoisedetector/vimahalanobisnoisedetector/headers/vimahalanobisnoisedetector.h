@@ -29,6 +29,7 @@ class ViMahalanobisNoiseDetector : public ViNoiseDetector
 	private:
 
 		int mWindowSize;
+		int mHalfWindowSize;
 		DATASET *mGretlData;
 		int *mGretlParameters;
 
