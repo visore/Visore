@@ -18,7 +18,7 @@ class ViPredictorBenchmarker : public QObject
 		void nextFile();
 		void process();
 
-		void addParam(qreal start, qreal end, qreal increase);
+		void addParam(QString name, qreal start, qreal end, qreal increase);
 		bool nextParam();
 		void initParams();
 
@@ -32,9 +32,12 @@ class ViPredictorBenchmarker : public QObject
 	protected:
 
 		void printFileHeader();
+		void printFileData(const qreal *rmse, const qint64 &time);
+		void printTerminal(const qreal *rmse, const qint64 &time);
 
 	private:
 
+		QList<QString> mParamsNames;
 		QList<qreal> mParamsStart, mParamsEnd, mParamsIncrease, mParamsCurrent;
 
 		ViPredictor *mPredictor;

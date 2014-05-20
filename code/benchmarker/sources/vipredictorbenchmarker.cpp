@@ -5,11 +5,10 @@
 #include <iomanip>
 
 #include <vipolynomialpredictor.h>
+#include <vihermitepredictor.h>
 
 #define WINDOW_SIZE 4096
-#define MAXIMUM_PREDICTION 128
-
-#define NO_CHANGE 50
+#define MAXIMUM_PREDICTION 256
 
 ViPredictorBenchmarker::ViPredictorBenchmarker()
 {
@@ -17,17 +16,19 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	mMainTime.start();
 
 	mPredictor = new ViPolynomialPredictor();
+	//mPredictor = new ViHermitePredictor();
 
-	addParam(32, 32, 1);
-	addParam(3, 3, 1);
+	addParam("Window Size", 128,128, 1);
+	addParam("Degree", 5, 5, 1);
 }
 
 ViPredictorBenchmarker::~ViPredictorBenchmarker()
 {
 }
 
-void ViPredictorBenchmarker::addParam(qreal start, qreal end, qreal increase)
+void ViPredictorBenchmarker::addParam(QString name, qreal start, qreal end, qreal increase)
 {
+	mParamsNames.append(name);
 	mParamsStart.append(start);
 	mParamsEnd.append(end);
 	mParamsIncrease.append(increase);
@@ -111,19 +112,13 @@ void ViPredictorBenchmarker::nextFile()
 	else
 	{
 		initParams();
-		for(int i = 0; i < mParamsStart.size(); ++i)
-		{
-			mParamsCurrent[i] = mParamsStart[i];
-		}
-
+		for(int i = 0; i < mParamsStart.size(); ++i) mParamsCurrent[i] = mParamsStart[i];
 		mCurrentFile = mFiles.dequeue();
-
 		printFileHeader();
 
 		mCurrentObject->clearBuffers();
 		mCurrentObject.setNull();
 		mCurrentObject = ViAudioObject::create();
-
 		mCurrentObject->setFilePath(ViAudio::Target, mCurrentFile);
 		QObject::connect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
 		mCurrentObject->decode();
@@ -133,21 +128,11 @@ void ViPredictorBenchmarker::nextFile()
 void ViPredictorBenchmarker::process()
 {
 	QObject::disconnect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
-
-
-	int i, lengthIndex;
-	qint64 accuracyCount, time;
-	qreal accuraccy, totalAccuracy, acc, percentageDone, remaining, best = DBL_MAX;
+	qint64 time;
 
 	do
 	{
-
-		if(mParamsStart.size() == 1) mPredictor->setParameters(mParamsCurrent[0]);
-		else if(mParamsStart.size() == 2) mPredictor->setParameters(mParamsCurrent[0], mParamsCurrent[1]);
-		else if(mParamsStart.size() == 3) mPredictor->setParameters(mParamsCurrent[0], mParamsCurrent[1], mParamsCurrent[2]);
-		else if(mParamsStart.size() == 4) mPredictor->setParameters(mParamsCurrent[0], mParamsCurrent[1], mParamsCurrent[2], mParamsCurrent[3]);
-		else if(mParamsStart.size() == 5) mPredictor->setParameters(mParamsCurrent[0], mParamsCurrent[1], mParamsCurrent[2], mParamsCurrent[3], mParamsCurrent[4]);
-		else { cout << "Invalid parameter count of "<<mParamsStart.size()<<". Min: 1, Max: 5" << endl; quit(); }
+		for(int i = 0; i < mParamsStart.size(); ++i) mPredictor->setParameter(mParamsNames[i], mParamsCurrent[i]);
 
 		qreal rmse[MAXIMUM_PREDICTION];
 		mTime.restart();
@@ -160,18 +145,8 @@ void ViPredictorBenchmarker::process()
 		return;
 
 		++mDoneParamIterations;
-		percentageDone = mDoneParamIterations / double(mTotalParamIterations);
-		remaining = mMainTime.elapsed();
-		remaining = ((1.0/percentageDone) * remaining) - remaining;
-
-		acc = 0;
-		if(acc < best) best = acc;
-		cout << int(percentageDone * 100.0) << "%\t("<<timeConversion(remaining).toLatin1().data()<<")\tRMSE: "<<acc<<" ("<<best<<")\tTime: "<<time<<endl;
-
-		for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << (int) mParamsCurrent[i] << "\t";
-		mOutputStream << acc << "\t" << time << "\t\t";
-		mOutputStream << "\n";
-		mOutputStream.flush();
+		printFileData(rmse, time);
+		printTerminal(rmse, time);
 	}
 	while(nextParam());
 
@@ -180,6 +155,8 @@ void ViPredictorBenchmarker::process()
 
 void ViPredictorBenchmarker::printFileHeader()
 {
+	int i;
+
 	mOutputFile.close();
 	mOutputFile.setFileName(mResults.dequeue());
 	mOutputFile.open(QIODevice::WriteOnly);
@@ -188,8 +165,40 @@ void ViPredictorBenchmarker::printFileHeader()
 	mOutputStream << mPredictor->name() << "\n\n";
 	mOutputStream << QFileInfo(mCurrentFile).fileName() << "\n\n";
 
+	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << "PARAMETER " << i + 1 << " (" << mPredictor->parameterName(i) <<")\t";
 	mOutputStream << "RMSE" << "\t" << "TIME" << "\t\t";
+	for(i = 1; i <= MAXIMUM_PREDICTION; ++i) mOutputStream << "PREDICTION BY " << i << " (RMSE)\t";
 	mOutputStream << "\n";
+	mOutputStream.flush();
+}
+
+void ViPredictorBenchmarker::printFileData(const qreal *rmse, const qint64 &time)
+{
+	int i;
+	qreal meanRmse = 0;
+	for(i = 0; i < MAXIMUM_PREDICTION; ++i) meanRmse += rmse[i];
+	meanRmse /= MAXIMUM_PREDICTION;
+
+	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << (int) mParamsCurrent[i] << "\t";
+	mOutputStream << meanRmse << "\t" << time << "\t\t";
+	for(i = 0; i < MAXIMUM_PREDICTION; ++i) mOutputStream << rmse[i] << "\t";
+	mOutputStream << "\n";
+	mOutputStream.flush();
+}
+
+void ViPredictorBenchmarker::printTerminal(const qreal *rmse, const qint64 &time)
+{
+	int i;
+	qreal meanRmse = 0;
+	for(i = 0; i < MAXIMUM_PREDICTION; ++i) meanRmse += rmse[i];
+	meanRmse /= MAXIMUM_PREDICTION;
+
+	qreal percentageDone = mDoneParamIterations / qreal(mTotalParamIterations);
+	qint64 remaining = mMainTime.elapsed();
+	remaining = ((1.0 / percentageDone) * remaining) - remaining;
+
+	cout << int(percentageDone * 100.0) << "%\t(" << timeConversion(remaining).toLatin1().data() << ")\t";
+	cout << "RMSE: " << setprecision(6) << meanRmse << "\tTIME: " << time << endl;
 }
 
 QString ViPredictorBenchmarker::timeConversion(int msecs)

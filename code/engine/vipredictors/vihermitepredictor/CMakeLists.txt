@@ -1,0 +1,16 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Initiate source files
+FILE(GLOB VI_HERMITE_PREDICTOR_SOURCES ${SOURCES}/*.cpp)
+FILE(GLOB VI_HERMITE_PREDICTOR_HEADERS ${HEADERS}/*.h)
+
+#Create library
+ADD_LIBRARY(vihermitepredictor SHARED ${VI_HERMITE_PREDICTOR_HEADERS} ${VI_HERMITE_PREDICTOR_SOURCES})
+TARGET_LINK_LIBRARIES(vihermitepredictor vipredictor)
+QT5_USE_MODULES(vihermitepredictor Xml Multimedia)
+
+#Install file
+INSTALL(TARGETS vihermitepredictor DESTINATION ${VI_PREDICTORS_INSTALL_PATH})

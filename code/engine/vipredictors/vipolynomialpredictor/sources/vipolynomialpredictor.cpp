@@ -1,5 +1,6 @@
 #include <vipolynomialpredictor.h>
 #include <visystemsolver.h>
+#include <vilogger.h>
 
 ViPolynomialPredictor::ViPolynomialPredictor()
 	: ViDegreePredictor()
@@ -17,16 +18,22 @@ ViPolynomialPredictor::~ViPolynomialPredictor()
 {
 }
 
-void ViPolynomialPredictor::setParameters(const qreal &parameter1, const qreal &parameter2)
+void ViPolynomialPredictor::setParameter(const int &number, const qreal &value)
 {
-	setWindowSize(parameter1);
-	setDegree(parameter2);
+	if(number == 0) setWindowSize(value);
+	else if(number == 1) setDegree(value);
+	else
+	{
+		LOG("Invalid parameter for this predictor.", QtCriticalMsg);
+		exit(-1);
+	}
 }
 
 void ViPolynomialPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
 {
 	static int i, j, x, count;
 	static qreal value;
+	static ViVector coefficients;
 
 	ViMatrix matrix(size, mDegree + 1);
 	ViVector vector(size);
@@ -35,13 +42,9 @@ void ViPolynomialPredictor::predict(const qreal *samples, const int &size, qreal
 	{
 		vector[i] = samples[i];
 		matrix[i][0] = 1;
-		for(j = 1; j <= mDegree; ++j)
-		{
-			matrix[i][j] = qPow(i, j);
-		}
+		for(j = 1; j <= mDegree; ++j) matrix[i][j] = qPow(i, j);
 	}
 
-	static ViVector coefficients;
 	if(ViSystemSolver::solve(matrix, vector, coefficients))
 	{
 		count = coefficients.size();

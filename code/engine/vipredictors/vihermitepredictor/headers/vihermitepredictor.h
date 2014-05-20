@@ -1,16 +1,16 @@
-#ifndef VIPOLYNOMIALPREDICTOR_H
-#define VIPOLYNOMIALPREDICTOR_H
+#ifndef VIHERMITEPREDICTOR_H
+#define VIHERMITEPREDICTOR_H
 
 #include <vipredictor.h>
 
-class ViPolynomialPredictor : public ViDegreePredictor
+class ViHermitePredictor : public ViDegreePredictor
 {
 
 	public:
 
-		ViPolynomialPredictor();
-		ViPolynomialPredictor(const ViPolynomialPredictor &other);
-		~ViPolynomialPredictor();
+		ViHermitePredictor();
+		ViHermitePredictor(const ViHermitePredictor &other);
+		~ViHermitePredictor();
 
 		void setParameter(const int &number, const qreal &value);
 

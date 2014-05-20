@@ -1,0 +1,17 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(HEADERS ${ROOT}/headers)
+SET(SOURCES ${ROOT}/sources)
+
+#Initiate source files
+FILE(GLOB VI_FANN_SOURCES ${SOURCES}/*.cpp)
+FILE(GLOB VI_FANN_HEADERS ${HEADERS}/*.h)
+
+#Create library
+INCLUDE_DIRECTORIES(${FANN_INCLUDE_DIR})
+ADD_LIBRARY(vifann SHARED ${VI_FANN_HEADERS} ${VI_FANN_SOURCES})
+QT5_USE_MODULES(vifann Core)
+TARGET_LINK_LIBRARIES(vifann fann)
+
+#Install file
+INSTALL(TARGETS vifann DESTINATION engine)

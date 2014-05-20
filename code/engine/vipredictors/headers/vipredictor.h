@@ -22,11 +22,13 @@ class ViPredictor : public ViName
 		void predict(ViBuffer *input, ViBuffer *output);
 		void predict(ViBuffer *input, ViBuffer *output, const int &predictionCount, qreal *rmse);
 
-		virtual void setParameters(const qreal &parameter1);
-		virtual void setParameters(const qreal &parameter1, const qreal &parameter2);
-		virtual void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3);
-		virtual void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4);
-		virtual void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4, const qreal &parameter5);
+		virtual void setParameter(const int &number, const qreal &value);
+		void setParameter(const QString &name, const qreal &value);
+		void setParameters(const qreal &parameter1);
+		void setParameters(const qreal &parameter1, const qreal &parameter2);
+		void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3);
+		void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4);
+		void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4, const qreal &parameter5);
 
 		QString parameterName(const int &index, const bool &allCaps = true);
 
