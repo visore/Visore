@@ -1,16 +1,16 @@
-#ifndef VIPOLYNOMIALPREDICTOR_H
-#define VIPOLYNOMIALPREDICTOR_H
+#ifndef VIFOURIERPREDICTOR_H
+#define VIFOURIERPREDICTOR_H
 
 #include <vipredictor.h>
 
-class ViPolynomialPredictor : public ViModelPredictor
+class ViFourierPredictor : public ViModelPredictor
 {
 
 	public:
 
-		ViPolynomialPredictor(const Estimation &estimation = Fixed);
-		ViPolynomialPredictor(const ViPolynomialPredictor &other);
-		~ViPolynomialPredictor();
+		ViFourierPredictor(const Estimation &estimation = Fixed);
+		ViFourierPredictor(const ViFourierPredictor &other);
+		~ViFourierPredictor();
 
 		void setParameter(const int &number, const qreal &value);
 

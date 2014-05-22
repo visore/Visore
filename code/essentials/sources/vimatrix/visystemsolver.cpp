@@ -27,6 +27,7 @@ bool ViSystemSolver::solve(const ViMatrix &matrix, const ViVector &vector, ViVec
 		}
 		else
 		{
+			coefficients.clear();
 			STATICLOG("The matrix cannot be inverted.", QtCriticalMsg, "ViSystemSolver");
 			return false;
 		}

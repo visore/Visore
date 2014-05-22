@@ -1,16 +1,16 @@
-#ifndef VIHERMITEPREDICTOR_H
-#define VIHERMITEPREDICTOR_H
+#ifndef VISPLINEPREDICTOR_H
+#define VISPLINEPREDICTOR_H
 
 #include <vipredictor.h>
 
-class ViHermitePredictor : public ViPredictor
+class ViSplinePredictor : public ViPredictor
 {
 
 	public:
 
-		ViHermitePredictor();
-		ViHermitePredictor(const ViHermitePredictor &other);
-		~ViHermitePredictor();
+		ViSplinePredictor();
+		ViSplinePredictor(const ViSplinePredictor &other);
+		~ViSplinePredictor();
 
 		void setDegree(const int &degree);
 
@@ -19,6 +19,7 @@ class ViHermitePredictor : public ViPredictor
 	protected:
 
 		void predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
+		qreal calculateMultiplier(const int &derivative, const int &parameterNumber);
 
 	private:
 

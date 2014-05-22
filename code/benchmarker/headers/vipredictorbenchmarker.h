@@ -22,6 +22,8 @@ class ViPredictorBenchmarker : public QObject
 		bool nextParam();
 		void initParams();
 
+		void progress(qreal percentage);
+
 	public:
 
 		ViPredictorBenchmarker();

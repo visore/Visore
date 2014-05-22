@@ -4,26 +4,62 @@
 #include <QDir>
 #include <iomanip>
 
+#include <viconstantpredictor.h>
 #include <vipolynomialpredictor.h>
 #include <vihermitepredictor.h>
+#include <vifourierpredictor.h>
+#include <visplinepredictor.h>
+#include <viarmapredictor.h>
+#include <vigarchpredictor.h>
 
 #define WINDOW_SIZE 4096
-#define MAXIMUM_PREDICTION 256
+#define MAXIMUM_PREDICTION 128
 
 ViPredictorBenchmarker::ViPredictorBenchmarker()
 {
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	mPredictor = new ViPolynomialPredictor();
-	//mPredictor = new ViHermitePredictor();
+	/*mPredictor = new ViConstantPredictor(ViConstantPredictor::Random);
+	addParam("Window Size", 64, 64, 1);*/
 
-	addParam("Window Size", 128,128, 1);
-	addParam("Degree", 5, 5, 1);
+	mPredictor = new ViHermitePredictor();
+	addParam("Window Size", 256, 256, 1);
+	addParam("Degree", 3, 3, 1);
+
+	/*mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Fixed);
+	addParam("Window Size", 128, 128, 10);
+	addParam("Degree", 3, 3, 1);*/
+
+	/*mPredictor = new ViFourierPredictor();
+	addParam("Window Size", 10, 10, 1);
+	addParam("Degree", 3, 3, 1);*/
+
+	/*mPredictor = new ViSplinePredictor();
+	addParam("Window Size", 32, 32, 1);
+	addParam("Degree", 1, 1, 1);*/
+
+	/*mPredictor = new ViGarchPredictor();
+	addParam("Window Size", 1024, 1024, 1);
+	addParam("GARCH Order", 0, 0, 1);
+	addParam("ARCH Order", 1, 1, 1);*/
+
+	/*mPredictor = new ViArmaPredictor();
+	addParam("Window Size", 256,256, 1);
+	addParam("AR Order", 3, 3, 1);
+	addParam("I Order", 1, 1, 1);
+	addParam("MA Order", 1, 1, 1);*/
+
+	QObject::connect(mPredictor, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }
 
 ViPredictorBenchmarker::~ViPredictorBenchmarker()
 {
+}
+
+void ViPredictorBenchmarker::progress(qreal percentage)
+{
+	cout << setprecision(2) << percentage << "%" << endl;
 }
 
 void ViPredictorBenchmarker::addParam(QString name, qreal start, qreal end, qreal increase)
@@ -96,7 +132,7 @@ void ViPredictorBenchmarker::benchmark()
 		for(int j = 0; j < files2.size(); ++j)
 		{
 			mFiles.enqueue(dir2.absoluteFilePath(files2[j]));
-			mResults.enqueue(dir3.absoluteFilePath(files2[j])+".txt");
+			mResults.enqueue(dir3.absoluteFilePath(files2[j]) + ViId::generate() + ".txt");
 		}
 	}
 	mTotalFiles = mFiles.size();
@@ -139,10 +175,16 @@ void ViPredictorBenchmarker::process()
 		mPredictor->predict(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Custom), MAXIMUM_PREDICTION, rmse);
 		time = mTime.elapsed();
 
+		/*ViModelPredictor *p = (ViModelPredictor*) mPredictor;
+		QVector<int> r = p->bestDegrees();
+		cout<<endl;
+		for(int i = 0; i < r.size(); ++i) cout<<r[i]<<"\t";
+		cout<<endl;*/
+
 		// Write
-		QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
+		/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
 		mCurrentObject->encode(ViAudio::Custom);
-		return;
+		return;*/
 
 		++mDoneParamIterations;
 		printFileData(rmse, time);

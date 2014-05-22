@@ -2,20 +2,30 @@
 #include <visystemsolver.h>
 #include <vilogger.h>
 
+#define DEFAULT_DEGREE 3
+
 ViHermitePredictor::ViHermitePredictor()
-	: ViDegreePredictor()
+	: ViPredictor()
 {
+	setDegree(DEFAULT_DEGREE);
+
 	addParameterName("Window Size");
 	addParameterName("Degree");
 }
 
 ViHermitePredictor::ViHermitePredictor(const ViHermitePredictor &other)
-	: ViDegreePredictor(other)
+	: ViPredictor(other)
 {
+	mDegree = other.mDegree;
 }
 
 ViHermitePredictor::~ViHermitePredictor()
 {
+}
+
+void ViHermitePredictor::setDegree(const int &degree)
+{
+	mDegree = degree;
 }
 
 void ViHermitePredictor::setParameter(const int &number, const qreal &value)
@@ -38,19 +48,19 @@ void ViHermitePredictor::predict(const qreal *samples, const int &size, qreal *p
 	newSize = size - 1;
 	doubleSize = newSize * 2;
 	ViVector vector(doubleSize);
-	ViMatrix matrix(doubleSize, mDegree + 1);
+	ViMatrix matrix(doubleSize, mDegree *2);
 
 	for(i = 0; i < newSize; ++i)
 	{
-		vector[i] = samples[i];
-		vector[i + newSize] = samples[i] - samples[i - 1]; // Fill the second half of the vector with the outgoing slopes
-		x = i; // For the matrix
+		//vector[i] = samples[i];
+		vector[i] = samples[i+1];
+		vector[i + newSize] = samples[i + 1] - samples[i]; // Fill the second half of the vector with the outgoing slopes
 
 		for(j = 0; j < mDegree; ++j)
 		{
 			exponent = mDegree - j;
-			matrix[i][j] = qPow(x, exponent); // Fill the first half of the matrix with the Hermite polynomials constructed from the x-values
-			matrix[i + newSize][j] = exponent * qPow(x, exponent - 1); // Fill the second half of the matrix with the derivitaves
+			matrix[i][j] = qPow(i, exponent); // Fill the first half of the matrix with the Hermite polynomials constructed from the x-values
+			matrix[i + newSize][j + mDegree] = exponent * qPow(i, exponent - 1); // Fill the second half of the matrix with the derivitaves
 		}
 		matrix[i][mDegree] = 1;
 	}
@@ -64,7 +74,16 @@ void ViHermitePredictor::predict(const qreal *samples, const int &size, qreal *p
 		{
 			x = newSize + i;
 			value = 0;
-			for(j = 0; j < count; ++j) value += coefficients[j] * qPow(x, mDegree - j);
+		//	for(j = 0; j < count; ++j) value += coefficients[j] * qPow(x, mDegree - j);
+
+			for(j = 0; j < mDegree; ++j)
+						{
+							exponent = mDegree - j;
+							value += coefficients[j] * qPow(x, exponent);
+							value += exponent * coefficients[j+mDegree] * qPow(x, exponent - 1);
+							//cout<<coefficients[j]<<"\t"<<coefficients[j]<<"\t"<<value<<endl;
+						}
+			//cout<<"********************: "<<endl;
 			predictedSamples[i] = value;
 		}
 	}

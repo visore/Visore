@@ -18,6 +18,9 @@ int main(int argc, char *argv[])
 	application.setApplicationName(ViManager::name());
 	application.setApplicationVersion(ViManager::version().toString());
 
+	// Set random seed
+	srand(time(NULL));
+
 	//Register SIGNAL/SLOT parameter types
 	qRegisterMetaType<ViAudioPosition>("ViAudioPosition");
 	qRegisterMetaType<ViRealSpectrum>("ViRealSpectrum");

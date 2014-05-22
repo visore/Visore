@@ -2,15 +2,18 @@
 #include <visystemsolver.h>
 #include <vilogger.h>
 
-ViPolynomialPredictor::ViPolynomialPredictor()
-	: ViDegreePredictor()
+#define DEFAULT_DEGREE 3
+
+ViPolynomialPredictor::ViPolynomialPredictor(const Estimation &estimation)
+	: ViModelPredictor(1, estimation)
 {
+	setDegree(DEFAULT_DEGREE);
 	addParameterName("Window Size");
 	addParameterName("Degree");
 }
 
 ViPolynomialPredictor::ViPolynomialPredictor(const ViPolynomialPredictor &other)
-	: ViDegreePredictor(other)
+	: ViModelPredictor(other)
 {
 }
 
@@ -29,35 +32,34 @@ void ViPolynomialPredictor::setParameter(const int &number, const qreal &value)
 	}
 }
 
-void ViPolynomialPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+bool ViPolynomialPredictor::estimateModel(const int &degree, ViVector &coefficients, const qreal *samples, const int &size)
 {
-	static int i, j, x, count;
-	static qreal value;
-	static ViVector coefficients;
+	static int i, j;
 
-	ViMatrix matrix(size, mDegree + 1);
+	ViMatrix matrix(size, degree + 1);
 	ViVector vector(size);
 
 	for(i = 0; i < size; ++i)
 	{
 		vector[i] = samples[i];
 		matrix[i][0] = 1;
-		for(j = 1; j <= mDegree; ++j) matrix[i][j] = qPow(i, j);
+		for(j = 1; j <= degree; ++j) matrix[i][j] = qPow(i, j);
 	}
 
-	if(ViSystemSolver::solve(matrix, vector, coefficients))
+	return ViSystemSolver::solve(matrix, vector, coefficients);
+}
+
+void ViPolynomialPredictor::predictModel(const int &degree, const ViVector &coefficients, qreal *prediction, const int &size, const int &start)
+{
+	static int i, j, x, count;
+	static qreal value;
+
+	count = coefficients.size();
+	for(i = 0; i < size; ++i)
 	{
-		count = coefficients.size();
-		for(i = 0; i < predictionCount; ++i)
-		{
-			x = size + i;
-			value = 0;
-			for(j = 0; j < count; ++j) value += coefficients[count - j - 1] * qPow(x, mDegree - j);
-			predictedSamples[i] = value;
-		}
-	}
-	else
-	{
-		for(i = 0; i < predictionCount; ++i) predictedSamples[i] = 0;
+		x = i + start;
+		value = 0;
+		for(j = 0; j < count; ++j) value += coefficients[count - j - 1] * qPow(x, degree - j);
+		prediction[i] = value;
 	}
 }

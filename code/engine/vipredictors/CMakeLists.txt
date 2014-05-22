@@ -12,6 +12,11 @@ ADD_DEFINITIONS(-DPREDICTORS_PATH="${VI_PREDICTORS_INSTALL_PATH}")
 #Add sub libraries
 ADD_SUBDIRECTORY(${ROOT}/vipolynomialpredictor)
 ADD_SUBDIRECTORY(${ROOT}/vihermitepredictor)
+ADD_SUBDIRECTORY(${ROOT}/viarmapredictor)
+ADD_SUBDIRECTORY(${ROOT}/vigarchpredictor)
+ADD_SUBDIRECTORY(${ROOT}/vifourierpredictor)
+ADD_SUBDIRECTORY(${ROOT}/visplinepredictor)
+ADD_SUBDIRECTORY(${ROOT}/viconstantpredictor)
 
 #Initiate source files
 FILE(GLOB VI_PREDICTOR_SOURCES ${SOURCES}/*.cpp)

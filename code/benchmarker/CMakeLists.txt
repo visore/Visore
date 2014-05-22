@@ -9,7 +9,36 @@ FILE(GLOB VI_BENCHMARKER_HEADERS ${HEADERS}/*.h)
 
 #Create library
 ADD_LIBRARY(vibenchmarker SHARED ${VI_BENCHMARKER_HEADERS} ${VI_BENCHMARKER_SOURCES})
-TARGET_LINK_LIBRARIES(vibenchmarker viessentials vipredictionnoisedetector vimadnoisedetector vipredictionnoisedetector vifouriernoisedetector viarmanoisedetector vizscorenoisedetector vinearestneighbournoisedetector vimahalanobisnoisedetector vicrosscorrelator vipiecewiseconstantinterpolator viwarpedburginterpolator visplineinterpolator vihermiteinterpolator vicosineinterpolator vifourierinterpolator vipolynomialinterpolator viarmainterpolator vipolynomialpredictor vihermitepredictor)
+TARGET_LINK_LIBRARIES(vibenchmarker
+	viessentials
+	vicrosscorrelator
+
+	vipredictionnoisedetector
+	vimadnoisedetector
+	vipredictionnoisedetector
+	vifouriernoisedetector
+	viarmanoisedetector
+	vizscorenoisedetector
+	vinearestneighbournoisedetector
+	vimahalanobisnoisedetector
+
+	vipiecewiseconstantinterpolator
+	viwarpedburginterpolator
+	visplineinterpolator
+	vihermiteinterpolator
+	vicosineinterpolator
+	vifourierinterpolator
+	vipolynomialinterpolator
+	viarmainterpolator
+
+	vipolynomialpredictor
+	vihermitepredictor
+	vifourierpredictor
+	visplinepredictor
+	viarmapredictor
+	vigarchpredictor
+	viconstantpredictor
+)
 QT5_USE_MODULES(vibenchmarker Xml Multimedia)
 
 #Install file

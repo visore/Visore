@@ -1,9 +1,9 @@
 #include <vipredictor.h>
 #include <viaudiodata.h>
 #include <vilogger.h>
+#include <float.h>
 
 #define DEFAULT_WINDOW_SIZE 2048
-#define DEFAULT_DEGREE 1
 
 ViPredictor::ViPredictor()
 {
@@ -74,6 +74,8 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	outputData.enqueueSplitSamples(offsetData, 0);
 	outputData.enqueueSplitSamples(offsetData, 1);
 
+	qint64 processedSamples = 0, totalSamples = inputData.bufferSamples();
+
 	while(inputData.hasData())
 	{
 		inputData.read();
@@ -88,7 +90,11 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 		{
 			predict(cache1.data(), mWindowSize, predictedSamples, predictionCount);
 
-			for(i = 0; i < predictionCount; ++i) rmse[i] += qPow(predictedSamples[i] - cache1[mWindowSize + i], 2);
+			for(i = 0; i < predictionCount; ++i)
+			{
+				adjustValue(predictedSamples[i]);
+				rmse[i] += qPow(predictedSamples[i] - cache1[mWindowSize + i], 2);
+			}
 			++rmseCount;
 
 			output1.append(predictedSamples[0]);
@@ -109,7 +115,11 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 		{
 			predict(cache2.data(), mWindowSize, predictedSamples, predictionCount);
 
-			for(i = 0; i < predictionCount; ++i) rmse[i] += qPow(predictedSamples[i] - cache2[mWindowSize + i], 2);
+			for(i = 0; i < predictionCount; ++i)
+			{
+				adjustValue(predictedSamples[i]);
+				rmse[i] += qPow(predictedSamples[i] - cache2[mWindowSize + i], 2);
+			}
 			++rmseCount;
 
 			output2.append(predictedSamples[0]);
@@ -121,6 +131,9 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 			}
 			cache2.removeFirst();
 		}
+
+		processedSamples += data1.size() + data2.size();
+		setProgress((100.0 * processedSamples) / totalSamples);
 	}
 
 	newCount = predictionCount - 1;
@@ -128,8 +141,12 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	{
 		predict(cache1.data(), mWindowSize, predictedSamples, newCount);
 
-		//for(i = 0; i < newCount; ++i) rmse[i] += qPow(predictedSamples[i] - cache1[mWindowSize + i], 2);
-		//++rmseCount;
+		for(i = 0; i < newCount; ++i)
+		{
+			adjustValue(predictedSamples[i]);
+			rmse[i] += qPow(predictedSamples[i] - cache1[mWindowSize + i], 2);
+		}
+		++rmseCount;
 
 		output1.append(predictedSamples[0]);
 		cache1.removeFirst();
@@ -141,8 +158,12 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	{
 		predict(cache2.data(), mWindowSize, predictedSamples, newCount);
 
-		//for(i = 0; i < newCount; ++i) rmse[i] += qPow(predictedSamples[i] - cache2[mWindowSize + i], 2);
-		//++rmseCount;
+		for(i = 0; i < newCount; ++i)
+		{
+			adjustValue(predictedSamples[i]);
+			rmse[i] += qPow(predictedSamples[i] - cache2[mWindowSize + i], 2);
+		}
+		++rmseCount;
 
 		output2.append(predictedSamples[0]);
 		cache2.removeFirst();
@@ -164,6 +185,12 @@ void ViPredictor::predict(const qreal *samples, const int &size, qreal *predicte
 {
 	predict(samples, size, predictedSamples, predictionCount);
 	for(int i = 0; i < predictionCount; ++i) mse[i] = qPow(predictedSamples[i] - expectations[i], 2);
+}
+
+void ViPredictor::adjustValue(qreal &value)
+{
+	if(value > 1) value = 1;
+	else if (value < -1) value = -1;
 }
 
 void ViPredictor::setParameter(const int &number, const qreal &value)
@@ -258,28 +285,134 @@ void ViPredictor::addParameterName(const QString &name)
 	mParameterNames.append(name);
 }
 
-ViDegreePredictor::ViDegreePredictor()
+ViModelPredictor::ViModelPredictor(const int &degreeCount, const Estimation &estimation)
 	: ViPredictor()
 {
-	setDegree(DEFAULT_DEGREE);
+	mDegrees.resize(degreeCount);
+	mBestDegrees.resize(degreeCount);
+
+	mEstimation = estimation;
+	if(mEstimation == Fixed) predictPointer = &ViModelPredictor::predictFixed;
+	else if(mEstimation == Best) predictPointer = &ViModelPredictor::predictBest;
 }
 
-ViDegreePredictor::ViDegreePredictor(const ViDegreePredictor &other)
+ViModelPredictor::ViModelPredictor(const ViModelPredictor &other)
 	: ViPredictor(other)
 {
-	mDegree = other.mDegree;
+	mDegrees = other.mDegrees;
+	mBestDegrees = other.mBestDegrees;
+
+	mEstimation = other.mEstimation;
+	if(mEstimation == Fixed) predictPointer = &ViModelPredictor::predictFixed;
+	else if(mEstimation == Best) predictPointer = &ViModelPredictor::predictBest;
 }
 
-ViDegreePredictor::~ViDegreePredictor()
+ViModelPredictor::~ViModelPredictor()
 {
 }
 
-void ViDegreePredictor::setDegree(const int &degree)
+void ViModelPredictor::setDegree(const int &degree, const int &degreeIndex)
 {
-	mDegree = degree;
+	mDegrees[degreeIndex] = degree;
+	mBestDegrees[degreeIndex].clear();
+	mBestDegrees[degreeIndex].resize(degree);
+	mBestDegrees[degreeIndex].fill(0);
 }
 
-int ViDegreePredictor::degree()
+int ViModelPredictor::degree(const int &degreeIndex)
 {
-	return mDegree;
+	return mDegrees[degreeIndex];
+}
+
+QVector<int> ViModelPredictor::bestDegrees(const int &degreeIndex)
+{
+	return mBestDegrees[degreeIndex];
+}
+
+int ViModelPredictor::bestDegrees(const int &degree, const int &degreeIndex)
+{
+	return mBestDegrees[degreeIndex][degree];
+}
+
+void ViModelPredictor::increaseBestDegrees(const int &degree)
+{
+	increaseBestDegrees(0, degree);
+}
+
+void ViModelPredictor::increaseBestDegrees(const int &degreeIndex, const int &degree)
+{
+	mBestDegrees[degreeIndex][degree] += 1;
+}
+
+void ViModelPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+{
+	(this->*predictPointer)(samples, size, predictedSamples, predictionCount);
+}
+
+void ViModelPredictor::predictFixed(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+{
+	static int i;
+	static ViVector coefficients;
+	if(estimateModel(degree(), coefficients, samples, size)) predictModel(degree(), coefficients, predictedSamples, predictionCount, size);
+	else for(i = 0; i < predictionCount; ++i) predictedSamples[i] = 0;
+
+	/*
+	// Recursive prediction
+	static int i, index;
+	static ViVector coefficients;
+
+	qreal newSamples[size + predictionCount];
+	for(i = 0; i < size; ++i) newSamples[i] = samples[i];
+
+	for(i = 0; i < predictionCount; ++i)
+	{
+		index = size + i;
+		if(estimateModel(degree(), coefficients, newSamples, index)) predictModel(degree(), coefficients, predictedSamples + i, 1, index);
+		else predictedSamples[i] = 0;
+		newSamples[index] = predictedSamples[i];
+	}*/
+}
+
+void ViModelPredictor::predictBest(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+{
+	static int i;
+	static ViVector currentCoefficients, bestCoefficients;
+	static qreal currentScore, bestScore;
+
+	qreal prediction[size];
+	bestScore = DBL_MAX;
+	for(i = 1; i <= degree(); ++i)
+	{
+		if(estimateModel(i, currentCoefficients, samples, size))
+		{
+			predictModel(i, currentCoefficients, prediction, size, 0);
+			currentScore = calculateScore(samples, prediction, size);
+			if(currentScore < bestScore)
+			{
+				bestScore = currentScore;
+				bestCoefficients = currentCoefficients;
+			}
+			else break;
+		}
+	}
+	--i; // Important: last iteration will increase i before exiting the loop
+	increaseBestDegrees(i - 1);
+	predictModel(i, bestCoefficients, predictedSamples, predictionCount, size);
+}
+
+bool ViModelPredictor::estimateModel(const int &degree, ViVector &coefficients, const qreal *samples, const int &size)
+{
+}
+
+void ViModelPredictor::predictModel(const int &degree, const ViVector &coefficients, qreal *prediction, const int &size, const int &start)
+{
+}
+
+qreal ViModelPredictor::calculateScore(const qreal *observed, const qreal *predicted, const int &size)
+{
+	static int i;
+	static qreal mse;
+	mse = 0;
+	for(i = 0; i < size; ++i) mse += qPow(predicted[i] - observed[i], 2);
+	return mse / size;
 }

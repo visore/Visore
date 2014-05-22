@@ -283,7 +283,7 @@ qreal ViBenchMarker4::calculateAccuracy(const qreal &totalAccuracy, const qint64
 {
 	//return (2 - (totalAccuracy / count)) / 2.0;
 
-	return (qSqrt(totalAccuracy / count)) / 2; // Root mean squared error. Devided my 0 to get RMSE between 0 and 1, otherwise it is between 0 and 2
+	return qSqrt(totalAccuracy / count); // Root mean squared error.
 }
 
 QString ViBenchMarker4::timeConversion(int msecs)
