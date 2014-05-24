@@ -11,6 +11,8 @@ class ViMatrix
 	public:
 
 		ViMatrix();
+		ViMatrix(const ViVector *rows, const int &rowCount);
+		ViMatrix(const ViVector *rows1, const int &rowCount1, const ViVector *rows2, const int &rowCount2);
 		ViMatrix(const int &rows, const int &colums, const double **data = NULL);
 		ViMatrix(const ViMatrix &other);
 		virtual ~ViMatrix();

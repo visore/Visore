@@ -15,7 +15,8 @@ class ViVector
 
 		ViVector();
 		ViVector(const int &size, double *data = NULL, const bool &copy = true);
-		ViVector(const int &size, float *data);
+		ViVector(const int &size, const double *data);
+		ViVector(const int &size1, const double *data1, const int &size2, const double *data2);
 		ViVector(const ViVector &other);
 		virtual ~ViVector();
 

@@ -8,6 +8,40 @@ ViMatrix::ViMatrix()
 	mVectors = NULL;
 }
 
+ViMatrix::ViMatrix(const ViVector *rows, const int &rowCount)
+{
+	mRows = rowCount;
+	if(mRows == 0)
+	{
+		mColumns = 0;
+		mVectors = NULL;
+	}
+	else
+	{
+		mColumns = rows[0].size();
+		mVectors = new ViVector*[mRows];
+		for(int row = 0; row < mRows; ++row) mVectors[row] = new ViVector(rows[row]);
+	}
+}
+
+ViMatrix::ViMatrix(const ViVector *rows1, const int &rowCount1, const ViVector *rows2, const int &rowCount2)
+{
+	mRows = rowCount1 + rowCount2;
+	if(mRows == 0)
+	{
+		mColumns = 0;
+		mVectors = NULL;
+	}
+	else
+	{
+		mColumns = rows1[0].size();
+		mVectors = new ViVector*[mRows];
+		int row;
+		for(row = 0; row < rowCount1; ++row) mVectors[row] = new ViVector(rows1[row]);
+		for(row = 0; row < rowCount2; ++row) mVectors[row + rowCount1] = new ViVector(rows2[row]);
+	}
+}
+
 ViMatrix::ViMatrix(const int &rows, const int &colums, const double **data)
 {
 	mRows = rows;
@@ -17,11 +51,8 @@ ViMatrix::ViMatrix(const int &rows, const int &colums, const double **data)
 	for(row = 0; row < mRows; ++row)
 	{
 		mVectors[row] = new ViVector(mColumns);
-		for(column = 0; column < mColumns; ++column)
-		{
-			if (data) (*this)[row][column] = data[row][column];
-			else (*this)[row][column] = 0;
-		}
+		if(data) for(column = 0; column < mColumns; ++column) (*mVectors[row])[column] = data[row][column];
+		else for(column = 0; column < mColumns; ++column) (*mVectors[row])[column] = 0;
 	}
 }
 

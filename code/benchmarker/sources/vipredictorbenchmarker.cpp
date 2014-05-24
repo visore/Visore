@@ -11,9 +11,14 @@
 #include <visplinepredictor.h>
 #include <viarmapredictor.h>
 #include <vigarchpredictor.h>
+#include <vilagrangepredictor.h>
+
+#include <vistandardpolynomial.h>
+#include <vifourierpolynomial.h>
+#include <vinewtonpolynomial.h>
 
 #define WINDOW_SIZE 4096
-#define MAXIMUM_PREDICTION 128
+#define MAXIMUM_PREDICTION 32
 
 ViPredictorBenchmarker::ViPredictorBenchmarker()
 {
@@ -23,13 +28,20 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	/*mPredictor = new ViConstantPredictor(ViConstantPredictor::Random);
 	addParam("Window Size", 64, 64, 1);*/
 
-	mPredictor = new ViHermitePredictor();
-	addParam("Window Size", 256, 256, 1);
-	addParam("Degree", 3, 3, 1);
-
-	/*mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Fixed);
-	addParam("Window Size", 128, 128, 10);
+	/*mPredictor = new ViHermitePredictor(new ViFourierPolynomial());
+	addParam("Window Size", 10, 10, 5);
 	addParam("Degree", 3, 3, 1);*/
+
+	/*mPredictor = new ViPolynomialPredictor(new ViFourierPolynomial(), ViPolynomialPredictor::Fixed);
+	addParam("Window Size", 10, 20, 5);
+	addParam("Degree", 1, 15, 1);*/
+
+	/*mPredictor = new ViPolynomialPredictor(new ViNewtonPolynomial(), ViPolynomialPredictor::Fixed);
+	addParam("Window Size", 10, 10, 5);
+	addParam("Degree", 1, 6, 1);*/
+
+	mPredictor = new ViLagrangePredictor();
+	addParam("Window Size", 1, 128, 1);
 
 	/*mPredictor = new ViFourierPredictor();
 	addParam("Window Size", 10, 10, 1);

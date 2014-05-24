@@ -17,6 +17,7 @@ ADD_SUBDIRECTORY(${ROOT}/vigarchpredictor)
 ADD_SUBDIRECTORY(${ROOT}/vifourierpredictor)
 ADD_SUBDIRECTORY(${ROOT}/visplinepredictor)
 ADD_SUBDIRECTORY(${ROOT}/viconstantpredictor)
+ADD_SUBDIRECTORY(${ROOT}/vilagrangepredictor)
 
 #Initiate source files
 FILE(GLOB VI_PREDICTOR_SOURCES ${SOURCES}/*.cpp)
@@ -24,7 +25,7 @@ FILE(GLOB VI_PREDICTOR_HEADERS ${HEADERS}/*.h)
 
 #Create library
 ADD_LIBRARY(vipredictor SHARED ${VI_PREDICTOR_HEADERS} ${VI_PREDICTOR_SOURCES})
-TARGET_LINK_LIBRARIES(vipredictor viessentials)
+TARGET_LINK_LIBRARIES(vipredictor viessentials vistandardpolynomial vifourierpolynomial vinewtonpolynomial)
 QT5_USE_MODULES(vipredictor Xml Multimedia)
 
 #Install file

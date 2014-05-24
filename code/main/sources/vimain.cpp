@@ -8,6 +8,8 @@
 #include<vibenchmarker4.h>
 #include <vipredictorbenchmarker.h>
 
+#include<vifourierpolynomial.h>
+
 int main(int argc, char *argv[])
 {
 	QApplication application(argc, argv);
@@ -32,7 +34,27 @@ int main(int argc, char *argv[])
 	ViPredictorBenchmarker bench;
 	if(BENCH)
 	{
-		bench.benchmark();
+		/*int dir = 8;
+		int deg = 3;
+		ViFourierPolynomial p;
+		p.setDegree(deg);
+		p.setDerivatives(dir);
+
+
+		for(int i = 0; i <= dir;++i)
+		{
+			cout<<"************************: "<<i<<endl;
+			for(int j = 1; j <= 1;++j)
+			{
+				cout<<p.get(deg, i)[j].toString().toLatin1().data()<<endl;
+			}
+		}*/
+
+
+
+
+
+	bench.benchmark();
 	}
 	else
 	{

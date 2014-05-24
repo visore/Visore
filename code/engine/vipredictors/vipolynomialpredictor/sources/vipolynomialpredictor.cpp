@@ -4,9 +4,15 @@
 
 #define DEFAULT_DEGREE 3
 
-ViPolynomialPredictor::ViPolynomialPredictor(const Estimation &estimation)
+ViPolynomialPredictor::ViPolynomialPredictor(ViPolynomial *polynomial, const Estimation &estimation)
 	: ViModelPredictor(1, estimation)
 {
+	mPolynomial = polynomial;
+	if(mPolynomial == NULL)
+	{
+		LOG("The polynomial cannot be NULL.", QtCriticalMsg);
+		exit(-1);
+	}
 	setDegree(DEFAULT_DEGREE);
 	addParameterName("Window Size");
 	addParameterName("Degree");
@@ -15,10 +21,18 @@ ViPolynomialPredictor::ViPolynomialPredictor(const Estimation &estimation)
 ViPolynomialPredictor::ViPolynomialPredictor(const ViPolynomialPredictor &other)
 	: ViModelPredictor(other)
 {
+	mPolynomial = other.mPolynomial->clone();
 }
 
 ViPolynomialPredictor::~ViPolynomialPredictor()
 {
+	delete mPolynomial;
+}
+
+void ViPolynomialPredictor::setDegree(const int &degree, const int &degreeIndex)
+{
+	ViModelPredictor::setDegree(degree, degreeIndex);
+	mPolynomial->setDegree(degree);
 }
 
 void ViPolynomialPredictor::setParameter(const int &number, const qreal &value)
@@ -34,32 +48,13 @@ void ViPolynomialPredictor::setParameter(const int &number, const qreal &value)
 
 bool ViPolynomialPredictor::estimateModel(const int &degree, ViVector &coefficients, const qreal *samples, const int &size)
 {
-	static int i, j;
-
-	ViMatrix matrix(size, degree + 1);
-	ViVector vector(size);
-
-	for(i = 0; i < size; ++i)
-	{
-		vector[i] = samples[i];
-		matrix[i][0] = 1;
-		for(j = 1; j <= degree; ++j) matrix[i][j] = qPow(i, j);
-	}
-
+	ViMatrix matrix(mPolynomial->get(degree), size);
+	ViVector vector(size, samples);
 	return ViSystemSolver::solve(matrix, vector, coefficients);
 }
 
 void ViPolynomialPredictor::predictModel(const int &degree, const ViVector &coefficients, qreal *prediction, const int &size, const int &start)
 {
-	static int i, j, x, count;
-	static qreal value;
-
-	count = coefficients.size();
-	for(i = 0; i < size; ++i)
-	{
-		x = i + start;
-		value = 0;
-		for(j = 0; j < count; ++j) value += coefficients[count - j - 1] * qPow(x, degree - j);
-		prediction[i] = value;
-	}
+	static int i;
+	for(i = 0; i < size; ++i) mPolynomial->solve(degree, start + i, coefficients, prediction[i]);
 }

@@ -289,6 +289,7 @@ ViModelPredictor::ViModelPredictor(const int &degreeCount, const Estimation &est
 	: ViPredictor()
 {
 	mDegrees.resize(degreeCount);
+	mDegrees.fill(0);
 	mBestDegrees.resize(degreeCount);
 
 	mEstimation = estimation;

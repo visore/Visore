@@ -17,11 +17,8 @@ ViVector::ViVector(const int &size, double *data, const bool &copy)
 	{
 		mCopy = true;
 		mData = new double[mSize];
-		for(int i = 0; i < mSize; ++i)
-		{
-			if(data) mData[i] = data[i];
-			else mData[i] = 0.0;
-		}
+		if(data) for(int i = 0; i < mSize; ++i) mData[i] = data[i];
+		else for(int i = 0; i < mSize; ++i) mData[i] = 0.0;
 	}
 	else
 	{
@@ -30,15 +27,22 @@ ViVector::ViVector(const int &size, double *data, const bool &copy)
 	}
 }
 
-ViVector::ViVector(const int &size, float *data)
+ViVector::ViVector(const int &size, const double *data)
 {
 	mCopy = true;
 	mSize = size;
 	mData = new double[mSize];
-	for(int i = 0; i < mSize; ++i)
-	{
-		mData[i] = data[i];
-	}
+	for(int i = 0; i < mSize; ++i) mData[i] = data[i];
+}
+
+ViVector::ViVector(const int &size1, const double *data1, const int &size2, const double *data2)
+{
+	mCopy = true;
+	mSize = size1 + size2;
+	mData = new double[mSize];
+	int i;
+	for(i = 0; i < size1; ++i) mData[i] = data1[i];
+	for(i = 0; i < size2; ++i) mData[i + size1] = data2[i];
 }
 
 ViVector::ViVector(const ViVector &other)

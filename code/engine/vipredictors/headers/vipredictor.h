@@ -16,7 +16,7 @@ class ViPredictor : public ViName, public ViNotifier
 		ViPredictor(const ViPredictor &other);
 		~ViPredictor();
 
-		void setWindowSize(const int &size);
+		virtual void setWindowSize(const int &size);
 		int windowSize();
 
 		void setOffset(const int &offset);
@@ -68,7 +68,7 @@ class ViModelPredictor : public ViPredictor
 		ViModelPredictor(const ViModelPredictor &other);
 		~ViModelPredictor();
 
-		void setDegree(const int &degree, const int &degreeIndex = 0);
+		virtual void setDegree(const int &degree, const int &degreeIndex = 0);
 		int degree(const int &degreeIndex = 0);
 
 		QVector<int> bestDegrees(const int &degreeIndex = 0);
