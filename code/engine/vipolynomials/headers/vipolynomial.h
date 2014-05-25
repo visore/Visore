@@ -16,7 +16,7 @@ class ViPolynomial
 
 		void setDerivatives(const int &derivatives); // Specify how many derivatives (first, second, etc) should be precalculated
 
-		virtual void setDegree(const int &degree);
+		virtual void setDegree(const int &degree); // Returns the maximum allowed window size (since Newton must have the same degree and window size
 		const int& degree() const;
 
 		const int& coefficientCount() const;

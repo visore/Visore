@@ -37,11 +37,7 @@ void ViStandardPolynomial::construct(const int &degree, const qreal &x, const QV
 
 void ViStandardPolynomial::solve(const int &degree, const int &offset, const ViVector &coefficients, qreal &result, const int &derivative)
 {
-	if(degree == 0)
-	{
-		result = 0;
-	}
-	else if(derivative == 0)
+	if(derivative == 0 && degree != 0)
 	{
 		const ViVector &vector = getOffset(degree, offset)[0];
 		result = coefficients[0];
@@ -49,10 +45,14 @@ void ViStandardPolynomial::solve(const int &degree, const int &offset, const ViV
 	}
 	else
 	{
+		result = 0;
+	}
+	/*else
+	{
 		const ViVector &vector = getOffset(degree, offset, derivative)[0];
 		result = coefficients[derivative];
 		for(mI = derivative + 1; mI <= degree; ++mI) result += coefficients[mI] * vector[mI];
-	}
+	}*/
 }
 
 int ViStandardPolynomial::maxCoefficients(const int &degree) const

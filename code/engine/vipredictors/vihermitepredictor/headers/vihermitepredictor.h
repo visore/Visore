@@ -18,7 +18,7 @@ class ViHermitePredictor : public ViModelPredictor
 			Ingoing,	// Uses the ingoing derivatives at a certain point. Eg: the derivative at point x1 is the derivative between x0 and x1
 			Average,		// Uses the average of the derivatives at both sides. Eg: the derivative at point x1 is the average of the derivatives between x0 and x1; and x1 and x2
 
-			Default = Outgoing
+			Default = Average
 		};
 
 	public:

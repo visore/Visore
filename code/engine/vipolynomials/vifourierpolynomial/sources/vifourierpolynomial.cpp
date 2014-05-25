@@ -81,11 +81,7 @@ void ViFourierPolynomial::construct(const int &degree, const qreal &x, const QVe
 
 void ViFourierPolynomial::solve(const int &degree, const int &offset, const ViVector &coefficients, qreal &result, const int &derivative)
 {
-	if(degree == 0)
-	{
-		result = 0;
-	}
-	else if(derivative == 0)
+	if(derivative == 0 && degree != 0)
 	{
 		const ViVector &vector = getOffset(degree, offset)[0];
 		result = coefficients[0] / 2.0;
@@ -97,7 +93,7 @@ void ViFourierPolynomial::solve(const int &degree, const int &offset, const ViVe
 	}
 	else
 	{
-
+		result = 0;
 	}
 }
 

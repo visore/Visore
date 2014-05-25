@@ -33,7 +33,27 @@ void ViNewtonPolynomial::construct(const int &degree, const qreal &x, const QVec
 	}
 	else
 	{
-
+		row[0] = 0;
+		for(int d = 1; d <= degree; ++d)
+		{
+			qreal v = 0;
+			for(int k = 0; k < d; ++k)
+			{
+				qreal v1 = 0;
+				for(int i = 0; i < k; ++i)
+				{
+					qreal v2 = allX[i];
+					for(int j = i + 1; j < k; ++i)
+					{
+						if(i != j) v2 *= allX[j];
+					}
+					v1 += v2;
+				}
+				qreal v3 = (d- k) * qPow(x, d - 1 - k) * v1;
+				v += v3;
+			}
+			row[d] = v;
+		}
 	}
 }
 
