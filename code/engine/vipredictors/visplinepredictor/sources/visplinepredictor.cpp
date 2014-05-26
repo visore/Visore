@@ -39,7 +39,7 @@ void ViSplinePredictor::setParameter(const int &number, const qreal &value)
 	}
 }
 
-void ViSplinePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+bool ViSplinePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
 {
 	static int i, j, index, xIndex, x1, x2, end, end2, indexes, parameterCount, sizeT, derivative, advance, advance2, row, front, exponent;
 

@@ -219,7 +219,7 @@ void ViLogger::enableTerminal(bool enable)
 
 void ViLogger::append(ViLogEntry entry)
 {
-	mEntries.append(entry);
+	//mEntries.append(entry); // This can cause too much memory consumption
 	if(mTerminalEnabled)
 	{
 		entry.print();

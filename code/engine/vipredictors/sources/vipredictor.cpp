@@ -88,14 +88,26 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 
 		while(cache1.size() > end)
 		{
-			predict(cache1.data(), mWindowSize, predictedSamples, predictionCount);
-
-			for(i = 0; i < predictionCount; ++i)
+			if(predict(cache1.data(), mWindowSize, predictedSamples, predictionCount))
 			{
-				adjustValue(predictedSamples[i]);
-				rmse[i] += qPow(predictedSamples[i] - cache1[mWindowSize + i], 2);
+				for(i = 0; i < predictionCount; ++i)
+				{
+					adjustValue(predictedSamples[i]);
+					rmse[i] += qPow(predictedSamples[i] - cache1[mWindowSize + i], 2);
+				}
+				++rmseCount;
 			}
-			++rmseCount;
+			else
+			{
+				for(i = 0; i < predictionCount; ++i)
+				{
+					predictedSamples[i] = 0;
+					rmse[i] += 4; // (-1 -1)^2
+				}
+				++rmseCount;
+			}
+
+
 
 			output1.append(predictedSamples[0]);
 			if(output1.size() >= mWindowSize)
@@ -113,14 +125,25 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 
 		while(cache2.size() > end)
 		{
-			predict(cache2.data(), mWindowSize, predictedSamples, predictionCount);
-
-			for(i = 0; i < predictionCount; ++i)
+			if(predict(cache2.data(), mWindowSize, predictedSamples, predictionCount))
 			{
-				adjustValue(predictedSamples[i]);
-				rmse[i] += qPow(predictedSamples[i] - cache2[mWindowSize + i], 2);
+				for(i = 0; i < predictionCount; ++i)
+				{
+					adjustValue(predictedSamples[i]);
+					rmse[i] += qPow(predictedSamples[i] - cache2[mWindowSize + i], 2);
+				}
+				++rmseCount;
 			}
-			++rmseCount;
+			else
+			{
+				for(i = 0; i < predictionCount; ++i)
+				{
+					predictedSamples[i] = 0;
+					rmse[i] += 4; // (-1 -1)^2
+				}
+				++rmseCount;
+			}
+
 
 			output2.append(predictedSamples[0]);
 			if(output2.size() >= mWindowSize)
@@ -139,14 +162,25 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	newCount = predictionCount - 1;
 	while(cache1.size() > mWindowSize)
 	{
-		predict(cache1.data(), mWindowSize, predictedSamples, newCount);
-
-		for(i = 0; i < newCount; ++i)
+		if(predict(cache1.data(), mWindowSize, predictedSamples, newCount))
 		{
-			adjustValue(predictedSamples[i]);
-			rmse[i] += qPow(predictedSamples[i] - cache1[mWindowSize + i], 2);
+			for(i = 0; i < newCount; ++i)
+			{
+				adjustValue(predictedSamples[i]);
+				rmse[i] += qPow(predictedSamples[i] - cache1[mWindowSize + i], 2);
+			}
+			++rmseCount;
 		}
-		++rmseCount;
+		else
+		{
+			for(i = 0; i < predictionCount; ++i)
+			{
+				predictedSamples[i] = 0;
+				rmse[i] += 4; // (-1 -1)^2
+			}
+			++rmseCount;
+		}
+
 
 		output1.append(predictedSamples[0]);
 		cache1.removeFirst();
@@ -156,14 +190,24 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	newCount = predictionCount - 1;
 	while(cache2.size() > mWindowSize)
 	{
-		predict(cache2.data(), mWindowSize, predictedSamples, newCount);
-
-		for(i = 0; i < newCount; ++i)
+		if(predict(cache2.data(), mWindowSize, predictedSamples, newCount))
 		{
-			adjustValue(predictedSamples[i]);
-			rmse[i] += qPow(predictedSamples[i] - cache2[mWindowSize + i], 2);
+			for(i = 0; i < newCount; ++i)
+			{
+				adjustValue(predictedSamples[i]);
+				rmse[i] += qPow(predictedSamples[i] - cache2[mWindowSize + i], 2);
+			}
+			++rmseCount;
 		}
-		++rmseCount;
+		else
+		{
+			for(i = 0; i < predictionCount; ++i)
+			{
+				predictedSamples[i] = 0;
+				rmse[i] += 4; // (-1 -1)^2
+			}
+			++rmseCount;
+		}
 
 		output2.append(predictedSamples[0]);
 		cache2.removeFirst();
@@ -179,12 +223,6 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	outputData.enqueueSplitSamples(outputSamples, 1);
 
 	for(i = 0; i < predictionCount; ++i) rmse[i] = qSqrt(rmse[i] / rmseCount); // Devided 2, since samples are in the range [-1,1] (aka RMSE is [0, 2]) and we want the RMSE to be in [0,1]
-}
-
-void ViPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal *expectations, qreal *mse)
-{
-	predict(samples, size, predictedSamples, predictionCount);
-	for(int i = 0; i < predictionCount; ++i) mse[i] = qPow(predictedSamples[i] - expectations[i], 2);
 }
 
 void ViPredictor::adjustValue(qreal &value)
@@ -345,9 +383,10 @@ void ViModelPredictor::increaseBestDegrees(const int &degreeIndex, const int &de
 	mBestDegrees[degreeIndex][degree] += 1;
 }
 
-void ViModelPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+bool ViModelPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
 {
 	(this->*predictPointer)(samples, size, predictedSamples, predictionCount);
+	return true;
 }
 
 void ViModelPredictor::predictFixed(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)

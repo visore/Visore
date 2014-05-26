@@ -28,7 +28,7 @@ class ViConstantPredictor : public ViPredictor
 
 	protected:
 
-		void predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
 
 		void predictZero(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
 		void predictMean(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);

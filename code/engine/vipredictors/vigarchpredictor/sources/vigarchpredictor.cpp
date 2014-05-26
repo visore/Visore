@@ -49,7 +49,8 @@ void ViGarchPredictor::setParameter(const int &number, const qreal &value)
 	}
 }
 
-void ViGarchPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+bool ViGarchPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
 {
 	mGretl->forecast(samples, size, predictedSamples, predictionCount);
+	return true;
 }

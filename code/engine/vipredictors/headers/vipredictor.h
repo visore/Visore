@@ -40,8 +40,7 @@ class ViPredictor : public ViName, public ViNotifier
 		void addParameterName(const QString &name);
 		void adjustValue(qreal &value);
 
-		virtual void predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount) = 0;
-		void predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal *expectations, qreal *mse);
+		virtual bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount) = 0;
 
 	protected:
 
@@ -79,7 +78,7 @@ class ViModelPredictor : public ViPredictor
 		void increaseBestDegrees(const int &degree);
 		void increaseBestDegrees(const int &degreeIndex, const int &degree);
 
-		void predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
 
 		virtual void predictFixed(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
 		virtual void predictBest(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);

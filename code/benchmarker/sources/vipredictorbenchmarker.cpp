@@ -28,9 +28,8 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	/*mPredictor = new ViConstantPredictor(ViConstantPredictor::Random);
 	addParam("Window Size", 64, 64, 1);*/
 
-	/*mPredictor = new ViHermitePredictor(new ViFourierPolynomial());
-	addParam("Window Size", 4, 4, 5);
-	addParam("Degree", 2, 2, 1);*/
+	mPredictor = new ViHermitePredictor();
+	addParam("Window Size", 1, 10, 1);
 
 	/*mPredictor = new ViPolynomialPredictor(new ViFourierPolynomial(), ViPolynomialPredictor::Fixed);
 	addParam("Window Size", 10, 20, 5);
@@ -43,10 +42,13 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	/*mPredictor = new ViLagrangePredictor();
 	addParam("Window Size", 1, 128, 1);*/
 
-	mPredictor = new ViFourierPredictor(ViFourierPredictor::Osculating);
-	addParam("Window Size", 10, 10, 1);
-	addParam("Degree", 3, 3, 1);
-	addParam("Derivatives", 0, 0, 1);
+	//mPredictor = new ViFourierPredictor(ViFourierPredictor::Splines, ViFourierPredictor::Best);
+	/*addParam("Window Size", 1, 15, 1);
+	addParam("Degree", 1, 10, 1);
+	addParam("Derivatives", 5, 5, 1);*/
+	/*addParam("Window Size", 1, 15, 1);
+	addParam("Degree", 10, 10, 1);
+	addParam("Derivatives", 5, 5, 1);*/
 
 	/*mPredictor = new ViSplinePredictor();
 	addParam("Window Size", 32, 32, 1);
@@ -72,7 +74,7 @@ ViPredictorBenchmarker::~ViPredictorBenchmarker()
 
 void ViPredictorBenchmarker::progress(qreal percentage)
 {
-	//cout << setprecision(2) << percentage << "%" << endl;
+	cout << setprecision(2) << percentage << "%" << endl;
 }
 
 void ViPredictorBenchmarker::addParam(QString name, qreal start, qreal end, qreal increase)

@@ -12,7 +12,7 @@ class ViLagrangePredictor : public ViPredictor
 		ViLagrangePredictor(const ViLagrangePredictor &other);
 		~ViLagrangePredictor();
 
-		void predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
 
 		void setParameter(const int &number, const qreal &value);
 

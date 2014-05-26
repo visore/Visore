@@ -26,7 +26,7 @@ void ViLagrangePredictor::setParameter(const int &number, const qreal &value)
 	}
 }
 
-void ViLagrangePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+bool ViLagrangePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
 {
 	for(mI = 0; mI < predictionCount; ++mI)
 	{
@@ -43,4 +43,5 @@ void ViLagrangePredictor::predict(const qreal *samples, const int &size, qreal *
 		}
 		predictedSamples[mI] = mValue1;
 	}
+	return true;
 }
