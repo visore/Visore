@@ -136,7 +136,7 @@ cout<<"-----------: "<<lagrangeFirst<<endl;
 
 			// First derivative (second part)
 			//value1 = lagrangeSquared  * (scaledx-scaledi);
-			//result += ViDifferentiate::derivative(1, samples, size, i, error) * value1;
+			//result += (ViDifferentiate::derivative(1, samples, size, i, error)/totalDevider) * value1;
 
 			result += (samples[i] * lagrangeSquared) + (lagrangeFirst * (ViDifferentiate::derivative(1, samples, size, i, error)/totalDevider));
 
@@ -172,10 +172,10 @@ int main(int argc, char *argv[])
 	ViPredictorBenchmarker bench;
 	if(BENCH)
 	{
-		int size = 5;
-		qreal s[] = {0.1,0.2,0.3,0.4,0.5};
-		/*int size = 2;
-		qreal s[] = {1,4};*/
+		/*int size = 5;
+		qreal s[] = {1,2,3,4,5};
+		//int size = 2;
+		//qreal s[] = {1,4};
 
 		int psize = 2;
 		qreal p[2];
@@ -189,10 +189,10 @@ int main(int argc, char *argv[])
 		}
 
 
-		exit(-1);
+		exit(-1);*/
 
 
-		//bench.benchmark();
+		bench.benchmark();
 	}
 	else
 	{

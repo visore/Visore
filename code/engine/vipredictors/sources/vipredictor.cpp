@@ -311,6 +311,16 @@ void ViPredictor::setParameters(const qreal &parameter1, const qreal &parameter2
 	setParameter(4, parameter5);
 }
 
+bool ViPredictor::validParameters()
+{
+	return true;
+}
+
+bool ViPredictor::hasParameter(const QString &name)
+{
+	return mParameterNames.contains(name);
+}
+
 QString ViPredictor::parameterName(const int &index, const bool &allCaps)
 {
 	if(index >= mParameterNames.size()) return "";

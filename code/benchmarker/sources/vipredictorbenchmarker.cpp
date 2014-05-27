@@ -28,8 +28,8 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	/*mPredictor = new ViConstantPredictor(ViConstantPredictor::Random);
 	addParam("Window Size", 64, 64, 1);*/
 
-	mPredictor = new ViHermitePredictor();
-	addParam("Window Size", 1, 10, 1);
+	/*mPredictor = new ViHermitePredictor();
+	addParam("Window Size", 1, 10, 1);*/
 
 	/*mPredictor = new ViPolynomialPredictor(new ViFourierPolynomial(), ViPolynomialPredictor::Fixed);
 	addParam("Window Size", 10, 20, 5);
@@ -42,10 +42,16 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	/*mPredictor = new ViLagrangePredictor();
 	addParam("Window Size", 1, 128, 1);*/
 
-	//mPredictor = new ViFourierPredictor(ViFourierPredictor::Splines, ViFourierPredictor::Best);
-	/*addParam("Window Size", 1, 15, 1);
+	/*mPredictor = new ViFourierPredictor(ViFourierPredictor::Osculating, ViFourierPredictor::Fixed);
+	addParam("Window Size", 1, 30, 1);
 	addParam("Degree", 1, 10, 1);
-	addParam("Derivatives", 5, 5, 1);*/
+	addParam("Derivatives", 1, 5, 1);*/
+
+	mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Splines, ViPolynomialPredictor::Fixed);
+	addParam("Window Size", 1, 30, 1);
+	addParam("Degree", 1, 10, 1);
+	addParam("Derivatives", 1, 5, 1);
+
 	/*addParam("Window Size", 1, 15, 1);
 	addParam("Degree", 10, 10, 1);
 	addParam("Derivatives", 5, 5, 1);*/
@@ -79,11 +85,15 @@ void ViPredictorBenchmarker::progress(qreal percentage)
 
 void ViPredictorBenchmarker::addParam(QString name, qreal start, qreal end, qreal increase)
 {
-	mParamsNames.append(name);
-	mParamsStart.append(start);
-	mParamsEnd.append(end);
-	mParamsIncrease.append(increase);
-	mParamsCurrent.append(0);
+	if(mPredictor->hasParameter(name))
+	{
+		mParamsNames.append(name);
+		mParamsStart.append(start);
+		mParamsEnd.append(end);
+		mParamsIncrease.append(increase);
+		mParamsCurrent.append(0);
+	}
+	else cout << "This predictor (" << mPredictor->name("", true).toLatin1().data() << ") doesn't make use of the given parameter (" << name.toLatin1().data() << ")." << endl;
 }
 
 void ViPredictorBenchmarker::initParams()
@@ -183,12 +193,21 @@ void ViPredictorBenchmarker::process()
 
 	do
 	{
+		qreal rmse[MAXIMUM_PREDICTION];
+
 		for(int i = 0; i < mParamsStart.size(); ++i) mPredictor->setParameter(mParamsNames[i], mParamsCurrent[i]);
 
-		qreal rmse[MAXIMUM_PREDICTION];
-		mTime.restart();
-		mPredictor->predict(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Custom), MAXIMUM_PREDICTION, rmse);
-		time = mTime.elapsed();
+		if(mPredictor->validParameters())
+		{
+			mTime.restart();
+			mPredictor->predict(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Custom), MAXIMUM_PREDICTION, rmse);
+			time = mTime.elapsed();
+		}
+		else
+		{
+			for(int i = 0; i < MAXIMUM_PREDICTION; ++i) rmse[i] = 2;
+			time = 0;
+		}
 
 		/*ViModelPredictor *p = (ViModelPredictor*) mPredictor;
 		QVector<int> r = p->bestDegrees();

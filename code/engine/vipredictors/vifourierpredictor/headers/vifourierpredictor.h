@@ -34,6 +34,8 @@ class ViFourierPredictor : public ViPredictor
 
 		void setParameter(const int &number, const qreal &value);
 
+		bool validParameters();
+
 	protected:
 
 		bool validParameters(const Mode &mode, const int &windowSize, const int &degree, const int &derivatives);

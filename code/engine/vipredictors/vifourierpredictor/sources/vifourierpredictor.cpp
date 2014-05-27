@@ -16,7 +16,7 @@ ViFourierPredictor::ViFourierPredictor(const Mode &mode, const Estimation &estim
 
 	addParameterName("Window Size");
 	addParameterName("Degree");
-	addParameterName("Derivatives");
+	if(mMode == Osculating || mMode == Splines) addParameterName("Derivatives");
 }
 
 ViFourierPredictor::ViFourierPredictor(const ViFourierPredictor &other)
@@ -86,12 +86,18 @@ void ViFourierPredictor::setParameter(const int &number, const qreal &value)
 	}
 }
 
+bool ViFourierPredictor::validParameters()
+{
+	return validParameters(mMode, mWindowSize, mDegree, mDerivatives);
+}
+
 bool ViFourierPredictor::validParameters(const Mode &mode, const int &windowSize, const int &degree, const int &derivatives)
 {
 	if(mode == Normal) return windowSize >= (degree * 2) + 1;
 	else if(mode == Osculating) return (windowSize >= (degree * 2) + 1) && degree >= derivatives;
 	else if(mode == Splines)
 	{
+		if(windowSize <= 1) return false;
 		int coefficients = (windowSize - 1) * ((degree * 2) + 1); // For every spline
 		int equations = (windowSize - 1) * 2; // Polynomial for each spline
 		equations += (windowSize - 2) * derivatives; // Derivatives at all intermediate points
@@ -347,17 +353,18 @@ bool ViFourierPredictor::estimateModelSplines(const int &degree, const int &deri
 {
 	if(size <= 1) return false;
 
-	static int i, j;
+	static int i, j, columnOffset1, columnOffset2, rowOffset1, rowOffset2, splineCount, singleCoefficientCount, coefficientCount, derivativeCount, equationCount;
 	static qreal value1, value2, value3, value4;
+	static bool addFirstSpline;
 
-	int splineCount = (size - 1);
-	int singleCoefficientCount = ((degree * 2) + 1);
-	int coefficientCount = splineCount * singleCoefficientCount;
-	int derivativeCount = splineCount - 1;
+	splineCount = (size - 1);
+	singleCoefficientCount = ((degree * 2) + 1);
+	coefficientCount = splineCount * singleCoefficientCount;
+	derivativeCount = splineCount - 1;
 
-	bool addFirstSpline = false;
+	addFirstSpline = false;
 
-	int equationCount = 0;
+	equationCount = 0;
 	equationCount += splineCount * 2; // Spline polynomials. Times 2 since we use the spline with 2 points
 	equationCount += derivativeCount * derivative; // Intermediate derivatives should be equal;
 	if(equationCount < coefficientCount) // Add first spline == 0
@@ -369,7 +376,6 @@ bool ViFourierPredictor::estimateModelSplines(const int &degree, const int &deri
 	ViMatrix matrix(equationCount, coefficientCount);
 	ViVector vector(equationCount);
 
-	int columnOffset1, columnOffset2, rowOffset1, rowOffset2;
 	// Add spline polynomials
 	for(i = 0; i < splineCount; ++i)
 	{
@@ -403,7 +409,7 @@ bool ViFourierPredictor::estimateModelSplines(const int &degree, const int &deri
 	// Add the deratives between neighbouring splines
 	for(i = 1; i <= derivative; ++i)
 	{
-		rowOffset1 = (splineCount * 2) + ((i - 1) * derivative);
+		rowOffset1 = (splineCount * 2) + ((i - 1) * derivativeCount);
 		for(j = 0; j < derivativeCount; ++j)
 		{
 			rowOffset2 = rowOffset1 + j;

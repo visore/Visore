@@ -33,6 +33,9 @@ class ViPredictor : public ViName, public ViNotifier
 		void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4);
 		void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4, const qreal &parameter5);
 
+		virtual bool validParameters();
+		virtual bool hasParameter(const QString &name);
+
 		QString parameterName(const int &index, const bool &allCaps = true);
 
 	protected:
