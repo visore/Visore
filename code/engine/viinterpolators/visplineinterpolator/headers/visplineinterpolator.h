@@ -1,4 +1,4 @@
-#ifndef VISPLINEINTERPOLATOR_H
+/*#ifndef VISPLINEINTERPOLATOR_H
 #define VISPLINEINTERPOLATOR_H
 
 #include <viinterpolator.h>
@@ -23,3 +23,4 @@ class ViSplineInterpolator : public ViDegreeInterpolator
 };
 
 #endif
+*/

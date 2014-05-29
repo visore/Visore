@@ -28,20 +28,31 @@ void ViLagrangePredictor::setParameter(const int &number, const qreal &value)
 
 bool ViLagrangePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
 {
-	for(mI = 0; mI < predictionCount; ++mI)
+	static int i, j, k;
+	static qreal value1, value2, x, scaling, scaledJ, scaleK;
+
+	scaling = size + predictionCount - 1;
+
+	for(i = 0; i < predictionCount; ++i)
 	{
-		mX = size + mI;
-		mValue1 = 0;
-		for(mJ = 0; mJ < size; ++mJ)
+		x = (size + i) / scaling;
+		value1 = 0;
+		for(j = 0; j < size; ++j)
 		{
-			mValue2 = 1;
-			for(mK = 0; mK < size; ++mK)
+			scaledJ = j / scaling;
+			value2 = 1;
+			for(k = 0; k < size; ++k)
 			{
-				if(mJ != mK) mValue2 *= (mX - mK) / qreal(mJ - mK);
+				if(j != k)
+				{
+					scaleK = k / scaling;
+					value2 *= (x - scaleK) / (scaledJ - scaleK);
+				}
 			}
-			mValue1 += samples[mJ] * mValue2;
+			value1 += samples[j] * value2;
 		}
-		predictedSamples[mI] = mValue1;
+		predictedSamples[i] = value1;
 	}
+
 	return true;
 }

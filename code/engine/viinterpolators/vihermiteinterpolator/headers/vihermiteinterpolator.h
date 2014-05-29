@@ -1,4 +1,4 @@
-#ifndef VIHERMITEINTERPOLATOR_H
+/*#ifndef VIHERMITEINTERPOLATOR_H
 #define VIHERMITEINTERPOLATOR_H
 
 #include <viinterpolator.h>
@@ -29,3 +29,4 @@ class ViHermiteInterpolator : public ViDegreeInterpolator
 };
 
 #endif
+*/

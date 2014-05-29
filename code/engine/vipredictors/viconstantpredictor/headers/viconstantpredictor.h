@@ -22,6 +22,8 @@ class ViConstantPredictor : public ViPredictor
 		ViConstantPredictor(const ViConstantPredictor &other);
 		~ViConstantPredictor();
 
+		QString name(QString replace = "", bool spaced = false);
+
 		void setMode(const Mode &mode);
 
 		void setParameter(const int &number, const qreal &value);

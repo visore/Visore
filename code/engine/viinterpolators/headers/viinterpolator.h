@@ -6,8 +6,9 @@
 #include <vinoise.h>
 #include <vibuffer.h>
 #include <vilogger.h>
+#include <vinotifier.h>
 
-class ViInterpolator : public ViLibrary, public ViSerializer
+class ViInterpolator : public ViLibrary, public ViSerializer, public ViNotifier
 {
 
 	public:
@@ -21,6 +22,7 @@ class ViInterpolator : public ViLibrary, public ViSerializer
 		int windowSize();
 
 		bool interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *mask);
+		bool interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *target, ViBuffer *sizeMask, QVector<qreal> &rmse, qreal &averageRmse);
 		bool interpolate(ViSampleChunk &samples, const ViSampleChunk &noiseMask, const int &channel);
 
 		virtual ViInterpolator* clone() = 0;
@@ -28,12 +30,23 @@ class ViInterpolator : public ViLibrary, public ViSerializer
 		virtual ViElement exportData();
 		virtual bool importData(ViElement element);
 
-		virtual void setParameters(const qreal &param1){ LOG("Invalid number of parameters given: 1"); exit(-1); }
-		virtual void setParameters(const qreal &param1, const qreal &param2){ LOG("Invalid number of parameters given: 2"); exit(-1); }
-		virtual void setParameters(const qreal &param1, const qreal &param2, const qreal &param3){ LOG("Invalid number of parameters given: 3"); exit(-1); }
-		virtual void setParameters(const qreal &param1, const qreal &param2, const qreal &param3, const qreal &param4){ LOG("Invalid number of parameters given: 4"); exit(-1); }
+		virtual void setParameter(const int &number, const qreal &value);
+		void setParameter(const QString &name, const qreal &value);
+		void setParameters(const qreal &parameter1);
+		void setParameters(const qreal &parameter1, const qreal &parameter2);
+		void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3);
+		void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4);
+		void setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4, const qreal &parameter5);
+
+		virtual bool validParameters();
+		virtual bool hasParameter(const QString &name);
+
+		QString parameterName(const int &index, const bool &allCaps = true);
 
 	protected:
+
+		void adjustSamples(ViSampleChunk &data);
+		void addParameterName(const QString &name);
 
 		void process(const ViSampleChunk &samples, ViSampleChunk &output, const ViSampleChunk &noise, int &noiseSize, QVector<qreal> &noiseCache, QVector<qreal> &leftCache, QVector<qreal> &rightCache); // Returns the writable samples
 		void interpolate(ViSampleChunk &output, const int &noiseSize, QVector<qreal> &noiseCache, QVector<qreal> &leftCache, QVector<qreal> &rightCache);
@@ -43,6 +56,7 @@ class ViInterpolator : public ViLibrary, public ViSerializer
 
 		int mWindowSize;
 		int mHalfWindowSize;
+		QList<QString> mParameterNames;
 
 };
 

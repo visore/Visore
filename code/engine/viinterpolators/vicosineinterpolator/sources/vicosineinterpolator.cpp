@@ -1,4 +1,4 @@
-#include <vicosineinterpolator.h>
+/*#include <vicosineinterpolator.h>
 
 ViCosineInterpolator::ViCosineInterpolator()
 	: ViInterpolator()
@@ -36,3 +36,4 @@ ViCosineInterpolator* create()
 #ifdef __cplusplus
 }
 #endif
+*/

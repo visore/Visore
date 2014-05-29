@@ -1,4 +1,4 @@
-#ifndef VIFOURIERINTERPOLATOR_H
+/*#ifndef VIFOURIERINTERPOLATOR_H
 #define VIFOURIERINTERPOLATOR_H
 
 #include <viinterpolator.h>
@@ -52,3 +52,4 @@ class ViFourierInterpolator : public ViDegreeInterpolator
 };
 
 #endif
+*/

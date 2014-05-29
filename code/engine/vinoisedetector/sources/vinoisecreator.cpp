@@ -174,8 +174,9 @@ void ViNoiseCreator::addNoise(ViSampleChunk &samples1, ViSampleChunk &samples2, 
 		sizeMask2[i] = 0;
 	}
 
-	currentOffset = 0;
-	while(currentOffset + MAX_NOISE_LENGTH + NOISE_OFFSET <= samples1.size())
+	halfWidth = NOISE_OFFSET / 2;
+	currentOffset = halfWidth;
+	while(currentOffset + MAX_NOISE_LENGTH + halfWidth <= samples1.size())
 	{
 		createNoiseKind();
 		for(i = 0; i < mNoiseLength; ++i)
@@ -191,9 +192,9 @@ void ViNoiseCreator::addNoise(ViSampleChunk &samples1, ViSampleChunk &samples2, 
 		nextNoiseKind();
 	}
 
-	halfWidth = NOISE_OFFSET / 2;
-	currentOffset = halfWidth;
-	while(currentOffset + MAX_NOISE_LENGTH + halfWidth <= samples1.size())
+
+	currentOffset = NOISE_OFFSET;
+	while(currentOffset + MAX_NOISE_LENGTH + NOISE_OFFSET <= samples1.size())
 	{
 		createNoiseKind();
 		for(i = 0; i < mNoiseLength; ++i)

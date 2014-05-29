@@ -72,7 +72,7 @@ class ViPolynomialPredictor : public ViPredictor
 		Estimation mEstimation;
 		Mode mMode;
 
-		QVector<QVector<int>> mBestParameters;
+		QVector<QVector<qint64>> mBestParameters;
 
 		int mDegree;
 		int mDerivatives;

@@ -42,7 +42,9 @@ QString ViPolynomialPredictor::name(QString replace, bool spaced)
 	if(mEstimation == Fixed) estimation = "Fixed Estimation";
 	else if(mEstimation == Best) estimation = "Best Estimation";
 
-	return ViPredictor::name(replace, spaced) + " (" + mode + ", " + estimation + ")";
+	QString name = ViPredictor::name(replace, spaced) + " (" + mode + ", " + estimation + ")";
+	if(spaced) return name;
+	else return name.replace(" ", "").replace(",", "_");
 }
 
 void ViPolynomialPredictor::setDegree(const int &degree)
@@ -276,7 +278,7 @@ void ViPolynomialPredictor::predictModelNormal(const int &degree, const ViVector
 bool ViPolynomialPredictor::estimateModelOsculating(const int &degree, const int &derivative, ViVector &coefficients, const qreal *samples, const int &size, const qreal &scaling)
 {
 	static int i, j, offset, start, end, derivativeCount, totalDerivatives, totalSize;
-	static qreal value1, value2, x;
+	static qreal x;
 
 	derivativeCount = size - 2; // Average, we don't have derivatives for the first and last point
 	totalDerivatives = derivativeCount * derivative;
@@ -332,7 +334,7 @@ bool ViPolynomialPredictor::estimateModelSplines(const int &degree, const int &d
 	if(size <= 1) return false;
 
 	static int i, j, columnOffset, rowOffset1, rowOffset2, splineCount, singleCoefficientCount, coefficientCount, derivativeCount, equationCount;
-	static qreal value1, value2, value3, value4, x1, x2;
+	static qreal x1, x2;
 	static bool addFirstSpline;
 
 	splineCount = size - 1;
@@ -365,7 +367,7 @@ bool ViPolynomialPredictor::estimateModelSplines(const int &degree, const int &d
 		vector[rowOffset2] = samples[i + 1];
 
 		x1 = i / scaling;
-		x2 = x1 + scaling;
+		x2 = (i + 1) / scaling;
 
 		matrix[rowOffset1][columnOffset] = 1;
 		matrix[rowOffset2][columnOffset] = 1;
@@ -383,14 +385,14 @@ bool ViPolynomialPredictor::estimateModelSplines(const int &degree, const int &d
 	// Add the deratives between neighbouring splines
 	for(i = 1; i <= derivative; ++i)
 	{
-		rowOffset1 = (splineCount * 2) + ((i - 1) * derivativeCount);
+		rowOffset1 = (splineCount * 2) + ((i - 1) * derivative);
 		for(j = 0; j < derivativeCount; ++j)
 		{
 			rowOffset2 = rowOffset1 + j;
 			columnOffset = j * singleCoefficientCount;
-			value1 = (j + 1) / scaling;
-			calculateDerivative(degree, value1, matrix[rowOffset2], i, columnOffset, 1);
-			calculateDerivative(degree, value1, matrix[rowOffset2], i, columnOffset + singleCoefficientCount, -1); // -1: take the derivative on the right-hand side to the left of the equation
+			x1 = (j + 1) / scaling;
+			calculateDerivative(degree, x1, matrix[rowOffset2], i, columnOffset, 1);
+			calculateDerivative(degree, x1, matrix[rowOffset2], i, columnOffset + singleCoefficientCount, -1); // -1: take the derivative on the right-hand side to the left of the equation
 		}
 	}
 

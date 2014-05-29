@@ -1,4 +1,4 @@
-#include <viarmainterpolator.h>
+/*#include <viarmainterpolator.h>
 #include <vilogger.h>
 
 #define LN2PI1 2.837877066409345 // log(2*pi) + 1
@@ -399,7 +399,7 @@ MODEL* ViArmaInterpolator::bestModel(DATASET *data)
 
 	cout<<"ARMA("<<bestAr<<", "<<bestMa<<")"<<endl;
 	return bestModel;
-
+*/
 
 	/*static qreal current, min;
 	static int arOrder, maOrder, arOrderBest, maOrderBest;
@@ -454,7 +454,7 @@ MODEL* ViArmaInterpolator::bestModel(DATASET *data)
 	cout<<"ARMA("<<mGretlParameters[1]<<", "<<mGretlParameters[3]<<")"<<endl;
 
 	*model = arma_model(adjustParameters(mGretlParameters), NULL, data, (gretlopt) mGretlEstimation, NULL);*/
-}
+/*}
 
 qreal ViArmaInterpolator::calculateR2(MODEL *model)
 {
@@ -520,3 +520,4 @@ ViArmaInterpolator* create()
 #ifdef __cplusplus
 }
 #endif
+*/

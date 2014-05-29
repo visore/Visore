@@ -23,7 +23,6 @@ TARGET_LINK_LIBRARIES(vibenchmarker
 	vimahalanobisnoisedetector
 
 	vipiecewiseconstantinterpolator
-	viwarpedburginterpolator
 	visplineinterpolator
 	vihermiteinterpolator
 	vicosineinterpolator
@@ -34,11 +33,11 @@ TARGET_LINK_LIBRARIES(vibenchmarker
 	vipolynomialpredictor
 	vihermitepredictor
 	vifourierpredictor
-	visplinepredictor
 	viarmapredictor
 	vigarchpredictor
 	viconstantpredictor
 	vilagrangepredictor
+	vinewtonpredictor
 )
 QT5_USE_MODULES(vibenchmarker Xml Multimedia)
 

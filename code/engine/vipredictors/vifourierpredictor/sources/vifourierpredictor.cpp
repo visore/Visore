@@ -42,7 +42,9 @@ QString ViFourierPredictor::name(QString replace, bool spaced)
 	if(mEstimation == Fixed) estimation = "Fixed Estimation";
 	else if(mEstimation == Best) estimation = "Best Estimation";
 
-	return ViPredictor::name(replace, spaced) + " (" + mode + ", " + estimation + ")";
+	QString name = ViPredictor::name(replace, spaced) + " (" + mode + ", " + estimation + ")";
+	if(spaced) return name;
+	else return name.replace(" ", "").replace(",", "_");
 }
 
 void ViFourierPredictor::setDegree(const int &degree)
@@ -354,7 +356,7 @@ bool ViFourierPredictor::estimateModelSplines(const int &degree, const int &deri
 	if(size <= 1) return false;
 
 	static int i, j, columnOffset1, columnOffset2, rowOffset1, rowOffset2, splineCount, singleCoefficientCount, coefficientCount, derivativeCount, equationCount;
-	static qreal value1, value2, value3, value4;
+	static qreal x1, x2, value1, value2;
 	static bool addFirstSpline;
 
 	splineCount = (size - 1);
@@ -387,36 +389,36 @@ bool ViFourierPredictor::estimateModelSplines(const int &degree, const int &deri
 		vector[rowOffset1] = samples[i];
 		vector[rowOffset2] = samples[i + 1];
 
-		value1 = scaling * i;
-		value2 = value1 + scaling;
+		x1 = scaling * i;
+		x2 = scaling * (i + 1);
 
 		matrix[rowOffset1][columnOffset1] = 0.5;
 		matrix[rowOffset2][columnOffset1] = 0.5;
 
 		for(j = 1; j <= degree; ++j)
 		{
-			value3 = value1 * j;
-			value4 = value2 * j;
+			value1 = x1 * j;
+			value2 = x2 * j;
 
-			matrix[rowOffset1][j + columnOffset1] = qCos(value3);
-			matrix[rowOffset2][j + columnOffset1] = qCos(value4);
+			matrix[rowOffset1][j + columnOffset1] = qCos(value1);
+			matrix[rowOffset2][j + columnOffset1] = qCos(value2);
 
-			matrix[rowOffset1][j + columnOffset2] = qSin(value3);
-			matrix[rowOffset2][j + columnOffset2] = qSin(value4);
+			matrix[rowOffset1][j + columnOffset2] = qSin(value1);
+			matrix[rowOffset2][j + columnOffset2] = qSin(value2);
 		}
 	}
 
 	// Add the deratives between neighbouring splines
 	for(i = 1; i <= derivative; ++i)
 	{
-		rowOffset1 = (splineCount * 2) + ((i - 1) * derivativeCount);
+		rowOffset1 = (splineCount * 2) + ((i - 1) * derivative);
 		for(j = 0; j < derivativeCount; ++j)
 		{
 			rowOffset2 = rowOffset1 + j;
 			columnOffset1 = j * singleCoefficientCount;
-			value1 = scaling * (j + 1);
-			calculateDerivative(degree, value1, matrix[rowOffset2], i, columnOffset1, 1);
-			calculateDerivative(degree, value1, matrix[rowOffset2], i, columnOffset1 + singleCoefficientCount, -1); // -1: take the derivative on the right-hand side to the left of the equation
+			x1 = scaling * (j + 1);
+			calculateDerivative(degree, x1, matrix[rowOffset2], i, columnOffset1, 1);
+			calculateDerivative(degree, x1, matrix[rowOffset2], i, columnOffset1 + singleCoefficientCount, -1); // -1: take the derivative on the right-hand side to the left of the equation
 		}
 	}
 

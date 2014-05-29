@@ -16,15 +16,6 @@ class ViLagrangePredictor : public ViPredictor
 
 		void setParameter(const int &number, const qreal &value);
 
-	private:
-
-		int mI;
-		int mJ;
-		int mK;
-		int mX;
-		qreal mValue1;
-		qreal mValue2;
-
 };
 
 #endif

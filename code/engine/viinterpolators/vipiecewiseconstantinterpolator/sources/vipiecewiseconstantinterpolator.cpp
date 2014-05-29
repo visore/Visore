@@ -1,4 +1,4 @@
-#include <vipiecewiseconstantinterpolator.h>
+/*#include <vipiecewiseconstantinterpolator.h>
 
 bool ViPiecewiseConstantInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
@@ -41,3 +41,4 @@ ViPiecewiseConstantInterpolator* create()
 #ifdef __cplusplus
 }
 #endif
+*/

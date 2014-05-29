@@ -1,4 +1,4 @@
-#include <vihermiteinterpolator.h>
+/*#include <vihermiteinterpolator.h>
 #include <visystemsolver.h>
 
 #define DEFAULT_DEGREE 3
@@ -105,3 +105,4 @@ ViHermiteInterpolator* create()
 #ifdef __cplusplus
 }
 #endif
+*/

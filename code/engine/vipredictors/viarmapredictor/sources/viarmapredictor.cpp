@@ -6,13 +6,13 @@
 ViArmaPredictor::ViArmaPredictor()
 	: ViPredictor()
 {
-	mGretl = new ViGretl(ViGretl::ARMA);
+	mGretl = new ViGretl(ViGretl::ARIMA);
 	setWindowSize(DEFAULT_WINDOW_SIZE);
 
 	addParameterName("Window Size");
-	addParameterName("AR Order");
-	addParameterName("I Order");
-	addParameterName("MA Order");
+	addParameterName("AR Degree");
+	addParameterName("I Degree");
+	addParameterName("MA Degree");
 }
 
 ViArmaPredictor::ViArmaPredictor(const ViArmaPredictor &other)
@@ -53,6 +53,5 @@ void ViArmaPredictor::setParameter(const int &number, const qreal &value)
 
 bool ViArmaPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
 {
-	mGretl->forecast(samples, size, predictedSamples, predictionCount);
-	return true;
+	return mGretl->forecast(samples, size, predictedSamples, predictionCount);
 }

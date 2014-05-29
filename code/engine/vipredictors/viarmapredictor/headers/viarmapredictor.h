@@ -9,6 +9,14 @@ class ViArmaPredictor : public ViPredictor
 
 	public:
 
+		enum Estimation
+		{
+			Fixed,
+			Best,
+		};
+
+	public:
+
 		ViArmaPredictor();
 		ViArmaPredictor(const ViArmaPredictor &other);
 		~ViArmaPredictor();

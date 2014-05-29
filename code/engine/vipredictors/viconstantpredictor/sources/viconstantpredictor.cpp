@@ -19,6 +19,21 @@ ViConstantPredictor::~ViConstantPredictor()
 {
 }
 
+QString ViConstantPredictor::name(QString replace, bool spaced)
+{
+	QString name = ViPredictor::name(replace, spaced) + " (";
+
+	if(mMode == Zero) name += "Zero Mode";
+	else if(mMode == Mean) name += "Mean Mode";
+	else if(mMode == Last) name += "Last Mode";
+	else if(mMode == Random) name += "Random Mode";
+
+	name += ")";
+
+	if(spaced) return name;
+	else return name.replace(" ", "");
+}
+
 void ViConstantPredictor::setMode(const Mode &mode)
 {
 	mMode = mode;

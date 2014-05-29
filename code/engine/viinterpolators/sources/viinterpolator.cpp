@@ -1,6 +1,8 @@
 #include <viinterpolator.h>
 #include <viaudiodata.h>
+#include <vinoisecreator.h>
 #include <vilogger.h>
+#include <QtMath>
 
 #define DEFAULT_WINDOW_SIZE 0	// Will use all available samples
 #define MAX_WINDOW_SIZE 64768	// Even if the window size is 0 (use all data), the window size will never be larger than this
@@ -16,6 +18,7 @@ ViInterpolator::ViInterpolator(const ViInterpolator &other)
 {
 	mHalfWindowSize = other.mHalfWindowSize;
 	mWindowSize = other.mWindowSize;
+	mParameterNames = other.mParameterNames;
 }
 
 ViInterpolator::~ViInterpolator()
@@ -34,6 +37,118 @@ int ViInterpolator::windowSize()
 	return mWindowSize;
 }
 
+void ViInterpolator::setParameter(const int &number, const qreal &value)
+{
+	LOG("No parameters implemented for this interpolator.", QtCriticalMsg);
+	exit(-1);
+}
+
+void ViInterpolator::setParameter(const QString &name, const qreal &value)
+{
+	QString newName = name.trimmed().toLower().replace(" ", "");
+	for(int i = 0; i < mParameterNames.size(); ++i)
+	{
+		QString currentName = mParameterNames[i].trimmed().toLower().replace(" ", "");
+		if(newName == currentName)
+		{
+			setParameter(i, value);
+			return;
+		}
+	}
+}
+
+void ViInterpolator::setParameters(const qreal &parameter1)
+{
+	if(mParameterNames.size() < 1)
+	{
+		LOG("Invalid parameter count for this interpolator.", QtCriticalMsg);
+		exit(-1);
+	}
+	setParameter(0, parameter1);
+}
+
+void ViInterpolator::setParameters(const qreal &parameter1, const qreal &parameter2)
+{
+	if(mParameterNames.size() < 2)
+	{
+		LOG("Invalid parameter count for this interpolator.", QtCriticalMsg);
+		exit(-1);
+	}
+	setParameter(0, parameter1);
+	setParameter(1, parameter2);
+}
+
+void ViInterpolator::setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3)
+{
+	if(mParameterNames.size() < 3)
+	{
+		LOG("Invalid parameter count for this interpolator.", QtCriticalMsg);
+		exit(-1);
+	}
+	setParameter(0, parameter1);
+	setParameter(1, parameter2);
+	setParameter(2, parameter3);
+}
+
+void ViInterpolator::setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4)
+{
+	if(mParameterNames.size() < 4)
+	{
+		LOG("Invalid parameter count for this interpolator.", QtCriticalMsg);
+		exit(-1);
+	}
+	setParameter(0, parameter1);
+	setParameter(1, parameter2);
+	setParameter(2, parameter3);
+	setParameter(3, parameter4);
+}
+
+void ViInterpolator::setParameters(const qreal &parameter1, const qreal &parameter2, const qreal &parameter3, const qreal &parameter4, const qreal &parameter5)
+{
+	if(mParameterNames.size() < 5)
+	{
+		LOG("Invalid parameter count for this interpolator.", QtCriticalMsg);
+		exit(-1);
+	}
+	setParameter(0, parameter1);
+	setParameter(1, parameter2);
+	setParameter(2, parameter3);
+	setParameter(3, parameter4);
+	setParameter(4, parameter5);
+}
+
+bool ViInterpolator::validParameters()
+{
+	return true;
+}
+
+bool ViInterpolator::hasParameter(const QString &name)
+{
+	return mParameterNames.contains(name);
+}
+
+QString ViInterpolator::parameterName(const int &index, const bool &allCaps)
+{
+	if(index >= mParameterNames.size()) return "";
+	if(allCaps) return mParameterNames[index].toUpper();
+	return mParameterNames[index];
+}
+
+void ViInterpolator::addParameterName(const QString &name)
+{
+	mParameterNames.append(name);
+}
+
+void ViInterpolator::adjustSamples(ViSampleChunk &data)
+{
+	static int i;
+	for(i = 0; i < data.size(); ++i)
+	{
+		if(data[i] > 1) data[i] = 1;
+		else if(data[i] < -1) data[i] = -1;
+	}
+}
+
 bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *mask)
 {
 	ViAudioReadData corrupted(input);
@@ -46,6 +161,8 @@ bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 	ViSampleChunk output1, output2;
 	QVector<qreal> leftCache1, leftCache2, rightCache1, rightCache2, noiseCache1, noiseCache2;
 	int noiseSize1 = 0, noiseSize2 = 0;
+
+	qint64 processedSize = 0, totalSize = corrupted.bufferSamples();
 
 	while(corrupted.hasData())
 	{
@@ -60,16 +177,24 @@ bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 		process(corrupted1, output1, noise1, noiseSize1, noiseCache1, leftCache1, rightCache1);
 		process(corrupted2, output2, noise2, noiseSize2, noiseCache2, leftCache2, rightCache2);
 
+		adjustSamples(output1);
+		adjustSamples(output2);
+
 		corrected.enqueueSplitSamples(output1, 0);
 		corrected.enqueueSplitSamples(output2, 1);
 
 		output1.clear();
 		output2.clear();
+
+		processedSize += corrupted1.size() + corrupted2.size();
+		setProgress((processedSize * 99.0) / totalSize);
 	}
 
 	// Interpolate the remaining samples
 	interpolate(output1, noiseSize1, noiseCache1, leftCache1, rightCache1);
 	interpolate(output2, noiseSize2, noiseCache2, leftCache2, rightCache2);
+	adjustSamples(output1);
+	adjustSamples(output2);
 	corrected.enqueueSplitSamples(output1, 0);
 	corrected.enqueueSplitSamples(output2, 1);
 
@@ -81,6 +206,80 @@ bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 	output2.resize(rightCache2.size());
 	for(int i = 0; i < output2.size(); ++i) output2[i] = rightCache2[i];
 	corrected.enqueueSplitSamples(output2, 1);
+
+	setProgress(100);
+}
+
+bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *target, ViBuffer *sizeMask, QVector<qreal> &rmse, qreal &averageRmse)
+{
+	interpolate(input, output, sizeMask);
+
+	rmse.clear();
+	rmse.resize(ViNoiseCreator::maximumNoiseSize() - ViNoiseCreator::minimumNoiseSize() + 1);
+	rmse.fill(0);
+
+	QVector<qint64> count;
+	count.resize(rmse.size());
+	count.fill(0);
+
+	averageRmse = 0;
+	qint64 averageCount = 0;
+
+	ViAudioReadData readCorrected(output);
+	ViAudioReadData readTarget(target);
+	ViAudioReadData readMask(sizeMask);
+	readCorrected.setSampleCount(8192*2);
+	readTarget.setSampleCount(8192*2);
+	readMask.setSampleCount(8192*2);
+
+	qreal mse;
+	int i, size, noiseSize;
+
+	while(readCorrected.hasData())
+	{
+		readCorrected.read();
+		ViSampleChunk &corrected1 = readCorrected.splitSamples(0);
+		ViSampleChunk &corrected2 = readCorrected.splitSamples(1);
+
+		readTarget.read();
+		ViSampleChunk &target1 = readTarget.splitSamples(0);
+		ViSampleChunk &target2 = readTarget.splitSamples(1);
+
+		readMask.read();
+		ViSampleChunk &noise1 = readMask.splitSamples(0);
+		ViSampleChunk &noise2 = readMask.splitSamples(1);
+
+		size = corrected1.size();
+		for(i = 0; i < size; ++i)
+		{
+			noiseSize = ViNoiseCreator::fromSizeMask(noise1[i]);
+			if(noiseSize > 0)
+			{
+				mse = qPow(corrected1[i] - target1[i], 2);
+				rmse[noiseSize - 1] += mse;
+				count[noiseSize - 1] += 1;
+				averageRmse += mse;
+				++averageCount;
+			}
+		}
+
+		size = corrected2.size();
+		for(i = 0; i < size; ++i)
+		{
+			noiseSize = ViNoiseCreator::fromSizeMask(noise2[i]);
+			if(noiseSize > 0)
+			{
+				mse = qPow(corrected2[i] - target2[i], 2);
+				rmse[noiseSize - 1] += mse;
+				count[noiseSize - 1] += 1;
+				averageRmse += mse;
+				++averageCount;
+			}
+		}
+	}
+
+	for(i = 0; i < rmse.size(); ++i) rmse[i] = qSqrt(rmse[i] / count[i]);
+	averageRmse = qSqrt(averageRmse / averageCount);
 }
 
 void ViInterpolator::process(const ViSampleChunk &input, ViSampleChunk &output, const ViSampleChunk &noise, int &noiseSize, QVector<qreal> &noiseCache, QVector<qreal> &leftCache, QVector<qreal> &rightCache)
@@ -126,14 +325,15 @@ void ViInterpolator::process(const ViSampleChunk &input, ViSampleChunk &output, 
 
 void ViInterpolator::interpolate(ViSampleChunk &output, const int &noiseSize, QVector<qreal> &noiseCache, QVector<qreal> &leftCache, QVector<qreal> &rightCache)
 {
+	int i;
 	ViSampleChunk outputData(noiseSize + leftCache.size());
-	for(int i = 0; i < leftCache.size(); ++i) outputData[i] = leftCache[i];
+	for(i = 0; i < leftCache.size(); ++i) outputData[i] = leftCache[i];
 	if(noiseSize == 0)
 	{
 		output.append(outputData);
 		return;
 	}
-	for(int i = 0; i < noiseCache.size(); ++i) outputData[i + leftCache.size()] = noiseCache[i];
+	for(i = 0; i < noiseCache.size(); ++i) outputData[i + leftCache.size()] = noiseCache[i];
 
 	qreal *leftData = leftCache.data();
 	qreal *rightData = rightCache.data();
@@ -146,8 +346,6 @@ void ViInterpolator::interpolate(ViSampleChunk &output, const int &noiseSize, QV
 		rightSize = qMin(rightSize, mHalfWindowSize);
 		leftData += leftSize;
 	}
-
-	//cout<<"++:"<<leftSize<<"\t"<<noiseSize<<"\t"<<rightSize<<endl;
 
 	interpolate(leftData, leftSize, rightData, rightSize, outputData.data() + leftCache.size(), noiseSize);
 	output.append(outputData);

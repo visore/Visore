@@ -1,4 +1,4 @@
-#ifndef VIPIECEWISECONSTANTINTERPOLATOR_H
+/*#ifndef VIPIECEWISECONSTANTINTERPOLATOR_H
 #define VIPIECEWISECONSTANTINTERPOLATOR_H
 
 #include <viinterpolator.h>
@@ -17,3 +17,4 @@ class ViPiecewiseConstantInterpolator : public ViInterpolator
 };
 
 #endif
+*/

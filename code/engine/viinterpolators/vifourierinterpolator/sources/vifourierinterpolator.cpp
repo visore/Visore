@@ -1,4 +1,4 @@
-#include <vifourierinterpolator.h>
+/*#include <vifourierinterpolator.h>
 #include <viscaler.h>
 #include <float.h>
 
@@ -85,7 +85,7 @@ bool ViFourierInterpolator::interpolateBest(const qreal *leftSamples, const int 
 	interpolate(bestDegree, bestCoefficients, leftSize, rightSize, outputSamples, outputSize);
 	return true;
 
-
+*/
 
 	/*static int i;
 
@@ -109,7 +109,7 @@ bool ViFourierInterpolator::interpolateBest(const qreal *leftSamples, const int 
 
 	interpolate(bestDegree, bestCoefficients, leftSize, rightSize, outputSamples, outputSize);
 	return true;*/
-}
+/*}
 
 bool ViFourierInterpolator::estimate(const int &degree, ViVector &coefficients, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize)
 {
@@ -232,3 +232,4 @@ ViFourierInterpolator* create()
 #ifdef __cplusplus
 }
 #endif
+*/

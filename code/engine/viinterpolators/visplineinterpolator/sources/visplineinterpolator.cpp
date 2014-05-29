@@ -1,3 +1,5 @@
+/*
+
 #include <visplineinterpolator.h>
 #include <visystemsolver.h>
 
@@ -156,3 +158,4 @@ ViSplineInterpolator* create()
 #ifdef __cplusplus
 }
 #endif
+*/

@@ -1,4 +1,4 @@
-#ifndef VIARMAINTERPOLATOR_H
+/*#ifndef VIARMAINTERPOLATOR_H
 #define VIARMAINTERPOLATOR_H
 
 #include <viinterpolator.h>
@@ -106,3 +106,4 @@ class ViArmaInterpolator : public ViInterpolator
 };
 
 #endif
+*/

@@ -7,6 +7,7 @@
 #include<vibenchmarker3.h>
 #include<vibenchmarker4.h>
 #include <vipredictorbenchmarker.h>
+#include <viinterpolatorbenchmarker.h>
 
 #include <vidifferentiater.h>
 
@@ -169,7 +170,9 @@ int main(int argc, char *argv[])
     //bool BENCH = false;
 
 	//ViBenchMarker4 bench;
-	ViPredictorBenchmarker bench;
+	//ViPredictorBenchmarker bench;
+	ViInterpolatorBenchmarker bench;
+
 	if(BENCH)
 	{
 		/*int size = 5;

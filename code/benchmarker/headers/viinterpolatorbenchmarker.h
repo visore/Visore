@@ -1,11 +1,11 @@
-#ifndef VIPREDICTORBENCHMARKER_H
-#define VIPREDICTORBENCHMARKER_H
+#ifndef VIINTERPOLATORBENCHMARKER_H
+#define VIINTERPOLATORBENCHMARKER_H
 
 #include <viaudioobject.h>
-#include <vipredictor.h>
+#include <viinterpolator.h>
 #include <QTime>
 
-class ViPredictorBenchmarker : public QObject
+class ViInterpolatorBenchmarker : public QObject
 {
 
 	Q_OBJECT
@@ -26,23 +26,23 @@ class ViPredictorBenchmarker : public QObject
 
 	public:
 
-		ViPredictorBenchmarker();
-		virtual ~ViPredictorBenchmarker();
+		ViInterpolatorBenchmarker();
+		virtual ~ViInterpolatorBenchmarker();
 
 		void benchmark();
 
 	protected:
 
 		void printFileHeader();
-		void printFileData(const qreal *rmse, const qint64 &time);
-		void printTerminal(const qreal *rmse, const qint64 &time);
+		void printFileData(const QVector<qreal> &rmse, const qreal &averageRmse, const qint64 &time);
+		void printTerminal(const QVector<qreal> &rmse, const qreal &averageRmse, const qint64 &time);
 
 	private:
 
 		QList<QString> mParamsNames;
 		QList<qreal> mParamsStart, mParamsEnd, mParamsIncrease, mParamsCurrent;
 
-		ViPredictor *mPredictor;
+		ViInterpolator *mInterpolator;
 
 		QQueue<QString> mFiles;
 		QString mCurrentFile;

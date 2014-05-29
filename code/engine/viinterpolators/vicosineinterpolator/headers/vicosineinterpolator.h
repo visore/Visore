@@ -1,4 +1,4 @@
-#ifndef VICOSINEINTERPOLATOR_H
+/*#ifndef VICOSINEINTERPOLATOR_H
 #define VICOSINEINTERPOLATOR_H
 
 #include <viinterpolator.h>
@@ -21,3 +21,4 @@ class ViCosineInterpolator : public ViInterpolator
 };
 
 #endif
+*/
