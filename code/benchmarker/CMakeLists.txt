@@ -29,6 +29,8 @@ TARGET_LINK_LIBRARIES(vibenchmarker
 	vifourierinterpolator
 	vipolynomialinterpolator
 	viarmainterpolator
+	vinewtoninterpolator
+	vilagrangeinterpolator
 
 	vipolynomialpredictor
 	vihermitepredictor

@@ -29,7 +29,6 @@ void ViInterpolator::setWindowSize(const int &size)
 {
 	mHalfWindowSize = qFloor(size / 2);
 	mWindowSize = mHalfWindowSize * 2;
-	if(mHalfWindowSize == 0) setWindowSize(MAX_WINDOW_SIZE);
 }
 
 int ViInterpolator::windowSize()

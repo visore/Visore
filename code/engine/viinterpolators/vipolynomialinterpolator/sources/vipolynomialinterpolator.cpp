@@ -72,6 +72,7 @@ void ViPolynomialInterpolator::setParameter(const int &number, const qreal &valu
 
 bool ViPolynomialInterpolator::validParameters()
 {
+	if(mEstimation == Best) return true;
 	return validParameters(mMode, mWindowSize, mDegree, mDerivatives);
 }
 
@@ -319,8 +320,7 @@ bool ViPolynomialInterpolator::estimateModelOsculating(const int &degree, const 
 		for(j = start; j < end; ++j)
 		{
 			offset = size + (derivativeCount * (i - 1)) + (j - 1);
-			bool error;
-			vector[offset] = ViDifferentiate::derivative(i, leftSamples, leftSize, j, error);
+			vector[offset] = ViDifferentiate::derivative(i, leftSamples, j);
 			calculateDerivative(degree, j / scaling, matrix[offset], i);
 		}
 	}
@@ -331,8 +331,7 @@ bool ViPolynomialInterpolator::estimateModelOsculating(const int &degree, const 
 		for(j = start; j < end; ++j)
 		{
 			offset = (leftSize - 2) + size + (derivativeCount * (i - 1)) + (j - 1);
-			bool error;
-			vector[offset] = ViDifferentiate::derivative(i, rightSamples, rightSize, j, error);
+			vector[offset] = ViDifferentiate::derivative(i, rightSamples, j);
 			calculateDerivative(degree, j / scaling, matrix[offset], i);
 		}
 	}

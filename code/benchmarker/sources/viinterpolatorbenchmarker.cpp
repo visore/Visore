@@ -6,6 +6,10 @@
 #include <iomanip>
 
 #include <vipolynomialinterpolator.h>
+#include <vifourierinterpolator.h>
+#include <vilagrangeinterpolator.h>
+#include <vinewtoninterpolator.h>
+#include <viarmainterpolator.h>
 
 #define WINDOW_SIZE 4096
 
@@ -14,11 +18,29 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	//mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Osculating);
-	mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Splines);
+	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Osculating, ViPolynomialInterpolator::Fixed);
+	addParam("Window Size", 50, 50, 10);
+	addParam("Degree", 2, 2, 1);
+	addParam("Derivatives", 2, 2, 1);*/
+	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Osculating);
+	addParam("Window Size", 30, 30, 5);
+	addParam("Degree", 4, 4, 1);
+	addParam("Derivatives", 1, 1, 1);*/
+	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Splines);
 	addParam("Window Size", 5, 200, 5);
 	addParam("Degree", 1, 8, 1);
-	addParam("Derivatives", 1, 8, 1);
+	addParam("Derivatives", 1, 8, 1);*/
+
+	/*mInterpolator = new ViFourierInterpolator(ViFourierInterpolator::Osculating, ViFourierInterpolator::Fixed);
+	addParam("Window Size", 10, 100, 10);
+	addParam("Degree", 1, 10, 1);
+	addParam("Derivatives", 1, 10, 1);*/
+
+	/*mInterpolator = new ViLagrangeInterpolator();
+	addParam("Window Size", 2, 2500, 2);*/
+
+	mInterpolator = new ViNewtonInterpolator();
+	addParam("Window Size", 2, 2500, 2);
 
 	QObject::connect(mInterpolator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }
@@ -169,7 +191,7 @@ void ViInterpolatorBenchmarker::process()
 
 		// Write
 		/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-		mCurrentObject->encode(ViAudio::Corrupted);
+		mCurrentObject->encode(ViAudio::Corrected);
 		return;*/
 
 		++mDoneParamIterations;

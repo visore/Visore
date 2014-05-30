@@ -1,8 +1,8 @@
-/*#ifndef VIFOURIERINTERPOLATOR_H
+#ifndef VIFOURIERINTERPOLATOR_H
 #define VIFOURIERINTERPOLATOR_H
 
 #include <viinterpolator.h>
-#include <visystemsolver.h>
+#include <vivector.h>
 
 // http://paulbourke.net/miscellaneous/interpolation/
 // http://en.wikipedia.org/wiki/Trigonometric_interpolation
@@ -13,43 +13,79 @@
 
 // http://cant.ua.ac.be/sites/cant.ua.ac.be/files/courses/cscw/ratint/fourier.fausett.pdf
 
-class ViFourierInterpolator : public ViDegreeInterpolator
+class ViFourierInterpolator : public ViInterpolator
 {
 
 	public:
 
-		enum OrderSelection
+		enum Estimation
 		{
 			Fixed,
-			Best
+			Best,
 		};
 
-		ViFourierInterpolator();
-		ViFourierInterpolator(const int &degree);
+		enum Mode
+		{
+			Normal,
+			Osculating,	// Hermite-based: use additional derivatives
+			Splines		// Use splines
+		};
+
+	public:
+
+		ViFourierInterpolator(const Mode &mode = Normal, const Estimation &estimation = Fixed);
+		ViFourierInterpolator(const ViFourierInterpolator &other);
+		~ViFourierInterpolator();
+
+		QString name(QString replace = "", bool spaced = false);
+
+		void setDegree(const int &degree);
+		void setDerivatives(const int &derivatives);
+
+		void setParameter(const int &number, const qreal &value);
+		bool validParameters();
 
 		ViFourierInterpolator* clone();
 
-		void setOrderSelection(OrderSelection selection);
-
-		void setParameters(const qreal &param1);
-		void setParameters(const qreal &param1, const qreal &param2);
-
 	protected:
 
+		bool validParameters(const Mode &mode, const int &windowSize, const int &degree, const int &derivatives);
+		bool validParameters(const Mode &mode, const int &leftSize, const int &rightSize, const int &degree, const int &derivatives);
+		void setPointers(const Mode &mode, const Estimation &estimation);
+
 		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+		bool interpolateFixed(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, const qreal &scaling);
+		bool interpolateBest(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, const qreal &scaling);
 
-		bool interpolateFixed(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
-		bool interpolateBest(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+		bool interpolateBestNormal(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, const qreal &scaling);
+		bool interpolateBestDerivative(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, const qreal &scaling);
 
-		bool estimate(const int &degree, ViVector &coefficients, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize);
-		void interpolate(const int &degree, const ViVector &coefficients, const int &leftSize, const int &rightSize, qreal *outputSamples, const int &outputSize);
-		qreal ess(const int &degree, const ViVector &coefficients, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize);
+		bool estimateModelNormal(const int &degree, const int &derivative, ViVector &coefficients, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling);
+		void interpolateModelNormal(const int &degree, const ViVector &coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling);
+
+		bool estimateModelOsculating(const int &degree, const int &derivative, ViVector &coefficients, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling);
+		void interpolateModelOsculating(const int &degree, const ViVector &coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling);
+
+		bool estimateModelSplines(const int &degree, const int &derivative, ViVector &coefficients, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling);
+		void interpolateModelSplines(const int &degree, const ViVector &coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling);
+
+		void calculateDerivative(const int &degree, const qreal &x, ViVector &row, const int &derivative);
+		void calculateDerivative(const int &degree, const qreal &x, ViVector &row, const int &derivative, const int &offset, const int multiplier);
+		qreal calculateMse(const qreal *observed, const qreal *interpolateed, const int &size);
 
 	private:
 
-		bool (ViFourierInterpolator::*interpolatePointer)(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+		bool (ViFourierInterpolator::*interpolatePointer)(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, const qreal &scaling);
+		bool (ViFourierInterpolator::*interpolateBestPointer)(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, const qreal &scaling);
+		bool (ViFourierInterpolator::*estimateModelPointer)(const int &degree, const int &derivative, ViVector &coefficients, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling);
+		void (ViFourierInterpolator::*interpolateModelPointer)(const int &degree, const ViVector &coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling);
+
+		Estimation mEstimation;
+		Mode mMode;
+
+		int mDegree;
+		int mDerivatives;
 
 };
 
 #endif
-*/
