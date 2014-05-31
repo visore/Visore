@@ -183,7 +183,8 @@ void ViGretl::setCriteria(const Criteria &criteria)
 		}
 	}
 
-	if(mCriteria == R2) orderPointer = &ViGretl::calculateR2;
+	if(mCriteria == MSE) orderPointer = &ViGretl::calculateMSE;
+	else if(mCriteria == R2) orderPointer = &ViGretl::calculateR2;
 	else if(mCriteria == AR2) orderPointer = &ViGretl::calculateAR2;
 	else if(mCriteria == AIC) orderPointer = &ViGretl::calculateAIC;
 	else if(mCriteria == AICC) orderPointer = &ViGretl::calculateAICC;
@@ -227,6 +228,15 @@ bool ViGretl::setDegree(const Type &type, const int &degree)
 		mGretlParameters[1] = mGarchDegree;
 	}
 	return true;
+}
+
+int ViGretl::degree(const Type &type)
+{
+	if(type == AR) return mArDegree;
+	else if(type == I) return mIDegree;
+	else if(type == MA) return mMaDegree;
+	else if(type == ARCH) return mArchDegree;
+	else if(type == GARCH) return mGarchDegree;
 }
 
 void ViGretl::adjustWindowSize(int &windowSize)
@@ -273,14 +283,15 @@ bool ViGretl::forecast(DATASET *data, MODEL *model, qreal *output, const int &si
 	}
 	error = 0; // Gretl doesn't do this for us
 	FITRESID *cast = get_forecast(model, data->t2 + 1, data->n - 1, 0, data, OPT_NONE, &error);
-	if(!error)
+	if(error)
 	{
-		start = data->t2 + 1;
-		for(i = 0; i < size; ++i) output[i] = cast->fitted[start + i];
-		free_fit_resid(cast);
-		return true;
+		for(i = 0; i < size; ++i) output[i] = 0;
+		return false;
 	}
-	return false;
+	start = data->t2 + 1;
+	for(i = 0; i < size; ++i) output[i] = cast->fitted[start + i];
+	free_fit_resid(cast);
+	return true;
 }
 
 bool ViGretl::forecast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize)
@@ -481,6 +492,11 @@ void ViGretl::estimateArch(MODEL *model, DATASET *data, int *parameters)
 {
 	*model = garch_model(adjustParameters(parameters), data, NULL, (gretlopt) mGretlEstimation);
 	//*model = arch_model(parameters, parameters[2], data, (gretlopt) mGretlEstimation);
+}
+
+qreal ViGretl::calculateMSE(MODEL *model)
+{
+	return model->ess;
 }
 
 qreal ViGretl::calculateR2(MODEL *model)

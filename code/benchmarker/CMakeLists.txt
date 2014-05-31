@@ -28,7 +28,8 @@ TARGET_LINK_LIBRARIES(vibenchmarker
 	vicosineinterpolator
 	vifourierinterpolator
 	vipolynomialinterpolator
-	viarmainterpolator
+	viarimainterpolator
+	vigarchinterpolator
 	vinewtoninterpolator
 	vilagrangeinterpolator
 

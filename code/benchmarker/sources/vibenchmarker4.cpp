@@ -10,7 +10,7 @@
 #include <visplineinterpolator.h>
 #include <vihermiteinterpolator.h>
 #include <vifourierinterpolator.h>
-#include <viarmainterpolator.h>
+#include <viarimainterpolator.h>
 
 #define WINDOW_SIZE 4096
 #define MASK_START 0

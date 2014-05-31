@@ -41,6 +41,9 @@ class ViGretl
 		{
 			None,					// Will use fixed order
 
+			MeanSquaredError,
+			MSE = MeanSquaredError,
+
 			AutoCorrelation,		// Uses ACF and PACF
 			AC = AutoCorrelation,
 			ACF = AutoCorrelation,
@@ -96,6 +99,7 @@ class ViGretl
 		void setEstimation(const Estimation &estimation); // Only for ARIMA-based models
 		void setCriteria(const Criteria &criteria);
 		bool setDegree(const Type &type, const int &degree);
+		int degree(const Type &type);
 
 		MODEL* estimate(DATASET *data);
 		FITRESID* forecast(DATASET *data, MODEL *model);
@@ -122,6 +126,7 @@ class ViGretl
 		void estimateGarch(MODEL *model, DATASET *data, int *parameters);
 		void estimateArch(MODEL *model, DATASET *data, int *parameters);
 
+		qreal calculateMSE(MODEL *model);
 		qreal calculateR2(MODEL *model);
 		qreal calculateAR2(MODEL *model);
 		qreal calculateAIC(MODEL *model);

@@ -9,7 +9,7 @@
 #include <vifourierinterpolator.h>
 #include <vilagrangeinterpolator.h>
 #include <vinewtoninterpolator.h>
-#include <viarmainterpolator.h>
+#include <viarimainterpolator.h>
 
 #define WINDOW_SIZE 4096
 
@@ -39,8 +39,14 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	/*mInterpolator = new ViLagrangeInterpolator();
 	addParam("Window Size", 2, 2500, 2);*/
 
-	mInterpolator = new ViNewtonInterpolator();
-	addParam("Window Size", 2, 2500, 2);
+	/*mInterpolator = new ViNewtonInterpolator();
+	addParam("Window Size", 2, 2500, 2);*/
+
+	mInterpolator = new ViArimaInterpolator();
+	addParam("Window Size", 64, 4096, 64);
+	addParam("AR Degree", 1, 10, 1);
+	addParam("I Degree", 0, 5, 1);
+	addParam("MA Degree", 0, 5, 1);
 
 	QObject::connect(mInterpolator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }
