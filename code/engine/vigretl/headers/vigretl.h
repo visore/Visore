@@ -103,11 +103,17 @@ class ViGretl
 
 		MODEL* estimate(DATASET *data);
 		FITRESID* forecast(DATASET *data, MODEL *model);
+
 		bool forecast(DATASET *data, MODEL *model, qreal *output, const int &size);
+		bool backcast(DATASET *data, MODEL *model, qreal *output, const int &size);
 
 		bool forecast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize);
+		bool backcast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize); // reverses the input array and does a forecast
+
+		bool interpolate(const qreal *left, const int &leftSize, const qreal *right, const int &rightSize, qreal *output, const int &outputSize);
 
 		static DATASET* create(const qreal *input, const int &inputSize, const int &outputSize);
+		static DATASET* createReversed(const qreal *input, const int &inputSize, const int &outputSize);
 		static DATASET* create(const int &inputSize, const int &outputSize);
 
 		static void clear(DATASET *data);

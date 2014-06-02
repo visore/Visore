@@ -25,7 +25,7 @@ class ViVector
 		void resize(const int &size);
 		void fill(const double &value);
 
-		bool isValid() const; //at least 1 entry
+		bool isValid() const; // at least 1 entry, with no entries being INF or NaN
 		int size() const;
 		double sum() const;
 
@@ -56,7 +56,7 @@ class ViVector
 		ViVector operator * (const double &value) const;
 		ViVector operator * (const ViMatrix &matrix) const;
 
-		QString toString();
+		QString toString(const int &decimalPlaces = 5);
 
 	private:
 

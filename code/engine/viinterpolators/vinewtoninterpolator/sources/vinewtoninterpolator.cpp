@@ -1,10 +1,12 @@
 #include <vinewtoninterpolator.h>
-#include <visystemsolver.h>
+#include <vieigen.h>
 #include <vilogger.h>
 
 ViNewtonInterpolator::ViNewtonInterpolator()
 	: ViInterpolator()
 {
+	ViEigen::initialize();
+
 	addParameterName("Window Size");
 }
 
@@ -34,29 +36,29 @@ bool ViNewtonInterpolator::validParameters()
 
 bool ViNewtonInterpolator::validParameters(const int &windowSize)
 {
-	return windowSize > 1;
+	return windowSize > 1 && windowSize % 2 == 0;
 }
 
 bool ViNewtonInterpolator::validParameters(const int &leftSize, const int &rightSize)
 {
-	return leftSize != 0 && rightSize != 0;
+	return leftSize != 0 && rightSize != 0 && validParameters(leftSize + rightSize);
 }
-
 
 bool ViNewtonInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
 	// en.wikipedia.org/wiki/Newton_polynomial#Main_idea
 
 	static int i, j, k, size, offset;
-	static qreal scaledX, scaling, product, result;
-	static ViVector coefficients;
+	static qreal scaledX, scaling, product;
+	static bigreal result;
 
 	size = leftSize + rightSize;
-	scaling = size + outputSize - 1;
+	scaling = (size + outputSize - 1);
 
 	qreal x[size];
-	ViMatrix matrix(size, size);
-	ViVector vector(size);
+
+	ViEigenBigMatrix matrix(size, size);
+	ViEigenBigVector vector(size);
 
 	for(i = 0; i < leftSize; ++i)
 	{
@@ -67,37 +69,52 @@ bool ViNewtonInterpolator::interpolate(const qreal *leftSamples, const int &left
 	{
 		offset = i + leftSize;
 		x[offset] = (offset + outputSize) / scaling;
-		vector[offset] = rightSamples[i];
+		vector(offset) = rightSamples[i];
 	}
 
 	for(i = 0; i < size; ++i)
 	{
-		matrix[i][0] = 1;
+		matrix(i, 0) = 1;
 		for(j = 1; j < size; ++j)
 		{
 			product = 1;
 			for(k = 0; k < j; ++k) product *= x[i] - x[k];
-			matrix[i][j] = product;
+			matrix(i, j) = product;
 		}
 	}
 
-	if(ViSystemSolver::solve(matrix, vector, coefficients))
+	ViEigenBigVector coefficients = ViEigen::solve(matrix, vector);
+
+	/*for(i = 0; i < size; ++i)
 	{
-		for(i = 0; i < outputSize; ++i)
+		for(j = 0; j < size; ++j)
 		{
-			scaledX = (i + leftSize) / scaling;
-			result = coefficients[0];
-			for(j = 1; j < size; ++j)
-			{
-				product = 1;
-				for(k = 0; k < j; ++k) product *= scaledX - x[k];
-				result += coefficients[j] * product;
-			}
-			outputSamples[i] = result;
+			cout<<matrix(i,j)<<" ";
 		}
-		return true;
+		cout<<endl;
 	}
-	return false;
+	cout<<endl<<endl;
+	for(i = 0; i < size; ++i)
+	{
+		cout<<coefficients(i)<<" ";
+	}
+	cout<<endl;
+	exit(-1);*/
+
+	for(i = 0; i < outputSize; ++i)
+	{
+		scaledX = (i + leftSize) / scaling;
+		result = coefficients(0);
+		for(j = 1; j < size; ++j)
+		{
+			product = 1;
+			for(k = 0; k < j; ++k) product *= scaledX - x[k];
+			result += coefficients(j) * product;
+		}
+		outputSamples[i] = ViEigen::toReal(result);
+	}
+
+	return true;
 }
 
 ViNewtonInterpolator* ViNewtonInterpolator::clone()

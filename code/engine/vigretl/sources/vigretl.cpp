@@ -294,6 +294,28 @@ bool ViGretl::forecast(DATASET *data, MODEL *model, qreal *output, const int &si
 	return true;
 }
 
+bool ViGretl::backcast(DATASET *data, MODEL *model, qreal *output, const int &size)
+{
+	static int i, start, end, error;
+	if(model == NULL)
+	{
+		for(i = 0; i < size; ++i) output[i] = 0;
+		return false;
+	}
+	error = 0; // Gretl doesn't do this for us
+	FITRESID *cast = get_forecast(model, data->t2 + 1, data->n - 1, 0, data, OPT_NONE, &error);
+	if(error)
+	{
+		for(i = 0; i < size; ++i) output[i] = 0;
+		return false;
+	}
+	start = data->t2 + 1;
+	end = size - 1;
+	for(i = 0; i < size; ++i) output[end - i] = cast->fitted[start + i];
+	free_fit_resid(cast);
+	return true;
+}
+
 bool ViGretl::forecast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize)
 {
 	static bool result;
@@ -305,6 +327,47 @@ bool ViGretl::forecast(const qreal *input, const int &inputSize, qreal *output, 
 	return result;
 }
 
+bool ViGretl::backcast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize)
+{
+	static bool result;
+	DATASET *data = createReversed(input, inputSize, outputSize);
+	MODEL *model = estimate(data);
+	result = backcast(data, model, output, outputSize);
+	ViGretl::clear(model);
+	ViGretl::clear(data);
+	return result;
+}
+
+bool ViGretl::interpolate(const qreal *left, const int &leftSize, const qreal *right, const int &rightSize, qreal *output, const int &outputSize)
+{
+	DATASET *data = create_new_dataset(2, leftSize + outputSize + rightSize, 0);
+
+	static int i;
+	for(i = 0; i < leftSize; ++i) data->Z[1][i] = left[i];
+	for(i = 0; i < outputSize; ++i) data->Z[1][i + leftSize] = -999;
+	for(i = 0; i < rightSize; ++i) data->Z[1][i+ leftSize+outputSize] = right[i];
+
+	int miss = set_miss (NULL, "-999",data,NULL);
+
+MODEL *model;
+*model = arma_model(adjustParameters(mGretlParameters), NULL, data, (gretlopt) mGretlEstimation, NULL);
+if(model->errcode) cout<<"could not estimate: "<<model->errcode<<"\t"<<errmsg_get_with_default(model->errcode)<<endl;
+
+	static int start, error;
+	error = 0; // Gretl doesn't do this for us
+	FITRESID *cast = get_forecast(model, data->t1, data->t2, 0, data, OPT_NONE, &error);
+	if(error)
+	{
+		cout<<"could not forecast: "<<error<<endl;
+		for(i = 0; i < outputSize; ++i) output[i] = 0;
+		return false;
+	}
+	for(i = 0; i < outputSize; ++i) output[i] = cast->fitted[leftSize + i];
+	free_fit_resid(cast);
+	return true;
+
+}
+
 DATASET* ViGretl::create(const qreal *input, const int &inputSize, const int &outputSize)
 {
 	DATASET *data = create_new_dataset(2, inputSize + outputSize, 0);
@@ -313,6 +376,19 @@ DATASET* ViGretl::create(const qreal *input, const int &inputSize, const int &ou
 
 	static int i;
 	for(i = 0; i < inputSize; ++i) data->Z[1][i] = input[i];
+
+	return data;
+}
+
+DATASET* ViGretl::createReversed(const qreal *input, const int &inputSize, const int &outputSize)
+{
+	DATASET *data = create_new_dataset(2, inputSize + outputSize, 0);
+	strcpy(data->varname[1], "visoregretldata"); // For X12 we need the series to have a name
+	data->t2 = data->n - 1 - outputSize;
+
+	static int i, end;
+	end = inputSize - 1;
+	for(i = 0; i < inputSize; ++i) data->Z[1][i] = input[end - i];
 
 	return data;
 }

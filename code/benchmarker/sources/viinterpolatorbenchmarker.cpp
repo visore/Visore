@@ -40,11 +40,11 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	addParam("Window Size", 2, 2500, 2);*/
 
 	/*mInterpolator = new ViNewtonInterpolator();
-	addParam("Window Size", 2, 2500, 2);*/
+	addParam("Window Size", 450, 1000, 2);*/
 
 	mInterpolator = new ViArimaInterpolator();
-	addParam("Window Size", 64, 4096, 64);
-	addParam("AR Degree", 1, 10, 1);
+	addParam("Window Size", 2048, 2048, 256);
+	addParam("AR Degree", 1, 20, 1);
 	addParam("I Degree", 0, 5, 1);
 	addParam("MA Degree", 0, 5, 1);
 

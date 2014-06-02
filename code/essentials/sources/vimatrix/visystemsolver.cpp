@@ -33,5 +33,6 @@ bool ViSystemSolver::solve(const ViMatrix &matrix, const ViVector &vector, ViVec
 		}
 	}
 	coefficients = inverted.scalarMultiply(transpose) * vector;
+	if(!coefficients.isValid()) STATICLOG("Detected invalid coefficients:\n" + coefficients.toString(), QtCriticalMsg, "ViSystemSolver");
 	return true;
 }

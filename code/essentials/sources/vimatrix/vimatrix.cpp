@@ -369,12 +369,12 @@ void ViMatrix::copy(const ViMatrix& other)
 	}
 }
 
-QString ViMatrix::toString()
+QString ViMatrix::toString(const int &decimalPlaces)
 {
 	QString result = "";
 	for(int i = 0; i < mRows; ++i)
 	{
-		result += mVectors[i]->toString() + "\n";
+		result += mVectors[i]->toString(decimalPlaces) + "\n";
 	}
 	return result.trimmed();
 }

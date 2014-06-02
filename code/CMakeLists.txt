@@ -48,7 +48,7 @@ ENDIF()
 #Setup Qt5
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 SET(CMAKE_AUTOMOC ON)
-SET(QT5_DIR "/opt/Qt5.3.0/5.3/gcc_64" CACHE PATH "Qt5 install location (containing the bin, include and lib directories - eg: /usr/local/Qt-5.0.0)")
+SET(QT5_DIR "/opt/Qt5.2.0/5.2.0/gcc_64" CACHE PATH "Qt5 install location (containing the bin, include and lib directories - eg: /usr/local/Qt-5.0.0)")
 SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT5_DIR})
 FIND_PACKAGE(Qt5Core)
 FIND_PACKAGE(Qt5Gui)
@@ -57,7 +57,11 @@ FIND_PACKAGE(Qt5Network)
 FIND_PACKAGE(Qt5Xml)
 FIND_PACKAGE(Qt5Multimedia)
 
-FIND_PACKAGE(Gretl)
+#Setup Gretl
+FIND_PACKAGE(Gretl REQUIRED)
+
+#Setup MPFR - used by MPFRC++, used by Eigen (unsupported)
+FIND_PACKAGE(MPFR REQUIRED)
 
 #Set flags for Windows and MinGW auto-import
 IF(WIN32)

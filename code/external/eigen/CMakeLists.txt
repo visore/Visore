@@ -1,0 +1,3 @@
+#Setup directory paths
+SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+SET(EIGEN ${ROOT} CACHE INTERNAL "")

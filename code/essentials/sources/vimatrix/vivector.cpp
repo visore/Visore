@@ -1,6 +1,7 @@
 #include <vivector.h>
 #include <vimatrix.h>
-#include <qmath.h>
+#include <QtMath>
+#include <QtNumeric>
 
 ViVector::ViVector()
 {
@@ -84,7 +85,12 @@ void ViVector::fill(const double &value)
 
 bool ViVector::isValid() const
 {
-	return mSize > 0;
+	if(mSize == 0) return false;
+	for(int i = 0; i < mSize; ++i)
+	{
+		if(qIsInf(mData[i]) || qIsNaN(mData[i])) return false;
+	}
+	return true;
 }
 
 int ViVector::size() const
@@ -288,12 +294,12 @@ void ViVector::copy(const ViVector &other)
 	}
 }
 
-QString ViVector::toString()
+QString ViVector::toString(const int &decimalPlaces)
 {
 	QString result = "";
 	for(int i = 0; i < mSize; ++i)
 	{
-		result += QString::number(mData[i], 'f', 5) + " ";
+		result += QString::number(mData[i], 'f', decimalPlaces) + " ";
 	}
 	return result.trimmed();
 }

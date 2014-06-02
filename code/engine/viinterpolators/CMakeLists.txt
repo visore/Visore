@@ -27,7 +27,7 @@ FILE(GLOB VI_INTERPOLATOR_HEADERS ${HEADERS}/*.h)
 
 #Create library
 ADD_LIBRARY(viinterpolator SHARED ${VI_INTERPOLATOR_HEADERS} ${VI_INTERPOLATOR_SOURCES})
-TARGET_LINK_LIBRARIES(viinterpolator viessentials)
+TARGET_LINK_LIBRARIES(viinterpolator viessentials vieigen)
 QT5_USE_MODULES(viinterpolator Xml Multimedia)
 
 #Install file

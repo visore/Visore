@@ -157,7 +157,7 @@ qreal ViNoiseCreator::toSizeMask(const int &length)
 
 int ViNoiseCreator::fromSizeMask(const qreal &length)
 {
-	return round(length * 100);
+	return viround(length * 100);
 }
 
 void ViNoiseCreator::addNoise(ViSampleChunk &samples1, ViSampleChunk &samples2, ViSampleChunk &mask1, ViSampleChunk &mask2, ViSampleChunk &sizeMask1, ViSampleChunk &sizeMask2)

@@ -211,12 +211,12 @@ qbyte8u ViSampleSizeConverter::convertTo8u(const qbyte8u value)
 
 qbyte8u ViSampleSizeConverter::convertTo8u(const qbyte16u value)
 {
-	return ROUND(value / RATIO_16_8);
+	return VIROUND(value / RATIO_16_8);
 }
 
 qbyte8u ViSampleSizeConverter::convertTo8u(const qbyte32u value)
 {
-	return ROUND(value / RATIO_32_8);
+	return VIROUND(value / RATIO_32_8);
 }
 
 qbyte8u ViSampleSizeConverter::convertTo8u(const qbyte8s value)
@@ -226,22 +226,22 @@ qbyte8u ViSampleSizeConverter::convertTo8u(const qbyte8s value)
 
 qbyte8u ViSampleSizeConverter::convertTo8u(const qbyte16s value)
 {
-	return ROUND((value + RANGE_16) / RATIO_16_8);
+	return VIROUND((value + RANGE_16) / RATIO_16_8);
 }
 
 qbyte8u ViSampleSizeConverter::convertTo8u(const qbyte32s value)
 {
-	return ROUND((value + RANGE_32) / RATIO_32_8);
+	return VIROUND((value + RANGE_32) / RATIO_32_8);
 }
 
 qbyte8u ViSampleSizeConverter::convertTo8u(const qfloat value)
 {
-	return ROUND((value + RANGE_FLOAT) * RANGE_8);
+	return VIROUND((value + RANGE_FLOAT) * RANGE_8);
 }
 
 qbyte8u ViSampleSizeConverter::convertTo8u(const qreal value)
 {
-	return ROUND((value + RANGE_REAL) * RANGE_8);
+	return VIROUND((value + RANGE_REAL) * RANGE_8);
 }
 
 /**********************************************************************
@@ -250,7 +250,7 @@ Value conversion - unsigned 16
 
 qbyte16u ViSampleSizeConverter::convertTo16u(const qbyte8u value)
 {
-	return ROUND(value / RATIO_8_16);
+	return VIROUND(value / RATIO_8_16);
 }
 
 qbyte16u ViSampleSizeConverter::convertTo16u(const qbyte16u value)
@@ -260,12 +260,12 @@ qbyte16u ViSampleSizeConverter::convertTo16u(const qbyte16u value)
 
 qbyte16u ViSampleSizeConverter::convertTo16u(const qbyte32u value)
 {
-	return ROUND(value / RATIO_32_16);
+	return VIROUND(value / RATIO_32_16);
 }
 
 qbyte16u ViSampleSizeConverter::convertTo16u(const qbyte8s value)
 {
-	return ROUND((value + RANGE_8) / RATIO_8_16);
+	return VIROUND((value + RANGE_8) / RATIO_8_16);
 }
 
 qbyte16u ViSampleSizeConverter::convertTo16u(qbyte16s value)
@@ -275,17 +275,17 @@ qbyte16u ViSampleSizeConverter::convertTo16u(qbyte16s value)
 
 qbyte16u ViSampleSizeConverter::convertTo16u(const qbyte32s value)
 {
-	return ROUND((value + RANGE_32) / RATIO_32_16);
+	return VIROUND((value + RANGE_32) / RATIO_32_16);
 }
 
 qbyte16u ViSampleSizeConverter::convertTo16u(const qfloat value)
 {
-	return ROUND((value + RANGE_FLOAT) * RANGE_16);
+	return VIROUND((value + RANGE_FLOAT) * RANGE_16);
 }
 
 qbyte16u ViSampleSizeConverter::convertTo16u(const qreal value)
 {
-	return ROUND((value + RANGE_REAL) * RANGE_16);
+	return VIROUND((value + RANGE_REAL) * RANGE_16);
 }
 
 /**********************************************************************
@@ -294,12 +294,12 @@ Value conversion - unsigned 32
 
 qbyte32u ViSampleSizeConverter::convertTo32u(const qbyte8u value)
 {
-	return ROUND(value / RATIO_8_32);
+	return VIROUND(value / RATIO_8_32);
 }
 
 qbyte32u ViSampleSizeConverter::convertTo32u(const qbyte16u value)
 {
-	return ROUND(value / RATIO_16_32);
+	return VIROUND(value / RATIO_16_32);
 }
 
 qbyte32u ViSampleSizeConverter::convertTo32u(const qbyte32u value)
@@ -309,12 +309,12 @@ qbyte32u ViSampleSizeConverter::convertTo32u(const qbyte32u value)
 
 qbyte32u ViSampleSizeConverter::convertTo32u(const qbyte8s value)
 {
-	return ROUND((value + RANGE_8) / RATIO_8_32);
+	return VIROUND((value + RANGE_8) / RATIO_8_32);
 }
 
 qbyte32u ViSampleSizeConverter::convertTo32u(const qbyte16s value)
 {
-	return ROUND((value + RANGE_16) / RATIO_16_32);
+	return VIROUND((value + RANGE_16) / RATIO_16_32);
 }
 
 qbyte32u ViSampleSizeConverter::convertTo32u(const qbyte32s value)
@@ -324,12 +324,12 @@ qbyte32u ViSampleSizeConverter::convertTo32u(const qbyte32s value)
 
 qbyte32u ViSampleSizeConverter::convertTo32u(const qfloat value)
 {
-	return ROUND((value + RANGE_FLOAT) * RANGE_32);
+	return VIROUND((value + RANGE_FLOAT) * RANGE_32);
 }
 
 qbyte32u ViSampleSizeConverter::convertTo32u(const qreal value)
 {
-	return ROUND((value + RANGE_REAL) * RANGE_32);
+	return VIROUND((value + RANGE_REAL) * RANGE_32);
 }
 
 /**********************************************************************
@@ -343,12 +343,12 @@ qbyte8s ViSampleSizeConverter::convertTo8s(const qbyte8u value)
 
 qbyte8s ViSampleSizeConverter::convertTo8s(const qbyte16u value)
 {
-	return ROUND((value - RANGE_16) / RATIO_16_8);
+	return VIROUND((value - RANGE_16) / RATIO_16_8);
 }
 
 qbyte8s ViSampleSizeConverter::convertTo8s(const qbyte32u value)
 {
-	return ROUND((value - RANGE_32) / RATIO_32_8);
+	return VIROUND((value - RANGE_32) / RATIO_32_8);
 }
 
 qbyte8s ViSampleSizeConverter::convertTo8s(const qbyte8s value)
@@ -358,22 +358,22 @@ qbyte8s ViSampleSizeConverter::convertTo8s(const qbyte8s value)
 
 qbyte8s ViSampleSizeConverter::convertTo8s(const qbyte16s value)
 {
-	return ROUND(value / RATIO_16_8);
+	return VIROUND(value / RATIO_16_8);
 }
 
 qbyte8s ViSampleSizeConverter::convertTo8s(const qbyte32s value)
 {
-	return ROUND(value / RATIO_32_8);
+	return VIROUND(value / RATIO_32_8);
 }
 
 qbyte8s ViSampleSizeConverter::convertTo8s(const qfloat value)
 {
-	return ROUND(value * RANGE_8);
+	return VIROUND(value * RANGE_8);
 }
 
 qbyte8s ViSampleSizeConverter::convertTo8s(const qreal value)
 {
-	return ROUND(value * RANGE_8);
+	return VIROUND(value * RANGE_8);
 }
 
 /**********************************************************************
@@ -382,7 +382,7 @@ Value conversion - signed 16
 
 qbyte16s ViSampleSizeConverter::convertTo16s(const qbyte8u value)
 {
-	return ROUND((value - RANGE_8) / RATIO_8_16);
+	return VIROUND((value - RANGE_8) / RATIO_8_16);
 }
 
 qbyte16s ViSampleSizeConverter::convertTo16s(const qbyte16u value)
@@ -392,12 +392,12 @@ qbyte16s ViSampleSizeConverter::convertTo16s(const qbyte16u value)
 
 qbyte16s ViSampleSizeConverter::convertTo16s(const qbyte32u value)
 {
-	return ROUND((value - RANGE_32) / RATIO_32_16);
+	return VIROUND((value - RANGE_32) / RATIO_32_16);
 }
 
 qbyte16s ViSampleSizeConverter::convertTo16s(const qbyte8s value)
 {
-	return ROUND(value / RATIO_8_16);
+	return VIROUND(value / RATIO_8_16);
 }
 
 qbyte16s ViSampleSizeConverter::convertTo16s(const qbyte16s value)
@@ -407,17 +407,17 @@ qbyte16s ViSampleSizeConverter::convertTo16s(const qbyte16s value)
 
 qbyte16s ViSampleSizeConverter::convertTo16s(const qbyte32s value)
 {
-	return ROUND(value / RATIO_32_16);
+	return VIROUND(value / RATIO_32_16);
 }
 
 qbyte16s ViSampleSizeConverter::convertTo16s(const qfloat value)
 {
-	return ROUND(value * RANGE_16);
+	return VIROUND(value * RANGE_16);
 }
 
 qbyte16s ViSampleSizeConverter::convertTo16s(const qreal value)
 {
-	return ROUND(value * RANGE_16);
+	return VIROUND(value * RANGE_16);
 }
 
 /**********************************************************************
@@ -426,12 +426,12 @@ Value conversion - signed 32
 
 qbyte32s ViSampleSizeConverter::convertTo32s(const qbyte8u value)
 {
-	return ROUND((value - RANGE_8) / RATIO_8_32);
+	return VIROUND((value - RANGE_8) / RATIO_8_32);
 }
 
 qbyte32s ViSampleSizeConverter::convertTo32s(const qbyte16u value)
 {
-	return ROUND((value - RANGE_16) / RATIO_16_32);
+	return VIROUND((value - RANGE_16) / RATIO_16_32);
 }
 
 qbyte32s ViSampleSizeConverter::convertTo32s(const qbyte32u value)
@@ -441,12 +441,12 @@ qbyte32s ViSampleSizeConverter::convertTo32s(const qbyte32u value)
 
 qbyte32s ViSampleSizeConverter::convertTo32s(const qbyte8s value)
 {
-	return ROUND(value / RATIO_8_32);
+	return VIROUND(value / RATIO_8_32);
 }
 
 qbyte32s ViSampleSizeConverter::convertTo32s(const qbyte16s value)
 {
-	return ROUND(value / RATIO_16_32);
+	return VIROUND(value / RATIO_16_32);
 }
 
 qbyte32s ViSampleSizeConverter::convertTo32s(const qbyte32s value)
@@ -456,12 +456,12 @@ qbyte32s ViSampleSizeConverter::convertTo32s(const qbyte32s value)
 
 qbyte32s ViSampleSizeConverter::convertTo32s(const qfloat value)
 {
-	return ROUND(value * RANGE_32);
+	return VIROUND(value * RANGE_32);
 }
 
 qbyte32s ViSampleSizeConverter::convertTo32s(const qreal value)
 {
-	return ROUND(value * RANGE_32);
+	return VIROUND(value * RANGE_32);
 }
 
 /**********************************************************************

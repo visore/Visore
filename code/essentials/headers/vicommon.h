@@ -9,8 +9,8 @@
 #include <math.h>
 #include <typeinfo>
 
-#define ROUND(x) (x<0?ceil((x)-0.5):floor((x)+0.5))
-#define round(x) ROUND(x)
+#define VIROUND(x) (x<0?ceil((x)-0.5):floor((x)+0.5))
+#define viround(x) VIROUND(x)
 
 #define CLASSNAME stripClassName(typeid(*this).name()) // call className() from within an object
 #define TEMPLATE_CLASSNAME stripTemplateClassName(__PRETTY_FUNCTION__) // call className() from within an object

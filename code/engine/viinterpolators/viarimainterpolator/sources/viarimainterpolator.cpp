@@ -95,7 +95,7 @@ bool ViArimaInterpolator::validParameters()
 
 bool ViArimaInterpolator::validParameters(const int &windowSize, const int &arDegree, const int &iDegree, const int &maDegree)
 {
-	if(mWindowSize < 2) return false;
+	if(windowSize < 2 || windowSize % 2 != 0) return false;
 	if(arDegree == 0 && maDegree == 0) return false;
 	return true;
 }
@@ -114,7 +114,7 @@ bool ViArimaInterpolator::interpolate(const qreal *leftSamples, const int &leftS
 	qreal rightOutput[outputSize];
 
 	leftOk = mGretl->forecast(leftSamples, leftSize, leftOutput, outputSize);
-	rightOk = mGretl->forecast(rightSamples, rightSize, rightOutput, outputSize);
+	rightOk = mGretl->backcast(rightSamples, rightSize, rightOutput, outputSize);
 	if(leftOk && rightOk)
 	{
 		for(i = 0; i < outputSize; ++i) outputSamples[i] = (leftOutput[i] + rightOutput[i]) / 2;

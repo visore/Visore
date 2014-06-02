@@ -182,7 +182,7 @@ QVector<qbyte16u> ViSpectrumWidget::summarizeSpectrum(QVector<qbyte16u> &spectru
 		{
 			average += spectrum[j];
 		}
-		data[i] = ROUND(average / combined);
+		data[i] = VIROUND(average / combined);
 	}
 	return data;
 }

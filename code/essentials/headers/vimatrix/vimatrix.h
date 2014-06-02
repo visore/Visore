@@ -51,7 +51,7 @@ class ViMatrix
 		ViVector& operator [] (const int &index);
 		ViVector& operator [] (const int &index) const;
 
-		QString toString();
+		QString toString(const int &decimalPlaces = 5);
 
 	private:
 

@@ -37,7 +37,7 @@ ViBenchMarker4::ViBenchMarker4()
 	addParam("ARDEGREE", 0, 10, 1);
 	addParam("MADEGREE", 0, 3, 1);*/
 
-	addParam("WINDOW SIZE", 438, 438, 1);
+	addParam("WINDOW SIZE", 344, 438, 1);
 	addParam("DEGREE", 14,14, 1);
 }
 
