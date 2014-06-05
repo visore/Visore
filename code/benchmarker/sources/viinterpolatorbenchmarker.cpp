@@ -10,6 +10,7 @@
 #include <vilagrangeinterpolator.h>
 #include <vinewtoninterpolator.h>
 #include <viarimainterpolator.h>
+#include <vigarchinterpolator.h>
 
 #define WINDOW_SIZE 4096
 
@@ -26,10 +27,9 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	addParam("Window Size", 30, 30, 5);
 	addParam("Degree", 4, 4, 1);
 	addParam("Derivatives", 1, 1, 1);*/
-	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Splines);
-	addParam("Window Size", 5, 200, 5);
-	addParam("Degree", 1, 8, 1);
-	addParam("Derivatives", 1, 8, 1);*/
+	mInterpolator = new ViPolynomialInterpolator();
+	addParam("Window Size", 5, 512, 5);
+	addParam("Degree", 1, 15, 1);
 
 	/*mInterpolator = new ViFourierInterpolator(ViFourierInterpolator::Osculating, ViFourierInterpolator::Fixed);
 	addParam("Window Size", 10, 100, 10);
@@ -42,11 +42,16 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	/*mInterpolator = new ViNewtonInterpolator();
 	addParam("Window Size", 450, 1000, 2);*/
 
-	mInterpolator = new ViArimaInterpolator();
+	/*mInterpolator = new ViArimaInterpolator();
 	addParam("Window Size", 2048, 2048, 256);
-	addParam("AR Degree", 1, 20, 1);
-	addParam("I Degree", 0, 5, 1);
-	addParam("MA Degree", 0, 5, 1);
+	addParam("AR Degree", 18, 18, 1);
+	addParam("I Degree", 0, 0, 1);
+	addParam("MA Degree", 3, 3, 1);*/
+
+	/*mInterpolator = new ViGarchInterpolator();
+		addParam("Window Size", 2048, 2048, 256);
+		addParam("Arch Degree", 1, 1, 1);
+		addParam("Garch Degree", 1, 1, 1);*/
 
 	QObject::connect(mInterpolator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }

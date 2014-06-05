@@ -5,7 +5,11 @@
 ViNewtonInterpolator::ViNewtonInterpolator()
 	: ViInterpolator()
 {
-	ViEigen::initialize();
+	//ViEigen::initialize();
+
+	ViEigen<55> e;
+
+	ViEigen<55>::Matrix m = e.createMatrix();
 
 	addParameterName("Window Size");
 }
@@ -48,7 +52,7 @@ bool ViNewtonInterpolator::interpolate(const qreal *leftSamples, const int &left
 {
 	// en.wikipedia.org/wiki/Newton_polynomial#Main_idea
 
-	static int i, j, k, size, offset;
+	/*static int i, j, k, size, offset;
 	static qreal scaledX, scaling, product;
 	static bigreal result;
 
@@ -84,7 +88,7 @@ bool ViNewtonInterpolator::interpolate(const qreal *leftSamples, const int &left
 	}
 
 	ViEigenBigVector coefficients = ViEigen::solve(matrix, vector);
-
+*/
 	/*for(i = 0; i < size; ++i)
 	{
 		for(j = 0; j < size; ++j)
@@ -101,7 +105,7 @@ bool ViNewtonInterpolator::interpolate(const qreal *leftSamples, const int &left
 	cout<<endl;
 	exit(-1);*/
 
-	for(i = 0; i < outputSize; ++i)
+	/*for(i = 0; i < outputSize; ++i)
 	{
 		scaledX = (i + leftSize) / scaling;
 		result = coefficients(0);
@@ -114,7 +118,7 @@ bool ViNewtonInterpolator::interpolate(const qreal *leftSamples, const int &left
 		outputSamples[i] = ViEigen::toReal(result);
 	}
 
-	return true;
+	return true;*/
 }
 
 ViNewtonInterpolator* ViNewtonInterpolator::clone()
