@@ -4,11 +4,13 @@ SET(HEADERS ${ROOT}/headers)
 SET(SOURCES ${ROOT}/sources)
 
 #Initiate source files
+FILE(GLOB VI_EIGEN_SOURCES ${SOURCES}/*.cpp)
 FILE(GLOB VI_EIGEN_HEADERS ${HEADERS}/*.h)
 
 #Create library
-ADD_LIBRARY(vieigen SHARED ${VI_EIGEN_HEADERS})
-TARGET_LINK_LIBRARIES(vieigen ${MPFR_LIBRARIES})
+ADD_LIBRARY(vieigen SHARED ${VI_EIGEN_HEADERS} ${VI_EIGEN_SOURCES})
+TARGET_LINK_LIBRARIES(vieigen viessentials ${MPFR_LIBRARIES})
+QT5_USE_MODULES(vieigen Core Multimedia)
 
 #Install file
 INSTALL(TARGETS vieigen DESTINATION engine)

@@ -10,7 +10,7 @@
 ViPolynomialInterpolator::ViPolynomialInterpolator(const Mode &mode, const Estimation &estimation)
 	: ViInterpolator()
 {
-	mEigen = new ViEigenDoubleZ();
+	mEigen = NULL;
 
 	setPointers(mode, estimation);
 	setDegree(DEFAULT_DEGREE);
@@ -24,6 +24,8 @@ ViPolynomialInterpolator::ViPolynomialInterpolator(const Mode &mode, const Estim
 ViPolynomialInterpolator::ViPolynomialInterpolator(const ViPolynomialInterpolator &other)
 	: ViInterpolator(other)
 {
+	mEigen = other.mEigen;
+
 	setPointers(other.mMode, other.mEstimation);
 	setDegree(other.mDegree);
 	setDerivatives(other.mDerivatives);
@@ -70,6 +72,8 @@ void ViPolynomialInterpolator::setParameter(const int &number, const qreal &valu
 		LOG("Invalid parameter for this interpolator.", QtCriticalMsg);
 		exit(-1);
 	}
+	//mEigen = ViEigenManager::get(decimalPrecision(mWindowSize, mDegree));
+	mEigen = ViEigenManager::getByBits(96);
 }
 
 bool ViPolynomialInterpolator::validParameters()
@@ -80,6 +84,7 @@ bool ViPolynomialInterpolator::validParameters()
 
 bool ViPolynomialInterpolator::validParameters(const Mode &mode, const int &windowSize, const int &degree, const int &derivatives)
 {
+//	if(!ViEigenManager::isSupported(decimalPrecision(windowSize, degree))) return false;
 	if(mode == Normal) return windowSize >= degree + 1;
 	else if(mode == Osculating) return windowSize >= degree + 1 && degree >= derivatives;
 	else if(mode == Splines)
@@ -108,7 +113,7 @@ void ViPolynomialInterpolator::setPointers(const Mode &mode, const Estimation &e
 		interpolateBestPointer = &ViPolynomialInterpolator::interpolateBestNormal;
 		estimateModelPointer = &ViPolynomialInterpolator::estimateModelNormal;
 	}
-	/*else if(mMode == Osculating)
+	else if(mMode == Osculating)
 	{
 		interpolateModelPointer = &ViPolynomialInterpolator::interpolateModelOsculating;
 		interpolateBestPointer = &ViPolynomialInterpolator::interpolateBestDerivative;
@@ -119,7 +124,7 @@ void ViPolynomialInterpolator::setPointers(const Mode &mode, const Estimation &e
 		interpolateModelPointer = &ViPolynomialInterpolator::interpolateModelSplines;
 		interpolateBestPointer = &ViPolynomialInterpolator::interpolateBestDerivative;
 		estimateModelPointer = &ViPolynomialInterpolator::estimateModelSplines;
-	}*/
+	}
 
 	mEstimation = estimation;
 	if(mEstimation == Fixed) interpolatePointer = &ViPolynomialInterpolator::interpolateFixed;
@@ -136,8 +141,8 @@ bool ViPolynomialInterpolator::interpolateFixed(const qreal *leftSamples, const 
 {
 	if(validParameters(mMode, leftSize, rightSize, mDegree, mDerivatives))
 	{
-		//static ViEigenVector coefficients;
-		ViEigenVectorZ *coefficients = (this->*estimateModelPointer)(mDegree, mDerivatives, leftSamples, leftSize, rightSamples, rightSize, outputSize, scaling);
+		//static ViEigenBaseVector coefficients;
+		ViEigenBaseVector *coefficients = (this->*estimateModelPointer)(mDegree, mDerivatives, leftSamples, leftSize, rightSamples, rightSize, outputSize, scaling);
 		(this->*interpolateModelPointer)(mDegree, coefficients, outputSamples, outputSize, leftSize, scaling);
 		mEigen->clear(coefficients);
 		return true;
@@ -154,7 +159,7 @@ bool ViPolynomialInterpolator::interpolateBest(const qreal *leftSamples, const i
 bool ViPolynomialInterpolator::interpolateBestNormal(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, const qreal &scaling)
 {
 	/*static int i, rightStart;
-	static ViEigenVector currentCoefficients, bestCoefficients;
+	static ViEigenBaseVector currentCoefficients, bestCoefficients;
 	static qreal currentMse, bestMse;
 
 	qreal interpolationLeft[leftSize];
@@ -189,7 +194,7 @@ bool ViPolynomialInterpolator::interpolateBestNormal(const qreal *leftSamples, c
 bool ViPolynomialInterpolator::interpolateBestDerivative(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, const qreal &scaling)
 {
 	/*static int i, j, rightStart;
-	static ViEigenVector currentCoefficients, bestCoefficients;
+	static ViEigenBaseVector currentCoefficients, bestCoefficients;
 	static qreal currentMse, bestMse;
 	static bool wasBad, wasBadAgain;
 
@@ -235,15 +240,15 @@ bool ViPolynomialInterpolator::interpolateBestDerivative(const qreal *leftSample
 }
 
 
-ViEigenVectorZ* ViPolynomialInterpolator::estimateModelNormal(const int &degree, const int &derivative, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling)
+ViEigenBaseVector* ViPolynomialInterpolator::estimateModelNormal(const int &degree, const int &derivative, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling)
 {
 	static int i, j, offset, size;
 	static qreal x;
 
 	size = leftSize + rightSize;
 
-	ViEigenMatrixZ *matrix = mEigen->createMatrix(size, degree + 1);
-	ViEigenVectorZ *vector = mEigen->createVector(size);
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(size, degree + 1);
+	ViEigenBaseVector *vector = mEigen->createVector(size);
 
 	for(i = 0; i < leftSize; ++i)
 	{
@@ -251,7 +256,7 @@ ViEigenVectorZ* ViPolynomialInterpolator::estimateModelNormal(const int &degree,
 		x = i / scaling;
 		matrix->set(i, 0, 1);
 		matrix->set(i, 1, x);
-		for(j = 2; j <= degree; ++j) matrix->set(i, j, pow(x, j));
+		for(j = 2; j <= degree; ++j) matrix->setPower(i, j, x, j);
 	}
 
 	for(i = 0; i < rightSize; ++i)
@@ -261,85 +266,34 @@ ViEigenVectorZ* ViPolynomialInterpolator::estimateModelNormal(const int &degree,
 		x = (offset + outputSize) / scaling;
 		matrix->set(offset, 0, 1);
 		matrix->set(offset, 1, x);
-		for(j = 2; j <= degree; ++j) matrix->set(offset, j, pow(x, j));
+		for(j = 2; j <= degree; ++j) matrix->setPower(offset, j, x, j);
 	}
 
-	ViEigenVectorZ *coefficients = mEigen->solve(matrix, vector);
+	ViEigenBaseVector *coefficients = mEigen->estimate(matrix, vector);
 	mEigen->clear(matrix);
 	mEigen->clear(vector);
 	return coefficients;
 }
 
-void ViPolynomialInterpolator::interpolateModelNormal(const int &degree, const ViEigenVectorZ *coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling)
+void ViPolynomialInterpolator::interpolateModelNormal(const int &degree, const ViEigenBaseVector *coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling)
 {
 	static int i, j;
-	static qreal x, result, temp;
-
-	for(i = 0; i < outputSize; ++i)
-	{
-		x = (start + i) / scaling;
-		coefficients->get(temp, 0);
-		result = temp;
-		coefficients->get(temp, 1);
-		result += temp * x;
-		for(j = 2; j <= degree; ++j)
-		{
-			coefficients->get(temp, j);
-			result += temp * std::pow(x, j);
-		}
-		outputSamples[i] = result;
-	}
-}
-
-/*
-bool ViPolynomialInterpolator::estimateModelNormal(const int &degree, const int &derivative, ViEigenVector &coefficients, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling)
-{
-	static int i, j, offset, size;
 	static qreal x;
 
-	size = leftSize + rightSize;
-
-	ViEigenMatrix matrix = EigenX::createMatrix(size, degree + 1);
-	ViEigenVector vector = EigenX::createVector(size);
-
-	for(i = 0; i < leftSize; ++i)
-	{
-		vector(i) = leftSamples[i];
-		x = i / scaling;
-		matrix(i, 0) = 1;
-		matrix(i, 1) = x;
-		for(j = 2; j <= degree; ++j) EigenX::power(matrix(i, j), x, j);
-	}
-
-	for(i = 0; i < rightSize; ++i)
-	{
-		offset = leftSize + i;
-		vector(offset) = rightSamples[i];
-		x = (offset + outputSize) / scaling;
-		matrix(offset, 0) = 1;
-		matrix(offset, 1) = x;
-		for(j = 2; j <= degree; ++j) EigenX::power(matrix(offset, j), x, j);
-	}
-
-	EigenX::solve(matrix, vector, coefficients);
-	return true;
-}
-
-void ViPolynomialInterpolator::interpolateModelNormal(const int &degree, const ViEigenVector &coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling)
-{
-	static int i, j;
-	static qreal x, result;
-
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(outputSize, degree + 1);
 	for(i = 0; i < outputSize; ++i)
 	{
 		x = (start + i) / scaling;
-		result = EigenX::toReal(coefficients(0) + (coefficients(1) * x));
-		for(j = 2; j <= degree; ++j) result += EigenX::toReal(coefficients(j) * EigenX::power(x, j));
-		outputSamples[i] = result;
+		matrix->set(i, 0, 1);
+		matrix->set(i, 1, x);
+		for(j = 2; j <= degree; ++j) matrix->setPower(i, j, x, j);
 	}
+	mEigen->solve(coefficients, matrix, outputSamples, outputSize);
+	mEigen->clear(matrix);
 }
 
-bool ViPolynomialInterpolator::estimateModelOsculating(const int &degree, const int &derivative, ViEigenVector &coefficients, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling)
+
+ViEigenBaseVector* ViPolynomialInterpolator::estimateModelOsculating(const int &degree, const int &derivative, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling)
 {
 	static int i, j, offset, start, end, derivativeCount, totalDerivatives, totalSize, size;
 	static qreal x;
@@ -349,26 +303,26 @@ bool ViPolynomialInterpolator::estimateModelOsculating(const int &degree, const 
 	totalDerivatives = derivativeCount * derivative;
 	totalSize = size + totalDerivatives;
 
-	ViEigenMatrix matrix = EigenX::createMatrix(totalSize, degree + 1);
-	ViEigenVector vector = EigenX::createVector(totalSize);
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(totalSize, degree + 1);
+	ViEigenBaseVector *vector = mEigen->createVector(totalSize);
 
 	for(i = 0; i < leftSize; ++i)
 	{
-		vector(i) = leftSamples[i];
+		vector->set(i, leftSamples[i]);
 		x = i / scaling;
-		matrix(i, 0) = 1;
-		matrix(i, 1) = x;
-		for(j = 2; j <= degree; ++j) EigenX::power(matrix(i, j), x, j);
+		matrix->set(i, 0, 1);
+		matrix->set(i, 1, x);
+		for(j = 2; j <= degree; ++j) matrix->setPower(i, j, x, j);
 	}
 
 	for(i = 0; i < rightSize; ++i)
 	{
 		offset = leftSize + i;
-		vector(offset) = rightSamples[i];
+		vector->set(offset, rightSamples[i]);
 		x = (offset + outputSize) / scaling;
-		matrix(offset, 0) = 1;
-		matrix(offset, 1) = x;
-		for(j = 2; j <= degree; ++j) EigenX::power(matrix(offset, j), x, j);
+		matrix->set(offset, 0, 1);
+		matrix->set(offset, 1, x);
+		for(j = 2; j <= degree; ++j) matrix->setPower(offset, j, x, j);
 	}
 
 	// Determine for how many samples we cannot calculate a derivitate, and skip those equations.
@@ -381,7 +335,7 @@ bool ViPolynomialInterpolator::estimateModelOsculating(const int &degree, const 
 		for(j = start; j < end; ++j)
 		{
 			offset = size + (derivativeCount * (i - 1)) + (j - 1);
-			vector(offset) = ViDifferentiate::derivative(i, leftSamples, j);
+			vector->set(offset, ViDifferentiate::derivative(i, leftSamples, j));
 			calculateDerivative(degree, j / scaling, matrix, offset, i);
 		}
 	}
@@ -392,36 +346,41 @@ bool ViPolynomialInterpolator::estimateModelOsculating(const int &degree, const 
 		for(j = start; j < end; ++j)
 		{
 			offset = (leftSize - 2) + size + (derivativeCount * (i - 1)) + (j - 1);
-			vector(offset) = ViDifferentiate::derivative(i, rightSamples, j);
+			vector->set(offset, ViDifferentiate::derivative(i, rightSamples, j));
 			calculateDerivative(degree, j / scaling, matrix, offset, i);
 		}
 	}
 
-	EigenX::solve(matrix, vector, coefficients);
-	return true;
+	ViEigenBaseVector *coefficients = mEigen->estimate(matrix, vector);
+	mEigen->clear(matrix);
+	mEigen->clear(vector);
+	return coefficients;
 }
 
-void ViPolynomialInterpolator::interpolateModelOsculating(const int &degree, const ViEigenVector &coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling)
-{
+void ViPolynomialInterpolator::interpolateModelOsculating(const int &degree, const ViEigenBaseVector *coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling)
+{	
 	static int i, j;
-	static qreal x, result;
+	static qreal x;
 
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(outputSize, degree + 1);
 	for(i = 0; i < outputSize; ++i)
 	{
 		x = (start + i) / scaling;
-		result = EigenX::toReal(coefficients(0) + (coefficients(1) * x));
-		for(j = 2; j <= degree; ++j) result += EigenX::toReal(coefficients(j) * EigenX::power(x, j));
-		outputSamples[i] = result;
+		matrix->set(i, 0, 1);
+		matrix->set(i, 1, x);
+		for(j = 2; j <= degree; ++j) matrix->setPower(i, j, x, j);
 	}
+	mEigen->solve(coefficients, matrix, outputSamples, outputSize);
+	mEigen->clear(matrix);
 }
 
-bool ViPolynomialInterpolator::estimateModelSplines(const int &degree, const int &derivative, ViEigenVector &coefficients, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling)
+ViEigenBaseVector* ViPolynomialInterpolator::estimateModelSplines(const int &degree, const int &derivative, const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const qreal &scaling)
 {
 	static int i, j, extraEquations, columnOffset, rowOffset1, rowOffset2, rightStart, splineCount, leftSplineCount, rightSplineCount, singleCoefficientCount, coefficientCount, derivativeCount, equationCount, size;
 	static qreal x1, x2;
 
 	size = leftSize + rightSize;
-	if(size <= 1) return false;
+	if(size <= 1) return NULL;
 	rightStart = leftSize + outputSize;
 
 	splineCount = size - 1;
@@ -443,8 +402,8 @@ bool ViPolynomialInterpolator::estimateModelSplines(const int &degree, const int
 		++extraEquations;
 	}
 
-	ViEigenMatrix matrix = EigenX::createMatrix(equationCount, coefficientCount);
-	ViEigenVector vector = EigenX::createVector(equationCount);
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(equationCount, coefficientCount);
+	ViEigenBaseVector *vector = mEigen->createVector(equationCount);
 
 	// Add left spline polynomials
 	for(i = 0; i < leftSplineCount; ++i)
@@ -453,22 +412,22 @@ bool ViPolynomialInterpolator::estimateModelSplines(const int &degree, const int
 		rowOffset2 = rowOffset1 + 1;
 		columnOffset = singleCoefficientCount * i;
 
-		vector(rowOffset1) = leftSamples[i];
-		vector(rowOffset2) = leftSamples[i + 1];
+		vector->set(rowOffset1, leftSamples[i]);
+		vector->set(rowOffset2, leftSamples[i + 1]);
 
 		x1 = i / scaling;
 		x2 = (i + 1) / scaling;
 
-		matrix(rowOffset1, columnOffset) = 1;
-		matrix(rowOffset2, columnOffset) = 1;
+		matrix->set(rowOffset1, columnOffset, 1);
+		matrix->set(rowOffset2, columnOffset, 1);
 
-		matrix(rowOffset1, columnOffset + 1) = x1;
-		matrix(rowOffset2, columnOffset + 1) = x2;
+		matrix->set(rowOffset1, columnOffset + 1, x1);
+		matrix->set(rowOffset2, columnOffset + 1, x2);
 
 		for(j = 2; j <= degree; ++j)
 		{
-			EigenX::power(matrix(rowOffset1, j + columnOffset), x1, j);
-			EigenX::power(matrix(rowOffset2, j + columnOffset), x2, j);
+			matrix->setPower(rowOffset1, j + columnOffset, x1, j);
+			matrix->setPower(rowOffset2, j + columnOffset, x2, j);
 		}
 	}
 
@@ -477,22 +436,22 @@ bool ViPolynomialInterpolator::estimateModelSplines(const int &degree, const int
 	rowOffset2 = rowOffset1 + 1;
 	columnOffset = singleCoefficientCount * leftSplineCount;
 
-	vector(rowOffset1) = leftSamples[leftSize - 1];
-	vector(rowOffset2) = rightSamples[0];
+	vector->set(rowOffset1, leftSamples[leftSize - 1]);
+	vector->set(rowOffset2, rightSamples[0]);
 
 	x1 = (leftSize - 1) / scaling;
 	x2 = (leftSize + outputSize) / scaling;
 
-	matrix(rowOffset1, columnOffset) = 1;
-	matrix(rowOffset2, columnOffset) = 1;
+	matrix->set(rowOffset1, columnOffset, 1);
+	matrix->set(rowOffset2, columnOffset, 1);
 
-	matrix(rowOffset1, columnOffset + 1) = x1;
-	matrix(rowOffset2, columnOffset + 1) = x2;
+	matrix->set(rowOffset1, columnOffset + 1, x1);
+	matrix->set(rowOffset2, columnOffset + 1, x2);
 
 	for(j = 2; j <= degree; ++j)
 	{
-		EigenX::power(matrix(rowOffset1, j + columnOffset), x1, j);
-		EigenX::power(matrix(rowOffset2, j + columnOffset), x2, j);
+		matrix->setPower(rowOffset1, j + columnOffset, x1, j);
+		matrix->setPower(rowOffset2, j + columnOffset, x2, j);
 	}
 
 	// Add right spline polynomials
@@ -502,22 +461,22 @@ bool ViPolynomialInterpolator::estimateModelSplines(const int &degree, const int
 		rowOffset2 = rowOffset1 + 1;
 		columnOffset = singleCoefficientCount * (i + leftSplineCount + 1);
 
-		vector(rowOffset1) = rightSamples[i];
-		vector(rowOffset2) = rightSamples[i + 1];
+		vector->set(rowOffset1, rightSamples[i]);
+		vector->set(rowOffset2, rightSamples[i + 1]);
 
 		x1 = (rightStart + i) / scaling;
 		x2 = (rightStart + i + 1) / scaling;
 
-		matrix(rowOffset1, columnOffset) = 1;
-		matrix(rowOffset2, columnOffset) = 1;
+		matrix->set(rowOffset1, columnOffset, 1);
+		matrix->set(rowOffset2, columnOffset, 1);
 
-		matrix(rowOffset1, columnOffset + 1) = x1;
-		matrix(rowOffset2, columnOffset + 1) = x2;
+		matrix->set(rowOffset1, columnOffset + 1, x1);
+		matrix->set(rowOffset2, columnOffset + 1, x2);
 
 		for(j = 2; j <= degree; ++j)
 		{
-			EigenX::power(matrix(rowOffset1, j + columnOffset), x1, j);
-			EigenX::power(matrix(rowOffset2, j + columnOffset), x2, j);
+			matrix->setPower(rowOffset1, j + columnOffset, x1, j);
+			matrix->setPower(rowOffset2, j + columnOffset, x2, j);
 		}
 	}
 
@@ -552,14 +511,16 @@ bool ViPolynomialInterpolator::estimateModelSplines(const int &degree, const int
 	// Set the derivitives for the first spline at point 0 to 0
 	if(extraEquations > 0)
 	{
-		for(i = 1; i <= extraEquations; ++i) matrix(equationCount - i, 0) = 1;
+		for(i = 1; i <= extraEquations; ++i) matrix->set(equationCount - i, 0, 1);
 	}
 
-	EigenX::solve(matrix, vector, coefficients);
-	return true;
+	ViEigenBaseVector *coefficients = mEigen->estimate(matrix, vector);
+	mEigen->clear(matrix);
+	mEigen->clear(vector);
+	return coefficients;
 }
 
-void ViPolynomialInterpolator::interpolateModelSplines(const int &degree, const ViEigenVector &coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling)
+void ViPolynomialInterpolator::interpolateModelSplines(const int &degree, const ViEigenBaseVector *coefficients, qreal *outputSamples, const int &outputSize, const int &start, const qreal &scaling)
 {
 	static int i, j, offset;
 	static qreal x, result;
@@ -567,29 +528,33 @@ void ViPolynomialInterpolator::interpolateModelSplines(const int &degree, const 
 	// Use the middel spline for prediction
 	offset = (start - 1) * (degree + 1);
 
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(outputSize, degree + 1);
 	for(i = 0; i < outputSize; ++i)
 	{
 		x = (start + i) / scaling;
-		result = (coefficients(offset) + EigenX::toReal(coefficients(1 + offset) * x));
-		for(j = 2; j <= degree; ++j) result += EigenX::toReal(coefficients(j + offset) * EigenX::power(x, j));
+		matrix->set(i, offset, 1);
+		matrix->set(i, 1 + offset, x);
+		for(j = 2; j <= degree; ++j) matrix->setPower(i, j + offset, x, j);
 		outputSamples[i] = result;
 	}
+	mEigen->solve(coefficients, matrix, outputSamples, outputSize);
+	mEigen->clear(matrix);
 }
 
-void ViPolynomialInterpolator::calculateDerivative(const int &degree, const qreal &x, ViEigenMatrix &matrix, const int &rowOffset, const int &derivative)
+void ViPolynomialInterpolator::calculateDerivative(const int &degree, const qreal &x, ViEigenBaseMatrix *matrix, const int &rowOffset, const int &derivative)
 {
 	static int i;
-	for(i = 0; i < derivative; ++i) matrix(rowOffset, i) = 0;
-	matrix(rowOffset, derivative) = 1;
-	for(i = derivative + 1; i <= degree; ++i) matrix(rowOffset, i) = i * EigenX::power(x, i - 1);
+	for(i = 0; i < derivative; ++i) matrix->set(rowOffset, i, 0);
+	matrix->set(rowOffset, derivative, 1);
+	for(i = derivative + 1; i <= degree; ++i) matrix->setPowerMulti(rowOffset, i, i, x, i - 1);
 }
 
-void ViPolynomialInterpolator::calculateDerivative(const int &degree, const qreal &x, ViEigenMatrix &matrix, const int &rowOffset, const int &derivative, const int &offset, const int multiplier)
+void ViPolynomialInterpolator::calculateDerivative(const int &degree, const qreal &x, ViEigenBaseMatrix *matrix, const int &rowOffset, const int &derivative, const int &offset, const int multiplier)
 {
 	static int i;
-	for(i = 0; i < derivative; ++i) matrix(rowOffset, i + offset) = 0;
-	matrix(rowOffset, derivative + offset) = 1;
-	for(i = derivative + 1; i <= degree; ++i) matrix(rowOffset, i + offset) = multiplier * i * EigenX::power(x, i - 1);
+	for(i = 0; i < derivative; ++i) matrix->set(rowOffset, i + offset, 0);
+	matrix->set(rowOffset, derivative + offset, 1);
+	for(i = derivative + 1; i <= degree; ++i) matrix->setPowerMulti(rowOffset, i + offset, multiplier * i, x, i - 1);
 }
 
 qreal ViPolynomialInterpolator::calculateMse(const qreal *observed, const qreal *predicted, const int &size)
@@ -602,7 +567,28 @@ qreal ViPolynomialInterpolator::calculateMse(const qreal *observed, const qreal 
 
 	return mse / size;
 }
-*/
+
+
+int ViPolynomialInterpolator::decimalPrecision(const int &windowSize, const int &degree)
+{
+	mpfr::mpreal value(1, 1024);
+	value = mpfr::pow(value / windowSize, degree);
+	QString valueString = QString::fromStdString(value.toString());
+	int start = valueString.indexOf("e-");
+	if(start < 0)
+	{
+		start = valueString.indexOf(",");
+		if(start < 0) start = valueString.indexOf(".");
+		if(start < 0) return 0;
+		while(valueString.at(start + 1) == '0') ++start;
+		return start;
+	}
+	else
+	{
+		return valueString.mid(start + 2).toInt();
+	}
+}
+
 ViPolynomialInterpolator* ViPolynomialInterpolator::clone()
 {
 	return new ViPolynomialInterpolator(*this);

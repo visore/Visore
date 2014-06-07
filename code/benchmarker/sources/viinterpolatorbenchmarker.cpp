@@ -27,20 +27,20 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	addParam("Window Size", 30, 30, 5);
 	addParam("Degree", 4, 4, 1);
 	addParam("Derivatives", 1, 1, 1);*/
-	mInterpolator = new ViPolynomialInterpolator();
-	addParam("Window Size", 5, 512, 5);
-	addParam("Degree", 1, 15, 1);
+	/*mInterpolator = new ViPolynomialInterpolator();
+	addParam("Window Size", 4096, 4096, 5);
+	addParam("Degree", 100, 100, 1);*/
 
 	/*mInterpolator = new ViFourierInterpolator(ViFourierInterpolator::Osculating, ViFourierInterpolator::Fixed);
 	addParam("Window Size", 10, 100, 10);
 	addParam("Degree", 1, 10, 1);
 	addParam("Derivatives", 1, 10, 1);*/
 
-	/*mInterpolator = new ViLagrangeInterpolator();
-	addParam("Window Size", 2, 2500, 2);*/
+	mInterpolator = new ViLagrangeInterpolator();
+	addParam("Window Size", 2, 2500, 4);
 
 	/*mInterpolator = new ViNewtonInterpolator();
-	addParam("Window Size", 450, 1000, 2);*/
+	addParam("Window Size", 2, 1000, 4);*/
 
 	/*mInterpolator = new ViArimaInterpolator();
 	addParam("Window Size", 2048, 2048, 256);

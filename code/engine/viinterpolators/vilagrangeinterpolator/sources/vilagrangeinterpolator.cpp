@@ -1,5 +1,6 @@
 #include <vilagrangeinterpolator.h>
 #include <vilogger.h>
+#include <vieigen.h>
 
 ViLagrangeInterpolator::ViLagrangeInterpolator()
 	: ViInterpolator()
@@ -43,6 +44,8 @@ bool ViLagrangeInterpolator::validParameters(const int &leftSize, const int &rig
 
 bool ViLagrangeInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
 {
+	// Doesn't matter if you use double or mpreal, same result
+
 	static int i, j, k, offset, size;
 	static qreal result, product, scaledI, scaling;
 
@@ -77,7 +80,7 @@ bool ViLagrangeInterpolator::interpolate(const qreal *leftSamples, const int &le
 			}
 			result += y[j] * product;
 		}
-		outputSamples[i] = result;
+		outputSamples[i] = result.toDouble();
 	}
 }
 

@@ -2,7 +2,7 @@
 #define VINEWTONINTERPOLATOR_H
 
 #include <viinterpolator.h>
-#include <vivector.h>
+#include <vieigen.h>
 
 class ViNewtonInterpolator : public ViInterpolator
 {
@@ -24,6 +24,13 @@ class ViNewtonInterpolator : public ViInterpolator
 		bool validParameters(const int &leftSize, const int &rightSize);
 
 		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+
+		class ViNewtonTypedBase;
+
+	private:
+
+		ViEigenBase *mEigen;
+		ViNewtonTypedBase *mTyped;
 
 };
 
