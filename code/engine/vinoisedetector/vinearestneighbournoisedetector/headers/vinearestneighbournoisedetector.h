@@ -21,7 +21,7 @@ class ViNearestNeighbourNoiseDetector : public ViNoiseDetector
 
 		void setParameters(const qreal &param1); // k-nearest neighbours
 
-	//protected:
+	protected:
 
 		void calculateNoise(QQueue<qreal> &samples);
 

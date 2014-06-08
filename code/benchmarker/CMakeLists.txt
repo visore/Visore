@@ -22,7 +22,7 @@ TARGET_LINK_LIBRARIES(vibenchmarker
 	vinearestneighbournoisedetector
 	vimahalanobisnoisedetector
 
-	vipiecewiseconstantinterpolator
+	vinearestneighbourinterpolator
 	visplineinterpolator
 	vihermiteinterpolator
 	vicosineinterpolator

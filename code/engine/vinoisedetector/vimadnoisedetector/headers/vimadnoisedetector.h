@@ -22,8 +22,6 @@ class ViMadNoiseDetector : public ViNoiseDetector
 
 		void calculateNoise(QQueue<qreal> &samples);
 
-		qreal quickMedian(qreal *samples, const int &size, const int &position);
-
 	private:
 
 		int mWindowSize;

@@ -69,7 +69,7 @@ bool ViLagrangeInterpolator::interpolate(const qreal *leftSamples, const int &le
 
 	for(i = 0; i < outputSize; ++i)
 	{
-		scaledI = i / scaling;
+		scaledI = (i + leftSize) / scaling;
 		result = 0;
 		for(j = 0; j < size; ++j)
 		{
@@ -80,7 +80,7 @@ bool ViLagrangeInterpolator::interpolate(const qreal *leftSamples, const int &le
 			}
 			result += y[j] * product;
 		}
-		outputSamples[i] = result.toDouble();
+		outputSamples[i] = result;
 	}
 }
 

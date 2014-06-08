@@ -1,6 +1,5 @@
 #include <vibenchmarker.h>
 #include <viaudiodata.h>
-#include <vipiecewiseconstantinterpolator.h>
 #include <visplineinterpolator.h>
 #include <vipolynomialinterpolator.h>
 #include <vicosineinterpolator.h>

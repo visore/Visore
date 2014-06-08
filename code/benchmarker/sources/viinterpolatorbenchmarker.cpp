@@ -5,12 +5,14 @@
 #include <QDir>
 #include <iomanip>
 
+#include <vinearestneighbourinterpolator.h>
 #include <vipolynomialinterpolator.h>
 #include <vifourierinterpolator.h>
 #include <vilagrangeinterpolator.h>
 #include <vinewtoninterpolator.h>
 #include <viarimainterpolator.h>
 #include <vigarchinterpolator.h>
+#include <vihermiteinterpolator.h>
 
 #define WINDOW_SIZE 4096
 
@@ -36,11 +38,19 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	addParam("Degree", 1, 10, 1);
 	addParam("Derivatives", 1, 10, 1);*/
 
-	mInterpolator = new ViLagrangeInterpolator();
-	addParam("Window Size", 2, 2500, 4);
+/*	mInterpolator = new ViLagrangeInterpolator();
+	addParam("Window Size", 2, 2500, 4);*/
 
 	/*mInterpolator = new ViNewtonInterpolator();
 	addParam("Window Size", 2, 1000, 4);*/
+
+	/*mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Median);
+	addParam("K", 1, 1000, 1);*/
+
+	mInterpolator = new ViHermiteInterpolator();
+	addParam("Window Size", 10, 10, 1);
+	addParam("Degree", 1, 1, 1);
+
 
 	/*mInterpolator = new ViArimaInterpolator();
 	addParam("Window Size", 2048, 2048, 256);

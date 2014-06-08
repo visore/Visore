@@ -343,7 +343,7 @@ bool ViFourierInterpolator::estimateModelOsculating(const int &degree, const int
 		{
 			offset = size + (derivativeCount * (i - 1)) + (j - 1);
 			bool error;
-			vector[offset] = ViDifferentiate::derivative(i, leftSamples, leftSize, j, error);
+			vector[offset] = ViDifferentiater::derivative(i, leftSamples, leftSize, j, error);
 			calculateDerivative(degree, j * scaling, matrix[offset], i);
 		}
 	}
@@ -355,7 +355,7 @@ bool ViFourierInterpolator::estimateModelOsculating(const int &degree, const int
 		{
 			offset = (leftSize - 2) + size + (derivativeCount * (i - 1)) + (j - 1);
 			bool error;
-			vector[offset] = ViDifferentiate::derivative(i, rightSamples, rightSize, j, error);
+			vector[offset] = ViDifferentiater::derivative(i, rightSamples, rightSize, j, error);
 			calculateDerivative(degree, j * scaling, matrix[offset], i);
 		}
 	}

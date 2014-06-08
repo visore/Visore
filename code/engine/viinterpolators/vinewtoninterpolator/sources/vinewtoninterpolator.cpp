@@ -113,7 +113,7 @@ void ViNewtonInterpolator::setParameter(const int &number, const qreal &value)
 		exit(-1);
 	}
 
-	mEigen = ViEigenManager::getByBits(128);
+	mEigen = ViEigenManager::getByBits(512);
 	delete mTyped;
 	mTyped = new ViNewtonTyped<mpfr::mpreal>();
 }

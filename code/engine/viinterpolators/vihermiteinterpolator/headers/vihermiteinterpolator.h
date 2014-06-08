@@ -1,4 +1,4 @@
-/*#ifndef VIHERMITEINTERPOLATOR_H
+#ifndef VIHERMITEINTERPOLATOR_H
 #define VIHERMITEINTERPOLATOR_H
 
 #include <viinterpolator.h>
@@ -10,23 +10,34 @@
 // http://astro.temple.edu/~dhill001/course/numanalspring2010/Hermite%20Interpolation%20Section%205_7.pdf
 // http://caig.cs.nctu.edu.tw/course/NM07S/slides/chap3_3.pdf
 
-class ViHermiteInterpolator : public ViDegreeInterpolator
+class ViHermiteInterpolator : public ViInterpolator
 {
 
 	public:
 
 		ViHermiteInterpolator();
-		ViHermiteInterpolator(const int &degree);
+		ViHermiteInterpolator(const ViHermiteInterpolator &other);
+		~ViHermiteInterpolator();
+
+		void setDegree(const int &degree);
+
+		void setParameter(const int &number, const qreal &value);
+		bool validParameters();
 
 		ViHermiteInterpolator* clone();
-
-		void setParameters(const qreal &param1, const qreal &param2);
 
 	protected:
 
 		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
 
+		qreal calculateLagrange(const qreal *x, const int &size, const qreal &theX, const int &j);
+		qreal calculateLagrangeDerivative1(const qreal *x, const int &size, const qreal &theX, const int &j);
+
+	private:
+
+		int mDegree;
+
 };
 
 #endif
-*/
+

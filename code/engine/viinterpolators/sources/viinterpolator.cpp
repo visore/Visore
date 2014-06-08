@@ -5,6 +5,7 @@
 #include <QtMath>
 
 #define DEFAULT_WINDOW_SIZE 0	// Will use all available samples
+#define FALLBACK_SIZE 1024	// In case the window size is 0 (use all samples), use this to regulate the cahces
 #define MAX_WINDOW_SIZE 64768	// Even if the window size is 0 (use all data), the window size will never be larger than this
 
 ViInterpolator::ViInterpolator()
@@ -310,7 +311,15 @@ void ViInterpolator::process(const ViSampleChunk &input, ViSampleChunk &output, 
 			else
 			{
 				leftCache.append(input[i]);
-				if(leftCache.size() >= mWindowSize)
+				if(mWindowSize == 0 && leftCache.size() >= FALLBACK_SIZE)
+				{
+					int halfFallback = FALLBACK_SIZE / 2;
+					ViSampleChunk outputData(halfFallback);
+					for(int i = 0; i < halfFallback; ++i) outputData[i] = leftCache[i];
+					leftCache.remove(0, halfFallback);
+					output.append(outputData);
+				}
+				else if(leftCache.size() >= mWindowSize)
 				{
 					ViSampleChunk outputData(mHalfWindowSize);
 					for(int i = 0; i < mHalfWindowSize; ++i) outputData[i] = leftCache[i];

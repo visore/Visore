@@ -335,7 +335,7 @@ ViEigenBaseVector* ViPolynomialInterpolator::estimateModelOsculating(const int &
 		for(j = start; j < end; ++j)
 		{
 			offset = size + (derivativeCount * (i - 1)) + (j - 1);
-			vector->set(offset, ViDifferentiate::derivative(i, leftSamples, j));
+			vector->set(offset, ViDifferentiater::derivative(i, leftSamples, j));
 			calculateDerivative(degree, j / scaling, matrix, offset, i);
 		}
 	}
@@ -346,7 +346,7 @@ ViEigenBaseVector* ViPolynomialInterpolator::estimateModelOsculating(const int &
 		for(j = start; j < end; ++j)
 		{
 			offset = (leftSize - 2) + size + (derivativeCount * (i - 1)) + (j - 1);
-			vector->set(offset, ViDifferentiate::derivative(i, rightSamples, j));
+			vector->set(offset, ViDifferentiater::derivative(i, rightSamples, j));
 			calculateDerivative(degree, j / scaling, matrix, offset, i);
 		}
 	}

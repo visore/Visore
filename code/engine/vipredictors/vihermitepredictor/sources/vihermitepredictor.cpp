@@ -125,7 +125,7 @@ bool ViHermitePredictor::predict(const qreal *samples, const int &size, qreal *p
 
 			// First derivative (second part)
 			value = lagrangeSquared  * (scaledX - scaledI);
-			result += ViDifferentiate::derivative(1, samples, size, x, error) * value;
+			result += ViDifferentiater::derivative(1, samples, size, x, error) * value;
 		}
 		predictedSamples[j] = result;
 	}

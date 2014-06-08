@@ -139,7 +139,7 @@ cout<<"-----------: "<<lagrangeFirst<<endl;
 			//value1 = lagrangeSquared  * (scaledx-scaledi);
 			//result += (ViDifferentiate::derivative(1, samples, size, i, error)/totalDevider) * value1;
 
-			result += (samples[i] * lagrangeSquared) + (lagrangeFirst * (ViDifferentiate::derivative(1, samples, size, i, error)/totalDevider));
+			result += (samples[i] * lagrangeSquared) + (lagrangeFirst * (ViDifferentiater::derivative(1, samples, size, i, error)/totalDevider));
 
 			//cout<<value<<"\t"<<x<<"\t"<<i<<"\t"<<lagrangeSquared<<"\t"<<lagrangeFirst<<"\t"<<result<<endl;
 		}

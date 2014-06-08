@@ -307,7 +307,7 @@ bool ViPolynomialPredictor::estimateModelOsculating(const int &degree, const int
 		{
 			offset = size + (derivativeCount * (i - 1)) + (j - 1);
 			bool error;
-			vector[offset] = ViDifferentiate::derivative(i, samples, size, j, error);
+			vector[offset] = ViDifferentiater::derivative(i, samples, size, j, error);
 			calculateDerivative(degree, j / scaling, matrix[offset], i);
 		}
 	}
