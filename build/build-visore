@@ -1,0 +1,130 @@
+#!/bin/sh
+
+#-DCMAKE_INSTALL_PREFIX=/home/visore/Project/Visore/install/usr/local/visore -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit -DDISTRO=Debian
+
+current_directory=`dirname "$0"`
+current_directory=`cd $current_directory; pwd`
+
+code_directory=/home/visore/Project/Visore/Visore/code
+build_directory=/home/visore/Project/Visore/build
+install_directory=/home/visore/Project/Visore/install/usr/local/visore
+
+export PATH=$PATH:"$code_directory"/external/enmfp/libraries/64bit
+
+cmake=false;
+build=false;
+run=false;
+package=false;
+valgrind=false;
+gdb=false;
+cloc=false;
+parameters="";
+for i in $*
+do
+	if [ $i = "cmake" ]; then
+		cmake=true;
+	elif [ $i = "build" ]; then
+		build=true;
+	elif [ $i = "run" ]; then
+		run=true;
+	elif [ $i = "package" ]; then
+		package=true;
+	elif [ $i = "valgrind" ]; then
+		valgrind=true;
+	elif [ $i = "gdb" ]; then
+		gdb=true;
+	elif [ $i = "cloc" ]; then
+		cloc=true;
+	else
+		seperator=" ";
+		parameters=$parameters$seperator$i;
+	fi
+done
+
+if $cmake; then
+
+	#Remove clock skew warnings - Doesn't seem to work
+	#cd $current_directory
+	#find . -type f | xargs -n 5 touch
+
+	rm -r "$install_directory"
+	mkdir "$install_directory"
+	rm -r "$build_directory"
+	mkdir "$build_directory"
+	cd "$build_directory"
+	if [ -f /etc/debian_version ];
+	then
+		cmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit -DDISTRO=Debian
+	elif [ -f /etc/redhat_version ];
+	then
+		cmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit -DDISTRO=Redhat
+	else
+		cmake "$code_directory" -DCMAKE_INSTALL_PREFIX="$install_directory" -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=64bit
+	fi
+fi
+
+if $build; then
+	cd "$build_directory"
+	make -j4 install -j4
+fi
+
+if $package; then
+	cd "$build_directory"
+	make package
+fi
+
+if $gdb; then
+	cd $install_directory
+	cp ./*/*.so .
+	cp ./*/*/*.so .
+	cp ./*/*/*/*.so .
+	cp ./*/*/*/*/*.so .
+	cp /opt/Qt5.0.2/5.0.2/gcc_64/lib/*.so* .
+	cp /lib/x86_64-linux-gnu/libthread_db.so* .
+	LD_LIBRARY_PATH=/home/visore/Project/Visore/install/usr/local/visore
+	export LD_LIBRARY_PATH
+	ulimit -c unlimited
+	gdb visore
+elif $run; then
+	cd $install_directory
+	./launcher $parameters
+fi
+
+if $cloc; then
+	cd $code_directory;
+
+	totalCount=0;
+	for file in $(find . -name "*.*" -print)
+	do
+		if [ -f $file ]; then
+			totalCount=$(($totalCount + $(wc -l < $file)));
+		fi
+	done
+
+	sourceCount=0;
+	for file in $(find . -name "*.cpp" -not -iwholename "./cmake*" -not -iwholename "./common*" -not -iwholename "./external*" -print)
+	do
+		if [ -f $file ]; then
+			sourceCount=$(($sourceCount + $(wc -l < $file)));
+		fi
+	done
+	for file in $(find . -name "*.h" -not -iwholename "./cmake*" -not -iwholename "./common*" -not -iwholename "./external*" -print)
+	do
+		if [ -f $file ]; then
+			sourceCount=$(($sourceCount + $(wc -l < $file)));
+		fi
+	done
+
+	cmakeCount=0;
+	for file in $(find . -name "CMakeLists.txt" -print)
+	do
+		if [ -f $file ]; then
+			cmakeCount=$(($cmakeCount + $(wc -l < $file)));
+		fi
+	done
+
+	echo "Total lines of code:   $totalCount";
+	echo "Lines of Visore code:  $sourceCount";
+	echo "Lines of CMake code:   $cmakeCount";
+fi
+

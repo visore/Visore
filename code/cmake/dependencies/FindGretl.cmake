@@ -14,6 +14,8 @@ set(GRETL_LIBRARY_PATHS
 	/usr/local/lib
 	/usr/lib/gretl-gtk2
 	/usr/local/lib/gretl-gtk2
+	/usr/lib/gretl-gtk3
+	/usr/local/lib/gretl-gtk3
 )
 
 find_path(GRETL_INCLUDE_DIR libgretl.h PATHS ${GRETL_INCLUDE_PATHS} )
