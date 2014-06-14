@@ -8,11 +8,21 @@ ViEigenMatrixFloat::ViEigenMatrixFloat()
 ViEigenMatrixFloat::ViEigenMatrixFloat(const int &size)
 	: EigenMatrixFloat(size, size)
 {
+	int i, j;
+	for(i = 0; i < size; ++i)
+	{
+		for(j = 0; j < size; ++j) this->coeffRef(i, j) = 0;
+	}
 }
 
 ViEigenMatrixFloat::ViEigenMatrixFloat(const int &rows, const int &columns)
 	: EigenMatrixFloat(rows, columns)
 {
+	int i, j;
+	for(i = 0; i < rows; ++i)
+	{
+		for(j = 0; j < columns; ++j) this->coeffRef(i, j) = 0;
+	}
 }
 
 void ViEigenMatrixFloat::get(double &result, const int &row, const int &column)
@@ -55,6 +65,26 @@ void ViEigenMatrixFloat::setPowerMulti(const int &row, const int &column, const 
 	set(row, column, multi * std::pow(base, exponent));
 }
 
+void ViEigenMatrixFloat::setSin(const int &row, const int &column, const double &value)
+{
+	set(row, column, std::sin(value));
+}
+
+void ViEigenMatrixFloat::setCos(const int &row, const int &column, const double &value)
+{
+	set(row, column, std::cos(value));
+}
+
+void ViEigenMatrixFloat::setSinMulti(const int &row, const int &column, const double &multi, const double &value)
+{
+	set(row, column, multi * std::sin(value));
+}
+
+void ViEigenMatrixFloat::setCosMulti(const int &row, const int &column, const double &multi, const double &value)
+{
+	set(row, column, multi * std::cos(value));
+}
+
 QString ViEigenMatrixFloat::toString(const int &precision) const
 {
 	QString result = "";
@@ -77,6 +107,7 @@ ViEigenVectorFloat::ViEigenVectorFloat()
 ViEigenVectorFloat::ViEigenVectorFloat(const int &rows)
 	: EigenVectorFloat(rows)
 {
+	for(int i = 0; i < rows; ++i) this->coeffRef(i) = 0;
 }
 
 ViEigenVectorFloat::ViEigenVectorFloat(const EigenVectorFloat &other)
@@ -159,7 +190,7 @@ ViEigenBaseVector* ViEigenFloat::estimate(const ViEigenBaseMatrix *matrix, const
 	return cast(cast(matrix)->fullPivHouseholderQr().solve(*cast(vector)));
 }
 
-void ViEigenFloat::solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize)
+void ViEigenFloat::solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize, const int &offset)
 {
 	const ViEigenVectorFloat *castCoefficients = cast(coefficients);
 	const ViEigenMatrixFloat *castValues = cast(values);
@@ -169,10 +200,32 @@ void ViEigenFloat::solve(const ViEigenBaseVector *coefficients, const ViEigenBas
 	for(i = 0; i < outputSize; ++i)
 	{
 		result = 0;
-		for(j = 0; j < castCoefficients->rows(); ++j)
+		for(j = 0; j < castValues->cols(); ++j)
 		{
-			result += castCoefficients->coeffRef(j) * castValues->coeffRef(i, j);
+			result += castCoefficients->coeffRef(j + offset) * castValues->coeffRef(i, j);
 		}
+		if(result < -1) result = -1;
+		else if(result > 1) result = 1;
+		output[i] = result;
+	}
+}
+
+void ViEigenFloat::solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize, const int *offset)
+{
+	const ViEigenVectorFloat *castCoefficients = cast(coefficients);
+	const ViEigenMatrixFloat *castValues = cast(values);
+	double result;
+	int i, j;
+
+	for(i = 0; i < outputSize; ++i)
+	{
+		result = 0;
+		for(j = 0; j < castValues->cols(); ++j)
+		{
+			result += castCoefficients->coeffRef(j + offset[i]) * castValues->coeffRef(i, j);
+		}
+		if(result < -1) result = -1;
+		else if(result > 1) result = 1;
 		output[i] = result;
 	}
 }

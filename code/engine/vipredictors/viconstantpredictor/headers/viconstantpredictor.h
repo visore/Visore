@@ -37,8 +37,6 @@ class ViConstantPredictor : public ViPredictor
 		void predictLast(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
 		void predictRandom(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
 
-		qreal generateNoise(const qreal &variance);
-
 	private:
 
 		void (ViConstantPredictor::*predictPointer)(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);

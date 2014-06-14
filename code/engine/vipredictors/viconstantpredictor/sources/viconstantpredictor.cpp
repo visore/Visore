@@ -1,5 +1,5 @@
 #include <viconstantpredictor.h>
-#include <visystemsolver.h>
+#include <vimath.h>
 #include <vilogger.h>
 
 ViConstantPredictor::ViConstantPredictor(const Mode &mode)
@@ -85,39 +85,5 @@ void ViConstantPredictor::predictLast(const qreal *samples, const int &size, qre
 
 void ViConstantPredictor::predictRandom(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
 {
-	static int i;
-	static qreal mean, variance;
-	mean = 0;
-	for(i = 0; i < size; ++i) mean += samples[i];
-	mean /= size;
-	variance = 0;
-	for(i = 0; i < size; ++i) variance += qPow(samples[i] - mean, 2);
-	variance /= size + 1;
-	for(i = 0; i < predictionCount; ++i) predictedSamples[i] = generateNoise(variance);
-}
-
-qreal ViConstantPredictor::generateNoise(const qreal &variance)
-{
-	static bool hasSpare = false;
-	static qreal spare;
-
-	if(hasSpare)
-	{
-		hasSpare = false;
-		return spare * variance;
-	}
-
-	hasSpare = true;
-	static qreal u, v, s;
-	do
-	{
-		u = (rand() / ((double) RAND_MAX)) * 2 - 1;
-		v = (rand() / ((double) RAND_MAX)) * 2 - 1;
-		s = u * u + v * v;
-	}
-	while(s >= 1 || s == 0);
-
-	s = qSqrt(-2.0 * qLn(s) / s);
-	spare = v * s;
-	return variance * u * s;
+	ViMath<qreal>::noise(samples, size, predictedSamples, predictionCount);
 }

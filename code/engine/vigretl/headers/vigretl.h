@@ -1,6 +1,7 @@
 #ifndef VIGRETL_H
 #define VIGRETL_H
 
+#include <vierror.h>
 #include <QtGlobal>
 #include <libintl.h> // Very important. Solves the unqualified-id problem in libintl.h. We include it before gretl does
 #include <gretl/libgretl.h>
@@ -107,10 +108,17 @@ class ViGretl
 		bool forecast(DATASET *data, MODEL *model, qreal *output, const int &size);
 		bool backcast(DATASET *data, MODEL *model, qreal *output, const int &size);
 
+		bool forecast(DATASET *data, MODEL *model, qreal *output, const int &size, ViError *error);
+		bool backcast(DATASET *data, MODEL *model, qreal *output, const int &size, ViError *error);
+
 		bool forecast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize);
 		bool backcast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize); // reverses the input array and does a forecast
 
+		bool forecast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize, ViError *error);
+		bool backcast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize, ViError *error);
+
 		bool interpolate(const qreal *left, const int &leftSize, const qreal *right, const int &rightSize, qreal *output, const int &outputSize);
+		bool interpolate(const qreal *left, const int &leftSize, const qreal *right, const int &rightSize, qreal *output, const int &outputSize, ViError *error);
 
 		static DATASET* create(const qreal *input, const int &inputSize, const int &outputSize);
 		static DATASET* createReversed(const qreal *input, const int &inputSize, const int &outputSize);

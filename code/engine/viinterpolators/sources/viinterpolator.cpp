@@ -149,8 +149,10 @@ void ViInterpolator::adjustSamples(ViSampleChunk &data)
 	}
 }
 
-bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *mask)
+bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *mask, ViErrorCollection *modelErrors)
 {
+	modelErrors->clear();
+
 	ViAudioReadData corrupted(input);
 	ViAudioReadData noise(mask);
 	ViAudioWriteData corrected(output);
@@ -174,8 +176,8 @@ bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 		ViSampleChunk &noise1 = noise.splitSamples(0);
 		ViSampleChunk &noise2 = noise.splitSamples(1);
 
-		process(corrupted1, output1, noise1, noiseSize1, noiseCache1, leftCache1, rightCache1);
-		process(corrupted2, output2, noise2, noiseSize2, noiseCache2, leftCache2, rightCache2);
+		process(corrupted1, output1, noise1, noiseSize1, noiseCache1, leftCache1, rightCache1, modelErrors);
+		process(corrupted2, output2, noise2, noiseSize2, noiseCache2, leftCache2, rightCache2, modelErrors);
 
 		adjustSamples(output1);
 		adjustSamples(output2);
@@ -191,8 +193,8 @@ bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 	}
 
 	// Interpolate the remaining samples
-	interpolate(output1, noiseSize1, noiseCache1, leftCache1, rightCache1);
-	interpolate(output2, noiseSize2, noiseCache2, leftCache2, rightCache2);
+	interpolate(output1, noiseSize1, noiseCache1, leftCache1, rightCache1, modelErrors);
+	interpolate(output2, noiseSize2, noiseCache2, leftCache2, rightCache2, modelErrors);
 	adjustSamples(output1);
 	adjustSamples(output2);
 	corrected.enqueueSplitSamples(output1, 0);
@@ -210,20 +212,12 @@ bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *ma
 	setProgress(100);
 }
 
-bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *target, ViBuffer *sizeMask, QVector<qreal> &rmse, qreal &averageRmse)
+bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *target, ViBuffer *sizeMask, ViErrorCollection *gapErrors, ViErrorCollection *modelErrors)
 {
-	interpolate(input, output, sizeMask);
+	gapErrors->clear();
+	modelErrors->clear();
 
-	rmse.clear();
-	rmse.resize(ViNoiseCreator::maximumNoiseSize() - ViNoiseCreator::minimumNoiseSize() + 1);
-	rmse.fill(0);
-
-	QVector<qint64> count;
-	count.resize(rmse.size());
-	count.fill(0);
-
-	averageRmse = 0;
-	qint64 averageCount = 0;
+	interpolate(input, output, sizeMask, modelErrors);
 
 	ViAudioReadData readCorrected(output);
 	ViAudioReadData readTarget(target);
@@ -232,7 +226,6 @@ bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *ta
 	readTarget.setSampleCount(8192*2);
 	readMask.setSampleCount(8192*2);
 
-	qreal mse;
 	int i, size, noiseSize;
 
 	while(readCorrected.hasData())
@@ -253,36 +246,19 @@ bool ViInterpolator::interpolate(ViBuffer *input, ViBuffer *output, ViBuffer *ta
 		for(i = 0; i < size; ++i)
 		{
 			noiseSize = ViNoiseCreator::fromSizeMask(noise1[i]);
-			if(noiseSize > 0)
-			{
-				mse = qPow(corrected1[i] - target1[i], 2);
-				rmse[noiseSize - 1] += mse;
-				count[noiseSize - 1] += 1;
-				averageRmse += mse;
-				++averageCount;
-			}
+			if(noiseSize > 0) gapErrors->at(noiseSize).add(corrected1[i], target1[i]);
 		}
 
 		size = corrected2.size();
 		for(i = 0; i < size; ++i)
 		{
 			noiseSize = ViNoiseCreator::fromSizeMask(noise2[i]);
-			if(noiseSize > 0)
-			{
-				mse = qPow(corrected2[i] - target2[i], 2);
-				rmse[noiseSize - 1] += mse;
-				count[noiseSize - 1] += 1;
-				averageRmse += mse;
-				++averageCount;
-			}
+			if(noiseSize > 0) gapErrors->at(noiseSize).add(corrected2[i], target2[i]);
 		}
 	}
-
-	for(i = 0; i < rmse.size(); ++i) rmse[i] = qSqrt(rmse[i] / count[i]);
-	averageRmse = qSqrt(averageRmse / averageCount);
 }
 
-void ViInterpolator::process(const ViSampleChunk &input, ViSampleChunk &output, const ViSampleChunk &noise, int &noiseSize, QVector<qreal> &noiseCache, QVector<qreal> &leftCache, QVector<qreal> &rightCache)
+void ViInterpolator::process(const ViSampleChunk &input, ViSampleChunk &output, const ViSampleChunk &noise, int &noiseSize, QVector<qreal> &noiseCache, QVector<qreal> &leftCache, QVector<qreal> &rightCache, ViErrorCollection *modelErrors)
 {
 	int tempNoiseSize = 0;
 	for(int i = 0; i < input.size(); ++i)
@@ -291,7 +267,7 @@ void ViInterpolator::process(const ViSampleChunk &input, ViSampleChunk &output, 
 		{
 			if(tempNoiseSize == 0 && noiseSize != 0)
 			{
-				interpolate(output, noiseSize, noiseCache, leftCache, rightCache);
+				interpolate(output, noiseSize, noiseCache, leftCache, rightCache, modelErrors);
 				noiseSize = 0;
 				leftCache = rightCache;
 				rightCache.clear();
@@ -331,7 +307,7 @@ void ViInterpolator::process(const ViSampleChunk &input, ViSampleChunk &output, 
 	}
 }
 
-void ViInterpolator::interpolate(ViSampleChunk &output, const int &noiseSize, QVector<qreal> &noiseCache, QVector<qreal> &leftCache, QVector<qreal> &rightCache)
+void ViInterpolator::interpolate(ViSampleChunk &output, const int &noiseSize, QVector<qreal> &noiseCache, QVector<qreal> &leftCache, QVector<qreal> &rightCache, ViErrorCollection *modelErrors)
 {
 	int i;
 	ViSampleChunk outputData(noiseSize + leftCache.size());
@@ -343,19 +319,23 @@ void ViInterpolator::interpolate(ViSampleChunk &output, const int &noiseSize, QV
 	}
 	for(i = 0; i < noiseCache.size(); ++i) outputData[i + leftCache.size()] = noiseCache[i];
 
+	int leftSize = leftCache.size();
+	int rightSize = rightCache.size();
+
+	int ls = leftSize;
+
 	qreal *leftData = leftCache.data();
 	qreal *rightData = rightCache.data();
 
-	int leftSize = leftCache.size();
-	int rightSize = rightCache.size();
 	if(mHalfWindowSize > 0)
 	{
+		if(leftSize > mHalfWindowSize) leftData += (leftSize - mHalfWindowSize);
 		leftSize = qMin(leftSize, mHalfWindowSize);
 		rightSize = qMin(rightSize, mHalfWindowSize);
-		leftData += leftSize;
 	}
 
-	interpolate(leftData, leftSize, rightData, rightSize, outputData.data() + leftCache.size(), noiseSize);
+	if(modelErrors == NULL) interpolate(leftData, leftSize, rightData, rightSize, outputData.data() + leftCache.size(), noiseSize, NULL);
+	else interpolate(leftData, leftSize, rightData, rightSize, outputData.data() + leftCache.size(), noiseSize, &modelErrors->at(noiseSize));
 	output.append(outputData);
 }
 

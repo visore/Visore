@@ -7,12 +7,18 @@
 ViFann::ViFann()
 {
 	mNetwork = NULL;
+	mSingleArray = new qreal[1];
 }
 
 ViFann::ViFann(const ViFann &other)
 {
 	if(other.mNetwork == NULL) mNetwork = NULL;
 	else mNetwork = fann_copy(other.mNetwork);
+
+	mSingleArray = new qreal[1];
+
+	mInputCount = other.mInputCount;
+	mOutputCount = other.mOutputCount;
 }
 
 ViFann::~ViFann()
@@ -27,6 +33,12 @@ void ViFann::clear()
 		fann_destroy(mNetwork);
 		mNetwork = NULL;
 	}
+
+	if(mSingleArray != NULL)
+	{
+		delete mSingleArray;
+		mSingleArray = NULL;
+	}
 }
 
 bool ViFann::setStructure(const Type &type, const QList<int> &neurons, const qreal &connectionRate)
@@ -35,7 +47,10 @@ bool ViFann::setStructure(const Type &type, const QList<int> &neurons, const qre
 
 	unsigned int layers = neurons.size();
 	unsigned int layerNeurons[layers];
-	for(int i = 0; i < layers; ++i) layerNeurons[i] = neurons[i];
+	for(mI = 0; mI < layers; ++mI) layerNeurons[mI] = neurons[mI];
+
+	mInputCount = neurons.first();
+	mOutputCount = neurons.last();
 
 	if(type == Standard) mNetwork = fann_create_standard_array(layers, layerNeurons);
 	else if(type == Sparse) mNetwork = fann_create_sparse_array(connectionRate, layers, layerNeurons);
@@ -66,9 +81,9 @@ bool ViFann::setActivation(const Activation &activation)
 {
 	if(mNetwork == NULL) return false;
 	int layers = fann_get_num_layers(mNetwork);
-	for(int i = 1; i < layers; ++i)
+	for(mI = 1; mI < layers; ++mI)
 	{
-		if(!setActivation(activation, i)) return false;
+		if(!setActivation(activation, mI)) return false;
 	}
 	return true;
 }
@@ -78,9 +93,9 @@ bool ViFann::setActivation(const QList<Activation> &activations)
 	if(mNetwork == NULL) return false;
 	if(fann_get_num_layers(mNetwork) - 1 != activations.size()) return false; // -1 because of the input layer
 	int layers = fann_get_num_layers(mNetwork);
-	for(int i = 1; i < layers; ++i)
+	for(mI = 1; mI < layers; ++mI)
 	{
-		if(!setActivation(activations[i - 1], i)) return false;
+		if(!setActivation(activations[mI - 1], mI)) return false;
 	}
 	return true;
 }
@@ -100,4 +115,39 @@ bool ViFann::setActivation(const Activation &activation, const int &layer)
 
 	fann_set_activation_function_layer(mNetwork, function, layer);
 	return true;
+}
+
+void ViFann::setLearningRate(const qreal &rate)
+{
+	fann_set_learning_rate(mNetwork, rate);
+}
+
+void ViFann::setLearningMomentum(const qreal &momentum)
+{
+	fann_set_learning_momentum(mNetwork, momentum);
+}
+
+void ViFann::run(qreal *input, qreal *output)
+{
+	// TODO: Should we delete result?
+	qreal *result = FANN_API fann_run(mNetwork, input);
+	for(mI = 0; mI < mOutputCount; ++mI) output[mI] = result[mI];
+}
+
+void ViFann::run(qreal *input, qreal &output)
+{
+	// TODO: Should we delete result?
+	qreal *result = FANN_API fann_run(mNetwork, input);
+	output = result[0];
+}
+
+void ViFann::train(qreal *input, qreal *desiredOutput)
+{
+	fann_train(mNetwork, input, desiredOutput);
+}
+
+void ViFann::train(qreal *input, const qreal &desiredOutput)
+{
+	mSingleArray[0] = desiredOutput;
+	fann_train(mNetwork, input, mSingleArray);
 }

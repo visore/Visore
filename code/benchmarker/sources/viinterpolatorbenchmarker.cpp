@@ -6,6 +6,7 @@
 #include <iomanip>
 
 #include <vinearestneighbourinterpolator.h>
+#include <viprimitiveinterpolator.h>
 #include <vipolynomialinterpolator.h>
 #include <vifourierinterpolator.h>
 #include <vilagrangeinterpolator.h>
@@ -29,27 +30,27 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	addParam("Window Size", 30, 30, 5);
 	addParam("Degree", 4, 4, 1);
 	addParam("Derivatives", 1, 1, 1);*/
-	/*mInterpolator = new ViPolynomialInterpolator();
-	addParam("Window Size", 4096, 4096, 5);
-	addParam("Degree", 100, 100, 1);*/
+	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal);
+	addParam("Window Size", 4096, 4096, 128);
+	addParam("Degree", 1, 30, 1);*/
 
-	/*mInterpolator = new ViFourierInterpolator(ViFourierInterpolator::Osculating, ViFourierInterpolator::Fixed);
-	addParam("Window Size", 10, 100, 10);
-	addParam("Degree", 1, 10, 1);
-	addParam("Derivatives", 1, 10, 1);*/
+	mInterpolator = new ViFourierInterpolator(ViFourierInterpolator::Splines);
+	addParam("Window Size", 4, 128, 4);
+	addParam("Degree", 1, 30, 1);
+	addParam("Derivatives", 1, 30, 1);
 
-/*	mInterpolator = new ViLagrangeInterpolator();
-	addParam("Window Size", 2, 2500, 4);*/
-
-	/*mInterpolator = new ViNewtonInterpolator();
+	/*mInterpolator = new ViLagrangeInterpolator();
 	addParam("Window Size", 2, 1000, 4);*/
 
-	/*mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Median);
+	/*mInterpolator = new ViNewtonInterpolator();
+	addParam("Window Size", 2, 1000, 2);*/
+
+	/*mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Mean);
 	addParam("K", 1, 1000, 1);*/
 
-	mInterpolator = new ViHermiteInterpolator();
+	/*mInterpolator = new ViHermiteInterpolator();
 	addParam("Window Size", 10, 10, 1);
-	addParam("Degree", 1, 1, 1);
+	addParam("Degree", 1, 1, 1);*/
 
 
 	/*mInterpolator = new ViArimaInterpolator();
@@ -62,6 +63,10 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 		addParam("Window Size", 2048, 2048, 256);
 		addParam("Arch Degree", 1, 1, 1);
 		addParam("Garch Degree", 1, 1, 1);*/
+
+	/*mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Random);
+	addParam("Window Size", 64, 64, 2);*/
+
 
 	QObject::connect(mInterpolator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }
@@ -135,27 +140,44 @@ bool ViInterpolatorBenchmarker::nextParam()
 	}
 }
 
-void ViInterpolatorBenchmarker::benchmark()
+void ViInterpolatorBenchmarker::benchmark(QString folder)
 {
-	QDir dir("/home/visore/Visore Projects/Files/");
-	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	for(int i = 0; i < dirs.size(); ++i)
+	if(folder == "")
 	{
-		QDir dir3("/home/visore/Visore Projects/Results/" + dirs[i]);
-		if(!dir3.exists()) dir3.mkpath(dir3.absolutePath());
-
-		QDir dir2(dir.absoluteFilePath(dirs[i]));
-		QStringList files2 = dir2.entryList(QDir::Files);
-		for(int j = 0; j < files2.size(); ++j)
-		{
-			mFiles.enqueue(dir2.absoluteFilePath(files2[j]));
-			QString id = ViId::generate();
-			mResults.enqueue(dir3.absolutePath() + "/" + mInterpolator->name() + "_" + id + "_ALL.txt");
-			mResults2.enqueue(dir3.absolutePath() + "/" + mInterpolator->name() + "_" + id + "_MINIFIED.txt");
-		}
+		QDir dir("/home/visore/Visore Projects/Files/");
+		QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+		for(int i = 0; i < dirs.size(); ++i) addDir(dirs[i]);
 	}
+	else
+	{
+		addDir(folder);
+	}
+
 	mTotalFiles = mFiles.size();
 	nextFile();
+}
+
+void ViInterpolatorBenchmarker::addDir(QString dirName)
+{
+	QDir dirFile("/home/visore/Visore Projects/Files/" + dirName);
+	if(!dirFile.exists())
+	{
+		cout << "Directory does not exist: " << dirFile.absolutePath().toLatin1().data() << endl;
+		return;
+	}
+
+	QDir dirResult("/home/visore/Visore Projects/Results/" + dirName);
+	if(!dirResult.exists()) dirResult.mkpath(dirResult.absolutePath());
+
+	QDir dir(dirFile.absolutePath());
+	QStringList files = dir.entryList(QDir::Files);
+	for(int j = 0; j < files.size(); ++j)
+	{
+		mFiles.enqueue(dir.absoluteFilePath(files[j]));
+		QString id = ViId::generate();
+		mResults.enqueue(dirResult.absolutePath() + "/" + mInterpolator->name() + "_" + id + "_ALL.txt");
+		mResults2.enqueue(dirResult.absolutePath() + "/" + mInterpolator->name() + "_" + id + "_MINIFIED.txt");
+	}
 }
 
 void ViInterpolatorBenchmarker::nextFile()
@@ -184,29 +206,28 @@ void ViInterpolatorBenchmarker::process()
 {
 	QObject::disconnect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
 	qint64 time;
-	QVector<qreal> rmse;
-	qreal averageRmse;
+
+	ViErrorCollection interpolationErrors, modelErrors;
 
 	ViNoiseCreator creator;
 	creator.createNoise(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::NoiseMask), mCurrentObject->buffer(ViAudio::Custom));
 
 	do
 	{
+		interpolationErrors.clear();
+		modelErrors.clear();
+
 		for(int i = 0; i < mParamsStart.size(); ++i) mInterpolator->setParameter(mParamsNames[i], mParamsCurrent[i]);
 
 		if(mInterpolator->validParameters())
 		{
 			mTime.restart();
-			mInterpolator->interpolate(mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::Corrected), mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Custom), rmse, averageRmse);
+			mInterpolator->interpolate(mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::Corrected), mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Custom), &interpolationErrors, &modelErrors);
 			time = mTime.elapsed();
 			cout << "\r                                                 \r"; // Clear intermidiate percentage
 		}
 		else
 		{
-			int maxNoiseSize = ViNoiseCreator::maximumNoiseSize() - ViNoiseCreator::minimumNoiseSize() + 1;
-			rmse.resize(maxNoiseSize);
-			for(int i = 0; i < maxNoiseSize; ++i) rmse[i] = 2;
-			averageRmse = 2;
 			time = 0;
 		}
 
@@ -216,8 +237,8 @@ void ViInterpolatorBenchmarker::process()
 		return;*/
 
 		++mDoneParamIterations;
-		printFileData(rmse, averageRmse, time);
-		printTerminal(rmse, averageRmse, time);
+		printFileData(interpolationErrors, modelErrors, time);
+		printTerminal(interpolationErrors, modelErrors, time);
 	}
 	while(nextParam());
 
@@ -237,11 +258,12 @@ void ViInterpolatorBenchmarker::printFileHeader()
 	mOutputStream << QFileInfo(mCurrentFile).fileName() << "\n\n";
 
 	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << "PARAMETER " << i + 1 << " (" << mInterpolator->parameterName(i) <<")\t";
-	mOutputStream << "RMSE" << "\t" << "TIME" << "\t\t";
-	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << "NOISE SIZE " << i << " (RMSE)\t";
+	mOutputStream << "NRMSE INTERPOLATION" << "\t" << "NRMSE MODEL" << "\t" << "TIME" << "\t\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << "NOISE SIZE " << i << " (NRMSE INTERPOLATION)\t";
+	mOutputStream << "\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << "NOISE SIZE " << i << " (NRMSE MODEL)\t";
 	mOutputStream << "\n";
 	mOutputStream.flush();
-
 
 	mOutputFile2.close();
 	mOutputFile2.setFileName(mResults2.dequeue());
@@ -252,40 +274,46 @@ void ViInterpolatorBenchmarker::printFileHeader()
 	mOutputStream2 << QFileInfo(mCurrentFile).fileName() << "\n\n";
 
 	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream2 << "PARAMETER " << i + 1 << " (" << mInterpolator->parameterName(i) <<")\t";
-	mOutputStream2 << "RMSE" << "\t" << "TIME" << "\t\t";
-	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << "NOISE SIZE " << i << " (RMSE)\t";
+	mOutputStream2 << "NRMSE INTERPOLATION" << "\t" << "NRMSE MODEL" << "\t" << "TIME" << "\t\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << "NOISE SIZE " << i << " (NRMSE INTERPOLATION)\t";
+	mOutputStream2 << "\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << "NOISE SIZE " << i << " (NRMSE MODEL)\t";
 	mOutputStream2 << "\n";
 	mOutputStream2.flush();
 }
 
-void ViInterpolatorBenchmarker::printFileData(const QVector<qreal> &rmse, const qreal &averageRmse, const qint64 &time)
+void ViInterpolatorBenchmarker::printFileData(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
 {
 	int i;
 
 	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << (int) mParamsCurrent[i] << "\t";
-	mOutputStream << averageRmse << "\t" << time << "\t\t";
-	for(i = 0; i < rmse.size(); ++i) mOutputStream << rmse[i] << "\t";
+	mOutputStream << interpolationErrors.nrmse() << "\t" << modelErrors.nrmse() << "\t" << time << "\t\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << interpolationErrors[i].nrmse() << "\t";
+	mOutputStream << "\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << modelErrors[i].nrmse() << "\t";
 	mOutputStream << "\n";
 	mOutputStream.flush();
 
-	if(averageRmse != 2 && time != 0)
+	if(interpolationErrors.nrmse() >= 0 && time != 0)
 	{
 		for(i = 0; i < mParamsStart.size(); ++i) mOutputStream2 << (int) mParamsCurrent[i] << "\t";
-		mOutputStream2 << averageRmse << "\t" << time << "\t\t";
-		for(i = 0; i < rmse.size(); ++i) mOutputStream2 << rmse[i] << "\t";
+		mOutputStream2 << interpolationErrors.nrmse() << "\t" << modelErrors.nrmse() << "\t" << time << "\t\t";
+		for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << interpolationErrors[i].nrmse() << "\t";
+		mOutputStream2 << "\t";
+		for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << modelErrors[i].nrmse() << "\t";
 		mOutputStream2 << "\n";
 		mOutputStream2.flush();
 	}
 }
 
-void ViInterpolatorBenchmarker::printTerminal(const QVector<qreal> &rmse, const qreal &averageRmse, const qint64 &time)
+void ViInterpolatorBenchmarker::printTerminal(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
 {
 	qreal percentageDone = mDoneParamIterations / qreal(mTotalParamIterations);
 	qint64 remaining = mMainTime.elapsed();
 	remaining = ((1.0 / percentageDone) * remaining) - remaining;
 
 	cout << int(percentageDone * 100.0) << "%\t(" << timeConversion(remaining).toLatin1().data() << ")\t";
-	cout << "RMSE: " << setprecision(6) << averageRmse << "\tTIME: " << time << endl;
+	cout << "INTERPOLATION NRMSE: " << setprecision(6) << interpolationErrors.nrmse() << "\tMODEL NRMSE: " << setprecision(6) << modelErrors.nrmse() << "\tTIME: " << time << endl;
 }
 
 QString ViInterpolatorBenchmarker::timeConversion(int msecs)

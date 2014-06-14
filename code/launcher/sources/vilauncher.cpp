@@ -81,7 +81,7 @@ int main(int argc, char** argv)
 		command += files[i] + separator;
 	}
 
-	command += string(QTPATH) + separator;
+	command += string(QTPATH) + separator;	
 
 	#ifdef WINDOWS
 		command += " && start visore.exe";
@@ -89,6 +89,22 @@ int main(int argc, char** argv)
 		command += " && ./visore";
 	#endif
 
-	system(command.c_str());
+	if(argc == 1)
+	{
+		system(command.c_str());
+	}
+	else
+	{
+		string newCommand = "gnome-terminal --maximize ";
+		string tabStart = "--tab -e \"bash -c \\\"";
+		string tabEnd = "; exec bash\\\"\" ";
+		for(int i = 1; i < argc; ++i)
+		{
+			string subCommand = command + " " + argv[i];
+			newCommand += tabStart + subCommand + tabEnd;
+		}
+		system(newCommand.c_str());
+	}
+
 	return 0;
 }

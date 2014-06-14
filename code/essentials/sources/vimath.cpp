@@ -76,4 +76,80 @@ T ViMath<T>::median(T *values, const int &size, const int &position)
 	}
 }
 
+template<typename T>
+T ViMath<T>::variance(const T *values, const int &size, const bool &unbiased)
+{
+	static int i;
+	static T result, theMean;
+
+	result = 0;
+	theMean = mean(values, size);
+
+	for(i = 0; i < size; ++i) result += pow(values[i] - theMean, 2);
+
+	if(unbiased) return result / (size - 1);
+	return result / size;
+}
+
+template<typename T>
+T ViMath<T>::variance(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const bool &unbiased)
+{
+	static int i;
+	static T result, theMean;
+
+	result = 0;
+	theMean = mean(valuesLeft, sizeLeft, valuesRight, sizeRight);
+
+	for(i = 0; i < sizeLeft; ++i) result += pow(valuesLeft[i] - theMean, 2);
+	for(i = 0; i < sizeRight; ++i) result += pow(valuesRight[i] - theMean, 2);
+
+	if(unbiased) return result / (sizeLeft + sizeRight - 1);
+	return result / (sizeLeft + sizeRight);
+}
+
+template<typename T>
+T ViMath<T>::noise(const T &variance)
+{
+	static bool hasSpare = false;
+	static T spare;
+
+	if(hasSpare)
+	{
+		hasSpare = false;
+		return spare * variance;
+	}
+
+	hasSpare = true;
+	static qreal u, v, s;
+	do
+	{
+		u = (rand() / ((double) RAND_MAX)) * 2 - 1;
+		v = (rand() / ((double) RAND_MAX)) * 2 - 1;
+		s = u * u + v * v;
+	}
+	while(s >= 1 || s == 0);
+
+	s = sqrt(-2.0 * log(s) / s);
+	spare = v * s;
+	return variance * u * s;
+}
+
+template<typename T>
+void ViMath<T>::noise(const T *values, const int &size, T *noiseOutput, const int &noiseSize)
+{
+	static int i;
+	static T theVariance;
+	theVariance = variance(values, size);
+	for(i = 0; i < noiseSize; ++i) noiseOutput[i] = noise(theVariance);
+}
+
+template<typename T>
+void ViMath<T>::noise(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, T *noiseOutput, const int &noiseSize)
+{
+	static int i;
+	static T theVariance;
+	theVariance = variance(valuesLeft, sizeLeft, valuesRight, sizeRight);
+	for(i = 0; i < noiseSize; ++i) noiseOutput[i] = noise(theVariance);
+}
+
 #endif

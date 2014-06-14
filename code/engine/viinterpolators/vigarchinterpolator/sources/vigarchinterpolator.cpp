@@ -97,34 +97,9 @@ bool ViGarchInterpolator::validParameters(const int &leftSize, const int &rightS
 	return validParameters(leftSize + rightSize, archDegree, garchDegree);
 }
 
-bool ViGarchInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
+bool ViGarchInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error)
 {
-	static int i;
-	static bool leftOk, rightOk;
-
-	qreal leftOutput[outputSize];
-	qreal rightOutput[outputSize];
-
-	leftOk = mGretl->forecast(leftSamples, leftSize, leftOutput, outputSize);
-	rightOk = mGretl->forecast(rightSamples, rightSize, rightOutput, outputSize);
-	if(leftOk && rightOk)
-	{
-		for(i = 0; i < outputSize; ++i) outputSamples[i] = (leftOutput[i] + rightOutput[i]) / 2;
-	}
-	else if(leftOk)
-	{
-		for(i = 0; i < outputSize; ++i) outputSamples[i] = leftOutput[i];
-	}
-	else if(rightOk)
-	{
-		for(i = 0; i < outputSize; ++i) outputSamples[i] = rightOutput[i];
-	}
-	else
-	{
-		for(i = 0; i < outputSize; ++i) outputSamples[i] = 0;
-		return false;
-	}
-	return true;
+	return mGretl->interpolate(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error);
 }
 
 ViGarchInterpolator* ViGarchInterpolator::clone()

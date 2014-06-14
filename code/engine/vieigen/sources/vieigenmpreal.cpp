@@ -8,11 +8,21 @@ ViEigenMatrixMpreal::ViEigenMatrixMpreal()
 ViEigenMatrixMpreal::ViEigenMatrixMpreal(const int &size)
 	: EigenMatrixMpreal(size, size)
 {
+	int i, j;
+	for(i = 0; i < size; ++i)
+	{
+		for(j = 0; j < size; ++j) this->coeffRef(i, j) = 0;
+	}
 }
 
 ViEigenMatrixMpreal::ViEigenMatrixMpreal(const int &rows, const int &columns)
 	: EigenMatrixMpreal(rows, columns)
 {
+	int i, j;
+	for(i = 0; i < rows; ++i)
+	{
+		for(j = 0; j < columns; ++j) this->coeffRef(i, j) = 0;
+	}
 }
 
 void ViEigenMatrixMpreal::get(double &result, const int &row, const int &column)
@@ -57,6 +67,26 @@ void ViEigenMatrixMpreal::setPowerMulti(const int &row, const int &column, const
 	set(row, column, multi * mpfr::pow(mTemp, exponent));
 }
 
+void ViEigenMatrixMpreal::setSin(const int &row, const int &column, const double &value)
+{
+	set(row, column, mpfr::sin(value));
+}
+
+void ViEigenMatrixMpreal::setCos(const int &row, const int &column, const double &value)
+{
+	set(row, column, mpfr::cos(value));
+}
+
+void ViEigenMatrixMpreal::setSinMulti(const int &row, const int &column, const double &multi, const double &value)
+{
+	set(row, column, multi * mpfr::sin(value));
+}
+
+void ViEigenMatrixMpreal::setCosMulti(const int &row, const int &column, const double &multi, const double &value)
+{
+	set(row, column, multi * mpfr::cos(value));
+}
+
 QString ViEigenMatrixMpreal::toString(const int &precision) const
 {
 	QString result = "";
@@ -79,6 +109,7 @@ ViEigenVectorMpreal::ViEigenVectorMpreal()
 ViEigenVectorMpreal::ViEigenVectorMpreal(const int &rows)
 	: EigenVectorMpreal(rows)
 {
+	for(int i = 0; i < rows; ++i) this->coeffRef(i) = 0;
 }
 
 ViEigenVectorMpreal::ViEigenVectorMpreal(const EigenVectorMpreal &other)
@@ -176,7 +207,7 @@ ViEigenBaseVector* ViEigenMpreal<P>::estimate(const ViEigenBaseMatrix *matrix, c
 }
 
 template <int P>
-void ViEigenMpreal<P>::solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize)
+void ViEigenMpreal<P>::solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize, const int &offset)
 {
 	const ViEigenVectorMpreal *castCoefficients = cast(coefficients);
 	const ViEigenMatrixMpreal *castValues = cast(values);
@@ -186,10 +217,33 @@ void ViEigenMpreal<P>::solve(const ViEigenBaseVector *coefficients, const ViEige
 	for(i = 0; i < outputSize; ++i)
 	{
 		result = 0;
-		for(j = 0; j < castCoefficients->rows(); ++j)
+		for(j = 0; j < castValues->cols(); ++j)
 		{
-			result += castCoefficients->coeffRef(j) * castValues->coeffRef(i, j);
+			result += castCoefficients->coeffRef(j + offset) * castValues->coeffRef(i, j);
 		}
+		if(result < -1) result = -1;
+		else if(result > 1) result = 1;
+		output[i] = cast(result);
+	}
+}
+
+template <int P>
+void ViEigenMpreal<P>::solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize, const int *offset)
+{
+	const ViEigenVectorMpreal *castCoefficients = cast(coefficients);
+	const ViEigenMatrixMpreal *castValues = cast(values);
+	mpfr::mpreal result;
+	int i, j;
+
+	for(i = 0; i < outputSize; ++i)
+	{
+		result = 0;
+		for(j = 0; j < castValues->cols(); ++j)
+		{
+			result += castCoefficients->coeffRef(j + offset[i]) * castValues->coeffRef(i, j);
+		}
+		if(result < -1) result = -1;
+		else if(result > 1) result = 1;
 		output[i] = cast(result);
 	}
 }

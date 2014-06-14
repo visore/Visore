@@ -42,12 +42,12 @@ bool ViLagrangeInterpolator::validParameters(const int &leftSize, const int &rig
 	return validParameters(leftSize + rightSize);
 }
 
-bool ViLagrangeInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
+bool ViLagrangeInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error)
 {
 	// Doesn't matter if you use double or mpreal, same result
 
-	static int i, j, k, offset, size;
-	static qreal result, product, scaledI, scaling;
+	static int i, offset, size;
+	static qreal scaling;
 
 	size = leftSize + rightSize;
 	scaling = size + outputSize - 1;
@@ -67,9 +67,30 @@ bool ViLagrangeInterpolator::interpolate(const qreal *leftSamples, const int &le
 		y[offset] = rightSamples[i];
 	}
 
+	calculate(x, y, size, outputSamples, outputSize, leftSize, scaling);
+
+	if(error != NULL)
+	{
+		qreal leftModel[leftSize];
+		calculate(x, y, size, leftModel, leftSize, 0, scaling);
+		error->add(leftModel, leftSamples, leftSize);
+
+		qreal rightModel[rightSize];
+		calculate(x, y, size, rightModel, rightSize, leftSize + outputSize, scaling);
+		error->add(rightModel, rightSamples, rightSize);
+	}
+
+	return true;
+}
+
+void ViLagrangeInterpolator::calculate(const qreal *x, const qreal *y, const int &size, qreal *output, const int &outputSize, const int &startX, const qreal &scaling)
+{
+	static int i, j, k;
+	static qreal result, product, scaledI;
+
 	for(i = 0; i < outputSize; ++i)
 	{
-		scaledI = (i + leftSize) / scaling;
+		scaledI = (i + startX) / scaling;
 		result = 0;
 		for(j = 0; j < size; ++j)
 		{
@@ -80,7 +101,7 @@ bool ViLagrangeInterpolator::interpolate(const qreal *leftSamples, const int &le
 			}
 			result += y[j] * product;
 		}
-		outputSamples[i] = result;
+		output[i] = result;
 	}
 }
 

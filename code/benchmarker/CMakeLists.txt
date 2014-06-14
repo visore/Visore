@@ -23,9 +23,8 @@ TARGET_LINK_LIBRARIES(vibenchmarker
 	vimahalanobisnoisedetector
 
 	vinearestneighbourinterpolator
-	visplineinterpolator
+	viprimitiveinterpolator
 	vihermiteinterpolator
-	vicosineinterpolator
 	vifourierinterpolator
 	vipolynomialinterpolator
 	viarimainterpolator

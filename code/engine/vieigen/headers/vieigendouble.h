@@ -23,6 +23,11 @@ class ViEigenMatrixDouble : public ViEigenBaseMatrix, public EigenMatrixDouble
 		void setPower(const int &row, const int &column, const double &base, const int &exponent);
 		void setPowerMulti(const int &row, const int &column, const double &multi, const double &base, const int &exponent);
 
+		void setSin(const int &row, const int &column, const double &value);
+		void setCos(const int &row, const int &column, const double &value);
+		void setSinMulti(const int &row, const int &column, const double &multi, const double &value);
+		void setCosMulti(const int &row, const int &column, const double &multi, const double &value);
+
 		QString toString(const int &precision = 5) const;
 
 };
@@ -62,7 +67,8 @@ class ViEigenDouble : public ViEigenBase
 		ViEigenBaseVector* createVector(const int &rows);
 
 		ViEigenBaseVector* estimate(const ViEigenBaseMatrix *matrix, const ViEigenBaseVector *vector);
-		void solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize);
+		void solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize, const int &offset = 0);
+		void solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize, const int *offset);
 
 		void clear(ViEigenBaseMatrix *matrix);
 		void clear(ViEigenBaseVector *vector);

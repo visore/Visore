@@ -8,11 +8,21 @@ ViEigenMatrixDouble::ViEigenMatrixDouble()
 ViEigenMatrixDouble::ViEigenMatrixDouble(const int &size)
 	: EigenMatrixDouble(size, size)
 {
+	int i, j;
+	for(i = 0; i < size; ++i)
+	{
+		for(j = 0; j < size; ++j) this->coeffRef(i, j) = 0;
+	}
 }
 
 ViEigenMatrixDouble::ViEigenMatrixDouble(const int &rows, const int &columns)
 	: EigenMatrixDouble(rows, columns)
 {
+	int i, j;
+	for(i = 0; i < rows; ++i)
+	{
+		for(j = 0; j < columns; ++j) this->coeffRef(i, j) = 0;
+	}
 }
 
 void ViEigenMatrixDouble::get(double &result, const int &row, const int &column)
@@ -55,6 +65,26 @@ void ViEigenMatrixDouble::setPowerMulti(const int &row, const int &column, const
 	set(row, column, multi * std::pow(base, exponent));
 }
 
+void ViEigenMatrixDouble::setSin(const int &row, const int &column, const double &value)
+{
+	set(row, column, std::sin(value));
+}
+
+void ViEigenMatrixDouble::setCos(const int &row, const int &column, const double &value)
+{
+	set(row, column, std::cos(value));
+}
+
+void ViEigenMatrixDouble::setSinMulti(const int &row, const int &column, const double &multi, const double &value)
+{
+	set(row, column, multi * std::sin(value));
+}
+
+void ViEigenMatrixDouble::setCosMulti(const int &row, const int &column, const double &multi, const double &value)
+{
+	set(row, column, multi * std::cos(value));
+}
+
 QString ViEigenMatrixDouble::toString(const int &precision) const
 {
 	QString result = "";
@@ -77,6 +107,7 @@ ViEigenVectorDouble::ViEigenVectorDouble()
 ViEigenVectorDouble::ViEigenVectorDouble(const int &rows)
 	: EigenVectorDouble(rows)
 {
+	for(int i = 0; i < rows; ++i) this->coeffRef(i) = 0;
 }
 
 ViEigenVectorDouble::ViEigenVectorDouble(const EigenVectorDouble &other)
@@ -159,7 +190,7 @@ ViEigenBaseVector* ViEigenDouble::estimate(const ViEigenBaseMatrix *matrix, cons
 	return cast(cast(matrix)->fullPivHouseholderQr().solve(*cast(vector)));
 }
 
-void ViEigenDouble::solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize)
+void ViEigenDouble::solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize, const int &offset)
 {
 	const ViEigenVectorDouble *castCoefficients = cast(coefficients);
 	const ViEigenMatrixDouble *castValues = cast(values);
@@ -169,10 +200,32 @@ void ViEigenDouble::solve(const ViEigenBaseVector *coefficients, const ViEigenBa
 	for(i = 0; i < outputSize; ++i)
 	{
 		result = 0;
-		for(j = 0; j < castCoefficients->rows(); ++j)
+		for(j = 0; j < castValues->cols(); ++j)
 		{
-			result += castCoefficients->coeffRef(j) * castValues->coeffRef(i, j);
+			result += castCoefficients->coeffRef(j + offset) * castValues->coeffRef(i, j);
 		}
+		if(result < -1) result = -1;
+		else if(result > 1) result = 1;
+		output[i] = result;
+	}
+}
+
+void ViEigenDouble::solve(const ViEigenBaseVector *coefficients, const ViEigenBaseMatrix *values, double *output, const int &outputSize, const int *offset)
+{
+	const ViEigenVectorDouble *castCoefficients = cast(coefficients);
+	const ViEigenMatrixDouble *castValues = cast(values);
+	double result;
+	int i, j;
+
+	for(i = 0; i < outputSize; ++i)
+	{
+		result = 0;
+		for(j = 0; j < castValues->cols(); ++j)
+		{
+			result += castCoefficients->coeffRef(offset[i] + j) * castValues->coeffRef(i, j);
+		}
+		if(result < -1) result = -1;
+		else if(result > 1) result = 1;
 		output[i] = result;
 	}
 }

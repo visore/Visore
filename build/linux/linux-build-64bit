@@ -18,6 +18,7 @@ package=false;
 valgrind=false;
 gdb=false;
 cloc=false;
+parameters="";
 for i in $*
 do
 	if [ $i = "cmake" ]; then
@@ -34,6 +35,9 @@ do
 		gdb=true;
 	elif [ $i = "cloc" ]; then
 		cloc=true;
+	else
+		seperator=" ";
+		parameters=$parameters$seperator$i;
 	fi
 done
 
@@ -83,10 +87,7 @@ if $gdb; then
 	gdb visore
 elif $run; then
 	cd $install_directory
-	./launcher
-elif $run; then
-	cd $install_directory
-	./launcher
+	./launcher $parameters
 fi
 
 if $cloc; then

@@ -24,18 +24,20 @@ class ViInterpolatorBenchmarker : public QObject
 
 		void progress(qreal percentage);
 
+		void addDir(QString dirName);
+
 	public:
 
 		ViInterpolatorBenchmarker();
 		virtual ~ViInterpolatorBenchmarker();
 
-		void benchmark();
+		void benchmark(QString folder = "");
 
 	protected:
 
 		void printFileHeader();
-		void printFileData(const QVector<qreal> &rmse, const qreal &averageRmse, const qint64 &time);
-		void printTerminal(const QVector<qreal> &rmse, const qreal &averageRmse, const qint64 &time);
+		void printFileData(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
+		void printTerminal(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
 
 	private:
 

@@ -5,9 +5,7 @@
 #include <QTextStream>
 #include <iomanip>
 
-#include <vicosineinterpolator.h>
 #include <vipolynomialinterpolator.h>
-#include <visplineinterpolator.h>
 #include <vihermiteinterpolator.h>
 #include <vifourierinterpolator.h>
 #include <viarimainterpolator.h>
