@@ -22,51 +22,10 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Osculating, ViPolynomialInterpolator::Fixed);
-	addParam("Window Size", 50, 50, 10);
+	mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal, ViPolynomialInterpolator::Fixed);
+	addParam("Window Size", 1, 1000, 1);
 	addParam("Degree", 2, 2, 1);
-	addParam("Derivatives", 2, 2, 1);*/
-	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Osculating);
-	addParam("Window Size", 30, 30, 5);
-	addParam("Degree", 4, 4, 1);
-	addParam("Derivatives", 1, 1, 1);*/
-	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal);
-	addParam("Window Size", 4096, 4096, 128);
-	addParam("Degree", 1, 30, 1);*/
-
-	mInterpolator = new ViFourierInterpolator(ViFourierInterpolator::Splines);
-	addParam("Window Size", 4, 128, 4);
-	addParam("Degree", 1, 30, 1);
-	addParam("Derivatives", 1, 30, 1);
-
-	/*mInterpolator = new ViLagrangeInterpolator();
-	addParam("Window Size", 2, 1000, 4);*/
-
-	/*mInterpolator = new ViNewtonInterpolator();
-	addParam("Window Size", 2, 1000, 2);*/
-
-	/*mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Mean);
-	addParam("K", 1, 1000, 1);*/
-
-	/*mInterpolator = new ViHermiteInterpolator();
-	addParam("Window Size", 10, 10, 1);
-	addParam("Degree", 1, 1, 1);*/
-
-
-	/*mInterpolator = new ViArimaInterpolator();
-	addParam("Window Size", 2048, 2048, 256);
-	addParam("AR Degree", 18, 18, 1);
-	addParam("I Degree", 0, 0, 1);
-	addParam("MA Degree", 3, 3, 1);*/
-
-	/*mInterpolator = new ViGarchInterpolator();
-		addParam("Window Size", 2048, 2048, 256);
-		addParam("Arch Degree", 1, 1, 1);
-		addParam("Garch Degree", 1, 1, 1);*/
-
-	/*mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Random);
-	addParam("Window Size", 64, 64, 2);*/
-
+	addParam("Derivatives", 2, 2, 1);
 
 	QObject::connect(mInterpolator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }

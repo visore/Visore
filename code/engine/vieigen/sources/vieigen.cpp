@@ -27,7 +27,7 @@ ViEigenBase* ViEigenManager::getByBits(const int &bitPrecision)
 	{
 		if(bitPrecision <= keys[i])
 		{
-			STATICLOG("Using Eigen with a bit precision of " + QString::number(keys[i]), QtDebugMsg, "ViEigenManager");
+			//STATICLOG("Using Eigen with a bit precision of " + QString::number(keys[i]), QtDebugMsg, "ViEigenManager");
 			return mEigens[keys[i]];
 		}
 	}
@@ -45,7 +45,7 @@ ViEigenBase* ViEigenManager::getByDecimals(const int &decimalPrecision)
 	{
 		if(bits <= keys[i])
 		{
-			STATICLOG("Using Eigen with a bit precision of " + QString::number(keys[i]), QtDebugMsg, "ViEigenManager");
+			//STATICLOG("Using Eigen with a bit precision of " + QString::number(keys[i]), QtDebugMsg, "ViEigenManager");
 			return mEigens[keys[i]];
 		}
 	}

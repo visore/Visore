@@ -59,6 +59,8 @@ class ViInterpolator : public ViLibrary, public ViSerializer, public ViNotifier
 
 		int mWindowSize;
 		int mHalfWindowSize;
+		int mHalfWindowSizeLeft;
+		int mHalfWindowSizeRight;
 		QList<QString> mParameterNames;
 
 };

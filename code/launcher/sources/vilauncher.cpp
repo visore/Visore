@@ -98,11 +98,23 @@ int main(int argc, char** argv)
 		string newCommand = "gnome-terminal --maximize ";
 		string tabStart = "--tab -e \"bash -c \\\"";
 		string tabEnd = "; exec bash\\\"\" ";
-		for(int i = 1; i < argc; ++i)
+
+		char **values = argv + 1;
+		int count = argc - 1;
+
+		char* genres[] = {"-classical", "-country", "-electro", "-jazz", "-metal", "-pop", "-raggae", "-rock"};
+		if(strcmp(argv[1], "all") == 0 || strcmp(argv[1], "-all") == 0)
 		{
-			string subCommand = command + " " + argv[i];
+			values = genres;
+			count = 8;
+		}
+
+		for(int i = 0; i < count; ++i)
+		{
+			string subCommand = command + " " + values[i];
 			newCommand += tabStart + subCommand + tabEnd;
 		}
+		newCommand += " &";
 		system(newCommand.c_str());
 	}
 

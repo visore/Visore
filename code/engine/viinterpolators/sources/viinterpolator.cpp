@@ -18,6 +18,8 @@ ViInterpolator::ViInterpolator(const ViInterpolator &other)
 	: ViLibrary(other)
 {
 	mHalfWindowSize = other.mHalfWindowSize;
+	mHalfWindowSizeLeft = other.mHalfWindowSizeLeft;
+	mHalfWindowSizeRight = other.mHalfWindowSizeRight;
 	mWindowSize = other.mWindowSize;
 	mParameterNames = other.mParameterNames;
 }
@@ -28,8 +30,11 @@ ViInterpolator::~ViInterpolator()
 
 void ViInterpolator::setWindowSize(const int &size)
 {
-	mHalfWindowSize = qFloor(size / 2);
-	mWindowSize = mHalfWindowSize * 2;
+	mHalfWindowSize = floor(size / 2.0);
+
+	mWindowSize = size;
+	mHalfWindowSizeLeft = ceil(size / 2.0);
+	mHalfWindowSizeRight = floor(size / 2.0);
 }
 
 int ViInterpolator::windowSize()
@@ -329,9 +334,9 @@ void ViInterpolator::interpolate(ViSampleChunk &output, const int &noiseSize, QV
 
 	if(mHalfWindowSize > 0)
 	{
-		if(leftSize > mHalfWindowSize) leftData += (leftSize - mHalfWindowSize);
-		leftSize = qMin(leftSize, mHalfWindowSize);
-		rightSize = qMin(rightSize, mHalfWindowSize);
+		if(leftSize > mHalfWindowSizeLeft) leftData += (leftSize - mHalfWindowSizeLeft);
+		leftSize = qMin(leftSize, mHalfWindowSizeLeft);
+		rightSize = qMin(rightSize, mHalfWindowSizeRight);
 	}
 
 	if(modelErrors == NULL) interpolate(leftData, leftSize, rightData, rightSize, outputData.data() + leftCache.size(), noiseSize, NULL);

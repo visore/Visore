@@ -22,6 +22,19 @@ ViNearestNeighbourInterpolator::~ViNearestNeighbourInterpolator()
 {
 }
 
+
+QString ViNearestNeighbourInterpolator::name(QString replace, bool spaced)
+{
+	QString mode;
+
+	if(mMode == Mean) mode = "Mean";
+	else if(mMode == Median) mode = "Median";
+
+	QString name = ViInterpolator::name(replace, spaced) + " (" + mode + ")";
+	if(spaced) return name;
+	else return name.replace(" ", "");
+}
+
 void ViNearestNeighbourInterpolator::setMode(const Mode &mode)
 {
 	mMode = mode;
