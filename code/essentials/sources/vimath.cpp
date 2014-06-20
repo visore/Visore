@@ -6,8 +6,8 @@
 template<typename T>
 T ViMath<T>::mean(const T *values, const int &size)
 {
-	static int i;
-	static T result;
+	int i;
+	T result;
 	result = 0;
 	for(i = 0; i < size; ++i) result += values[i];
 	return result / size;
@@ -16,8 +16,8 @@ T ViMath<T>::mean(const T *values, const int &size)
 template<typename T>
 T ViMath<T>::mean(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight)
 {
-	static int i;
-	static T result;
+	int i;
+	T result;
 	result = 0;
 	for(i = 0; i < sizeLeft; ++i) result += valuesLeft[i];
 	for(i = 0; i < sizeRight; ++i) result += valuesRight[i];
@@ -27,7 +27,7 @@ T ViMath<T>::mean(const T *valuesLeft, const int &sizeLeft, const T *valuesRight
 template<typename T>
 T ViMath<T>::median(T *values, const int &size)
 {
-	static int position;
+	int position;
 	position = size / 2;
 	return median(values, size, position);
 }
@@ -38,8 +38,8 @@ T ViMath<T>::median(T *values, const int &size, const int &position)
 	// The quickselect algorithm
 	// http://www.stat.cmu.edu/~ryantibs/median/
 
-	static quint64 i, ir, j, l, m, mid;
-	static T a, temp; // temp is used by SWAP
+	quint64 i, ir, j, l, m, mid;
+	T a, temp; // temp is used by SWAP
 
 	l = 0;
 	ir = size - 1;
@@ -79,23 +79,50 @@ T ViMath<T>::median(T *values, const int &size, const int &position)
 template<typename T>
 T ViMath<T>::variance(const T *values, const int &size, const bool &unbiased)
 {
-	static int i;
-	static T result, theMean;
+	if(unbiased) return varianceUnbiased(values, size);
+	else return varianceBiased(values, size);
+}
+
+template<typename T>
+T ViMath<T>::variance(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const bool &unbiased)
+{
+	if(unbiased) return varianceUnbiased(valuesLeft, sizeLeft, valuesRight, sizeRight);
+	else return varianceBiased(valuesLeft, sizeLeft, valuesRight, sizeRight);
+}
+
+template<typename T>
+T ViMath<T>::variance(const T *values, const int &size, const T &mean, const bool &unbiased)
+{
+	if(unbiased) return varianceUnbiased(values, size, mean);
+	else return varianceBiased(values, size, mean);
+}
+
+template<typename T>
+T ViMath<T>::variance(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const T &mean, const bool &unbiased)
+{
+	if(unbiased) return varianceUnbiased(valuesLeft, sizeLeft, valuesRight, sizeRight, mean);
+	else return varianceBiased(valuesLeft, sizeLeft, valuesRight, sizeRight, mean);
+}
+
+template<typename T>
+T ViMath<T>::varianceBiased(const T *values, const int &size)
+{
+	int i;
+	T result, theMean;
 
 	result = 0;
 	theMean = mean(values, size);
 
 	for(i = 0; i < size; ++i) result += pow(values[i] - theMean, 2);
 
-	if(unbiased) return result / (size - 1);
 	return result / size;
 }
 
 template<typename T>
-T ViMath<T>::variance(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const bool &unbiased)
+T ViMath<T>::varianceBiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight)
 {
-	static int i;
-	static T result, theMean;
+	int i;
+	T result, theMean;
 
 	result = 0;
 	theMean = mean(valuesLeft, sizeLeft, valuesRight, sizeRight);
@@ -103,15 +130,191 @@ T ViMath<T>::variance(const T *valuesLeft, const int &sizeLeft, const T *valuesR
 	for(i = 0; i < sizeLeft; ++i) result += pow(valuesLeft[i] - theMean, 2);
 	for(i = 0; i < sizeRight; ++i) result += pow(valuesRight[i] - theMean, 2);
 
-	if(unbiased) return result / (sizeLeft + sizeRight - 1);
 	return result / (sizeLeft + sizeRight);
+}
+
+template<typename T>
+T ViMath<T>::varianceBiased(const T *values, const int &size, const T &mean)
+{
+	int i;
+	T result;
+
+	result = 0;
+
+	for(i = 0; i < size; ++i) result += pow(values[i] - mean, 2);
+
+	return result / size;
+}
+
+template<typename T>
+T ViMath<T>::varianceBiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const T &mean)
+{
+	int i;
+	T result;
+
+	result = 0;
+
+	for(i = 0; i < sizeLeft; ++i) result += pow(valuesLeft[i] - mean, 2);
+	for(i = 0; i < sizeRight; ++i) result += pow(valuesRight[i] - mean, 2);
+
+	return result / (sizeLeft + sizeRight);
+}
+
+template<typename T>
+T ViMath<T>::varianceUnbiased(const T *values, const int &size)
+{
+	int i;
+	T result, theMean;
+
+	result = 0;
+	theMean = mean(values, size);
+
+	for(i = 0; i < size; ++i) result += pow(values[i] - theMean, 2);
+
+	return result / (size - 1);
+}
+
+template<typename T>
+T ViMath<T>::varianceUnbiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight)
+{
+	int i;
+	T result, theMean;
+
+	result = 0;
+	theMean = mean(valuesLeft, sizeLeft, valuesRight, sizeRight);
+
+	for(i = 0; i < sizeLeft; ++i) result += pow(valuesLeft[i] - theMean, 2);
+	for(i = 0; i < sizeRight; ++i) result += pow(valuesRight[i] - theMean, 2);
+
+	return result / (sizeLeft + sizeRight - 1);
+}
+
+template<typename T>
+T ViMath<T>::varianceUnbiased(const T *values, const int &size, const T &mean)
+{
+	int i;
+	T result;
+
+	result = 0;
+
+	for(i = 0; i < size; ++i) result += pow(values[i] - mean, 2);
+
+	return result / (size - 1);
+}
+
+template<typename T>
+T ViMath<T>::varianceUnbiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const T &mean)
+{
+	int i;
+	T result;
+
+	result = 0;
+
+	for(i = 0; i < sizeLeft; ++i) result += pow(valuesLeft[i] - mean, 2);
+	for(i = 0; i < sizeRight; ++i) result += pow(valuesRight[i] - mean, 2);
+
+	return result / (sizeLeft + sizeRight - 1);
+}
+
+template<typename T>
+T standardDeviation(const T &variance, const bool &unbiased)
+{
+	return sqrt(variance);
+}
+
+template<typename T>
+T standardDeviation(const T *values, const int &size, const bool &unbiased)
+{
+	if(unbiased) return standardDeviationUnbiased(values, size);
+	else return standardDeviationBiased(values, size);
+}
+
+template<typename T>
+T standardDeviation(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const bool &unbiased)
+{
+	if(unbiased) return standardDeviationUnbiased(valuesLeft, sizeLeft, valuesRight, valuesLeft);
+	else return standardDeviationBiased(valuesLeft, sizeLeft, valuesRight, valuesLeft);
+}
+
+template<typename T>
+T standardDeviation(const T *values, const int &size, const T &mean, const bool &unbiased)
+{
+	if(unbiased) return standardDeviationUnbiased(values, size, mean);
+	else return standardDeviationBiased(values, size, mean);
+}
+
+template<typename T>
+T standardDeviation(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const T &mean, const bool &unbiased)
+{
+	if(unbiased) return standardDeviationUnbiased(valuesLeft, sizeLeft, valuesRight, valuesLeft, mean);
+	else return standardDeviationBiased(valuesLeft, sizeLeft, valuesRight, valuesLeft, mean);
+}
+
+template<typename T>
+T standardDeviationBiased(const T &variance)
+{
+	return sqrt(variance);
+}
+
+template<typename T>
+T standardDeviationBiased(const T *values, const int &size)
+{
+		return sqrt(varianceBiased(values, size));
+}
+
+template<typename T>
+T standardDeviationBiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight)
+{
+	return sqrt(varianceBiased(valuesLeft, sizeLeft, valuesRight, valuesLeft));
+}
+
+template<typename T>
+T standardDeviationBiased(const T *values, const int &size, const T &mean)
+{
+	return sqrt(varianceBiased(values, size, mean));
+}
+
+template<typename T>
+T standardDeviationBiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const T &mean)
+{
+	return sqrt(varianceBiased(valuesLeft, sizeLeft, valuesRight, valuesLeft, mean));
+}
+
+template<typename T>
+T ViMath<T>::standardDeviationUnbiased(const T &variance)
+{
+	return sqrt(variance);
+}
+
+template<typename T>
+T ViMath<T>::standardDeviationUnbiased(const T *values, const int &size)
+{
+	return sqrt(varianceUnbiased(values, size));
+}
+
+template<typename T>
+T ViMath<T>::standardDeviationUnbiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight)
+{
+		return sqrt(varianceUnbiased(valuesLeft, sizeLeft, valuesRight, valuesLeft));
+}
+
+template<typename T>
+T ViMath<T>::standardDeviationUnbiased(const T *values, const int &size, const T &mean)
+{
+	return sqrt(varianceUnbiased(values, size, mean));
+}
+
+template<typename T>
+T ViMath<T>::standardDeviationUnbiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const T &mean)
+{
+	return sqrt(varianceUnbiased(valuesLeft, sizeLeft, valuesRight, valuesLeft, mean));
 }
 
 template<typename T>
 T ViMath<T>::noise(const T &variance)
 {
-	static bool hasSpare = false;
-	static T spare;
+	bool hasSpare = false;
+	T spare;
 
 	if(hasSpare)
 	{
@@ -120,7 +323,7 @@ T ViMath<T>::noise(const T &variance)
 	}
 
 	hasSpare = true;
-	static qreal u, v, s;
+	qreal u, v, s;
 	do
 	{
 		u = (rand() / ((double) RAND_MAX)) * 2 - 1;
@@ -137,8 +340,8 @@ T ViMath<T>::noise(const T &variance)
 template<typename T>
 void ViMath<T>::noise(const T *values, const int &size, T *noiseOutput, const int &noiseSize)
 {
-	static int i;
-	static T theVariance;
+	int i;
+	T theVariance;
 	theVariance = variance(values, size);
 	for(i = 0; i < noiseSize; ++i) noiseOutput[i] = noise(theVariance);
 }
@@ -146,8 +349,8 @@ void ViMath<T>::noise(const T *values, const int &size, T *noiseOutput, const in
 template<typename T>
 void ViMath<T>::noise(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, T *noiseOutput, const int &noiseSize)
 {
-	static int i;
-	static T theVariance;
+	int i;
+	T theVariance;
 	theVariance = variance(valuesLeft, sizeLeft, valuesRight, sizeRight);
 	for(i = 0; i < noiseSize; ++i) noiseOutput[i] = noise(theVariance);
 }

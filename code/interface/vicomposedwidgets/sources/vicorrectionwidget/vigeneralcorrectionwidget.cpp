@@ -5,7 +5,7 @@
 ViGeneralCorrectionWidget::ViGeneralCorrectionWidget(QWidget *parent)
 	: ViWidget(parent)
 {
-	mUi = new Ui::ViGeneralCorrectionWidget();
+	/*mUi = new Ui::ViGeneralCorrectionWidget();
 	mUi->setupUi(this);
 
 	QObject::connect(mUi->processAllRadioButton, SIGNAL(toggled(bool)), this, SLOT(toggleDetector()));
@@ -25,7 +25,7 @@ ViGeneralCorrectionWidget::ViGeneralCorrectionWidget(QWidget *parent)
 	mUi->detectorComboBox->setCurrentText(mDefaultDetector);
 
 	QObject::connect(mUi->detectorComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeNoiseDetector()));
-	changeNoiseDetector();
+	changeNoiseDetector();*/
 }
 
 ViGeneralCorrectionWidget::~ViGeneralCorrectionWidget()
@@ -74,8 +74,8 @@ ViModifyProcessor::ModifyMode ViGeneralCorrectionWidget::modifyMode()
 
 ViNoiseDetector* ViGeneralCorrectionWidget::noiseDetector()
 {
-	ViNoiseDetector *detector = ViNoiseDetectorManager::create(mUi->detectorComboBox->itemData(mUi->detectorComboBox->currentIndex()).toString());
-	return detector;
+	//ViNoiseDetector *detector = ViNoiseDetectorManager::create(mUi->detectorComboBox->itemData(mUi->detectorComboBox->currentIndex()).toString());
+	//return detector;
 }
 
 void ViGeneralCorrectionWidget::toggleDetector()
@@ -94,8 +94,8 @@ void ViGeneralCorrectionWidget::toggleDetector()
 
 void ViGeneralCorrectionWidget::changeNoiseDetector()
 {
-	ViNoiseDetector *detector = ViNoiseDetectorManager::create(mUi->detectorComboBox->itemData(mUi->detectorComboBox->currentIndex()).toString());
-	delete detector;
+//	ViNoiseDetector *detector = ViNoiseDetectorManager::create(mUi->detectorComboBox->itemData(mUi->detectorComboBox->currentIndex()).toString());
+	//delete detector;
 }
 
 void ViGeneralCorrectionWidget::changeNoiseSize(int size)

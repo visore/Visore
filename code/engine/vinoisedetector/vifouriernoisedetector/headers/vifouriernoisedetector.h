@@ -1,4 +1,4 @@
-#ifndef VIFOURIERNOISEDETECTOR_H
+/*#ifndef VIFOURIERNOISEDETECTOR_H
 #define VIFOURIERNOISEDETECTOR_H
 
 #include <vinoisedetector.h>
@@ -26,3 +26,4 @@ class ViFourierNoiseDetector : public ViNoiseDetector
 
 #endif
 
+*/

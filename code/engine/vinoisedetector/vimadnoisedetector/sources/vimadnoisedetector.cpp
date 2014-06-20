@@ -1,4 +1,4 @@
-#include <vimadnoisedetector.h>
+/*#include <vimadnoisedetector.h>
 #include <vimath.h>
 #include <qmath.h>
 
@@ -86,3 +86,4 @@ ViMadNoiseDetector* create()
 #ifdef __cplusplus
 }
 #endif
+*/

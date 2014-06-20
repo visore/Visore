@@ -28,7 +28,7 @@ class ViArmaPredictor : public ViPredictor
 
 	protected:
 
-		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error = NULL);
 
 	private:
 

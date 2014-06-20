@@ -2,35 +2,24 @@
 #include <vieigen.h>
 #include <vidifferentiater.h>
 
-#define DEFAULT_DEGREE 1
-
 ViHermiteInterpolator::ViHermiteInterpolator()
 	: ViInterpolator()
 {
-	setDegree(DEFAULT_DEGREE);
 	addParameterName("Window Size");
-	addParameterName("Degree");
 }
 
 ViHermiteInterpolator::ViHermiteInterpolator(const ViHermiteInterpolator &other)
 	: ViInterpolator(other)
 {
-	mDegree = other.mDegree;
 }
 
 ViHermiteInterpolator::~ViHermiteInterpolator()
 {
 }
 
-void ViHermiteInterpolator::setDegree(const int &degree)
-{
-	mDegree = degree;
-}
-
 void ViHermiteInterpolator::setParameter(const int &number, const qreal &value)
 {
 	if(number == 0) setWindowSize(value);
-	else if(number == 1) setDegree(value);
 	else
 	{
 		LOG("Invalid parameter for this interpolator.", QtCriticalMsg);
@@ -40,7 +29,7 @@ void ViHermiteInterpolator::setParameter(const int &number, const qreal &value)
 
 bool ViHermiteInterpolator::validParameters()
 {
-	return mDegree > 0 && mWindowSize > 1;
+	return mWindowSize > 1;
 }
 
 qreal ViHermiteInterpolator::calculateLagrange(const qreal *x, const int &size, const qreal &theX, const int &j)

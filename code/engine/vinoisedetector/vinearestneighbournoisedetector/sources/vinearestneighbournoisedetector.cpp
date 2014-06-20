@@ -1,4 +1,4 @@
-#include <vinearestneighbournoisedetector.h>
+/*#include <vinearestneighbournoisedetector.h>
 
 #define DEFAULT_K 32
 
@@ -67,3 +67,4 @@ ViNearestNeighbourNoiseDetector* create()
 #ifdef __cplusplus
 }
 #endif
+*/

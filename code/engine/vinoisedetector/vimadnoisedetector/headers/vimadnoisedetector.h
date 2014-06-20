@@ -1,4 +1,4 @@
-#ifndef VIMADNOISEDETECTOR_H
+/*#ifndef VIMADNOISEDETECTOR_H
 #define VIMADNOISEDETECTOR_H
 
 #include <vinoisedetector.h>
@@ -32,3 +32,4 @@ class ViMadNoiseDetector : public ViNoiseDetector
 
 #endif
 
+*/

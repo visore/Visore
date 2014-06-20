@@ -1,4 +1,4 @@
-#include <vimahalanobisnoisedetector.h>
+/*#include <vimahalanobisnoisedetector.h>
 
 #define DEFAULT_WINDOW_SIZE 64
 #define AMPLIFIER 0.2
@@ -90,3 +90,4 @@ ViMahalanobisNoiseDetector* create()
 #ifdef __cplusplus
 }
 #endif
+*/

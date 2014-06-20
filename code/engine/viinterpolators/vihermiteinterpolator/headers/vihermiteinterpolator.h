@@ -19,8 +19,6 @@ class ViHermiteInterpolator : public ViInterpolator
 		ViHermiteInterpolator(const ViHermiteInterpolator &other);
 		~ViHermiteInterpolator();
 
-		void setDegree(const int &degree);
-
 		void setParameter(const int &number, const qreal &value);
 		bool validParameters();
 
@@ -33,10 +31,6 @@ class ViHermiteInterpolator : public ViInterpolator
 		void calculate(const qreal *x, const qreal *y, const qreal *derivatives, const int &size, qreal *output, const int &outputSize, const int &startX, const qreal &scaling);
 		qreal calculateLagrange(const qreal *x, const int &size, const qreal &theX, const int &j);
 		qreal calculateLagrangeDerivative1(const qreal *x, const int &size, const qreal &theX, const int &j);
-
-	private:
-
-		int mDegree;
 
 };
 

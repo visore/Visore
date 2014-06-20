@@ -1,5 +1,4 @@
 #include <vipolynomialpredictor.h>
-#include <visystemsolver.h>
 #include <vilogger.h>
 #include <vidifferentiater.h>
 #include <float.h>
@@ -50,30 +49,12 @@ QString ViPolynomialPredictor::name(QString replace, bool spaced)
 void ViPolynomialPredictor::setDegree(const int &degree)
 {
 	mDegree = degree;
-
-	mBestParameters.clear();
-	mBestParameters.resize(mDegree + 1);
-	for(int i = 0; i <= mDegree; ++i)
-	{
-		mBestParameters[i].clear();
-		mBestParameters[i].resize(mDerivatives + 1);
-		mBestParameters[i].fill(0);
-	}
 }
 
 void ViPolynomialPredictor::setDerivatives(const int &derivatives)
 {
 	if(mMode == Normal) mDerivatives = 0;
 	else mDerivatives = derivatives;
-
-	mBestParameters.clear();
-	mBestParameters.resize(mDegree + 1);
-	for(int i = 0; i <= mDegree; ++i)
-	{
-		mBestParameters[i].clear();
-		mBestParameters[i].resize(mDerivatives + 1);
-		mBestParameters[i].fill(0);
-	}
 }
 
 void ViPolynomialPredictor::setParameter(const int &number, const qreal &value)
@@ -83,27 +64,45 @@ void ViPolynomialPredictor::setParameter(const int &number, const qreal &value)
 	else if(number == 2) setDerivatives(value);
 	else
 	{
-		LOG("Invalid parameter for this predictor.", QtCriticalMsg);
+		LOG("Invalid parameter for this Predictor.", QtCriticalMsg);
 		exit(-1);
 	}
+	setType();
+}
+
+void ViPolynomialPredictor::setType()
+{
+	if(mDegree <= 15) mEigen = ViEigenManager::getByBits(53);
+	else if(mDegree <= 20) mEigen = ViEigenManager::getByBits(64);
+	else if(mDegree <= 22) mEigen = ViEigenManager::getByBits(72);
+	else if(mDegree <= 26) mEigen = ViEigenManager::getByBits(80);
+	else if(mDegree <= 30) mEigen = ViEigenManager::getByBits(88);
+	else if(mDegree <= 35) mEigen = ViEigenManager::getByBits(96);
+	else if(mDegree <= 40) mEigen = ViEigenManager::getByBits(104);
+	else if(mDegree <= 50) mEigen = ViEigenManager::getByBits(112);
+	else if(mDegree <= 60) mEigen = ViEigenManager::getByBits(120);
+	else if(mDegree <= 70) mEigen = ViEigenManager::getByBits(128);
+	else mEigen = ViEigenManager::getByBits(256);
 }
 
 bool ViPolynomialPredictor::validParameters()
 {
+	if(mEstimation == Best) return true;
 	return validParameters(mMode, mWindowSize, mDegree, mDerivatives);
 }
 
 bool ViPolynomialPredictor::validParameters(const Mode &mode, const int &windowSize, const int &degree, const int &derivatives)
 {
+//	if(!ViEigenManager::isSupported(decimalPrecision(windowSize, degree))) return false;
 	if(mode == Normal) return windowSize >= degree + 1;
-	else if(mode == Osculating) return windowSize >= degree + 1 && degree >= derivatives;
+	else if(mode == Osculating) return windowSize >= degree + 1 && degree >= derivatives && derivatives <= (windowSize / 2.0);
 	else if(mode == Splines)
 	{
 		if(windowSize <= 1) return false;
 		int coefficients = (windowSize - 1) * (degree + 1); // For every spline
 		int equations = (windowSize - 1) * 2; // Polynomial for each spline
-		equations += (windowSize - 2) * derivatives; // Derivatives at all intermediate points
-		equations += 1; // Set incoming spline (a0) equal to 0
+		equations += (windowSize - 2) * derivatives; // Derivatives at all intermediate points, except the first and last point on every side
+		equations += 1 * derivatives; // Set incoming spline (a0) equal to 0
 		return equations >= coefficients && degree >= derivatives;
 	}
 }
@@ -111,98 +110,140 @@ bool ViPolynomialPredictor::validParameters(const Mode &mode, const int &windowS
 void ViPolynomialPredictor::setPointers(const Mode &mode, const Estimation &estimation)
 {
 	mMode = mode;
+	mEstimation = estimation;
+
 	if(mMode == Normal)
 	{
+		if(mEstimation == Fixed) predictPointer = &ViPolynomialPredictor::predictFixed;
+		else if(mEstimation == Best) predictPointer = &ViPolynomialPredictor::predictBestNormal;
 		predictModelPointer = &ViPolynomialPredictor::predictModelNormal;
-		predictBestPointer = &ViPolynomialPredictor::predictBestNormal;
 		estimateModelPointer = &ViPolynomialPredictor::estimateModelNormal;
 	}
 	else if(mMode == Osculating)
 	{
+		if(mEstimation == Fixed) predictPointer = &ViPolynomialPredictor::predictFixed;
+		else if(mEstimation == Best) predictPointer = &ViPolynomialPredictor::predictBestOsculating;
 		predictModelPointer = &ViPolynomialPredictor::predictModelOsculating;
-		predictBestPointer = &ViPolynomialPredictor::predictBestDerivative;
 		estimateModelPointer = &ViPolynomialPredictor::estimateModelOsculating;
 	}
 	else if(mMode == Splines)
 	{
+		if(mEstimation == Fixed) predictPointer = &ViPolynomialPredictor::predictFixedSplines;
+		else if(mEstimation == Best) predictPointer = &ViPolynomialPredictor::predictBestSplines;
 		predictModelPointer = &ViPolynomialPredictor::predictModelSplines;
-		predictBestPointer = &ViPolynomialPredictor::predictBestDerivative;
 		estimateModelPointer = &ViPolynomialPredictor::estimateModelSplines;
 	}
-
-	mEstimation = estimation;
-	if(mEstimation == Fixed) predictPointer = &ViPolynomialPredictor::predictFixed;
-	else if(mEstimation == Best) predictPointer = &ViPolynomialPredictor::predictBest;
 }
 
-bool ViPolynomialPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+bool ViPolynomialPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error)
 {
 	// Scaling because multiplying integers (or powers) might lead to variable overflow
-	return (this->*predictPointer)(samples, size, predictedSamples, predictionCount, qreal(predictionCount + size - 1));
+	return (this->*predictPointer)(samples, size, predictedSamples, predictionCount, qreal(size + predictionCount - 1), error);
 }
 
-bool ViPolynomialPredictor::predictFixed(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling)
+bool ViPolynomialPredictor::predictFixed(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *error)
 {
 	if(validParameters(mMode, size, mDegree, mDerivatives))
 	{
-		static int i;
-		static ViVector coefficients;
-		if((this->*estimateModelPointer)(mDegree, mDerivatives, coefficients, samples, size, scaling)) (this->*predictModelPointer)(mDegree, coefficients, predictedSamples, predictionCount, size, scaling);
-		else for(i = 0; i < predictionCount; ++i) predictedSamples[i] = 0;
+		ViEigenBaseVector *coefficients = (this->*estimateModelPointer)(mDegree, mDerivatives, samples, size, scaling);
+		(this->*predictModelPointer)(mDegree, coefficients, predictedSamples, predictionCount, size, scaling, NULL);
+		if(error != NULL)
+		{
+			qreal prediction[size];
+			(this->*predictModelPointer)(mDegree, coefficients, prediction, size, 0, scaling, NULL);
+			error->add(prediction, samples, size);
+		}
+		mEigen->clear(coefficients);
 		return true;
 	}
 	LOG("Invalid parameter combination detected.", QtCriticalMsg);
 	return false;
 }
 
-bool ViPolynomialPredictor::predictBest(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling)
+bool ViPolynomialPredictor::predictFixedSplines(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *error)
 {
-	return (this->*predictBestPointer)(samples, size, predictedSamples, predictionCount, scaling);
+	if(validParameters(mMode, size, mDegree, mDerivatives))
+	{
+		ViEigenBaseVector *coefficients = (this->*estimateModelPointer)(mDegree, mDerivatives, samples, size, scaling);
+
+		// Use the middel spline for prediction
+		int predictionOffset[predictionCount];
+		splineOffsetPrediction(predictionOffset, predictionCount, size, mDegree + 1);
+		(this->*predictModelPointer)(mDegree, coefficients, predictedSamples, predictionCount, size, scaling, predictionOffset);
+
+		if(error != NULL)
+		{
+			qreal prediction[size];
+			int offsets[size];
+			splineOffsetModel(offsets, size, mDegree + 1);
+			(this->*predictModelPointer)(mDegree, coefficients, prediction, size, 0, scaling, offsets);
+			error->add(prediction, samples, size);
+		}
+		mEigen->clear(coefficients);
+		return true;
+	}
+	LOG("Invalid parameter combination detected.", QtCriticalMsg);
+	return false;
 }
 
-bool ViPolynomialPredictor::predictBestNormal(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling)
+bool ViPolynomialPredictor::predictBestNormal(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *error)
 {
-	static int i;
-	static ViVector currentCoefficients, bestCoefficients;
+	static int i, bestDegree;
 	static qreal currentMse, bestMse;
+
+	ViEigenBaseVector *bestCoefficients = NULL;
 
 	qreal prediction[size];
 	bestMse = DBL_MAX;
+	bestDegree = 1;
 
 	for(i = 1; i <= mDegree; ++i)
 	{
 		if(validParameters(mMode, size, i, 0))
 		{
-			if((this->*estimateModelPointer)(i, 0, currentCoefficients, samples, size, scaling))
+			ViEigenBaseVector *currentCoefficients = (this->*estimateModelPointer)(i, 0, samples, size, scaling);
+			(this->*predictModelPointer)(i, currentCoefficients, prediction, size, 0, scaling, NULL);
+			currentMse = ViError::calculateMse(prediction, samples, size);
+			if(currentMse < bestMse)
 			{
-				(this->*predictModelPointer)(i, currentCoefficients, prediction, size, 0, scaling);
-				currentMse = calculateMse(samples, prediction, size);
-				if(currentMse < bestMse)
-				{
-					bestMse = currentMse;
-					bestCoefficients = currentCoefficients;
-				}
-				else break;
+				mEigen->clear(bestCoefficients);
+				bestDegree = i;
+				bestMse = currentMse;
+				bestCoefficients = currentCoefficients;
+			}
+			else
+			{
+				mEigen->clear(currentCoefficients);
+				break;
 			}
 		}
 	}
 	if(bestMse == DBL_MAX) return false;
 
-	--i; // Important: last iteration will increase i before exiting the loop
-	mBestParameters[i][0] += 1;
-	(this->*predictModelPointer)(i, bestCoefficients, predictedSamples, predictionCount, size, scaling);
+	if(error != NULL)
+	{
+		(this->*predictModelPointer)(bestDegree, bestCoefficients, prediction, size, 0, scaling, NULL);
+		error->add(prediction, samples, size);
+	}
+
+	(this->*predictModelPointer)(bestDegree, bestCoefficients, predictedSamples, predictionCount, size, scaling, NULL);
+	mEigen->clear(bestCoefficients);
+
 	return true;
 }
 
-bool ViPolynomialPredictor::predictBestDerivative(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling)
+bool ViPolynomialPredictor::predictBestOsculating(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *error)
 {
-	static int i, j;
-	static ViVector currentCoefficients, bestCoefficients;
+	static int i, j, bestDegree;
 	static qreal currentMse, bestMse;
 	static bool wasBad, wasBadAgain;
 
+	ViEigenBaseVector *bestCoefficients = NULL;
+
 	qreal prediction[size];
+
 	bestMse = DBL_MAX;
+	bestDegree = 1;
 	wasBad = false;
 	wasBadAgain = false;
 
@@ -212,236 +253,332 @@ bool ViPolynomialPredictor::predictBestDerivative(const qreal *samples, const in
 		{
 			if(validParameters(mMode, size, i, j))
 			{
-				if((this->*estimateModelPointer)(i, j, currentCoefficients, samples, size, scaling))
+				ViEigenBaseVector *currentCoefficients = (this->*estimateModelPointer)(i, j, samples, size, scaling);
+				(this->*predictModelPointer)(i, currentCoefficients, prediction, size, 0, scaling, NULL);
+				currentMse = ViError::calculateMse(prediction, samples, size);
+				if(currentMse < bestMse)
 				{
-					(this->*predictModelPointer)(i, currentCoefficients, prediction, size, 0, scaling);
-					currentMse = calculateMse(samples, prediction, size);
-					if(currentMse < bestMse)
-					{
-						bestMse = currentMse;
-						bestCoefficients = currentCoefficients;
-						wasBad = false;
-					}
-					else
-					{
-						if(wasBad) wasBadAgain = true;
-						else wasBad = true;
-						break;
-					}
+					mEigen->clear(bestCoefficients);
+					bestMse = currentMse;
+					bestCoefficients = currentCoefficients;
+					bestDegree = i;
+					wasBad = false;
+				}
+				else
+				{
+					mEigen->clear(currentCoefficients);
+					if(wasBad) wasBadAgain = true;
+					else wasBad = true;
+					break;
 				}
 			}
 		}
-		//if(wasBadAgain) break;
+		if(wasBadAgain) break;
 	}
 	if(bestMse == DBL_MAX) return false;
 
-	--i; --j; // Important: last iteration will increase i before exiting the loop
-	mBestParameters[i][j] += 1;
-	(this->*predictModelPointer)(i, bestCoefficients, predictedSamples, predictionCount, size, scaling);
+	if(error != NULL)
+	{
+		(this->*predictModelPointer)(bestDegree, bestCoefficients, prediction, size, 0, scaling, NULL);
+		error->add(prediction, samples, size);
+	}
+
+	(this->*predictModelPointer)(bestDegree, bestCoefficients, predictedSamples, predictionCount, size, scaling, NULL);
+	mEigen->clear(bestCoefficients);
+
 	return true;
 }
 
-bool ViPolynomialPredictor::estimateModelNormal(const int &degree, const int &derivative, ViVector &coefficients, const qreal *samples, const int &size, const qreal &scaling)
+bool ViPolynomialPredictor::predictBestSplines(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *error)
+{
+	static int i, j, bestDegree;
+	static qreal currentMse, bestMse;
+	static bool wasBad, wasBadAgain;
+
+	ViEigenBaseVector *bestCoefficients = NULL;
+
+	qreal prediction[size];
+
+	bestMse = DBL_MAX;
+	bestDegree = 1;
+	wasBad = false;
+	wasBadAgain = false;
+
+	int offsets[size];
+
+	for(i = 1; i <= mDegree; ++i)
+	{
+		for(j = 1; j <= mDerivatives; ++j)
+		{
+			if(validParameters(mMode, size, i, j))
+			{
+				ViEigenBaseVector *currentCoefficients = (this->*estimateModelPointer)(i, j, samples, size, scaling);
+				splineOffsetModel(offsets, size, i + 1);
+				(this->*predictModelPointer)(i, currentCoefficients, prediction, size, 0, scaling, offsets);
+				currentMse = ViError::calculateMse(prediction, samples, size);
+				if(currentMse < bestMse)
+				{
+					mEigen->clear(bestCoefficients);
+					bestMse = currentMse;
+					bestCoefficients = currentCoefficients;
+					bestDegree = i;
+					wasBad = false;
+				}
+				else
+				{
+					mEigen->clear(currentCoefficients);
+					if(wasBad) wasBadAgain = true;
+					else wasBad = true;
+					break;
+				}
+			}
+		}
+		if(wasBadAgain) break;
+	}
+	if(bestMse == DBL_MAX) return false;
+
+	if(error != NULL)
+	{
+		splineOffsetModel(offsets, size, bestDegree + 1);
+		(this->*predictModelPointer)(bestDegree, bestCoefficients, prediction, size, 0, scaling, offsets);
+		error->add(prediction, samples, size);
+	}
+
+	int predictionOffset[predictionCount];
+	splineOffsetPrediction(predictionOffset, predictionCount, size, bestDegree + 1);
+	(this->*predictModelPointer)(bestDegree, bestCoefficients, predictedSamples, predictionCount, size, scaling, predictionOffset);
+	mEigen->clear(bestCoefficients);
+	return true;
+}
+
+ViEigenBaseVector* ViPolynomialPredictor::estimateModelNormal(const int &degree, const int &derivative, const qreal *samples, const int &size, const qreal &scaling)
 {
 	static int i, j;
 	static qreal x;
 
-	ViMatrix matrix(size, degree + 1);
-	ViVector vector(size);
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(size, degree + 1);
+	ViEigenBaseVector *vector = mEigen->createVector(size);
 
 	for(i = 0; i < size; ++i)
 	{
-		vector[i] = samples[i];
+		vector->set(i, samples[i]);
 		x = i / scaling;
-		matrix[i][0] = 1;
-		matrix[i][1] = x;
-		for(j = 2; j <= degree; ++j) matrix[i][j] = qPow(x, j);
+		matrix->set(i, 0, 1);
+		matrix->set(i, 1, x);
+		for(j = 2; j <= degree; ++j) matrix->setPower(i, j, x, j);
 	}
 
-	return ViSystemSolver::solve(matrix, vector, coefficients);
+	ViEigenBaseVector *coefficients = mEigen->estimate(matrix, vector);
+	mEigen->clear(matrix);
+	mEigen->clear(vector);
+	return coefficients;
 }
 
-void ViPolynomialPredictor::predictModelNormal(const int &degree, const ViVector &coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling)
+void ViPolynomialPredictor::predictModelNormal(const int &degree, const ViEigenBaseVector *coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling, const int *offsets)
 {
 	static int i, j;
-	static qreal x, result;
+	static qreal x;
 
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(size, degree + 1);
 	for(i = 0; i < size; ++i)
 	{
 		x = (start + i) / scaling;
-		result = coefficients[0] + (coefficients[1] * x);
-		for(j = 2; j <= degree; ++j) result += coefficients[j] * qPow(x, j);
-		prediction[i] = result;
+		matrix->set(i, 0, 1);
+		matrix->set(i, 1, x);
+		for(j = 2; j <= degree; ++j) matrix->setPower(i, j, x, j);
 	}
+
+	mEigen->solve(coefficients, matrix, prediction, size);
+	mEigen->clear(matrix);
 }
 
-bool ViPolynomialPredictor::estimateModelOsculating(const int &degree, const int &derivative, ViVector &coefficients, const qreal *samples, const int &size, const qreal &scaling)
+
+ViEigenBaseVector* ViPolynomialPredictor::estimateModelOsculating(const int &degree, const int &derivative, const qreal *samples, const int &size, const qreal &scaling)
 {
 	static int i, j, offset, start, end, derivativeCount, totalDerivatives, totalSize;
 	static qreal x;
 
-	derivativeCount = size - 2; // Average, we don't have derivatives for the first and last point
+	derivativeCount = size - 2; // Average, we don't have derivatives for the first and last points
 	totalDerivatives = derivativeCount * derivative;
 	totalSize = size + totalDerivatives;
 
-	ViMatrix matrix(totalSize, degree + 1);
-	ViVector vector(totalSize);
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(totalSize, degree + 1);
+	ViEigenBaseVector *vector = mEigen->createVector(totalSize);
 
 	for(i = 0; i < size; ++i)
 	{
-		vector[i] = samples[i];
+		vector->set(i, samples[i]);
 		x = i / scaling;
-		matrix[i][0] = 1;
-		matrix[i][1] = x;
-		for(j = 2; j <= degree; ++j) matrix[i][j] = qPow(x, j);
+		matrix->set(i, 0, 1);
+		matrix->set(i, 1, x);
+		for(j = 2; j <= degree; ++j) matrix->setPower(i, j, x, j);
 	}
+
+	qreal derivatives[size];
 
 	// Determine for how many samples we cannot calculate a derivitate, and skip those equations.
 	// Der1 and der2 must skip 1 sample at the start and 1 at the end, der3 and der4 skip 2, etc
-	start = qCeil(derivative / 2.0);
-
+	start = ceil(derivative / 2.0);
 	end = size - start;
+
 	for(i = 1; i <= derivative; ++i)
 	{
+		ViDifferentiater::derivative(i, samples, size, derivatives);
 		for(j = start; j < end; ++j)
 		{
 			offset = size + (derivativeCount * (i - 1)) + (j - 1);
-			bool error;
-			vector[offset] = ViDifferentiater::derivative(i, samples, size, j, error);
-			calculateDerivative(degree, j / scaling, matrix[offset], i);
+			vector->set(offset, derivatives[j]);
+			calculateDerivative(degree, j / scaling, matrix, offset, i);
 		}
 	}
 
-	return ViSystemSolver::solve(matrix, vector, coefficients);
+	ViEigenBaseVector *coefficients = mEigen->estimate(matrix, vector);
+	mEigen->clear(matrix);
+	mEigen->clear(vector);
+	return coefficients;
 }
 
-void ViPolynomialPredictor::predictModelOsculating(const int &degree, const ViVector &coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling)
+void ViPolynomialPredictor::predictModelOsculating(const int &degree, const ViEigenBaseVector *coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling, const int *offsets)
 {
 	static int i, j;
-	static qreal x, result;
+	static qreal x;
 
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(size, degree + 1);
 	for(i = 0; i < size; ++i)
 	{
 		x = (start + i) / scaling;
-		result = coefficients[0] + (coefficients[1] * x);
-		for(j = 2; j <= degree; ++j) result += coefficients[j] * qPow(x, j);
-		prediction[i] = result;
+		matrix->set(i, 0, 1);
+		matrix->set(i, 1, x);
+		for(j = 2; j <= degree; ++j) matrix->setPower(i, j, x, j);
 	}
+	mEigen->solve(coefficients, matrix, prediction, size);
+	mEigen->clear(matrix);
 }
 
-bool ViPolynomialPredictor::estimateModelSplines(const int &degree, const int &derivative, ViVector &coefficients, const qreal *samples, const int &size, const qreal &scaling)
+ViEigenBaseVector* ViPolynomialPredictor::estimateModelSplines(const int &degree, const int &derivative, const qreal *samples, const int &size, const qreal &scaling)
 {
-	if(size <= 1) return false;
-
-	static int i, j, columnOffset, rowOffset1, rowOffset2, splineCount, singleCoefficientCount, coefficientCount, derivativeCount, equationCount;
+	static int i, j, extraEquations, columnOffset, rowOffset1, rowOffset2, splineCount, singleCoefficientCount, coefficientCount, derivativeCount, equationCount;
 	static qreal x1, x2;
-	static bool addFirstSpline;
+
+	if(size <= 1) return NULL;
 
 	splineCount = size - 1;
+
 	singleCoefficientCount = degree + 1;
 	coefficientCount = splineCount * singleCoefficientCount;
 	derivativeCount = splineCount - 1;
 
-	addFirstSpline = false;
+	extraEquations = 0;
 
 	equationCount = 0;
 	equationCount += splineCount * 2; // Spline polynomials. Times 2 since we use the spline with 2 points
 	equationCount += derivativeCount * derivative; // Intermediate derivatives should be equal;
-	if(equationCount < coefficientCount) // Add first spline == 0
+	while(equationCount < coefficientCount) // Add first spline == 0
 	{
 		++equationCount;
-		addFirstSpline = true;
+		++extraEquations;
 	}
 
-	ViMatrix matrix(equationCount, coefficientCount);
-	ViVector vector(equationCount);
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(equationCount, coefficientCount);
+	ViEigenBaseVector *vector = mEigen->createVector(equationCount);
 
-	// Add spline polynomials
+	// Add left spline polynomials
 	for(i = 0; i < splineCount; ++i)
 	{
 		rowOffset1 = i * 2;
 		rowOffset2 = rowOffset1 + 1;
 		columnOffset = singleCoefficientCount * i;
 
-		vector[rowOffset1] = samples[i];
-		vector[rowOffset2] = samples[i + 1];
+		vector->set(rowOffset1, samples[i]);
+		vector->set(rowOffset2, samples[i + 1]);
 
 		x1 = i / scaling;
 		x2 = (i + 1) / scaling;
 
-		matrix[rowOffset1][columnOffset] = 1;
-		matrix[rowOffset2][columnOffset] = 1;
+		matrix->set(rowOffset1, columnOffset, 1);
+		matrix->set(rowOffset2, columnOffset, 1);
 
-		matrix[rowOffset1][columnOffset + 1] = x1;
-		matrix[rowOffset2][columnOffset + 1] = x2;
+		matrix->set(rowOffset1, columnOffset + 1, x1);
+		matrix->set(rowOffset2, columnOffset + 1, x2);
 
 		for(j = 2; j <= degree; ++j)
 		{
-			matrix[rowOffset1][j + columnOffset] = qPow(x1, j);
-			matrix[rowOffset2][j + columnOffset] = qPow(x2, j);
+			matrix->setPower(rowOffset1, j + columnOffset, x1, j);
+			matrix->setPower(rowOffset2, j + columnOffset, x2, j);
 		}
 	}
 
-	// Add the deratives between neighbouring splines
+	// Add the deratives between neighbouring left splines
 	for(i = 1; i <= derivative; ++i)
 	{
-		rowOffset1 = (splineCount * 2) + ((i - 1) * derivative);
-		for(j = 0; j < derivativeCount; ++j)
+		rowOffset1 = (splineCount * 2) + ((i - 1) * splineCount);
+		for(j = 0; j < splineCount; ++j)
 		{
 			rowOffset2 = rowOffset1 + j;
 			columnOffset = j * singleCoefficientCount;
 			x1 = (j + 1) / scaling;
-			calculateDerivative(degree, x1, matrix[rowOffset2], i, columnOffset, 1);
-			calculateDerivative(degree, x1, matrix[rowOffset2], i, columnOffset + singleCoefficientCount, -1); // -1: take the derivative on the right-hand side to the left of the equation
+			calculateDerivative(degree, x1, matrix, rowOffset2, i, columnOffset, 1);
+			calculateDerivative(degree, x1, matrix, rowOffset2, i, columnOffset + singleCoefficientCount, -1); // -1: take the derivative on the right-hand side to the left of the equation
 		}
 	}
 
-	// Make the first spline 0 if needed
-	if(addFirstSpline) matrix[equationCount - 1][0] = 1;
+	// Set the derivitives for the first spline at point 0 to 0
+	if(extraEquations > 0)
+	{
+		for(i = 1; i <= extraEquations; ++i) matrix->set(equationCount - i, 0, 1);
+	}
 
-	return ViSystemSolver::solve(matrix, vector, coefficients);
+	ViEigenBaseVector *coefficients = mEigen->estimate(matrix, vector);
+
+	mEigen->clear(matrix);
+	mEigen->clear(vector);
+	return coefficients;
 }
 
-void ViPolynomialPredictor::predictModelSplines(const int &degree, const ViVector &coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling)
+void ViPolynomialPredictor::predictModelSplines(const int &degree, const ViEigenBaseVector *coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling, const int *offsets)
 {
-	static int i, j, offset;
-	static qreal x, result;
+	static int i, j;
+	static qreal x;
 
-	// Use the last spline for prediction
-	offset = (start - 2) * (degree + 1);
-
+	ViEigenBaseMatrix *matrix = mEigen->createMatrix(size, degree + 1);
 	for(i = 0; i < size; ++i)
 	{
 		x = (start + i) / scaling;
-		result = coefficients[offset] + (coefficients[1 + offset] * x);
-		for(j = 2; j <= degree; ++j) result += coefficients[j + offset] * qPow(x, j);
-		prediction[i] = result;
+		matrix->set(i, 0, 1);
+		matrix->set(i, 1, x);
+		for(j = 2; j <= degree; ++j) matrix->setPower(i, j, x, j);
 	}
+	mEigen->solve(coefficients, matrix, prediction, size, offsets);
+	mEigen->clear(matrix);
 }
 
-void ViPolynomialPredictor::calculateDerivative(const int &degree, const qreal &x, ViVector &row, const int &derivative)
+void ViPolynomialPredictor::calculateDerivative(const int &degree, const qreal &x, ViEigenBaseMatrix *matrix, const int &rowOffset, const int &derivative)
 {
 	static int i;
-	for(i = 0; i < derivative; ++i) row[i] = 0;
-	row[derivative] = 1;
-	for(i = derivative + 1; i <= degree; ++i) row[i] = i * qPow(x, i - 1);
+	for(i = 0; i < derivative; ++i) matrix->set(rowOffset, i, 0);
+	matrix->set(rowOffset, derivative, 1);
+	for(i = derivative + 1; i <= degree; ++i) matrix->setPowerMulti(rowOffset, i, i, x, i - 1);
 }
 
-void ViPolynomialPredictor::calculateDerivative(const int &degree, const qreal &x, ViVector &row, const int &derivative, const int &offset, const int multiplier)
+void ViPolynomialPredictor::calculateDerivative(const int &degree, const qreal &x, ViEigenBaseMatrix *matrix, const int &rowOffset, const int &derivative, const int &offset, const int multiplier)
 {
 	static int i;
-	for(i = 0; i < derivative; ++i) row[i + offset] = 0;
-	row[derivative + offset] = 1;
-	for(i = derivative + 1; i <= degree; ++i) row[i + offset] = multiplier * i * qPow(x, i - 1);
+	for(i = 0; i < derivative; ++i) matrix->set(rowOffset, i + offset, 0);
+	matrix->set(rowOffset, derivative + offset, multiplier);
+	for(i = derivative + 1; i <= degree; ++i) matrix->setPowerMulti(rowOffset, i + offset, multiplier * i, x, i - 1);
 }
 
-qreal ViPolynomialPredictor::calculateMse(const qreal *observed, const qreal *predicted, const int &size)
+void ViPolynomialPredictor::splineOffsetModel(int *offsets, const int &size, const int &coefficientCount)
 {
 	static int i;
-	static qreal mse;
+	offsets[0] = 0;
+	for(i = 1; i < size; ++i) offsets[i] = (i - 1) * coefficientCount;
+}
 
-	mse = 0;
-	for(i = 0; i < size; ++i) mse += qPow(predicted[i] - observed[i], 2);
 
-	return mse / size;
+void ViPolynomialPredictor::splineOffsetPrediction(int *offsets, const int &predictionCount, const int &size, const int &coefficientCount)
+{
+	static int i, offset;
+	offset = (size - 2) * coefficientCount;
+	for(i = 0; i < predictionCount; ++i) offsets[i] = offset;
 }

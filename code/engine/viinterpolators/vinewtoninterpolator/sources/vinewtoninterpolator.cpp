@@ -187,7 +187,8 @@ bool ViNewtonInterpolator::validParameters()
 
 bool ViNewtonInterpolator::validParameters(const int &windowSize)
 {
-	return windowSize > 1 && windowSize % 2 == 0;
+	//return windowSize > 1 && windowSize % 2 == 0;
+	return windowSize > 1;
 }
 
 bool ViNewtonInterpolator::validParameters(const int &leftSize, const int &rightSize)

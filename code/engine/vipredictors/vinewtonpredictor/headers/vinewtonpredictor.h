@@ -2,6 +2,44 @@
 #define VINEWTONPREDICTOR_H
 
 #include <vipredictor.h>
+#include <vieigen.h>
+
+class ViNewtonPredictor : public ViPredictor
+{
+
+	public:
+
+		ViNewtonPredictor();
+		ViNewtonPredictor(const ViNewtonPredictor &other);
+		~ViNewtonPredictor();
+
+		void setParameter(const int &number, const qreal &value);
+		bool validParameters();
+
+		ViNewtonPredictor* clone();
+
+	protected:
+
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error = NULL);
+
+		void setType();
+
+		class ViNewtonTypedBase;
+
+	private:
+
+		ViEigenBase *mEigen;
+		ViNewtonTypedBase *mTyped;
+
+};
+
+#endif
+
+
+/*#ifndef VINEWTONPREDICTOR_H
+#define VINEWTONPREDICTOR_H
+
+#include <vipredictor.h>
 
 class ViNewtonPredictor : public ViPredictor
 {
@@ -34,7 +72,7 @@ class ViNewtonPredictor : public ViPredictor
 
 		void setPointers(const Estimation &estimation);
 
-		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViErrorCollection *modelErrors = NULL);
 		bool predictFixed(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling);
 		bool predictBest(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling);
 
@@ -56,3 +94,4 @@ class ViNewtonPredictor : public ViPredictor
 };
 
 #endif
+*/

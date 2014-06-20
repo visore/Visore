@@ -2,6 +2,9 @@
 #include <vidifferentiater.h>
 #include <vilogger.h>
 
+
+#define DEFAULT_DEGREE 1
+
 ViHermitePredictor::ViHermitePredictor()
 	: ViPredictor()
 {
@@ -11,12 +14,10 @@ ViHermitePredictor::ViHermitePredictor()
 ViHermitePredictor::ViHermitePredictor(const ViHermitePredictor &other)
 	: ViPredictor(other)
 {
-
 }
 
 ViHermitePredictor::~ViHermitePredictor()
 {
-
 }
 
 void ViHermitePredictor::setParameter(const int &number, const qreal &value)
@@ -24,173 +25,113 @@ void ViHermitePredictor::setParameter(const int &number, const qreal &value)
 	if(number == 0) setWindowSize(value);
 	else
 	{
-		LOG("Invalid parameter for this predictor.", QtCriticalMsg);
+		LOG("Invalid parameter for this Predictor.", QtCriticalMsg);
 		exit(-1);
 	}
 }
 
-
-bool ViHermitePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+bool ViHermitePredictor::validParameters()
 {
-	// http://www.math.usm.edu/lambers/mat772/fall10/lecture6.pdf
-	// http://bruce-shapiro.com/math481A/notes/19-Hermite-interpolation.pdf
-	// http://www.phys.ufl.edu/~coldwell/wsteve/FDERS/The%20Lagrange%20Polynomial.htm
+	return mWindowSize > 1;
+}
 
-	static int i, j, m, k, x;
-	static qreal result;
-	static qreal totalDevider; // qreal, since we devide
+qreal ViHermitePredictor::calculateLagrange(const qreal *x, const int &size, const qreal &theX, const int &j)
+{
+	static int m;
+	static qreal product;
 
-	qreal scaledX, scaledI, scaledM, scaledK;
-	qreal value, lagrangeSquared, lagrangeFirst, lagrangeFirst1;
-
-	totalDevider = size + predictionCount - 1;
-
-	bool error;
-
-
-
-	for(j = 0; j < predictionCount; ++j)
+	product = 1;
+	for(m = 0; m < size; ++m)
 	{
-		x = size + j;
-		scaledX = x / totalDevider;
+		if(m != j) product *= (theX - x[m]) / (x[j] - x[m]);
+	}
+	return product;
+}
 
-		result = 0;
-		for(i = 0; i < size; ++i)
+qreal ViHermitePredictor::calculateLagrangeDerivative1(const qreal *x, const int &size, const qreal &theX, const int &j)
+{
+	//http://www.phys.ufl.edu/~coldwell/wsteve/FDERS/The%20Lagrange%20Polynomial.htm
+	//http://www.phys.ufl.edu/~coldwell/wsteve/FDERS/The%20Lagrange%20Polynomial_files/eq0006MP.gif
+	//http://www2.math.umd.edu/~dlevy/classes/amsc466/lecture-notes/differentiation-chap.pdf
+
+	static int l, m;
+	static qreal result, product;
+
+	result = 0;
+	for(l = 0; l < size; ++l)
+	{
+		if(l != j)
 		{
-			scaledI = i / totalDevider;
-
-			// Lagrange
-			lagrangeSquared = 1;
+			product = 1 / (x[j] - x[l]);
 			for(m = 0; m < size; ++m)
 			{
-				if(i != m)
-				{
-					scaledM = m / totalDevider;
-					lagrangeSquared *= (scaledX - scaledM) / (scaledI - scaledM);
-				}
+				if(m != l && m != j) product *= (theX - x[m]) / (x[j] - x[m]);
 			}
-			lagrangeSquared *= lagrangeSquared;
-
-
-
-
-			/*if(i==0)
-			{
-				lagrangeSquared = (scaledX - (1/totalDevider)) / (0 - (1/totalDevider));
-				lagrangeFirst = 1 / (0 - (1/totalDevider));
-			}
-			else if(i==1)
-			{
-				lagrangeSquared = (scaledX - 0) / ((1/totalDevider) - 0);
-				lagrangeFirst = 1 / ((1/totalDevider) - 0);
-			}*/
-
-
-
-			// Lagrange first derivative
-			lagrangeFirst = 0;
-			for(m = 0; m < size; ++m)
-			{
-				if(i != m)
-				{
-					scaledM = m / totalDevider;
-					lagrangeFirst += 1 /(scaledI-scaledM);
-				}
-			}
-
-
-
-
-			/*for(k = 0; k < size; ++k)
-			{
-				if(i != k)
-				{
-					scaledK = k / totalDevider;
-					lagrangeFirst1 = 1 / (scaledI - scaledK);
-					for(m = 0; m < size; ++m)
-					{
-						if(i != m)
-						{
-							scaledM = m / totalDevider;
-							lagrangeFirst1 *= (scaledX - scaledM) / (scaledI - scaledM);
-						}
-					}
-					lagrangeFirst += lagrangeFirst1;
-				}
-			}*/
-
-			// Normal polynomial (first part)
-			value = lagrangeSquared * (1 - (2 * lagrangeFirst * (scaledX - scaledI)));
-			result += samples[i] * value;
-
-			// First derivative (second part)
-			value = lagrangeSquared  * (scaledX - scaledI);
-			result += ViDifferentiater::derivative(1, samples, size, x, error) * value;
+			result += product;
 		}
-		predictedSamples[j] = result;
+	}
+	return result;
+}
+
+bool ViHermitePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError)
+{
+	static int i;
+	static qreal scaling;
+
+	scaling = size - 1;
+
+	qreal x[size];
+
+	for(i = 0; i < size; ++i) x[i] = i / scaling;
+
+	qreal derivatives[size];
+	ViDifferentiater::derivative(1, samples, size, derivatives);
+
+	calculate(x, samples, derivatives, size, predictedSamples, predictionCount, size, scaling);
+
+	if(modelError != NULL)
+	{
+		qreal model[size];
+		calculate(x, samples, derivatives, size, model, size, 0, scaling);
+		modelError->add(model, samples, size);
 	}
 
 	return true;
 }
 
-qreal ViHermitePredictor::lagrange(const qreal *samples, const int &size, const int &x, const qreal &scaler)
+void ViHermitePredictor::calculate(const qreal *x, const qreal *y, const qreal *derivatives, const int &size, qreal *output, const int &outputSize, const int &startX, const qreal &scaling)
 {
+	// http://www.math.usm.edu/lambers/mat772/fall10/lecture6.pdf
+	// http://bruce-shapiro.com/math481A/notes/19-Hermite-interpolation.pdf
+	// http://www.phys.ufl.edu/~coldwell/wsteve/FDERS/The%20Lagrange%20Polynomial.htm
+
 	static int i, j;
-	static qreal result, value, scaledI, scaledJ, scaledX;
+	static qreal outputX, h1, h2, lagrange, lagrangeSquared, result, derivative;
 
-	scaledX = x / scaler;
-	result = 0;
-
-	for(i = 0; i < size; ++i)
+	for(i = 0; i < outputSize; ++i)
 	{
-		scaledI = i / scaler;
+		result = 0;
+		outputX = (startX + i) / scaling;
 
-		value = 1;
 		for(j = 0; j < size; ++j)
 		{
-			if(i != j)
-			{
-				scaledJ = j / scaler;
-				value *= (scaledX - scaledJ) / (scaledI - scaledJ);
-			}
+			// Calculate Lagrange base polynomial
+			lagrange = calculateLagrange(x, size, outputX, j);
+			lagrangeSquared = lagrange * lagrange;
+
+			// Calculate Lagrange base polynomial derivative
+			derivative = calculateLagrangeDerivative1(x, size, x[j], j);
+
+			h1 = (1 - (2 * (outputX - x[j]) * derivative)) * lagrangeSquared;
+			h2 = (outputX - x[j]) * lagrangeSquared;
+
+			result += (y[j] * h1) + (derivatives[j] * h2);
 		}
-
-		result += samples[i] * value;
+		output[i] = result;
 	}
-
-	return result;
 }
 
-qreal ViHermitePredictor::lagrangeFirstDerivative(const qreal *samples, const int &size, const int &x, const qreal &scaler)
+ViHermitePredictor* ViHermitePredictor::clone()
 {
-	static int i, j;
-	static qreal result, value, scaledI, scaledJ, scaledX;
-
-	scaledX = x / scaler;
-	result = 0;
-
-	for(i = 0; i < size; ++i)
-	{
-		scaledI = i / scaler;
-
-		value = 1;
-		for(j = 0; j < size; ++j)
-		{
-			if(i != j)
-			{
-				scaledJ = j / scaler;
-				value *= (scaledX - scaledJ) / (scaledI - scaledJ);
-			}
-		}
-
-		result += samples[i] * value;
-	}
-
-	return result;
+	return new ViHermitePredictor(*this);
 }
-
-bool ViHermitePredictor::estimate(const int &degree, ViVector &coefficients, const qreal *samples, const int &size, const qreal &scaling)
-{
-
-}
-

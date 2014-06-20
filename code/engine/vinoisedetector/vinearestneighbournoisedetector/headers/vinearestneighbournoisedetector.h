@@ -1,4 +1,4 @@
-#ifndef VINEARESTNEIGHBOURNOISEDETECTOR_H
+/*#ifndef VINEARESTNEIGHBOURNOISEDETECTOR_H
 #define VINEARESTNEIGHBOURNOISEDETECTOR_H
 
 #include <vinoisedetector.h>
@@ -34,3 +34,4 @@ class ViNearestNeighbourNoiseDetector : public ViNoiseDetector
 
 #endif
 
+*/

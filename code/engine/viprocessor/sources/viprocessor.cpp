@@ -156,7 +156,7 @@ void ViProcessor::handleExit()
 
 bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::Type type)
 {
-	emit started();
+	/*emit started();
     setProgress(0);
 
 	mObject = audioObject;
@@ -190,7 +190,7 @@ bool ViProcessor::initializeProcess(ViAudioObjectPointer audioObject, ViAudio::T
 		setProgress(100);
 		emit finished();
 		return false;
-	}
+	}*/
 }
 
 void ViProcessor::scaleSamples(qreal from, qreal to)
@@ -211,7 +211,7 @@ void ViProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type)
 
 void ViProcessor::setNoiseDetector(ViNoiseDetector *detector)
 {
-	if(mNoiseDetector != NULL)
+	/*if(mNoiseDetector != NULL)
     {
         delete mNoiseDetector;
     }
@@ -219,7 +219,7 @@ void ViProcessor::setNoiseDetector(ViNoiseDetector *detector)
 	if(mNoiseDetector != NULL)
 	{
 		mNoiseDetector->setMode(mChannelMode);
-	}
+	}*/
 }
 
 bool ViProcessor::isNoisy()
@@ -229,7 +229,7 @@ bool ViProcessor::isNoisy()
 
 bool ViProcessor::isNoisy(int channel)
 {
-	if(mNoiseDetector == NULL)
+	/*if(mNoiseDetector == NULL)
 	{
 		LOG("No noise detector specified.", QtCriticalMsg);
 		return false;
@@ -237,7 +237,7 @@ bool ViProcessor::isNoisy(int channel)
 	else
 	{
 		return mNoiseDetector->isNoisy(mData, channel);
-	}
+	}*/
 }
 
 void ViProcessor::setChannelMode(ViProcessor::ChannelMode mode)
@@ -367,7 +367,7 @@ ViFrequencyChunk& ViProcessor::currentFrequencies(int channel)
 
 ViNoise& ViProcessor::currentNoise(const int &channel)
 {
-	return mNoiseDetector->noise(channel);
+	//return mNoiseDetector->noise(channel);
 }
 
 void ViProcessor::setMultiShot(bool multishot)
@@ -582,7 +582,7 @@ void ViModifyProcessor::run()
 
 int ViModifyProcessor::readNext()
 {
-	QMutexLocker locker(&mMutex);
+	/*QMutexLocker locker(&mMutex);
     mCurrentChannel = 0;
     if(mData.hasData())
     {
@@ -610,7 +610,7 @@ int ViModifyProcessor::readNext()
         }
 		return size;
     }
-	return 0;
+	return 0;*/
 }
 
 void ViModifyProcessor::process(ViAudioObjectPointer audioObject, ViAudio::Type type1, ViAudio::Type type2)

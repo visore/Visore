@@ -1,4 +1,4 @@
-#include <viarmanoisedetector.h>
+/*#include <viarmanoisedetector.h>
 
 #define TWO_PI 6.2831853071795864769252866
 #define LN2PI1 2.837877066409345 // log(2*pi) + 1
@@ -332,7 +332,7 @@ void ViArmaNoiseDetector::setDegree(const int &arDegree, const int &maDegree)
 	setDegree(AR, arDegree);
 	setDegree(MA, maDegree);
 }
-/*
+*//*
 qreal ViArmaNoiseDetector::generateNoise(const qreal &variance) const
 {
 	static bool hasSpare = false;
@@ -352,7 +352,7 @@ qreal ViArmaNoiseDetector::generateNoise(const qreal &variance) const
 	rand2 = (rand() / ((double) RAND_MAX)) * TWO_PI;
 
 	return variance * rand1 * qCos(rand2);
-}*/
+}
 
 qreal ViArmaNoiseDetector::generateNoise(const qreal &variance) const
 {
@@ -515,14 +515,7 @@ void ViArmaNoiseDetector::calculateNoiseGretl(QQueue<qreal> &samples)
 			if(model->errcode) failed = true;
 			else
 			{
-				/*error = 0; // gretl doesn't do this for us. We manually have to start with "no" error.
-				FITRESID *forecast = get_forecast(model, mGretlData->t2 + 1, mGretlData->n - 1, 0, mGretlData, OPT_NONE, &error);
-				if(error) failed = true;
-				else
-				{
-					if(forecast->nobs > mWindowSize) mPrediction = forecast->fitted[mWindowSize];
-					free_fit_resid(forecast);
-				}*/
+
 
 				error = 0; // gretl doesn't do this for us. We manually have to start with "no" error.
 				FITRESID *forecast = get_forecast(model, mGretlData->t2 + 1, mGretlData->n - 1, 0, mGretlData, OPT_NONE, &error);
@@ -558,14 +551,14 @@ if(difference>diff)samples[mWindowSize+counter]=samples[mWindowSize+counter-1];
 				setNoise(0);
 				samples.removeFirst();
 			}
-			/*else
-			{
-				difference = qAbs(samples[mWindowSize] - mPrediction);
-				if(difference > NOISE_CUTOFF) mHasNoise = true;
-				setNoise(difference);
-				//setNoise(mPrediction);
-			}
-			samples.removeFirst();*/
+			//else
+			//{
+			//	difference = qAbs(samples[mWindowSize] - mPrediction);
+			//	if(difference > NOISE_CUTOFF) mHasNoise = true;
+			//	setNoise(difference);
+			//	//setNoise(mPrediction);
+			//}
+			//samples.removeFirst();
 
 		}
 
@@ -579,76 +572,6 @@ if(difference>diff)samples[mWindowSize+counter]=samples[mWindowSize+counter-1];
 
 
 
-
-
-
-	/*static bool failed;
-	static int i, error;
-	static qreal difference;
-
-	while(samples.size() > mWindowSize)
-	{
-		failed = false;
-
-		if(mHasNoise)
-		{
-			//if(mPrediction > 1) samples[mWindowSize - 1] = 1;
-			//else samples[mWindowSize - 1] = mPrediction;
-
-			if(qAbs(samples[mWindowSize - 2] - mPrediction) < 0.1)
-			{
-				samples[mWindowSize - 1] = mPrediction;
-			}
-			else
-			{
-				qreal m = 0;
-				for(i = 0; i < mWindowSize-1; ++i)
-				{
-					m+=samples[i];
-				}
-				m /= (mWindowSize-1);
-				samples[mWindowSize - 1] = m;
-			}
-
-			mHasNoise = false;
-		}
-		mPrediction = 0;
-
-		for(i = 0; i < mWindowSize; ++i)
-		{
-			mGretlData->Z[1][i] = samples[i];
-		}
-
-		MODEL *model = gretl_model_new();
-		(this->*gretlModelPointer)(model);
-
-		if(model->errcode) failed = true;
-		else
-		{
-			error = 0; // gretl doesn't do this for us. We manually have to start with "no" error.
-			FITRESID *forecast = get_forecast(model, mGretlData->t2 + 1, mGretlData->n - 1, 0, mGretlData, OPT_NONE, &error);
-			if(error) failed = true;
-			else
-			{
-				if(forecast->nobs > mWindowSize) mPrediction = forecast->fitted[mWindowSize];
-				free_fit_resid(forecast);
-			}
-		}
-		gretl_model_free(model);
-
-		if(failed)
-		{
-			setNoise(0);
-		}
-		else
-		{
-			difference = qAbs(samples[mWindowSize] - mPrediction);
-			if(difference > NOISE_CUTOFF) mHasNoise = true;
-			setNoise(difference);
-			//setNoise(mPrediction);
-		}
-		samples.removeFirst();
-	}*/
 }
 
 void ViArmaNoiseDetector::gretlFixedModel(MODEL *model)
@@ -764,24 +687,6 @@ void ViArmaNoiseDetector::gretlBestModel(MODEL *model)
 		if(arOrder > MAXIMUM_TEST_DEGREE) break;
 	}
 
-	/*min = DBL_MAX;
-	mGretlParameters[1] = arOrderBest;
-	while(true)
-	{
-		mGretlParameters[3] = maOrder;
-		tempModel = gretl_model_new();
-		*tempModel = arma_model(mGretlParameters, NULL, mGretlData, (gretlopt) mGretlEstimation, NULL);
-		current = (this->*gretlOrderPointer)(tempModel);
-		gretl_model_free(tempModel);
-		if(current > min)
-		{
-			maOrderBest = maOrder - 1;
-			break;
-		}
-		min = current;
-		++maOrder;
-		if(maOrder > MAXIMUM_TEST_DEGREE) break;
-	}*/
 
 	if(arOrderBest < 0) arOrderBest = 0;
 	if(maOrderBest < 0) maOrderBest = 0;
@@ -1074,3 +979,4 @@ ViArmaNoiseDetector* create()
 #ifdef __cplusplus
 }
 #endif
+*/

@@ -27,7 +27,7 @@ ViBenchMarker3::ViBenchMarker3()
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	mDetector = new ViArmaNoiseDetector();
+//	mDetector = new ViArmaNoiseDetector();
 	//mDetector = new ViMahalanobisNoiseDetector();
 	//mDetector = new ViMadNoiseDetector();
 	//mDetector = new ViFourierNoiseDetector();
@@ -35,7 +35,7 @@ ViBenchMarker3::ViBenchMarker3()
 	//mDetector = new ViZscoreNoiseDetector();
 	//mDetector = new ViNearestNeighbourNoiseDetector();
 
-	mDetector->setDirection(ViNoiseDetector::Forward);
+//	mDetector->setDirection(ViNoiseDetector::Forward);
 	//mDetector->setDirection(ViNoiseDetector::Reversed);
 	//mDetector->setDirection(ViNoiseDetector::Bidirectional);
 
@@ -165,11 +165,11 @@ void ViBenchMarker3::process1(bool generate)
 	mCurrentObject->clearBuffer(ViAudio::Noise);
 	mCurrentObject->clearBuffer(ViAudio::NoiseMask);
 
-	if(mParamsStart.size() == 1) mDetector->setParameters(mParamsCurrent[0]);
+	/*if(mParamsStart.size() == 1) mDetector->setParameters(mParamsCurrent[0]);
 	else if(mParamsStart.size() == 2) mDetector->setParameters(mParamsCurrent[0], mParamsCurrent[1]);
 	else if(mParamsStart.size() == 3) mDetector->setParameters(mParamsCurrent[0], mParamsCurrent[1], mParamsCurrent[2]);
 	else if(mParamsStart.size() == 4) mDetector->setParameters(mParamsCurrent[0], mParamsCurrent[1], mParamsCurrent[2], mParamsCurrent[3]);
-	//else { cout << "Invalid parameter count of "<<mParamsStart.size()<<". Min: 1, Max: 4" << endl; quit(); }
+	//else { cout << "Invalid parameter count of "<<mParamsStart.size()<<". Min: 1, Max: 4" << endl; quit(); }*/
 
 	QObject::connect(mCurrentObject.data(), SIGNAL(noiseGenerated()), this, SLOT(process2()));
 	mTime.restart();
@@ -341,7 +341,7 @@ void ViBenchMarker3::printFileHeader()
 	mOutputFile.open(QIODevice::WriteOnly);
 	mOutputStream.setDevice(&mOutputFile);
 
-	mOutputStream<<mDetector->name()<<"\n";
+	/*mOutputStream<<mDetector->name()<<"\n";
 
 	if(mDetector->direction() == ViNoiseDetector::Forward) mOutputStream<< "Forward";
 	else if(mDetector->direction() == ViNoiseDetector::Reversed) mOutputStream<< "Reversed";
@@ -376,14 +376,14 @@ void ViBenchMarker3::printFileHeader()
 			mOutputStream << "NOISE LENGTH "<< i << "\t";
 		}
 	}
-	mOutputStream << "\n";
+	mOutputStream << "\n";*/
 }
 
 void ViBenchMarker3::printFileData(const qint64 &time, const qint64 &TP, const qint64 &TN, const qint64 &FP, const qint64 &FN, const QVector<qreal> &lengthTP, const QVector<qreal> &lengthFN)
 {
 	int i;
 	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << (int)mParamsCurrent[i] << "\t";
-	mOutputStream << (mCurrentThreshold / mDetector->amplification()) << "\t" << mCurrentThreshold << "\t" << TP << "\t" << TN << "\t" << FP << "\t" << FN << "\t";
+	/*mOutputStream << (mCurrentThreshold / mDetector->amplification()) << "\t" << mCurrentThreshold << "\t" << TP << "\t" << TN << "\t" << FP << "\t" << FN << "\t";
 	mOutputStream << sensitivity(TP, FN) << "\t";
 	mOutputStream << specificity(TN, FP) << "\t";
 	mOutputStream << matthews(TP, TN, FP, FN) << "\t" << time << "\t\t";
@@ -391,12 +391,12 @@ void ViBenchMarker3::printFileData(const qint64 &time, const qint64 &TP, const q
 	for(i = 0; i < lengthTP.size(); ++i) mOutputStream << lengthFN[i] << "\t";
 	for(i = 0; i < lengthTP.size(); ++i) mOutputStream << sensitivity(lengthTP[i], lengthFN[i]) <<"\t";
 	mOutputStream << "\n";
-	mOutputStream.flush();
+	mOutputStream.flush();*/
 }
 
 void ViBenchMarker3::printTerminal(const qint64 &time, const qint64 &TP, const qint64 &TN, const qint64 &FP, const qint64 &FN, const qreal &bestMatthews)
 {
-	qreal percentageDone = mDoneParamIterations / qreal(mTotalParamIterations);
+	/*qreal percentageDone = mDoneParamIterations / qreal(mTotalParamIterations);
 	percentageDone /= mTotalFiles;
 	percentageDone += (mTotalFiles - mFiles.size() - 1) / qreal(mTotalFiles);
 
@@ -406,7 +406,7 @@ void ViBenchMarker3::printTerminal(const qint64 &time, const qint64 &TP, const q
 	cout << setprecision(6);
 	cout << int(percentageDone * 100.0) << "%\t(" << timeConversion(remaining).toLatin1().data()<<")\t";
 	cout << "THRES: " << (mCurrentThreshold / mDetector->amplification()) << "\t";
-	cout << "SEN: " << sensitivity(TP, FN) << "\tSPE: " << specificity(TN, FP) << "\tMAT: " << matthews(TP, TN, FP, FN) << " (" << bestMatthews << ")\tTIME: " << time << endl;
+	cout << "SEN: " << sensitivity(TP, FN) << "\tSPE: " << specificity(TN, FP) << "\tMAT: " << matthews(TP, TN, FP, FN) << " (" << bestMatthews << ")\tTIME: " << time << endl;*/
 }
 
 qreal ViBenchMarker3::sensitivity(const qint64 &TP, const qint64 &FN)

@@ -2,6 +2,7 @@
 #define VIPOLYNOMIALPREDICTOR_H
 
 #include <vipredictor.h>
+#include <vieigen.h>
 
 class ViPolynomialPredictor : public ViPredictor
 {
@@ -38,36 +39,41 @@ class ViPolynomialPredictor : public ViPredictor
 
 	protected:
 
+		void setType();
+
 		bool validParameters(const Mode &mode, const int &windowSize, const int &degree, const int &derivatives);
 
 		void setPointers(const Mode &mode, const Estimation &estimation);
 
-		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
-		bool predictFixed(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling);
-		bool predictBest(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling);
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError = NULL);
+		bool predictFixed(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *modelError = NULL);
+		bool predictFixedSplines(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *modelError = NULL);
 
-		bool predictBestNormal(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling);
-		bool predictBestDerivative(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling);
+		bool predictBestNormal(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *modelError = NULL);
+		bool predictBestOsculating(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *modelError = NULL);
+		bool predictBestSplines(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *modelError = NULL);
 
-		bool estimateModelNormal(const int &degree, const int &derivative, ViVector &coefficients, const qreal *samples, const int &size, const qreal &scaling);
-		void predictModelNormal(const int &degree, const ViVector &coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling);
+		ViEigenBaseVector* estimateModelNormal(const int &degree, const int &derivative, const qreal *samples, const int &size, const qreal &scaling);
+		void predictModelNormal(const int &degree, const ViEigenBaseVector *coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling, const int *offsets = NULL);
 
-		bool estimateModelOsculating(const int &degree, const int &derivative, ViVector &coefficients, const qreal *samples, const int &size, const qreal &scaling);
-		void predictModelOsculating(const int &degree, const ViVector &coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling);
+		ViEigenBaseVector* estimateModelOsculating(const int &degree, const int &derivative, const qreal *samples, const int &size, const qreal &scaling);
+		void predictModelOsculating(const int &degree, const ViEigenBaseVector *coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling, const int *offsets = NULL);
 
-		bool estimateModelSplines(const int &degree, const int &derivative, ViVector &coefficients, const qreal *samples, const int &size, const qreal &scaling);
-		void predictModelSplines(const int &degree, const ViVector &coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling);
+		ViEigenBaseVector* estimateModelSplines(const int &degree, const int &derivative, const qreal *samples, const int &size, const qreal &scaling);
+		void predictModelSplines(const int &degree, const ViEigenBaseVector *coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling, const int *offsets = NULL);
 
-		void calculateDerivative(const int &degree, const qreal &x, ViVector &row, const int &derivative);
-		void calculateDerivative(const int &degree, const qreal &x, ViVector &row, const int &derivative, const int &offset, const int multiplier);
+		void calculateDerivative(const int &degree, const qreal &x, ViEigenBaseMatrix *matrix, const int &rowOffset, const int &derivative);
+		void calculateDerivative(const int &degree, const qreal &x, ViEigenBaseMatrix *matrix, const int &rowOffset, const int &derivative, const int &offset, const int multiplier);
 		qreal calculateMse(const qreal *observed, const qreal *predicted, const int &size);
+
+		void splineOffsetModel(int *offsets, const int &size, const int &coefficientCount);
+		void splineOffsetPrediction(int *offsets, const int &predictionCount, const int &size, const int &coefficientCount);
 
 	private:
 
-		bool (ViPolynomialPredictor::*predictPointer)(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling);
-		bool (ViPolynomialPredictor::*predictBestPointer)(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling);
-		bool (ViPolynomialPredictor::*estimateModelPointer)(const int &degree, const int &derivative, ViVector &coefficients, const qreal *samples, const int &size, const qreal &scaling);
-		void (ViPolynomialPredictor::*predictModelPointer)(const int &degree, const ViVector &coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling);
+		bool (ViPolynomialPredictor::*predictPointer)(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *error = NULL);
+		ViEigenBaseVector* (ViPolynomialPredictor::*estimateModelPointer)(const int &degree, const int &derivative, const qreal *samples, const int &size, const qreal &scaling);
+		void (ViPolynomialPredictor::*predictModelPointer)(const int &degree, const ViEigenBaseVector *coefficients, qreal *prediction, const int &size, const int &start, const qreal &scaling, const int *offsets = NULL);
 
 		Estimation mEstimation;
 		Mode mMode;
@@ -76,6 +82,7 @@ class ViPolynomialPredictor : public ViPredictor
 
 		int mDegree;
 		int mDerivatives;
+		ViEigenBase *mEigen;
 
 };
 

@@ -1282,7 +1282,7 @@ void ViAudioObject::correlateNext()
 
 bool ViAudioObject::generateNoiseMask(ViNoiseDetector *detector)
 {
-	if(!hasBuffer(ViAudio::Corrupted))
+	/*if(!hasBuffer(ViAudio::Corrupted))
 	{
 		log("A noise mask requires a corrupted signal.", QtCriticalMsg);
 		setFinished();
@@ -1301,7 +1301,7 @@ bool ViAudioObject::generateNoiseMask(ViNoiseDetector *detector)
 	buffer(ViAudio::Noise)->setFormat(theFormat);
 	buffer(ViAudio::NoiseMask)->setFormat(theFormat);
 	mNoiseDetector->setBuffers(buffer(ViAudio::Corrupted), buffer(ViAudio::Noise), buffer(ViAudio::NoiseMask));
-	mNoiseDetector->generate();
+	mNoiseDetector->generate();*/
 }
 
 /*******************************************************************************************************************

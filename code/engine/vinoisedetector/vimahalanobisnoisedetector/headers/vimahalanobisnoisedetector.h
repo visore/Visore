@@ -1,4 +1,4 @@
-#ifndef VIMAHALANOBISNOISEDETECTOR_H
+/*#ifndef VIMAHALANOBISNOISEDETECTOR_H
 #define VIMAHALANOBISNOISEDETECTOR_H
 
 #include <vinoisedetector.h>
@@ -36,4 +36,4 @@ class ViMahalanobisNoiseDetector : public ViNoiseDetector
 };
 
 #endif
-
+*/

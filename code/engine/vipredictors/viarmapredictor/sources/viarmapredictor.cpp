@@ -51,7 +51,7 @@ void ViArmaPredictor::setParameter(const int &number, const qreal &value)
 	}
 }
 
-bool ViArmaPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount)
+bool ViArmaPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error)
 {
-	return mGretl->forecast(samples, size, predictedSamples, predictionCount);
+	return mGretl->forecast(samples, size, predictedSamples, predictionCount, error);
 }

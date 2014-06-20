@@ -1,4 +1,4 @@
-#include <vifouriernoisedetector.h>
+/*#include <vifouriernoisedetector.h>
 
 #define WINDOW_SIZE 64
 
@@ -68,3 +68,4 @@ ViFourierNoiseDetector* create()
 #ifdef __cplusplus
 }
 #endif
+*/

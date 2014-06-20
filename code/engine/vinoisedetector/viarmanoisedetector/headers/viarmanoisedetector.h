@@ -1,4 +1,4 @@
-#ifndef VIARMANOISEDETECTOR_H
+/*#ifndef VIARMANOISEDETECTOR_H
 #define VIARMANOISEDETECTOR_H
 
 #include <vinoisedetector.h>
@@ -91,10 +91,9 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 		void calculateNoiseNative(QQueue<qreal> &samples);
 		void calculateNoiseGretl(QQueue<qreal> &samples);
 
-		/*
-		* Box-Muller transform - was listed above, and is relatively simple to implement. If you need very precise samples however, be aware that the Box-Muller transform combined with some uniform generators suffers from an anomaly called Neave Effect.
-		* H. R. Neave, "On using the Box-Muller transformation with multiplicative congruential pseudorandom number generators," Applied Statistics, 22, 92-97, 1973
-		 */
+		//Box-Muller transform - was listed above, and is relatively simple to implement. If you need very precise samples however, be aware that the Box-Muller transform combined with some uniform generators suffers from an anomaly called Neave Effect.
+		//H. R. Neave, "On using the Box-Muller transformation with multiplicative congruential pseudorandom number generators," Applied Statistics, 22, 92-97, 1973
+		//
 		//qreal generateNoise(const qreal &variance) const;
 
 		//Marsaglia polar method
@@ -153,3 +152,4 @@ class ViArmaNoiseDetector : public ViNoiseDetector
 
 #endif
 
+*/

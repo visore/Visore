@@ -41,12 +41,12 @@ ViBenchMarker2::ViBenchMarker2()
 	//mDetector = new ViMadNoiseDetector(); //
     //mDetector = new ViFourierNoiseDetector();
 	//mDetector = new ViPredictionNoiseDetector(2);
-	mDetector = new ViZscoreNoiseDetector();
+//	mDetector = new ViZscoreNoiseDetector();
     //mDetector = new ViNearestNeighbourNoiseDetector();
 	//mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA, ViArmaNoiseDetector::Gretl, ViArmaNoiseDetector::CML);
 	//mDetector = new ViArmaNoiseDetector(ViArmaNoiseDetector::ARMA, ViArmaNoiseDetector::Gretl, ViArmaNoiseDetector::CML);
 
-	mDetector->setDirection(ViNoiseDetector::Forward);
+//	mDetector->setDirection(ViNoiseDetector::Forward);
 	//mDetector->setDirection(ViNoiseDetector::Reversed);
 	//mDetector->setDirection(ViNoiseDetector::Bidirectional);
 }
@@ -65,8 +65,8 @@ void ViBenchMarker2::benchmark()
 		mFiles.enqueue(dir.absoluteFilePath(files[i]));
 	}
 
-	QString name = mDetector->name() + "_";
-	if(ViNoise::NOISE_TYPE == ViNoise::Direct) name += "Direct";
+	//QString name = mDetector->name() + "_";
+/*	if(ViNoise::NOISE_TYPE == ViNoise::Direct) name += "Direct";
 	else if(ViNoise::NOISE_TYPE == ViNoise::Mean) name += "Mean";
 	else if(ViNoise::NOISE_TYPE == ViNoise::Maximum) name += "Maximum";
 
@@ -76,7 +76,7 @@ void ViBenchMarker2::benchmark()
 
 	mOutputStream<<name<<"\n\n\n";
 
-	nextFile();
+	nextFile();*/
 }
 
 void ViBenchMarker2::nextFile()
@@ -134,7 +134,7 @@ void ViBenchMarker2::process2()
 	qint64 i;
 	qint64 offset1 = 0, offset2 = 0;
 	qreal maxMath = 0;
-	qreal amplification = mDetector->amplification();
+	/*qreal amplification = mDetector->amplification();
 	while(mask.hasData())
 	{
 		mask.read();
@@ -209,7 +209,7 @@ void ViBenchMarker2::process2()
 	}
     mCurrentObject->clearBuffers();
 
-	nextFile();
+	nextFile();*/
 }
 
 void ViBenchMarker2::generateNoise()

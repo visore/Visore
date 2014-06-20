@@ -240,17 +240,20 @@ bool ViPolynomialInterpolator::interpolateBestNormal(const qreal *leftSamples, c
 			}
 			else
 			{
-				if(error != NULL && bestMse != DBL_MAX)
-				{
-					error->add(interpolationLeft, leftSamples, leftSize);
-					error->add(interpolationRight, rightSamples, rightSize);
-				}
 				mEigen->clear(currentCoefficients);
 				break;
 			}
 		}
 	}
 	if(bestMse == DBL_MAX) return false;
+
+	if(error != NULL)
+	{
+		(this->*interpolateModelPointer)(bestDegree, bestCoefficients, interpolationLeft, leftSize, 0, scaling, NULL);
+		(this->*interpolateModelPointer)(bestDegree, bestCoefficients, interpolationRight, rightSize, rightStart, scaling, NULL);
+		error->add(interpolationLeft, leftSamples, leftSize);
+		error->add(interpolationRight, rightSamples, rightSize);
+	}
 
 	(this->*interpolateModelPointer)(bestDegree, bestCoefficients, outputSamples, outputSize, leftSize, scaling, NULL);
 	mEigen->clear(bestCoefficients);
@@ -295,11 +298,6 @@ bool ViPolynomialInterpolator::interpolateBestOsculating(const qreal *leftSample
 				}
 				else
 				{
-					if(error != NULL && bestMse != DBL_MAX)
-					{
-						error->add(interpolationLeft, leftSamples, leftSize);
-						error->add(interpolationRight, rightSamples, rightSize);
-					}
 					mEigen->clear(currentCoefficients);
 					if(wasBad) wasBadAgain = true;
 					else wasBad = true;
@@ -310,6 +308,14 @@ bool ViPolynomialInterpolator::interpolateBestOsculating(const qreal *leftSample
 		if(wasBadAgain) break;
 	}
 	if(bestMse == DBL_MAX) return false;
+
+	if(error != NULL)
+	{
+		(this->*interpolateModelPointer)(bestDegree, bestCoefficients, interpolationLeft, leftSize, 0, scaling, NULL);
+		(this->*interpolateModelPointer)(bestDegree, bestCoefficients, interpolationRight, rightSize, rightStart, scaling, NULL);
+		error->add(interpolationLeft, leftSamples, leftSize);
+		error->add(interpolationRight, rightSamples, rightSize);
+	}
 
 	(this->*interpolateModelPointer)(bestDegree, bestCoefficients, outputSamples, outputSize, leftSize, scaling, NULL);
 	mEigen->clear(bestCoefficients);
@@ -361,11 +367,6 @@ bool ViPolynomialInterpolator::interpolateBestSplines(const qreal *leftSamples, 
 				}
 				else
 				{
-					if(error != NULL && bestMse != DBL_MAX)
-					{
-						error->add(interpolationLeft, leftSamples, leftSize);
-						error->add(interpolationRight, rightSamples, rightSize);
-					}
 					mEigen->clear(currentCoefficients);
 					if(wasBad) wasBadAgain = true;
 					else wasBad = true;
@@ -376,6 +377,16 @@ bool ViPolynomialInterpolator::interpolateBestSplines(const qreal *leftSamples, 
 		if(wasBadAgain) break;
 	}
 	if(bestMse == DBL_MAX) return false;
+
+	if(error != NULL)
+	{
+		splineOffsetLeft(leftOffsets, leftSize, bestDegree + 1);
+		splineOffsetRight(rightOffsets, rightSize, bestDegree + 1, leftSize + outputSize, outputSize);
+		(this->*interpolateModelPointer)(bestDegree, bestCoefficients, interpolationLeft, leftSize, 0, scaling, leftOffsets);
+		(this->*interpolateModelPointer)(bestDegree, bestCoefficients, interpolationRight, rightSize, rightStart, scaling, rightOffsets);
+		error->add(interpolationLeft, leftSamples, leftSize);
+		error->add(interpolationRight, rightSamples, rightSize);
+	}
 
 	int outputOffset[outputSize];
 	splineOffsetOutput(outputOffset, outputSize, bestDegree + 1, leftSize);

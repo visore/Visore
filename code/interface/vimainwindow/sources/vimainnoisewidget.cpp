@@ -6,7 +6,7 @@
 ViMainNoiseWidget::ViMainNoiseWidget(QWidget *parent)
     : ViWidget(parent)
 {
-	mUi = new Ui::ViMainNoiseWidget();
+	/*mUi = new Ui::ViMainNoiseWidget();
     mUi->setupUi(this);
 
 	clear();
@@ -39,7 +39,7 @@ ViMainNoiseWidget::ViMainNoiseWidget(QWidget *parent)
 		mUi->detectorComboBox->addItem(ViName::formatName(noiseDetectors[i], "", true), noiseDetectors[i]);
 	}
 	mDefaultDetector = ViNoiseDetectorManager::defaultName("", true);
-	mUi->detectorComboBox->setCurrentText(mDefaultDetector);
+	mUi->detectorComboBox->setCurrentText(mDefaultDetector);*/
 }
 
 ViMainNoiseWidget::~ViMainNoiseWidget()
@@ -78,12 +78,12 @@ void ViMainNoiseWidget::toggleDetector()
 
 void ViMainNoiseWidget::generate()
 {
-	if(mUi->typeComboBox->currentText() == "Custom Mask")
+	/*if(mUi->typeComboBox->currentText() == "Custom Mask")
 	{
 		engine()->generateCustomMask(mUi->projectLoader->objects());
 	}
 	else if(mUi->typeComboBox->currentText() == "Noise Mask")
 	{
 		engine()->generateNoiseMask(mUi->projectLoader->objects(), ViNoiseDetectorManager::create(mUi->detectorComboBox->itemData(mUi->detectorComboBox->currentIndex()).toString()));
-	}
+	}*/
 }

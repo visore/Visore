@@ -62,12 +62,12 @@ void ViBenchMarker::benchmark()
 
 	//mDetector = new ViNearestNeighbourNoiseDetector();
 	//mDetector = new ViZscoreNoiseDetector();
-	mDetector = new ViFourierNoiseDetector();
+//	mDetector = new ViFourierNoiseDetector();
 	//mDetector = new ViPredictionNoiseDetector(2);
 	//mDetector = new ViMadNoiseDetector();
 	//mDetector = new ViMahalanobisNoiseDetector();
 
-	mOutputFile.setFileName("/home/visore/Visore Projects/RESULTS/"+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")+".txt");
+	/*mOutputFile.setFileName("/home/visore/Visore Projects/RESULTS/"+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")+".txt");
 	mOutputFile.open(QIODevice::WriteOnly);
 	mOutputStream.setDevice(&mOutputFile);
 	mOutputStream<<mDetector->name()<<"\n\n\n";
@@ -75,7 +75,7 @@ void ViBenchMarker::benchmark()
 	QObject::connect(&mObjectChain, SIGNAL(progressed(qreal)), this, SLOT(printProgress(qreal)), Qt::UniqueConnection);
 	QObject::connect(&mObjectChain, SIGNAL(finished()), this, SLOT(process()), Qt::UniqueConnection);
 
-	loadProject(mProjects.dequeue());
+	loadProject(mProjects.dequeue());*/
 }
 
 void ViBenchMarker::clear()
@@ -122,8 +122,8 @@ void ViBenchMarker::processProject()
 {
 	QObject::disconnect(&mProject, SIGNAL(finished()), this, SLOT(processProject()));
 
-	mDetector->clear();
-	mDetector->setThreshold(mCurrentThreshold);
+//	mDetector->clear();
+	//mDetector->setThreshold(mCurrentThreshold);
 
 	processProject2();
 }
@@ -133,13 +133,13 @@ void ViBenchMarker::processProject2()
 	mObjectChain.clear();
 	mObjectChain.add(mProject.object(mCurrentObject));
 
-	mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted)), 0.1);
+	/*mObjectChain.addFunction(ViFunctionCall("decode", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted)), 0.1);
 	mObjectChain.addFunction(ViFunctionCall("align"), 0.2);
 	mObjectChain.addFunction(ViFunctionCall("generateCustomMask"), 0.3);
 	mObjectChain.addFunction(ViFunctionCall("generateNoiseMask", QVariant::fromValue(mDetector)), 0.3);
 	mObjectChain.addFunction(ViFunctionCall("clearBuffers", QVariant::fromValue(ViAudio::Target | ViAudio::Corrupted)), 0.1);
 
-	mObjectChain.execute("Generating Noise");
+	mObjectChain.execute("Generating Noise");*/
 }
 
 void ViBenchMarker::process()

@@ -13,15 +13,20 @@ class ViHermitePredictor : public ViPredictor
 		~ViHermitePredictor();
 
 		void setParameter(const int &number, const qreal &value);
+		bool validParameters();
+
+		ViHermitePredictor* clone();
 
 	protected:
 
-		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount);
-		bool estimate(const int &degree, ViVector &coefficients, const qreal *samples, const int &size, const qreal &scaling);
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError = NULL);
 
-		qreal lagrange(const qreal *samples, const int &size, const int &x, const qreal &scaler);
-		qreal lagrangeFirstDerivative(const qreal *samples, const int &size, const int &x, const qreal &scaler);
+		void calculate(const qreal *x, const qreal *y, const qreal *derivatives, const int &size, qreal *output, const int &outputSize, const int &startX, const qreal &scaling);
+		qreal calculateLagrange(const qreal *x, const int &size, const qreal &theX, const int &j);
+		qreal calculateLagrangeDerivative1(const qreal *x, const int &size, const qreal &theX, const int &j);
+
 
 };
 
 #endif
+

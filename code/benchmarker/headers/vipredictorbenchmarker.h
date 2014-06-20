@@ -24,18 +24,20 @@ class ViPredictorBenchmarker : public QObject
 
 		void progress(qreal percentage);
 
+		void addDir(QString dirName);
+
 	public:
 
 		ViPredictorBenchmarker();
 		virtual ~ViPredictorBenchmarker();
 
-		void benchmark();
+		void benchmark(QString folder = "");
 
 	protected:
 
 		void printFileHeader();
-		void printFileData(const qreal *rmse, const qint64 &time);
-		void printTerminal(const qreal *rmse, const qint64 &time);
+		void printFileData(ViErrorCollection &predictionErrors, ViError &modelError, const qint64 &time);
+		void printTerminal(ViErrorCollection &predictionErrors, ViError &modelError, const qint64 &time);
 
 	private:
 
