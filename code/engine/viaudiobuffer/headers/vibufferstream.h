@@ -29,7 +29,7 @@ class ViBufferStream : public QObject, public ViId, public ViFunctorParameter
 
 	public:
 
-		~ViBufferStream();
+		virtual ~ViBufferStream();
 
 		virtual int read(char *data, int length);
 		virtual int read(ViBufferChunk &chunk, int length);

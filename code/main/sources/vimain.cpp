@@ -8,6 +8,7 @@
 #include<vibenchmarker4.h>
 #include <vipredictorbenchmarker.h>
 #include <viinterpolatorbenchmarker.h>
+#include <vinoisedetectorbenchmarker.h>
 
 int main(int argc, char *argv[])
 {
@@ -34,9 +35,9 @@ int main(int argc, char *argv[])
     bool BENCH = true;
     //bool BENCH = false;
 
-	//ViBenchMarker4 bench;
-	ViPredictorBenchmarker bench;
+	//ViPredictorBenchmarker bench;
 	//ViInterpolatorBenchmarker bench;
+	ViNoiseDetectorBenchmarker bench;
 
 	if(BENCH)
 	{

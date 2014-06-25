@@ -1,18 +1,16 @@
-/*#include <vimahalanobisnoisedetector.h>
+#include <vimahalanobisnoisedetector.h>
 
 #define DEFAULT_WINDOW_SIZE 64
-#define AMPLIFIER 0.2
 
 ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector()
 	: ViNoiseDetector()
 {
 	ViGretl::initialize();
 	mGretlData = NULL;
+
+	setScale(10);
 	setWindowSize(DEFAULT_WINDOW_SIZE);
-
-	setAmplification(AMPLIFIER);
-
-	addParameterName("Window Size");
+	addParameter("Window Size");
 
 	mGretlParameters = gretl_list_new(1);
 	mGretlParameters[1] = 1;
@@ -45,49 +43,30 @@ void ViMahalanobisNoiseDetector::setWindowSize(int size)
 	mGretlData = create_new_dataset(2, mWindowSize, 0);
 }
 
-void ViMahalanobisNoiseDetector::setParameters(const qreal &param1)
+bool ViMahalanobisNoiseDetector::validParameters()
 {
-	setWindowSize(param1);
+	return parameter("Window Size") > 0;
 }
 
-void ViMahalanobisNoiseDetector::calculateNoise(QQueue<qreal> &samples)
+void ViMahalanobisNoiseDetector::initialize()
+{
+	setWindowSize(parameter("Window Size"));
+}
+
+void ViMahalanobisNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
 {
 	static int i, error;
-	static MahalDist *distance;
 
 	while(samples.size() >= mWindowSize)
 	{
 		for(i = 0; i < mWindowSize; ++i) mGretlData->Z[1][i] = samples[i];
 
-		distance = get_mahal_distances(mGretlParameters, mGretlData, OPT_NONE, NULL, &error);
+		MahalDist *distance = get_mahal_distances(mGretlParameters, mGretlData, OPT_NONE, NULL, &error);
 
-		if(error) setNoise(0);
-		else
-		{
-			setNoise(distance->d[mHalfWindowSize]);
-			free_mahal_dist(distance);
-		}
+		if(error) noise.append(0);
+		else noise.append(distance->d[mHalfWindowSize]);
 
+		free_mahal_dist(distance);
 		samples.removeFirst();
 	}
 }
-
-ViMahalanobisNoiseDetector* ViMahalanobisNoiseDetector::clone()
-{
-	return new ViMahalanobisNoiseDetector(*this);
-}
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-ViMahalanobisNoiseDetector* create()
-{
-	return new ViMahalanobisNoiseDetector();
-}
-
-#ifdef __cplusplus
-}
-#endif
-*/

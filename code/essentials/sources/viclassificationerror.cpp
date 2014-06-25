@@ -82,7 +82,9 @@ qint64 ViClassificationError::calculateFN(const int *classification, const int *
 
 qreal ViClassificationError::calculateSensitivity(const qint64 &TP, const qint64 &FN)
 {
-	return qreal(TP) / (TP + FN);
+	qint64 devider = TP + FN;
+	if(devider == 0) return 0;
+	return qreal(TP) / devider;
 }
 
 qreal ViClassificationError::calculateSensitivity(const bool *classification, const bool *observation, const int &size)
@@ -97,7 +99,9 @@ qreal ViClassificationError::calculateSensitivity(const int *classification, con
 
 qreal ViClassificationError::calculateSpecificity(const qint64 &TN, const qint64 &FP)
 {
-		return qreal(TN) / (TN + FP);
+	qint64 devider = TN + FP;
+	if(devider == 0) return 0;
+	return qreal(TN) / devider;
 }
 
 qreal ViClassificationError::calculateSpecificity(const bool *classification, const bool *observation, const int &size)
@@ -112,7 +116,9 @@ qreal ViClassificationError::calculateSpecificity(const int *classification, con
 
 qreal ViClassificationError::calculateAccuracy(const qint64 &TP, const qint64 &TN, const qint64 &FP, const qint64 &FN)
 {
-	return qreal(TP + TN) / (TP + TN + FP + FN);
+	qint64 devider = TP + TN + FP + FN;
+	if(devider == 0) return 0;
+	return qreal(TP + TN) / devider;
 }
 
 qreal ViClassificationError::calculateAccuracy(const bool *classification, const bool *observation, const int &size)
@@ -127,7 +133,9 @@ qreal ViClassificationError::calculateAccuracy(const int *classification, const 
 
 qreal ViClassificationError::calculateF1Score(const qint64 &TP, const qint64 &FP, const qint64 &FN)
 {
-	return qreal(2 * TP) / ((2 * TP) + FP + FN);
+	qint64 devider = (2 * TP) + FP + FN;
+	if(devider == 0) return 0;
+	return qreal(2 * TP) / devider;
 }
 
 qreal ViClassificationError::calculateF1Score(const bool *classification, const bool *observation, const int &size)
@@ -142,7 +150,9 @@ qreal ViClassificationError::calculateF1Score(const int *classification, const i
 
 qreal ViClassificationError::calculateMatthewsCoefficient(const qint64 &TP, const qint64 &TN, const qint64 &FP, const qint64 &FN)
 {
-	return ((TP * TN) - (FP * FN)) / (sqrt(TP + FP) * sqrt(TP + FN) * sqrt(TN + FP) * sqrt(TN + FN)); // Take individual sqrt, otherwise the number gets to large with multiplication
+	qreal devider = sqrt(TP + FP) * sqrt(TP + FN) * sqrt(TN + FP) * sqrt(TN + FN); // Take individual sqrt, otherwise the number gets to large with multiplication
+	if(devider == 0) return 0;
+	return ((TP * TN) - (FP * FN)) / devider;
 }
 
 qreal ViClassificationError::calculateMatthewsCoefficient(const bool *classification, const bool *observation, const int &size)

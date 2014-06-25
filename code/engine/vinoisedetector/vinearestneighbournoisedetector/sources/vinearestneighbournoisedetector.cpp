@@ -1,12 +1,13 @@
-/*#include <vinearestneighbournoisedetector.h>
+#include <vinearestneighbournoisedetector.h>
 
 #define DEFAULT_K 32
 
 ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector()
 	: ViNoiseDetector()
 {
+	setScale(2);
 	setK(DEFAULT_K);
-	addParameterName("K");
+	addParameter("K");
 }
 
 ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector(const ViNearestNeighbourNoiseDetector &other)
@@ -23,12 +24,17 @@ void ViNearestNeighbourNoiseDetector::setK(const int &k)
 	setOffset(mHalfK);
 }
 
-void ViNearestNeighbourNoiseDetector::setParameters(const qreal &param1)
+bool ViNearestNeighbourNoiseDetector::validParameters()
 {
-	setK(param1);
+	return parameter("K") > 0;
 }
 
-void ViNearestNeighbourNoiseDetector::calculateNoise(QQueue<qreal> &samples)
+void ViNearestNeighbourNoiseDetector::initialize()
+{
+	setK(parameter("K"));
+}
+
+void ViNearestNeighbourNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
 {
 	static int i;
 	static qreal totalDifference;
@@ -38,33 +44,13 @@ void ViNearestNeighbourNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 		const qreal &currentValue = samples[mHalfK];
 		totalDifference = 0;
 
-		for(i = 0; i < mHalfK; ++i) totalDifference += qAbs(currentValue - samples[i]);
-		for(i = mHalfK + 1; i < mK; ++i) totalDifference += qAbs(currentValue - samples[i]);
+		for(i = 0; i < mHalfK; ++i) totalDifference += abs(currentValue - samples[i]);
+		for(i = mHalfK + 1; i < mK; ++i) totalDifference += abs(currentValue - samples[i]);
 
 		// Devide by mK, since we want the mean of all differences
 		// Devide 2, since the maximum distance between samples can be 2
-		setNoise(totalDifference / (mK * 2));
+		noise.append(totalDifference / mK);
 
 		samples.removeFirst();
 	}
 }
-
-ViNearestNeighbourNoiseDetector* ViNearestNeighbourNoiseDetector::clone()
-{
-	return new ViNearestNeighbourNoiseDetector(*this);
-}
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-ViNearestNeighbourNoiseDetector* create()
-{
-	return new ViNearestNeighbourNoiseDetector();
-}
-
-#ifdef __cplusplus
-}
-#endif
-*/

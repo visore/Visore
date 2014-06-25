@@ -7,11 +7,13 @@
 ViNoiseDetector::ViNoiseDetector()
 {
 	mOffset = 0;
+	mScale = 1;
 }
 
 ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 {
 	mOffset = other.mOffset;
+	mScale = other.mScale;
 	mParameters = other.mParameters;
 }
 
@@ -19,12 +21,14 @@ ViNoiseDetector::~ViNoiseDetector()
 {
 }
 
-void ViNoiseDetector::detect(ViBuffer *corrupted, ViBuffer *noiseMap)
+qreal ViNoiseDetector::detect(ViBuffer *corrupted, ViBuffer *noiseMap)
 {
-	int i, remove;
+	int i;
+	qreal maxNoise = 0;
 
 	noiseMap->clear();
 	initialize();
+	setProgress(0);
 
 	ViAudioReadData corruptedData(corrupted);
 	ViAudioWriteData mapData(noiseMap);
@@ -40,6 +44,9 @@ void ViNoiseDetector::detect(ViBuffer *corrupted, ViBuffer *noiseMap)
 		map2.append(0);
 	}
 
+	qint64 totalSamples = corruptedData.bufferSamples();
+	qint64 processedSamples = 0;
+
 	while(corruptedData.hasData())
 	{
 		corruptedData.read();
@@ -49,40 +56,59 @@ void ViNoiseDetector::detect(ViBuffer *corrupted, ViBuffer *noiseMap)
 		for(i = 0; i < corrupted1.size(); ++i) samples1.append(corrupted1[i]);
 		for(i = 0; i < corrupted2.size(); ++i) samples2.append(corrupted2[i]);
 
-		remove = detect(samples1, map1);
-		samples1.remove(0, remove);
-
-		remove = detect(samples2, map2);
-		samples2.remove(0, remove);
+		detect(samples1, map1);
+		detect(samples2, map2);
 
 		while(map1.size() >= WINDOW_SIZE)
 		{
-			for(i = 0; i < WINDOW_SIZE; ++i) chunk[i] = map1[i];
+			for(i = 0; i < WINDOW_SIZE; ++i)
+			{
+				chunk[i] = map1[i] / mScale;
+				if(chunk[i] > maxNoise) maxNoise = chunk[i];
+			}
 			map1.remove(0, WINDOW_SIZE);
 			mapData.enqueueSplitSamples(chunk, 0);
 		}
 
 		while(map2.size() >= WINDOW_SIZE)
 		{
-			for(i = 0; i < WINDOW_SIZE; ++i) chunk[i] = map2[i];
+			for(i = 0; i < WINDOW_SIZE; ++i)
+			{
+				chunk[i] = map2[i] / mScale;
+				if(chunk[i] > maxNoise) maxNoise = chunk[i];
+			}
 			map2.remove(0, WINDOW_SIZE);
 			mapData.enqueueSplitSamples(chunk, 1);
 		}
+
+		processedSamples += corrupted1.size() + corrupted2.size();
+		setProgress((processedSamples * 99.0) / totalSamples);
 	}
 
 	if(map1.size() > 0)
 	{
 		chunk.resize(map1.size());
-		for(i = 0; i < map1.size(); ++i) chunk[i] = map1[i];
+		for(i = 0; i < map1.size(); ++i)
+		{
+			chunk[i] = map1[i] / mScale;
+			if(chunk[i] > maxNoise) maxNoise = chunk[i];
+		}
 		mapData.enqueueSplitSamples(chunk, 0);
 	}
 
 	if(map2.size() > 0)
 	{
 		chunk.resize(map2.size());
-		for(i = 0; i < map2.size(); ++i) chunk[i] = map2[i];
+		for(i = 0; i < map2.size(); ++i)
+		{
+			chunk[i] = map2[i] / mScale;
+			if(chunk[i] > maxNoise) maxNoise = chunk[i];
+		}
 		mapData.enqueueSplitSamples(chunk, 1);
 	}
+
+	setProgress(100);
+	return maxNoise;
 }
 
 void ViNoiseDetector::mask(ViBuffer *noiseMap, ViBuffer *noiseMask, const qreal &threshold)
@@ -232,10 +258,10 @@ qreal ViNoiseDetector::parameter(const QString &name)
 {
 	if(hasParameter(name))
 	{
-		LOG("Trying to access an invalid parameter", QtFatalMsg);
-		exit(-1);
+		return mParameters[name];
 	}
-	return mParameters[name];
+	LOG("Trying to access an invalid parameter: " + name, QtFatalMsg);
+	exit(-1);
 }
 
 void ViNoiseDetector::addParameter(const QString &name)
@@ -253,452 +279,21 @@ void ViNoiseDetector::addParameter(const QString &name)
 	mParameters.insert(name, 0);
 }
 
-void ViNoiseDetector::initialize()
-{
-}
-
-/*#include <viscaler.h>
-
-#define WINDOW_SIZE 8096
-
-void ViNoiseDetectorThread::setDetector(ViNoiseDetector *detector)
-{
-	mDetector = detector;
-}
-
-void ViNoiseDetectorThread::run()
-{
-	mDetector->create();
-}
-
-ViNoiseDetector::ViNoiseDetector()
-{
-	clear();
-	mOffset = 0;
-	mThreshold = 0.5;
-	mDirection = Forward;
-	mAmplification = 1;
-}
-
-ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples)
-{
-	clear();
-	initialize(channels, samples);
-	mOffset = 0;
-	mThreshold = 0.5;
-	mDirection = Forward;
-	mAmplification = 1;
-}
-
-ViNoiseDetector::ViNoiseDetector(const int &channels, const qint64 samples, ViProcessor::ChannelMode mode)
-{
-	clear();
-	initialize(channels, samples);
-	setMode(mode);
-	mOffset = 0;
-	mThreshold = 0.5;
-	mDirection = Forward;
-	mAmplification = 1;
-}
-
-ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
-{
-	clear();
-	mMode = other.mMode;
-	mChannel = other.mChannel;
-	mIndexes = other.mIndexes;
-	mReverseIndexes = other.mReverseIndexes;
-	mOffset = other.mOffset;
-	mThreshold = other.mThreshold;
-	mDirection = other.mDirection;
-	mAmplification = other.mAmplification;
-	mParameterNames = other.mParameterNames;
-	initialize(mChannel, 512);
-}
-
-ViNoiseDetector::~ViNoiseDetector()
-{
-	viDeleteAll(mNoise);
-	viDeleteAll(mReverseNoise);
-}
-
-void ViNoiseDetector::setDirection(Direction direction)
-{
-	mDirection = direction;
-}
-
-ViNoiseDetector::Direction ViNoiseDetector::direction()
-{
-	return mDirection;
-}
-
 void ViNoiseDetector::setOffset(const int &offset)
 {
 	mOffset = offset;
 }
 
-void ViNoiseDetector::initialize(const int &channels, const qint64 samples)
+qreal ViNoiseDetector::unscaleThreshold(const qreal &threshold)
 {
-	viDeleteAll(mNoise);
-	viDeleteAll(mReverseNoise);
-	qint64 size = qCeil(samples / qreal(channels));
-	for(int i = 0; i < channels; ++i)
-	{
-		mIndexes.append(0);
-		mReverseIndexes.append(0);
-
-		ViNoise *noise = new ViNoise(size);
-		noise->setThreshold(mThreshold);
-		mNoise.append(noise);
-
-		ViNoise *noise2 = new ViNoise(size);
-		noise2->setThreshold(mThreshold);
-		mReverseNoise.append(noise2);
-	}
+	return threshold * mScale;
 }
 
-void ViNoiseDetector::setThreshold(const qreal &threshold)
+void ViNoiseDetector::setScale(const qreal &scale)
 {
-	mThreshold = threshold;
-	for(int i = 0; i < mNoise.size(); ++i)
-	{
-		mNoise[i]->setThreshold(threshold);
-		mReverseNoise[i]->setThreshold(threshold);
-	}
+	mScale = scale;
 }
 
-void ViNoiseDetector::setMode(ViProcessor::ChannelMode mode)
+void ViNoiseDetector::initialize()
 {
-	mMode = mode;
 }
-
-ViProcessor::ChannelMode ViNoiseDetector::mode()
-{
-	return mMode;
-}
-
-void ViNoiseDetector::setChannel(int channel)
-{
-	mChannel = channel;
-}
-
-int ViNoiseDetector::channel()
-{
-	return mChannel;
-}
-
-void ViNoiseDetector::setData(ViAudioReadData &data)
-{
-	mData = &data;
-}
-
-bool ViNoiseDetector::hasData()
-{
-	return mData != NULL;
-}
-
-bool ViNoiseDetector::isNoisy(int channel)
-{
-	setChannel(channel);
-	return isNoisy();
-}
-
-bool ViNoiseDetector::isNoisy(ViAudioReadData &data)
-{
-	setData(data);
-	return isNoisy();
-}
-
-bool ViNoiseDetector::isNoisy(ViAudioReadData &data, int channel)
-{
-	setData(data);
-	setChannel(channel);
-	return isNoisy();
-}
-
-bool ViNoiseDetector::isNoisy()
-{
-
-
-	//mNoise[mChannel].minimize();
-	//return mNoise[mChannel]isNoisy();
-}
-
-void ViNoiseDetector::setNoise(const qreal &value)
-{
-	if(mReverse)
-	{
-		mReverseNoise[mChannel]->set(mReverseIndexes[mChannel], value * mAmplification);
-		mReverseIndexes[mChannel] += 1;
-	}
-	else
-	{
-		mNoise[mChannel]->set(mIndexes[mChannel], value * mAmplification);
-		mIndexes[mChannel] += 1;
-	}
-}
-
-ViNoise& ViNoiseDetector::noise(const int &channel)
-{
-	return *mNoise[channel];
-}
-
-void ViNoiseDetector::clear()
-{
-	mData = NULL;
-	mChannel = 0;
-	setMode(ViProcessor::Combined);
-	mIndexes.clear();
-	mReverseIndexes.clear();
-
-	viDeleteAll(mNoise);
-	viDeleteAll(mReverseNoise);
-
-	mCache.clear();
-
-	mRead.clear();
-	mWrite1.clear();
-	mWrite2.clear();
-}
-
-void ViNoiseDetector::setAmplification(const qreal &amp)
-{
-	mAmplification = amp;
-}
-
-qreal ViNoiseDetector::amplification()
-{
-	return mAmplification;
-}
-
-void ViNoiseDetector::setParameter(const int &number, const qreal &value)
-{
-	LOG("No parameters implemented for this noise detector.", QtCriticalMsg);
-	exit(-1);
-}
-
-void ViNoiseDetector::setParameters(const qreal &param1)
-{
-	LOG("Invalid number of parameters given: 1", QtCriticalMsg);
-	exit(-1);
-}
-
-void ViNoiseDetector::setParameters(const qreal &param1, const qreal &param2)
-{
-	LOG("Invalid number of parameters given: 2", QtCriticalMsg);
-	exit(-1);
-}
-
-void ViNoiseDetector::setParameters(const qreal &param1, const qreal &param2, const qreal &param3)
-{
-	LOG("Invalid number of parameters given: 3", QtCriticalMsg);
-	exit(-1);
-}
-
-void ViNoiseDetector::setParameters(const qreal &param1, const qreal &param2, const qreal &param3, const qreal &param4)
-{
-	LOG("Invalid number of parameters given: 4", QtCriticalMsg);
-	exit(-1);
-}
-
-bool ViNoiseDetector::validParameters()
-{
-	return true;
-}
-
-bool ViNoiseDetector::hasParameter(const QString &name)
-{
-	return mParameterNames.contains(name);
-}
-
-QString ViNoiseDetector::parameterName(const int &number, const bool &allCaps)
-{
-	if(number >= mParameterNames.size()) return "";
-	if(allCaps) return mParameterNames[number].toUpper();
-	return mParameterNames[number];
-}
-
-int ViNoiseDetector::parameterCount()
-{
-	return mParameterNames.size();
-}
-
-void ViNoiseDetector::addParameterName(const QString &name)
-{
-	mParameterNames.append(name);
-}
-
-void ViNoiseDetector::setBuffers(ViBuffer *read, ViBuffer *write1, ViBuffer *write2)
-{
-	clear();
-
-	mRead.setBuffer(read);
-	mRead.setSampleCount(WINDOW_SIZE);
-	mWrite1.setBuffer(write1);
-	mWrite2.setBuffer(write2);
-}
-
-void ViNoiseDetector::generate()
-{
-	mThread.setDetector(this);
-	mThread.start();
-}
-
-void ViNoiseDetector::create()
-{
-	mReverse = false;
-	qint64 totalSamples = mRead.bufferSamples();
-	qint64 channelSamples = totalSamples / mRead.channelCount();
-	qint64 newSize, i, j;
-	int c;
-
-    qint64 totalSize = mRead.bufferSamples(), processedSize = 0;
-    if(mDirection == Bidirectional) totalSize *= 2;
-
-	initialize(mRead.channelCount(), totalSamples);
-	for(i = 0; i < mRead.channelCount(); ++i)
-	{
-		mCache.append(QQueue<qreal>());
-	}
-
-	if(mDirection & Forward)
-	{
-		for(i = 0; i < mRead.channelCount(); ++i)
-		{
-			setChannel(i);
-			for(j = 0; j < mOffset; ++j)
-			{
-				setNoise(0);
-			}
-		}
-
-		while(mRead.hasData())
-		{
-			mRead.read();
-
-			for(i = 0; i < mRead.channelCount(); ++i)
-			{
-				setChannel(i);
-				const ViSampleChunk &samples = mRead.splitSamples(i);
-				for(j = 0; j < samples.size(); ++j)
-				{
-					mCache[i].append(samples[j]);
-				}
-				calculateNoise(mCache[i]);
-			}
-
-            processedSize += mRead.sampleCount();
-            setProgress((processedSize * 99.0) / totalSize);
-		}
-
-		for(c = 0; c < mRead.channelCount(); ++c)
-		{
-			setChannel(c);
-			newSize = mNoise[c]->size();
-			while(newSize < channelSamples) setNoise(0);
-		}
-	}
-
-	if(mDirection & Reversed)
-	{
-		mRead.clear();
-		mCache.clear();
-		for(i = 0; i < mRead.channelCount(); ++i)
-		{
-			mCache.append(QQueue<qreal>());
-		}
-
-		mReverse = true;
-		mRead.setReversed();
-		int end;
-
-		for(i = 0; i < mRead.channelCount(); ++i)
-		{
-			setChannel(i);
-			end = mOffset;
-			if(i == 0) --end; // For some reason the 1st channel is ahead of 1 sample when processing in reversed
-			for(j = 0; j < end; ++j)
-			{
-				setNoise(0);
-			}
-		}
-
-		while(mRead.hasData())
-		{
-			mRead.read();
-
-			for(i = 0; i < mRead.channelCount(); ++i)
-			{
-				setChannel(i);
-				const ViSampleChunk &samples = mRead.splitSamples(i);
-				for(j = 0; j < samples.size(); ++j)
-				{
-					mCache[i].append(samples[j]);
-				}
-				calculateNoise(mCache[i]);
-			}
-
-            processedSize += mRead.sampleCount();
-            setProgress((processedSize * 99.0) / totalSize);
-		}
-		for(c = 0; c < mRead.channelCount(); ++c)
-		{
-			setChannel(c);
-			newSize = mReverseNoise[c]->size();
-			while(newSize < channelSamples) setNoise(0);
-		}
-	}
-
-	if(mDirection == Bidirectional)
-	{
-		for(c = 0; c < mRead.channelCount(); ++c)
-		{
-			newSize = mReverseNoise[c]->size();
-			for(i = 0; i < newSize; ++i)
-			{
-				mNoise[c]->set(i, (mNoise[c]->get(i) + mReverseNoise[c]->get(newSize - i - 1)) / 2);
-			}
-		}
-	}
-	else if(mDirection == Reversed)
-	{
-		for(c = 0; c < mRead.channelCount(); ++c)
-		{
-			newSize = mReverseNoise[c]->size();
-			for(i = 0; i < newSize; ++i)
-			{
-				mNoise[c]->set(i, mReverseNoise[c]->get(newSize - i - 1));
-			}
-		}
-	}
-
-	viDeleteAll(mReverseNoise);
-
-	for(i = 0; i < mRead.channelCount(); ++i)
-	{
-		mNoise[i]->generateMask();
-	}
-
-	int size = mWrite1.sampleCount() / 2;
-	qint64 offset = 0;
-	ViSampleChunk chunk(size);
-
-	while(offset < channelSamples)
-	{
-		for(i = 0; i < mRead.channelCount(); ++i)
-		{
-			chunk = mNoise[i]->data()->subset(offset, size);
-			mWrite1.enqueueSplitSamples(chunk,i);
-
-			chunk = mNoise[i]->mask()->subset(offset, size);
-			mWrite2.enqueueSplitSamples(chunk,i);
-		}
-		offset += size;
-	}
-
-	mCache.clear();
-	//clear();
-	setProgress(100);
-	emit finished();
-}
-*/

@@ -1,19 +1,17 @@
-/*#include <vimadnoisedetector.h>
+#include <vimadnoisedetector.h>
 #include <vimath.h>
 #include <qmath.h>
 
 #define MAD 0.6745
-#define MAD_THRESHOLD 3.5
 #define WINDOW_SIZE 128
-#define AMPLIFICATION 0.1
 
 ViMadNoiseDetector::ViMadNoiseDetector()
 	: ViNoiseDetector()
 {
 	mWindow = NULL;
+	setScale(30);
 	setWindowSize(WINDOW_SIZE);
-	setAmplification(AMPLIFICATION);
-	addParameterName("Window Size");
+	addParameter("Window Size");
 }
 
 ViMadNoiseDetector::ViMadNoiseDetector(const ViMadNoiseDetector &other)
@@ -41,12 +39,17 @@ void ViMadNoiseDetector::setWindowSize(const int &size)
 	setOffset(mHalfWindowSize);
 }
 
-void ViMadNoiseDetector::setParameters(const qreal &param1)
+bool ViMadNoiseDetector::validParameters()
 {
-	setWindowSize(param1);
+	return parameter("Window Size") > 0;
 }
 
-void ViMadNoiseDetector::calculateNoise(QQueue<qreal> &samples)
+void ViMadNoiseDetector::initialize()
+{
+	setWindowSize(parameter("Window Size"));
+}
+
+void ViMadNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
 {
 	static int i;
 	static qreal median, mad;
@@ -58,32 +61,12 @@ void ViMadNoiseDetector::calculateNoise(QQueue<qreal> &samples)
 		median = ViMath<qreal>::median(mWindow, mWindowSize, mHalfWindowSize);
 
 		// Calculate MAD
-		for(i = 0; i < mWindowSize; ++i) mWindow[i] = qAbs(samples[i] - median);
+		for(i = 0; i < mWindowSize; ++i) mWindow[i] = abs(samples[i] - median);
 		mad = ViMath<qreal>::median(mWindow, mWindowSize, mHalfWindowSize);
 
 		// Calculate the z-score
-		setNoise((MAD * abs(samples[mHalfWindowSize] - median)) / mad); // Original MAD doesn't take the absolute value here
+		noise.append(abs((MAD * (samples[mHalfWindowSize] - median)) / mad)); // Original MAD doesn't take the absolute value here
 
 		samples.removeFirst();
 	}
 }
-
-ViMadNoiseDetector* ViMadNoiseDetector::clone()
-{
-	return new ViMadNoiseDetector(*this);
-}
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-ViMadNoiseDetector* create()
-{
-	return new ViMadNoiseDetector();
-}
-
-#ifdef __cplusplus
-}
-#endif
-*/

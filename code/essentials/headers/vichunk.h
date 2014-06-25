@@ -13,7 +13,7 @@ class ViChunk
 		ViChunk(T *data, qint64 size); //Takes ownership
 		ViChunk(qint64 size);
 		ViChunk(const ViChunk<T> &other);
-		~ViChunk();
+		virtual ~ViChunk();
 
 		T* data() const;
 		const T* constData() const;

@@ -34,9 +34,10 @@ void ViAudioData::setDefaults()
 
 void ViAudioData::clear()
 {
-	/*QMutexLocker locker(&mMutex);
-	mBuffer = NULL;*/
-    clearOther();
+	QMutexLocker locker(&mMutex);
+	mStream.isNull();
+	mBuffer = NULL;
+	clearOther();
 }
 
 void ViAudioData::setBuffer(ViBuffer *buffer)
@@ -181,7 +182,7 @@ bool ViAudioReadData::hasData()
 
 ViSampleChunk& ViAudioReadData::read()
 {
-	clear();
+	clearOther();
 	QMutexLocker locker(&mMutex);
 	mSampleChunk.setSize(mConverter.pcmToReal(mRawChunk.data(), mSampleChunk.data(), mStream->read(mRawChunk)));
     mNeedsSampleSplit = true;
@@ -300,6 +301,8 @@ ViFrequencyChunk& ViAudioReadData::splitFrequencies(int index)
 void ViAudioReadData::clearOther()
 {
     mSplitSampleChunks.clear();
+	mSplitFrequencyChunks.clear();
+	mScaledSplitSampleChunks.clear();
     mNeedsSampleSplit = true;
     mNeedsFrequencySplit = true;
     mNeedsFrequency = true;

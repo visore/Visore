@@ -1,4 +1,4 @@
-/*#ifndef VIMAHALANOBISNOISEDETECTOR_H
+#ifndef VIMAHALANOBISNOISEDETECTOR_H
 #define VIMAHALANOBISNOISEDETECTOR_H
 
 #include <vinoisedetector.h>
@@ -16,15 +16,15 @@ class ViMahalanobisNoiseDetector : public ViNoiseDetector
 		ViMahalanobisNoiseDetector();
 		ViMahalanobisNoiseDetector(const ViMahalanobisNoiseDetector &other);
 		~ViMahalanobisNoiseDetector();
-		ViMahalanobisNoiseDetector* clone();
 
 		void setWindowSize(int size);
 
-		void setParameters(const qreal &param1);
+		bool validParameters();
 
 	protected:
 
-		void calculateNoise(QQueue<qreal> &samples);
+		void initialize();
+		void detect(QVector<qreal> &samples, QVector<qreal> &noise);
 
 	private:
 
@@ -36,4 +36,4 @@ class ViMahalanobisNoiseDetector : public ViNoiseDetector
 };
 
 #endif
-*/
+

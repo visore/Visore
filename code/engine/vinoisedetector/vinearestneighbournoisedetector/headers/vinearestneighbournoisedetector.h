@@ -1,4 +1,4 @@
-/*#ifndef VINEARESTNEIGHBOURNOISEDETECTOR_H
+#ifndef VINEARESTNEIGHBOURNOISEDETECTOR_H
 #define VINEARESTNEIGHBOURNOISEDETECTOR_H
 
 #include <vinoisedetector.h>
@@ -15,15 +15,15 @@ class ViNearestNeighbourNoiseDetector : public ViNoiseDetector
 
 		ViNearestNeighbourNoiseDetector();
 		ViNearestNeighbourNoiseDetector(const ViNearestNeighbourNoiseDetector &other);
-		ViNearestNeighbourNoiseDetector* clone();
 
 		void setK(const int &k); // k nearest neighbours
 
-		void setParameters(const qreal &param1); // k-nearest neighbours
+		bool validParameters();
 
 	protected:
 
-		void calculateNoise(QQueue<qreal> &samples);
+		void initialize();
+		void detect(QVector<qreal> &samples, QVector<qreal> &noise);
 
 	private:
 
@@ -33,5 +33,3 @@ class ViNearestNeighbourNoiseDetector : public ViNoiseDetector
 };
 
 #endif
-
-*/

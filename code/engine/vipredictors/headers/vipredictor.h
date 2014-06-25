@@ -14,7 +14,7 @@ class ViPredictor : public ViName, public ViNotifier
 
 		ViPredictor();
 		ViPredictor(const ViPredictor &other);
-		~ViPredictor();
+		virtual ~ViPredictor();
 
 		virtual void setWindowSize(const int &size);
 		int windowSize();

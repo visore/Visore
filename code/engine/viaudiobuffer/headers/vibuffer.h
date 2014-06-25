@@ -32,7 +32,7 @@ class ViBuffer : public QObject, public ViId, public ViFunctor
 
 
 		ViBuffer();
-		~ViBuffer();
+		virtual ~ViBuffer();
 
 		QByteArray* data();
 		void setData(QByteArray *data);
@@ -70,7 +70,6 @@ class ViBuffer : public QObject, public ViId, public ViFunctor
 		
 		int mWriteStreamCount;
 		int mReadStreamCount;
-		QList<ViBufferStreamPointer> mStreams;
 
 };
 

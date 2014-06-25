@@ -1,6 +1,5 @@
 #include <vilagrangeinterpolator.h>
 #include <vilogger.h>
-#include <vieigen.h>
 
 ViLagrangeInterpolator::ViLagrangeInterpolator()
 	: ViInterpolator()

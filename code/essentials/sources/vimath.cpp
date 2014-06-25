@@ -217,65 +217,65 @@ T ViMath<T>::varianceUnbiased(const T *valuesLeft, const int &sizeLeft, const T 
 }
 
 template<typename T>
-T standardDeviation(const T &variance, const bool &unbiased)
+T ViMath<T>::standardDeviation(const T &variance, const bool &unbiased)
 {
 	return sqrt(variance);
 }
 
 template<typename T>
-T standardDeviation(const T *values, const int &size, const bool &unbiased)
+T ViMath<T>::standardDeviation(const T *values, const int &size, const bool &unbiased)
 {
 	if(unbiased) return standardDeviationUnbiased(values, size);
 	else return standardDeviationBiased(values, size);
 }
 
 template<typename T>
-T standardDeviation(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const bool &unbiased)
+T ViMath<T>::standardDeviation(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const bool &unbiased)
 {
 	if(unbiased) return standardDeviationUnbiased(valuesLeft, sizeLeft, valuesRight, valuesLeft);
 	else return standardDeviationBiased(valuesLeft, sizeLeft, valuesRight, valuesLeft);
 }
 
 template<typename T>
-T standardDeviation(const T *values, const int &size, const T &mean, const bool &unbiased)
+T ViMath<T>::standardDeviation(const T *values, const int &size, const T &mean, const bool &unbiased)
 {
 	if(unbiased) return standardDeviationUnbiased(values, size, mean);
 	else return standardDeviationBiased(values, size, mean);
 }
 
 template<typename T>
-T standardDeviation(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const T &mean, const bool &unbiased)
+T ViMath<T>::standardDeviation(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const T &mean, const bool &unbiased)
 {
 	if(unbiased) return standardDeviationUnbiased(valuesLeft, sizeLeft, valuesRight, valuesLeft, mean);
 	else return standardDeviationBiased(valuesLeft, sizeLeft, valuesRight, valuesLeft, mean);
 }
 
 template<typename T>
-T standardDeviationBiased(const T &variance)
+T ViMath<T>::standardDeviationBiased(const T &variance)
 {
 	return sqrt(variance);
 }
 
 template<typename T>
-T standardDeviationBiased(const T *values, const int &size)
+T ViMath<T>::standardDeviationBiased(const T *values, const int &size)
 {
 		return sqrt(varianceBiased(values, size));
 }
 
 template<typename T>
-T standardDeviationBiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight)
+T ViMath<T>::standardDeviationBiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight)
 {
 	return sqrt(varianceBiased(valuesLeft, sizeLeft, valuesRight, valuesLeft));
 }
 
 template<typename T>
-T standardDeviationBiased(const T *values, const int &size, const T &mean)
+T ViMath<T>::standardDeviationBiased(const T *values, const int &size, const T &mean)
 {
 	return sqrt(varianceBiased(values, size, mean));
 }
 
 template<typename T>
-T standardDeviationBiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const T &mean)
+T ViMath<T>::standardDeviationBiased(const T *valuesLeft, const int &sizeLeft, const T *valuesRight, const int &sizeRight, const T &mean)
 {
 	return sqrt(varianceBiased(valuesLeft, sizeLeft, valuesRight, valuesLeft, mean));
 }
