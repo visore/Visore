@@ -16,11 +16,9 @@ class ViNewtonPredictor : public ViPredictor
 		void setParameter(const int &number, const qreal &value);
 		bool validParameters();
 
-		ViNewtonPredictor* clone();
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error = NULL);
 
 	protected:
-
-		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error = NULL);
 
 		void setType();
 

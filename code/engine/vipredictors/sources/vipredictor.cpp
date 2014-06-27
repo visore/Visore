@@ -324,6 +324,11 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	outputData.enqueueSplitSamples(outputSamples, 1);
 }
 
+bool ViPredictor::predict(qreal *samples, const int &size, qreal &prediction)
+{
+	return predict(samples, size, &prediction, 1, NULL);
+}
+
 void ViPredictor::setParameter(const int &number, const qreal &value)
 {
 	LOG("No parameters implemented for this predictor.", QtCriticalMsg);
@@ -419,6 +424,11 @@ QString ViPredictor::parameterName(const int &index, const bool &allCaps)
 	if(index >= mParameterNames.size()) return "";
 	if(allCaps) return mParameterNames[index].toUpper();
 	return mParameterNames[index];
+}
+
+QStringList ViPredictor::parameters()
+{
+	return mParameterNames;
 }
 
 void ViPredictor::addParameterName(const QString &name)

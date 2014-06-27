@@ -10,6 +10,12 @@
 class ViNoiseDetector : public ViNotifier, public ViName
 {
 
+	Q_OBJECT
+
+	signals:
+
+		void parameterChanged(QString name, qreal value);
+
 	public:
 
 		ViNoiseDetector();
@@ -22,8 +28,9 @@ class ViNoiseDetector : public ViNotifier, public ViName
 
 		ViClassificationErrorCollection error(ViBuffer *noiseMask, ViBuffer *sizeMask);
 		ViClassificationErrorCollection error(ViBuffer *noiseMap, ViBuffer *sizeMask, const qreal &threshold);
+		void error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVector<qreal> &thresholds, QVector<ViClassificationErrorCollection> &errors);
 
-		virtual bool validParameters() const;
+		virtual bool validParameters();
 
 		void setParameter(const QString &name, const qreal &value);
 		void setParameter(const int &index, const qreal &value);

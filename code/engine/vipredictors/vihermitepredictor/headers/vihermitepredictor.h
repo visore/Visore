@@ -17,9 +17,9 @@ class ViHermitePredictor : public ViPredictor
 
 		ViHermitePredictor* clone();
 
-	protected:
-
 		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError = NULL);
+
+	protected:
 
 		void calculate(const qreal *x, const qreal *y, const qreal *derivatives, const int &size, qreal *output, const int &outputSize, const int &startX, const qreal &scaling);
 		qreal calculateLagrange(const qreal *x, const int &size, const qreal &theX, const int &j);

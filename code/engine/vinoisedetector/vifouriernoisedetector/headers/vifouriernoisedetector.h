@@ -1,4 +1,4 @@
-/*#ifndef VIFOURIERNOISEDETECTOR_H
+#ifndef VIFOURIERNOISEDETECTOR_H
 #define VIFOURIERNOISEDETECTOR_H
 
 #include <vinoisedetector.h>
@@ -12,18 +12,31 @@ class ViFourierNoiseDetector : public ViNoiseDetector
 		ViFourierNoiseDetector();
 		ViFourierNoiseDetector(const ViFourierNoiseDetector &other);
 		~ViFourierNoiseDetector();
-		ViFourierNoiseDetector* clone();
+
+		void setWindowSize(const int &size);
+		void setStart(const qreal &start); // precentage
+		void setEnd(const qreal &end); // precentage
+		void setRange(const qreal &start, const qreal &end); // precentage
+
+		bool validParameters();
 
 	protected:
 
-		void calculateNoise(QQueue<qreal> &samples);
+		void initialize();
+		void detect(QVector<qreal> &samples, QVector<qreal> &noise);
 
 	private:
 
 		ViFourierTransformer *mTransformer;
+		int mWindowSize;
+		qreal mStart;
+		qreal mEnd;
+		int mStartSample;
+		int mEndSample;
+		int mSampleCount;
+		qreal *mInput;
+		qreal *mOutput;
 
 };
 
 #endif
-
-*/

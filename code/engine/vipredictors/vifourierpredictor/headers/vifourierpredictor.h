@@ -37,6 +37,8 @@ class ViFourierPredictor : public ViPredictor
 
 		bool validParameters();
 
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError = NULL);
+
 	protected:
 
 		void setType();
@@ -45,7 +47,6 @@ class ViFourierPredictor : public ViPredictor
 
 		void setPointers(const Mode &mode, const Estimation &estimation);
 
-		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError = NULL);
 		bool predictFixed(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *modelError = NULL);
 		bool predictFixedSplines(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, const qreal &scaling, ViError *modelError = NULL);
 

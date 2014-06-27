@@ -1,93 +1,81 @@
-/*#include <vipredictionnoisedetector.h>
-#include <visystemsolver.h>
+#include <vipredictionnoisedetector.h>
+#include <vinoisecreator.h>
 
-#define WINDOW_SIZE 128
+#define NOISE_THRESHOLD 0.63
 
-ViPredictionNoiseDetector::ViPredictionNoiseDetector(const int &degree)
+ViPredictionNoiseDetector::ViPredictionNoiseDetector(ViPredictor *predictor)
 	: ViNoiseDetector()
 {
-	setDegree(degree);
-	setOffset(WINDOW_SIZE);
+	mPredictor = predictor;
+
+	QStringList parameters = mPredictor->parameters();
+	for(int i = 0; i < parameters.size(); ++i) addParameter(parameters[i]);
+	setScale(4);
+
+	mPredictionCount = ViNoiseCreator::maximumNoiseSize();
+	mPredictions = new qreal[mPredictionCount];
+
+	QObject::connect(this, SIGNAL(parameterChanged(QString,qreal)), this, SLOT(changeParameter(QString,qreal)));
+}
+
+ViPredictionNoiseDetector::~ViPredictionNoiseDetector()
+{
+	delete mPredictor;
+	delete [] mPredictions;
 }
 
 QString ViPredictionNoiseDetector::name(QString replace, bool spaced)
 {
 	QString n = ViNoiseDetector::name(replace, spaced);
 	if(spaced) n += " ";
-	return n + QString::number(mDegree);
+	else n += "_";
+	return n + mPredictor->name(replace, spaced);
 }
 
-void ViPredictionNoiseDetector::setDegree(const int &degree)
+bool ViPredictionNoiseDetector::validParameters()
 {
-	mDegree = degree;
-	int i, j, size = WINDOW_SIZE;
-	mMatrix = ViMatrix(size, mDegree + 1);
-	for(i = 0; i < size; ++i)
+	return mPredictor->validParameters();
+}
+
+void ViPredictionNoiseDetector::changeParameter(QString name, qreal value)
+{
+	mPredictor->setParameter(name, value);
+
+	setOffset(mPredictor->offset());
+	mWindowSize = mPredictor->windowSize();
+	mRequiredSize = mWindowSize + ViNoiseCreator::maximumNoiseSize();
+}
+
+void ViPredictionNoiseDetector::initialize()
+{
+
+}
+
+void ViPredictionNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
+{
+	int i;
+	while(samples.size() >= mRequiredSize)
 	{
-		mMatrix[i][0] = 1;
-		for(j = 1; j <= mDegree; ++j)
+		mPredictor->predict(samples.data(), mWindowSize, mPrediction);
+		mDifference = abs(mPrediction - samples[mWindowSize]);
+		if(mDifference > NOISE_THRESHOLD)
 		{
-			mMatrix[i][j] = qPow(i, j);
-		}
-		mPowers.append(qPow(WINDOW_SIZE, mDegree - i));
-	}
-}
-
-int ViPredictionNoiseDetector::degree()
-{
-	return mDegree;
-}
-
-void ViPredictionNoiseDetector::calculateNoise(QQueue<qreal> &samples)
-{
-	static int i, count;
-	ViVector vector(WINDOW_SIZE);
-	static ViVector coefficients;
-
-	while(samples.size() > WINDOW_SIZE)
-	{
-		for(i = 0; i < WINDOW_SIZE; ++i)
-		{
-			vector[i] = samples[i];
-		}
-
-		if(ViSystemSolver::solve(mMatrix, vector, coefficients))
-		{
-			static qreal value;
-			value = 0;
-			count = coefficients.size();
-			for(i = 0; i < count; ++i)
+			mPredictor->predict(samples.data(), mWindowSize, mPredictions, mPredictionCount);
+			for(i = 0; i < mPredictionCount; ++i)
 			{
-				value += coefficients[count - i - 1] * mPowers[i];
-				//value += coefficients[count - i - 1] * qPow(size, mDegree - i);
+				mDifference = abs(mPredictions[i] - samples[mWindowSize + i]);
+				if(mDifference < NOISE_THRESHOLD) break;
+				samples[mWindowSize + i] = samples[mWindowSize + i - 1];
+				noise.append(mDifference);
+				//noise.append(10);
 			}
-			setNoise(qAbs(value - samples[WINDOW_SIZE]));
+			samples.remove(0, i);
 		}
 		else
 		{
-			setNoise(0);
+			//noise.append(0);
+			noise.append(mDifference);
+			samples.removeFirst();
 		}
-
-		samples.removeFirst();
 	}
 }
-
-ViPredictionNoiseDetector* ViPredictionNoiseDetector::clone()
-{
-	return new ViPredictionNoiseDetector(*this);
-}
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-ViPredictionNoiseDetector* create()
-{
-	return new ViPredictionNoiseDetector();
-}
-
-#ifdef __cplusplus
-}
-#endif
-*/

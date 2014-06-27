@@ -28,6 +28,9 @@ class ViPredictor : public ViName, public ViNotifier
 		void predict(ViBuffer *input, ViBuffer *output, ViErrorCollection *predictionErrors, ViError *modelError = NULL);
 		void predict(ViBuffer *input, ViBuffer *output, const int &predictionCount, ViErrorCollection *predictionErrors, ViError *modelError = NULL);
 
+		bool predict(qreal *samples, const int &size, qreal &prediction);
+		virtual bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error = NULL) = 0;
+
 		virtual void setParameter(const int &number, const qreal &value);
 		void setParameter(const QString &name, const qreal &value);
 		void setParameters(const qreal &parameter1);
@@ -40,13 +43,12 @@ class ViPredictor : public ViName, public ViNotifier
 		virtual bool hasParameter(const QString &name);
 
 		QString parameterName(const int &index, const bool &allCaps = true);
+		QStringList parameters();
 
 	protected:
 
 		void addParameterName(const QString &name);
 		void adjustValue(qreal &value);
-
-		virtual bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error = NULL) = 0;
 
 	protected:
 

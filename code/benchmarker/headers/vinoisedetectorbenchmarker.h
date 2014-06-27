@@ -23,7 +23,8 @@ class ViNoiseDetectorBenchmarker : public QObject
 		void initParams();
 
 		void progressDetect(qreal percentage);
-		void progressThreshold(qreal percentage);
+		void progressThreshold();
+		void clearProgress();
 
 		void addDir(QString dirName);
 
@@ -33,6 +34,8 @@ class ViNoiseDetectorBenchmarker : public QObject
 		virtual ~ViNoiseDetectorBenchmarker();
 
 		void benchmark(QString folder = "");
+
+		void calculateThreshold(ViBuffer *noise, ViBuffer *size, qreal &bestThreshold, ViClassificationErrorCollection &bestErrors, qreal &bestMatthews, const qreal &maxNoise);
 
 	protected:
 

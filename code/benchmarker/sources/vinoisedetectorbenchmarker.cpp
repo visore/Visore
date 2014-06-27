@@ -9,10 +9,20 @@
 #include <vinearestneighbournoisedetector.h>
 #include <vimahalanobisnoisedetector.h>
 #include <vimadnoisedetector.h>
+#include <vifouriernoisedetector.h>
+#include <vipredictionnoisedetector.h>
+
+#include <viconstantpredictor.h>
+#include <vipolynomialpredictor.h>
+#include <vihermitepredictor.h>
+#include <vifourierpredictor.h>
+#include <viarmapredictor.h>
+#include <vigarchpredictor.h>
+#include <vilagrangepredictor.h>
+#include <vinewtonpredictor.h>
 
 #define WINDOW_SIZE 4096
-#define THRESHOLD_NO_CHANGE 50 // Stop searching threshold if no change was observed for n iterations
-#define THRESHOLD_DETAIL 1000 // Given the min (0) and max (max value in noise map) threshold, how mnay thresholds should be tested in between
+#define THRESHOLD_PARTS 20 // In how many parts a threshold range should be devided in
 
 ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 {
@@ -25,11 +35,20 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	/*mDetector = new ViNearestNeighbourNoiseDetector();
 	addParam("K", 1, 512, 1);*/
 
-	mDetector = new ViMahalanobisNoiseDetector();
-	addParam("Window Size", 30, 5120, 20);
+	/*mDetector = new ViMahalanobisNoiseDetector();
+	addParam("Window Size", 30, 5120, 20);*/
 
 	/*mDetector = new ViMadNoiseDetector();
 	addParam("Window Size", 256, 5120, 5);*/
+
+	/*mDetector = new ViFourierNoiseDetector();
+	addParam("Window Size", 8, 16, 1);
+	addParam("Range Start", 0, 100, 20);
+	addParam("Range End", 0, 100, 20);*/
+
+	mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor());
+	addParam("Window Size", 128, 128, 8);
+	addParam("Degree", 1, 1, 1);
 
 	QObject::connect(mDetector, SIGNAL(progressed(qreal)), this, SLOT(progressDetect(qreal)));
 }
@@ -40,12 +59,17 @@ ViNoiseDetectorBenchmarker::~ViNoiseDetectorBenchmarker()
 
 void ViNoiseDetectorBenchmarker::progressDetect(qreal percentage)
 {
-	cout << setprecision(2) << fixed << "\r" << (percentage * 0.8) << "%" << flush;
+	cout << setprecision(2) << fixed << "\r" << (percentage * 0.9) << "% " << flush;
 }
 
-void ViNoiseDetectorBenchmarker::progressThreshold(qreal percentage)
+void ViNoiseDetectorBenchmarker::progressThreshold()
 {
-	cout << setprecision(2) << fixed << "\r" << (80 + (percentage * 0.2)) << "%" << flush;
+	cout << "." << flush;
+}
+
+void ViNoiseDetectorBenchmarker::clearProgress()
+{
+	cout << "\r                                                                                                                                 \r"; // Clear intermidiate percentage
 }
 
 void ViNoiseDetectorBenchmarker::addParam(QString name, qreal start, qreal end, qreal increase)
@@ -177,9 +201,8 @@ void ViNoiseDetectorBenchmarker::process()
 	qreal maxMatthews = -1;
 	qint64 time;
 	qreal bestThreshold, bestMatthews;
-	int noChange;
 
-	ViClassificationErrorCollection currentErrors, bestErrors;
+	ViClassificationErrorCollection bestErrors;
 
 	ViNoiseCreator creator;
 	creator.createNoise(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::CustomMask), mCurrentObject->buffer(ViAudio::Custom));
@@ -190,9 +213,8 @@ void ViNoiseDetectorBenchmarker::process()
 	{
 		bestThreshold = 0;
 		bestMatthews = -1;
-		noChange = 0;
-		currentErrors.clear();
 		bestErrors.clear();
+
 		mCurrentObject->clearBuffer(ViAudio::Noise);
 
 		for(int i = 0; i < mParamsStart.size(); ++i) mDetector->setParameter(mParamsNames[i], mParamsCurrent[i]);
@@ -208,37 +230,9 @@ void ViNoiseDetectorBenchmarker::process()
 			mCurrentObject->encode(ViAudio::Noise);
 			return;*/
 
-			qreal minThreshold = 0;
-			qreal maxThreshold = maxNoise;
-			qreal increaseThreshold = roundThreshold(maxNoise / THRESHOLD_DETAIL);
-
-			int total = ((maxThreshold - minThreshold) / increaseThreshold) + 1;
-			int current = 0;
-			for(qreal t = minThreshold; t <= maxThreshold; t += increaseThreshold)
-			{
-				currentErrors = mDetector->error(mCurrentObject->buffer(ViAudio::Noise), mCurrentObject->buffer(ViAudio::Custom), t);
-				qreal temp = currentErrors.matthewsCoefficient();
-				if(temp > bestMatthews)
-				{
-					noChange = 0;
-					bestThreshold = t;
-					bestErrors = currentErrors;
-					bestMatthews = temp;
-				}
-				else
-				{
-					++noChange;
-					if(noChange > THRESHOLD_NO_CHANGE) break;
-				}
-				++current;
-				progressThreshold((current * 100.0) / total);
-			}
-			progressThreshold(100);
-
-			qreal mat = bestErrors.matthewsCoefficient();
-			if(mat > maxMatthews) maxMatthews = mat;
-
-			cout << "\r                                                 \r"; // Clear intermidiate percentage
+			calculateThreshold(mCurrentObject->buffer(ViAudio::Noise), mCurrentObject->buffer(ViAudio::Custom), bestThreshold, bestErrors, bestMatthews, maxNoise);
+			if(bestMatthews > maxMatthews) maxMatthews = bestMatthews;
+			clearProgress();
 		}
 		else
 		{
@@ -259,6 +253,51 @@ void ViNoiseDetectorBenchmarker::process()
 	nextFile();
 }
 
+void ViNoiseDetectorBenchmarker::calculateThreshold(ViBuffer *noise, ViBuffer *size, qreal &bestThreshold, ViClassificationErrorCollection &bestErrors, qreal &bestMatthews, const qreal &maxNoise)
+{
+	bestErrors.clear();
+
+	qreal minThreshold = 0;
+	qreal maxThreshold = maxNoise;
+	qreal part;
+
+	int i, zoomCount = 0;
+	bool hasChanged;
+
+	QVector<ViClassificationErrorCollection> errors(THRESHOLD_PARTS + 1, ViClassificationErrorCollection());
+	QVector<qreal> thresholds(THRESHOLD_PARTS + 1);
+
+	while(true)
+	{
+		part = (maxThreshold - minThreshold) / THRESHOLD_PARTS;
+		hasChanged = false;
+
+		for(i = 0; i <= THRESHOLD_PARTS; ++i) thresholds[i] = minThreshold + (part * i);
+		mDetector->error(noise, size, thresholds, errors);
+
+		for(i = 0; i <= THRESHOLD_PARTS; ++i)
+		{
+			qreal tempMatthews = errors[i].matthewsCoefficient();
+			if(tempMatthews > bestMatthews)
+			{
+				minThreshold = thresholds[i] - part;
+				maxThreshold = thresholds[i] + part;
+				if(minThreshold < 0) minThreshold = 0;
+				if(maxThreshold > maxNoise) maxThreshold = maxNoise;
+
+				bestThreshold = thresholds[i];
+				bestErrors = errors[i];
+				bestMatthews = tempMatthews;
+
+				hasChanged = true;
+			}
+		}
+		if(!hasChanged) break;
+		++zoomCount;
+		progressThreshold();
+	}
+}
+
 void ViNoiseDetectorBenchmarker::printFileHeader()
 {	
 	int i;
@@ -271,7 +310,7 @@ void ViNoiseDetectorBenchmarker::printFileHeader()
 	mOutputStream << mDetector->name() << "\n\n";
 	mOutputStream << QFileInfo(mCurrentFile).fileName() << "\n\n";
 
-	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << "PARAMETER " << i + 1 << " (" << mDetector->parameter(i) <<")\t";
+	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << "PARAMETER " << i + 1 << " (" << mParamsNames[i] <<")\t";
 	mOutputStream << "THRESHOLD (SCALED)" << "\t" << "THRESHOLD (REAL)" << "\t" << "TP" << "\t" << "TN" << "\t" << "FP" << "\t" << "FN" << "\t" << "SENSITIVITY" << "\t" << "SPECIFICITY" << "\t" << "MATTHEWS COEFFICIENT" << "\t" << "TIME" << "\t\t";
 	mOutputStream << "NO NOISE " << "\t\t\t";
 	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << "NOISE SIZE " << i << "\t\t\t";
@@ -291,7 +330,7 @@ void ViNoiseDetectorBenchmarker::printFileHeader()
 	mOutputStream2 << mDetector->name() << "\n\n";
 	mOutputStream2 << QFileInfo(mCurrentFile).fileName() << "\n\n";
 
-	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream2 << "PARAMETER " << i + 1 << " (" << mDetector->parameter(i) <<")\t";
+	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream2 << "PARAMETER " << i + 1 << " (" << mParamsNames[i] <<")\t";
 	mOutputStream2 << "THRESHOLD (SCALED)" << "\t" << "THRESHOLD (REAL)" << "\t" << "TP" << "\t" << "TN" << "\t" << "FP" << "\t" << "FN" << "\t" << "SENSITIVITY" << "\t" << "SPECIFICITY" << "\t" << "MATTHEWS COEFFICIENT" << "\t" << "TIME" << "\t\t";
 	mOutputStream2 << "NO NOISE " << "\t\t\t";
 	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << "NOISE SIZE " << i << "\t\t\t";
@@ -333,7 +372,7 @@ void ViNoiseDetectorBenchmarker::printTerminal(ViClassificationErrorCollection &
 	remaining = ((1.0 / percentageDone) * remaining) - remaining;
 
 	cout << int(percentageDone * 100.0) << "%\t(" << timeConversion(remaining).toLatin1().data() << ")\t";
-	cout << "THRES: " << setprecision(6) << threshold << "\tTP: " << errors.TP() << "\tTN: " << errors.TN() << "\tFP: " << errors.FP() << "\tFN: " << errors.FN() << "\tSEN: " << setprecision(6) << errors.sensitivity() << "\tSPE: " << setprecision(6) << errors.specificity() << "\tMAT: " << setprecision(6) << errors.matthewsCoefficient() << " (" << setprecision(6) << maxMatthews << ")\tTIME: " << time << endl;
+	cout << "THRES: " << setprecision(6) << threshold << "\tSEN: " << setprecision(6) << errors.sensitivity() << "\tSPE: " << setprecision(6) << errors.specificity() << "\tMAT: " << setprecision(6) << errors.matthewsCoefficient() << " (" << setprecision(6) << maxMatthews << ")\tTIME: " << time << endl;
 }
 
 qreal ViNoiseDetectorBenchmarker::roundThreshold(const qreal &value)

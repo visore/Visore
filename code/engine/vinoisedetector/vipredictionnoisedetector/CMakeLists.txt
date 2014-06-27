@@ -9,7 +9,7 @@ FILE(GLOB VI_PREDICTION_NOISE_DETECTOR_SOURCES ${SOURCES}/*.cpp)
 
 #Create library
 ADD_LIBRARY(vipredictionnoisedetector SHARED ${VI_PREDICTION_NOISE_DETECTOR_HEADERS} ${VI_PREDICTION_NOISE_DETECTOR_SOURCES})
-TARGET_LINK_LIBRARIES(vipredictionnoisedetector vinoisedetector)
+TARGET_LINK_LIBRARIES(vipredictionnoisedetector vinoisedetector vipredictor)
 QT5_USE_MODULES(vipredictionnoisedetector Multimedia Xml)
 
 #Install file
