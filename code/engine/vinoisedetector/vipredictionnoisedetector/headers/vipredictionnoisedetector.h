@@ -38,6 +38,10 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 		int mPredictionCount;
 		qreal mDifference;
 		qreal mThreshold;
+		int mI;
+		int mJ;
+		qreal mMean;
+		int mCounter;
 
 };
 

@@ -60,8 +60,6 @@ void ViPredictionNoiseDetector::changeParameter(QString name, qreal value)
 
 void ViPredictionNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
 {
-	static int counter, i, j;
-	qreal max;
 	while(samples.size() >= mRequiredSize)
 	{
 		if(samples.size() <= mWindowSize) mPredictor->predict(samples.data(), samples.size(), mPrediction);
@@ -73,27 +71,33 @@ void ViPredictionNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &
 			if(samples.size() <= mWindowSize) mPredictor->predict(samples.data(), samples.size(), mPredictions, mPredictionCount);
 			else mPredictor->predict(samples.data() + (samples.size() - mWindowSize), mWindowSize, mPredictions, mPredictionCount);
 
-			counter = 0;
-			//noise.append(mDifference);
-			noise.append(100);
-			max = mDifference;
+			noise.append(mDifference);
+			mMean = mDifference;
+			mCounter = 1;
 
-			for(i = mPredictionCount - 1; i > 0; --i)
+			for(mI = mPredictionCount - 1; mI > 0; --mI)
 			{
-				mDifference = abs(mPredictions[i] - samples[mWindowSize + i]);
+				mDifference = abs(mPredictions[mI] - samples[mWindowSize + mI]);
 				if(mDifference > mThreshold)
 				{
-					//noise.append(mDifference);
-					noise.append(100);
+					noise.append(mDifference);
+					mMean += mDifference;
+					++mCounter;
 
-					if(mDifference > max) max = mDifference;
-					for(j = 1; j < i; ++j)
+					for(mJ = 1; mJ < mI; ++mJ)
 					{
-						mDifference = abs(mPredictions[j] - samples[mWindowSize + j]);
-						if(mDifference > max) max = mDifference;
+						mDifference = abs(mPredictions[mJ] - samples[mWindowSize + mJ]);
+						if(mDifference > mThreshold)
+						{
+							mMean += mDifference;
+							++mCounter;
+						}
 					}
-					for(j = 1; j < i; ++j) noise.append(100);//noise.append(max);
-					samples.remove(0, i);
+
+					mMean /= mCounter;
+					for(mJ = 1; mJ < mI; ++mJ) noise.append(mMean);
+
+					samples.remove(0, mI);
 					break;
 				}
 			}
@@ -101,8 +105,7 @@ void ViPredictionNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &
 		}
 		else
 		{
-			//noise.append(mDifference);
-			noise.append(0);
+			noise.append(mDifference);
 			samples.removeFirst();
 		}
 	}
