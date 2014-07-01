@@ -74,7 +74,8 @@ void ViPredictionNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &
 			else mPredictor->predict(samples.data() + (samples.size() - mWindowSize), mWindowSize, mPredictions, mPredictionCount);
 
 			counter = 0;
-			noise.append(mDifference);
+			//noise.append(mDifference);
+			noise.append(100);
 			max = mDifference;
 
 			for(i = mPredictionCount - 1; i > 0; --i)
@@ -82,38 +83,26 @@ void ViPredictionNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &
 				mDifference = abs(mPredictions[i] - samples[mWindowSize + i]);
 				if(mDifference > mThreshold)
 				{
-					noise.append(mDifference);
+					//noise.append(mDifference);
+					noise.append(100);
+
 					if(mDifference > max) max = mDifference;
 					for(j = 1; j < i; ++j)
 					{
 						mDifference = abs(mPredictions[j] - samples[mWindowSize + j]);
 						if(mDifference > max) max = mDifference;
 					}
-					for(j = 1; j < i; ++j) noise.append(max);
+					for(j = 1; j < i; ++j) noise.append(100);//noise.append(max);
 					samples.remove(0, i);
 					break;
 				}
 			}
 			samples.removeFirst();
-
-			/*do
-			{
-				mDifference = abs(mPredictions[counter] - samples[mWindowSize + counter]);
-				//if(mDifference <= mThreshold) break;
-				//mDifference = abs(mPrediction - samples[mWindowSize + counter]);
-				samples[mWindowSize + counter] = mPredictions[counter];
-				//samples[mWindowSize + counter] = 0;
-				noise.append(mDifference);
-				//noise.append(100);
-				++counter;
-			}
-			while(counter < mPredictionCount);
-			samples.remove(0, counter);*/
 		}
 		else
 		{
-			noise.append(mDifference);
-			//noise.append(0);
+			//noise.append(mDifference);
+			noise.append(0);
 			samples.removeFirst();
 		}
 	}

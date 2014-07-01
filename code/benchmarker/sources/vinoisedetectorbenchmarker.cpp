@@ -49,8 +49,8 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
 	addParam("Window Size", 256, 256, 8);
 	addParam("AR Degree", 2, 2, 1);
-	addParam("MA Degree", 0, 1, 1);
-	addParam("Threshold", 0.4, 0.8, 0.05);
+	addParam("MA Degree", 1, 1, 1);
+	addParam("Threshold", 0.65, 0.65, 0.05);
 
 	QObject::connect(mDetector, SIGNAL(progressed(qreal)), this, SLOT(progressDetect(qreal)));
 }
