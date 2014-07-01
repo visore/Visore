@@ -8,6 +8,12 @@
 class ViMadNoiseDetector : public ViNoiseDetector
 {
 
+	Q_OBJECT
+
+	protected slots:
+
+		void changeParameter(QString name, qreal value);
+
     public:
 
 		ViMadNoiseDetector();
@@ -20,7 +26,6 @@ class ViMadNoiseDetector : public ViNoiseDetector
 
 	protected:
 
-		void initialize();
 		void detect(QVector<qreal> &samples, QVector<qreal> &noise);
 
 	private:

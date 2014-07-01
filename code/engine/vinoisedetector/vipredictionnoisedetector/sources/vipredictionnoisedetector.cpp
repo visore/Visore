@@ -1,7 +1,7 @@
 #include <vipredictionnoisedetector.h>
 #include <vinoisecreator.h>
 
-#define NOISE_THRESHOLD 0.63
+#define DEFAULT_THRESHOLD 0.63
 
 ViPredictionNoiseDetector::ViPredictionNoiseDetector(ViPredictor *predictor)
 	: ViNoiseDetector()
@@ -10,7 +10,10 @@ ViPredictionNoiseDetector::ViPredictionNoiseDetector(ViPredictor *predictor)
 
 	QStringList parameters = mPredictor->parameters();
 	for(int i = 0; i < parameters.size(); ++i) addParameter(parameters[i]);
+	addParameter("Threshold");
 	setScale(4);
+
+	setThreshold(DEFAULT_THRESHOLD);
 
 	mPredictionCount = ViNoiseCreator::maximumNoiseSize();
 	mPredictions = new qreal[mPredictionCount];
@@ -32,6 +35,11 @@ QString ViPredictionNoiseDetector::name(QString replace, bool spaced)
 	return n + mPredictor->name(replace, spaced);
 }
 
+void ViPredictionNoiseDetector::setThreshold(const qreal threshold)
+{
+	mThreshold = threshold;
+}
+
 bool ViPredictionNoiseDetector::validParameters()
 {
 	return mPredictor->validParameters();
@@ -39,42 +47,73 @@ bool ViPredictionNoiseDetector::validParameters()
 
 void ViPredictionNoiseDetector::changeParameter(QString name, qreal value)
 {
-	mPredictor->setParameter(name, value);
+	if(name == "Threshold") setThreshold(value);
+	else
+	{
+		mPredictor->setParameter(name, value);
 
-	setOffset(mPredictor->offset());
-	mWindowSize = mPredictor->windowSize();
-	mRequiredSize = mWindowSize + ViNoiseCreator::maximumNoiseSize();
-}
-
-void ViPredictionNoiseDetector::initialize()
-{
-
+		setOffset(mPredictor->offset());
+		mWindowSize = mPredictor->windowSize();
+		mRequiredSize = mWindowSize + mPredictionCount;
+	}
 }
 
 void ViPredictionNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
 {
-	int i;
+	static int counter, i, j;
+	qreal max;
 	while(samples.size() >= mRequiredSize)
 	{
-		mPredictor->predict(samples.data(), mWindowSize, mPrediction);
+		if(samples.size() <= mWindowSize) mPredictor->predict(samples.data(), samples.size(), mPrediction);
+		else  mPredictor->predict(samples.data() + (samples.size() - mWindowSize), mWindowSize, mPrediction);
 		mDifference = abs(mPrediction - samples[mWindowSize]);
-		if(mDifference > NOISE_THRESHOLD)
+
+		if(mDifference > mThreshold)
 		{
-			mPredictor->predict(samples.data(), mWindowSize, mPredictions, mPredictionCount);
-			for(i = 0; i < mPredictionCount; ++i)
+			if(samples.size() <= mWindowSize) mPredictor->predict(samples.data(), samples.size(), mPredictions, mPredictionCount);
+			else mPredictor->predict(samples.data() + (samples.size() - mWindowSize), mWindowSize, mPredictions, mPredictionCount);
+
+			counter = 0;
+			noise.append(mDifference);
+			max = mDifference;
+
+			for(i = mPredictionCount - 1; i > 0; --i)
 			{
 				mDifference = abs(mPredictions[i] - samples[mWindowSize + i]);
-				if(mDifference < NOISE_THRESHOLD) break;
-				samples[mWindowSize + i] = samples[mWindowSize + i - 1];
-				noise.append(mDifference);
-				//noise.append(10);
+				if(mDifference > mThreshold)
+				{
+					noise.append(mDifference);
+					if(mDifference > max) max = mDifference;
+					for(j = 1; j < i; ++j)
+					{
+						mDifference = abs(mPredictions[j] - samples[mWindowSize + j]);
+						if(mDifference > max) max = mDifference;
+					}
+					for(j = 1; j < i; ++j) noise.append(max);
+					samples.remove(0, i);
+					break;
+				}
 			}
-			samples.remove(0, i);
+			samples.removeFirst();
+
+			/*do
+			{
+				mDifference = abs(mPredictions[counter] - samples[mWindowSize + counter]);
+				//if(mDifference <= mThreshold) break;
+				//mDifference = abs(mPrediction - samples[mWindowSize + counter]);
+				samples[mWindowSize + counter] = mPredictions[counter];
+				//samples[mWindowSize + counter] = 0;
+				noise.append(mDifference);
+				//noise.append(100);
+				++counter;
+			}
+			while(counter < mPredictionCount);
+			samples.remove(0, counter);*/
 		}
 		else
 		{
-			//noise.append(0);
 			noise.append(mDifference);
+			//noise.append(0);
 			samples.removeFirst();
 		}
 	}

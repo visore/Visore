@@ -9,7 +9,7 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 
 	Q_OBJECT
 
-	private slots:
+	protected slots:
 
 		void changeParameter(QString name, qreal value);
 
@@ -20,11 +20,12 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 
 		QString name(QString replace = "", bool spaced = false);
 
+		void setThreshold(const qreal threshold);
+
 		bool validParameters();
 
 	protected:
 
-		void initialize();
 		void detect(QVector<qreal> &samples, QVector<qreal> &noise);
 
 	private:
@@ -36,6 +37,7 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 		qreal *mPredictions;
 		int mPredictionCount;
 		qreal mDifference;
+		qreal mThreshold;
 
 };
 

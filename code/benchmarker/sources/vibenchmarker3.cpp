@@ -8,7 +8,6 @@
 #include <vimadnoisedetector.h>
 #include <vipredictionnoisedetector.h>
 #include <vifouriernoisedetector.h>
-#include <viarmanoisedetector.h>
 #include <QTextStream>
 
 #include <iomanip>

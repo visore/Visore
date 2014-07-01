@@ -9,6 +9,8 @@ ViZscoreNoiseDetector::ViZscoreNoiseDetector()
 	setScale(30);
 	setWindowSize(DEFAULT_WINDOW_SIZE);
 	addParameter("Window Size");
+
+	QObject::connect(this, SIGNAL(parameterChanged(QString,qreal)), this, SLOT(changeParameter(QString,qreal)));
 }
 
 void ViZscoreNoiseDetector::setWindowSize(const int &size)
@@ -23,9 +25,14 @@ bool ViZscoreNoiseDetector::validParameters()
 	return parameter("Window Size") > 0;
 }
 
-void ViZscoreNoiseDetector::initialize()
+void ViZscoreNoiseDetector::changeParameter(QString name, qreal value)
 {
-	setWindowSize(parameter("Window Size"));
+	if(name == "Window Size") setWindowSize(value);
+	else
+	{
+		LOG("The noise detector doe not have a parameter named " + name + ".", QtFatalMsg);
+		exit(-1);
+	}
 }
 
 void ViZscoreNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)

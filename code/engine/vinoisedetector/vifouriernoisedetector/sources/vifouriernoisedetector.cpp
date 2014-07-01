@@ -45,6 +45,16 @@ void ViFourierNoiseDetector::setWindowSize(const int &size)
 	mInput = new qreal[mWindowSize];
 	if(mOutput != NULL) delete [] mOutput;
 	mOutput = new qreal[mWindowSize];
+
+	int halfWindowSize = mWindowSize / 2; // Because the frequency spectrum is a mirror on both sides
+
+	mStartSample = floor(halfWindowSize * (mStart / 100.0));
+	if(mStartSample < 0) mStartSample = 0;
+
+	mEndSample = ceil(halfWindowSize * (mEnd / 100.0));
+	if(mEndSample > halfWindowSize) mEndSample = halfWindowSize;
+
+	mSampleCount = mEndSample - mStartSample + 1;
 }
 
 void ViFourierNoiseDetector::setStart(const qreal &start)
@@ -68,20 +78,16 @@ bool ViFourierNoiseDetector::validParameters()
 	return parameter("Window Size") > 1 && ViPowerCalculator::isPower(parameter("Window Size"), 2) && parameter("Range Start") >= 0 && parameter("Range End") >= 0 && parameter("Range Start") <= 100 && parameter("Range End") <= 100 && parameter("Range Start") < parameter("Range End");
 }
 
-void ViFourierNoiseDetector::initialize()
+void ViFourierNoiseDetector::changeParameter(QString name, qreal value)
 {
-	setWindowSize(parameter("Window Size"));
-	setRange(parameter("Range Start"), parameter("Range End"));
-
-	int halfWindowSize = mWindowSize / 2; // Because the frequency spectrum is a mirror on both sides
-
-	mStartSample = floor(halfWindowSize * (mStart / 100.0));
-	if(mStartSample < 0) mStartSample = 0;
-
-	mEndSample = ceil(halfWindowSize * (mEnd / 100.0));
-	if(mEndSample > halfWindowSize) mEndSample = halfWindowSize;
-
-	mSampleCount = mEndSample - mStartSample + 1;
+	if(name == "Window Size") setWindowSize(value);
+	else if(name == "Range Start") setStart(value);
+	else if(name == "Range End") setEnd(value);
+	else
+	{
+		LOG("The noise detector doe not have a parameter named " + name + ".", QtFatalMsg);
+		exit(-1);
+	}
 }
 
 void ViFourierNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)

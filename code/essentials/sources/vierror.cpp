@@ -9,10 +9,17 @@ ViError::ViError()
 
 void ViError::add(const qreal &prediction, const qreal &observation)
 {
-	mTotal += mpfr::pow(prediction - observation, 2);
+	if(prediction == DBL_MAX || observation == DBL_MAX || std::isnan(prediction) || std::isnan(observation))
+	{
+		mTotal += 1;
+	}
+	else
+	{
+		mTotal += mpfr::pow(prediction - observation, 2);
+		if(observation < mMin) mMin = observation;
+		else if(observation > mMax) mMax = observation;
+	}
 	++mCount;
-	if(observation < mMin) mMin = observation;
-	else if(observation > mMax) mMax = observation;
 }
 
 void ViError::add(const qreal *prediction, const qreal *observation, const int &size)

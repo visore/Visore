@@ -105,20 +105,13 @@ class ViGretl
 		MODEL* estimate(DATASET *data);
 		FITRESID* forecast(DATASET *data, MODEL *model);
 
-		bool forecast(DATASET *data, MODEL *model, qreal *output, const int &size);
-		bool backcast(DATASET *data, MODEL *model, qreal *output, const int &size);
+		bool forecast(DATASET *data, MODEL *model, qreal *output, const int &size, ViError *error = NULL);
+		bool backcast(DATASET *data, MODEL *model, qreal *output, const int &size, ViError *error = NULL);
 
-		bool forecast(DATASET *data, MODEL *model, qreal *output, const int &size, ViError *error);
-		bool backcast(DATASET *data, MODEL *model, qreal *output, const int &size, ViError *error);
+		bool forecast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize, ViError *error = NULL);
+		bool backcast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize, ViError *error = NULL);
 
-		bool forecast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize);
-		bool backcast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize); // reverses the input array and does a forecast
-
-		bool forecast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize, ViError *error);
-		bool backcast(const qreal *input, const int &inputSize, qreal *output, const int &outputSize, ViError *error);
-
-		bool interpolate(const qreal *left, const int &leftSize, const qreal *right, const int &rightSize, qreal *output, const int &outputSize);
-		bool interpolate(const qreal *left, const int &leftSize, const qreal *right, const int &rightSize, qreal *output, const int &outputSize, ViError *error);
+		bool interpolate(const qreal *left, const int &leftSize, const qreal *right, const int &rightSize, qreal *output, const int &outputSize, ViError *error = NULL);
 
 		static DATASET* create(const qreal *input, const int &inputSize, const int &outputSize);
 		static DATASET* createReversed(const qreal *input, const int &inputSize, const int &outputSize);
@@ -149,6 +142,7 @@ class ViGretl
 		qreal calculateHQC(MODEL *model);
 
 		int* adjustParameters(int *parameters);
+		void adjustSamples(qreal *samples, const int &size);
 
 	private:
 

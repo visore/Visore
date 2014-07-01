@@ -11,6 +11,12 @@
 class ViMahalanobisNoiseDetector : public ViNoiseDetector
 {
 
+	Q_OBJECT
+
+	protected slots:
+
+		void changeParameter(QString name, qreal value);
+
     public:
 
 		ViMahalanobisNoiseDetector();
@@ -23,7 +29,6 @@ class ViMahalanobisNoiseDetector : public ViNoiseDetector
 
 	protected:
 
-		void initialize();
 		void detect(QVector<qreal> &samples, QVector<qreal> &noise);
 
 	private:

@@ -11,6 +11,12 @@
 class ViZscoreNoiseDetector : public ViNoiseDetector
 {
 
+	Q_OBJECT
+
+	protected slots:
+
+		void changeParameter(QString name, qreal value);
+
     public:
 
 		ViZscoreNoiseDetector();
@@ -21,7 +27,6 @@ class ViZscoreNoiseDetector : public ViNoiseDetector
 
 	protected:
 
-		void initialize();
 		void detect(QVector<qreal> &samples, QVector<qreal> &noise);
 
 	private:

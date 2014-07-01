@@ -14,6 +14,8 @@ ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector()
 
 	mGretlParameters = gretl_list_new(1);
 	mGretlParameters[1] = 1;
+
+	QObject::connect(this, SIGNAL(parameterChanged(QString,qreal)), this, SLOT(changeParameter(QString,qreal)));
 }
 
 ViMahalanobisNoiseDetector::ViMahalanobisNoiseDetector(const ViMahalanobisNoiseDetector &other)
@@ -48,9 +50,14 @@ bool ViMahalanobisNoiseDetector::validParameters()
 	return parameter("Window Size") > 0;
 }
 
-void ViMahalanobisNoiseDetector::initialize()
+void ViMahalanobisNoiseDetector::changeParameter(QString name, qreal value)
 {
-	setWindowSize(parameter("Window Size"));
+	if(name == "Window Size") setWindowSize(value);
+	else
+	{
+		LOG("The noise detector doe not have a parameter named " + name + ".", QtFatalMsg);
+		exit(-1);
+	}
 }
 
 void ViMahalanobisNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)

@@ -8,6 +8,8 @@ ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector()
 	setScale(2);
 	setK(DEFAULT_K);
 	addParameter("K");
+
+	QObject::connect(this, SIGNAL(parameterChanged(QString,qreal)), this, SLOT(changeParameter(QString,qreal)));
 }
 
 ViNearestNeighbourNoiseDetector::ViNearestNeighbourNoiseDetector(const ViNearestNeighbourNoiseDetector &other)
@@ -29,9 +31,14 @@ bool ViNearestNeighbourNoiseDetector::validParameters()
 	return parameter("K") > 0;
 }
 
-void ViNearestNeighbourNoiseDetector::initialize()
+void ViNearestNeighbourNoiseDetector::changeParameter(QString name, qreal value)
 {
-	setK(parameter("K"));
+	if(name == "K") setK(value);
+	else
+	{
+		LOG("The noise detector doe not have a parameter named " + name + ".", QtFatalMsg);
+		exit(-1);
+	}
 }
 
 void ViNearestNeighbourNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)

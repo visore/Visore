@@ -12,6 +12,8 @@ ViMadNoiseDetector::ViMadNoiseDetector()
 	setScale(30);
 	setWindowSize(WINDOW_SIZE);
 	addParameter("Window Size");
+
+	QObject::connect(this, SIGNAL(parameterChanged(QString,qreal)), this, SLOT(changeParameter(QString,qreal)));
 }
 
 ViMadNoiseDetector::ViMadNoiseDetector(const ViMadNoiseDetector &other)
@@ -44,9 +46,14 @@ bool ViMadNoiseDetector::validParameters()
 	return parameter("Window Size") > 0;
 }
 
-void ViMadNoiseDetector::initialize()
+void ViMadNoiseDetector::changeParameter(QString name, qreal value)
 {
-	setWindowSize(parameter("Window Size"));
+	if(name == "Window Size") setWindowSize(value);
+	else
+	{
+		LOG("The noise detector doe not have a parameter named " + name + ".", QtFatalMsg);
+		exit(-1);
+	}
 }
 
 void ViMadNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)

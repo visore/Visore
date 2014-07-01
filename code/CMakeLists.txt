@@ -50,6 +50,12 @@ SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 SET(CMAKE_AUTOMOC ON)
 
 SET(QT_DIRETORIES
+	/opt/Qt5.3.3/5.3.3/gcc_64
+	/opt/Qt5.3.3/5.3/gcc_64
+	/opt/Qt5.3.2/5.3.2/gcc_64
+	/opt/Qt5.3.2/5.3/gcc_64
+	/opt/Qt5.3.1/5.3.1/gcc_64
+	/opt/Qt5.3.1/5.3/gcc_64
 	/opt/Qt5.3.0/5.3.0/gcc_64
 	/opt/Qt5.3.0/5.3/gcc_64
 	/opt/Qt5.2.0/5.2.0/gcc_64

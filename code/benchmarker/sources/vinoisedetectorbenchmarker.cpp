@@ -46,9 +46,11 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	addParam("Range Start", 0, 100, 20);
 	addParam("Range End", 0, 100, 20);*/
 
-	mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor());
-	addParam("Window Size", 128, 128, 8);
-	addParam("Degree", 1, 1, 1);
+	mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
+	addParam("Window Size", 256, 256, 8);
+	addParam("AR Degree", 2, 2, 1);
+	addParam("MA Degree", 0, 1, 1);
+	addParam("Threshold", 0.4, 0.8, 0.05);
 
 	QObject::connect(mDetector, SIGNAL(progressed(qreal)), this, SLOT(progressDetect(qreal)));
 }
@@ -233,16 +235,17 @@ void ViNoiseDetectorBenchmarker::process()
 			calculateThreshold(mCurrentObject->buffer(ViAudio::Noise), mCurrentObject->buffer(ViAudio::Custom), bestThreshold, bestErrors, bestMatthews, maxNoise);
 			if(bestMatthews > maxMatthews) maxMatthews = bestMatthews;
 			clearProgress();
+
+			// Write
+			/*mDetector->mask(mCurrentObject->buffer(ViAudio::Noise), mCurrentObject->buffer(ViAudio::NoiseMask), 0.15, 8);
+			QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
+			mCurrentObject->encode(ViAudio::NoiseMask);
+			return;*/
 		}
 		else
 		{
 			time = 0;
 		}
-
-		// Write
-		/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-		mCurrentObject->encode(ViAudio::Corrected);
-		return;*/
 
 		++mDoneParamIterations;
 		printFileData(bestErrors, time, bestThreshold);
@@ -347,7 +350,11 @@ void ViNoiseDetectorBenchmarker::printFileData(ViClassificationErrorCollection &
 {
 	int i;
 
-	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << (int) mParamsCurrent[i] << "\t";
+	for(i = 0; i < mParamsStart.size(); ++i)
+	{
+		if((int) mParamsCurrent[i] == mParamsCurrent[i]) mOutputStream << (int) mParamsCurrent[i] << "\t";
+		else mOutputStream << mParamsCurrent[i] << "\t";
+	}
 	mOutputStream << threshold << "\t" << mDetector->unscaleThreshold(threshold) << "\t" << errors.TP() << "\t" << errors.TN() << "\t" << errors.FP() << "\t" << errors.FN() << "\t" << errors.sensitivity() << "\t" << errors.specificity() << "\t" << errors.matthewsCoefficient() << "\t" << time << "\t\t";
 	mOutputStream << errors.at(0).TN() << "\t" << errors.at(0).FP() << "\t" << errors.at(0).specificity() << "\t";
 	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << errors.at(i).TP() << "\t" << errors.at(i).FN() << "\t" << errors.at(i).sensitivity() << "\t";
@@ -356,7 +363,11 @@ void ViNoiseDetectorBenchmarker::printFileData(ViClassificationErrorCollection &
 
 	if(time != 0)
 	{
-		for(i = 0; i < mParamsStart.size(); ++i) mOutputStream2 << (int) mParamsCurrent[i] << "\t";
+		for(i = 0; i < mParamsStart.size(); ++i)
+		{
+			if((int) mParamsCurrent[i] == mParamsCurrent[i]) mOutputStream2 << (int) mParamsCurrent[i] << "\t";
+			else mOutputStream2 << mParamsCurrent[i] << "\t";
+		}
 		mOutputStream2 << threshold << "\t" << mDetector->unscaleThreshold(threshold) << "\t" << errors.TP() << "\t" << errors.TN() << "\t" << errors.FP() << "\t" << errors.FN() << "\t" << errors.sensitivity() << "\t" << errors.specificity() << "\t" << errors.matthewsCoefficient() << "\t" << time << "\t\t";
 		mOutputStream2 << errors.at(0).TN() << "\t" << errors.at(0).FP() << "\t" << errors.at(0).specificity() << "\t";
 		for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << errors.at(i).TP() << "\t" << errors.at(i).FN() << "\t" << errors.at(i).sensitivity() << "\t";

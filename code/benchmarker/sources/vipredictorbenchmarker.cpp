@@ -14,7 +14,7 @@
 #include <vinewtonpredictor.h>
 
 #define WINDOW_SIZE 4096
-#define MAXIMUM_PREDICTION 16
+#define MAXIMUM_PREDICTION 50
 
 ViPredictorBenchmarker::ViPredictorBenchmarker()
 {
@@ -27,12 +27,12 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	/*mPredictor = new ViHermitePredictor();
 	addParam("Window Size", 1, 256, 1);*/
 
-	mPredictor = new ViLagrangePredictor();
-	addParam("Window Size", 1, 128, 1);
+	/*mPredictor = new ViLagrangePredictor();
+	addParam("Window Size", 1, 128, 1);*/
 
-	/*mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Normal, ViPolynomialPredictor::Best);
-	addParam("Window Size", 8, 8, 8);
-	addParam("Degree", 20, 20, 1);
+	/*mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Normal, ViPolynomialPredictor::Fixed);
+	addParam("Window Size", 8, 1024, 8);
+	addParam("Degree", 1, 10, 1);
 	addParam("Derivatives", 1, 4, 1);*/
 
 	/*mPredictor = new ViFourierPredictor(ViFourierPredictor::Normal, ViFourierPredictor::Fixed);
@@ -49,11 +49,15 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	addParam("GARCH Order", 0, 0, 1);
 	addParam("ARCH Order", 1, 1, 1);*/
 
-	/*mPredictor = new ViArmaPredictor();
-	addParam("Window Size", 256,256, 1);
-	addParam("AR Degree", 1, 5, 1);
-	addParam("I Degree", 0, 1, 1);
-	addParam("MA Degree", 0, 2, 1);*/
+	mPredictor = new ViArmaPredictor();
+	addParam("Window Size", 32,512, 32);
+	addParam("AR Degree", 1, 7, 1);
+	//addParam("I Degree", 0, 1, 1);
+	addParam("MA Degree", 0, 1, 1);
+	/*addParam("Window Size", 64,64, 32);
+		addParam("AR Degree", 1, 7, 1);
+		//addParam("I Degree", 0, 1, 1);
+		addParam("MA Degree", 0, 1, 1);*/
 
 	QObject::connect(mPredictor, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }

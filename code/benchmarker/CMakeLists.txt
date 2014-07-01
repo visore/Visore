@@ -17,7 +17,6 @@ TARGET_LINK_LIBRARIES(vibenchmarker
 	vimadnoisedetector
 	vipredictionnoisedetector
 	vifouriernoisedetector
-	viarmanoisedetector
 	vizscorenoisedetector
 	vinearestneighbournoisedetector
 	vimahalanobisnoisedetector
