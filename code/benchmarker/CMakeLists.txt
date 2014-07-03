@@ -39,6 +39,7 @@ TARGET_LINK_LIBRARIES(vibenchmarker
 	viconstantpredictor
 	vilagrangepredictor
 	vinewtonpredictor
+	vineuralpredictor
 )
 QT5_USE_MODULES(vibenchmarker Xml Multimedia)
 

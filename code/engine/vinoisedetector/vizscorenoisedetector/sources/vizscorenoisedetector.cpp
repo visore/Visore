@@ -35,7 +35,7 @@ void ViZscoreNoiseDetector::changeParameter(QString name, qreal value)
 	}
 }
 
-void ViZscoreNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
+void ViZscoreNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel)
 {
 	static qreal mean, standardDeviation;
 	while(samples.size() >= mWindowSize)

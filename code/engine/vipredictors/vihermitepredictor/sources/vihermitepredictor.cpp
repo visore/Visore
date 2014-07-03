@@ -73,7 +73,7 @@ qreal ViHermitePredictor::calculateLagrangeDerivative1(const qreal *x, const int
 	return result;
 }
 
-bool ViHermitePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError)
+bool ViHermitePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError, const int &channel)
 {
 	static int i;
 	static qreal scaling;

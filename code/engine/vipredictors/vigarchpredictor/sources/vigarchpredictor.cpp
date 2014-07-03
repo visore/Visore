@@ -49,7 +49,7 @@ void ViGarchPredictor::setParameter(const int &number, const qreal &value)
 	}
 }
 
-bool ViGarchPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error)
+bool ViGarchPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error, const int &channel)
 {
 	return mGretl->forecast(samples, size, predictedSamples, predictionCount, error);
 }

@@ -27,7 +27,7 @@ class ViZscoreNoiseDetector : public ViNoiseDetector
 
 	protected:
 
-		void detect(QVector<qreal> &samples, QVector<qreal> &noise);
+		void detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel = 0);
 
 	private:
 

@@ -1,6 +1,7 @@
 #include <vierror.h>
 
 #define PRECISION 512
+#define CACHE 512
 
 ViError::ViError()
 {
@@ -11,15 +12,26 @@ void ViError::add(const qreal &prediction, const qreal &observation)
 {
 	if(prediction == DBL_MAX || observation == DBL_MAX || std::isnan(prediction) || std::isnan(observation))
 	{
-		mTotal += 1;
+		mTemp = 1;
 	}
 	else
 	{
-		mTotal += mpfr::pow(prediction - observation, 2);
+		mTemp = mpfr::pow(prediction - observation, 2);
 		if(observation < mMin) mMin = observation;
 		else if(observation > mMax) mMax = observation;
 	}
+
+	mTotal += mTemp;
 	++mCount;
+
+	mCacheTotal += mTemp.toDouble();
+	++mCacheCount;
+	if(mCacheCount >= CACHE)
+	{
+		mCache.append(mCacheTotal);
+		mCacheTotal = 0;
+		mCacheCount = 0;
+	}
 }
 
 void ViError::add(const qreal *prediction, const qreal *observation, const int &size)
@@ -72,6 +84,28 @@ qreal ViError::nrmse() const
 	return -1;
 }
 
+QList<qreal> ViError::mseTime() const
+{
+	QList<qreal> result;
+	for(int i = 0; i < mCache.size(); ++i) result.append(mCache[i] / CACHE);
+	return result;
+}
+
+QList<qreal> ViError::rmseTime() const
+{
+	QList<qreal> result;
+	for(int i = 0; i < mCache.size(); ++i) result.append(std::sqrt(mCache[i] / CACHE));
+	return result;
+}
+
+QList<qreal> ViError::nrmseTime() const
+{
+	QList<qreal> result;
+	qreal range = mMax - mMin;
+	for(int i = 0; i < mCache.size(); ++i) result.append(std::sqrt(mCache[i] / CACHE) / range);
+	return result;
+}
+
 mpfr::mpreal ViError::make(const qreal &value)
 {
 	return mpfr::mpreal(value, PRECISION);
@@ -86,8 +120,12 @@ void ViError::clear()
 {
 	mCount = make();
 	mTotal = make();
+	mTemp = make();
 	mMin = 1;
 	mMax = -1;
+	mCache.clear();
+	mCacheTotal = 0;
+	mCacheCount = 0;
 }
 
 ViError& ViErrorCollection::atIndex(const int &index)
@@ -113,10 +151,11 @@ qreal ViErrorCollection::mse() const
 	QList<int> keys = mErrors.keys();
 	for(int i = 0; i < keys.size(); ++i)
 	{
-		if(mErrors[i].isValid())
+		int &key = keys[i];
+		if(mErrors[key].isValid())
 		{
-			count += mErrors[i].mCount;
-			total += mErrors[i].mTotal;
+			count += mErrors[key].mCount;
+			total += mErrors[key].mTotal;
 		}
 	}
 	if(count == 0) return -1;
@@ -130,10 +169,11 @@ qreal ViErrorCollection::rmse() const
 	QList<int> keys = mErrors.keys();
 	for(int i = 0; i < keys.size(); ++i)
 	{
-		if(mErrors[i].isValid())
+		int &key = keys[i];
+		if(mErrors[key].isValid())
 		{
-			count += mErrors[i].mCount;
-			total += mErrors[i].mTotal;
+			count += mErrors[key].mCount;
+			total += mErrors[key].mTotal;
 		}
 	}
 	if(count == 0) return -1;
@@ -150,12 +190,13 @@ qreal ViErrorCollection::nrmse() const
 	QList<int> keys = mErrors.keys();
 	for(int i = 0; i < keys.size(); ++i)
 	{
-		if(mErrors[i].isValid())
+		int &key = keys[i];
+		if(mErrors[key].isValid())
 		{
-			count += mErrors[i].mCount;
-			total += mErrors[i].mTotal;
-			if(mErrors[i].mMax > max) max = mErrors[i].mMax;
-			else if(mErrors[i].mMin < min) min = mErrors[i].mMin;
+			count += mErrors[key].mCount;
+			total += mErrors[key].mTotal;
+			if(mErrors[key].mMax > max) max = mErrors[key].mMax;
+			if(mErrors[key].mMin < min) min = mErrors[key].mMin;
 		}
 	}
 	if(count == 0 || (max - min) == 0) return -1;

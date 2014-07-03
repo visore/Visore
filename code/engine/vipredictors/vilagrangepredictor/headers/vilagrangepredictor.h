@@ -15,7 +15,7 @@ class ViLagrangePredictor : public ViPredictor
 		void setParameter(const int &number, const qreal &value);
 		bool validParameters();
 
-		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error = NULL);
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error = NULL, const int &channel = 0);
 
 };
 

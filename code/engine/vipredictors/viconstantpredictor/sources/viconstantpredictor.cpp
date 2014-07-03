@@ -53,7 +53,7 @@ void ViConstantPredictor::setParameter(const int &number, const qreal &value)
 	}
 }
 
-bool ViConstantPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViErrorCollection *modelErrors)
+bool ViConstantPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError, const int &channel)
 {
 	(this->*predictPointer)(samples, size, predictedSamples, predictionCount);
 	return true;

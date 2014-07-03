@@ -32,7 +32,7 @@ bool ViLagrangePredictor::validParameters()
 	return mWindowSize > 1;
 }
 
-bool ViLagrangePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error)
+bool ViLagrangePredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error, const int &channel)
 {
 	/*static int i, j, k;
 	static mpfr::mpreal value1, value2, x, scaling;

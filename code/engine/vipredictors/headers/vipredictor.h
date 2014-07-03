@@ -28,8 +28,8 @@ class ViPredictor : public ViName, public ViNotifier
 		void predict(ViBuffer *input, ViBuffer *output, ViErrorCollection *predictionErrors, ViError *modelError = NULL);
 		void predict(ViBuffer *input, ViBuffer *output, const int &predictionCount, ViErrorCollection *predictionErrors, ViError *modelError = NULL);
 
-		bool predict(qreal *samples, const int &size, qreal &prediction);
-		virtual bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error = NULL) = 0;
+		bool predict(qreal *samples, const int &size, qreal &prediction, const int &channel = 0);
+		virtual bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error = NULL, const int &channel = 0) = 0;
 
 		virtual void setParameter(const int &number, const qreal &value);
 		void setParameter(const QString &name, const qreal &value);
@@ -45,15 +45,20 @@ class ViPredictor : public ViName, public ViNotifier
 		QString parameterName(const int &index, const bool &allCaps = true);
 		QStringList parameters();
 
+		virtual void initialize(const int &channelCount, const int &predictionCount); // Called before the first prediction
+
 	protected:
 
 		void addParameterName(const QString &name);
 		void adjustValue(qreal &value);
 
+		void setPredictionIndex(const int &index); // From all the n predicted samples, which one to use for the output
+
 	protected:
 
 		int mWindowSize;
 		int mOffset;
+		int mPredictionIndex;
 		QList<QString> mParameterNames;
 
 };

@@ -173,7 +173,7 @@ bool ViNewtonPredictor::validParameters()
 	return mWindowSize > 0;
 }
 
-bool ViNewtonPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error)
+bool ViNewtonPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error, const int &channel)
 {
 	mTyped->predict(samples, size, predictedSamples, predictionCount, mEigen, error);
 	return true;

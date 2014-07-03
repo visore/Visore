@@ -20,6 +20,7 @@
 #include <vigarchpredictor.h>
 #include <vilagrangepredictor.h>
 #include <vinewtonpredictor.h>
+#include <vineuralpredictor.h>
 
 #define WINDOW_SIZE 4096
 #define THRESHOLD_PARTS 20 // In how many parts a threshold range should be devided in
@@ -46,11 +47,14 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	addParam("Range Start", 0, 100, 20);
 	addParam("Range End", 0, 100, 20);*/
 
-	mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
+	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
 	addParam("Window Size", 256, 256, 8);
 	addParam("AR Degree", 2, 2, 1);
 	addParam("MA Degree", 1, 1, 1);
-	addParam("Threshold", 0.65, 0.65, 0.05);
+	addParam("Threshold", 0.55, 0.75, 0.005);*/
+
+	mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor());
+	addParam("Window Size", 1, 1, 8);
 
 	QObject::connect(mDetector, SIGNAL(progressed(qreal)), this, SLOT(progressDetect(qreal)));
 }

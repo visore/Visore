@@ -1,24 +1,30 @@
 #include <vifann.h>
 
-// FANN default
-#define MIN_RANDOM_WEIGHTS -0.1
-#define MAX_RANDOM_WEIGHTS 0.1
-
 ViFann::ViFann()
 {
 	mNetwork = NULL;
-	mSingleArray = new qreal[1];
+	clear();
 }
 
 ViFann::ViFann(const ViFann &other)
 {
+	mNetwork = NULL;
+	clear();
+
 	if(other.mNetwork == NULL) mNetwork = NULL;
 	else mNetwork = fann_copy(other.mNetwork);
 
-	mSingleArray = new qreal[1];
-
+	// Structure
+	mType = other.mType;
 	mInputCount = other.mInputCount;
 	mOutputCount = other.mOutputCount;
+	mNeurons = other.mNeurons;
+	mConnectionRate = other.mConnectionRate;
+
+	// Weights
+	mWeights = other.mWeights;
+	mWeightsMinimum = other.mWeightsMinimum;
+	mWeightsMaximum = other.mWeightsMaximum;
 }
 
 ViFann::~ViFann()
@@ -34,11 +40,17 @@ void ViFann::clear()
 		mNetwork = NULL;
 	}
 
-	if(mSingleArray != NULL)
-	{
-		delete mSingleArray;
-		mSingleArray = NULL;
-	}
+	// Structure
+	mType = NoType;
+	mInputCount = 0;
+	mOutputCount = 0;
+	mNeurons.clear();
+	mConnectionRate = 0;
+
+	// Weights
+	mWeights = NoWeights;
+	mWeightsMinimum = 0;
+	mWeightsMaximum = 0;
 }
 
 bool ViFann::setStructure(const Type &type, const QList<int> &neurons, const qreal &connectionRate)
@@ -49,21 +61,57 @@ bool ViFann::setStructure(const Type &type, const QList<int> &neurons, const qre
 	unsigned int layerNeurons[layers];
 	for(mI = 0; mI < layers; ++mI) layerNeurons[mI] = neurons[mI];
 
+	mType = type;
 	mInputCount = neurons.first();
 	mOutputCount = neurons.last();
+	mNeurons = neurons;
 
 	if(type == Standard) mNetwork = fann_create_standard_array(layers, layerNeurons);
-	else if(type == Sparse) mNetwork = fann_create_sparse_array(connectionRate, layers, layerNeurons);
+	else if(type == Sparse)
+	{
+		mNetwork = fann_create_sparse_array(connectionRate, layers, layerNeurons);
+		mConnectionRate = connectionRate;
+	}
 	else if(type == Shortcut) mNetwork = fann_create_shortcut_array(layers, layerNeurons);
 	else return false;
+
+
+
+	//fann_set_training_algorithm(mNetwork,FANN_TRAIN_INCREMENTAL);
+
+	//fann_set_train_error_function(mNetwork,FANN_ERRORFUNC_LINEAR);
+
+
 	return true;
 }
 
-bool ViFann::setWeights(Weights &initialization, const qreal &minimum, const qreal &maximum)
+bool ViFann::setInputCount(const int &count)
+{
+	if(mNeurons.isEmpty()) return false;
+	QList<int> neurons = mNeurons;
+	neurons.first() = count;
+	return setStructure(mType, neurons, mConnectionRate);
+}
+
+bool ViFann::setOutputCount(const int &count)
+{
+	if(mNeurons.isEmpty()) return false;
+	QList<int> neurons = mNeurons;
+	neurons.last() = count;
+	return setStructure(mType, neurons, mConnectionRate);
+}
+
+bool ViFann::setWeights(const Weights &initialization, const qreal &minimum, const qreal &maximum)
 {
 	if(mNetwork == NULL) return false;
+	mWeights = initialization;
 
-	if(initialization == Random) fann_randomize_weights(mNetwork, MIN_RANDOM_WEIGHTS, MAX_RANDOM_WEIGHTS);
+	if(initialization == Random)
+	{
+		fann_randomize_weights(mNetwork, minimum, maximum);
+		mWeightsMinimum = minimum;
+		mWeightsMaximum = maximum;
+	}
 	else if(initialization == WidrowNguyen)
 	{
 		// Create fake training set so that FANN can determine the min and max values
@@ -127,27 +175,122 @@ void ViFann::setLearningMomentum(const qreal &momentum)
 	fann_set_learning_momentum(mNetwork, momentum);
 }
 
-void ViFann::run(qreal *input, qreal *output)
+void ViFann::run(const qreal *input, qreal *output)
 {
 	// TODO: Should we delete result?
-	qreal *result = FANN_API fann_run(mNetwork, input);
+	qreal *result = FANN_API fann_run(mNetwork, (qreal*) input);
 	for(mI = 0; mI < mOutputCount; ++mI) output[mI] = result[mI];
+	adjustSamples(output, mOutputCount);
 }
 
-void ViFann::run(qreal *input, qreal &output)
+void ViFann::run(const qreal *input, qreal &output)
 {
 	// TODO: Should we delete result?
-	qreal *result = FANN_API fann_run(mNetwork, input);
+	qreal *result = FANN_API fann_run(mNetwork, (qreal*) input);
 	output = result[0];
+	adjustSample(output);
 }
 
-void ViFann::train(qreal *input, qreal *desiredOutput)
+void ViFann::run(const qreal *input, qreal *output, const int &interations)
 {
-	fann_train(mNetwork, input, desiredOutput);
+	qreal newInput[mInputCount];
+	memcpy(newInput, input, mInputCount * sizeof(qreal));
+	qreal copySize = (mInputCount - 1) * sizeof(qreal);
+
+	for(mI = 0; mI < interations; ++mI)
+	{
+		qreal *result = FANN_API fann_run(mNetwork, newInput);
+		output[mI] = result[0];
+		memcpy(newInput, newInput + 1, copySize);
+		newInput[mInputCount - 1] = result[0];
+	}
+	adjustSamples(output, interations);
 }
 
-void ViFann::train(qreal *input, const qreal &desiredOutput)
+void ViFann::train(const qreal *input, const qreal *desiredOutput)
 {
-	mSingleArray[0] = desiredOutput;
-	fann_train(mNetwork, input, mSingleArray);
+	fann_train(mNetwork, (qreal*) input, (qreal*) desiredOutput);
+}
+
+void ViFann::train(const qreal *input, const qreal &desiredOutput)
+{
+	fann_train(mNetwork, (qreal*) input, (qreal*) &desiredOutput);
+}
+
+void ViFann::runTrain(const qreal *input, qreal *output, const qreal *desiredOutput)
+{
+	run(input, output);
+	train(input, desiredOutput);
+}
+
+void ViFann::runTrain(const qreal *input, qreal &output, const qreal &desiredOutput)
+{
+	run(input, output);
+	train(input, desiredOutput);
+}
+
+ViFann::Type ViFann::type()
+{
+	return mType;
+}
+
+int ViFann::inputCount()
+{
+	return mInputCount;
+}
+
+int ViFann::outputCount()
+{
+	return mOutputCount;
+}
+
+int ViFann::layerCount()
+{
+	return mNeurons.size();
+}
+
+int ViFann::neuronCount(const int &layer)
+{
+	if(layer < 0 || layer >= mNeurons.size()) return 0;
+	return mNeurons[layer];
+}
+
+QList<int> ViFann::neurons()
+{
+	return mNeurons;
+}
+
+qreal ViFann::connectionRate()
+{
+	return mConnectionRate;
+}
+
+ViFann::Weights ViFann::weights()
+{
+	return mWeights;
+}
+
+qreal ViFann::weightsMinimum()
+{
+	return mWeightsMinimum;
+}
+
+qreal ViFann::weightsMaximum()
+{
+	return mWeightsMaximum;
+}
+
+inline void ViFann::adjustSamples(qreal *samples, const int &size)
+{
+	for(mI = 0; mI < size; ++mI)
+	{
+		if(samples[mI] > 1) samples[mI] = 1;
+		else if(samples[mI] < -1) samples[mI] = -1;
+	}
+}
+
+inline void ViFann::adjustSample(qreal &sample)
+{
+	if(sample > 1) sample = 1;
+	else if(sample < -1) sample = -1;
 }

@@ -55,7 +55,9 @@ class ViNoiseDetector : public ViNotifier, public ViName
 		void setOffset(const int &offset);
 		void setScale(const qreal &scale);
 
-		virtual void detect(QVector<qreal> &samples, QVector<qreal> &noise) = 0; // returns the number of samples to remove.
+		virtual void initialize(const int &channelCount);
+
+		virtual void detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel = 0) = 0; // returns the number of samples to remove.
 
 	private:
 

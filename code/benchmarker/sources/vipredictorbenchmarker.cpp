@@ -12,6 +12,7 @@
 #include <vigarchpredictor.h>
 #include <vilagrangepredictor.h>
 #include <vinewtonpredictor.h>
+#include <vineuralpredictor.h>
 
 #define WINDOW_SIZE 4096
 #define MAXIMUM_PREDICTION 50
@@ -21,7 +22,7 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	/*mPredictor = new ViConstantPredictor(ViConstantPredictor::Random);
+	/*mPredictor = new ViConstantPredictor(ViConstantPredictor::Last);
 	addParam("Window Size", 64, 64, 1);*/
 
 	/*mPredictor = new ViHermitePredictor();
@@ -49,15 +50,20 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	addParam("GARCH Order", 0, 0, 1);
 	addParam("ARCH Order", 1, 1, 1);*/
 
-	mPredictor = new ViArmaPredictor();
+	/*mPredictor = new ViArmaPredictor();
 	addParam("Window Size", 32,512, 32);
 	addParam("AR Degree", 1, 7, 1);
 	//addParam("I Degree", 0, 1, 1);
-	addParam("MA Degree", 0, 1, 1);
+	addParam("MA Degree", 0, 1, 1);*/
 	/*addParam("Window Size", 64,64, 32);
 		addParam("AR Degree", 1, 7, 1);
 		//addParam("I Degree", 0, 1, 1);
 		addParam("MA Degree", 0, 1, 1);*/
+
+	mPredictor = new ViNeuralPredictor();
+	addParam("Window Size", 1, 1, 1);
+	addParam("l1", 0, 0, 2);
+	//addParam("l3", 15,15, 5);
 
 	QObject::connect(mPredictor, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }
@@ -219,15 +225,25 @@ void ViPredictorBenchmarker::process()
 			time = 0;
 		}
 
-		/*ViModelPredictor *p = (ViModelPredictor*) mPredictor;
-		QVector<int> r = p->bestDegrees();
-		cout<<endl;
-		for(int i = 0; i < r.size(); ++i) cout<<r[i]<<"\t";
-		cout<<endl;*/
-
 		// Write
 		/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
 		mCurrentObject->encode(ViAudio::Custom);
+		return;*/
+
+		/*ViAudioWriteData d(mCurrentObject->buffer(ViAudio::CustomMask));
+		ViSampleChunk f(4096);
+		QList<qreal> errors = predictionErrors.at(1).nrmseTime();
+		while(true)
+		{
+			if(errors.size()<4096)break;
+			for(int i = 0; i < 4096; ++i)
+			{
+				f[i] = errors[0];
+				errors.removeFirst();
+			}
+			d.write(f);
+		}
+		mCurrentObject->encode(ViAudio::CustomMask);
 		return;*/
 
 		++mDoneParamIterations;
@@ -281,6 +297,11 @@ void ViPredictorBenchmarker::printFileData(ViErrorCollection &predictionErrors, 
 	mOutputStream << predictionErrors.nrmse() << "\t" << modelError.nrmse() << "\t" << time << "\t\t";
 	for(i = 1; i <= MAXIMUM_PREDICTION; ++i) mOutputStream << predictionErrors.at(i).nrmse() << "\t";
 	mOutputStream << "\n";
+	mOutputStream.flush();
+
+	mOutputStream << "\n\n\n";
+	QList<qreal> errors = predictionErrors.at(1).nrmseTime();
+	for(i = 0; i < errors.size(); ++i) mOutputStream << errors[i] << "\n";
 	mOutputStream.flush();
 
 	if(predictionErrors.nrmse() >= 0 && time != 0)

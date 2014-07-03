@@ -41,7 +41,7 @@ void ViNearestNeighbourNoiseDetector::changeParameter(QString name, qreal value)
 	}
 }
 
-void ViNearestNeighbourNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
+void ViNearestNeighbourNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel)
 {
 	static int i;
 	static qreal totalDifference;

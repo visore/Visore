@@ -23,6 +23,8 @@ ViNoiseDetector::~ViNoiseDetector()
 
 qreal ViNoiseDetector::detect(ViBuffer *corrupted, ViBuffer *noiseMap)
 {
+	initialize(corrupted->format().channelCount());
+
 	int i;
 	qreal maxNoise = 0;
 
@@ -55,8 +57,8 @@ qreal ViNoiseDetector::detect(ViBuffer *corrupted, ViBuffer *noiseMap)
 		for(i = 0; i < corrupted1.size(); ++i) samples1.append(corrupted1[i]);
 		for(i = 0; i < corrupted2.size(); ++i) samples2.append(corrupted2[i]);
 
-		detect(samples1, map1);
-		detect(samples2, map2);
+		detect(samples1, map1, 0);
+		detect(samples2, map2, 1);
 
 		while(map1.size() >= WINDOW_SIZE)
 		{
@@ -484,4 +486,8 @@ void ViNoiseDetector::changeParameter(QString name, qreal value)
 {
 	LOG("This noise detector did not implement the changeParameter slot.", QtFatalMsg);
 	exit(-1);
+}
+
+void ViNoiseDetector::initialize(const int &channelCount)
+{
 }

@@ -4,6 +4,7 @@
 #include <vichunk.h>
 #include <QtGlobal>
 #include <QMap>
+#include <QList>
 #include <mpreal.h>
 
 class ViErrorCollection;
@@ -28,6 +29,10 @@ class ViError
 		qreal rmse() const;
 		qreal nrmse() const; // Normalized RMSE
 
+		QList<qreal> mseTime() const;
+		QList<qreal> rmseTime() const;
+		QList<qreal> nrmseTime() const; // Normalized RMSE
+
 		bool isValid() const;
 		void clear();
 
@@ -39,8 +44,13 @@ class ViError
 
 		mpfr::mpreal mCount;
 		mpfr::mpreal mTotal;
+		mpfr::mpreal mTemp;
 		qreal mMin;
 		qreal mMax;
+
+		QList<qreal> mCache;
+		qreal mCacheTotal;
+		int mCacheCount;
 
 };
 

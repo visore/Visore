@@ -19,6 +19,7 @@ ADD_SUBDIRECTORY(${ROOT}/viarimainterpolator)
 ADD_SUBDIRECTORY(${ROOT}/vigarchinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/vilagrangeinterpolator)
 ADD_SUBDIRECTORY(${ROOT}/vinewtoninterpolator)
+ADD_SUBDIRECTORY(${ROOT}/vineuralinterpolator)
 
 #Initiate source files
 FILE(GLOB VI_INTERPOLATOR_SOURCES ${SOURCES}/*.cpp)

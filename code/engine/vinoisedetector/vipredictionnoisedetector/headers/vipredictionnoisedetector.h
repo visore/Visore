@@ -26,7 +26,8 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 
 	protected:
 
-		void detect(QVector<qreal> &samples, QVector<qreal> &noise);
+		void initialize(const int &channelCount);
+		void detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel = 0);
 
 	private:
 

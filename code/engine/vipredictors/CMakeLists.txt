@@ -18,6 +18,7 @@ ADD_SUBDIRECTORY(${ROOT}/vifourierpredictor)
 ADD_SUBDIRECTORY(${ROOT}/viconstantpredictor)
 ADD_SUBDIRECTORY(${ROOT}/vilagrangepredictor)
 ADD_SUBDIRECTORY(${ROOT}/vinewtonpredictor)
+ADD_SUBDIRECTORY(${ROOT}/vineuralpredictor)
 
 #Initiate source files
 FILE(GLOB VI_PREDICTOR_SOURCES ${SOURCES}/*.cpp)

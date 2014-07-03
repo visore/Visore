@@ -60,7 +60,7 @@ void ViMahalanobisNoiseDetector::changeParameter(QString name, qreal value)
 	}
 }
 
-void ViMahalanobisNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
+void ViMahalanobisNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel)
 {
 	static int i, error;
 

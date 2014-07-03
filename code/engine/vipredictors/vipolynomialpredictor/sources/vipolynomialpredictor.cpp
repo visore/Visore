@@ -135,7 +135,7 @@ void ViPolynomialPredictor::setPointers(const Mode &mode, const Estimation &esti
 	}
 }
 
-bool ViPolynomialPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error)
+bool ViPolynomialPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error, const int &channel)
 {
 	// Scaling because multiplying integers (or powers) might lead to variable overflow
 	return (this->*predictPointer)(samples, size, predictedSamples, predictionCount, qreal(size + predictionCount - 1), error);

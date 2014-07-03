@@ -90,7 +90,7 @@ void ViFourierNoiseDetector::changeParameter(QString name, qreal value)
 	}
 }
 
-void ViFourierNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
+void ViFourierNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel)
 {
 	static int i;
 	static qreal value;

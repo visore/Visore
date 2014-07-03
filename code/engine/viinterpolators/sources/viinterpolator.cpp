@@ -5,7 +5,7 @@
 #include <QtMath>
 
 #define DEFAULT_WINDOW_SIZE 0	// Will use all available samples
-#define FALLBACK_SIZE 1024	// In case the window size is 0 (use all samples), use this to regulate the cahces
+#define FALLBACK_SIZE 8192	// In case the window size is 0 (use all samples), use this to regulate the caches
 #define MAX_WINDOW_SIZE 64768	// Even if the window size is 0 (use all data), the window size will never be larger than this
 
 ViInterpolator::ViInterpolator()

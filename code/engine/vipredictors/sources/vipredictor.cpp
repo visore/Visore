@@ -8,6 +8,7 @@
 ViPredictor::ViPredictor()
 {
 	setWindowSize(DEFAULT_WINDOW_SIZE);
+	mPredictionIndex = 0;
 }
 
 ViPredictor::ViPredictor(const ViPredictor &other)
@@ -15,6 +16,7 @@ ViPredictor::ViPredictor(const ViPredictor &other)
 	mWindowSize = other.mWindowSize;
 	mOffset = other.mOffset;
 	mParameterNames = other.mParameterNames;
+	mPredictionIndex = other.mPredictionIndex;
 }
 
 ViPredictor::~ViPredictor()
@@ -52,6 +54,14 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 {
 	if(modelError != NULL) modelError->clear();
 
+	if(mPredictionIndex >= predictionCount)
+	{
+		LOG("The prediction index of " + QString::number(mPredictionIndex) + " can not be used with a prediction count of " + QString::number(predictionCount), QtFatalMsg);
+		exit(-1);
+	}
+
+	initialize(input->format().channelCount(), predictionCount);
+
 	int i, end, newCount;
 
 	end = mWindowSize + predictionCount;
@@ -87,7 +97,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 
 		while(cache1.size() > end)
 		{
-			if(predict(cache1.data(), mWindowSize, predictedSamples, predictionCount, modelError))
+			if(predict(cache1.data(), mWindowSize, predictedSamples, predictionCount, modelError, 0))
 			{
 				for(i = 0; i < predictionCount; ++i) adjustValue(predictedSamples[i]);
 			}
@@ -96,7 +106,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 				for(i = 0; i < predictionCount; ++i) predictedSamples[i] = 0;
 			}
 
-			output1.append(predictedSamples[0]);
+			output1.append(predictedSamples[mPredictionIndex]);
 			if(output1.size() >= mWindowSize)
 			{
 				for(i = 0; i < mWindowSize; ++i) outputSamples[i] = output1[i];
@@ -112,7 +122,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 
 		while(cache2.size() > end)
 		{
-			if(predict(cache2.data(), mWindowSize, predictedSamples, predictionCount, modelError))
+			if(predict(cache2.data(), mWindowSize, predictedSamples, predictionCount, modelError, 1))
 			{
 				for(i = 0; i < predictionCount; ++i) adjustValue(predictedSamples[i]);
 			}
@@ -121,7 +131,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 				for(i = 0; i < predictionCount; ++i) predictedSamples[i] = 0;
 			}
 
-			output2.append(predictedSamples[0]);
+			output2.append(predictedSamples[mPredictionIndex]);
 			if(output2.size() >= mWindowSize)
 			{
 				for(i = 0; i < mWindowSize; ++i) outputSamples[i] = output2[i];
@@ -138,7 +148,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	newCount = predictionCount - 1;
 	while(cache1.size() > mWindowSize)
 	{
-		if(predict(cache1.data(), mWindowSize, predictedSamples, newCount, modelError))
+		if(predict(cache1.data(), mWindowSize, predictedSamples, newCount, modelError, 0))
 		{
 			for(i = 0; i < newCount; ++i) adjustValue(predictedSamples[i]);
 		}
@@ -147,7 +157,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 			for(i = 0; i < predictionCount; ++i) predictedSamples[i] = 0;
 		}
 
-		output1.append(predictedSamples[0]);
+		output1.append(predictedSamples[mPredictionIndex]);
 		cache1.removeFirst();
 		--newCount;
 	}
@@ -155,7 +165,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	newCount = predictionCount - 1;
 	while(cache2.size() > mWindowSize)
 	{
-		if(predict(cache2.data(), mWindowSize, predictedSamples, newCount, modelError))
+		if(predict(cache2.data(), mWindowSize, predictedSamples, newCount, modelError, 1))
 		{
 			for(i = 0; i < newCount; ++i) adjustValue(predictedSamples[i]);
 		}
@@ -164,7 +174,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 			for(i = 0; i < predictionCount; ++i) predictedSamples[i] = 0;
 		}
 
-		output2.append(predictedSamples[0]);
+		output2.append(predictedSamples[mPredictionIndex]);
 		cache2.removeFirst();
 		--newCount;
 	}
@@ -194,6 +204,14 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	if(predictionErrors != NULL) predictionErrors->clear();
 	if(modelError != NULL) modelError->clear();
 
+	if(mPredictionIndex >= predictionCount)
+	{
+		LOG("The prediction index of " + QString::number(mPredictionIndex) + " can not be used with a prediction count of " + QString::number(predictionCount), QtFatalMsg);
+		exit(-1);
+	}
+
+	initialize(input->format().channelCount(), predictionCount);
+
 	int i, end, newCount;
 
 	end = mWindowSize + predictionCount;
@@ -229,7 +247,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 
 		while(cache1.size() > end)
 		{
-			if(predict(cache1.data(), mWindowSize, predictedSamples, predictionCount, modelError))
+			if(predict(cache1.data(), mWindowSize, predictedSamples, predictionCount, modelError, 0))
 			{
 				for(i = 0; i < predictionCount; ++i) adjustValue(predictedSamples[i]);
 			}
@@ -239,7 +257,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 			}
 			for(i = 0; i < predictionCount; ++i) predictionErrors->at(i + 1).add(predictedSamples[i], cache1[i]);
 
-			output1.append(predictedSamples[0]);
+			output1.append(predictedSamples[mPredictionIndex]);
 			if(output1.size() >= mWindowSize)
 			{
 				for(i = 0; i < mWindowSize; ++i) outputSamples[i] = output1[i];
@@ -255,7 +273,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 
 		while(cache2.size() > end)
 		{
-			if(predict(cache2.data(), mWindowSize, predictedSamples, predictionCount, modelError))
+			if(predict(cache2.data(), mWindowSize, predictedSamples, predictionCount, modelError, 1))
 			{
 				for(i = 0; i < predictionCount; ++i) adjustValue(predictedSamples[i]);
 			}
@@ -265,7 +283,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 			}
 			for(i = 0; i < predictionCount; ++i) predictionErrors->at(i + 1).add(predictedSamples[i], cache2[i]);
 
-			output2.append(predictedSamples[0]);
+			output2.append(predictedSamples[mPredictionIndex]);
 			if(output2.size() >= mWindowSize)
 			{
 				for(i = 0; i < mWindowSize; ++i) outputSamples[i] = output2[i];
@@ -282,7 +300,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	newCount = predictionCount - 1;
 	while(cache1.size() > mWindowSize)
 	{
-		if(predict(cache1.data(), mWindowSize, predictedSamples, newCount, modelError))
+		if(predict(cache1.data(), mWindowSize, predictedSamples, newCount, modelError, 0))
 		{
 			for(i = 0; i < newCount; ++i) adjustValue(predictedSamples[i]);
 		}
@@ -290,9 +308,9 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 		{
 			for(i = 0; i < predictionCount; ++i) predictedSamples[i] = 0;
 		}
-		for(i = 0; i < mWindowSize; ++i) predictionErrors->at(i + 1).add(predictedSamples[i], cache1[i]);
+		for(i = 0; i < newCount; ++i) predictionErrors->at(i + 1).add(predictedSamples[i], cache1[i]);
 
-		output1.append(predictedSamples[0]);
+		output1.append(predictedSamples[mPredictionIndex]);
 		cache1.removeFirst();
 		--newCount;
 	}
@@ -300,7 +318,7 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	newCount = predictionCount - 1;
 	while(cache2.size() > mWindowSize)
 	{
-		if(predict(cache2.data(), mWindowSize, predictedSamples, newCount, modelError))
+		if(predict(cache2.data(), mWindowSize, predictedSamples, newCount, modelError, 1))
 		{
 			for(i = 0; i < newCount; ++i) adjustValue(predictedSamples[i]);
 		}
@@ -308,9 +326,9 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 		{
 			for(i = 0; i < predictionCount; ++i) predictedSamples[i] = 0;
 		}
-		for(i = 0; i < mWindowSize; ++i) predictionErrors->at(i + 1).add(predictedSamples[i], cache2[i]);
+		for(i = 0; i < newCount; ++i) predictionErrors->at(i + 1).add(predictedSamples[i], cache2[i]);
 
-		output2.append(predictedSamples[0]);
+		output2.append(predictedSamples[mPredictionIndex]);
 		cache2.removeFirst();
 		--newCount;
 	}
@@ -324,9 +342,9 @@ void ViPredictor::predict(ViBuffer *input, ViBuffer *output, const int &predicti
 	outputData.enqueueSplitSamples(outputSamples, 1);
 }
 
-bool ViPredictor::predict(qreal *samples, const int &size, qreal &prediction)
+bool ViPredictor::predict(qreal *samples, const int &size, qreal &prediction, const int &channel)
 {
-	return predict(samples, size, &prediction, 1, NULL);
+	return predict(samples, size, &prediction, 1, NULL, channel);
 }
 
 void ViPredictor::setParameter(const int &number, const qreal &value)
@@ -434,4 +452,13 @@ QStringList ViPredictor::parameters()
 void ViPredictor::addParameterName(const QString &name)
 {
 	mParameterNames.append(name);
+}
+
+void ViPredictor::initialize(const int &channelCount, const int &predictionCount)
+{
+}
+
+void ViPredictor::setPredictionIndex(const int &index)
+{
+	mPredictionIndex = index;
 }

@@ -56,7 +56,7 @@ void ViMadNoiseDetector::changeParameter(QString name, qreal value)
 	}
 }
 
-void ViMadNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise)
+void ViMadNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel)
 {
 	static int i;
 	static qreal median, mad;

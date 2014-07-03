@@ -17,7 +17,7 @@ class ViHermitePredictor : public ViPredictor
 
 		ViHermitePredictor* clone();
 
-		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError = NULL);
+		bool predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *modelError = NULL, const int &channel = 0);
 
 	protected:
 
