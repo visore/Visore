@@ -25,7 +25,7 @@ class ViNewtonInterpolator : public ViInterpolator
 
 		void setType();
 
-		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error = NULL);
+		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
 
 		class ViNewtonTypedBase;
 

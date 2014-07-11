@@ -57,6 +57,7 @@ class ViInterpolatorBenchmarker : public QObject
 		QFile mOutputFile2;
 		QTextStream mOutputStream2;
 		qreal mCurrentThreshold;
+		qreal mBestScore;
 
 		QTime mTime;
 		QTime mMainTime;
@@ -64,6 +65,8 @@ class ViInterpolatorBenchmarker : public QObject
 		int mDoneParamIterations;
 
 		int mTotalFiles;
+
+		int mQuitCount;
 
 };
 

@@ -2,8 +2,37 @@
 #define VIFANN_H
 
 #include <QList>
+#include <QVector>
 #include <doublefann.h> // FANN uses doubles
 //#include <floatfann.h> // FANN uses floats
+
+class ViFann;
+
+class ViFannTrain
+{
+
+	friend class ViFann;
+
+	public:
+
+		~ViFannTrain();
+
+		bool setInput(const int &index, const qreal *data);
+		bool setOutput(const int &index, const qreal *data);
+
+	protected:
+
+		ViFannTrain(const int &dataCount, const int &inputs, const int &outputs);
+		ViFannTrain(const ViFannTrain &other);
+
+		fann_train_data* data();
+		bool isSame(const int &dataCount, const int &inputs, const int &outputs);
+
+	private:
+
+		fann_train_data *mData;
+
+};
 
 class ViFann
 {
@@ -34,6 +63,20 @@ class ViFann
 			Linear,			// Symetric bounded linear (-1,1)
 			Cosine,			// Symetric periodical cosinus [-1,1]
 			Sine,			// Symetric periodical sinus [-1,1]
+		};
+
+		enum Training
+		{
+			Fixed,
+			Cascade
+		};
+
+		enum Algorithm
+		{
+			Incremental,
+			Batch,
+			RProp,
+			QuickProp
 		};
 
 	public:
@@ -79,6 +122,22 @@ class ViFann
 		// A momentum coefficient that is too low cannot reliably avoid local minima, and can also slow down the training of the system.
 		void setLearningMomentum(const qreal &momentum);
 
+		// Set the type of training and the training algorithm
+		void setTraining(const Training &training, const Algorithm &algorithm);
+		void setTraining(const Training &training);
+		void setTraining(const Algorithm &algorithm);
+
+		// Stopping conditions for training
+		void setStopEpochs(const int &maxEpochs); // Only applies to fixed training
+		void setStopNeurons(const int &maxNeurons); // Only applies to cascade training
+		void setStopMse(const qreal &mse);
+		void setStopStagnation(const qreal &fraction, const int &iterations); // Will stop training if the MSE of "iterations" sequnetial epochs is lower than "fraction". "fraction" is in [0,1]. Eg: "fraction" of 0.01 is equal to 1% change in MSE.
+
+		// Create a training set
+		ViFannTrain* createTrain(const int &dataCount);
+		bool setTrainInput(const int &index, const qreal *data);
+		bool setTrainOutput(const int &index, const qreal *data);
+
 		// Run the input through the network and generate the output
 		// Does not train the newtork
 		// Input array should at least have the same size than the number of input neurons, same with output array
@@ -91,9 +150,15 @@ class ViFann
 		void train(const qreal *input, const qreal *desiredOutput);
 		void train(const qreal *input, const qreal &desiredOutput);
 
+		// Train for a number of iterations or until a certain MSE was reached
+		void train(const bool &debug = false);
+
 		// First run the input, and then train it
 		void runTrain(const qreal *input, qreal *output, const qreal *desiredOutput);
 		void runTrain(const qreal *input, qreal &output, const qreal &desiredOutput);
+
+		// Checks if all the settings and paramters work together
+		bool isValid();
 
 		// Getters
 
@@ -108,6 +173,9 @@ class ViFann
 		Weights weights();
 		qreal weightsMinimum();
 		qreal weightsMaximum();
+
+		qreal mse();
+		fann* network();
 
 	protected:
 
@@ -133,6 +201,16 @@ class ViFann
 		Weights mWeights;
 		qreal mWeightsMinimum;
 		qreal mWeightsMaximum;
+
+		// Train
+		ViFannTrain *mTrain;
+		Training mTraining;
+		Algorithm mAlgorithm;
+		int mTrainEpochs;
+		int mTrainNeurons;
+		qreal mTrainMse;
+		qreal mTrainStagnationFraction;
+		int mTrainStagnationIterations;
 
 };
 

@@ -97,7 +97,7 @@ bool ViGarchInterpolator::validParameters(const int &leftSize, const int &rightS
 	return validParameters(leftSize + rightSize, archDegree, garchDegree);
 }
 
-bool ViGarchInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error)
+bool ViGarchInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
 	return mGretl->interpolate(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error);
 }

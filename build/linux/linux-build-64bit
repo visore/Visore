@@ -85,6 +85,18 @@ if $gdb; then
 	export LD_LIBRARY_PATH
 	ulimit -c unlimited
 	gdb visore
+elif $valgrind; then
+	cd $install_directory
+	cp ./*/*.so .
+	cp ./*/*/*.so .
+	cp ./*/*/*/*.so .
+	cp ./*/*/*/*/*.so .
+	cp /opt/Qt5.2.0/5.2.0/gcc_64/lib/*.so* .
+	cp /lib/x86_64-linux-gnu/libthread_db.so* .
+	LD_LIBRARY_PATH=/home/visore/Project/Visore/install/usr/local/visore
+	export LD_LIBRARY_PATH
+	ulimit -c unlimited
+	valgrind ./visore
 elif $run; then
 	cd $install_directory
 	./launcher $parameters

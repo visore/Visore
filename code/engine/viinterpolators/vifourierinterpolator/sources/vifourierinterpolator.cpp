@@ -140,7 +140,7 @@ void ViFourierInterpolator::setPointers(const Mode &mode, const Estimation &esti
 	}
 }
 
-bool ViFourierInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error)
+bool ViFourierInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
 	// Scaling by (predictionCount + size - 1) to get all the x-values in [0,1]. Otherwise working with 1, 2, 3, 4, ... will result in sin(PI*x) to always be 0.
 	// Multiply by Pi, since we wok with sin and cos and we want the values to be in [0, Pi] or [0, 2Pi]

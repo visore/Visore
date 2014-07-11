@@ -41,7 +41,7 @@ bool ViLagrangeInterpolator::validParameters(const int &leftSize, const int &rig
 	return validParameters(leftSize + rightSize);
 }
 
-bool ViLagrangeInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error)
+bool ViLagrangeInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
 	// Doesn't matter if you use double or mpreal, same result
 

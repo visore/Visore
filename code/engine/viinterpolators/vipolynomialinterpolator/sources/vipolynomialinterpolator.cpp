@@ -147,7 +147,7 @@ void ViPolynomialInterpolator::setPointers(const Mode &mode, const Estimation &e
 	}
 }
 
-bool ViPolynomialInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error)
+bool ViPolynomialInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
 	// Scaling because multiplying integers (or powers) might lead to variable overflow
 	return (this->*interpolatePointer)(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, qreal(leftSize + outputSize + rightSize - 1), error);

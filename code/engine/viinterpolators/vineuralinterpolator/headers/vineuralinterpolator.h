@@ -9,7 +9,7 @@ class ViNeuralInterpolator : public ViInterpolator
 
 	public:
 
-		ViNeuralInterpolator(ViFann *network); // Takes ownership
+		ViNeuralInterpolator();
 		ViNeuralInterpolator(const ViNeuralInterpolator &other);
 		~ViNeuralInterpolator();
 
@@ -20,19 +20,39 @@ class ViNeuralInterpolator : public ViInterpolator
 		void setParameter(const int &number, const qreal &value);
 		bool validParameters();
 
+		ViNeuralInterpolator* clone();
+
 	protected:
 
-		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error = NULL);
+		void clear();
+		void initialize(const int &channelCount);
 
-		bool devide(qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &windowSize, qreal *output, const int &outputSize);
+		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
+
+		// trainCount: The number of training sets to use (includes left and right). Will always use the same number of training sets from left and right samples. If <= 0, use max number of sets
+		// stepSize: How many samples to skip before creating the next training set. If this is too high, trainCount will be adjusted
+		void train(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const int &trainCount, const int &stepSize);
+
+		bool devide(const qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &leftInputs, const int &rightInputs, qreal *output, const int &outputSize);
+		void devide(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, qreal *input, const int &leftInputs, const int &rightInputs);
+
+		void reverse(const qreal *input, qreal *output, const int &size);
 
 	private:
 
-		ViFann *mNetwork;
+		QList<ViFann*> mNetworks;
 		qreal *mInput;
-		qreal *mOutput;
+		QList<qreal*> mOutput;
+
+		QList<qreal> a;
+		QList<qint64> b;
+		int l1,l2,l3,l4,l5;
 
 		int mWindowSize;
+		int mInputs;
+		int mLeftInputs;
+		int mRightInputs;
+		int mOutputs;
 
 };
 

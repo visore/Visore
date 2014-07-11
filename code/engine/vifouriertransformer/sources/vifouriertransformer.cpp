@@ -24,7 +24,7 @@ ViFourierTransformer::~ViFourierTransformer()
 	}
 	if(mWindowData != 0)
 	{
-		delete mWindowData;
+		delete [] mWindowData;
 	}
 }
 
@@ -35,7 +35,7 @@ ViFourierTransformer::Initialization ViFourierTransformer::setSize(const int siz
 		mSize = size;
 		if(mWindowData != NULL)
 		{
-			delete mWindowData;
+			delete [] mWindowData;
 		}
 		mWindowData = new double[mSize];
 		if(mWindowFunction != 0)

@@ -44,7 +44,7 @@ void ViAudioData::setBuffer(ViBuffer *buffer)
 {
 	QMutexLocker locker(&mMutex);
 	mBuffer = buffer;
-    update();
+	update();
 }
 
 ViBuffer* ViAudioData::buffer()
@@ -161,17 +161,19 @@ ViAudioReadData::ViAudioReadData()
 	setDefaults();
 }
 
-ViAudioReadData::ViAudioReadData(ViBuffer *buffer)
+ViAudioReadData::ViAudioReadData(ViBuffer *buffer, const bool &reversed)
 	: ViAudioData()
 {
 	setDefaults();
+	mReversed = reversed;
 	setBuffer(buffer);
 }
 
-void ViAudioReadData::setReversed(bool reverse)
+void ViAudioReadData::setReversed(const bool &reversed)
 {
-	mStream.setNull();
-	mStream = mBuffer->createReadStream(reverse);
+	QMutexLocker locker(&mMutex);
+	mReversed = reversed;
+	update();
 }
 
 bool ViAudioReadData::hasData()
@@ -203,7 +205,7 @@ ViSampleChunks& ViAudioReadData::splitSamples()
 	QMutexLocker locker(&mMutex);
     if(mNeedsSampleSplit)
     {
-        ViSampleChanneler<qreal>::split(mSampleChunk.data(), mSampleChunk.size(), mChannelCount, mSplitSampleChunks);
+		ViSampleChanneler<qreal>::split(mSampleChunk.data(), mSampleChunk.size(), mChannelCount, mSplitSampleChunks);
         mNeedsSampleSplit = false;
     }
     return mSplitSampleChunks;
@@ -312,6 +314,7 @@ void ViAudioReadData::clearOther()
 
 void ViAudioReadData::defaultOther()
 {
+	mReversed = false;
 	mNeedsSampleSplit = true;
 	mNeedsFrequencySplit = true;
 	mNeedsFrequency = true;
@@ -321,7 +324,7 @@ void ViAudioReadData::defaultOther()
 
 void ViAudioReadData::updateOther()
 {
-    mStream = mBuffer->createReadStream();
+	mStream = mBuffer->createReadStream(mReversed);
 	mTemporaryChunk = ViFrequencyChunk(mSampleCount);
 }
 
@@ -459,7 +462,7 @@ void ViAudioWriteData::clearOther()
 
 void ViAudioWriteData::updateOther()
 {
-    mStream = mBuffer->createWriteStream();
+	mStream = mBuffer->createWriteStream();
 	mChannelSamples.clear();
 	for(int i = 0; i < mChannelCount; ++i)
 	{

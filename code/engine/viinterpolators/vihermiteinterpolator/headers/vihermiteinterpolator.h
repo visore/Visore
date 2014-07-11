@@ -26,7 +26,7 @@ class ViHermiteInterpolator : public ViInterpolator
 
 	protected:
 
-		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error = NULL);
+		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
 
 		void calculate(const qreal *x, const qreal *y, const qreal *derivatives, const int &size, qreal *output, const int &outputSize, const int &startX, const qreal &scaling);
 		qreal calculateLagrange(const qreal *x, const int &size, const qreal &theX, const int &j);

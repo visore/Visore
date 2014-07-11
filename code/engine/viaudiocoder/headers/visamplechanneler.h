@@ -20,7 +20,6 @@ class ViSampleChanneler
         static void merge(QList<ViChunk<T>> &input, ViChunk<T> &output);
 
         static ViChunk<T>* merge(QList<ViChunk<T>*> channels);
-		//static ViChunk<T>* merge(QList<QList<T> > &channels);
 
 };
 

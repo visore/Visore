@@ -70,7 +70,7 @@ qreal ViHermiteInterpolator::calculateLagrangeDerivative1(const qreal *x, const 
 	return result;
 }
 
-bool ViHermiteInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error)
+bool ViHermiteInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
 	static int i, size;
 	static qreal scaling;

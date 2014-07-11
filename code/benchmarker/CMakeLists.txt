@@ -30,6 +30,7 @@ TARGET_LINK_LIBRARIES(vibenchmarker
 	vigarchinterpolator
 	vinewtoninterpolator
 	vilagrangeinterpolator
+	vineuralinterpolator
 
 	vipolynomialpredictor
 	vihermitepredictor

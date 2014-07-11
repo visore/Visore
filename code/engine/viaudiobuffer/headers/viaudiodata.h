@@ -15,7 +15,7 @@ class ViAudioData
 
         void clear();
 
-        void setBuffer(ViBuffer *buffer);
+		void setBuffer(ViBuffer *buffer);
         ViBuffer* buffer();
 		qint64 bufferSize();
 		qint64 bufferSamples();
@@ -70,9 +70,9 @@ class ViAudioReadData : public ViAudioData
     public:
 
 		ViAudioReadData();
-		ViAudioReadData(ViBuffer *buffer);
+		ViAudioReadData(ViBuffer *buffer, const bool &reversed = false);
 
-		void setReversed(bool reverse = true); // Read from end to start
+		void setReversed(const bool &reversed = true); // Read from end to start. Reversed reads will have the last channel first, and first channel last
 
         bool hasData();
 
@@ -100,6 +100,8 @@ class ViAudioReadData : public ViAudioData
         void updateOther();
 
     private:
+
+		bool mReversed;
 
         ViSampleChunks mSplitSampleChunks;
         ViFrequencyChunks mSplitFrequencyChunks;

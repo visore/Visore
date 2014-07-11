@@ -14,18 +14,27 @@
 #include <viarimainterpolator.h>
 #include <vigarchinterpolator.h>
 #include <vihermiteinterpolator.h>
+#include <vineuralinterpolator.h>
 
 #define WINDOW_SIZE 4096
+#define WRITE true
 
 ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 {
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal, ViPolynomialInterpolator::Fixed);
-	addParam("Window Size", 1, 1000, 1);
-	addParam("Degree", 2, 2, 1);
-	addParam("Derivatives", 2, 2, 1);
+	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal, ViPolynomialInterpolator::Fixed);
+	addParam("Window Size", 2, 2, 1);
+	addParam("Degree", 1, 1, 1);
+	//addParam("Derivatives", 2, 2, 1);*/
+
+	mInterpolator = new ViNeuralInterpolator();
+	addParam("Window Size", 32,32, 16);
+	addParam("l1", 0, 32,8);
+	addParam("l2", 0, 32,8);
+
+	mInterpolator->setDirection(ViInterpolator::Forward);
 
 	QObject::connect(mInterpolator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }
@@ -163,6 +172,9 @@ void ViInterpolatorBenchmarker::nextFile()
 
 void ViInterpolatorBenchmarker::process()
 {
+	mQuitCount = 0;
+	mBestScore = DBL_MAX;
+
 	QObject::disconnect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
 	qint64 time;
 
@@ -191,9 +203,12 @@ void ViInterpolatorBenchmarker::process()
 		}
 
 		// Write
-		/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-		mCurrentObject->encode(ViAudio::Corrected);
-		return;*/
+		if(WRITE)
+		{
+			QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
+			mCurrentObject->encode(ViAudio::Corrected);
+			//return;
+		}
 
 		++mDoneParamIterations;
 		printFileData(interpolationErrors, modelErrors, time);
@@ -271,8 +286,10 @@ void ViInterpolatorBenchmarker::printTerminal(ViErrorCollection &interpolationEr
 	qint64 remaining = mMainTime.elapsed();
 	remaining = ((1.0 / percentageDone) * remaining) - remaining;
 
+	if(interpolationErrors.nrmse() < mBestScore) mBestScore = interpolationErrors.nrmse();
+
 	cout << int(percentageDone * 100.0) << "%\t(" << timeConversion(remaining).toLatin1().data() << ")\t";
-	cout << "INTERPOLATION NRMSE: " << setprecision(6) << interpolationErrors.nrmse() << "\tMODEL NRMSE: " << setprecision(6) << modelErrors.nrmse() << "\tTIME: " << time << endl;
+	cout << "INTERPOLATION NRMSE: " << setprecision(6) << interpolationErrors.nrmse() << " ("  << setprecision(6) << mBestScore << ")\tMODEL NRMSE: " << setprecision(6) << modelErrors.nrmse() << "\tTIME: " << time << endl;
 }
 
 QString ViInterpolatorBenchmarker::timeConversion(int msecs)
@@ -295,6 +312,9 @@ QString ViInterpolatorBenchmarker::timeConversion(int msecs)
 
 void ViInterpolatorBenchmarker::quit()
 {
+	++mQuitCount;
+	if(WRITE && mQuitCount < 2) return;
+
 	cout << "QUIT!" << endl;
 	exit(0);
 }

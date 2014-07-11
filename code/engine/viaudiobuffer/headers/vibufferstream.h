@@ -50,8 +50,8 @@ class ViBufferStream : public QObject, public ViId, public ViFunctorParameter
 		void restart();
 		QIODevice::OpenMode mode();
 
-		qint64 position();
-		bool setPosition(qint64 position);
+		virtual qint64 position();
+		virtual bool setPosition(qint64 position);
 		bool isValidPosition(qint64 position);
 		virtual bool atEnd();
 		bool hasData();

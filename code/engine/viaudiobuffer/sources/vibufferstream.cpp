@@ -161,14 +161,13 @@ bool ViBufferStream::setPosition(qint64 position)
 
 bool ViBufferStream::isValidPosition(qint64 position)
 {
-	return position < mBuffer->size();
+	return position >= 0 && position < mBuffer->size();
 }
 
 bool ViBufferStream::atEnd()
 {
 	QMutexLocker streamLocker(&mStreamMutex);
-	qint64 position = mDevice->pos();
-	return position >= (mBuffer->size() - 1);
+	return mDevice->pos() >= (mBuffer->size() - 1);
 }
 
 bool ViBufferStream::hasData()

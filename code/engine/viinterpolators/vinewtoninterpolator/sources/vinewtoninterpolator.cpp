@@ -196,7 +196,7 @@ bool ViNewtonInterpolator::validParameters(const int &leftSize, const int &right
 	return leftSize != 0 && rightSize != 0 && validParameters(leftSize + rightSize);
 }
 
-bool ViNewtonInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error)
+bool ViNewtonInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
 	mTyped->interpolate(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, mEigen, error);
 	return true;
