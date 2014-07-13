@@ -80,7 +80,7 @@ class ViFann
 
 	public:
 
-		ViFann(const bool &useGpu = false);
+		ViFann(const bool &useGpu = true);
 		ViFann(const ViFann &other);
 		~ViFann();
 
