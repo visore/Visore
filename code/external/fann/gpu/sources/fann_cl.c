@@ -262,7 +262,7 @@ cl_device_id get_device(cl_context *cont)
         return device;
     }
 
-    cl_context_properties context_properties[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)intel_platform_id, 0 };
+    cl_context_properties context_properties[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)intel_platform_id, NULL };
 
     // create the OpenCL context on a CPU 
     cl_context context;
@@ -490,13 +490,12 @@ cl_platform_id GetIntelOCLPlatform()
 
     cl_uint uiPlatformsCount = 0;
     cl_int err = clGetPlatformIDs(10, pPlatforms, &uiPlatformsCount);
-    cl_uint ui;
-    for (ui = 0; ui < uiPlatformsCount; ++ui)
+    for (cl_uint ui = 0; ui < uiPlatformsCount; ++ui)
     {
         err = clGetPlatformInfo(pPlatforms[ui], CL_PLATFORM_NAME, 128 * sizeof(char), pPlatformName, NULL);
         if ( err != CL_SUCCESS )
         {
-            printf("ERROR: Failed to retreive platform vendor name.\n");
+            printf("ERROR: Failed to retreive platform vendor name.\n", ui);
             return NULL;
         }
 

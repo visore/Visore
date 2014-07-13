@@ -139,19 +139,6 @@ extern "C"
 #include "fann_cascade.h"
 #include "fann_io.h"
 
-#ifdef GPU
-
-FANN_EXTERNAL void FANN_API fann_run_many(struct fann **ann, fann_type * input, fann_type **output, int num_anns, int num_runs);
-
-FANN_EXTERNAL void FANN_API fann_train_on_data_cl(struct fann *ann, struct fann_train_data *data,
-                                                  unsigned int max_epochs,
-                                                  unsigned int epochs_between_reports,
-                                                  float desired_error);
-
-FANN_EXTERNAL float FANN_API fann_train_epoch_cl(struct fann *ann, struct fann_train_data *data);
-
-#endif
-
 /* Function: fann_create_standard
 	
 	Creates a standard fully connected backpropagation neural network.

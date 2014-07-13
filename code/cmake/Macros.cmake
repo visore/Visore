@@ -1,3 +1,6 @@
+# FILE_DIRECTORIES without paths to exclude
+IF(0)
+
 MACRO(FILE_DIRECTORIES return_list)
 	FILE(GLOB_RECURSE header_list *.h)
 	FILE(GLOB_RECURSE source_list *.cpp)
@@ -14,8 +17,11 @@ MACRO(FILE_DIRECTORIES return_list)
 	SET(${return_list} ${dir_list})
 ENDMACRO()
 
+ENDIF()
+
 # FILE_DIRECTORIES with paths to exclude
-IF(0)
+#IF(0)
+
 MACRO(FILE_DIRECTORIES return_list exclude_list)
 	FILE(GLOB_RECURSE header_list *.h)
 	FILE(GLOB_RECURSE source_list *.cpp)
@@ -47,4 +53,5 @@ MACRO(FILE_DIRECTORIES return_list exclude_list)
 	LIST(REMOVE_DUPLICATES dir_list)
 	SET(${return_list} ${dir_list})
 ENDMACRO()
-ENDIF()
+
+#ENDIF()
