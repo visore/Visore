@@ -11,8 +11,8 @@ ViFannTrain::ViFannTrain(const ViFannTrain &other)
 	mData = fann_create_train(other.mData->num_data, other.mData->num_input, other.mData->num_output);
 	for(int i = 0; i < mData->num_data; ++i)
 	{
-		memcpy(mData->input[i], other.mData->input[i], sizeof(fann_type) * mData->num_input);
-		memcpy(mData->output[i], other.mData->output[i], sizeof(fann_type) * mData->num_output);
+		memcpy(mData->input[i], other.mData->input[i], sizeof(float) * mData->num_input);
+		memcpy(mData->output[i], other.mData->output[i], sizeof(float) * mData->num_output);
 	}
 }
 
@@ -21,7 +21,7 @@ ViFannTrain::~ViFannTrain()
 	fann_destroy_train(mData);
 }
 
-bool ViFannTrain::setInput(const int &index, const qreal *data)
+bool ViFannTrain::setInput(const int &index, const float *data)
 {
 	if(index < 0 || index >= mData->num_data)
 	{
@@ -29,11 +29,11 @@ bool ViFannTrain::setInput(const int &index, const qreal *data)
 		exit(-1);
 		return false;
 	}
-	memcpy(mData->input[index], data, sizeof(fann_type) * mData->num_input);
+	memcpy(mData->input[index], data, sizeof(float) * mData->num_input);
 	return true;
 }
 
-bool ViFannTrain::setOutput(const int &index, const qreal *data)
+bool ViFannTrain::setOutput(const int &index, const float *data)
 {
 	if(index < 0 || index >= mData->num_data)
 	{
@@ -41,7 +41,7 @@ bool ViFannTrain::setOutput(const int &index, const qreal *data)
 		exit(-1);
 		return false;
 	}
-	memcpy(mData->output[index], data, sizeof(fann_type) * mData->num_output);
+	memcpy(mData->output[index], data, sizeof(float) * mData->num_output);
 	return true;
 }
 
@@ -55,21 +55,29 @@ bool ViFannTrain::isSame(const int &dataCount, const int &inputs, const int &out
 	return mData->num_data == dataCount && mData->num_input == inputs && mData->num_output == outputs;
 }
 
-ViFann::ViFann()
+ViFann::ViFann(const bool &useGpu)
 {
 	mNetwork = NULL;
 	mTrain = NULL;
+	mInput = NULL;
+	mOutput = NULL;
 	clear();
+	enableGpu(useGpu);
 }
 
 ViFann::ViFann(const ViFann &other)
 {
 	mNetwork = NULL;
 	mTrain = NULL;
+	mInput = NULL;
+	mOutput = NULL;
 	clear();
+	enableGpu(other.mGpu);
 
 	if(other.mNetwork != NULL) mNetwork = fann_copy(other.mNetwork);
 	if(other.mTrain != NULL) mTrain = new ViFannTrain(*other.mTrain);
+	if(other.mInput != NULL) mInput = new float[other.mInputCount];
+	if(other.mOutput != NULL) mOutput = new float[other.mOutputCount];
 
 	// Structure
 	mType = other.mType;
@@ -98,12 +106,48 @@ ViFann::~ViFann()
 	clear();
 }
 
+void ViFann::enableGpu(const bool &enable)
+{
+	if(enable)
+	{
+		#ifdef GPU
+			mGpu = true;
+			fannTrainManyPointer = &ViFann::fannTrainManyGpu;
+			fannTrainSinglePointer = &ViFann::fannTrainSingleGpu;
+			LOG("FANN GPU processing enabled.");
+		#else
+			mGpu = false;
+			fannTrainManyPointer = &ViFann::fannTrainManyCpu;
+			fannTrainSinglePointer = &ViFann::fannTrainSingleCpu;
+			LOG("Could not enable FANN GPU processing. No capable GPU found.", QtCriticalMsg);
+		#endif
+	}
+	else
+	{
+		mGpu = false;
+		fannTrainManyPointer = &ViFann::fannTrainManyCpu;
+		fannTrainSinglePointer = &ViFann::fannTrainSingleCpu;
+	}
+}
+
 void ViFann::clear()
 {
 	if(mNetwork != NULL)
 	{
 		fann_destroy(mNetwork);
 		mNetwork = NULL;
+	}
+
+	// Other
+	if(mInput != NULL)
+	{
+		delete [] mInput;
+		mInput = NULL;
+	}
+	if(mOutput != NULL)
+	{
+		delete [] mOutput;
+		mOutput = NULL;
 	}
 
 	// Structure
@@ -146,6 +190,11 @@ bool ViFann::setStructure(const Type &type, const QList<int> &neurons, const qre
 	{
 		if(neurons[mI] != 0) mNeurons.append(neurons[mI]);
 	}
+
+	if(mInput == NULL) delete [] mInput;
+	if(mOutput == NULL) delete [] mOutput;
+	mInput = new float[mInputCount];
+	mOutput = new float[mOutputCount];
 
 	unsigned int layers = mNeurons.size();
 	unsigned int layerNeurons[layers];
@@ -310,10 +359,32 @@ bool ViFann::setTrainInput(const int &index, const qreal *data)
 		LOG("Training set not create yet. Call the createTrain function first.", QtCriticalMsg);
 		return false;
 	}
-	return mTrain->setInput(index, data);
+	toFloat(data, mInput, mInputCount);
+	return mTrain->setInput(index, mInput);
 }
 
 bool ViFann::setTrainOutput(const int &index, const qreal *data)
+{
+	if(mTrain == NULL)
+	{
+		LOG("Training set not create yet. Call the createTrain function first.", QtCriticalMsg);
+		return false;
+	}
+	toFloat(data, mOutput, mOutputCount);
+	return mTrain->setOutput(index, mOutput);
+}
+
+bool ViFann::setTrainInput(const int &index, const float *data)
+{
+	if(mTrain == NULL)
+	{
+		LOG("Training set not create yet. Call the createTrain function first.", QtCriticalMsg);
+		return false;
+	}
+	return mTrain->setInput(index, data);
+}
+
+bool ViFann::setTrainOutput(const int &index, const float *data)
 {
 	if(mTrain == NULL)
 	{
@@ -345,44 +416,79 @@ bool ViFann::isValid()
 
 void ViFann::run(const qreal *input, qreal *output)
 {
-	// TODO: Should we delete result?
-	qreal *result = FANN_API fann_run(mNetwork, (qreal*) input);
-	for(mI = 0; mI < mOutputCount; ++mI) output[mI] = result[mI];
-	adjustSamples(output, mOutputCount);
+	toFloat(input, mInput, mInputCount);
+	run(mInput, mOutput);
+	toReal(mOutput, output, mOutputCount);
 }
 
 void ViFann::run(const qreal *input, qreal &output)
 {
+	toFloat(input, mInput, mInputCount);
+	run(mInput, mSingle);
+	output = mSingle;
+}
+
+void ViFann::run(const qreal *input, qreal *output, const int &iterations)
+{
+	toFloat(input, mInput, mInputCount);
+	run(mInput, mOutput, iterations);
+	toReal(mOutput, output, mOutputCount);
+}
+
+void ViFann::run(const float *input, float *output)
+{
 	// TODO: Should we delete result?
-	qreal *result = FANN_API fann_run(mNetwork, (qreal*) input);
+	float *result = fann_run(mNetwork, (float*) input);
+	for(mI = 0; mI < mOutputCount; ++mI) output[mI] = result[mI];
+	adjustSamples(output, mOutputCount);
+}
+
+void ViFann::run(const float *input, float &output)
+{
+	// TODO: Should we delete result?
+	float *result = fann_run(mNetwork, (float*) input);
 	output = result[0];
 	adjustSample(output);
 }
 
-void ViFann::run(const qreal *input, qreal *output, const int &interations)
+void ViFann::run(const float *input, float *output, const int &iterations)
 {
-	qreal newInput[mInputCount];
-	memcpy(newInput, input, mInputCount * sizeof(qreal));
-	qreal copySize = (mInputCount - 1) * sizeof(qreal);
+	float newInput[mInputCount];
+	memcpy(newInput, input, mInputCount * sizeof(float));
+	int copySize = (mInputCount - 1) * sizeof(float);
 
-	for(mI = 0; mI < interations; ++mI)
+	for(mI = 0; mI < iterations; ++mI)
 	{
-		qreal *result = FANN_API fann_run(mNetwork, newInput);
+		float *result = fann_run(mNetwork, newInput);
 		output[mI] = result[0];
 		memcpy(newInput, newInput + 1, copySize);
 		newInput[mInputCount - 1] = result[0];
 	}
-	adjustSamples(output, interations);
+	adjustSamples(output, iterations);
 }
 
 void ViFann::train(const qreal *input, const qreal *desiredOutput)
 {
-	fann_train(mNetwork, (qreal*) input, (qreal*) desiredOutput);
+	toFloat(input, mInput, mInputCount);
+	toFloat(desiredOutput, mOutput, mOutputCount);
+	train(mInput, mOutput);
 }
 
 void ViFann::train(const qreal *input, const qreal &desiredOutput)
 {
-	fann_train(mNetwork, (qreal*) input, (qreal*) &desiredOutput);
+	mSingle = desiredOutput;
+	toFloat(input, mInput, mInputCount);
+	train(mInput, mSingle);
+}
+
+void ViFann::train(const float *input, const float *desiredOutput)
+{
+	fann_train(mNetwork, (float*) input, (float*) desiredOutput);
+}
+
+void ViFann::train(const float *input, const float &desiredOutput)
+{
+	fann_train(mNetwork, (float*) input, (float*) &desiredOutput);
 }
 
 void ViFann::train(const bool &debug)
@@ -405,14 +511,14 @@ void ViFann::train(const bool &debug)
 			}
 			fann_cascadetrain_on_data(mNetwork, mTrain->data(), mTrainNeurons, 1, mTrainMse);
 		}
-		else if(mTrainStagnationIterations < 0) fann_train_on_data(mNetwork, mTrain->data(), mTrainEpochs, 1, mTrainMse);
+		else if(mTrainStagnationIterations < 0) (this->*fannTrainManyPointer)(mNetwork, mTrain->data(), mTrainEpochs, 1, mTrainMse);
 		else
 		{
 			int i, counter = 0;
 			qreal previousMse, mse, difference;
 			for(i = 1; i <= mTrainEpochs; ++i)
 			{
-				mse = fann_train_epoch(mNetwork, mTrain->data());
+				mse = (this->*fannTrainSinglePointer)(mNetwork, mTrain->data());
 				difference = abs(previousMse - mse);
 				previousMse = mse;
 				LOG("Current epoch: " + QString::number(i) + "\t\tCurrent MSE: " + QString::number(mse, 'f', 10) + "\tMSE change fraction: " + QString::number(difference, 'f', 10) + " (desired: " + QString::number(mTrainStagnationFraction, 'f', 10) + ")");
@@ -447,14 +553,14 @@ void ViFann::train(const bool &debug)
 			}
 			fann_cascadetrain_on_data(mNetwork, mTrain->data(), mTrainNeurons, 0, mTrainMse);
 		}
-		else if(mTrainStagnationIterations < 0) fann_train_on_data(mNetwork, mTrain->data(), mTrainEpochs, 0, mTrainMse);
+		else if(mTrainStagnationIterations < 0) (this->*fannTrainManyPointer)(mNetwork, mTrain->data(), mTrainEpochs, 0, mTrainMse);
 		else
 		{
 			int i, counter = 0;
 			qreal previousMse, mse, difference;
 			for(i = 1; i <= mTrainEpochs; ++i)
 			{
-				mse = fann_train_epoch(mNetwork, mTrain->data());
+				mse = (this->*fannTrainSinglePointer)(mNetwork, mTrain->data());
 				if(mse <= mTrainMse) break;
 				difference = abs(previousMse - mse);
 				previousMse = mse;
@@ -474,11 +580,29 @@ void ViFann::train(const bool &debug)
 
 void ViFann::runTrain(const qreal *input, qreal *output, const qreal *desiredOutput)
 {
+	toFloat(input, mInput, mInputCount);
+	toFloat(output, mOutput, mOutputCount);
+	run(mInput, mOutput);
+	toFloat(desiredOutput, mOutput, mOutputCount);
+	train(mInput, mOutput);
+}
+
+void ViFann::runTrain(const qreal *input, qreal &output, const qreal &desiredOutput)
+{
+	toFloat(input, mInput, mInputCount);
+	run(mInput, mSingle);
+	output = mSingle;
+	mSingle = desiredOutput;
+	train(mInput, mSingle);
+}
+
+void ViFann::runTrain(const float *input, float *output, const float *desiredOutput)
+{
 	run(input, output);
 	train(input, desiredOutput);
 }
 
-void ViFann::runTrain(const qreal *input, qreal &output, const qreal &desiredOutput)
+void ViFann::runTrain(const float *input, float &output, const float &desiredOutput)
 {
 	run(input, output);
 	train(input, desiredOutput);
@@ -545,7 +669,41 @@ fann* ViFann::network()
 	return mNetwork;
 }
 
-inline void ViFann::adjustSamples(qreal *samples, const int &size)
+void ViFann::fannTrainManyCpu(fann *network, fann_train_data *data, const unsigned int &maxEpochs, const unsigned int &epochsBetweenReports, const float &desiredError)
+{
+	fann_train_on_data(network, data, maxEpochs, epochsBetweenReports, desiredError);
+}
+
+float ViFann::fannTrainSingleCpu(fann *network, fann_train_data *data)
+{
+	return fann_train_epoch(network, data);
+}
+
+void ViFann::fannTrainManyGpu(fann *network, fann_train_data *data, const unsigned int &maxEpochs, const unsigned int &epochsBetweenReports, const float &desiredError)
+{
+	#ifdef GPU
+		fann_train_on_data_cl(network, data, maxEpochs, epochsBetweenReports, desiredError);
+	#endif
+}
+
+float ViFann::fannTrainSingleGpu(fann *network, fann_train_data *data)
+{
+	#ifdef GPU
+		return fann_train_epoch_cl(network, data);
+	#endif
+}
+
+inline void ViFann::toFloat(const qreal *input, float *output, const int &size)
+{
+	for(int i = 0; i < size; ++i) output[i] = input[i];
+}
+
+inline void ViFann::toReal(const float *input, qreal *output, const int &size)
+{
+	for(int i = 0; i < size; ++i) output[i] = input[i];
+}
+
+inline void ViFann::adjustSamples(float *samples, const int &size)
 {
 	for(mI = 0; mI < size; ++mI)
 	{
@@ -554,7 +712,7 @@ inline void ViFann::adjustSamples(qreal *samples, const int &size)
 	}
 }
 
-inline void ViFann::adjustSample(qreal &sample)
+inline void ViFann::adjustSample(float &sample)
 {
 	if(sample > 1) sample = 1;
 	else if(sample < -1) sample = -1;

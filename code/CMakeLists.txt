@@ -24,6 +24,7 @@ SET(CMAKE_MODULE_PATH ${ROOT}/cmake)
 INCLUDE(Version)
 INCLUDE(Dependencies)
 INCLUDE(Macros)
+INCLUDE(DetectGPU)
 
 #Set System
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -82,6 +83,11 @@ FIND_PACKAGE(Gretl REQUIRED)
 
 #Setup MPFR - used by MPFRC++, used by Eigen (unsupported)
 FIND_PACKAGE(MPFR REQUIRED)
+
+# FANN GPU
+SET(FANN_PATH "external/fann")
+FIND_PACKAGE(OpenCL REQUIRED)
+DETECTGPU()
 
 #Set flags for Windows and MinGW auto-import
 IF(WIN32)

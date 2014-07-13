@@ -30,9 +30,10 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	//addParam("Derivatives", 2, 2, 1);*/
 
 	mInterpolator = new ViNeuralInterpolator();
-	addParam("Window Size", 32,32, 16);
-	addParam("l1", 0, 32,8);
-	addParam("l2", 0, 32,8);
+	addParam("Window Size", 256,256, 16);
+	//addParam("l1", 0,32,8);
+	//addParam("l2", 0, ,8);
+	//addParam("l3", 0, 32,8);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 

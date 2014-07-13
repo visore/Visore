@@ -3,8 +3,7 @@
 
 #include <QList>
 #include <QVector>
-#include <doublefann.h> // FANN uses doubles
-//#include <floatfann.h> // FANN uses floats
+#include <floatfann.h>
 
 class ViFann;
 
@@ -17,13 +16,13 @@ class ViFannTrain
 
 		~ViFannTrain();
 
-		bool setInput(const int &index, const qreal *data);
-		bool setOutput(const int &index, const qreal *data);
-
 	protected:
 
 		ViFannTrain(const int &dataCount, const int &inputs, const int &outputs);
 		ViFannTrain(const ViFannTrain &other);
+
+		bool setInput(const int &index, const float *data);
+		bool setOutput(const int &index, const float *data);
 
 		fann_train_data* data();
 		bool isSame(const int &dataCount, const int &inputs, const int &outputs);
@@ -81,9 +80,11 @@ class ViFann
 
 	public:
 
-		ViFann();
+		ViFann(const bool &useGpu = false);
 		ViFann(const ViFann &other);
 		~ViFann();
+
+		void enableGpu(const bool &enable = true);
 
 		void clear();
 
@@ -137,18 +138,25 @@ class ViFann
 		ViFannTrain* createTrain(const int &dataCount);
 		bool setTrainInput(const int &index, const qreal *data);
 		bool setTrainOutput(const int &index, const qreal *data);
+		bool setTrainInput(const int &index, const float *data);
+		bool setTrainOutput(const int &index, const float *data);
 
 		// Run the input through the network and generate the output
 		// Does not train the newtork
 		// Input array should at least have the same size than the number of input neurons, same with output array
 		void run(const qreal *input, qreal *output);
 		void run(const qreal *input, qreal &output); // For a single output neuron
-		void run(const qreal *input, qreal *output, const int &interations); // Generates 1 output at a time, feeds the output into the input and generates the next output (for interations outputs)
+		void run(const qreal *input, qreal *output, const int &iterations); // Generates 1 output at a time, feeds the output into the input and generates the next output (for iterations outputs)
+		void run(const float *input, float *output);
+		void run(const float *input, float &output);
+		void run(const float *input, float *output, const int &iterations);
 
 		// Train the network with a single interation, using the input and desired output
 		// Input array should at least have the same size than the number of input neurons, same with output array
 		void train(const qreal *input, const qreal *desiredOutput);
 		void train(const qreal *input, const qreal &desiredOutput);
+		void train(const float *input, const float *desiredOutput);
+		void train(const float *input, const float &desiredOutput);
 
 		// Train for a number of iterations or until a certain MSE was reached
 		void train(const bool &debug = false);
@@ -156,6 +164,8 @@ class ViFann
 		// First run the input, and then train it
 		void runTrain(const qreal *input, qreal *output, const qreal *desiredOutput);
 		void runTrain(const qreal *input, qreal &output, const qreal &desiredOutput);
+		void runTrain(const float *input, float *output, const float *desiredOutput);
+		void runTrain(const float *input, float &output, const float &desiredOutput);
 
 		// Checks if all the settings and paramters work together
 		bool isValid();
@@ -179,13 +189,29 @@ class ViFann
 
 	protected:
 
-		inline void adjustSamples(qreal *samples, const int &size);
-		inline void adjustSample(qreal &sample);
+		void fannTrainManyCpu(fann *network, fann_train_data *data, const unsigned int &maxEpochs, const unsigned int &epochsBetweenReports, const float &desiredError);
+		float fannTrainSingleCpu(fann *network, fann_train_data *data);
+		void fannTrainManyGpu(fann *network, fann_train_data *data, const unsigned int &maxEpochs, const unsigned int &epochsBetweenReports, const float &desiredError);
+		float fannTrainSingleGpu(fann *network, fann_train_data *data);
+
+		inline void toFloat(const qreal *input, float *output, const int &size);
+		inline void toReal(const float *input, qreal *output, const int &size);
+
+		inline void adjustSamples(float *samples, const int &size);
+		inline void adjustSample(float &sample);
 
 	private:
 
 		// Other
 		int mI;
+		float *mInput;
+		float *mOutput;
+		float mSingle;
+
+		// GPU
+		bool mGpu;
+		void (ViFann::*fannTrainManyPointer)(fann *network, fann_train_data *data, const unsigned int &maxEpochs, const unsigned int &epochsBetweenReports, const float &desiredError);
+		float (ViFann::*fannTrainSinglePointer)(fann *network, fann_train_data *data);
 
 		// Network
 		fann *mNetwork;

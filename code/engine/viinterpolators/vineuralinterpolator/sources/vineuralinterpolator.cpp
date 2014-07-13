@@ -137,8 +137,8 @@ void ViNeuralInterpolator::initialize(const int &channelCount)
 		//network->setLearningMomentum(0.1);
 		network->setTraining(ViFann::Fixed, ViFann::RProp);
 		network->setStopEpochs(500);
-		network->setStopMse(0.000001);
-		network->setStopStagnation(0.0001, 5);
+		network->setStopMse(0.0000001);
+		network->setStopStagnation(0.0000001, 10);
 		network->setStopNeurons(10);
 		if(!network->isValid())
 		{
