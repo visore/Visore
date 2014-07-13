@@ -65,10 +65,6 @@ void execute_kern(cl_command_queue cmd_queue, cl_context context,
     cl_int err = 0;
     cl_event ev;
     size_t ceil_runs;
-#ifndef NDEBUG
-    size_t start_time = 0;
-    size_t end_time;
-#endif
     
     //Round up num_runs
     if(num_runs % loc_size)
@@ -77,9 +73,11 @@ void execute_kern(cl_command_queue cmd_queue, cl_context context,
         ceil_runs = num_runs;
     
 #ifndef NDEBUG
-    //err = clSetCommandQueueProperty(cmd_queue, CL_QUEUE_PROFILING_ENABLE, CL_TRUE, NULL);
-    //if (err != CL_SUCCESS)
-    //    clSetCommandQueueProperty_err(err);
+    size_t start_time = 0;
+    size_t end_time;
+    err = clSetCommandQueueProperty(cmd_queue, CL_QUEUE_PROFILING_ENABLE, CL_TRUE, NULL);
+    if (err != CL_SUCCESS)
+        clSetCommandQueueProperty_err(err);
 #endif
     
     // Run the calculation by enqueuing it and forcing the 

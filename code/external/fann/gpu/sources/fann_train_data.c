@@ -182,7 +182,7 @@ float fann_train_epoch_sarprop(struct fann *ann, struct fann_train_data *data)
 	return fann_get_MSE(ann);
 }
 #endif
-/*
+
 void dump_train_vals(struct fann *ann)
 {
     struct fann_layer *layer_it, *last_layer;
@@ -197,9 +197,9 @@ void dump_train_vals(struct fann *ann)
     //For each layer
     for (layer_it = ann->first_layer; layer_it != last_layer; ++layer_it) {
         struct fann_neuron *neuron_it, *last_neuron;
+        last_neuron = layer_it->last_neuron;
         unsigned int neuron_num = 0;
         unsigned int l_output_num = 0;
-        last_neuron = layer_it->last_neuron;
         //For each neuron
         for (neuron_it = layer_it->first_neuron; neuron_it != last_neuron; ++neuron_it) {
             unsigned int n_output_num;
@@ -232,7 +232,7 @@ void dump_train_vals(struct fann *ann)
             ++neuron_num;
         }
     }
-} */
+}
 
 /*
  * Internal train function 

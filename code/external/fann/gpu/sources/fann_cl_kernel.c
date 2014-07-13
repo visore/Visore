@@ -670,8 +670,7 @@ cl_kernel get_kernel(char *kern_name, cl_context context, cl_device_id device)
                                         NULL, &err);
     assert(err == CL_SUCCESS);
     
-    err = clBuildProgram(program, 1, &device, "", NULL, NULL);
-	//"-cl-fast-relaxed-math -Werror"
+    err = clBuildProgram(program, 1, &device, "-cl-fast-relaxed-math -Werror", NULL, NULL);
     //Detailed debugging info
     if (err != CL_SUCCESS)
     {

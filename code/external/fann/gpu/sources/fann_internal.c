@@ -17,20 +17,14 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __floatfann_h__
-#define __floatfann_h__
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
-typedef float fann_type;
-
-#undef FLOATFANN
-#define FLOATFANN
-#define FANNPRINTF "%.20e"
-#define FANNSCANF "%f"
-
-#define FANN_INCLUDE
+#include "compat_time.h"
 #include "fann.h"
-
-#endif
+#include "fann_internal.h"
+#include "fann_error.h"
 
 /*
  * vim: ts=2 smarttab smartindent shiftwidth=2 nowrap

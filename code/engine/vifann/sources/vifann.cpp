@@ -67,38 +67,43 @@ ViFann::ViFann(const bool &useGpu)
 
 ViFann::ViFann(const ViFann &other)
 {
-	mNetwork = NULL;
-	mTrain = NULL;
-	mInput = NULL;
-	mOutput = NULL;
-	clear();
-	enableGpu(other.mGpu);
+	#ifdef GPU
+		LOG("The GPU version of FANN currently doesn't allow the copy of ANNs.", QtFatalMsg);
+		exit(-1);
+	#else
+		mNetwork = NULL;
+		mTrain = NULL;
+		mInput = NULL;
+		mOutput = NULL;
+		clear();
+		enableGpu(other.mGpu);
 
-	if(other.mNetwork != NULL) mNetwork = fann_copy(other.mNetwork);
-	if(other.mTrain != NULL) mTrain = new ViFannTrain(*other.mTrain);
-	if(other.mInput != NULL) mInput = new float[other.mInputCount];
-	if(other.mOutput != NULL) mOutput = new float[other.mOutputCount];
+		if(other.mNetwork != NULL) mNetwork = fann_copy(other.mNetwork);
+		if(other.mTrain != NULL) mTrain = new ViFannTrain(*other.mTrain);
+		if(other.mInput != NULL) mInput = new float[other.mInputCount];
+		if(other.mOutput != NULL) mOutput = new float[other.mOutputCount];
 
-	// Structure
-	mType = other.mType;
-	mInputCount = other.mInputCount;
-	mOutputCount = other.mOutputCount;
-	mNeurons = other.mNeurons;
-	mConnectionRate = other.mConnectionRate;
+		// Structure
+		mType = other.mType;
+		mInputCount = other.mInputCount;
+		mOutputCount = other.mOutputCount;
+		mNeurons = other.mNeurons;
+		mConnectionRate = other.mConnectionRate;
 
-	// Weights
-	mWeights = other.mWeights;
-	mWeightsMinimum = other.mWeightsMinimum;
-	mWeightsMaximum = other.mWeightsMaximum;
+		// Weights
+		mWeights = other.mWeights;
+		mWeightsMinimum = other.mWeightsMinimum;
+		mWeightsMaximum = other.mWeightsMaximum;
 
-	// Training
-	mTraining = other.mTraining;
-	mAlgorithm = other.mAlgorithm;
-	mTrainEpochs = other.mTrainEpochs;
-	mTrainNeurons = other.mTrainNeurons;
-	mTrainMse = other.mTrainMse;
-	mTrainStagnationFraction = other.mTrainStagnationFraction;
-	mTrainStagnationIterations = other.mTrainStagnationIterations;
+		// Training
+		mTraining = other.mTraining;
+		mAlgorithm = other.mAlgorithm;
+		mTrainEpochs = other.mTrainEpochs;
+		mTrainNeurons = other.mTrainNeurons;
+		mTrainMse = other.mTrainMse;
+		mTrainStagnationFraction = other.mTrainStagnationFraction;
+		mTrainStagnationIterations = other.mTrainStagnationIterations;
+	#endif
 }
 
 ViFann::~ViFann()
@@ -180,38 +185,45 @@ void ViFann::clear()
 
 bool ViFann::setStructure(const Type &type, const QList<int> &neurons, const qreal &connectionRate)
 {
-	clear();
+	#ifdef GPU
+		LOG("The GPU version of FANN currently doesn't support shortcut, sparse or cascade networks.", QtFatalMsg);
+		exit(-1);
+	#else
+		clear();
 
-	mType = type;
-	mInputCount = neurons.first();
-	mOutputCount = neurons.last();
-	mNeurons.clear();
-	for(mI = 0; mI < neurons.size(); ++mI)
-	{
-		if(neurons[mI] != 0) mNeurons.append(neurons[mI]);
-	}
+		mType = type;
+		mInputCount = neurons.first();
+		mOutputCount = neurons.last();
+		mNeurons.clear();
+		for(mI = 0; mI < neurons.size(); ++mI)
+		{
+			if(neurons[mI] != 0) mNeurons.append(neurons[mI]);
+		}
 
-	if(mInput == NULL) delete [] mInput;
-	if(mOutput == NULL) delete [] mOutput;
-	mInput = new float[mInputCount];
-	mOutput = new float[mOutputCount];
+		if(mInput == NULL) delete [] mInput;
+		if(mOutput == NULL) delete [] mOutput;
+		mInput = new float[mInputCount];
+		mOutput = new float[mOutputCount];
 
-	unsigned int layers = mNeurons.size();
-	unsigned int layerNeurons[layers];
-	for(mI = 0; mI < layers; ++mI) layerNeurons[mI] = mNeurons[mI];
+		unsigned int layers = mNeurons.size();
+		unsigned int layerNeurons[layers];
+		for(mI = 0; mI < layers; ++mI) layerNeurons[mI] = mNeurons[mI];
 
-	if(type == Standard) mNetwork = fann_create_standard_array(layers, layerNeurons);
-	else if(type == Sparse)
-	{
-		mNetwork = fann_create_sparse_array(connectionRate, layers, layerNeurons);
-		mConnectionRate = connectionRate;
-	}
-	else if(type == Shortcut) mNetwork = fann_create_shortcut_array(layers, layerNeurons);
-	else return false;
+		if(type == Standard) mNetwork = fann_create_standard_array(layers, layerNeurons);
+		#ifdef GPU
+			else if(type == Sparse)
+			{
+				mNetwork = fann_create_sparse_array(connectionRate, layers, layerNeurons);
+				mConnectionRate = connectionRate;
+			}
+			else if(type == Shortcut) mNetwork = fann_create_shortcut_array(layers, layerNeurons);
+		#endif
+		else return false;
 
-	fann_set_train_stop_function(mNetwork, FANN_STOPFUNC_MSE);
+		fann_set_train_stop_function(mNetwork, FANN_STOPFUNC_MSE);
 
-	return true;
+		return true;
+	#endif
 }
 
 bool ViFann::setInputCount(const int &count)
@@ -502,14 +514,16 @@ void ViFann::train(const bool &debug)
 	{
 		if(mTraining == Cascade)
 		{
-			if(mTrainStagnationIterations >= 0)
-			{
-				fann_set_cascade_output_change_fraction(mNetwork, mTrainStagnationFraction);
-				fann_set_cascade_output_stagnation_epochs(mNetwork, mTrainStagnationIterations);
-				fann_set_cascade_candidate_change_fraction(mNetwork, mTrainStagnationFraction);
-				fann_set_cascade_candidate_stagnation_epochs(mNetwork, mTrainStagnationIterations);
-			}
-			fann_cascadetrain_on_data(mNetwork, mTrain->data(), mTrainNeurons, 1, mTrainMse);
+			#ifdef GPU
+				if(mTrainStagnationIterations >= 0)
+				{
+					fann_set_cascade_output_change_fraction(mNetwork, mTrainStagnationFraction);
+					fann_set_cascade_output_stagnation_epochs(mNetwork, mTrainStagnationIterations);
+					fann_set_cascade_candidate_change_fraction(mNetwork, mTrainStagnationFraction);
+					fann_set_cascade_candidate_stagnation_epochs(mNetwork, mTrainStagnationIterations);
+				}
+				fann_cascadetrain_on_data(mNetwork, mTrain->data(), mTrainNeurons, 1, mTrainMse);
+			#endif
 		}
 		else if(mTrainStagnationIterations < 0) (this->*fannTrainManyPointer)(mNetwork, mTrain->data(), mTrainEpochs, 1, mTrainMse);
 		else
@@ -544,14 +558,16 @@ void ViFann::train(const bool &debug)
 	{
 		if(mTraining == Cascade)
 		{
-			if(mTrainStagnationIterations >= 0)
-			{
-				fann_set_cascade_output_change_fraction(mNetwork, mTrainStagnationFraction);
-				fann_set_cascade_output_stagnation_epochs(mNetwork, mTrainStagnationIterations);
-				fann_set_cascade_candidate_change_fraction(mNetwork, mTrainStagnationFraction);
-				fann_set_cascade_candidate_stagnation_epochs(mNetwork, mTrainStagnationIterations);
-			}
-			fann_cascadetrain_on_data(mNetwork, mTrain->data(), mTrainNeurons, 0, mTrainMse);
+			#ifdef GPU
+				if(mTrainStagnationIterations >= 0)
+				{
+					fann_set_cascade_output_change_fraction(mNetwork, mTrainStagnationFraction);
+					fann_set_cascade_output_stagnation_epochs(mNetwork, mTrainStagnationIterations);
+					fann_set_cascade_candidate_change_fraction(mNetwork, mTrainStagnationFraction);
+					fann_set_cascade_candidate_stagnation_epochs(mNetwork, mTrainStagnationIterations);
+				}
+				fann_cascadetrain_on_data(mNetwork, mTrain->data(), mTrainNeurons, 0, mTrainMse);
+			#endif
 		}
 		else if(mTrainStagnationIterations < 0) (this->*fannTrainManyPointer)(mNetwork, mTrain->data(), mTrainEpochs, 0, mTrainMse);
 		else

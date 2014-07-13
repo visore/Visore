@@ -17,20 +17,25 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __floatfann_h__
-#define __floatfann_h__
+/* Easy way to allow for build of multiple binaries */
 
-typedef float fann_type;
+#include "config.h"
+#include "doublefann.h"
 
-#undef FLOATFANN
-#define FLOATFANN
-#define FANNPRINTF "%.20e"
-#define FANNSCANF "%f"
+#include "fann.c"
+#include "fann_io.c"
+#include "fann_train.c"
+#include "fann_train_data.c"
+#include "fann_error.c"
+#include "fann_cascade.c"
+#include "fann_generic.c"
+#include "fann_sparse.c"
+#include "fann_som.c"
+#include "fann_gng.c"
 
-#define FANN_INCLUDE
-#include "fann.h"
+#include "fann_recurrent.c"
+#include "fann_base_fully_recurrent.c"
 
-#endif
 
 /*
  * vim: ts=2 smarttab smartindent shiftwidth=2 nowrap

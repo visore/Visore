@@ -123,10 +123,10 @@ void opt_run_many(struct fann **anns, fann_type *input,
     cl_mem  sums_cl, outputs_cl;
     cl_mem  inputs_cl = NULL;
     
-    cl_device_id dev = get_device(&context);
+    cl_device_id dev = get_device();
 
     // Now create a context to perform our calculation with the specified device 
-    //context = clCreateContext(0, 1, &dev, NULL, NULL, &err);
+    context = clCreateContext(0, 1, &dev, NULL, NULL, &err);
     assert(err == CL_SUCCESS);
     
     // And also a command queue for the context
@@ -263,13 +263,13 @@ void opt_train_epoch_batch(struct fann **anns,
     }
     
     if(res_cl->dev == NULL)
-        res_cl->dev = get_device(&res_cl->context);
+        res_cl->dev = get_device();
     
-    //if (res_cl->context == NULL) {
-    //    //Create a context to perform our calculation with the specified device 
-    //    res_cl->context = clCreateContext(0, 1, &(res_cl->dev), NULL, NULL, &err);
-    //    assert(err == CL_SUCCESS);
-    //}
+    if (res_cl->context == NULL) {
+        //Create a context to perform our calculation with the specified device 
+        res_cl->context = clCreateContext(0, 1, &(res_cl->dev), NULL, NULL, &err);
+        assert(err == CL_SUCCESS);
+    }
     
     if (res_cl->cmd_queue == NULL)
         // And also a command queue for the context
@@ -454,15 +454,6 @@ FANN_EXTERNAL void FANN_API fann_train_on_data_cl(struct fann *ann, struct fann_
 	}
     
     free_res(res_cl);
-}
-
-//Run the same set of ANNs on many inputs
-FANN_EXTERNAL void FANN_API fann_run_many(struct fann **ann, fann_type * input,
-                                          fann_type **output, int num_anns, int num_runs)
-{
-    //FIXME: ensure that the ANN(s) are compatible with the optimized method here
-    
-    opt_run_many(ann, input, output, num_anns, num_runs);
 }
 
 FANN_EXTERNAL struct fann *FANN_API fann_create_standard(unsigned int num_layers, ...)

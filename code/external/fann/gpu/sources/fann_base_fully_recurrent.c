@@ -1,18 +1,42 @@
-#ifndef __fann_base_c
-#define __fann_base_c
+/*
+Fast Artificial Neural Network Library (fann)
+Copyright (C) 2003 Steffen Nissen (lukesky@diku.dk)
 
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#ifndef __fann_fully_recurrent_c
+#define __fann_fully_recurrent_c
+
+#include <assert.h>
 #include <string.h>
 #include "fann.h"
 
-static __inline void fann_base_inline_neuron_destructor(struct fann_neuron* neuron)
+/* Free memory when neuron is destroyed */
+FANN_EXTERNAL void FANN_API fann_neuron_destructor_fully_recurrent(struct fann_neuron* neuron)
 {
+	assert(neuron != NULL);
+
 	fann_safe_free(neuron->weights);
 	fann_safe_free(neuron->weights_deltas);
 	fann_safe_free(neuron->sums);
-	fann_safe_free(neuron->type);
 }
 
-static __inline int fann_base_inline_neuron_constructor(struct fann *ann, struct fann_layer *layer, 
+
+/* Allocate memory when neuron is created */
+FANN_EXTERNAL int FANN_API fann_neuron_constructor_fully_recurrent(struct fann *ann, struct fann_layer *layer, 
 		struct fann_neuron *neuron, struct fann_neuron_descr * descr)
 {
 	unsigned int i;
@@ -24,59 +48,94 @@ static __inline int fann_base_inline_neuron_constructor(struct fann *ann, struct
 	neuron->activation_steepness = 0.5;
 #endif
 
+
+	/* Each neuron outputs only to one portion of the output array (if any)*/
+	neuron->num_outputs         = 1;
 	neuron->activation_function = FANN_SIGMOID_STEPWISE;
-	neuron->num_outputs=descr->num_outputs;
-	neuron->inputs=layer->inputs;
-	neuron->num_inputs=layer->num_inputs;
-
+	neuron->inputs              = layer->inputs;
+	neuron->num_inputs          = layer->num_inputs + layer->num_neurons;
+	neuron->destructor          = fann_neuron_destructor_fully_recurrent;
+	neuron->run					= fann_neuron_run_fully_recurrent;
+	neuron->compute_error		= fann_fully_recurrent_neuron_compute_MSE;
+	neuron->train_initialize    = fann_neuron_train_initialize_fully_recurrent;
+	
 	/* set the error array to null (lazy allocation) */
-	neuron->train_errors=NULL;
+	neuron->train_errors = NULL;
 
-	/* allocate the weights */
-	neuron->num_weights=neuron->num_outputs*neuron->num_inputs;
+	/* allocate the weights -- connected to all neurons and all inputs */
+	neuron->num_weights = neuron->num_outputs * (layer->num_inputs + layer->num_neurons);
 
-	if ( (neuron->weights = (fann_type*) malloc(neuron->num_weights*sizeof(fann_type))) == NULL)
+	if ( (neuron->weights = (fann_type*) malloc(neuron->num_weights * sizeof(fann_type))) == NULL)
+	{
 		return 1;
+	}
 
 	/* randomly initialize the weights */
 	for (i=0; i<neuron->num_weights; i++)
+	{
 		neuron->weights[i] = (fann_type) fann_random_weight();
+	}
 
-	/* allocate space for the dot products results */
+	/* allocate space for the dot product results */
 	if ( (neuron->sums = (fann_type*) malloc(neuron->num_outputs*sizeof(fann_type))) == NULL)
+	{
 		return 1;
+	}
+
 	return 0;
 }
 
-static __inline  void  fann_base_inline_layer_destructor(struct fann_layer* layer)
+
+/* Deallocate a layer */
+FANN_EXTERNAL void FANN_API fann_layer_destructor_fully_recurrent(struct fann_layer* layer)
 {
 	struct fann_neuron *neuron_it;
 
+	assert(layer != NULL);
+	assert(layer->first_neuron != NULL);
+	assert(layer->last_neuron  != NULL);
+
+	/* Deallocate memory for each neuron in this layer */
 	for (neuron_it=layer->first_neuron; neuron_it!=layer->last_neuron; neuron_it++)
-		neuron_it->destructor(neuron_it);
+	{
+		if (neuron_it->destructor != NULL)
+		{
+			neuron_it->destructor(neuron_it);
+		}
+	}
 
 	fann_safe_free(layer->first_neuron);
 	fann_safe_free(layer->train_errors);
 	fann_safe_free(layer->outputs);
-	fann_safe_free(layer->type);
 }
 
-static __inline  int  fann_base_inline_layer_constructor(struct fann *ann, 
+
+/* Allocate memory for a layer */
+FANN_EXTERNAL int FANN_API fann_layer_constructor_fully_recurrent(struct fann *ann, 
 		struct fann_layer *layer, struct fann_layer_descr *descr)
 {
 	/* sanity checks are done before calling this function */
 	struct fann_neuron_descr *neurons_descr = descr->neurons_descr;
-	unsigned int i=0;
-	fann_type *free_output;
-	struct fann_neuron *n;
+	struct fann_neuron *n  = NULL;
+	fann_type *free_output = NULL;
+
+	unsigned int i = 0;
 
 #ifdef FIXEDFANN
 	fann_type multiplier = ann->fixed_params->multiplier;
 #endif
 
-	layer->num_neurons = descr->num_neurons;
+	assert(ann   != NULL);
+	assert(layer != NULL);
+	assert(descr != NULL);
 
-	/* count the number of outputs for the layer */
+	layer->num_neurons			   = descr->num_neurons;
+	layer->destructor			   = fann_layer_destructor_fully_recurrent;
+	layer->run					   = fann_layer_run_fully_recurrent;
+	layer->initialize_train_errors = fann_layer_train_initialize_fully_recurrent;
+
+	/* count the number of outputs for the layer,*/
+	/*   excluding bias*/
 	layer->num_outputs = 0;
 
 	for (i=0; i< layer->num_neurons; i++)
@@ -84,13 +143,13 @@ static __inline  int  fann_base_inline_layer_constructor(struct fann *ann,
 		layer->num_outputs += neurons_descr[i].num_outputs;
 	}
 
-	layer->num_outputs++;	/* +1 for bias */
+	/*layer->num_outputs++;*/	/* +1 for bias */
 
 	/* set the error array to null (lazy allocation)*/
-	layer->train_errors=NULL;
+	layer->train_errors = NULL;
 
 	/* allocate the outputs array */
-	free_output = layer->outputs = (fann_type*) calloc(layer->num_outputs,sizeof(fann_type));
+	free_output = layer->outputs = (fann_type*) calloc(layer->num_outputs, sizeof(fann_type));
 	if( layer->outputs == NULL)
 	{
 		return 1;
@@ -98,9 +157,9 @@ static __inline  int  fann_base_inline_layer_constructor(struct fann *ann,
 
 	/* set bias output to 1*/
 #ifdef FIXEDFANN
-	layer->outputs[layer->num_outputs-1]=multiplier;
+	layer->outputs[layer->num_outputs-1] = multiplier;
 #else
-	layer->outputs[layer->num_outputs-1]=1;
+	layer->outputs[layer->num_outputs-1] = 1;
 #endif
 
 	/* allocate the neurons array */
@@ -109,40 +168,92 @@ static __inline  int  fann_base_inline_layer_constructor(struct fann *ann,
 		return 1;
 	}
 
-	layer->last_neuron=layer->first_neuron+layer->num_neurons;
+	layer->last_neuron = layer->first_neuron + layer->num_neurons;
 
-	for (i=0; i< layer->num_neurons; i++)
+	/* Allocate memory for each neuron */
+	for (i=0; i<layer->num_neurons; i++)
 	{
-		n=layer->first_neuron+i;
+		n = layer->first_neuron + i;
 
-		n->outputs=free_output;
-		if( neurons_descr[i].constructor(ann, layer, n, neurons_descr+i) != 0)
+		n->outputs = free_output;
+		if (neurons_descr[i].constructor(ann, layer, n, neurons_descr+i) != 0)
 		{
 			return 1;
 		}
-		free_output+=n->num_outputs;
 
+		free_output += n->num_outputs;
 	}
+
 	return 0;
 }
 
-static __inline  void  fann_base_inline_layer_run(struct fann *ann, struct fann_layer* layer)
+
+/* Runs a single layer for one iteration */
+FANN_EXTERNAL void FANN_API fann_layer_run_fully_recurrent(
+	struct fann *ann, struct fann_layer* layer)
 {
 	struct fann_neuron * last_neuron = layer->last_neuron;
 	struct fann_neuron * neuron_it;
+	unsigned int neuron_num = 0;
+	unsigned int i = 0;
+	
+	fann_type sum      = (fann_type)0.0;
+	fann_type *outputs = NULL;
 
+	if ((outputs = calloc(ann->num_output, sizeof(fann_type))) == NULL)
+	{
+		printf("Run Layer: 'outputs' allocation failed!\n");
+		return;
+	}
+
+
+	/* Run each neuron in the layer a single iteration */
 	for(neuron_it = layer->first_neuron; neuron_it != last_neuron; neuron_it++)
-		neuron_it->run(ann, neuron_it);	
+	{
+		/* Find the sum of weights*inputs*/
+		sum = (fann_type)0.0;
+		for (i=0; i<neuron_it->num_weights; i++)
+		{
+			if (i < ann->num_input + 1)
+			{
+				neuron_it->sums[i] = neuron_it->weights[i] * layer->inputs[i];
+			}
+			else
+			{
+				neuron_it->sums[i] = neuron_it->weights[i] * layer->outputs[i - ann->num_input - 1];
+			}
+
+			sum += neuron_it->sums[i];
+		}
+
+		/* FIXME: Support alternate functions other than sigmoid!*/
+		outputs[neuron_num] = 1.0f / (1.0f + exp(-sum));
+		neuron_num++;
+	}
+
+	/* Copy the new values over to the ANN*/
+	for (i=0; i<ann->num_output; i++)
+	{
+		ann->output[i] = outputs[i];
+	}
+	
+	fann_safe_free(outputs);
 }
 
-static __inline  void  fann_base_inline_neuron_train_initialize(struct fann *ann, struct fann_layer *layer, struct fann_neuron *neuron)
+
+/* Allocate memory for training a neuron */
+FANN_EXTERNAL void FANN_API fann_neuron_train_initialize_fully_recurrent(
+	struct fann *ann, 
+	struct fann_layer *layer, 
+	struct fann_neuron *neuron)
 {
 	neuron->num_backprop_done=0;
 
 	/* allocate the weights_deltas */
 	if(neuron->weights_deltas == NULL)
 	{
-		if ( (neuron->weights_deltas = (fann_type*) calloc(neuron->num_weights, sizeof(fann_type))) == NULL)
+		if ((neuron->weights_deltas = 
+				(fann_type*) calloc(neuron->num_weights, sizeof(fann_type))) == NULL)
 		{
 			fann_error((struct fann_error *) ann, FANN_E_CANT_ALLOCATE_MEM);
 			return;
@@ -155,7 +266,9 @@ static __inline  void  fann_base_inline_neuron_train_initialize(struct fann *ann
 	}
 }
 
-static __inline  void  fann_base_inline_layer_train_initialize(struct fann *ann, struct fann_layer *layer)
+
+/* Allocate memory for training for a layer */
+FANN_EXTERNAL void FANN_API fann_layer_train_initialize_fully_recurrent(struct fann *ann, struct fann_layer *layer)
 {
 	fann_type *free_train_errors;
 	struct fann_neuron *neuron_it, *last_neuron;
@@ -185,13 +298,23 @@ static __inline  void  fann_base_inline_layer_train_initialize(struct fann *ann,
 	}
 
 	for (neuron_it = layer->first_neuron; neuron_it != last_neuron; neuron_it++)
+	{
 		neuron_it->train_initialize(ann, layer, neuron_it);
+	}
 }
 
-static __inline void fann_recurrent_neuron_run(struct fann *ann, struct fann_neuron *neuron)
+
+/* Run a single neuron for one iteration */
+FANN_EXTERNAL void FANN_API fann_neuron_run_fully_recurrent(struct fann *ann, struct fann_neuron *neuron)
 {
+	unsigned int i = 0;
 
+	for (i=0; i<neuron->num_weights; i++)
+	{
+		neuron->sums[i] = neuron->weights[i] * neuron->inputs[i];
+	}	
 }
+
 
 /*
  * Compute the error at the network output
@@ -202,37 +325,26 @@ static __inline void fann_recurrent_neuron_run(struct fann *ann, struct fann_neu
  * After this train_errors in the output layer will be set to:
  * (desired_output - neuron_value)
  */
-#define fann_base_neuron_compute_MSE(ann, neuron, desired_output)\
-/*static __inline  void  fann_base_neuron_compute_MSE(struct fann *ann, struct fann_neuron *neuron, fann_type *desired_output)*/\
-{\
-	unsigned int o;\
-	fann_type neuron_value, neuron_diff;\
-	fann_type *error_it, *output_it;\
-\
-	/* assign each neuron its piece of train_errors array */\
-	error_it = neuron->train_errors;\
-	output_it = neuron->outputs;\
-\
-	for (o = 0; o < neuron->num_outputs; o++)\
-	{\
-		neuron_value = output_it[o];\
-		neuron_diff = desired_output[o] - neuron_value;\
-\
-		update_MSE_macro()(ann, neuron, &neuron_diff);\
-\
-		if(ann->training_params->train_error_function)\
-		{	/* TODO make switch when more functions */\
-			if(neuron_diff < -.9999999)\
-				neuron_diff = -17.0;\
-			else if(neuron_diff > .9999999)\
-				neuron_diff = 17.0;\
-			else\
-				neuron_diff = (fann_type) log((1.0 + neuron_diff) / (1.0 - neuron_diff));\
-		}\
-\
-		error_it[o] = neuron_diff;\
-		ann->training_params->num_MSE++;\
-	}\
+FANN_EXTERNAL void FANN_API fann_fully_recurrent_neuron_compute_MSE(struct fann *ann, struct fann_neuron *neuron, fann_type *desired_output)
+{
+	unsigned int o;
+	fann_type neuron_value, neuron_diff;
+	fann_type *error_it, *output_it;
+
+	/* assign each neuron its piece of train_errors array */
+	error_it = neuron->train_errors;
+	output_it = neuron->outputs;
+
+	for (o = 0; o < neuron->num_outputs; o++)
+	{
+		neuron_value = output_it[o];
+		neuron_diff = desired_output[o] - neuron_value;
+
+		ann->training_params->MSE_value += neuron_diff * neuron_diff;
+
+		error_it[o] = neuron_diff;
+		ann->training_params->num_MSE++;
+	}
 }
 
 /*
@@ -245,10 +357,10 @@ static __inline void fann_recurrent_neuron_run(struct fann *ann, struct fann_neu
  */
 #ifndef FIXEDFANN
 
-#define  fann_base_neuron_backprop(ann, neuron, prev_layer_errors)\
+#define  fann_fully_recurrent_neuron_backprop(ann, neuron, prev_layer_errors)\
 {\
 	unsigned int o, j;\
-	fann_type *errors, *inputs, *weights, *deltas;\
+	fann_type *errors, *inputs, *outputs, *weights, *sums, *deltas;\
 	fann_type tmp=0;\
 	const unsigned int num_outputs = neuron->num_outputs;\
 	const unsigned int num_inputs = neuron->num_inputs;\
@@ -256,8 +368,10 @@ static __inline void fann_recurrent_neuron_run(struct fann *ann, struct fann_neu
 	/* some assignments to speed up things */\
 	errors = neuron->train_errors;\
 	inputs = neuron->inputs;\
+	outputs = neuron->outputs;\
 	weights = neuron->weights;\
 	deltas = neuron->weights_deltas;\
+	sums = neuron->sums;\
 	\
 	/* detect if we are on the first layer (if so we get no prev_layer_errors) */\
 	if (prev_layer_errors != NULL)\
@@ -304,30 +418,29 @@ static __inline void fann_recurrent_neuron_run(struct fann *ann, struct fann_neu
 #else /* FIXEDFANN */
 
 /* BUG: Function body needed! */
-#define  fann_base_neuron_backprop(ann, neuron, prev_layer_errors)\
+#define  fann_fully_recurrent_neuron_backprop(ann, neuron, prev_layer_errors)\
 {\
 }
 
 #endif
 
-static __inline  void  fann_base_inline_neuron_update(struct fann *ann, struct fann_neuron *neuron)
+static __inline  void  fann_fully_recurrent_neuron_update(struct fann *ann, struct fann_neuron *neuron)
 {
 }
 
-#define fann_base_neuron_constructor(ann, layer, neuron, descr) fann_base_inline_neuron_constructor(ann, layer, neuron, descr)
-#define fann_base_neuron_destructor(neuron) fann_base_inline_neuron_destructor(neuron)
-#define fann_base_neuron_train_initialize(ann, layer, neuron) fann_base_inline_neuron_train_initialize(ann, layer, neuron)
-#define fann_base_layer_destructor(layer) fann_base_inline_layer_destructor(layer)
-#define fann_base_layer_constructor(ann, layer, descr) fann_base_inline_layer_constructor(ann, layer, descr) 
-#define fann_base_layer_run(ann, layer) fann_base_inline_layer_run(ann, layer)
-#define fann_base_layer_train_initialize(ann, layer) fann_base_inline_layer_train_initialize(ann, layer)
-#define fann_base_neuron_run(ann, neuron) MAKE_NAME(base_neuron_run)(ann, neuron)
-#define fann_base_neuron_update(ann, neuron) fann_base_inline_neuron_update(ann, neuron)
-#endif /*__fann_base_c*/
+
+#endif /*__fann_fully_recurrent_c*/
+
+
+
+
+
+
 
 /* OUTSIDE THE HEADER GUARD */
 
 #ifndef EXCLUDE_BASE_RUN
+#define EXCLUDE_BASE_RUN 
 #ifdef FIXEDFANN 
 static __inline  void  MAKE_NAME(base_neuron_run)(struct fann * ann, struct fann_neuron * neuron)
 {
@@ -471,7 +584,7 @@ static __inline  void  MAKE_NAME(base_neuron_run)(struct fann * ann, struct fann
 	}
 }
 #else
-static __inline  void  MAKE_NAME(base_neuron_run)(struct fann * ann, struct fann_neuron * neuron)
+static __inline  void  MAKE_NAME(base_neuron_run)(struct fann * ann, struct fann_neuron * neuron) 
 {
 	unsigned int i, o, num_connections, num_outputs;
 	fann_type *neuron_sums, *inputs, *weights;
@@ -481,43 +594,33 @@ static __inline  void  MAKE_NAME(base_neuron_run)(struct fann * ann, struct fann
 
 	/* Algorithm for fully connected networks */
 	steepness = neuron->activation_steepness;
-
+	
 	inputs = neuron->inputs;
 	num_outputs = neuron->num_outputs;
 	num_connections = neuron->num_inputs;
 	weights = neuron->weights;
 	neuron_sums=neuron->sums;
 	
-	for (o=0; o<num_outputs ; ++o)
+	for (o=0; o<num_outputs ; o++)
 	{
-		fann_type sum = 0.0;
-        
+		neuron_sums[o]=0;
 		/* unrolled loop start */
 		i = num_connections & 3;	/* same as modulo 4 */
 		switch (i)
 		{
 			case 3:
-				sum += fann_mult(weights[2], inputs[2]);
-//                printf("%5d %5d: %15f %15f\n", o, 2, weights[2], inputs[2]);
+				neuron_sums[o] += fann_mult(weights[2], inputs[2]);
 			case 2:
-				sum += fann_mult(weights[1], inputs[1]);
-//                printf("%5d %5d: %15f %15f\n", o, 1, weights[1], inputs[1]);
+				neuron_sums[o] += fann_mult(weights[1], inputs[1]);
 			case 1:
-				sum += fann_mult(weights[0], inputs[0]);
-//                printf("%5d %5d: %15f %15f\n", o, 0, weights[0], inputs[0]);
+				neuron_sums[o] += fann_mult(weights[0], inputs[0]);
 			case 0:
 				break;
 		}
 		
 		for(; i != num_connections; i += 4)
 		{
-            
-//            printf("%5d %5d: %15f %15f\n", o, i, weights[i]    , inputs[i]    );
-//            printf("%5d %5d: %15f %15f\n", o, i+1, weights[i + 1], inputs[i + 1]);
-//            printf("%5d %5d: %15f %15f\n", o, i+2, weights[i + 2], inputs[i + 2]);
-//            printf("%5d %5d: %15f %15f\n", o, i+3, weights[i + 3], inputs[i + 3]);
-            
-            sum +=
+			neuron_sums[o] +=
 				fann_mult(weights[i]    , inputs[i]    ) +
 				fann_mult(weights[i + 1], inputs[i + 1]) +
 				fann_mult(weights[i + 2], inputs[i + 2]) +
@@ -525,29 +628,21 @@ static __inline  void  MAKE_NAME(base_neuron_run)(struct fann * ann, struct fann
 		}
 		weights += num_connections;
 		/* unrolled loop end */
-		
-		sum = fann_mult(steepness, sum);
-		
+
+		neuron_sums[o] = fann_mult(steepness, neuron_sums[o]);
+
 		max_sum = 150/steepness;
-		if(sum > max_sum)
-			sum = max_sum;
-		else if(sum < -max_sum)
-			sum = -max_sum;
-		
-        neuron_sums[o] = sum;
-		activation_macro()(neuron, o);
-        
-//        printf("%5d %5d: %15f\n", o, i, neuron->outputs[o]);
+		if(neuron_sums[o] > max_sum)
+			neuron_sums[o] = max_sum;
+		else if(neuron_sums[o] < -max_sum)
+			neuron_sums[o] = -max_sum;
+
+    	activation_macro()(neuron, o);
 	}
-    
-//    double wsum = 0.0;
-//    for(o=0; o<num_outputs; ++o)
-//        wsum += neuron->weights[num_connections+o];
-    
-//    printf("%20.14f (%20.14f) ", wsum, neuron_sums[1]);
 }
 #endif /*FIXEDFANN*/
 #endif /* EXCLUDE_BASE_RUN */
+#undef EXCLUDE_BASE_RUN
 /*
  * vim: ts=2 smarttab smartindent shiftwidth=2 nowrap noet
  */

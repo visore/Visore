@@ -4,8 +4,7 @@
 int device_stats(cl_device_id device_id)
 {
 	
-	int err, i;
-	size_t j;
+	int err;
 	size_t returned_size;
 	
 	// Report the device vendor and device name
@@ -50,15 +49,15 @@ int device_stats(cl_device_id device_id)
 	
 	printf("Clock Frequency (MHz): %i\n\n",clock_frequency);
 	
-	for(i=0;i<6;i++){
+	for(int i=0;i<6;i++){
 		err|= clGetDeviceInfo(device_id, vector_types[i], sizeof(clock_frequency), &vector_width, &returned_size);
 		printf("Vector type width for: %s = %i\n",vector_type_names[i],vector_width);
 	}
 	
 	printf("\nMax Work Group Size: %lu\n",max_work_group_size);
 	printf("Max Work Item Dims: %lu\n",max_work_item_dims);
-	for(j=0;j<max_work_item_dims;j++) 
-		printf("Max Work Items in Dim %lu: %lu\n",(long unsigned)(j+1),(long unsigned)max_work_item_sizes[j]);
+	for(size_t i=0;i<max_work_item_dims;i++) 
+		printf("Max Work Items in Dim %lu: %lu\n",(long unsigned)(i+1),(long unsigned)max_work_item_sizes[i]);
 	
 	printf("Max Compute Units: %i\n",max_compute_units);
 	printf("\n");
@@ -241,43 +240,14 @@ void clSetCommandQueueProperty_err(cl_int err)
     exit(-1);
 }
 
-cl_device_id get_device(cl_context *cont)
+cl_device_id get_device()
 {
 	cl_int err = 0;
 	cl_device_id device = NULL;
-#ifndef NDEBUG
-    size_t returned_size = 0;
-    cl_char vendor_name[1024] = {0};
-    cl_char device_name[1024] = {0};
-#endif
-
+    
     // Find the GPU CL device, this is what we really want
     // If there is no GPU device is CL capable, fall back to CPU
-//    err = clGetDeviceIDs(NULL, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
-    printf("Trying to run on a CPU \n");
-    cl_platform_id intel_platform_id = GetIntelOCLPlatform();
-    if( intel_platform_id == NULL )
-    {
-        printf("ERROR: Failed to find Intel OpenCL platform.\n");
-        return device;
-    }
-
-    cl_context_properties context_properties[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)intel_platform_id, NULL };
-
-    // create the OpenCL context on a CPU 
-    cl_context context;
-	context=*cont=clCreateContextFromType(context_properties, CL_DEVICE_TYPE_CPU, NULL, NULL, NULL);
-    if (context == (cl_context)0)
-        return device;
-
-    // get the list of CPU devices associated with context
-    size_t cb;
-    err = clGetContextInfo(context, CL_CONTEXT_DEVICES, 0, NULL, &cb);
-
-    cl_device_id *devices;
-    devices = (cl_device_id*)malloc(cb);
-
-    clGetContextInfo(context, CL_CONTEXT_DEVICES, cb, devices, NULL);
+    err = clGetDeviceIDs(NULL, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
 //    err = clGetDeviceIDs(NULL, CL_DEVICE_TYPE_CPU, 1, &device, NULL);
     if (err != CL_SUCCESS)
     {
@@ -285,13 +255,13 @@ cl_device_id get_device(cl_context *cont)
         err = clGetDeviceIDs(NULL, CL_DEVICE_TYPE_CPU, 1, &device, NULL);
         assert(err == CL_SUCCESS);
     }
-	else
-		device = devices[0];
-	return device;
     assert(device);
     
 #ifndef NDEBUG
+    size_t returned_size = 0;
     // Get some information about the returned device
+    cl_char vendor_name[1024] = {0};
+    cl_char device_name[1024] = {0};
     err = clGetDeviceInfo(device, CL_DEVICE_VENDOR, sizeof(vendor_name), 
                           vendor_name, &returned_size);
     err |= clGetDeviceInfo(device, CL_DEVICE_NAME, sizeof(device_name), 
@@ -483,25 +453,3 @@ void make_working_mem(cl_command_queue cmd_queue, cl_context context, cl_kernel 
     assert(err == CL_SUCCESS);
 }
 
-cl_platform_id GetIntelOCLPlatform()
-{
-    cl_platform_id pPlatforms[10] = { 0 };
-    char pPlatformName[128] = { 0 };
-
-    cl_uint uiPlatformsCount = 0;
-    cl_int err = clGetPlatformIDs(10, pPlatforms, &uiPlatformsCount);
-    for (cl_uint ui = 0; ui < uiPlatformsCount; ++ui)
-    {
-        err = clGetPlatformInfo(pPlatforms[ui], CL_PLATFORM_NAME, 128 * sizeof(char), pPlatformName, NULL);
-        if ( err != CL_SUCCESS )
-        {
-            printf("ERROR: Failed to retreive platform vendor name.\n", ui);
-            return NULL;
-        }
-
-        //if (!strcmp(pPlatformName, "Intel(R) OpenCL"))
-            return pPlatforms[ui];
-    }
-
-    return NULL;
-}

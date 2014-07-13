@@ -34,14 +34,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "fann_gng.c"
 
 #include "fann_recurrent.c"
-//#include "optimized\opencl\fann.c"
 /* #include "fann_base_fully_recurrent.c" */
 
-#include "fann_cl.h"
-#include "fann_cl_ann.h"
-#include "fann_cl_kernel.h"
-#include "fann_cl_run.h"
-#include "fann_cl_train.h"
+#include "fann_cl.c"
+#include "fann_cl_ann.c"
+#include "fann_cl_kernel.c"
+#include "fann_cl_run.c"
+#include "fann_cl_train.c"
 
 /*
  * vim: ts=2 smarttab smartindent shiftwidth=2 nowrap

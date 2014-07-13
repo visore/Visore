@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 	#define EXCLUDE_SCALAR
 	#define EXCLUDE_SSE
     #define EXCLUDE_BLAS
-    //#define EXCLUDE_OPENCL
+    #define EXCLUDE_OPENCL
 #endif
 
 #ifndef FANN_INCLUDE
@@ -156,8 +156,6 @@ extern "C"
 #include "fann_som.h"
 #include "fann_gng.h"
 #include "fann_recurrent.h"
-
-FANN_EXTERNAL void FANN_API fann_run_many(struct fann **ann, fann_type * input, fann_type **output, int num_anns, int num_runs);
 
 FANN_EXTERNAL void FANN_API fann_train_on_data_cl(struct fann *ann, struct fann_train_data *data,
                                                   unsigned int max_epochs,
