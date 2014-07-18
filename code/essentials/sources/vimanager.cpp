@@ -97,6 +97,18 @@ ViManager::ViManager()
 	dir = QDir(path);
 	if(!dir.exists()) dir.mkpath(path);
 
+	if(mSettings->value("paths/tempother").isNull())
+	{
+		path = tempPath + "other" + QDir::separator();
+		mSettings->setValue("paths/tempother", path);
+	}
+	else
+	{
+		path = mSettings->value("paths/tempother").toString();
+	}
+	dir = QDir(path);
+	if(!dir.exists()) dir.mkpath(path);
+
 	if(mSettings->value("paths/project").isNull())
 	{
 		mSettings->setValue("paths/project", QDir::homePath() + QDir::separator() + "Visore Projects" + QDir::separator());
@@ -244,6 +256,16 @@ QString ViManager::tempDataPath()
 void ViManager::setTempDataPath(QString path)
 {
 	ViManager::setValue("paths/tempdata", path);
+}
+
+QString ViManager::tempOtherPath()
+{
+	return ViManager::value("paths/tempother").toString();
+}
+
+void ViManager::setTempOtherPath(QString path)
+{
+	ViManager::setValue("paths/tempother", path);
 }
 
 QString ViManager::projectPath()

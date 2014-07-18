@@ -159,7 +159,8 @@ class ViFann
 		void train(const float *input, const float &desiredOutput);
 
 		// Train for a number of iterations or until a certain MSE was reached
-		void train(const bool &debug = false);
+		// Returns the number of epochs actually trained. Only works if setStopStagnation was set.
+		int train(const bool &debug = false);
 
 		// First run the input, and then train it
 		void runTrain(const qreal *input, qreal *output, const qreal *desiredOutput);
@@ -169,6 +170,10 @@ class ViFann
 
 		// Checks if all the settings and paramters work together
 		bool isValid();
+
+		// Save and load to/from file
+		bool saveToFile(const QString &path);
+		bool loadFromFile(const QString &path);
 
 		// Getters
 

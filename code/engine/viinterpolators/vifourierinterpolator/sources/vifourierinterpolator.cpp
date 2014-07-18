@@ -94,7 +94,7 @@ bool ViFourierInterpolator::validParameters()
 bool ViFourierInterpolator::validParameters(const Mode &mode, const int &windowSize, const int &degree, const int &derivatives)
 {
 	if(mode == Normal) return windowSize >= (degree * 2) + 1;
-	else if(mode == Osculating) return (windowSize >= (degree * 2) + 1) && degree >= derivatives && derivatives <= (windowSize / 2.0);
+	else if(mode == Osculating) return (windowSize >= (degree * 2) + 1) && degree > derivatives && derivatives <= (windowSize / 2.0);
 	else if(mode == Splines)
 	{
 		if(windowSize <= 1) return false;

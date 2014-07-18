@@ -94,7 +94,7 @@ bool ViFourierPredictor::validParameters()
 bool ViFourierPredictor::validParameters(const Mode &mode, const int &windowSize, const int &degree, const int &derivatives)
 {
 	if(mode == Normal) return windowSize >= (degree * 2) + 1;
-	else if(mode == Osculating) return (windowSize >= (degree * 2) + 1) && degree >= derivatives;
+	else if(mode == Osculating) return (windowSize >= (degree * 2) + 1) && degree > derivatives;
 	else if(mode == Splines)
 	{
 		if(windowSize <= 1) return false;

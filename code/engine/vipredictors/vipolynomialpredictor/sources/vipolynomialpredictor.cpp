@@ -15,7 +15,7 @@ ViPolynomialPredictor::ViPolynomialPredictor(const Mode &mode, const Estimation 
 
 	addParameterName("Window Size");
 	addParameterName("Degree");
-	if(mMode == Osculating || mMode == Splines) addParameterName("Derivatives");
+	if(mMode == Osculating) addParameterName("Derivatives");
 }
 
 ViPolynomialPredictor::ViPolynomialPredictor(const ViPolynomialPredictor &other)
@@ -93,18 +93,9 @@ bool ViPolynomialPredictor::validParameters()
 
 bool ViPolynomialPredictor::validParameters(const Mode &mode, const int &windowSize, const int &degree, const int &derivatives)
 {
-//	if(!ViEigenManager::isSupported(decimalPrecision(windowSize, degree))) return false;
 	if(mode == Normal) return windowSize >= degree + 1;
-	else if(mode == Osculating) return windowSize >= degree + 1 && degree >= derivatives && derivatives <= (windowSize / 2.0);
-	else if(mode == Splines)
-	{
-		if(windowSize <= 1) return false;
-		int coefficients = (windowSize - 1) * (degree + 1); // For every spline
-		int equations = (windowSize - 1) * 2; // Polynomial for each spline
-		equations += (windowSize - 2) * derivatives; // Derivatives at all intermediate points, except the first and last point on every side
-		equations += 1 * derivatives; // Set incoming spline (a0) equal to 0
-		return equations >= coefficients && degree >= derivatives;
-	}
+	else if(mode == Osculating) return windowSize >= degree + 1 && degree > derivatives && derivatives <= (windowSize / 2.0);
+	else if(mode == Splines) return windowSize > 1;
 }
 
 void ViPolynomialPredictor::setPointers(const Mode &mode, const Estimation &estimation)
@@ -457,22 +448,20 @@ void ViPolynomialPredictor::predictModelOsculating(const int &degree, const ViEi
 
 ViEigenBaseVector* ViPolynomialPredictor::estimateModelSplines(const int &degree, const int &derivative, const qreal *samples, const int &size, const qreal &scaling)
 {
-	static int i, j, extraEquations, columnOffset, rowOffset1, rowOffset2, splineCount, singleCoefficientCount, coefficientCount, derivativeCount, equationCount;
+	static int i, j, lastDerivative, lastDerivativeCounter, extraEquations, columnOffset, rowOffset1, rowOffset2, splineCount, singleCoefficientCount, coefficientCount, derivativeCount, equationCount;
 	static qreal x1, x2;
 
 	if(size <= 1) return NULL;
 
 	splineCount = size - 1;
-
 	singleCoefficientCount = degree + 1;
 	coefficientCount = splineCount * singleCoefficientCount;
-	derivativeCount = splineCount - 1;
+	derivativeCount = degree - 1;
 
-	extraEquations = 0;
-
+	extraEquations = 0;	
 	equationCount = 0;
 	equationCount += splineCount * 2; // Spline polynomials. Times 2 since we use the spline with 2 points
-	equationCount += derivativeCount * derivative; // Intermediate derivatives should be equal;
+	equationCount += derivativeCount * (splineCount - 1); // Intermediate derivatives should be equal;
 	while(equationCount < coefficientCount) // Add first spline == 0
 	{
 		++equationCount;
@@ -509,7 +498,7 @@ ViEigenBaseVector* ViPolynomialPredictor::estimateModelSplines(const int &degree
 	}
 
 	// Add the deratives between neighbouring left splines
-	for(i = 1; i <= derivative; ++i)
+	for(i = 1; i <= derivativeCount; ++i)
 	{
 		rowOffset1 = (splineCount * 2) + ((i - 1) * splineCount);
 		for(j = 0; j < splineCount; ++j)
@@ -522,10 +511,20 @@ ViEigenBaseVector* ViPolynomialPredictor::estimateModelSplines(const int &degree
 		}
 	}
 
-	// Set the derivitives for the first spline at point 0 to 0
-	if(extraEquations > 0)
+	// Set the derivitives for the first/last spline at point 0 to 0
+	lastDerivative = 1;
+	lastDerivativeCounter = 0;
+	while(extraEquations > 0)
 	{
-		for(i = 1; i <= extraEquations; ++i) matrix->set(equationCount - i, 0, 1);
+		if(lastDerivativeCounter) calculateDerivative(degree, 1, matrix, equationCount - extraEquations, degree - lastDerivative, coefficientCount - singleCoefficientCount, 1);
+		else calculateDerivative(degree, 0, matrix, equationCount - extraEquations, degree - lastDerivative, 0, 1);
+		--extraEquations;
+		++lastDerivativeCounter;
+		if(lastDerivativeCounter == 2)
+		{
+			++lastDerivative;
+			lastDerivativeCounter = 0;
+		}
 	}
 
 	ViEigenBaseVector *coefficients = mEigen->estimate(matrix, vector);
@@ -554,18 +553,40 @@ void ViPolynomialPredictor::predictModelSplines(const int &degree, const ViEigen
 
 void ViPolynomialPredictor::calculateDerivative(const int &degree, const qreal &x, ViEigenBaseMatrix *matrix, const int &rowOffset, const int &derivative)
 {
-	static int i;
+	static int i, j;
+	static qreal factorial;
+
 	for(i = 0; i < derivative; ++i) matrix->set(rowOffset, i, 0);
-	matrix->set(rowOffset, derivative, 1);
-	for(i = derivative + 1; i <= degree; ++i) matrix->setPowerMulti(rowOffset, i, i, x, i - 1);
+
+	factorial = derivative;
+	for(i = 1; i < derivative; ++i) factorial *= derivative - i;
+	matrix->set(rowOffset, derivative, factorial);
+
+	for(i = derivative + 1; i <= degree; ++i)
+	{
+		factorial = i;
+		for(j = 1; j < derivative; ++j) factorial *= i - j;
+		matrix->setPowerMulti(rowOffset, i, factorial, x, i - derivative);
+	}
 }
 
 void ViPolynomialPredictor::calculateDerivative(const int &degree, const qreal &x, ViEigenBaseMatrix *matrix, const int &rowOffset, const int &derivative, const int &offset, const int multiplier)
 {
-	static int i;
+	static int i, j;
+	static qreal factorial;
+
 	for(i = 0; i < derivative; ++i) matrix->set(rowOffset, i + offset, 0);
-	matrix->set(rowOffset, derivative + offset, multiplier);
-	for(i = derivative + 1; i <= degree; ++i) matrix->setPowerMulti(rowOffset, i + offset, multiplier * i, x, i - 1);
+
+	factorial = derivative;
+	for(i = 1; i < derivative; ++i) factorial *= derivative - i;
+	matrix->set(rowOffset, derivative + offset, factorial * multiplier);
+
+	for(i = derivative + 1; i <= degree; ++i)
+	{
+		factorial = i;
+		for(j = 1; j < derivative; ++j) factorial *= i - j;
+		matrix->setPowerMulti(rowOffset, i + offset, multiplier * factorial, x, i - derivative);
+	}
 }
 
 void ViPolynomialPredictor::splineOffsetModel(int *offsets, const int &size, const int &coefficientCount)

@@ -1,5 +1,6 @@
 #include <vineuralinterpolator.h>
-#include <iomanip>
+#include <vimanager.h>
+
 #define DEFAULT_WINDOW_SIZE 32
 
 ViNeuralInterpolator::ViNeuralInterpolator()
@@ -129,31 +130,40 @@ void ViNeuralInterpolator::initialize(const int &channelCount)
 	for(i = 1; i <= mOutputs; ++i)
 	{
 		neurons.last() = i;
-		ViFann *network = new ViFann();
+		ViFann *network = new ViFann(false);
 		network->setStructure(ViFann::Shortcut, neurons);
 		network->setActivation(ViFann::Elliot);
 		network->setWeights(ViFann::Random);
+		//network->setWeights(ViFann::WidrowNguyen);
 		//network->setLearningRate(0.2);
 		//network->setLearningMomentum(0.1);
-		network->setTraining(ViFann::Fixed, ViFann::RProp);
+		network->setTraining(ViFann::Fixed, ViFann::QuickProp);
 		network->setStopEpochs(500);
-		network->setStopMse(0.0000001);
-		network->setStopStagnation(0.0000001, 10);
+		network->setStopMse(0.000000);
+		network->setStopStagnation(0.0000001, 5);
 		network->setStopNeurons(10);
 		if(!network->isValid())
 		{
 			LOG("Invalid neural network.", QtFatalMsg);
 			exit(-1);
 		}
+		//network->loadFromFile(ViManager::tempOtherPath() + QString::number(i) + ".fann");
+
 		mNetworks.append(network);
 
 		mOutput.append(new qreal[i]);
 	}
+
+	mTrainCount = 0;
 }
 
 bool ViNeuralInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
+	//mNetworks[outputSize - 1]->setWeights(ViFann::Random);
+
 	train(leftSamples, leftSize, rightSamples, rightSize, outputSize, 768, 2); // 768, 2
+	//for(int i = 1; i <= mOutputs; ++i) train(leftSamples, leftSize, rightSamples, rightSize, i, 10000,4);
+	//train(leftSamples, leftSize, rightSamples, rightSize, outputSize, 64, 4); // 768, 2
 
 	devide(leftSamples, leftSize, rightSamples, mInput, mLeftInputs, mRightInputs);
 	mNetworks[outputSize - 1]->run(mInput, outputSamples);
@@ -191,6 +201,7 @@ void ViNeuralInterpolator::train(const qreal *leftSamples, const int &leftSize, 
 	{
 		network->setTrainInput(counter, mInput);
 		network->setTrainOutput(counter, output);
+		//network->train(mInput, output);
 		leftOffset += stepSize;
 		++counter;
 	}
@@ -207,7 +218,10 @@ void ViNeuralInterpolator::train(const qreal *leftSamples, const int &leftSize, 
 	delete [] reversed;
 
 	//network->train(true);
-	network->train();
+	int trains = network->train();
+	mTrainCount += trains;
+	//cout<<"Training epochs: " << trains << " (" << mTrainCount << ") " << outputSize << endl;
+	//network->saveToFile(ViManager::tempOtherPath() + QString::number(outputSize) + ".fann");
 }
 
 bool ViNeuralInterpolator::devide(const qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &leftInputs, const int &rightInputs, qreal *output, const int &outputSize)

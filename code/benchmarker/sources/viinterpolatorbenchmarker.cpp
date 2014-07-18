@@ -17,21 +17,24 @@
 #include <vineuralinterpolator.h>
 
 #define WINDOW_SIZE 4096
-#define WRITE true
+#define WRITE false
 
 ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 {
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal, ViPolynomialInterpolator::Fixed);
-	addParam("Window Size", 2, 2, 1);
-	addParam("Degree", 1, 1, 1);
-	//addParam("Derivatives", 2, 2, 1);*/
+	mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Splines, ViPolynomialInterpolator::Fixed);
+	addParam("Window Size", 4,64, 4);
+	addParam("Degree",1,10, 1);
+	addParam("Derivatives", 1, 10, 1);
 
-	mInterpolator = new ViNeuralInterpolator();
-	addParam("Window Size", 256,256, 16);
-	//addParam("l1", 0,32,8);
+	//mInterpolator = new ViNeuralInterpolator();
+//	addParam("Window Size", 192,192, 16);
+	//addParam("l1",118,118,16);
+	//addParam("Window Size", 128,128, 16);
+	//addParam("l1", 48,48,16);
+	//addParam("l1", 0,64,16);
 	//addParam("l2", 0, ,8);
 	//addParam("l3", 0, 32,8);
 
@@ -186,6 +189,7 @@ void ViInterpolatorBenchmarker::process()
 
 	do
 	{
+		mQuitCount = 0;
 		interpolationErrors.clear();
 		modelErrors.clear();
 
@@ -287,7 +291,8 @@ void ViInterpolatorBenchmarker::printTerminal(ViErrorCollection &interpolationEr
 	qint64 remaining = mMainTime.elapsed();
 	remaining = ((1.0 / percentageDone) * remaining) - remaining;
 
-	if(interpolationErrors.nrmse() < mBestScore) mBestScore = interpolationErrors.nrmse();
+	qreal best = interpolationErrors.nrmse();
+	if(best >=0 && best < mBestScore) mBestScore = best;
 
 	cout << int(percentageDone * 100.0) << "%\t(" << timeConversion(remaining).toLatin1().data() << ")\t";
 	cout << "INTERPOLATION NRMSE: " << setprecision(6) << interpolationErrors.nrmse() << " ("  << setprecision(6) << mBestScore << ")\tMODEL NRMSE: " << setprecision(6) << modelErrors.nrmse() << "\tTIME: " << time << endl;

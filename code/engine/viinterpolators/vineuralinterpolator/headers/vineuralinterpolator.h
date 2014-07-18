@@ -54,6 +54,8 @@ class ViNeuralInterpolator : public ViInterpolator
 		int mRightInputs;
 		int mOutputs;
 
+		int mTrainCount;
+
 };
 
 #endif
