@@ -8,6 +8,7 @@ current_directory=`cd $current_directory; pwd`
 code_directory=/home/visore/Project/Visore/Visore/code
 build_directory=/home/visore/Project/Visore/build
 install_directory=/home/visore/Project/Visore/install/usr/local/visore
+git_directory=/home/visore/Project/Visore/Visore
 
 export PATH=$PATH:"$code_directory"/external/enmfp/libraries/64bit
 
@@ -19,6 +20,10 @@ valgrind=false;
 gdb=false;
 cloc=false;
 parameters="";
+git=false;
+gitpush=false;
+gitpull=false;
+gitmsg="";
 for i in $*
 do
 	if [ $i = "cmake" ]; then
@@ -35,6 +40,14 @@ do
 		gdb=true;
 	elif [ $i = "cloc" ]; then
 		cloc=true;
+	elif [ $i = "git" ]; then
+		git=true;
+	elif [ $git ] && [ $i = "push" ]; then
+		gitpush=true;
+	elif [ $git ] && [ $i = "pull" ]; then
+		gitpull=true;
+	elif [ $git ]; then
+		gitmsg=$i;
 	else
 		seperator=" ";
 		parameters=$parameters$seperator$i;
@@ -71,6 +84,18 @@ fi
 if $package; then
 	cd "$build_directory"
 	make package
+fi
+
+if $gitpush; then
+	if [ "$gitmsg" = "" ]; then
+		echo "A message is required to push git."
+		exit 0
+	fi
+	cd $git_directory
+	sh gitpush $gitmsg
+elif $gitpull; then
+	cd $git_directory
+	sh gitpull
 fi
 
 if $gdb; then
