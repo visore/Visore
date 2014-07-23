@@ -24,19 +24,10 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Splines, ViPolynomialInterpolator::Fixed);
-	addParam("Window Size", 4,64, 4);
-	addParam("Degree",1,10, 1);
-	addParam("Derivatives", 1, 10, 1);
-
-	//mInterpolator = new ViNeuralInterpolator();
-//	addParam("Window Size", 192,192, 16);
-	//addParam("l1",118,118,16);
-	//addParam("Window Size", 128,128, 16);
-	//addParam("l1", 48,48,16);
-	//addParam("l1", 0,64,16);
-	//addParam("l2", 0, ,8);
-	//addParam("l3", 0, 32,8);
+	mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal);
+	addParam("Window Size", 2, 1024, 2);
+	addParam("Degree", 1, 10, 1);
+	//addParam("Derivatives", 1, 10, 1);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 
