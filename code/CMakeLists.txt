@@ -7,7 +7,6 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x") # Add C++11 support
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings") # String to char* warnings
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include") # For gretl to use glib. After configureing gretl, type the command (inside config dir): pkg-config --cflags glib-2.0   and use the output
 
-
 #Setup directory paths
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 SET(MAIN ${ROOT}/main)
