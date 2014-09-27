@@ -42,11 +42,11 @@ do
 		cloc=true;
 	elif [ $i = "git" ]; then
 		git=true;
-	elif [ $git ] && [ $i = "push" ]; then
+	elif [ $git = true  ] && [ $i = "push" ]; then
 		gitpush=true;
-	elif [ $git ] && [ $i = "pull" ]; then
+	elif [ $git = true  ] && [ $i = "pull" ]; then
 		gitpull=true;
-	elif [ $git ]; then
+	elif [ $git = true ]; then
 		gitmsg=$i;
 	else
 		seperator=" ";

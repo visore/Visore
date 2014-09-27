@@ -53,6 +53,10 @@ class ViInterpolatorBenchmarker : public QObject
 		QQueue<QString> mFiles;
 		QQueue<QString> mSummaryFiles;
 		QString mCurrentFile;
+
+		QString mAllFile;
+		QString mMiniFile;
+
 		ViAudioObjectPointer mCurrentObject;
 
 		QQueue<QString> mResults;

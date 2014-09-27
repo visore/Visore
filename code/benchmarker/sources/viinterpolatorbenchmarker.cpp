@@ -25,9 +25,12 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal);
-	addParam("Window Size", 4, 4, 4);
-	addParam("Degree", 1, 1, 1);
+	mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Zero);
+	//addParam("Window Size", 32, 32, 4);
+
+	//mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal);
+	//addParam("Window Size", 32, 32, 4);
+	//addParam("Degree", 1, 15, 1);
 	//addParam("Derivatives", 1, 10, 1);
 
 //	mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Mean);
@@ -170,8 +173,12 @@ void ViInterpolatorBenchmarker::nextFile()
 	{
 		for(int i = 0; i < mParamsStart.size(); ++i) mParamsCurrent[i] = mParamsStart[i];
 		mCurrentFile = mFiles.dequeue();
-		printFileHeader(mResults.first());
-		printFileHeader(mResults2.first());
+
+		mAllFile = mResults.dequeue();
+		mMiniFile = mResults2.dequeue();
+
+		printFileHeader(mAllFile);
+		printFileHeader(mMiniFile);
 
 		mCurrentObject->clearBuffers();
 		mCurrentObject.setNull();
@@ -224,12 +231,10 @@ void ViInterpolatorBenchmarker::process()
 		}
 
 		++mDoneParamIterations;
-		printFileDataAll(mResults.first(), interpolationErrors, modelErrors, time);
-		printFileDataMinified(mResults2.first(), interpolationErrors, modelErrors, time);
-		if(SUMMARY) printFileDataSummary(genre(mResults.first()), interpolationErrors, modelErrors, time);
+		printFileDataAll(mAllFile, interpolationErrors, modelErrors, time);
+		printFileDataMinified(mMiniFile, interpolationErrors, modelErrors, time);
+		if(SUMMARY) printFileDataSummary(genre(mMiniFile), interpolationErrors, modelErrors, time);
 		printTerminal(interpolationErrors, modelErrors, time);
-		mResults.dequeue();
-		mResults2.dequeue();
 	}
 	while(nextParam());
 
