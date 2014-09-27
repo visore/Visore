@@ -587,7 +587,7 @@ void ViAudioObject::logStatus(QString message, QtMsgType type)
 void ViAudioObject::setFinished()
 {
 	mIsBusy = false;
-	emit progressed(100);
+	//emit progressed(100);
 	emit finished();
 }
 

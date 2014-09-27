@@ -35,9 +35,13 @@ class ViInterpolatorBenchmarker : public QObject
 
 	protected:
 
-		void printFileHeader();
-		void printFileData(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
+		void printFileHeader(QString filepath);
+		void printFileDataAll(QString filepath, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
+		void printFileDataMinified(QString filepath, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
+		void printFileDataSummary(QString genre, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
 		void printTerminal(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
+
+		QString genre(QString path);
 
 	private:
 
@@ -47,6 +51,7 @@ class ViInterpolatorBenchmarker : public QObject
 		ViInterpolator *mInterpolator;
 
 		QQueue<QString> mFiles;
+		QQueue<QString> mSummaryFiles;
 		QString mCurrentFile;
 		ViAudioObjectPointer mCurrentObject;
 

@@ -18,20 +18,21 @@
 
 #define WINDOW_SIZE 4096
 #define WRITE false
+#define SUMMARY false
 
 ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 {
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	//mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal);
-	//addParam("Window Size", 2, 1024, 2);
-	//addParam("Degree", 1, 10, 1);
+	mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal);
+	addParam("Window Size", 4, 4, 4);
+	addParam("Degree", 1, 1, 1);
 	//addParam("Derivatives", 1, 10, 1);
 
-	mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Similarity);
-	addParam("Window Size", 512,512, 2);
-	addParam("Samples",32,32, 2);
+//	mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Mean);
+	//addParam("K", 4,64, 4);
+	//addParam("Samples",32,32, 2);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 
@@ -68,6 +69,7 @@ void ViInterpolatorBenchmarker::initParams()
 	{
 		mTotalParamIterations *= (mParamsEnd[i] - mParamsStart[i] + mParamsIncrease[i]) / mParamsIncrease[i];
 	}
+	mTotalParamIterations *= mTotalFiles;
 }
 
 bool ViInterpolatorBenchmarker::nextParam()
@@ -121,6 +123,7 @@ void ViInterpolatorBenchmarker::benchmark(QString folder)
 	}
 
 	mTotalFiles = mFiles.size();
+	initParams();
 	nextFile();
 }
 
@@ -135,6 +138,16 @@ void ViInterpolatorBenchmarker::addDir(QString dirName)
 
 	QDir dirResult("/home/visore/Visore Projects/Results/" + dirName);
 	if(!dirResult.exists()) dirResult.mkpath(dirResult.absolutePath());
+
+	if(SUMMARY)
+	{
+		QString summary = dirResult.absolutePath() + "/summary.txt";
+		if(!mSummaryFiles.contains(summary))
+		{
+			printFileHeader(summary);
+			mSummaryFiles.append(summary);
+		}
+	}
 
 	QDir dir(dirFile.absolutePath());
 	QStringList files = dir.entryList(QDir::Files);
@@ -155,16 +168,16 @@ void ViInterpolatorBenchmarker::nextFile()
 	}
 	else
 	{
-		initParams();
 		for(int i = 0; i < mParamsStart.size(); ++i) mParamsCurrent[i] = mParamsStart[i];
 		mCurrentFile = mFiles.dequeue();
-		printFileHeader();
+		printFileHeader(mResults.first());
+		printFileHeader(mResults2.first());
 
 		mCurrentObject->clearBuffers();
 		mCurrentObject.setNull();
 		mCurrentObject = ViAudioObject::create();
 		mCurrentObject->setFilePath(ViAudio::Target, mCurrentFile);
-		QObject::connect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
+		QObject::connect(mCurrentObject.data(), SIGNAL(finished()), this, SLOT(process()));
 		mCurrentObject->decode();
 	}
 }
@@ -174,7 +187,7 @@ void ViInterpolatorBenchmarker::process()
 	mQuitCount = 0;
 	mBestScore = DBL_MAX;
 
-	QObject::disconnect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
+	QObject::disconnect(mCurrentObject.data(), SIGNAL(finished()), this, SLOT(process()));
 	qint64 time;
 
 	ViErrorCollection interpolationErrors, modelErrors;
@@ -206,78 +219,116 @@ void ViInterpolatorBenchmarker::process()
 		if(WRITE)
 		{
 			QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-			mCurrentObject->encode(ViAudio::Corrected);
+			mCurrentObject->encode(ViAudio::Corrupted);
 			//return;
 		}
 
 		++mDoneParamIterations;
-		printFileData(interpolationErrors, modelErrors, time);
+		printFileDataAll(mResults.first(), interpolationErrors, modelErrors, time);
+		printFileDataMinified(mResults2.first(), interpolationErrors, modelErrors, time);
+		if(SUMMARY) printFileDataSummary(genre(mResults.first()), interpolationErrors, modelErrors, time);
 		printTerminal(interpolationErrors, modelErrors, time);
+		mResults.dequeue();
+		mResults2.dequeue();
 	}
 	while(nextParam());
 
 	nextFile();
 }
 
-void ViInterpolatorBenchmarker::printFileHeader()
+void ViInterpolatorBenchmarker::printFileHeader(QString filepath)
 {
 	int i;
 
-	mOutputFile.close();
-	mOutputFile.setFileName(mResults.dequeue());
-	mOutputFile.open(QIODevice::WriteOnly);
-	mOutputStream.setDevice(&mOutputFile);
+	QFile file(filepath);
+	file.open(QIODevice::WriteOnly);
+	QTextStream stream(&file);
 
-	mOutputStream << mInterpolator->name() << "\n\n";
-	mOutputStream << QFileInfo(mCurrentFile).fileName() << "\n\n";
+	stream << mInterpolator->name() << "\n\n";
+	stream << QFileInfo(mCurrentFile).fileName() << "\n\n";
 
-	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << "PARAMETER " << i + 1 << " (" << mInterpolator->parameterName(i) <<")\t";
-	mOutputStream << "NRMSE INTERPOLATION" << "\t" << "NRMSE MODEL" << "\t" << "TIME" << "\t\t";
-	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << "NOISE SIZE " << i << " (NRMSE INTERPOLATION)\t";
-	mOutputStream << "\t";
-	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << "NOISE SIZE " << i << " (NRMSE MODEL)\t";
-	mOutputStream << "\n";
-	mOutputStream.flush();
+	for(i = 0; i < mParamsStart.size(); ++i) stream << "PARAMETER " << i + 1 << " (" << mInterpolator->parameterName(i) <<")\t";
+	stream << "NRMSE INTERPOLATION" << "\t" << "NRMSE MODEL" << "\t" << "TIME" << "\t\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) stream << "NOISE SIZE " << i << " (NRMSE INTERPOLATION)\t";
+	stream << "\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) stream << "NOISE SIZE " << i << " (NRMSE MODEL)\t";
+	stream << "\n";
+	stream.flush();
 
-	mOutputFile2.close();
-	mOutputFile2.setFileName(mResults2.dequeue());
-	mOutputFile2.open(QIODevice::WriteOnly);
-	mOutputStream2.setDevice(&mOutputFile2);
-
-	mOutputStream2 << mInterpolator->name() << "\n\n";
-	mOutputStream2 << QFileInfo(mCurrentFile).fileName() << "\n\n";
-
-	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream2 << "PARAMETER " << i + 1 << " (" << mInterpolator->parameterName(i) <<")\t";
-	mOutputStream2 << "NRMSE INTERPOLATION" << "\t" << "NRMSE MODEL" << "\t" << "TIME" << "\t\t";
-	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << "NOISE SIZE " << i << " (NRMSE INTERPOLATION)\t";
-	mOutputStream2 << "\t";
-	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << "NOISE SIZE " << i << " (NRMSE MODEL)\t";
-	mOutputStream2 << "\n";
-	mOutputStream2.flush();
+	file.close();
 }
 
-void ViInterpolatorBenchmarker::printFileData(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
+void ViInterpolatorBenchmarker::printFileDataAll(QString filepath, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
 {
 	int i;
 
-	for(i = 0; i < mParamsStart.size(); ++i) mOutputStream << (int) mParamsCurrent[i] << "\t";
-	mOutputStream << interpolationErrors.nrmse() << "\t" << modelErrors.nrmse() << "\t" << time << "\t\t";
-	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << interpolationErrors[i].nrmse() << "\t";
-	mOutputStream << "\t";
-	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream << modelErrors[i].nrmse() << "\t";
-	mOutputStream << "\n";
-	mOutputStream.flush();
+	QFile file(filepath);
+	file.open(QIODevice::WriteOnly | QIODevice::Append);
+	QTextStream stream(&file);
+
+	for(i = 0; i < mParamsStart.size(); ++i) stream << (int) mParamsCurrent[i] << "\t";
+	stream << interpolationErrors.nrmse() << "\t" << modelErrors.nrmse() << "\t" << time << "\t\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) stream << interpolationErrors[i].nrmse() << "\t";
+	stream << "\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) stream << modelErrors[i].nrmse() << "\t";
+	stream << "\n";
+	stream.flush();
+}
+
+void ViInterpolatorBenchmarker::printFileDataMinified(QString filepath, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
+{
+	int i;
 
 	if(interpolationErrors.nrmse() >= 0 && time != 0)
 	{
-		for(i = 0; i < mParamsStart.size(); ++i) mOutputStream2 << (int) mParamsCurrent[i] << "\t";
-		mOutputStream2 << interpolationErrors.nrmse() << "\t" << modelErrors.nrmse() << "\t" << time << "\t\t";
-		for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << interpolationErrors[i].nrmse() << "\t";
-		mOutputStream2 << "\t";
-		for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) mOutputStream2 << modelErrors[i].nrmse() << "\t";
-		mOutputStream2 << "\n";
-		mOutputStream2.flush();
+		QFile file(filepath);
+		file.open(QIODevice::WriteOnly | QIODevice::Append);
+		QTextStream stream(&file);
+
+		for(i = 0; i < mParamsStart.size(); ++i) stream << (int) mParamsCurrent[i] << "\t";
+		stream << interpolationErrors.nrmse() << "\t" << modelErrors.nrmse() << "\t" << time << "\t\t";
+		for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) stream << interpolationErrors[i].nrmse() << "\t";
+		stream << "\t";
+		for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) stream << modelErrors[i].nrmse() << "\t";
+		stream << "\n";
+		stream.flush();
 	}
+}
+
+void ViInterpolatorBenchmarker::printFileDataSummary(QString genre, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
+{
+	int i;
+
+	QString filepath = "";
+	for(i = 0; i < mSummaryFiles.size(); ++i)
+	{
+		if(mSummaryFiles[i].contains(genre))
+		{
+			filepath = mSummaryFiles[i];
+			break;
+		}
+	}
+	if(filepath == "") return;
+
+	QFile file(filepath);
+	file.open(QIODevice::WriteOnly | QIODevice::Append);
+	QTextStream stream(&file);
+
+	for(i = 0; i < mParamsStart.size(); ++i) stream << (int) mParamsCurrent[i] << "\t";
+	stream << interpolationErrors.nrmse() << "\t" << modelErrors.nrmse() << "\t" << time << "\t\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) stream << interpolationErrors[i].nrmse() << "\t";
+	stream << "\t";
+	for(i = ViNoiseCreator::minimumNoiseSize(); i <= ViNoiseCreator::maximumNoiseSize(); ++i) stream << modelErrors[i].nrmse() << "\t";
+	stream << "\n";
+	stream.flush();
+}
+
+QString ViInterpolatorBenchmarker::genre(QString path)
+{
+	path = path.replace("/home/visore/Visore Projects/Files/", "");
+	int i = path.indexOf("/");
+	if(i < 0) return "";
+	return path.left(i).replace("/", "");
 }
 
 void ViInterpolatorBenchmarker::printTerminal(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
