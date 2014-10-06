@@ -11,7 +11,8 @@ class ViNearestNeighbourInterpolator : public ViInterpolator
 		enum Mode
 		{
 			Mean,
-			Median
+			Median,
+			Traditional
 		};
 
 	public:
@@ -36,6 +37,7 @@ class ViNearestNeighbourInterpolator : public ViInterpolator
 
 		bool interpolateMean(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
 		bool interpolateMedian(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
+		bool interpolateTraditional(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize);
 
 		inline void nearest(const int &leftSize, const int &rightSize, const int &outputSize, const int &x, const int &k, int &useLeft, int &useRight);
 

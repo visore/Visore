@@ -25,13 +25,18 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Zero);
-	//addParam("Window Size", 32, 32, 4);
+	//mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Lanczos);
+	//addParam("Window Size", 2, 1024, 2);
+	//addParam("Window Size", 1, 256, 1);
 
-	//mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal);
-	//addParam("Window Size", 32, 32, 4);
-	//addParam("Degree", 1, 15, 1);
+	//mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Splines);
+	//addParam("Window Size", 94, 100, 2);
+	//addParam("Degree", 1, 10, 1);
 	//addParam("Derivatives", 1, 10, 1);
+
+	mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Traditional);
+	addParam("K", 6, 6, 1);
+
 
 //	mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Mean);
 	//addParam("K", 4,64, 4);

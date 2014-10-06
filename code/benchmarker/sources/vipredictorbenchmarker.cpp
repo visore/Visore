@@ -202,6 +202,7 @@ void ViPredictorBenchmarker::nextFile()
 void ViPredictorBenchmarker::process()
 {
 	QObject::disconnect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
+	mBestScore = DBL_MAX;
 
 	qint64 time;
 	ViErrorCollection predictionErrors;
@@ -320,8 +321,11 @@ void ViPredictorBenchmarker::printTerminal(ViErrorCollection &predictionErrors, 
 	qint64 remaining = mMainTime.elapsed();
 	remaining = ((1.0 / percentageDone) * remaining) - remaining;
 
+	qreal best = predictionErrors.nrmse();
+	if(best >=0 && best < mBestScore) mBestScore = best;
+
 	cout << int(percentageDone * 100.0) << "%\t(" << timeConversion(remaining).toLatin1().data() << ")\t";
-	cout << "PREDICTION NRMSE: " << setprecision(6) << predictionErrors.nrmse() << "\tMODEL NRMSE: " << setprecision(6) << modelError.nrmse() << "\tTIME: " << time << endl;
+	cout << "PREDICTION NRMSE: " << setprecision(6) << predictionErrors.nrmse() << " ("  << setprecision(6) << mBestScore << ")\tMODEL NRMSE: " << setprecision(6) << modelError.nrmse() << "\tTIME: " << time << endl;
 }
 
 QString ViPredictorBenchmarker::timeConversion(int msecs)

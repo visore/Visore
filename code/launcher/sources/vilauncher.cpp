@@ -102,7 +102,7 @@ int main(int argc, char** argv)
 		char **values = argv + 1;
 		int count = argc - 1;
 
-		char* genres[] = {"-classical", "-country", "-electro", "-jazz", "-metal", "-pop", "-raggae", "-rock"};
+		char* genres[] = {"-classical", "-country", "-electro", "-jazz", "-metal", "-pop", "-reggae", "-rock"};
 		if(strcmp(argv[1], "all") == 0 || strcmp(argv[1], "-all") == 0)
 		{
 			values = genres;

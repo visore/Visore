@@ -1,74 +1,81 @@
-#ifndef VIBENCHMARKER_H
-#define VIBENCHMARKER_H
+#ifndef ViBenchmarker_H
+#define ViBenchmarker_H
 
-#include <vibuffer.h>
-#include <vinoise.h>
-#include <viaudiocoder.h>
+#include <viaudioobject.h>
 #include <viinterpolator.h>
 #include <QTime>
-#include<vicrosscorrelator.h>
-#include <viproject.h>
-#include <viaudioobjectchain.h>
 
-class ViBenchMarker : public QObject
+class ViBenchmarker : public QObject
 {
 
 	Q_OBJECT
 
 	private slots:
 
-		void loadProject(QString path);
-		void processProject();
-		void processProject2();
+		void quit();
+		QString timeConversion(int msecs);
+
+		void nextFile();
 		void process();
 
-		void processTuning();
+		void addParam(QString name, qreal start, qreal end, qreal increase);
+		bool nextParam();
+		void initParams();
 
-		void printProgress(qreal progress);
-		void quit();
+		void progress(qreal percentage);
+
+		void addDir(QString dirName);
 
 	public:
 
-		ViBenchMarker();
-		virtual ~ViBenchMarker();
+		ViBenchmarker();
+		virtual ~ViBenchmarker();
 
-		void benchmark();
+		void benchmark(QString folder = "");
+
+	protected:
+
+		void printFileHeader(QString filepath);
+		void printFileDataAll(QString filepath, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
+		void printFileDataMinified(QString filepath, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
+		void printFileDataSummary(QString genre, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
+		void printTerminal(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time);
+
+		QString genre(QString path);
 
 	private:
 
-		void clear();
+		QList<QString> mParamsNames;
+		QList<qreal> mParamsStart, mParamsEnd, mParamsIncrease, mParamsCurrent;
 
-	private:
+		ViInterpolator *mInterpolator;
 
-		ViBuffer mBuffer;
-		ViBuffer mBuffer2;
-		ViAudioCoder mCoder;
+		QQueue<QString> mFiles;
+		QQueue<QString> mSummaryFiles;
+		QString mCurrentFile;
 
-		QList<ViNoise> mNoises;
+		QString mAllFile;
+		QString mMiniFile;
 
-		int mCurrentNoiseSize;
-		int mCurrentDegree;
+		ViAudioObjectPointer mCurrentObject;
 
-		QTime mTime;
-
-		qint64 mTotalTime;
-
-		ViNoiseDetector *mDetector;
-
-		QQueue<QString> mProjects;
-		ViProject mProject;
-		ViAudioObjectPointer mObject;
-		int mCurrentObject;
-
-		ViAudioObjectChain mObjectChain;
-
-		QMap<qreal,qint64> TP, TN, FP, FN;
-		qreal mCurrentThreshold;
-		qreal mOldProgress;
-		qreal mTotalProgress;
-
+		QQueue<QString> mResults;
 		QFile mOutputFile;
 		QTextStream mOutputStream;
+		QQueue<QString> mResults2;
+		QFile mOutputFile2;
+		QTextStream mOutputStream2;
+		qreal mCurrentThreshold;
+		qreal mBestScore;
+
+		QTime mTime;
+		QTime mMainTime;
+		int mTotalParamIterations;
+		int mDoneParamIterations;
+
+		int mTotalFiles;
+
+		int mQuitCount;
 
 };
 

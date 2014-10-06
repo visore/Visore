@@ -42,10 +42,10 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	/*mDetector = new ViMadNoiseDetector();
 	addParam("Window Size", 256, 5120, 5);*/
 
-	/*mDetector = new ViFourierNoiseDetector();
-	addParam("Window Size", 8, 16, 1);
-	addParam("Range Start", 0, 100, 20);
-	addParam("Range End", 0, 100, 20);*/
+	mDetector = new ViFourierNoiseDetector();
+	addParam("Window Size", 4096,4096, 128);
+	addParam("Range Start", 0, 0, 25);
+	addParam("Range End", 100, 100, 25);
 
 	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
 	addParam("Window Size", 256, 256, 8);
@@ -53,8 +53,8 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	addParam("MA Degree", 1, 1, 1);
 	addParam("Threshold", 0.55, 0.75, 0.005);*/
 
-	mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor());
-	addParam("Window Size", 1, 1, 8);
+	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor());
+	addParam("Window Size", 1, 1, 8);*/
 
 	QObject::connect(mDetector, SIGNAL(progressed(qreal)), this, SLOT(progressDetect(qreal)));
 }
@@ -232,7 +232,7 @@ void ViNoiseDetectorBenchmarker::process()
 			time = mTime.elapsed();
 
 			// Write
-			/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
+		/*	QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
 			mCurrentObject->encode(ViAudio::Noise);
 			return;*/
 

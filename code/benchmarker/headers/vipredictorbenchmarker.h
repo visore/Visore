@@ -62,6 +62,7 @@ class ViPredictorBenchmarker : public QObject
 		QTime mMainTime;
 		int mTotalParamIterations;
 		int mDoneParamIterations;
+		qreal mBestScore;
 
 		int mTotalFiles;
 

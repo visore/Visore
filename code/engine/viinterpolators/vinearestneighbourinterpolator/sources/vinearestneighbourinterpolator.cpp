@@ -29,6 +29,7 @@ QString ViNearestNeighbourInterpolator::name(QString replace, bool spaced)
 
 	if(mMode == Mean) mode = "Mean";
 	else if(mMode == Median) mode = "Median";
+	else if(mMode == Traditional) mode = "Traditional";
 
 	QString name = ViInterpolator::name(replace, spaced) + " (" + mode + ")";
 	if(spaced) return name;
@@ -40,6 +41,7 @@ void ViNearestNeighbourInterpolator::setMode(const Mode &mode)
 	mMode = mode;
 	if(mMode == Mean) interpolatePointer = &ViNearestNeighbourInterpolator::interpolateMean;
 	else if(mMode == Median) interpolatePointer = &ViNearestNeighbourInterpolator::interpolateMedian;
+	else if(mMode == Traditional) interpolatePointer = &ViNearestNeighbourInterpolator::interpolateTraditional;
 }
 
 void ViNearestNeighbourInterpolator::setK(const int &k)
@@ -97,6 +99,21 @@ bool ViNearestNeighbourInterpolator::interpolateMedian(const qreal *leftSamples,
 
 		outputSamples[i] = ViMath<qreal>::median(temp, size);
 	}
+
+	return true;
+}
+
+bool ViNearestNeighbourInterpolator::interpolateTraditional(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize)
+{
+	static int i, end;
+	static qreal value;
+
+	end = outputSize / 2;
+	value = leftSamples[leftSize - 1];
+	for(i = 0; i < end; ++i) outputSamples[i] = value;
+
+	value = rightSamples[0];
+	for(i = end; i < outputSize; ++i) outputSamples[i] = value;
 
 	return true;
 }

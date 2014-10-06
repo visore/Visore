@@ -3,7 +3,7 @@
 #include "vicoder.h"
 #include <QApplication>
 
-#include<vibenchmarker2.h>
+#include<vibenchmarker.h>
 #include<vibenchmarker3.h>
 #include<vibenchmarker4.h>
 #include <vipredictorbenchmarker.h>
@@ -35,8 +35,9 @@ int main(int argc, char *argv[])
     bool BENCH = true;
     //bool BENCH = false;
 
-	//ViPredictorBenchmarker bench;
-	ViInterpolatorBenchmarker bench;
+	//ViBenchmarker bench;
+	ViPredictorBenchmarker bench;
+	//ViInterpolatorBenchmarker bench;
 	//ViNoiseDetectorBenchmarker bench;
 
 	if(BENCH)

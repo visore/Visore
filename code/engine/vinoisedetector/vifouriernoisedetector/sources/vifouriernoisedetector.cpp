@@ -15,6 +15,8 @@ ViFourierNoiseDetector::ViFourierNoiseDetector()
 	addParameter("Range End");
 
 	setScale(10);
+
+	QObject::connect(this, SIGNAL(parameterChanged(QString,qreal)), this, SLOT(changeParameter(QString,qreal)));
 }
 
 ViFourierNoiseDetector::ViFourierNoiseDetector(const ViFourierNoiseDetector &other)
@@ -100,10 +102,10 @@ void ViFourierNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noi
 		for(i = 0; i < mWindowSize; ++i) mInput[i] = samples[i];
 		mTransformer->forwardTransform(mInput, mOutput);
 
-        value = 0;
+		value = 0;
 		for(i = mStartSample; i <= mEndSample; ++i) value += abs(mOutput[i - 1] - mOutput[i]);
 
 		noise.append(value / mSampleCount);
-        samples.removeFirst();
+		samples.removeFirst();
 	}
 }
