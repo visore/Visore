@@ -10,6 +10,8 @@
 #include <viinterpolatorbenchmarker.h>
 #include <vinoisedetectorbenchmarker.h>
 
+#include <viinterpolatorbatcher.h>
+
 int main(int argc, char *argv[])
 {
 	QApplication application(argc, argv);
@@ -36,9 +38,11 @@ int main(int argc, char *argv[])
     //bool BENCH = false;
 
 	//ViBenchmarker bench;
-	ViPredictorBenchmarker bench;
+	//ViPredictorBenchmarker bench;
 	//ViInterpolatorBenchmarker bench;
 	//ViNoiseDetectorBenchmarker bench;
+
+	ViInterpolatorBatcher bench;
 
 	if(BENCH)
 	{

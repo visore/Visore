@@ -1,4 +1,4 @@
-#include <viinterpolatorbenchmarker.h>
+#include <viinterpolatorbatcher.h>
 #include <viaudiodata.h>
 #include <vinoisecreator.h>
 #include <QTextStream>
@@ -18,51 +18,196 @@
 
 #define WINDOW_SIZE 4096
 #define WRITE false
-#define SUMMARY false
+#define SUMMARY true
 
-ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
+ViInterpolatorBatcher::ViInterpolatorBatcher()
 {
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	//mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Lanczos);
-	//addParam("Window Size", 2, 1024, 2);
-	//addParam("Window Size", 1, 256, 1);
+	// ***************************
+	// PRIMITIVE
+	// ***************************
 
-	//mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Splines);
-	//addParam("Window Size", 94, 100, 2);
-	//addParam("Degree", 1, 10, 1);
-	//addParam("Derivatives", 1, 10, 1);
+	// Zero Interpolator
+	//mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Zero);
 
-	//mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Traditional);
-	//addParam("K", 6, 6, 1);
+	// Cosine Interpolator
+	//mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Cosine);
+
+	// Random Interpolator
+	/*mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Random);
+	setParam("Window Size", 2);*/
+
+	// Mirror Interpolator
+	//mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Mirror);
+
+	// Duplicate Interpolator
+	//mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Duplicate);
+
+	// Similarity Interpolator
+	/*mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Similarity);
+	setParam("Window Size", 2);
+	setParam("Samples", 2);*/
+
+	// Lanczos Interpolator
+	/*mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Lanczos);
+	setParam("Window Size", 2);*/
 
 
-//	mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Mean);
-	//addParam("K", 4,64, 4);
-	//addParam("Samples",32,32, 2);
+	// ***************************
+	// NN
+	// ***************************
 
-	mInterpolator = new ViArimaInterpolator();
-	addParam("Window Size", 1024, 4096, 256);
-	addParam("AR Degree", 0, 0, 0);
-	addParam("I Degree", 0, 0, 0);
-	addParam("MA Degree", 1, 10, 2);
+	/*mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Traditional);
+	setParam("K", 2);*/
+
+
+	// ***************************
+	// LAGRANGE
+	// ***************************
+
+	/*mInterpolator = new ViLagrangeInterpolator();
+	setParam("Window Size", 2);*/
+
+
+	// ***************************
+	// NEWTON
+	// ***************************
+
+	/*mInterpolator = new ViNewtonInterpolator();
+	setParam("Window Size", 2);*/
+
+
+	// ***************************
+	// HERMITE
+	// ***************************
+
+	/*mInterpolator = new ViHermiteInterpolator();
+	setParam("Window Size", 2);*/
+
+
+	// ***************************
+	// Polynomial
+	// ***************************
+
+	// Normal
+	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal);
+	setParam("Window Size", 2);
+	setParam("Degree", 2);*/
+
+	// Osculating
+	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Osculating);
+	setParam("Window Size", 2);
+	setParam("Degree", 2);
+	setParam("Derivatives", 2);*/
+
+	// Splines
+	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Splines);
+	setParam("Window Size", 8);
+	setParam("Degree", 1);*/
+
+
+	// ***************************
+	// Fourier
+	// ***************************
+
+	// Normal
+	/*mInterpolator = new ViFourierInterpolator(ViFourierInterpolator::Normal);
+	setParam("Window Size", 2);
+	setParam("Degree", 2);*/
+
+	// Osculating
+	/*mInterpolator = new ViFourierInterpolator(ViFourierInterpolator::Osculating);
+	setParam("Window Size", 2);
+	setParam("Degree", 2);
+	setParam("Derivatives", 2);*/
+
+	// Splines
+	/*mInterpolator = new ViFourierInterpolator(ViFourierInterpolator::Splines);
+	setParam("Window Size", 2);
+	setParam("Degree", 2);*/
+
+
+	// ***************************
+	// AR
+	// ***************************
+
+	/*mInterpolator = new ViArimaInterpolator();
+	setParam("Window Size", 1024);
+	setParam("AR Degree", 2);
+	setParam("I Degree", 0);
+	setParam("MA Degree", 0);*/
+
+
+	// ***************************
+	// MA
+	// ***************************
+
+	/*mInterpolator = new ViArimaInterpolator();
+	setParam("Window Size", 1024);
+	setParam("AR Degree", 0);
+	setParam("I Degree", 0);
+	setParam("MA Degree", 2);*/
+
+
+	// ***************************
+	// ARMA
+	// ***************************
+
+	/*mInterpolator = new ViArimaInterpolator();
+	setParam("Window Size", 1024);
+	setParam("AR Degree", 2);
+	setParam("I Degree", 0);
+	setParam("MA Degree", 2);*/
+
+
+	// ***************************
+	// ARIMA
+	// ***************************
+
+	/*mInterpolator = new ViArimaInterpolator();
+	setParam("Window Size", 1024);
+	setParam("AR Degree", 2);
+	setParam("I Degree", 2);
+	setParam("MA Degree", 2);*/
+
+
+	// ***************************
+	// ARCH
+	// ***************************
+
+	/*mInterpolator = new ViGarchInterpolator();
+	setParam("Window Size", 1024);
+	setParam("Arch Degree", 2);
+	setParam("Garch Degree", 0);*/
+
+
+	// ***************************
+	// GARCH
+	// ***************************
+
+	/*mInterpolator = new ViGarchInterpolator();
+	setParam("Window Size", 1024);
+	setParam("Arch Degree", 2);
+	setParam("Garch Degree", 2);*/
+
+
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
-
 	QObject::connect(mInterpolator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }
 
-ViInterpolatorBenchmarker::~ViInterpolatorBenchmarker()
+ViInterpolatorBatcher::~ViInterpolatorBatcher()
 {
 }
 
-void ViInterpolatorBenchmarker::progress(qreal percentage)
+void ViInterpolatorBatcher::progress(qreal percentage)
 {
 	//cout << setprecision(2) << fixed << "\r" << percentage << "%" << flush;
 }
 
-void ViInterpolatorBenchmarker::addParam(QString name, qreal start, qreal end, qreal increase)
+void ViInterpolatorBatcher::addParam(QString name, qreal start, qreal end, qreal increase)
 {
 	if(mInterpolator->hasParameter(name))
 	{
@@ -75,7 +220,12 @@ void ViInterpolatorBenchmarker::addParam(QString name, qreal start, qreal end, q
 	else cout << "This interpolator (" << mInterpolator->name("", true).toLatin1().data() << ") doesn't make use of the given parameter (" << name.toLatin1().data() << ")." << endl;
 }
 
-void ViInterpolatorBenchmarker::initParams()
+void ViInterpolatorBatcher::setParam(QString name, qreal value)
+{
+	addParam(name, value, value, 0);
+}
+
+void ViInterpolatorBatcher::initParams()
 {
 	mDoneParamIterations = 0;
 	mTotalParamIterations = 1;
@@ -86,7 +236,7 @@ void ViInterpolatorBenchmarker::initParams()
 	mTotalParamIterations *= mTotalFiles;
 }
 
-bool ViInterpolatorBenchmarker::nextParam()
+bool ViInterpolatorBatcher::nextParam()
 {
 	int size = mParamsStart.size();
 
@@ -123,7 +273,7 @@ bool ViInterpolatorBenchmarker::nextParam()
 	}
 }
 
-void ViInterpolatorBenchmarker::benchmark(QString folder)
+void ViInterpolatorBatcher::benchmark(QString folder)
 {
 	if(folder == "")
 	{
@@ -141,7 +291,7 @@ void ViInterpolatorBenchmarker::benchmark(QString folder)
 	nextFile();
 }
 
-void ViInterpolatorBenchmarker::addDir(QString dirName)
+void ViInterpolatorBatcher::addDir(QString dirName)
 {
 	QDir dirFile("/home/visore/Visore Projects/Files/" + dirName);
 	if(!dirFile.exists())
@@ -174,7 +324,7 @@ void ViInterpolatorBenchmarker::addDir(QString dirName)
 	}
 }
 
-void ViInterpolatorBenchmarker::nextFile()
+void ViInterpolatorBatcher::nextFile()
 {
 	if(mFiles.isEmpty())
 	{
@@ -200,7 +350,7 @@ void ViInterpolatorBenchmarker::nextFile()
 	}
 }
 
-void ViInterpolatorBenchmarker::process()
+void ViInterpolatorBatcher::process()
 {
 	mQuitCount = 0;
 	mBestScore = DBL_MAX;
@@ -213,8 +363,8 @@ void ViInterpolatorBenchmarker::process()
 	ViNoiseCreator creator;
 	creator.createNoise(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::NoiseMask), mCurrentObject->buffer(ViAudio::Custom));
 
-	do
-	{
+	//do
+	//{
 		mQuitCount = 0;
 		interpolationErrors.clear();
 		modelErrors.clear();
@@ -246,13 +396,13 @@ void ViInterpolatorBenchmarker::process()
 		printFileDataMinified(mMiniFile, interpolationErrors, modelErrors, time);
 		if(SUMMARY) printFileDataSummary(genre(mMiniFile), interpolationErrors, modelErrors, time);
 		printTerminal(interpolationErrors, modelErrors, time);
-	}
-	while(nextParam());
+	//}
+	//while(nextParam());
 
 	nextFile();
 }
 
-void ViInterpolatorBenchmarker::printFileHeader(QString filepath)
+void ViInterpolatorBatcher::printFileHeader(QString filepath)
 {
 	int i;
 
@@ -274,7 +424,7 @@ void ViInterpolatorBenchmarker::printFileHeader(QString filepath)
 	file.close();
 }
 
-void ViInterpolatorBenchmarker::printFileDataAll(QString filepath, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
+void ViInterpolatorBatcher::printFileDataAll(QString filepath, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
 {
 	int i;
 
@@ -291,7 +441,7 @@ void ViInterpolatorBenchmarker::printFileDataAll(QString filepath, ViErrorCollec
 	stream.flush();
 }
 
-void ViInterpolatorBenchmarker::printFileDataMinified(QString filepath, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
+void ViInterpolatorBatcher::printFileDataMinified(QString filepath, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
 {
 	int i;
 
@@ -311,7 +461,7 @@ void ViInterpolatorBenchmarker::printFileDataMinified(QString filepath, ViErrorC
 	}
 }
 
-void ViInterpolatorBenchmarker::printFileDataSummary(QString genre, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
+void ViInterpolatorBatcher::printFileDataSummary(QString genre, ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
 {
 	int i;
 
@@ -339,7 +489,7 @@ void ViInterpolatorBenchmarker::printFileDataSummary(QString genre, ViErrorColle
 	stream.flush();
 }
 
-QString ViInterpolatorBenchmarker::genre(QString path)
+QString ViInterpolatorBatcher::genre(QString path)
 {
 	path = path.replace("/home/visore/Visore Projects/Files/", "");
 	int i = path.indexOf("/");
@@ -347,7 +497,7 @@ QString ViInterpolatorBenchmarker::genre(QString path)
 	return path.left(i).replace("/", "");
 }
 
-void ViInterpolatorBenchmarker::printTerminal(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
+void ViInterpolatorBatcher::printTerminal(ViErrorCollection &interpolationErrors, ViErrorCollection &modelErrors, const qint64 &time)
 {
 	qreal percentageDone = mDoneParamIterations / qreal(mTotalParamIterations);
 	qint64 remaining = mMainTime.elapsed();
@@ -357,10 +507,10 @@ void ViInterpolatorBenchmarker::printTerminal(ViErrorCollection &interpolationEr
 	if(best >=0 && best < mBestScore) mBestScore = best;
 
 	cout << int(percentageDone * 100.0) << "%\t(" << timeConversion(remaining).toLatin1().data() << ")\t";
-	cout << "INTERPOLATION NRMSE: " << setprecision(6) << interpolationErrors.nrmse() << " ("  << setprecision(6) << mBestScore << ")\tMODEL NRMSE: " << setprecision(6) << modelErrors.nrmse() << "\tTIME: " << time << endl;
+	cout << "INTERPOLATION NRMSE: " << setprecision(12) << interpolationErrors.nrmse() << " ("  << setprecision(6) << mBestScore << ")\tMODEL NRMSE: " << setprecision(6) << modelErrors.nrmse() << "\tTIME: " << time << endl;
 }
 
-QString ViInterpolatorBenchmarker::timeConversion(int msecs)
+QString ViInterpolatorBatcher::timeConversion(int msecs)
 {
 	QString formattedTime;
 
@@ -378,7 +528,7 @@ QString ViInterpolatorBenchmarker::timeConversion(int msecs)
 }
 
 
-void ViInterpolatorBenchmarker::quit()
+void ViInterpolatorBatcher::quit()
 {
 	++mQuitCount;
 	if(WRITE && mQuitCount < 2) return;
