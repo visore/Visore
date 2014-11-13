@@ -42,13 +42,20 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	//addParam("K", 4,64, 4);
 	//addParam("Samples",32,32, 2);
 
-	mInterpolator = new ViArimaInterpolator();
+	/*mInterpolator = new ViArimaInterpolator();
 	addParam("Window Size", 1024, 4096, 256);
 	addParam("AR Degree", 0, 0, 0);
 	addParam("I Degree", 0, 0, 0);
-	addParam("MA Degree", 1, 10, 2);
+	addParam("MA Degree", 1, 10, 2);*/
+
+	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::Interpolation);
+	addParam("Hidden Layer 3", 0, 32, 4);
+	addParam("Hidden Layer 2", 0, 64, 4);
+	addParam("Hidden Layer 1", 0, 128, 4);
+	addParam("Window Size", 4, 256, 4);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
+	//mInterpolator->setDirection(ViInterpolator::Bidirectional);
 
 	QObject::connect(mInterpolator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }

@@ -1,22 +1,24 @@
 #include <vineuralinterpolator.h>
 #include <vimanager.h>
+#include <vinoisecreator.h>
 
 #define DEFAULT_WINDOW_SIZE 32
+#define MAX_HIDDEN_LAYERS 10
 
-ViNeuralInterpolator::ViNeuralInterpolator()
+ViNeuralInterpolator::ViNeuralInterpolator(Mode mode)
 	: ViInterpolator()
 {
 	mInput = NULL;
 	setWindowSize(DEFAULT_WINDOW_SIZE);
+	setMode(mode);
 
 	addParameterName("Window Size");
 
-	addParameterName("l1");
-	addParameterName("l2");
-	addParameterName("l3");
-	addParameterName("l4");
-	addParameterName("l5");
-	l1=l2=l3=l4=l5=0;
+	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
+	{
+		addParameterName("Hidden Layer " + QString::number(i + 1));
+		mHiddenNeurons.append(0);
+	}
 }
 
 ViNeuralInterpolator::ViNeuralInterpolator(const ViNeuralInterpolator &other)
@@ -33,15 +35,6 @@ ViNeuralInterpolator::~ViNeuralInterpolator()
 
 QString ViNeuralInterpolator::name(QString replace, bool spaced)
 {
-	/*QString mode;
-
-	if(mMode == Zero) mode = "Zero";
-	else if(mMode == Random) mode = "Random";
-	else if(mMode == Cosine) mode = "Cosine";
-
-	QString name = ViInterpolator::name(replace, spaced) + " (" + mode + ")";
-	if(spaced) return name;
-	else return name.replace(" ", "");*/
 	return ViInterpolator::name(replace, spaced);
 }
 
@@ -52,15 +45,18 @@ void ViNeuralInterpolator::setWindowSize(const int &size)
 	//mInput = new qreal[mWindowSize];
 }
 
+void ViNeuralInterpolator::setMode(Mode mode)
+{
+	mMode = mode;
+}
+
 void ViNeuralInterpolator::setParameter(const int &number, const qreal &value)
 {
 	if(number == 0) setWindowSize(value);
-
-	else if(number==1)l1=value;
-	else if(number==2)l2=value;
-	else if(number==3)l3=value;
-	else if(number==4)l4=value;
-	else if(number==5)l5=value;
+	else if(number >= 1 && number <= MAX_HIDDEN_LAYERS)
+	{
+		mHiddenNeurons[number - 1] = value;
+	}
 
 	else
 	{
@@ -89,9 +85,136 @@ void ViNeuralInterpolator::clear()
 
 	for(i = 0; i < mOutput.size(); ++i) delete [] mOutput[i];
 	mOutput.clear();
+
+	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
+	{
+		mHiddenNeurons[i] = 0;
+	}
 }
 
 void ViNeuralInterpolator::initialize(const int &channelCount)
+{
+	if(mMode == IncrementalPrediction) initializeIncrementalPrediction(channelCount);
+	else if(mMode == SetPrediction) initializeSetPrediction(channelCount);
+	else if(mMode == IncrementalRecurrentPrediction) initializeIncrementalRecurrentPrediction(channelCount);
+	else if(mMode == IncrementalSetPrediction) initializeIncrementalSetPrediction(channelCount);
+	else if(mMode == Interpolation) initializeInterpolation(channelCount);
+}
+
+void ViNeuralInterpolator::initializeIncrementalPrediction(const int &channelCount)
+{
+	mInputs = mWindowSize;
+	mOutputs = ViNoiseCreator::maximumNoiseSize();
+
+	QList<int> neurons;
+	neurons.append(mInputs);
+	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
+	{
+		if(mHiddenNeurons[i] == 0) break;
+		neurons.append(mHiddenNeurons[i]);
+	}
+	neurons.append(mOutputs);
+
+	ViFann *network = new ViFann(false);
+	network->setStructure(ViFann::Shortcut, neurons);
+	network->setTraining(ViFann::Fixed, ViFann::Incremental);
+	network->setActivation(ViFann::Elliot);
+	network->setWeights(ViFann::Random);
+	//network->setWeights(ViFann::WidrowNguyen);
+	//network->setLearningRate(0.2);
+	//network->setLearningMomentum(0.1);
+	network->setStopEpochs(1);
+	network->setStopMse(0.000000);
+	network->setStopStagnation(0.0000001, 5);
+	if(!network->isValid())
+	{
+		LOG("Invalid neural network.", QtFatalMsg);
+		exit(-1);
+	}
+
+	mNetworks.append(network);
+	mInput = new qreal[mInputs];
+	mOutput.append(new qreal[mOutputs]);
+}
+
+void ViNeuralInterpolator::initializeSetPrediction(const int &channelCount)
+{
+	mInputs = mWindowSize;
+	mOutputs = ViNoiseCreator::maximumNoiseSize();
+
+	QList<int> neurons;
+	neurons.append(mInputs);
+	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
+	{
+		if(mHiddenNeurons[i] == 0) break;
+		neurons.append(mHiddenNeurons[i]);
+	}
+	neurons.append(mOutputs);
+
+	ViFann *network = new ViFann(false);
+	network->setStructure(ViFann::Shortcut, neurons);
+	network->setTraining(ViFann::Fixed, ViFann::QuickProp);
+	network->setActivation(ViFann::Elliot);
+	network->setWeights(ViFann::Random);
+	//network->setWeights(ViFann::WidrowNguyen);
+	//network->setLearningRate(0.2);
+	//network->setLearningMomentum(0.1);
+	network->setStopEpochs(100);
+	network->setStopMse(0.000000);
+	network->setStopStagnation(0.0000001, 5);
+	if(!network->isValid())
+	{
+		LOG("Invalid neural network.", QtFatalMsg);
+		exit(-1);
+	}
+
+	mNetworks.append(network);
+	mInput = new qreal[mInputs];
+	mOutput.append(new qreal[mOutputs]);
+}
+
+void ViNeuralInterpolator::initializeIncrementalRecurrentPrediction(const int &channelCount)
+{
+	mInputs = mWindowSize + 1;
+	mOutputs = 1;
+
+	QList<int> neurons;
+	neurons.append(mInputs);
+	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
+	{
+		if(mHiddenNeurons[i] == 0) break;
+		neurons.append(mHiddenNeurons[i]);
+	}
+	neurons.append(mOutputs);
+
+	ViFann *network = new ViFann(false);
+	network->setStructure(ViFann::Shortcut, neurons);
+	network->setTraining(ViFann::Fixed, ViFann::Incremental);
+	network->setActivation(ViFann::Elliot);
+	network->setWeights(ViFann::Random);
+	//network->setWeights(ViFann::WidrowNguyen);
+	//network->setLearningRate(0.2);
+	//network->setLearningMomentum(0.1);
+	network->setStopEpochs(1);
+	network->setStopMse(0.000000);
+	network->setStopStagnation(0.0000001, 5);
+	if(!network->isValid())
+	{
+		LOG("Invalid neural network.", QtFatalMsg);
+		exit(-1);
+	}
+
+	mNetworks.append(network);
+	mInput = new qreal[mInputs];
+	mOutput.append(new qreal[mOutputs]);
+}
+
+void ViNeuralInterpolator::initializeIncrementalSetPrediction(const int &channelCount)
+{
+
+}
+
+void ViNeuralInterpolator::initializeInterpolation(const int &channelCount)
 {
 	int i;
 	clear();
@@ -104,25 +227,10 @@ void ViNeuralInterpolator::initialize(const int &channelCount)
 
 	QList<int> neurons;
 	neurons.append(mInputs);
-	if(l1>0)
+	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
 	{
-		neurons.append(l1);
-		if(l2>0)
-		{
-			neurons.append(l2);
-			if(l3>0)
-			{
-				neurons.append(l3);
-				if(l4>0)
-				{
-					neurons.append(l4);
-					if(l5>0)
-					{
-						neurons.append(l5);
-					}
-				}
-			}
-		}
+		if(mHiddenNeurons[i] == 0) break;
+		neurons.append(mHiddenNeurons[i]);
 	}
 	neurons.append(mOutputs);
 
@@ -138,8 +246,8 @@ void ViNeuralInterpolator::initialize(const int &channelCount)
 		//network->setLearningRate(0.2);
 		//network->setLearningMomentum(0.1);
 		network->setTraining(ViFann::Fixed, ViFann::QuickProp);
-		network->setStopEpochs(500);
-		network->setStopMse(0.000000);
+		network->setStopEpochs(50);
+		network->setStopMse(0.0000001);
 		network->setStopStagnation(0.0000001, 5);
 		network->setStopNeurons(10);
 		if(!network->isValid())
@@ -158,6 +266,124 @@ void ViNeuralInterpolator::initialize(const int &channelCount)
 }
 
 bool ViNeuralInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
+{
+	if(mMode == IncrementalPrediction) interpolateIncrementalPrediction(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
+	else if(mMode == SetPrediction) interpolateSetPrediction(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
+	else if(mMode == IncrementalRecurrentPrediction) interpolateIncrementalRecurrentPrediction(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
+	else if(mMode == IncrementalSetPrediction) interpolateIncrementalSetPrediction(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
+	else if(mMode == Interpolation) interpolateInterpolation(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
+}
+
+bool ViNeuralInterpolator::interpolateIncrementalPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
+{
+	ViFann *network = mNetworks.first();
+	int counter = 0;
+	int total = mInputs + mOutputs;
+
+	network->createTrain(leftSize - total);
+	while(counter < leftSize - total)
+	{
+		network->setTrainInput(counter, leftSamples + counter);
+		network->setTrainOutput(counter, leftSamples + counter + mInputs);
+		++counter;
+	}
+
+	network->train();
+
+	qreal *output = mOutput.first();
+	network->run(leftSamples + (leftSize - mInputs), output);
+	for(counter = 0; counter < outputSize; ++counter)
+	{
+		outputSamples[counter] = output[counter];
+	}
+
+	/*ViFann *network = mNetworks.first();
+	int counter = 0;
+	int total = mInputs + mOutputs;
+
+	while(counter < leftSize - total)
+	{
+		network->train(leftSamples + counter, leftSamples + counter + mInputs);
+		++counter;
+	}
+
+	qreal *output = mOutput.first();
+	network->run(leftSamples + (leftSize - mInputs), output);
+	for(counter = 0; counter < outputSize; ++counter)
+	{
+		outputSamples[counter] = output[counter];
+	}*/
+}
+
+bool ViNeuralInterpolator::interpolateSetPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
+{
+	ViFann *network = mNetworks.first();
+	int counter = 0;
+	int total = mInputs + mOutputs;
+
+	network->createTrain(leftSize - total);
+	while(counter < leftSize - total)
+	{
+		network->setTrainInput(counter, leftSamples + counter);
+		network->setTrainOutput(counter, leftSamples + counter + mInputs);
+		++counter;
+	}
+
+	network->train();
+
+	qreal *output = mOutput.first();
+	network->run(leftSamples + (leftSize - mInputs), output);
+	for(counter = 0; counter < outputSize; ++counter)
+	{
+		outputSamples[counter] = output[counter];
+	}
+}
+
+bool ViNeuralInterpolator::interpolateIncrementalRecurrentPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
+{
+	ViFann *network = mNetworks.first();
+	int i, j, counter = 0, end = mInputs - 1;
+	int total = mInputs + mOutputs;
+	qreal out = 0;
+
+	network->createTrain(leftSize - total);
+	while(counter < leftSize - total)
+	{
+		network->setTrainInput(counter, leftSamples + counter);
+		network->setTrainOutput(counter, leftSamples + counter + mInputs);
+		++counter;
+	}
+
+	network->train();
+
+	qreal *output = mOutput.first();
+	counter = leftSize - end - 1;
+	for(i = 0; i <= end; ++i)
+	{
+		mInput[i] = leftSamples[counter + i];
+	}
+	network->run(mInput, output);
+	out = outputSamples[0] = output[0];
+
+	for(i = 1; i < outputSize; ++i)
+	{
+		for(j = 1; j < mInputs; ++j)
+		{
+			mInput[j-1] = mInput[j];
+		}
+		mInput[mInputs - 1] = out;
+
+		network->run(mInput, output);
+		out = outputSamples[i] = output[0];
+	}
+}
+
+bool ViNeuralInterpolator::interpolateIncrementalSetPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
+{
+
+}
+
+bool ViNeuralInterpolator::interpolateInterpolation(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
 	//mNetworks[outputSize - 1]->setWeights(ViFann::Random);
 
