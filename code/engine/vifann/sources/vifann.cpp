@@ -367,6 +367,12 @@ ViFannTrain* ViFann::createTrain(const int &dataCount)
 	return mTrain;
 }
 
+void ViFann::deleteTrain()
+{
+	delete mTrain;
+	mTrain = NULL;
+}
+
 bool ViFann::setTrainInput(const int &index, const qreal *data)
 {
 	if(mTrain == NULL)

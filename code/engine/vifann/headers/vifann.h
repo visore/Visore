@@ -136,6 +136,7 @@ class ViFann
 
 		// Create a training set
 		ViFannTrain* createTrain(const int &dataCount);
+		void deleteTrain();
 		bool setTrainInput(const int &index, const qreal *data);
 		bool setTrainOutput(const int &index, const qreal *data);
 		bool setTrainInput(const int &index, const float *data);

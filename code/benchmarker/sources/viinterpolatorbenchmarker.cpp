@@ -43,16 +43,17 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	//addParam("Samples",32,32, 2);
 
 	/*mInterpolator = new ViArimaInterpolator();
-	addParam("Window Size", 1024, 4096, 256);
+	addParam("MA Degree", 1, 100, 1);
+	addParam("Window Size", 1024, 1024, 256);
 	addParam("AR Degree", 0, 0, 0);
-	addParam("I Degree", 0, 0, 0);
-	addParam("MA Degree", 1, 10, 2);*/
+	addParam("I Degree", 0, 0, 0);*/
+
 
 	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::Interpolation);
-	addParam("Hidden Layer 3", 0, 32, 4);
-	addParam("Hidden Layer 2", 0, 64, 4);
-	addParam("Hidden Layer 1", 0, 128, 4);
-	addParam("Window Size", 4, 256, 4);
+	//addParam("Hidden Layer 3", 0, 32, 4);
+	//addParam("Hidden Layer 2", 0, 64, 4);
+	addParam("Hidden Layer 1", 16, 16, 4);
+	addParam("Window Size", 128, 128, 4);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 	//mInterpolator->setDirection(ViInterpolator::Bidirectional);
@@ -66,7 +67,7 @@ ViInterpolatorBenchmarker::~ViInterpolatorBenchmarker()
 
 void ViInterpolatorBenchmarker::progress(qreal percentage)
 {
-	//cout << setprecision(2) << fixed << "\r" << percentage << "%" << flush;
+	cout << setprecision(2) << fixed << "\r" << percentage << "%" << flush;
 }
 
 void ViInterpolatorBenchmarker::addParam(QString name, qreal start, qreal end, qreal increase)

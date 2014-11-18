@@ -289,6 +289,7 @@ bool ViNeuralInterpolator::interpolateIncrementalPrediction(const qreal *leftSam
 	}
 
 	network->train();
+	network->deleteTrain();
 
 	qreal *output = mOutput.first();
 	network->run(leftSamples + (leftSize - mInputs), output);
@@ -330,6 +331,7 @@ bool ViNeuralInterpolator::interpolateSetPrediction(const qreal *leftSamples, co
 	}
 
 	network->train();
+	network->deleteTrain();
 
 	qreal *output = mOutput.first();
 	network->run(leftSamples + (leftSize - mInputs), output);
@@ -355,6 +357,7 @@ bool ViNeuralInterpolator::interpolateIncrementalRecurrentPrediction(const qreal
 	}
 
 	network->train();
+	network->deleteTrain();
 
 	qreal *output = mOutput.first();
 	counter = leftSize - end - 1;
@@ -446,6 +449,7 @@ void ViNeuralInterpolator::train(const qreal *leftSamples, const int &leftSize, 
 	//network->train(true);
 	int trains = network->train();
 	mTrainCount += trains;
+	network->deleteTrain();
 	//cout<<"Training epochs: " << trains << " (" << mTrainCount << ") " << outputSize << endl;
 	//network->saveToFile(ViManager::tempOtherPath() + QString::number(outputSize) + ".fann");
 }
