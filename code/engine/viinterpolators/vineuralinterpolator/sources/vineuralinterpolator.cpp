@@ -116,7 +116,7 @@ void ViNeuralInterpolator::initializeIncrementalPrediction(const int &channelCou
 	neurons.append(mOutputs);
 
 	ViFann *network = new ViFann(false);
-	network->setStructure(ViFann::Shortcut, neurons);
+	network->setStructure(ViFann::Standard, neurons);
 	network->setTraining(ViFann::Fixed, ViFann::Incremental);
 	network->setActivation(ViFann::Elliot);
 	network->setWeights(ViFann::Random);
@@ -125,7 +125,7 @@ void ViNeuralInterpolator::initializeIncrementalPrediction(const int &channelCou
 	//network->setLearningMomentum(0.1);
 	network->setStopEpochs(1);
 	network->setStopMse(0.000000);
-	network->setStopStagnation(0.0000001, 5);
+	//network->setStopStagnation(0.0000001, 5);
 	if(!network->isValid())
 	{
 		LOG("Invalid neural network.", QtFatalMsg);

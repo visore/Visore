@@ -49,11 +49,11 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	addParam("I Degree", 0, 0, 0);*/
 
 
-	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::Interpolation);
+	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::IncrementalPrediction);
 	//addParam("Hidden Layer 3", 0, 32, 4);
-	//addParam("Hidden Layer 2", 0, 64, 4);
-	addParam("Hidden Layer 1", 16, 16, 4);
-	addParam("Window Size", 128, 128, 4);
+	addParam("Hidden Layer 2", 0, 64, 4);
+	addParam("Hidden Layer 1", 0, 128, 4);
+	addParam("Window Size", 4, 512, 4);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 	//mInterpolator->setDirection(ViInterpolator::Bidirectional);
