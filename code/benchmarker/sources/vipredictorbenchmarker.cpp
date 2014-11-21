@@ -28,13 +28,13 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	/*mPredictor = new ViHermitePredictor();
 	addParam("Window Size", 1, 256, 1);*/
 
-	/*mPredictor = new ViLagrangePredictor();
-	addParam("Window Size", 1, 128, 1);*/
+	//mPredictor = new ViLagrangePredictor();
+	//addParam("Window Size", 64, 64, 1);
 
-	/*mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Normal, ViPolynomialPredictor::Fixed);
-	addParam("Window Size", 8, 1024, 8);
-	addParam("Degree", 1, 10, 1);
-	addParam("Derivatives", 1, 4, 1);*/
+	mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Normal, ViPolynomialPredictor::Fixed);
+	addParam("Window Size", 2, 2, 8);
+	addParam("Degree", 1, 2, 1);
+	//addParam("Derivatives", 1, 4, 1);
 
 	/*mPredictor = new ViFourierPredictor(ViFourierPredictor::Normal, ViFourierPredictor::Fixed);
 	addParam("Window Size", 8, 64, 8);
@@ -60,9 +60,9 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 		//addParam("I Degree", 0, 1, 1);
 		addParam("MA Degree", 0, 1, 1);*/
 
-	mPredictor = new ViNeuralPredictor();
-	addParam("Window Size", 1, 1, 1);
-	addParam("l1", 0, 0, 2);
+	//mPredictor = new ViNeuralPredictor();
+	//addParam("Window Size", 1, 1, 1);
+	//addParam("l1", 0, 0, 2);
 	//addParam("l3", 15,15, 5);
 
 	QObject::connect(mPredictor, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));

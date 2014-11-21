@@ -86,10 +86,10 @@ void ViNeuralInterpolator::clear()
 	for(i = 0; i < mOutput.size(); ++i) delete [] mOutput[i];
 	mOutput.clear();
 
-	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
+	/*for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
 	{
 		mHiddenNeurons[i] = 0;
-	}
+	}*/
 }
 
 void ViNeuralInterpolator::initialize(const int &channelCount)
@@ -103,6 +103,8 @@ void ViNeuralInterpolator::initialize(const int &channelCount)
 
 void ViNeuralInterpolator::initializeIncrementalPrediction(const int &channelCount)
 {
+	clear();
+
 	mInputs = mWindowSize;
 	mOutputs = ViNoiseCreator::maximumNoiseSize();
 
@@ -139,6 +141,8 @@ void ViNeuralInterpolator::initializeIncrementalPrediction(const int &channelCou
 
 void ViNeuralInterpolator::initializeSetPrediction(const int &channelCount)
 {
+	clear();
+
 	mInputs = mWindowSize;
 	mOutputs = ViNoiseCreator::maximumNoiseSize();
 
@@ -175,6 +179,8 @@ void ViNeuralInterpolator::initializeSetPrediction(const int &channelCount)
 
 void ViNeuralInterpolator::initializeIncrementalRecurrentPrediction(const int &channelCount)
 {
+	clear();
+
 	mInputs = mWindowSize + 1;
 	mOutputs = 1;
 
