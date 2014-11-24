@@ -209,6 +209,7 @@ void ViInterpolatorBatcher::progress(qreal percentage)
 
 void ViInterpolatorBatcher::addParam(QString name, qreal start, qreal end, qreal increase)
 {
+	if(start == 0 && end == 0) return;
 	if(mInterpolator->hasParameter(name))
 	{
 		mParamsNames.append(name);

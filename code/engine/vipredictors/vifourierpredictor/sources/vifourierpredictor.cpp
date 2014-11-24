@@ -404,7 +404,7 @@ ViEigenBaseVector* ViFourierPredictor::estimateModelOsculating(const int &degree
 	static int i, j, offset, start, end, derivativeCount, totalDerivatives, totalSize;
 	static qreal x, value;
 
-	derivativeCount = size - 4; // Average, we don't have derivatives for the first and last point for both sides
+	derivativeCount = size - 2; // Average, we don't have derivatives for the first and last point for both sides
 	totalDerivatives = derivativeCount * derivative;
 	totalSize = size + totalDerivatives;
 

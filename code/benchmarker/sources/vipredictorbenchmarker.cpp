@@ -31,15 +31,15 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	//mPredictor = new ViLagrangePredictor();
 	//addParam("Window Size", 64, 64, 1);
 
-	mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Normal, ViPolynomialPredictor::Fixed);
-	addParam("Window Size", 2, 2, 8);
-	addParam("Degree", 1, 2, 1);
-	//addParam("Derivatives", 1, 4, 1);
+	/*mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Osculating, ViPolynomialPredictor::Fixed);
+	addParam("Window Size", 8, 8, 8);
+	addParam("Degree", 2, 2, 1);
+	addParam("Derivatives", 1, 1, 1);*/
 
-	/*mPredictor = new ViFourierPredictor(ViFourierPredictor::Normal, ViFourierPredictor::Fixed);
-	addParam("Window Size", 8, 64, 8);
+	mPredictor = new ViFourierPredictor(ViFourierPredictor::Osculating, ViFourierPredictor::Fixed);
+	addParam("Window Size", 8, 1024, 8);
 	addParam("Degree", 1, 10, 1);
-	addParam("Derivatives", 1, 4, 1);*/
+	addParam("Derivatives", 1, 10, 1);
 
 	/*addParam("Window Size", 1, 15, 1);
 	addParam("Degree", 10, 10, 1);
@@ -47,8 +47,8 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 
 	/*mPredictor = new ViGarchPredictor();
 	addParam("Window Size", 1024, 1024, 1);
-	addParam("GARCH Order", 0, 0, 1);
-	addParam("ARCH Order", 1, 1, 1);*/
+	addParam("ARCH Order", 1, 1, 1);
+	addParam("GARCH Order", 0, 0, 1);*/
 
 	/*mPredictor = new ViArmaPredictor();
 	addParam("Window Size", 32,512, 32);
@@ -79,6 +79,7 @@ void ViPredictorBenchmarker::progress(qreal percentage)
 
 void ViPredictorBenchmarker::addParam(QString name, qreal start, qreal end, qreal increase)
 {
+	if(start == 0 && end == 0) return;
 	if(mPredictor->hasParameter(name))
 	{
 		mParamsNames.append(name);
