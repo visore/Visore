@@ -30,8 +30,8 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	mDetector = new ViZscoreNoiseDetector();
-	addParam("Window Size", 1024, 4096, 64);
+	/*mDetector = new ViZscoreNoiseDetector();
+	addParam("Window Size", 4, 4096, 4);*/
 
 	/*mDetector = new ViNearestNeighbourNoiseDetector();
 	addParam("K", 1, 512, 1);*/
@@ -39,8 +39,8 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	/*mDetector = new ViMahalanobisNoiseDetector();
 	addParam("Window Size", 30, 5120, 20);*/
 
-	/*mDetector = new ViMadNoiseDetector();
-	addParam("Window Size", 256, 5120, 5);*/
+	mDetector = new ViMadNoiseDetector();
+	addParam("Window Size", 8, 5120, 8);
 
 	/*mDetector = new ViFourierNoiseDetector();
 	addParam("Window Size", 4096,4096, 128);

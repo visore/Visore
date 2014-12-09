@@ -155,11 +155,11 @@ ViInterpolatorBatcher::ViInterpolatorBatcher()
 	// ARMA
 	// ***************************
 
-	/*mInterpolator = new ViArimaInterpolator();
-	setParam("Window Size", 1024);
-	setParam("AR Degree", 2);
-	setParam("I Degree", 0);
-	setParam("MA Degree", 2);*/
+	mInterpolator = new ViArimaInterpolator(ViArimaInterpolator::AR2);
+	setParam("Window Size", 1440);
+	setParam("AR Degree", 9);
+	//setParam("I Degree", 0);
+	//setParam("MA Degree", 2);
 
 
 	// ***************************
@@ -204,7 +204,7 @@ ViInterpolatorBatcher::~ViInterpolatorBatcher()
 
 void ViInterpolatorBatcher::progress(qreal percentage)
 {
-	//cout << setprecision(2) << fixed << "\r" << percentage << "%" << flush;
+	cout << setprecision(2) << fixed << "\r" << percentage << "%" << flush;
 }
 
 void ViInterpolatorBatcher::addParam(QString name, qreal start, qreal end, qreal increase)

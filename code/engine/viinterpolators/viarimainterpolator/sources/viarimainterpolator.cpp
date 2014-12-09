@@ -34,6 +34,8 @@ void ViArimaInterpolator::setEstimation(const Estimation &estimation)
 	else if(mEstimation == AICC) mGretl->setCriteria(ViGretl::AICC);
 	else if(mEstimation == BIC) mGretl->setCriteria(ViGretl::BIC);
 	else if(mEstimation == HQC) mGretl->setCriteria(ViGretl::HQC);
+	else if(mEstimation == R2) mGretl->setCriteria(ViGretl::R2);
+	else if(mEstimation == AR2) mGretl->setCriteria(ViGretl::AR2);
 }
 
 QString ViArimaInterpolator::name(QString replace, bool spaced)

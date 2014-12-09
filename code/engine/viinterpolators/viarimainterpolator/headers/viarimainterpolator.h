@@ -18,7 +18,9 @@ class ViArimaInterpolator : public ViInterpolator
 			AIC,
 			AICC,
 			BIC,
-			HQC
+			HQC,
+			R2,
+			AR2
 		};
 
 	public:

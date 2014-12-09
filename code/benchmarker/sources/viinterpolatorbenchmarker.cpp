@@ -43,10 +43,10 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	//addParam("Samples",32,32, 2);
 
 	mInterpolator = new ViArimaInterpolator();
-	addParam("Window Size", 8, 4096, 8);
-	addParam("AR Degree", 1, 20, 1);
+	addParam("Window Size", 1440, 1440, 8);
+	addParam("AR Degree", 9, 9, 1);
 	//addParam("I Degree", 0, 0, 0);
-	//addParam("MA Degree", 0, 0, 0);
+	addParam("MA Degree", 2, 2, 0);
 
 	/*mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::IncrementalPrediction);
 	//addParam("Hidden Layer 3", 0, 32, 4);

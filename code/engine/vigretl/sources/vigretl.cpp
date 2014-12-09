@@ -17,7 +17,7 @@
 
 #define MAXIMUM_ITERATIONS		10
 #define MAXIMUM_TEST_AR_DEGREE	20
-#define MAXIMUM_TEST_MA_DEGREE	0
+#define MAXIMUM_TEST_MA_DEGREE	10
 
 bool ViGretl::mInitialized = false;
 
@@ -220,12 +220,12 @@ bool ViGretl::setDegree(const Type &type, const int &degree)
 	else if(type == ARCH)
 	{
 		mArchDegree = degree;
-		mGretlParameters[2] = mArchDegree;
+		mGretlParameters[1] = mArchDegree;
 	}
 	else if(type == GARCH)
 	{
 		mGarchDegree = degree;
-		mGretlParameters[1] = mGarchDegree;
+		mGretlParameters[2] = mGarchDegree;
 	}
 	return true;
 }
@@ -548,16 +548,17 @@ MODEL* ViGretl::autocorrelationModel(DATASET *data)
 
 MODEL* ViGretl::bestModel(DATASET *data)
 {
-	qreal score, minScore = DBL_MAX;
-	MODEL *bestModel = NULL;
-	int *parameters = gretl_list_copy(mGretlParameters);
-
-	for(int i = 0; i <= MAXIMUM_TEST_AR_DEGREE; ++i)
+	if(mArDegree != 0 && mMaDegree == 0) // AR model
 	{
-		parameters[1] = i;
-		for(int j = 0; j <= MAXIMUM_TEST_MA_DEGREE; ++j)
+
+		qreal score, minScore = DBL_MAX;
+		MODEL *bestModel = NULL;
+		int *parameters = gretl_list_copy(mGretlParameters);
+		parameters[3] = 0;
+
+		for(int i = 1; i <= MAXIMUM_TEST_AR_DEGREE; ++i)
 		{
-			parameters[3] = j;
+			parameters[1] = i;
 			MODEL *tempModel = gretl_model_new();
 			(this->*estimatePointer)(tempModel, data, parameters);
 			score = (this->*orderPointer)(tempModel);
@@ -569,12 +570,38 @@ MODEL* ViGretl::bestModel(DATASET *data)
 			}
 			else gretl_model_free(tempModel);
 		}
+
+		free(parameters);
+		return bestModel;
 	}
+	else
+	{
+		qreal score, minScore = DBL_MAX;
+		MODEL *bestModel = NULL;
+		int *parameters = gretl_list_copy(mGretlParameters);
 
-	free(parameters);
+		for(int i = 0; i <= MAXIMUM_TEST_AR_DEGREE; ++i)
+		{
+			parameters[1] = i;
+			for(int j = 0; j <= MAXIMUM_TEST_MA_DEGREE; ++j)
+			{
+				parameters[3] = j;
+				MODEL *tempModel = gretl_model_new();
+				(this->*estimatePointer)(tempModel, data, parameters);
+				score = (this->*orderPointer)(tempModel);
+				if(score < minScore)
+				{
+					minScore = score;
+					gretl_model_free(bestModel);
+					bestModel = tempModel;
+				}
+				else gretl_model_free(tempModel);
+			}
+		}
 
-	//cout<<"ARMA("<<bestAr<<", "<<bestMa<<")"<<endl;
-	return bestModel;
+		free(parameters);
+		return bestModel;
+	}
 }
 
 void ViGretl::estimateArima(MODEL *model, DATASET *data, int *parameters)
