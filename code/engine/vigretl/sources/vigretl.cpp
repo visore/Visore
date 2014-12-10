@@ -220,12 +220,12 @@ bool ViGretl::setDegree(const Type &type, const int &degree)
 	else if(type == ARCH)
 	{
 		mArchDegree = degree;
-		mGretlParameters[1] = mArchDegree;
+		mGretlParameters[2] = mArchDegree;
 	}
 	else if(type == GARCH)
 	{
 		mGarchDegree = degree;
-		mGretlParameters[2] = mGarchDegree;
+		mGretlParameters[1] = mGarchDegree;
 	}
 	return true;
 }
