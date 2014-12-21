@@ -60,7 +60,11 @@ void ViFourierPredictor::setDerivatives(const int &derivatives)
 void ViFourierPredictor::setParameter(const int &number, const qreal &value)
 {
 	if(number == 0) setWindowSize(value);
-	else if(number == 1) setDegree(value);
+	else if(number == 1)
+	{
+		setDegree(value);
+		if(mMode == Splines) setDerivatives(value);
+	}
 	else if(number == 2) setDerivatives(value);
 	else
 	{
@@ -102,6 +106,7 @@ bool ViFourierPredictor::validParameters(const Mode &mode, const int &windowSize
 		int equations = (windowSize - 1) * 2; // Fourier for each spline
 		equations += (windowSize - 2) * derivatives; // Derivatives at all intermediate points
 		equations += 1; // Set incoming spline (a0) equal to 0
+	//	LOG("*******************: "+QString::number(equations)+"  "+QString::number(coefficients)+"  "+QString::number(degree)+"  "+QString::number(derivatives));
 		return equations >= coefficients && degree >= derivatives;
 	}
 }
@@ -529,7 +534,7 @@ ViEigenBaseVector* ViFourierPredictor::estimateModelSplines(const int &degree, c
 	for(i = 1; i <= derivative; ++i)
 	{
 		rowOffset1 = (splineCount * 2) + ((i - 1) * splineCount);
-		for(j = 0; j < splineCount; ++j)
+		for(j = 0; j < splineCount-1; ++j)
 		{
 			rowOffset2 = rowOffset1 + j;
 			columnOffset1 = j * singleCoefficientCount;

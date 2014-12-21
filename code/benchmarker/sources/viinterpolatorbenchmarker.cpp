@@ -42,17 +42,17 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	//addParam("K", 4,64, 4);
 	//addParam("Samples",32,32, 2);
 
-	mInterpolator = new ViArimaInterpolator();
+	/*mInterpolator = new ViArimaInterpolator();
 	addParam("Window Size", 1440, 1440, 8);
 	addParam("AR Degree", 9, 9, 1);
 	//addParam("I Degree", 0, 0, 0);
-	addParam("MA Degree", 2, 2, 0);
+	addParam("MA Degree", 2, 2, 0);*/
 
-	/*mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::IncrementalPrediction);
+	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::Interpolation);
 	//addParam("Hidden Layer 3", 0, 32, 4);
-	addParam("Hidden Layer 2", 0, 64, 4);
-	addParam("Hidden Layer 1", 0, 128, 4);
-	addParam("Window Size", 4, 512, 1);*/
+	//addParam("Hidden Layer 2", 0, 64, 4);
+	//addParam("Hidden Layer 1", 0, 128, 4);
+	addParam("Window Size", 352, 352, 1);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 	//mInterpolator->setDirection(ViInterpolator::Bidirectional);

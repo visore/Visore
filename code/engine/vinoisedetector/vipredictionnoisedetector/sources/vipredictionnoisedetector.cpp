@@ -1,7 +1,7 @@
 #include <vipredictionnoisedetector.h>
 #include <vinoisecreator.h>
 
-#define DEFAULT_THRESHOLD 0.63
+#define DEFAULT_THRESHOLD 0.93
 
 ViPredictionNoiseDetector::ViPredictionNoiseDetector(ViPredictor *predictor)
 	: ViNoiseDetector()

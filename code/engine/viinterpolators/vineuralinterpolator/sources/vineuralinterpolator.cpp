@@ -3,6 +3,7 @@
 #include <vinoisecreator.h>
 
 #define DEFAULT_WINDOW_SIZE 32
+#define DEFAULT_EPOCHS 100
 #define MAX_HIDDEN_LAYERS 10
 
 ViNeuralInterpolator::ViNeuralInterpolator(Mode mode)
@@ -11,7 +12,9 @@ ViNeuralInterpolator::ViNeuralInterpolator(Mode mode)
 	mInput = NULL;
 	setWindowSize(DEFAULT_WINDOW_SIZE);
 	setMode(mode);
+	setEpochs(DEFAULT_EPOCHS);
 
+	addParameterName("Epochs");
 	addParameterName("Window Size");
 
 	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
@@ -50,12 +53,18 @@ void ViNeuralInterpolator::setMode(Mode mode)
 	mMode = mode;
 }
 
+void ViNeuralInterpolator::setEpochs(int epochs)
+{
+	mEpochs = epochs;
+}
+
 void ViNeuralInterpolator::setParameter(const int &number, const qreal &value)
 {
-	if(number == 0) setWindowSize(value);
-	else if(number >= 1 && number <= MAX_HIDDEN_LAYERS)
+	if(number == 0) setEpochs(value);
+	else if(number == 1) setWindowSize(value);
+	else if(number >= 2 && number <= MAX_HIDDEN_LAYERS)
 	{
-		mHiddenNeurons[number - 1] = value;
+		mHiddenNeurons[number - 2] = value;
 	}
 
 	else
@@ -156,14 +165,14 @@ void ViNeuralInterpolator::initializeSetPrediction(const int &channelCount)
 	neurons.append(mOutputs);
 
 	ViFann *network = new ViFann(false);
-	network->setStructure(ViFann::Shortcut, neurons);
-	network->setTraining(ViFann::Fixed, ViFann::QuickProp);
+	network->setStructure(ViFann::Standard, neurons);
+	network->setTraining(ViFann::Fixed, ViFann::RProp);
 	network->setActivation(ViFann::Elliot);
 	network->setWeights(ViFann::Random);
 	//network->setWeights(ViFann::WidrowNguyen);
 	//network->setLearningRate(0.2);
 	//network->setLearningMomentum(0.1);
-	network->setStopEpochs(100);
+	network->setStopEpochs(mEpochs);
 	network->setStopMse(0.000000);
 	network->setStopStagnation(0.0000001, 5);
 	if(!network->isValid())
@@ -194,7 +203,7 @@ void ViNeuralInterpolator::initializeIncrementalRecurrentPrediction(const int &c
 	neurons.append(mOutputs);
 
 	ViFann *network = new ViFann(false);
-	network->setStructure(ViFann::Shortcut, neurons);
+	network->setStructure(ViFann::Standard, neurons);
 	network->setTraining(ViFann::Fixed, ViFann::Incremental);
 	network->setActivation(ViFann::Elliot);
 	network->setWeights(ViFann::Random);
@@ -245,17 +254,17 @@ void ViNeuralInterpolator::initializeInterpolation(const int &channelCount)
 	{
 		neurons.last() = i;
 		ViFann *network = new ViFann(false);
-		network->setStructure(ViFann::Shortcut, neurons);
+		network->setStructure(ViFann::Standard, neurons);
 		network->setActivation(ViFann::Elliot);
 		network->setWeights(ViFann::Random);
 		//network->setWeights(ViFann::WidrowNguyen);
 		//network->setLearningRate(0.2);
 		//network->setLearningMomentum(0.1);
-		network->setTraining(ViFann::Fixed, ViFann::QuickProp);
-		network->setStopEpochs(50);
+		network->setTraining(ViFann::Fixed, ViFann::RProp);
+		network->setStopEpochs(mEpochs);
 		network->setStopMse(0.0000001);
 		network->setStopStagnation(0.0000001, 5);
-		network->setStopNeurons(10);
+		//network->setStopNeurons(10);
 		if(!network->isValid())
 		{
 			LOG("Invalid neural network.", QtFatalMsg);
@@ -396,7 +405,7 @@ bool ViNeuralInterpolator::interpolateInterpolation(const qreal *leftSamples, co
 {
 	//mNetworks[outputSize - 1]->setWeights(ViFann::Random);
 
-	train(leftSamples, leftSize, rightSamples, rightSize, outputSize, 768, 2); // 768, 2
+	train(leftSamples, leftSize, rightSamples, rightSize, outputSize, 768, 8); // 768, 8
 	//for(int i = 1; i <= mOutputs; ++i) train(leftSamples, leftSize, rightSamples, rightSize, i, 10000,4);
 	//train(leftSamples, leftSize, rightSamples, rightSize, outputSize, 64, 4); // 768, 2
 

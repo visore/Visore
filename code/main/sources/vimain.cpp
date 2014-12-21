@@ -38,11 +38,11 @@ int main(int argc, char *argv[])
     //bool BENCH = false;
 
 	//ViBenchmarker bench;
-	//ViPredictorBenchmarker bench;
+	ViPredictorBenchmarker bench;
 	//ViInterpolatorBenchmarker bench;
 	//ViNoiseDetectorBenchmarker bench;
 
-	ViInterpolatorBatcher bench;
+//	ViInterpolatorBatcher bench;
 
 	if(BENCH)
 	{

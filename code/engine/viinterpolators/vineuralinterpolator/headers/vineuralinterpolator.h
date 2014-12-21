@@ -28,6 +28,7 @@ class ViNeuralInterpolator : public ViInterpolator
 
 		void setWindowSize(const int &size); // Input neurons (size is sum of right and left samples)
 		void setMode(Mode mode);
+		void setEpochs(int epochs);
 
 		void setParameter(const int &number, const qreal &value);
 		bool validParameters();
@@ -79,6 +80,8 @@ class ViNeuralInterpolator : public ViInterpolator
 		int mLeftInputs;
 		int mRightInputs;
 		int mOutputs;
+
+		int mEpochs;
 
 		int mTrainCount;
 

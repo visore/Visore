@@ -155,9 +155,9 @@ ViInterpolatorBatcher::ViInterpolatorBatcher()
 	// ARMA
 	// ***************************
 
-	mInterpolator = new ViArimaInterpolator(ViArimaInterpolator::AR2);
+	/*mInterpolator = new ViArimaInterpolator(ViArimaInterpolator::AR2);
 	setParam("Window Size", 1440);
-	setParam("AR Degree", 9);
+	setParam("AR Degree", 9);*/
 	//setParam("I Degree", 0);
 	//setParam("MA Degree", 2);
 
@@ -192,7 +192,11 @@ ViInterpolatorBatcher::ViInterpolatorBatcher()
 	setParam("Arch Degree", 2);
 	setParam("Garch Degree", 2);*/
 
-
+	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::Interpolation);
+	//addParam("Hidden Layer 3", 0, 32, 4);
+	//addParam("Hidden Layer 2", 60, 60, 4);
+//	addParam("Hidden Layer 1", 128, 128, 4);
+	addParam("Window Size", 128, 128, 1);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 	QObject::connect(mInterpolator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));

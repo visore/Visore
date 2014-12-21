@@ -31,15 +31,15 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	//mPredictor = new ViLagrangePredictor();
 	//addParam("Window Size", 64, 64, 1);
 
-	/*mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Osculating, ViPolynomialPredictor::Fixed);
-	addParam("Window Size", 8, 8, 8);
-	addParam("Degree", 2, 2, 1);
-	addParam("Derivatives", 1, 1, 1);*/
+	/*mPredictor = new ViPolynomialPredictor(ViPolynomialPredictor::Splines, ViPolynomialPredictor::Fixed);
+	addParam("Window Size", 4, 4, 4);
+	addParam("Degree", 3, 3, 1);*/
+	//addParam("Derivatives", 1, 1, 1);
 
-	mPredictor = new ViFourierPredictor(ViFourierPredictor::Osculating, ViFourierPredictor::Fixed);
+	mPredictor = new ViFourierPredictor(ViFourierPredictor::Normal, ViFourierPredictor::Fixed);
 	addParam("Window Size", 8, 1024, 8);
-	addParam("Degree", 1, 10, 1);
-	addParam("Derivatives", 1, 10, 1);
+	addParam("Degree", 5, 20, 5);
+	//addParam("Derivatives", 11, 11, 1);
 
 	/*addParam("Window Size", 1, 15, 1);
 	addParam("Degree", 10, 10, 1);
