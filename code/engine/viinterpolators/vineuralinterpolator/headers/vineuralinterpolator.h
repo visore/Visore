@@ -35,6 +35,8 @@ class ViNeuralInterpolator : public ViInterpolator
 
 		ViNeuralInterpolator* clone();
 
+		void printTrainMse();
+
 	protected:
 
 		void clear();

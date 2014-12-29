@@ -2,6 +2,11 @@
 #include <vilogger.h>
 #include <QFile>
 
+#define ENABLE_CALLBACK true
+
+QList<qreal> ViFann::mMseTotal;
+int ViFann::mMseCount = 0;
+
 ViFannTrain::ViFannTrain(const int &dataCount, const int &inputs, const int &outputs)
 {
 	mData = fann_create_train(dataCount, inputs, outputs);
@@ -225,6 +230,13 @@ bool ViFann::setStructure(const Type &type, const QList<int> &neurons, const qre
 	else return false;
 
 	fann_set_train_stop_function(mNetwork, FANN_STOPFUNC_MSE);
+
+	if(ENABLE_CALLBACK)
+	{
+		fann_set_callback(mNetwork, &ViFann::trainCallback);
+		mMseTotal.clear();
+		mMseCount = 0;
+	}
 
 	return true;
 }
@@ -559,6 +571,9 @@ int ViFann::train(const bool &debug)
 		return -1;
 	}
 
+	int reportEpochs = 0;
+	if(ENABLE_CALLBACK) reportEpochs = 1;
+
 	if(debug)
 	{
 		if(mTraining == Cascade)
@@ -618,10 +633,10 @@ int ViFann::train(const bool &debug)
 					fann_set_cascade_candidate_change_fraction(mNetwork, mTrainStagnationFraction);
 					fann_set_cascade_candidate_stagnation_epochs(mNetwork, mTrainStagnationIterations);
 				}
-				fann_cascadetrain_on_data(mNetwork, mTrain->data(), mTrainNeurons, 0, mTrainMse);
+				fann_cascadetrain_on_data(mNetwork, mTrain->data(), mTrainNeurons, reportEpochs, mTrainMse);
 			#endif
 		}
-		else if(mTrainStagnationIterations < 0) (this->*fannTrainManyPointer)(mNetwork, mTrain->data(), mTrainEpochs, 0, mTrainMse);
+		else if(mTrainStagnationIterations < 0) (this->*fannTrainManyPointer)(mNetwork, mTrain->data(), mTrainEpochs, reportEpochs, mTrainMse);
 		else
 		{
 			int i, counter = 0;
@@ -788,4 +803,29 @@ inline void ViFann::adjustSample(float &sample)
 {
 	if(sample > 1) sample = 1;
 	else if(sample < -1) sample = -1;
+}
+
+int ViFann::trainCallback(fann* network, fann_train_data *data, unsigned int maxEpochs, unsigned int epochReports, float desiredMse, unsigned int epochs)
+{
+	if(mMseTotal.size() <= epochs)
+	{
+		for(int i = mMseTotal.size(); i <= epochs; ++i)
+		{
+			mMseTotal.append(0);
+		}
+	}
+
+	mMseTotal[epochs] += fann_get_MSE(network);
+	if(epochs == 1) ++mMseCount;
+
+	return 0;
+}
+
+void ViFann::printTrainMse()
+{
+	cout << endl;
+	for(int i = 0; i < mMseTotal.size(); ++i)
+	{
+		cout << i << "\t" << mMseTotal[i] / qreal(mMseCount) << endl;
+	}
 }

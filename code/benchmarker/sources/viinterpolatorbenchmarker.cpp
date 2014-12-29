@@ -19,6 +19,7 @@
 #define WINDOW_SIZE 4096
 #define WRITE false
 #define SUMMARY false
+#define PRINT_TRAIN_MSE false // Only for ANNs
 
 ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 {
@@ -52,7 +53,8 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	//addParam("Hidden Layer 3", 0, 32, 4);
 	//addParam("Hidden Layer 2", 0, 64, 4);
 	//addParam("Hidden Layer 1", 0, 128, 4);
-	addParam("Window Size", 352, 352, 1);
+	addParam("Window Size", 832, 832, 1);
+	//addParam("Hidden Layer 1", 96, 96, 4);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 	//mInterpolator->setDirection(ViInterpolator::Bidirectional);
@@ -254,6 +256,8 @@ void ViInterpolatorBenchmarker::process()
 		printFileDataMinified(mMiniFile, interpolationErrors, modelErrors, time);
 		if(SUMMARY) printFileDataSummary(genre(mMiniFile), interpolationErrors, modelErrors, time);
 		printTerminal(interpolationErrors, modelErrors, time);
+
+		if(PRINT_TRAIN_MSE) ((ViNeuralInterpolator*) mInterpolator)->printTrainMse();
 	}
 	while(nextParam());
 

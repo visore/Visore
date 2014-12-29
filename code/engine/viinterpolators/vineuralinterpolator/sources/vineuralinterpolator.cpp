@@ -174,7 +174,7 @@ void ViNeuralInterpolator::initializeSetPrediction(const int &channelCount)
 	//network->setLearningMomentum(0.1);
 	network->setStopEpochs(mEpochs);
 	network->setStopMse(0.000000);
-	network->setStopStagnation(0.0000001, 5);
+	//network->setStopStagnation(0.0000001, 5);
 	if(!network->isValid())
 	{
 		LOG("Invalid neural network.", QtFatalMsg);
@@ -212,7 +212,7 @@ void ViNeuralInterpolator::initializeIncrementalRecurrentPrediction(const int &c
 	//network->setLearningMomentum(0.1);
 	network->setStopEpochs(1);
 	network->setStopMse(0.000000);
-	network->setStopStagnation(0.0000001, 5);
+	//network->setStopStagnation(0.0000001, 5);
 	if(!network->isValid())
 	{
 		LOG("Invalid neural network.", QtFatalMsg);
@@ -262,8 +262,8 @@ void ViNeuralInterpolator::initializeInterpolation(const int &channelCount)
 		//network->setLearningMomentum(0.1);
 		network->setTraining(ViFann::Fixed, ViFann::RProp);
 		network->setStopEpochs(mEpochs);
-		network->setStopMse(0.0000001);
-		network->setStopStagnation(0.0000001, 5);
+		network->setStopMse(0.000000);
+		//network->setStopStagnation(0.0000001, 5);
 		//network->setStopNeurons(10);
 		if(!network->isValid())
 		{
@@ -507,4 +507,9 @@ void ViNeuralInterpolator::reverse(const qreal *input, qreal *output, const int 
 ViNeuralInterpolator* ViNeuralInterpolator::clone()
 {
 	return new ViNeuralInterpolator(*this);
+}
+
+void ViNeuralInterpolator::printTrainMse()
+{
+	ViFann::printTrainMse();
 }

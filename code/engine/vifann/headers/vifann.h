@@ -193,6 +193,8 @@ class ViFann
 		qreal mse();
 		fann* network();
 
+		static void printTrainMse();
+
 	protected:
 
 		void fannTrainManyCpu(fann *network, fann_train_data *data, const unsigned int &maxEpochs, const unsigned int &epochsBetweenReports, const float &desiredError);
@@ -205,6 +207,8 @@ class ViFann
 
 		inline void adjustSamples(float *samples, const int &size);
 		inline void adjustSample(float &sample);
+
+		static int trainCallback(fann* network, fann_train_data *data, unsigned int maxEpochs, unsigned int epochReports, float desiredMse, unsigned int epochs);
 
 	private:
 
@@ -244,6 +248,8 @@ class ViFann
 		qreal mTrainStagnationFraction;
 		int mTrainStagnationIterations;
 
+		static QList<qreal> mMseTotal;
+		static int mMseCount;
 };
 
 #endif
