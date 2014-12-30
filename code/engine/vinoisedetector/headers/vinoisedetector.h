@@ -22,9 +22,20 @@ class ViNoiseDetector : public ViNotifier, public ViName
 
 	public:
 
+		enum Mode
+		{
+			Standard,
+			Mean,
+			Maximum
+		};
+
+	public:
+
 		ViNoiseDetector();
 		ViNoiseDetector(const ViNoiseDetector &other);
 		virtual ~ViNoiseDetector();
+
+		void setMode(Mode mode);
 
 		qreal detect(ViBuffer *corrupted, ViBuffer *noiseMap); // Returns the maximum noise value, therefore in [0, max]
 
@@ -59,7 +70,16 @@ class ViNoiseDetector : public ViNotifier, public ViName
 
 		virtual void detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel = 0) = 0; // returns the number of samples to remove.
 
+		void initThreshold(ViBuffer *noiseMap, const qreal &threshold);
+		bool isNoise(const qreal &value);
+
 	private:
+
+		Mode mMode;
+		qreal mThreshold;
+		qreal mAdjustedThreshold;
+		qreal mMean;
+		qreal mMaximum;
 
 		int mOffset;
 		qreal mScale;

@@ -23,7 +23,7 @@
 #include <vineuralpredictor.h>
 
 #define WINDOW_SIZE 4096
-#define THRESHOLD_PARTS 20 // In how many parts a threshold range should be devided in
+#define THRESHOLD_PARTS 50 // In how many parts a threshold range should be devided in
 
 ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 {
@@ -31,30 +31,32 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	mMainTime.start();
 
 	/*mDetector = new ViZscoreNoiseDetector();
-	addParam("Window Size", 4, 4096, 4);*/
+	addParam("Window Size", 1868, 1868, 4);*/
 
 	/*mDetector = new ViNearestNeighbourNoiseDetector();
-	addParam("K", 1, 512, 1);*/
+	addParam("K", 324, 324, 1);*/
 
 	/*mDetector = new ViMahalanobisNoiseDetector();
-	addParam("Window Size", 30, 5120, 20);*/
+	addParam("Window Size", 3264, 3264, 20);*/
 
 	/*mDetector = new ViMadNoiseDetector();
-	addParam("Window Size", 8, 5120, 8);*/
+	addParam("Window Size", 1600, 1600, 8);*/
 
-	/*mDetector = new ViFourierNoiseDetector();
-	addParam("Window Size", 4096,4096, 128);
-	addParam("Range Start", 0, 0, 25);
-	addParam("Range End", 100, 100, 25);*/
+	mDetector = new ViFourierNoiseDetector();
+	addParam("Window Size", 64,64, 128);
+	addParam("Range Start", 5, 5, 25);
+	addParam("Range End", 25, 25, 25);
 
-	mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor(ViPolynomialPredictor::Osculating));
+	/*mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor(ViPolynomialPredictor::Osculating));
 	addParam("Window Size", 48, 48, 8);
-	addParam("Degree", 2, 2, 1);
+	addParam("Degree", 2, 2, 1);*/
 	//addParam("MA Degree", 1, 1, 1);
 	//addParam("Threshold", 0.9, 2, 0.01);
 
 	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor());
 	addParam("Window Size", 1, 1, 8);*/
+
+	mDetector->setMode(ViNoiseDetector::Standard);
 
 	QObject::connect(mDetector, SIGNAL(progressed(qreal)), this, SLOT(progressDetect(qreal)));
 }

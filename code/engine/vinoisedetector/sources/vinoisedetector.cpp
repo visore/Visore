@@ -8,10 +8,22 @@ ViNoiseDetector::ViNoiseDetector()
 {
 	mOffset = 0;
 	mScale = 1;
+
+	mMode = Standard;
+	mThreshold = 0;
+	mMean = 0;
+	mMaximum = 0;
+	mAdjustedThreshold = 0;
 }
 
 ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 {
+	mMode = other.mMode;
+	mThreshold = other.mThreshold;
+	mMean = other.mMean;
+	mMaximum = other.mMaximum;
+	mAdjustedThreshold = other.mAdjustedThreshold;
+
 	mOffset = other.mOffset;
 	mScale = other.mScale;
 	mParameters = other.mParameters;
@@ -19,6 +31,65 @@ ViNoiseDetector::ViNoiseDetector(const ViNoiseDetector &other)
 
 ViNoiseDetector::~ViNoiseDetector()
 {
+}
+
+void ViNoiseDetector::setMode(Mode mode)
+{
+	mMode = mode;
+}
+
+void ViNoiseDetector::initThreshold(ViBuffer *noiseMap, const qreal &threshold)
+{
+	mThreshold = threshold;
+
+	if(mMode == Standard)
+	{
+		mAdjustedThreshold = mThreshold;
+	}
+	else if(mMode == Mean)
+	{
+		int i, end;
+		mMean = 0;
+		qint64 count = 0;
+		ViAudioReadData mapData(noiseMap);
+		mapData.setSampleCount(WINDOW_SIZE);
+		while(mapData.hasData())
+		{
+			mapData.read();
+			ViSampleChunk &samples = mapData.samples();
+			end = samples.size();
+			for(i = 0; i < end; ++i)
+			{
+				mMean += samples[i];
+			}
+			count += end;
+		}
+		mMean /= count;
+		mAdjustedThreshold = mMean + mThreshold;
+	}
+	else if(mMode == Maximum)
+	{
+		int i, end;
+		mMaximum = 0;
+		ViAudioReadData mapData(noiseMap);
+		mapData.setSampleCount(WINDOW_SIZE);
+		while(mapData.hasData())
+		{
+			mapData.read();
+			ViSampleChunk &samples = mapData.samples();
+			end = samples.size();
+			for(i = 0; i < end; ++i)
+			{
+				if(samples[i] > mMaximum) mMaximum = samples[i];
+			}
+		}
+		mAdjustedThreshold = mMaximum - mThreshold;
+	}
+}
+
+bool ViNoiseDetector::isNoise(const qreal &value)
+{
+	return value >= mAdjustedThreshold;
 }
 
 qreal ViNoiseDetector::detect(ViBuffer *corrupted, ViBuffer *noiseMap)
@@ -122,6 +193,8 @@ qreal ViNoiseDetector::detect(ViBuffer *corrupted, ViBuffer *noiseMap)
 
 void ViNoiseDetector::mask(ViBuffer *noiseMap, ViBuffer *noiseMask, const qreal &threshold)
 {
+	initThreshold(noiseMap, threshold);
+
 	int i;
 
 	noiseMask->clear();
@@ -141,7 +214,8 @@ void ViNoiseDetector::mask(ViBuffer *noiseMap, ViBuffer *noiseMask, const qreal 
 
 		for(i = 0; i < samples.size(); ++i)
 		{
-			if(samples[i] >= threshold) mask[i] = 1;
+			//if(samples[i] >= threshold) mask[i] = 1;
+			if(samples[i] >= mAdjustedThreshold) mask[i] = 1;
 			else mask[i] = 0;
 		}
 
@@ -151,6 +225,8 @@ void ViNoiseDetector::mask(ViBuffer *noiseMap, ViBuffer *noiseMask, const qreal 
 
 void ViNoiseDetector::mask(ViBuffer *noiseMap, ViBuffer *noiseMask, const qreal &threshold, const int &maxGap)
 {
+	initThreshold(noiseMap, threshold);
+
 	int i, k, l, end;
 	bool hasNoise;
 
@@ -179,7 +255,8 @@ void ViNoiseDetector::mask(ViBuffer *noiseMap, ViBuffer *noiseMask, const qreal 
 			{
 				for(k = maxGap; k > 0; --k)
 				{
-					if(map1[i + k] >= threshold)
+					//if(map1[i + k] >= threshold)
+					if(map1[i + k] >= mAdjustedThreshold)
 					{
 						for(l = 1; l < k; ++l) mask[i + l] = 1;
 						i += (k - 1);
@@ -201,7 +278,8 @@ void ViNoiseDetector::mask(ViBuffer *noiseMap, ViBuffer *noiseMask, const qreal 
 			{
 				for(k = maxGap; k > 0; --k)
 				{
-					if(map2[i + k] >= threshold)
+					//if(map2[i + k] >= threshold)
+					if(map2[i + k] >= mAdjustedThreshold)
 					{
 						for(l = 1; l < k; ++l) mask[i + l] = 1;
 						i += (k - 1);
@@ -244,6 +322,8 @@ ViClassificationErrorCollection ViNoiseDetector::error(ViBuffer *noiseMask, ViBu
 
 ViClassificationErrorCollection ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const qreal &threshold)
 {
+	initThreshold(noiseMap, threshold);
+
 	int i, noiseSize;
 	ViClassificationErrorCollection collection;
 
@@ -262,7 +342,7 @@ ViClassificationErrorCollection ViNoiseDetector::error(ViBuffer *noiseMap, ViBuf
 		for(i = 0; i < map.size(); ++i)
 		{
 			noiseSize = ViNoiseCreator::fromSizeMask(size[i]);
-			collection.at(noiseSize).add(map[i] >= threshold, (bool) noiseSize);
+			collection.at(noiseSize).add(map[i] >= mAdjustedThreshold, (bool) noiseSize);
 		}
 	}
 
@@ -271,6 +351,8 @@ ViClassificationErrorCollection ViNoiseDetector::error(ViBuffer *noiseMap, ViBuf
 
 void ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVector<qreal> &thresholds, QVector<ViClassificationErrorCollection> &errors)
 {
+	initThreshold(noiseMap, 0);
+
 	int i, j, noiseSize, count;
 
 	count = thresholds.size();
@@ -280,6 +362,14 @@ void ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVecto
 	ViAudioReadData sizeData(sizeMask);
 	mapData.setSampleCount(WINDOW_SIZE);
 	sizeData.setSampleCount(WINDOW_SIZE);
+
+	QVector<qreal> newThresholds(count);
+	for(j = 0; j < count; ++j)
+	{
+		if(mMode == Standard) newThresholds[j] = thresholds[j];
+		else if(mMode == Mean) newThresholds[j] = mMean + thresholds[j];
+		else if(mMode == Maximum) newThresholds[j] = mMaximum - thresholds[j];
+	}
 
 	while(mapData.hasData())
 	{
@@ -293,7 +383,8 @@ void ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVecto
 			noiseSize = ViNoiseCreator::fromSizeMask(size[i]);
 			for(j = 0; j < count; ++j)
 			{
-				errors[j].at(noiseSize).add(map[i] >= thresholds[j], (bool) noiseSize);
+				//errors[j].at(noiseSize).add(map[i] >= thresholds[j], (bool) noiseSize);
+				errors[j].at(noiseSize).add(map[i] >= newThresholds[j], (bool) noiseSize);
 			}
 		}
 	}
@@ -301,6 +392,8 @@ void ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVecto
 
 void ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVector<qreal> &thresholds, QVector<ViClassificationErrorCollection> &errors, const int &maxGap)
 {
+	initThreshold(noiseMap, 0);
+
 	int i, j, k, l, noiseSize, noiseSize2, count, end;
 	bool hasNoise;
 
@@ -311,6 +404,14 @@ void ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVecto
 	ViAudioReadData sizeData(sizeMask);
 	mapData.setSampleCount(WINDOW_SIZE);
 	sizeData.setSampleCount(WINDOW_SIZE);
+
+	QVector<qreal> newThresholds(count);
+	for(j = 0; j < count; ++j)
+	{
+		if(mMode == Standard) newThresholds[j] = thresholds[j];
+		else if(mMode == Mean) newThresholds[j] = mMean + thresholds[j];
+		else if(mMode == Maximum) newThresholds[j] = mMaximum - thresholds[j];
+	}
 
 	while(mapData.hasData())
 	{
@@ -327,13 +428,13 @@ void ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVecto
 			for(i = 0; i < end; ++i)
 			{
 				noiseSize = ViNoiseCreator::fromSizeMask(size1[i]);
-				hasNoise = map1[i] >= thresholds[j];
+				hasNoise = map1[i] >= newThresholds[j];
 				errors[j].at(noiseSize).add(hasNoise, (bool) noiseSize);
 				if(hasNoise)
 				{
 					for(k = maxGap; k > 0; --k)
 					{
-						if(map1[i + k] >= thresholds[j])
+						if(map1[i + k] >= newThresholds[j])
 						{
 							for(l = 1; l < k; ++l)
 							{
@@ -346,7 +447,7 @@ void ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVecto
 					}
 				}
 			}
-			for(i = end; i < map1.size(); ++i) errors[j].at(noiseSize).add(map1[i] >= thresholds[j], (bool) ViNoiseCreator::fromSizeMask(size1[i]));
+			for(i = end; i < map1.size(); ++i) errors[j].at(noiseSize).add(map1[i] >= newThresholds[j], (bool) ViNoiseCreator::fromSizeMask(size1[i]));
 		}
 
 		end = map2.size() - maxGap;
@@ -355,13 +456,13 @@ void ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVecto
 			for(i = 0; i < end; ++i)
 			{
 				noiseSize = ViNoiseCreator::fromSizeMask(size2[i]);
-				hasNoise = map2[i] >= thresholds[j];
+				hasNoise = map2[i] >= newThresholds[j];
 				errors[j].at(noiseSize).add(hasNoise, (bool) noiseSize);
 				if(hasNoise)
 				{
 					for(k = maxGap; k > 0; --k)
 					{
-						if(map2[i + k] >= thresholds[j])
+						if(map2[i + k] >= newThresholds[j])
 						{
 							for(l = 1; l < k; ++l)
 							{
@@ -374,7 +475,7 @@ void ViNoiseDetector::error(ViBuffer *noiseMap, ViBuffer *sizeMask, const QVecto
 					}
 				}
 			}
-			for(i = end; i < map2.size(); ++i) errors[j].at(noiseSize).add(map2[i] >= thresholds[j], (bool) ViNoiseCreator::fromSizeMask(size2[i]));
+			for(i = end; i < map2.size(); ++i) errors[j].at(noiseSize).add(map2[i] >= newThresholds[j], (bool) ViNoiseCreator::fromSizeMask(size2[i]));
 		}
 	}
 }

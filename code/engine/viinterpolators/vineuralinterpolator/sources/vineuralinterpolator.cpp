@@ -3,7 +3,7 @@
 #include <vinoisecreator.h>
 
 #define DEFAULT_WINDOW_SIZE 32
-#define DEFAULT_EPOCHS 100
+#define DEFAULT_EPOCHS 30
 #define MAX_HIDDEN_LAYERS 10
 
 ViNeuralInterpolator::ViNeuralInterpolator(Mode mode)

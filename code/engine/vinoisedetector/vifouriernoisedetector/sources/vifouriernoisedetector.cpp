@@ -62,17 +62,39 @@ void ViFourierNoiseDetector::setWindowSize(const int &size)
 void ViFourierNoiseDetector::setStart(const qreal &start)
 {
 	mStart = start;
+
+	int halfWindowSize = mWindowSize / 2;
+	mStartSample = floor(halfWindowSize * (mStart / 100.0));
+	if(mStartSample < 0) mStartSample = 0;
+
+	mSampleCount = mEndSample - mStartSample + 1;
 }
 
 void ViFourierNoiseDetector::setEnd(const qreal &end)
 {
 	mEnd = end;
+
+	int halfWindowSize = mWindowSize / 2;
+	mEndSample = ceil(halfWindowSize * (mEnd / 100.0));
+	if(mEndSample > halfWindowSize) mEndSample = halfWindowSize;
+
+	mSampleCount = mEndSample - mStartSample + 1;
 }
 
 void ViFourierNoiseDetector::setRange(const qreal &start, const qreal &end)
 {
 	mStart = start;
 	mEnd = end;
+
+	int halfWindowSize = mWindowSize / 2; // Because the frequency spectrum is a mirror on both sides
+
+	mStartSample = floor(halfWindowSize * (mStart / 100.0));
+	if(mStartSample < 0) mStartSample = 0;
+
+	mEndSample = ceil(halfWindowSize * (mEnd / 100.0));
+	if(mEndSample > halfWindowSize) mEndSample = halfWindowSize;
+
+	mSampleCount = mEndSample - mStartSample + 1;
 }
 
 bool ViFourierNoiseDetector::validParameters()
