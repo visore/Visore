@@ -132,7 +132,7 @@ void ViNeuralInterpolator::initializeIncrementalPrediction(const int &channelCou
 	network->setActivation(ViFann::Elliot);
 	network->setWeights(ViFann::Random);
 	//network->setWeights(ViFann::WidrowNguyen);
-	//network->setLearningRate(0.2);
+	network->setLearningRate(0.01);
 	//network->setLearningMomentum(0.1);
 	network->setStopEpochs(1);
 	network->setStopMse(0.000000);
@@ -208,8 +208,8 @@ void ViNeuralInterpolator::initializeIncrementalRecurrentPrediction(const int &c
 	network->setActivation(ViFann::Elliot);
 	network->setWeights(ViFann::Random);
 	//network->setWeights(ViFann::WidrowNguyen);
-	//network->setLearningRate(0.2);
-	//network->setLearningMomentum(0.1);
+	network->setLearningRate(0.01);
+	//network->setLearningMomentum(0.0);
 	network->setStopEpochs(1);
 	network->setStopMse(0.000000);
 	//network->setStopStagnation(0.0000001, 5);
@@ -258,7 +258,7 @@ void ViNeuralInterpolator::initializeInterpolation(const int &channelCount)
 		network->setActivation(ViFann::Elliot);
 		network->setWeights(ViFann::Random);
 		//network->setWeights(ViFann::WidrowNguyen);
-		//network->setLearningRate(0.2);
+		//network->setLearningRate(0.1);
 		//network->setLearningMomentum(0.1);
 		network->setTraining(ViFann::Fixed, ViFann::RProp);
 		network->setStopEpochs(mEpochs);
@@ -465,6 +465,7 @@ void ViNeuralInterpolator::train(const qreal *leftSamples, const int &leftSize, 
 	int trains = network->train();
 	mTrainCount += trains;
 	network->deleteTrain();
+
 	//cout<<"Training epochs: " << trains << " (" << mTrainCount << ") " << outputSize << endl;
 	//network->saveToFile(ViManager::tempOtherPath() + QString::number(outputSize) + ".fann");
 }

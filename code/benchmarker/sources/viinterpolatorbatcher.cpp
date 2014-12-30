@@ -192,13 +192,71 @@ ViInterpolatorBatcher::ViInterpolatorBatcher()
 	setParam("Arch Degree", 2);
 	setParam("Garch Degree", 2);*/
 
-	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::Interpolation);
-	//addParam("Hidden Layer 3", 0, 32, 4);
-	//addParam("Hidden Layer 2", 60, 60, 4);
-//	addParam("Hidden Layer 1", 128, 128, 4);
-	addParam("Window Size", 128, 128, 1);
 
+
+	// ***************************
+	// ANN - Incremental Prediction
+	// ***************************
+
+	/*mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::IncrementalPrediction);
+	addParam("Window Size", 928, 928, 1);
+	addParam("Hidden Layer 1", 80, 80, 1);
+	mInterpolator->setDirection(ViInterpolator::Forward);*/
+
+	// ***************************
+	// ANN - Bidirectional Incremental Prediction
+	// ***************************
+
+	/*mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::IncrementalPrediction);
+	addParam("Window Size", 928, 928, 1);
+	addParam("Hidden Layer 1", 80, 80, 1);
+	mInterpolator->setDirection(ViInterpolator::Bidirectional);*/
+
+	// ***************************
+	// ANN - Recurrent Prediction
+	// ***************************
+
+	/*mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::IncrementalRecurrentPrediction);
+	addParam("Window Size", 832, 832, 1);
+	addParam("Hidden Layer 1", 96, 96, 1);
+	mInterpolator->setDirection(ViInterpolator::Forward);*/
+
+	// ***************************
+	// ANN - Bidirectional Recurrent Prediction
+	// ***************************
+
+	/*mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::IncrementalRecurrentPrediction);
+	addParam("Window Size", 832, 832, 1);
+	addParam("Hidden Layer 1", 96, 96, 1);
+	mInterpolator->setDirection(ViInterpolator::Bidirectional);*/
+
+	// ***************************
+	// ANN - Set Prediction
+	// ***************************
+
+	/*mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::SetPrediction);
+	addParam("Window Size", 416, 416, 1);
+	mInterpolator->setDirection(ViInterpolator::Forward);*/
+
+	// ***************************
+	// ANN - Bidirectional Set Prediction
+	// ***************************
+
+	/*mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::SetPrediction);
+	addParam("Window Size", 416, 416, 1);
+	mInterpolator->setDirection(ViInterpolator::Bidirectional);*/
+
+	// ***************************
+	// ANN - Interpolation
+	// ***************************
+
+	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::Interpolation);
+	addParam("Window Size", 256, 256, 1);
 	mInterpolator->setDirection(ViInterpolator::Forward);
+
+
+
+	//mInterpolator->setDirection(ViInterpolator::Forward);
 	QObject::connect(mInterpolator, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }
 

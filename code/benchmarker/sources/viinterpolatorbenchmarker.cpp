@@ -53,7 +53,7 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	//addParam("Hidden Layer 3", 0, 32, 4);
 	//addParam("Hidden Layer 2", 0, 64, 4);
 	//addParam("Hidden Layer 1", 0, 128, 4);
-	addParam("Window Size", 832, 832, 1);
+	addParam("Window Size", 256, 256, 1);
 	//addParam("Hidden Layer 1", 96, 96, 4);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);

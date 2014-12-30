@@ -826,6 +826,6 @@ void ViFann::printTrainMse()
 	cout << endl;
 	for(int i = 0; i < mMseTotal.size(); ++i)
 	{
-		cout << i << "\t" << mMseTotal[i] / qreal(mMseCount) << endl;
+		cout << mMseTotal[i] / qreal(mMseCount) << endl;
 	}
 }
