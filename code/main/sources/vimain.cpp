@@ -11,6 +11,7 @@
 #include <vinoisedetectorbenchmarker.h>
 
 #include <viinterpolatorbatcher.h>
+#include <vinoisebatcher.h>
 
 int main(int argc, char *argv[])
 {
@@ -43,6 +44,7 @@ int main(int argc, char *argv[])
 	ViNoiseDetectorBenchmarker bench;
 
 //	ViInterpolatorBatcher bench;
+	//ViNoiseBatcher bench;
 
 	if(BENCH)
 	{

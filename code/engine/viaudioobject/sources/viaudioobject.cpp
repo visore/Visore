@@ -53,6 +53,8 @@ ViAudioObject::ViAudioObject(bool autoDestruct)
 	QObject::connect(mCustomMaskCreator, SIGNAL(finished()), this, SIGNAL(customGenerated()));
 
 	setAligner(new ViFourierCrossAligner());
+
+	mDisbaleFinishSignal = false;
 }
 
 ViAudioObject::~ViAudioObject()
@@ -469,7 +471,7 @@ void ViAudioObject::decodeNext()
 		mDecoder = NULL;
 		locker.unlock();
 		emit decoded();
-		setFinished();
+		if(!mDisbaleFinishSignal) setFinished();
 	}
 	else
 	{

@@ -510,6 +510,11 @@ class ViAudioObject : public QObject, public ViFunctorParameter, public ViId
 		int mSideNumber;
 		int mTrackNumber;
 
+
+	public:
+
+		bool mDisbaleFinishSignal; // Noise batcher
+
 };
 
 #endif

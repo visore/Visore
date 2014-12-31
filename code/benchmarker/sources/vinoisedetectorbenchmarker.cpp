@@ -42,10 +42,10 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	/*mDetector = new ViMadNoiseDetector();
 	addParam("Window Size", 1600, 1600, 8);*/
 
-	mDetector = new ViFourierNoiseDetector();
+/*	mDetector = new ViFourierNoiseDetector();
 	addParam("Window Size", 64,64, 128);
 	addParam("Range Start", 5, 5, 25);
-	addParam("Range End", 25, 25, 25);
+	addParam("Range End", 25, 25, 25);*/
 
 	/*mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor(ViPolynomialPredictor::Osculating));
 	addParam("Window Size", 48, 48, 8);
@@ -53,8 +53,11 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	//addParam("MA Degree", 1, 1, 1);
 	//addParam("Threshold", 0.9, 2, 0.01);
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor());
-	addParam("Window Size", 1, 1, 8);*/
+	mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
+	addParam("Window Size", 64, 64, 8);
+	addParam("AR Degree", 9, 9, 8);
+	addParam("I Degree", 0, 0, 8);
+	addParam("MA Degree", 0, 0, 8);
 
 	mDetector->setMode(ViNoiseDetector::Standard);
 
