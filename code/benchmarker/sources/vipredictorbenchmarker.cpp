@@ -36,9 +36,9 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 	addParam("Degree", 3, 3, 1);*/
 	//addParam("Derivatives", 1, 1, 1);
 
-	mPredictor = new ViFourierPredictor(ViFourierPredictor::Normal, ViFourierPredictor::Fixed);
+	/*mPredictor = new ViFourierPredictor(ViFourierPredictor::Normal, ViFourierPredictor::Fixed);
 	addParam("Window Size", 8, 1024, 8);
-	addParam("Degree", 5, 20, 5);
+	addParam("Degree", 5, 20, 5);*/
 	//addParam("Derivatives", 11, 11, 1);
 
 	/*addParam("Window Size", 1, 15, 1);
@@ -60,10 +60,9 @@ ViPredictorBenchmarker::ViPredictorBenchmarker()
 		//addParam("I Degree", 0, 1, 1);
 		addParam("MA Degree", 0, 1, 1);*/
 
-	//mPredictor = new ViNeuralPredictor();
-	//addParam("Window Size", 1, 1, 1);
-	//addParam("l1", 0, 0, 2);
-	//addParam("l3", 15,15, 5);
+	mPredictor = new ViNeuralPredictor(ViNeuralPredictor::IncrementalSet);
+	addParam("Window Size", 32, 1024, 32);
+	addParam("Hidden Layer 1", 0, 64, 32);
 
 	QObject::connect(mPredictor, SIGNAL(progressed(qreal)), this, SLOT(progress(qreal)));
 }

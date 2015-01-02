@@ -53,11 +53,17 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	//addParam("MA Degree", 1, 1, 1);
 	//addParam("Threshold", 0.9, 2, 0.01);
 
-	mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
-	addParam("Window Size", 64, 64, 8);
-	addParam("AR Degree", 9, 9, 8);
-	addParam("I Degree", 0, 0, 8);
-	addParam("MA Degree", 0, 0, 8);
+	mDetector = new ViPredictionNoiseDetector(new ViGarchPredictor());
+	addParam("Window Size", 48, 48, 8);
+	/*addParam("Degree", 10, 10, 8);
+	addParam("Derivatives", 1, 1, 8);*/
+
+	addParam("Arch Degree", 1, 1, 8);
+	addParam("Garch Degree", 1, 1, 8);
+
+	/*addParam("AR Degree", 8, 8, 8);
+	addParam("I Degree", 1, 1, 8);
+	addParam("MA Degree", 2, 2, 8);*/
 
 	mDetector->setMode(ViNoiseDetector::Standard);
 

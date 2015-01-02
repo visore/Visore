@@ -10,8 +10,8 @@ ViGarchPredictor::ViGarchPredictor()
 	setWindowSize(DEFAULT_WINDOW_SIZE);
 
 	addParameterName("Window Size");
-	addParameterName("GARCH Order");
-	addParameterName("ARCH Order");
+	addParameterName("Arch Degree");
+	addParameterName("Garch Degree");
 }
 
 ViGarchPredictor::ViGarchPredictor(const ViGarchPredictor &other)
@@ -40,8 +40,8 @@ void ViGarchPredictor::setDegree(const ViGretl::Type &type, const int &degree)
 void ViGarchPredictor::setParameter(const int &number, const qreal &value)
 {
 	if(number == 0) setWindowSize(value);
-	else if(number == 1) setDegree(ViGretl::GARCH, value);
-	else if(number == 2) setDegree(ViGretl::ARCH, value);
+	else if(number == 1) setDegree(ViGretl::ARCH, value);
+	else if(number == 2) setDegree(ViGretl::GARCH, value);
 	else
 	{
 		LOG("Invalid parameter for this predictor.", QtCriticalMsg);

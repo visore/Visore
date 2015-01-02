@@ -9,7 +9,7 @@ FILE(GLOB VI_GARCH_PREDICTOR_HEADERS ${HEADERS}/*.h)
 
 #Create library
 ADD_LIBRARY(vigarchpredictor SHARED ${VI_GARCH_PREDICTOR_HEADERS} ${VI_GARCH_PREDICTOR_SOURCES})
-TARGET_LINK_LIBRARIES(vigarchpredictor vipredictor)
+TARGET_LINK_LIBRARIES(vigarchpredictor vipredictor vigretl)
 QT5_USE_MODULES(vigarchpredictor Multimedia)
 
 #Install file
