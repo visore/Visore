@@ -29,41 +29,103 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 {
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
+	mTemp = 0;
 
 	/*mDetector = new ViZscoreNoiseDetector();
-	addParam("Window Size", 1868, 1868, 4);*/
+	addParam("Window Size", 1868, 1868, 1);*/
 
 	/*mDetector = new ViNearestNeighbourNoiseDetector();
-	addParam("K", 324, 324, 1);*/
+	addParam("K", 324, 324, 1);
+	mThreshold = 0.340127125;*/
 
 	/*mDetector = new ViMahalanobisNoiseDetector();
-	addParam("Window Size", 3264, 3264, 20);*/
+	addParam("Window Size", 1500, 1500, 20);*/
+	//mThreshold = 0.32745225;
 
 	/*mDetector = new ViMadNoiseDetector();
-	addParam("Window Size", 1600, 1600, 8);*/
+	addParam("Window Size", 1600, 1600, 8);
+	mThreshold = 0.127406163;*/
 
-/*	mDetector = new ViFourierNoiseDetector();
+	/*mDetector = new ViFourierNoiseDetector();
 	addParam("Window Size", 64,64, 128);
 	addParam("Range Start", 5, 5, 25);
-	addParam("Range End", 25, 25, 25);*/
+	addParam("Range End", 25, 25, 25);
+	mThreshold = 0.8094575;*/
+
+
+
+
+
+
+
+	mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor(), ViPredictionNoiseDetector::Batch);
+	addParam("Threshold", 0.05, 1, 0.05);
+	addParam("Window Size", 48, 48, 1);
+	addParam("Degree", 1, 1, 1);
 
 	/*mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor(ViPolynomialPredictor::Osculating));
-	addParam("Window Size", 48, 48, 8);
-	addParam("Degree", 2, 2, 1);*/
-	//addParam("MA Degree", 1, 1, 1);
-	//addParam("Threshold", 0.9, 2, 0.01);
+	addParam("Window Size", 48, 48, 1);
+	addParam("Degree", 2, 2, 1);
+	addParam("Derivatives", 1, 1, 1);*/
 
-	mDetector = new ViPredictionNoiseDetector(new ViGarchPredictor());
-	addParam("Window Size", 48, 48, 8);
-	/*addParam("Degree", 10, 10, 8);
+	/*mDetector = new ViPredictionNoiseDetector(new ViFourierPredictor());
+	addParam("Window Size", 64, 64, 1);
+	addParam("Degree", 1, 1, 1);*/
+
+	/*mDetector = new ViPredictionNoiseDetector(new ViFourierPredictor(ViFourierPredictor::Osculating));
+	addParam("Window Size", 64, 64, 1);
+	addParam("Degree", 2, 2, 1);
 	addParam("Derivatives", 1, 1, 8);*/
 
-	addParam("Arch Degree", 1, 1, 8);
-	addParam("Garch Degree", 1, 1, 8);
+	/*mDetector = new ViPredictionNoiseDetector(new ViHermitePredictor());
+	addParam("Window Size", 2, 2, 1);*/
 
-	/*addParam("AR Degree", 8, 8, 8);
-	addParam("I Degree", 1, 1, 8);
-	addParam("MA Degree", 2, 2, 8);*/
+	/*mDetector = new ViPredictionNoiseDetector(new ViNewtonPredictor());
+	addParam("Window Size", 2, 2, 1);*/
+
+	/*mDetector = new ViPredictionNoiseDetector(new ViLagrangePredictor());
+	addParam("Window Size", 2, 2, 1);*/
+
+	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor(), ViPredictionNoiseDetector::Batch);
+	addParam("Window Size", 64, 64, 1);
+	addParam("AR Degree", 2, 2, 1);
+	addParam("I Degree", 0, 0, 1);
+	addParam("MA Degree", 0, 0, 1);*/
+
+/*	mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
+	addParam("Window Size", 204, 204, 1);
+	addParam("AR Degree", 0, 0, 1);
+	addParam("I Degree", 0, 0, 1);
+	addParam("MA Degree", 1, 1, 1);*/
+
+	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
+	addParam("Window Size", 64, 64, 1);
+	addParam("AR Degree", 2, 2, 1);
+	addParam("I Degree", 0, 0, 1);
+	addParam("MA Degree", 2, 2, 1);*/
+
+	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
+	addParam("Window Size", 48, 48, 1);
+	addParam("AR Degree", 2, 2, 1);
+	addParam("I Degree", 1, 1, 1);
+	addParam("MA Degree", 1, 1, 1);*/
+
+	/*mDetector = new ViPredictionNoiseDetector(new ViGarchPredictor());
+	addParam("Window Size", 48, 48, 1);
+	addParam("Arch Degree", 1, 1, 1);
+	addParam("Garch Degree", 0, 0, 1);*/
+
+	/*mDetector = new ViPredictionNoiseDetector(new ViGarchPredictor());
+	addParam("Window Size", 48, 48, 1);
+	addParam("Arch Degree", 1, 1, 1);
+	addParam("Garch Degree", 1, 1, 1);*/
+
+	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor(ViNeuralPredictor::IncrementalSet));
+	addParam("Window Size", 4, 4, 1);
+	addParam("Hidden Layer 1", 8, 8, 1);*/
+
+	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor(ViNeuralPredictor::IncrementalRecurrent));
+	addParam("Window Size", 12, 12, 1);*/
 
 	mDetector->setMode(ViNoiseDetector::Standard);
 
@@ -193,6 +255,7 @@ void ViNoiseDetectorBenchmarker::nextFile()
 {
 	if(mFiles.isEmpty())
 	{
+		cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX: " << setprecision(10) << mTemp / 8 << endl;
 		quit();
 	}
 	else
@@ -243,9 +306,9 @@ void ViNoiseDetectorBenchmarker::process()
 			time = mTime.elapsed();
 
 			// Write
-		/*	QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
+			/*QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
 			mCurrentObject->encode(ViAudio::Noise);
-			return;*/
+			//return;*/
 
 			calculateThreshold(mCurrentObject->buffer(ViAudio::Noise), mCurrentObject->buffer(ViAudio::Custom), bestThreshold, bestErrors, bestMatthews, maxNoise);
 			if(bestMatthews > maxMatthews) maxMatthews = bestMatthews;
@@ -256,6 +319,7 @@ void ViNoiseDetectorBenchmarker::process()
 			QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
 			mCurrentObject->encode(ViAudio::NoiseMask);
 			return;*/
+
 		}
 		else
 		{
@@ -267,6 +331,8 @@ void ViNoiseDetectorBenchmarker::process()
 		printTerminal(bestErrors, time, bestThreshold, maxMatthews);
 	}
 	while(nextParam());
+
+	mTemp += maxMatthews;
 
 	nextFile();
 }

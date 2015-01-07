@@ -187,6 +187,26 @@ qreal ViNoiseDetector::detect(ViBuffer *corrupted, ViBuffer *noiseMap)
 		mapData.enqueueSplitSamples(chunk, 1);
 	}
 
+/*	if(samples1.size() > 0)
+	{
+		chunk.resize(samples1.size());
+		for(i = 0; i < samples1.size(); ++i)
+		{
+			chunk[i] =0;
+		}
+		mapData.enqueueSplitSamples(chunk, 0);
+	}
+
+	if(samples2.size() > 0)
+	{
+		chunk.resize(samples2.size());
+		for(i = 0; i < samples2.size(); ++i)
+		{
+			chunk[i] =0;
+		}
+		mapData.enqueueSplitSamples(chunk, 1);
+	}
+*/
 	setProgress(100);
 	return maxNoise;
 }

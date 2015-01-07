@@ -70,6 +70,8 @@ class ViNoiseDetectorBenchmarker : public QObject
 
 		int mTotalFiles;
 
+		qreal mTemp;
+
 };
 
 #endif

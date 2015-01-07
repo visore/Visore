@@ -13,14 +13,23 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 
 		void changeParameter(QString name, qreal value);
 
+	public:
+
+		enum PredictionMode
+		{
+			Batch,
+			Recurrent
+		};
+
     public:
 
-		ViPredictionNoiseDetector(ViPredictor *predictor); // Takes ownership
+		ViPredictionNoiseDetector(ViPredictor *predictor, PredictionMode mode = Recurrent); // Takes ownership
 		~ViPredictionNoiseDetector();
 
 		QString name(QString replace = "", bool spaced = false);
 
 		void setThreshold(const qreal threshold);
+		void setPredictionMode(PredictionMode mode);
 
 		bool validParameters();
 
@@ -29,8 +38,12 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 		void initialize(const int &channelCount);
 		void detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel = 0);
 
+		void detectBatch(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel = 0);
+		void detectRecurrent(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel = 0);
+
 	private:
 
+		PredictionMode mPredictionMode;
 		int mWindowSize;
 		int mRequiredSize;
 		ViPredictor *mPredictor;
@@ -42,7 +55,10 @@ class ViPredictionNoiseDetector : public ViNoiseDetector
 		int mI;
 		int mJ;
 		qreal mMean;
+		qreal mMaxNoise;
 		int mCounter;
+
+		QVector<int> mNoiseCounter;
 
 };
 

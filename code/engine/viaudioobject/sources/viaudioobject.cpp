@@ -471,7 +471,7 @@ void ViAudioObject::decodeNext()
 		mDecoder = NULL;
 		locker.unlock();
 		emit decoded();
-		if(!mDisbaleFinishSignal) setFinished();
+		//if(!mDisbaleFinishSignal) setFinished();
 	}
 	else
 	{

@@ -1,9 +1,9 @@
 #include <vipredictionnoisedetector.h>
 #include <vinoisecreator.h>
 
-#define DEFAULT_THRESHOLD 0.93
+#define DEFAULT_THRESHOLD 0.5
 
-ViPredictionNoiseDetector::ViPredictionNoiseDetector(ViPredictor *predictor)
+ViPredictionNoiseDetector::ViPredictionNoiseDetector(ViPredictor *predictor, PredictionMode mode)
 	: ViNoiseDetector()
 {
 	mPredictor = predictor;
@@ -11,12 +11,16 @@ ViPredictionNoiseDetector::ViPredictionNoiseDetector(ViPredictor *predictor)
 	QStringList parameters = mPredictor->parameters();
 	for(int i = 0; i < parameters.size(); ++i) addParameter(parameters[i]);
 	addParameter("Threshold");
+
 	setScale(4);
 
 	setThreshold(DEFAULT_THRESHOLD);
 
-	mPredictionCount = ViNoiseCreator::maximumNoiseSize();
-	mPredictions = new qreal[mPredictionCount];
+	mPredictionCount = 0;
+	mPredictions = NULL;
+	setPredictionMode(mode);
+
+	mMaxNoise = ViNoiseCreator::maximumNoiseSize();
 
 	QObject::connect(this, SIGNAL(parameterChanged(QString,qreal)), this, SLOT(changeParameter(QString,qreal)));
 }
@@ -40,6 +44,17 @@ void ViPredictionNoiseDetector::setThreshold(const qreal threshold)
 	mThreshold = threshold;
 }
 
+void ViPredictionNoiseDetector::setPredictionMode(PredictionMode mode)
+{
+	mPredictionMode = mode;
+
+	if(mPredictionMode == Batch) mPredictionCount = ViNoiseCreator::maximumNoiseSize();
+	else mPredictionCount = 1;
+
+	delete [] mPredictions;
+	mPredictions = new qreal[mPredictionCount];
+}
+
 bool ViPredictionNoiseDetector::validParameters()
 {
 	return mPredictor->validParameters();
@@ -61,60 +76,65 @@ void ViPredictionNoiseDetector::changeParameter(QString name, qreal value)
 void ViPredictionNoiseDetector::initialize(const int &channelCount)
 {
 	mPredictor->initialize(channelCount, mPredictionCount);
+
+	mNoiseCounter.clear();
+	mNoiseCounter.append(0);
+	mNoiseCounter.append(0);
 }
 
 void ViPredictionNoiseDetector::detect(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel)
 {
+	if(mPredictionMode == Batch) detectBatch(samples, noise, channel);
+	else detectRecurrent(samples, noise, channel);
+}
+
+void ViPredictionNoiseDetector::detectBatch(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel)
+{
 	while(samples.size() >= mRequiredSize)
 	{
-		if(samples.size() <= mWindowSize) mPredictor->predict(samples.data(), samples.size(), mPredictions, 1, NULL, channel);
-		else  mPredictor->predict(samples.data() + (samples.size() - mWindowSize), mWindowSize, mPredictions, 1, NULL, channel);
+		mPredictor->predict(samples.data(), mWindowSize, mPredictions, mPredictionCount, NULL, channel);
 		mDifference = abs(mPredictions[0] - samples[mWindowSize]);
-
 		if(mDifference > mThreshold)
 		{
-			if(samples.size() <= mWindowSize) mPredictor->predict(samples.data(), samples.size(), mPredictions, mPredictionCount, NULL, channel);
-			else mPredictor->predict(samples.data() + (samples.size() - mWindowSize), mWindowSize, mPredictions, mPredictionCount, NULL, channel);
-
 			noise.append(mDifference);
-			mMean = mDifference;
-			mCounter = 1;
-
-			// Scan for mPredictionCount to find the first sample that is noisy
-			for(mI = mPredictionCount - 1; mI > 0; --mI)
+			for(int i =1; i < mPredictionCount; ++i)
 			{
-				mDifference = abs(mPredictions[mI] - samples[mWindowSize + mI]);
-				if(mDifference > mThreshold)
-				{
-					noise.append(mDifference);
-					mMean += mDifference;
-					++mCounter;
-
-					// Now that the last noisy sample was found, calculate the mean of all noisy samples between the first and last noisy samples
-					for(mJ = 1; mJ < mI; ++mJ)
-					{
-						mDifference = abs(mPredictions[mJ] - samples[mWindowSize + mJ]);
-						if(mDifference > mThreshold)
-						{
-							mMean += mDifference;
-							++mCounter;
-						}
-					}
-
-					// Replace all intermediate non-noisy samples with the mean of the noisy samples
-					mMean /= mCounter;
-					for(mJ = 1; mJ < mI; ++mJ) noise.append(mMean);
-
-					samples.remove(0, mI);
-					break;
-				}
+				noise.append(abs(mPredictions[i] - samples[mWindowSize+i]));
 			}
-			samples.removeFirst();
+			samples.remove(0, mPredictionCount);
 		}
 		else
 		{
 			noise.append(mDifference);
 			samples.removeFirst();
 		}
+	}
+}
+
+void ViPredictionNoiseDetector::detectRecurrent(QVector<qreal> &samples, QVector<qreal> &noise, const int &channel)
+{
+	while(samples.size() >= mRequiredSize)
+	{
+		mPredictor->predict(samples.data(), mWindowSize, mPredictions, mPredictionCount, NULL, channel);
+		mDifference = abs(mPredictions[0] - samples[mWindowSize]);
+		if(mDifference > mThreshold)
+		{
+			mNoiseCounter[channel] += 1;
+			if(mNoiseCounter[channel] <= mMaxNoise)
+			{
+				samples[mWindowSize] = 0;//samples[mWindowSize-1];
+			}
+			else
+			{
+				mNoiseCounter[channel] = 0;
+			}
+		}
+		else
+		{
+			mNoiseCounter[channel] = 0;
+		}
+
+		noise.append(mDifference);
+		samples.removeFirst();
 	}
 }
