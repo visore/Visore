@@ -58,32 +58,38 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 
 
 
-	mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor(), ViPredictionNoiseDetector::Batch);
+	/*mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor(), ViPredictionNoiseDetector::Batch);
 	addParam("Threshold", 0.05, 1, 0.05);
 	addParam("Window Size", 48, 48, 1);
-	addParam("Degree", 1, 1, 1);
+	addParam("Degree", 1, 1, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor(ViPolynomialPredictor::Osculating));
+	/*mDetector = new ViPredictionNoiseDetector(new ViPolynomialPredictor(ViPolynomialPredictor::Osculating), ViPredictionNoiseDetector::Batch);
+	addParam("Threshold", 0.5, 1, 0.05);
 	addParam("Window Size", 48, 48, 1);
 	addParam("Degree", 2, 2, 1);
 	addParam("Derivatives", 1, 1, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViFourierPredictor());
+	/*mDetector = new ViPredictionNoiseDetector(new ViFourierPredictor(), ViPredictionNoiseDetector::Batch);
+	addParam("Threshold", 0.05, 0.2, 0.05);
 	addParam("Window Size", 64, 64, 1);
 	addParam("Degree", 1, 1, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViFourierPredictor(ViFourierPredictor::Osculating));
+	/*mDetector = new ViPredictionNoiseDetector(new ViFourierPredictor(ViFourierPredictor::Osculating), ViPredictionNoiseDetector::Batch);
+	addParam("Threshold", 0.05, 1, 0.05);
 	addParam("Window Size", 64, 64, 1);
 	addParam("Degree", 2, 2, 1);
 	addParam("Derivatives", 1, 1, 8);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViHermitePredictor());
+	mDetector = new ViPredictionNoiseDetector(new ViHermitePredictor(), ViPredictionNoiseDetector::Batch);
+	addParam("Threshold",0.5, 2, 0.05);
+	addParam("Window Size", 2, 2, 1);
+
+	/*mDetector = new ViPredictionNoiseDetector(new ViNewtonPredictor(), ViPredictionNoiseDetector::Batch);
+	addParam("Threshold", 0.05, 0.5, 0.05);
 	addParam("Window Size", 2, 2, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViNewtonPredictor());
-	addParam("Window Size", 2, 2, 1);*/
-
-	/*mDetector = new ViPredictionNoiseDetector(new ViLagrangePredictor());
+	/*mDetector = new ViPredictionNoiseDetector(new ViLagrangePredictor(), ViPredictionNoiseDetector::Batch);
+	addParam("Threshold", 0.6, 2, 0.05);
 	addParam("Window Size", 2, 2, 1);*/
 
 	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor(), ViPredictionNoiseDetector::Batch);
@@ -92,39 +98,39 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	addParam("I Degree", 0, 0, 1);
 	addParam("MA Degree", 0, 0, 1);*/
 
-/*	mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
+/*	mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor(), ViPredictionNoiseDetector::Batch);
 	addParam("Window Size", 204, 204, 1);
 	addParam("AR Degree", 0, 0, 1);
 	addParam("I Degree", 0, 0, 1);
 	addParam("MA Degree", 1, 1, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
+	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor(), ViPredictionNoiseDetector::Batch);
 	addParam("Window Size", 64, 64, 1);
 	addParam("AR Degree", 2, 2, 1);
 	addParam("I Degree", 0, 0, 1);
 	addParam("MA Degree", 2, 2, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor());
+	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor(), ViPredictionNoiseDetector::Batch);
 	addParam("Window Size", 48, 48, 1);
 	addParam("AR Degree", 2, 2, 1);
 	addParam("I Degree", 1, 1, 1);
 	addParam("MA Degree", 1, 1, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViGarchPredictor());
+	/*mDetector = new ViPredictionNoiseDetector(new ViGarchPredictor(), ViPredictionNoiseDetector::Batch);
 	addParam("Window Size", 48, 48, 1);
 	addParam("Arch Degree", 1, 1, 1);
 	addParam("Garch Degree", 0, 0, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViGarchPredictor());
+	/*mDetector = new ViPredictionNoiseDetector(new ViGarchPredictor(), ViPredictionNoiseDetector::Batch);
 	addParam("Window Size", 48, 48, 1);
 	addParam("Arch Degree", 1, 1, 1);
 	addParam("Garch Degree", 1, 1, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor(ViNeuralPredictor::IncrementalSet));
+	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor(ViNeuralPredictor::IncrementalSet), ViPredictionNoiseDetector::Batch);
 	addParam("Window Size", 4, 4, 1);
 	addParam("Hidden Layer 1", 8, 8, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor(ViNeuralPredictor::IncrementalRecurrent));
+	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor(ViNeuralPredictor::IncrementalRecurrent), ViPredictionNoiseDetector::Batch);
 	addParam("Window Size", 12, 12, 1);*/
 
 	mDetector->setMode(ViNoiseDetector::Standard);
