@@ -408,7 +408,7 @@ void ViInterpolatorBatcher::nextFile()
 		mCurrentObject.setNull();
 		mCurrentObject = ViAudioObject::create();
 		mCurrentObject->setFilePath(ViAudio::Target, mCurrentFile);
-		QObject::connect(mCurrentObject.data(), SIGNAL(finished()), this, SLOT(process()));
+		QObject::connect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
 		mCurrentObject->decode();
 	}
 }
@@ -418,7 +418,7 @@ void ViInterpolatorBatcher::process()
 	mQuitCount = 0;
 	mBestScore = DBL_MAX;
 
-	QObject::disconnect(mCurrentObject.data(), SIGNAL(finished()), this, SLOT(process()));
+	QObject::disconnect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
 	qint64 time;
 
 	ViErrorCollection interpolationErrors, modelErrors;

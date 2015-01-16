@@ -49,12 +49,12 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	//addParam("I Degree", 0, 0, 0);
 	addParam("MA Degree", 2, 2, 0);*/
 
-	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::Interpolation);
+	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::SetPrediction);
 	//addParam("Hidden Layer 3", 0, 32, 4);
 	//addParam("Hidden Layer 2", 0, 64, 4);
 	//addParam("Hidden Layer 1", 0, 128, 4);
-	addParam("Window Size", 256, 256, 1);
-	//addParam("Hidden Layer 1", 96, 96, 4);
+	addParam("Window Size", 16, 1024, 16);
+	addParam("Hidden Layer 1", 0, 64, 16);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 	//mInterpolator->setDirection(ViInterpolator::Bidirectional);
@@ -205,7 +205,7 @@ void ViInterpolatorBenchmarker::nextFile()
 		mCurrentObject.setNull();
 		mCurrentObject = ViAudioObject::create();
 		mCurrentObject->setFilePath(ViAudio::Target, mCurrentFile);
-		QObject::connect(mCurrentObject.data(), SIGNAL(finished()), this, SLOT(process()));
+		QObject::connect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
 		mCurrentObject->decode();
 	}
 }
@@ -215,7 +215,7 @@ void ViInterpolatorBenchmarker::process()
 	mQuitCount = 0;
 	mBestScore = DBL_MAX;
 
-	QObject::disconnect(mCurrentObject.data(), SIGNAL(finished()), this, SLOT(process()));
+	QObject::disconnect(mCurrentObject.data(), SIGNAL(decoded()), this, SLOT(process()));
 	qint64 time;
 
 	ViErrorCollection interpolationErrors, modelErrors;

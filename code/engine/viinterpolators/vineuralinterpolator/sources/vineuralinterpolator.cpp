@@ -3,7 +3,7 @@
 #include <vinoisecreator.h>
 
 #define DEFAULT_WINDOW_SIZE 32
-#define DEFAULT_EPOCHS 30
+#define DEFAULT_EPOCHS 50
 #define MAX_HIDDEN_LAYERS 10
 
 ViNeuralInterpolator::ViNeuralInterpolator(Mode mode)
@@ -334,26 +334,71 @@ bool ViNeuralInterpolator::interpolateIncrementalPrediction(const qreal *leftSam
 bool ViNeuralInterpolator::interpolateSetPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
 	ViFann *network = mNetworks.first();
-	int counter = 0;
-	int total = mInputs + mOutputs;
 
-	network->createTrain(leftSize - total);
-	while(counter < leftSize - total)
-	{
-		network->setTrainInput(counter, leftSamples + counter);
-		network->setTrainOutput(counter, leftSamples + counter + mInputs);
-		++counter;
-	}
-
-	network->train();
-	network->deleteTrain();
+	trainSet(leftSamples, leftSize, rightSamples, rightSize, outputSize, 768, 8);
 
 	qreal *output = mOutput.first();
 	network->run(leftSamples + (leftSize - mInputs), output);
-	for(counter = 0; counter < outputSize; ++counter)
+	for(int i = 0; i < outputSize; ++i)
 	{
-		outputSamples[counter] = output[counter];
+		outputSamples[i] = output[i];
 	}
+}
+
+
+void ViNeuralInterpolator::trainSet(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, int trainCount, const int &stepSize)
+{
+	int leftOffset, windowSize, halfSteps, counter;
+
+	ViFann *network = mNetworks.first();
+	qreal *output = mOutput.first();
+
+	counter = 0;
+	windowSize = mInputs + outputSize;
+	if(trainCount > 0)
+	{
+		halfSteps = trainCount * stepSize;
+		leftOffset = leftSize - halfSteps - windowSize;
+	}
+
+	if(trainCount <= 0 || leftOffset < 0)
+	{
+		trainCount = floor((leftSize - windowSize) / qreal(stepSize));
+		halfSteps = trainCount * stepSize;
+		leftOffset = leftSize - halfSteps - windowSize;
+	}
+
+	network->createTrain(trainCount);
+
+	while(devideSet((qreal*) leftSamples, leftSize, leftOffset, mInput, mInputs, output, outputSize))
+	{
+		network->setTrainInput(counter, mInput);
+		network->setTrainOutput(counter, output);
+		//network->train(mInput, output);
+		leftOffset += stepSize;
+		++counter;
+	}
+
+	int trains = network->train();
+	mTrainCount += trains;
+	network->deleteTrain();
+
+	//cout<<"Training epochs: " << trains << " (" << mTrainCount << ") " << outputSize << endl;
+	//network->saveToFile(ViManager::tempOtherPath() + QString::number(outputSize) + ".fann");
+}
+
+bool ViNeuralInterpolator::devideSet(const qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &leftInputs, qreal *output, const int &outputSize)
+{
+	if(offset + leftInputs + outputSize >= sampleSize) return false;
+	static size_t size = sizeof(qreal);
+
+	// Copy left inputs
+	memcpy(input, samples + offset, size * leftInputs);
+
+	// Copy outputs
+	memcpy(output, samples + offset + leftInputs, size * outputSize);
+
+	return true;
 }
 
 bool ViNeuralInterpolator::interpolateIncrementalRecurrentPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)

@@ -60,6 +60,9 @@ class ViNeuralInterpolator : public ViInterpolator
 		// stepSize: How many samples to skip before creating the next training set. If this is too high, trainCount will be adjusted
 		void train(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const int &trainCount, const int &stepSize);
 
+		void trainSet(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize,  int trainCount, const int &stepSize);
+		bool devideSet(const qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &leftInputs, qreal *output, const int &outputSize);
+
 		bool devide(const qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &leftInputs, const int &rightInputs, qreal *output, const int &outputSize);
 		void devide(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, qreal *input, const int &leftInputs, const int &rightInputs);
 

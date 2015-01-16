@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
 
 	//ViBenchmarker bench;
 	//ViPredictorBenchmarker bench;
-	//ViInterpolatorBenchmarker bench;
-	ViNoiseDetectorBenchmarker bench;
+	ViInterpolatorBenchmarker bench;
+//	ViNoiseDetectorBenchmarker bench;
 
 //	ViInterpolatorBatcher bench;
 	//ViNoiseBatcher bench;
