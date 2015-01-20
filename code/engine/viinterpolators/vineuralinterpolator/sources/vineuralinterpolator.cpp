@@ -103,14 +103,14 @@ void ViNeuralInterpolator::clear()
 
 void ViNeuralInterpolator::initialize(const int &channelCount)
 {
-	if(mMode == IncrementalPrediction) initializeIncrementalPrediction(channelCount);
-	else if(mMode == SetPrediction) initializeSetPrediction(channelCount);
-	else if(mMode == IncrementalRecurrentPrediction) initializeIncrementalRecurrentPrediction(channelCount);
-	else if(mMode == IncrementalSetPrediction) initializeIncrementalSetPrediction(channelCount);
+	if(mMode == Incremental) initializeIncremental(channelCount);
+	else if(mMode == Recurrent) initializeRecurrent(channelCount);
+	else if(mMode == SeparateBatch) initializeSeparateBatch(channelCount);
+	else if(mMode == MaximumBatch) initializeMaximumBatch(channelCount);
 	else if(mMode == Interpolation) initializeInterpolation(channelCount);
 }
 
-void ViNeuralInterpolator::initializeIncrementalPrediction(const int &channelCount)
+void ViNeuralInterpolator::initializeIncremental(const int &channelCount)
 {
 	clear();
 
@@ -131,12 +131,10 @@ void ViNeuralInterpolator::initializeIncrementalPrediction(const int &channelCou
 	network->setTraining(ViFann::Fixed, ViFann::Incremental);
 	network->setActivation(ViFann::Elliot);
 	network->setWeights(ViFann::Random);
-	//network->setWeights(ViFann::WidrowNguyen);
 	network->setLearningRate(0.01);
 	//network->setLearningMomentum(0.1);
 	network->setStopEpochs(1);
 	network->setStopMse(0.000000);
-	//network->setStopStagnation(0.0000001, 5);
 	if(!network->isValid())
 	{
 		LOG("Invalid neural network.", QtFatalMsg);
@@ -148,45 +146,7 @@ void ViNeuralInterpolator::initializeIncrementalPrediction(const int &channelCou
 	mOutput.append(new qreal[mOutputs]);
 }
 
-void ViNeuralInterpolator::initializeSetPrediction(const int &channelCount)
-{
-	clear();
-
-	mInputs = mWindowSize;
-	mOutputs = ViNoiseCreator::maximumNoiseSize();
-
-	QList<int> neurons;
-	neurons.append(mInputs);
-	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
-	{
-		if(mHiddenNeurons[i] == 0) break;
-		neurons.append(mHiddenNeurons[i]);
-	}
-	neurons.append(mOutputs);
-
-	ViFann *network = new ViFann(false);
-	network->setStructure(ViFann::Standard, neurons);
-	network->setTraining(ViFann::Fixed, ViFann::RProp);
-	network->setActivation(ViFann::Elliot);
-	network->setWeights(ViFann::Random);
-	//network->setWeights(ViFann::WidrowNguyen);
-	//network->setLearningRate(0.2);
-	//network->setLearningMomentum(0.1);
-	network->setStopEpochs(mEpochs);
-	network->setStopMse(0.000000);
-	//network->setStopStagnation(0.0000001, 5);
-	if(!network->isValid())
-	{
-		LOG("Invalid neural network.", QtFatalMsg);
-		exit(-1);
-	}
-
-	mNetworks.append(network);
-	mInput = new qreal[mInputs];
-	mOutput.append(new qreal[mOutputs]);
-}
-
-void ViNeuralInterpolator::initializeIncrementalRecurrentPrediction(const int &channelCount)
+void ViNeuralInterpolator::initializeRecurrent(const int &channelCount)
 {
 	clear();
 
@@ -207,12 +167,10 @@ void ViNeuralInterpolator::initializeIncrementalRecurrentPrediction(const int &c
 	network->setTraining(ViFann::Fixed, ViFann::Incremental);
 	network->setActivation(ViFann::Elliot);
 	network->setWeights(ViFann::Random);
-	//network->setWeights(ViFann::WidrowNguyen);
 	network->setLearningRate(0.01);
 	//network->setLearningMomentum(0.0);
 	network->setStopEpochs(1);
 	network->setStopMse(0.000000);
-	//network->setStopStagnation(0.0000001, 5);
 	if(!network->isValid())
 	{
 		LOG("Invalid neural network.", QtFatalMsg);
@@ -224,9 +182,76 @@ void ViNeuralInterpolator::initializeIncrementalRecurrentPrediction(const int &c
 	mOutput.append(new qreal[mOutputs]);
 }
 
-void ViNeuralInterpolator::initializeIncrementalSetPrediction(const int &channelCount)
+void ViNeuralInterpolator::initializeSeparateBatch(const int &channelCount)
 {
+	clear();
 
+	mInputs = mWindowSize;
+	mOutputs = ViNoiseCreator::maximumNoiseSize();
+
+	QList<int> neurons;
+	neurons.append(mInputs);
+	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
+	{
+		if(mHiddenNeurons[i] == 0) break;
+		neurons.append(mHiddenNeurons[i]);
+	}
+	neurons.append(mOutputs);
+
+	for(int i = 1; i <= mOutputs; ++i)
+	{
+		neurons.last() = i;
+		ViFann *network = new ViFann(false);
+		network->setStructure(ViFann::Standard, neurons);
+		network->setTraining(ViFann::Fixed, ViFann::RProp);
+		network->setActivation(ViFann::Elliot);
+		network->setWeights(ViFann::Random);
+		network->setStopEpochs(mEpochs);
+		network->setStopMse(0.000000);
+		if(!network->isValid())
+		{
+			LOG("Invalid neural network.", QtFatalMsg);
+			exit(-1);
+		}
+
+		mNetworks.append(network);
+		mOutput.append(new qreal[i]);
+	}
+	mInput = new qreal[mInputs];
+}
+
+void ViNeuralInterpolator::initializeMaximumBatch(const int &channelCount)
+{
+	clear();
+
+	mInputs = mWindowSize;
+	mOutputs = ViNoiseCreator::maximumNoiseSize();
+
+	QList<int> neurons;
+	neurons.append(mInputs);
+	for(int i = 0; i < MAX_HIDDEN_LAYERS; ++i)
+	{
+		if(mHiddenNeurons[i] == 0) break;
+		neurons.append(mHiddenNeurons[i]);
+	}
+	neurons.append(mOutputs);
+
+	ViFann *network = new ViFann(false);
+	network->setStructure(ViFann::Standard, neurons);
+	network->setTraining(ViFann::Fixed, ViFann::RProp);
+	network->setActivation(ViFann::Elliot);
+	network->setWeights(ViFann::Random);
+	network->setStopEpochs(mEpochs);
+	network->setStopMse(0.000000);
+	if(!network->isValid())
+	{
+		LOG("Invalid neural network.", QtFatalMsg);
+		exit(-1);
+	}
+
+	mNetworks.append(network);
+	mOutput.append(new qreal[mOutputs]);
+	mInput = new qreal[mInputs];
 }
 
 void ViNeuralInterpolator::initializeInterpolation(const int &channelCount)
@@ -234,7 +259,7 @@ void ViNeuralInterpolator::initializeInterpolation(const int &channelCount)
 	int i;
 	clear();
 
-	mOutputs = 50;
+	mOutputs = ViNoiseCreator::maximumNoiseSize();
 
 	mInputs = mWindowSize;
 	mLeftInputs = ceil(mInputs / 2);
@@ -257,23 +282,16 @@ void ViNeuralInterpolator::initializeInterpolation(const int &channelCount)
 		network->setStructure(ViFann::Standard, neurons);
 		network->setActivation(ViFann::Elliot);
 		network->setWeights(ViFann::Random);
-		//network->setWeights(ViFann::WidrowNguyen);
-		//network->setLearningRate(0.1);
-		//network->setLearningMomentum(0.1);
 		network->setTraining(ViFann::Fixed, ViFann::RProp);
 		network->setStopEpochs(mEpochs);
 		network->setStopMse(0.000000);
-		//network->setStopStagnation(0.0000001, 5);
-		//network->setStopNeurons(10);
 		if(!network->isValid())
 		{
 			LOG("Invalid neural network.", QtFatalMsg);
 			exit(-1);
 		}
-		//network->loadFromFile(ViManager::tempOtherPath() + QString::number(i) + ".fann");
 
 		mNetworks.append(network);
-
 		mOutput.append(new qreal[i]);
 	}
 
@@ -282,14 +300,14 @@ void ViNeuralInterpolator::initializeInterpolation(const int &channelCount)
 
 bool ViNeuralInterpolator::interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
-	if(mMode == IncrementalPrediction) interpolateIncrementalPrediction(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
-	else if(mMode == SetPrediction) interpolateSetPrediction(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
-	else if(mMode == IncrementalRecurrentPrediction) interpolateIncrementalRecurrentPrediction(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
-	else if(mMode == IncrementalSetPrediction) interpolateIncrementalSetPrediction(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
+	if(mMode == Incremental) interpolateIncremental(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
+	else if(mMode == Recurrent) interpolateRecurrent(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
+	else if(mMode == SeparateBatch) interpolateSeparateBatch(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
+	else if(mMode == MaximumBatch) interpolateMaximumBatch(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
 	else if(mMode == Interpolation) interpolateInterpolation(leftSamples, leftSize, rightSamples, rightSize, outputSamples, outputSize, error, channel);
 }
 
-bool ViNeuralInterpolator::interpolateIncrementalPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
+bool ViNeuralInterpolator::interpolateIncremental(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
 	ViFann *network = mNetworks.first();
 	int counter = 0;
@@ -331,77 +349,7 @@ bool ViNeuralInterpolator::interpolateIncrementalPrediction(const qreal *leftSam
 	}*/
 }
 
-bool ViNeuralInterpolator::interpolateSetPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
-{
-	ViFann *network = mNetworks.first();
-
-	trainSet(leftSamples, leftSize, rightSamples, rightSize, outputSize, 768, 8);
-
-	qreal *output = mOutput.first();
-	network->run(leftSamples + (leftSize - mInputs), output);
-	for(int i = 0; i < outputSize; ++i)
-	{
-		outputSamples[i] = output[i];
-	}
-}
-
-
-void ViNeuralInterpolator::trainSet(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, int trainCount, const int &stepSize)
-{
-	int leftOffset, windowSize, halfSteps, counter;
-
-	ViFann *network = mNetworks.first();
-	qreal *output = mOutput.first();
-
-	counter = 0;
-	windowSize = mInputs + outputSize;
-	if(trainCount > 0)
-	{
-		halfSteps = trainCount * stepSize;
-		leftOffset = leftSize - halfSteps - windowSize;
-	}
-
-	if(trainCount <= 0 || leftOffset < 0)
-	{
-		trainCount = floor((leftSize - windowSize) / qreal(stepSize));
-		halfSteps = trainCount * stepSize;
-		leftOffset = leftSize - halfSteps - windowSize;
-	}
-
-	network->createTrain(trainCount);
-
-	while(devideSet((qreal*) leftSamples, leftSize, leftOffset, mInput, mInputs, output, outputSize))
-	{
-		network->setTrainInput(counter, mInput);
-		network->setTrainOutput(counter, output);
-		//network->train(mInput, output);
-		leftOffset += stepSize;
-		++counter;
-	}
-
-	int trains = network->train();
-	mTrainCount += trains;
-	network->deleteTrain();
-
-	//cout<<"Training epochs: " << trains << " (" << mTrainCount << ") " << outputSize << endl;
-	//network->saveToFile(ViManager::tempOtherPath() + QString::number(outputSize) + ".fann");
-}
-
-bool ViNeuralInterpolator::devideSet(const qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &leftInputs, qreal *output, const int &outputSize)
-{
-	if(offset + leftInputs + outputSize >= sampleSize) return false;
-	static size_t size = sizeof(qreal);
-
-	// Copy left inputs
-	memcpy(input, samples + offset, size * leftInputs);
-
-	// Copy outputs
-	memcpy(output, samples + offset + leftInputs, size * outputSize);
-
-	return true;
-}
-
-bool ViNeuralInterpolator::interpolateIncrementalRecurrentPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
+bool ViNeuralInterpolator::interpolateRecurrent(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
 	ViFann *network = mNetworks.first();
 	int i, j, counter = 0, end = mInputs - 1;
@@ -441,19 +389,115 @@ bool ViNeuralInterpolator::interpolateIncrementalRecurrentPrediction(const qreal
 	}
 }
 
-bool ViNeuralInterpolator::interpolateIncrementalSetPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
+bool ViNeuralInterpolator::interpolateSeparateBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
+	trainSeparateBatch(leftSamples, leftSize, rightSamples, rightSize, outputSize, 768, 8);
 
+	ViFann *network = mNetworks[outputSize - 1];
+	qreal *output = mOutput[outputSize - 1];
+	network->run(leftSamples + (leftSize - mInputs), output);
+	for(int i = 0; i < outputSize; ++i)
+	{
+		outputSamples[i] = output[i];
+	}
+}
+
+bool ViNeuralInterpolator::interpolateMaximumBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
+{
+	trainMaximumBatch(leftSamples, leftSize, rightSamples, rightSize, outputSize, 768, 8);
+
+	ViFann *network = mNetworks.first();
+	qreal *output = mOutput.first();
+	network->run(leftSamples + (leftSize - mInputs), output);
+	for(int i = 0; i < outputSize; ++i)
+	{
+		outputSamples[i] = output[i];
+	}
+}
+
+void ViNeuralInterpolator::trainSeparateBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, int trainCount, const int &stepSize)
+{
+	int leftOffset, windowSize, halfSteps, counter;
+
+	ViFann *network = mNetworks[outputSize - 1];
+	qreal *output = mOutput[outputSize - 1];
+
+	counter = 0;
+	windowSize = mInputs + outputSize;
+	if(trainCount > 0)
+	{
+		halfSteps = trainCount * stepSize;
+		leftOffset = leftSize - halfSteps - windowSize;
+	}
+	if(trainCount <= 0 || leftOffset < 0)
+	{
+		trainCount = floor((leftSize - windowSize) / qreal(stepSize));
+		halfSteps = trainCount * stepSize;
+		leftOffset = leftSize - halfSteps - windowSize;
+	}
+
+	network->createTrain(trainCount);
+	while(devideBatch((qreal*) leftSamples, leftSize, leftOffset, mInput, mInputs, output, outputSize))
+	{
+		network->setTrainInput(counter, mInput);
+		network->setTrainOutput(counter, output);
+		leftOffset += stepSize;
+		++counter;
+	}
+	network->train();
+	network->deleteTrain();
+}
+
+void ViNeuralInterpolator::trainMaximumBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, int trainCount, const int &stepSize)
+{
+	int leftOffset, windowSize, halfSteps, counter;
+
+	ViFann *network = mNetworks.first();
+	qreal *output = mOutput.first();
+
+	counter = 0;
+	windowSize = mInputs + mOutputs;
+	if(trainCount > 0)
+	{
+		halfSteps = trainCount * stepSize;
+		leftOffset = leftSize - halfSteps - windowSize;
+	}
+	if(trainCount <= 0 || leftOffset < 0)
+	{
+		trainCount = floor((leftSize - windowSize) / qreal(stepSize));
+		halfSteps = trainCount * stepSize;
+		leftOffset = leftSize - halfSteps - windowSize;
+	}
+
+	network->createTrain(trainCount);
+	while(devideBatch((qreal*) leftSamples, leftSize, leftOffset, mInput, mInputs, output, mOutputs))
+	{
+		network->setTrainInput(counter, mInput);
+		network->setTrainOutput(counter, output);
+		leftOffset += stepSize;
+		++counter;
+	}
+	network->train();
+	network->deleteTrain();
+}
+
+bool ViNeuralInterpolator::devideBatch(const qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &leftInputs, qreal *output, const int &outputSize)
+{
+	if(offset + leftInputs + outputSize >= sampleSize) return false;
+	static size_t size = sizeof(qreal);
+
+	// Copy left inputs
+	memcpy(input, samples + offset, size * leftInputs);
+
+	// Copy outputs
+	memcpy(output, samples + offset + leftInputs, size * outputSize);
+
+	return true;
 }
 
 bool ViNeuralInterpolator::interpolateInterpolation(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
-	//mNetworks[outputSize - 1]->setWeights(ViFann::Random);
-
 	train(leftSamples, leftSize, rightSamples, rightSize, outputSize, 768, 8); // 768, 8
-	//for(int i = 1; i <= mOutputs; ++i) train(leftSamples, leftSize, rightSamples, rightSize, i, 10000,4);
-	//train(leftSamples, leftSize, rightSamples, rightSize, outputSize, 64, 4); // 768, 2
-
 	devide(leftSamples, leftSize, rightSamples, mInput, mLeftInputs, mRightInputs);
 	mNetworks[outputSize - 1]->run(mInput, outputSamples);
 }

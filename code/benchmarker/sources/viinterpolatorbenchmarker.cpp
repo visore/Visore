@@ -17,7 +17,7 @@
 #include <vineuralinterpolator.h>
 
 #define WINDOW_SIZE 4096
-#define WRITE false
+#define WRITE true
 #define SUMMARY false
 #define PRINT_TRAIN_MSE false // Only for ANNs
 
@@ -26,22 +26,23 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	mCurrentObject = ViAudioObject::create();
 	mMainTime.start();
 
-	//mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Lanczos);
+	//mInterpolator = new ViPrimitiveInterpolator(ViPrimitiveInterpolator::Cosine);
 	//addParam("Window Size", 2, 1024, 2);
 	//addParam("Window Size", 1, 256, 1);
 
-	//mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Splines);
-	//addParam("Window Size", 94, 100, 2);
-	//addParam("Degree", 1, 10, 1);
+	/*mInterpolator = new ViPolynomialInterpolator(ViPolynomialInterpolator::Normal);
+	addParam("Window Size", 2, 2, 2);
+	addParam("Degree", 1, 1, 1);*/
 	//addParam("Derivatives", 1, 10, 1);
 
 	//mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Traditional);
 	//addParam("K", 6, 6, 1);
 
 
-//	mInterpolator = new ViNearestNeighbourInterpolator(ViNearestNeighbourInterpolator::Mean);
-	//addParam("K", 4,64, 4);
-	//addParam("Samples",32,32, 2);
+	/*mInterpolator = new ViArimaInterpolator();
+	addParam("Window Size", 1456,1456,2);
+	addParam("AR Degree", 9,9,1);
+	addParam("MA Degree", 2,2,1);*/
 
 	/*mInterpolator = new ViArimaInterpolator();
 	addParam("Window Size", 1440, 1440, 8);
@@ -49,12 +50,9 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	//addParam("I Degree", 0, 0, 0);
 	addParam("MA Degree", 2, 2, 0);*/
 
-	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::SetPrediction);
-	//addParam("Hidden Layer 3", 0, 32, 4);
-	//addParam("Hidden Layer 2", 0, 64, 4);
-	//addParam("Hidden Layer 1", 0, 128, 4);
-	addParam("Window Size", 16, 1024, 16);
-	addParam("Hidden Layer 1", 0, 64, 16);
+	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::SeparateBatch);
+	addParam("Window Size", 32, 1024, 32);
+	addParam("Hidden Layer 1", 0, 64, 32);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 	//mInterpolator->setDirection(ViInterpolator::Bidirectional);
@@ -223,7 +221,7 @@ void ViInterpolatorBenchmarker::process()
 	ViNoiseCreator creator;
 	creator.createNoise(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::NoiseMask), mCurrentObject->buffer(ViAudio::Custom));
 
-	do
+	//do
 	{
 		mQuitCount = 0;
 		interpolationErrors.clear();
@@ -246,8 +244,8 @@ void ViInterpolatorBenchmarker::process()
 		// Write
 		if(WRITE)
 		{
-			QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(quit()));
-			mCurrentObject->encode(ViAudio::Corrupted);
+			QObject::connect(mCurrentObject.data(), SIGNAL(encoded()), this, SLOT(nextFile()), Qt::UniqueConnection);
+			mCurrentObject->encode(ViAudio::Corrected);
 			//return;
 		}
 
@@ -259,9 +257,9 @@ void ViInterpolatorBenchmarker::process()
 
 		if(PRINT_TRAIN_MSE) ((ViNeuralInterpolator*) mInterpolator)->printTrainMse();
 	}
-	while(nextParam());
+	//while(nextParam());
 
-	nextFile();
+	//nextFile();
 }
 
 void ViInterpolatorBenchmarker::printFileHeader(QString filepath)

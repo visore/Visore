@@ -11,11 +11,11 @@ class ViNeuralInterpolator : public ViInterpolator
 
 		enum Mode
 		{
-			IncrementalPrediction,				// Incrementally trains the data and then predicts all samples at once
-			SetPrediction,						// Trains the NN with all data before the gap and then predicts all samples at once
-			IncrementalRecurrentPrediction,		// Same as IncrementalPrediction, but uses a recurrent NN and predicts one sample at a time
-			IncrementalSetPrediction,			// Same as SetPrediction, but uses a recurrent NN and predicts one sample at a time
-			Interpolation						// Trains NN with all data surrounding it and interpolates all samples at once - BEST (hopefully)
+			Incremental,	// TDANN trained incrementally with all succeeding samples. Max-noise-size samples all predicted at once.
+			Recurrent,		// Jordan SRTDANN trained incrementally with all succeeding samples. One sample predicted at a time.
+			SeparateBatch,	// TDANN trained with RProp with succeeding samples x saamples appart. One ANN per noise-size.
+			MaximumBatch,	// TDANN trained with RProp with succeeding samples x saamples appart. Max-noise-size samples all predicted at once.
+			Interpolation,	// Half the inputs from left, half from right. Trained with RProp to interpolate between both sides. One ANN per noise-size.
 		};
 
 	public:
@@ -42,26 +42,27 @@ class ViNeuralInterpolator : public ViInterpolator
 		void clear();
 		void initialize(const int &channelCount);
 
-		void initializeIncrementalPrediction(const int &channelCount);
-		void initializeSetPrediction(const int &channelCount);
-		void initializeIncrementalRecurrentPrediction(const int &channelCount);
-		void initializeIncrementalSetPrediction(const int &channelCount);
+		void initializeIncremental(const int &channelCount);
+		void initializeRecurrent(const int &channelCount);
+		void initializeSeparateBatch(const int &channelCount);
+		void initializeMaximumBatch(const int &channelCount);
 		void initializeInterpolation(const int &channelCount);
 
 		bool interpolate(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
 
-		bool interpolateIncrementalPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
-		bool interpolateSetPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
-		bool interpolateIncrementalRecurrentPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
-		bool interpolateIncrementalSetPrediction(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
+		bool interpolateIncremental(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
+		bool interpolateRecurrent(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
+		bool interpolateSeparateBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
+		bool interpolateMaximumBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
 		bool interpolateInterpolation(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel);
 
 		// trainCount: The number of training sets to use (includes left and right). Will always use the same number of training sets from left and right samples. If <= 0, use max number of sets
 		// stepSize: How many samples to skip before creating the next training set. If this is too high, trainCount will be adjusted
 		void train(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, const int &trainCount, const int &stepSize);
 
-		void trainSet(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize,  int trainCount, const int &stepSize);
-		bool devideSet(const qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &leftInputs, qreal *output, const int &outputSize);
+		void trainSeparateBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize,  int trainCount, const int &stepSize);
+		void trainMaximumBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize,  int trainCount, const int &stepSize);
+		bool devideBatch(const qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &leftInputs, qreal *output, const int &outputSize);
 
 		bool devide(const qreal *samples, const int &sampleSize, const int &offset, qreal *input, const int &leftInputs, const int &rightInputs, qreal *output, const int &outputSize);
 		void devide(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, qreal *input, const int &leftInputs, const int &rightInputs);

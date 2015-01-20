@@ -92,12 +92,12 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	addParam("Threshold", 0.65, 0.65, 0.05);
 	addParam("Window Size", 2, 2, 1);*/
 
-	mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor(), ViPredictionNoiseDetector::Recurrent);
+	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor(), ViPredictionNoiseDetector::Recurrent);
 	addParam("Threshold", 0.1, 0.1, 0.05);
 	addParam("Window Size", 64, 64, 1);
 	addParam("AR Degree", 2, 2, 1);
 	addParam("I Degree", 0, 0, 1);
-	addParam("MA Degree", 0, 0, 1);
+	addParam("MA Degree", 0, 0, 1);*/
 
 	/*mDetector = new ViPredictionNoiseDetector(new ViArmaPredictor(), ViPredictionNoiseDetector::Recurrent);
 	addParam("Threshold", 0.8, 0.8, 0.05);
@@ -132,14 +132,14 @@ ViNoiseDetectorBenchmarker::ViNoiseDetectorBenchmarker()
 	addParam("Arch Degree", 1, 1, 1);
 	addParam("Garch Degree", 1, 1, 1);*/
 
-	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor(ViNeuralPredictor::IncrementalSet), ViPredictionNoiseDetector::Recurrent);
+/*	mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor(ViNeuralPredictor::IncrementalSet), ViPredictionNoiseDetector::Recurrent);
 	addParam("Threshold", 0.4, 0.4, 0.05);
 	addParam("Window Size", 4, 4, 4);
-	addParam("Hidden Layer 1", 8, 8, 4);
-*/
-	/*mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor(ViNeuralPredictor::IncrementalRecurrent), ViPredictionNoiseDetector::Recurrent);
+	addParam("Hidden Layer 1", 8, 8, 4);*/
+
+	mDetector = new ViPredictionNoiseDetector(new ViNeuralPredictor(ViNeuralPredictor::IncrementalRecurrent), ViPredictionNoiseDetector::Recurrent);
 	addParam("Threshold", 0.4, 0.4, 0.05);
-	addParam("Window Size", 48, 48, 4);*/
+	addParam("Window Size", 48, 48, 4);
 
 	mDetector->setMode(ViNoiseDetector::Maximum);
 
