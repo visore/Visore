@@ -391,7 +391,7 @@ bool ViNeuralInterpolator::interpolateRecurrent(const qreal *leftSamples, const 
 
 bool ViNeuralInterpolator::interpolateSeparateBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
-	trainSeparateBatch(leftSamples, leftSize, rightSamples, rightSize, outputSize, 768, 8);
+	trainSeparateBatch(leftSamples, leftSize, rightSamples, rightSize, outputSize, 256, 6);
 
 	ViFann *network = mNetworks[outputSize - 1];
 	qreal *output = mOutput[outputSize - 1];
@@ -404,7 +404,7 @@ bool ViNeuralInterpolator::interpolateSeparateBatch(const qreal *leftSamples, co
 
 bool ViNeuralInterpolator::interpolateMaximumBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, qreal *outputSamples, const int &outputSize, ViError *error, const int &channel)
 {
-	trainMaximumBatch(leftSamples, leftSize, rightSamples, rightSize, outputSize, 768, 8);
+	trainMaximumBatch(leftSamples, leftSize, rightSamples, rightSize, outputSize, 256, 8);
 
 	ViFann *network = mNetworks.first();
 	qreal *output = mOutput.first();

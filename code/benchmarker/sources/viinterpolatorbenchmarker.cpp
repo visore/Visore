@@ -17,7 +17,7 @@
 #include <vineuralinterpolator.h>
 
 #define WINDOW_SIZE 4096
-#define WRITE true
+#define WRITE false
 #define SUMMARY false
 #define PRINT_TRAIN_MSE false // Only for ANNs
 
@@ -51,8 +51,8 @@ ViInterpolatorBenchmarker::ViInterpolatorBenchmarker()
 	addParam("MA Degree", 2, 2, 0);*/
 
 	mInterpolator = new ViNeuralInterpolator(ViNeuralInterpolator::SeparateBatch);
-	addParam("Window Size", 32, 1024, 32);
-	addParam("Hidden Layer 1", 0, 64, 32);
+	addParam("Window Size", 16, 1024, 16);
+	//addParam("Hidden Layer 1", 64, 64, 32);
 
 	mInterpolator->setDirection(ViInterpolator::Forward);
 	//mInterpolator->setDirection(ViInterpolator::Bidirectional);
@@ -221,7 +221,7 @@ void ViInterpolatorBenchmarker::process()
 	ViNoiseCreator creator;
 	creator.createNoise(mCurrentObject->buffer(ViAudio::Target), mCurrentObject->buffer(ViAudio::Corrupted), mCurrentObject->buffer(ViAudio::NoiseMask), mCurrentObject->buffer(ViAudio::Custom));
 
-	//do
+	do
 	{
 		mQuitCount = 0;
 		interpolationErrors.clear();
@@ -257,9 +257,9 @@ void ViInterpolatorBenchmarker::process()
 
 		if(PRINT_TRAIN_MSE) ((ViNeuralInterpolator*) mInterpolator)->printTrainMse();
 	}
-	//while(nextParam());
+	while(nextParam());
 
-	//nextFile();
+	nextFile();
 }
 
 void ViInterpolatorBenchmarker::printFileHeader(QString filepath)
