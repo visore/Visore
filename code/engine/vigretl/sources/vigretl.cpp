@@ -16,7 +16,7 @@
 #define DEFAULT_ARCH_DEGREE		1
 
 #define MAXIMUM_ITERATIONS		10
-#define MAXIMUM_TEST_AR_DEGREE	20
+#define MAXIMUM_TEST_AR_DEGREE	18
 #define MAXIMUM_TEST_MA_DEGREE	10
 
 bool ViGretl::mInitialized = false;
@@ -177,6 +177,8 @@ void ViGretl::setCriteria(const Criteria &criteria)
 	else if(mType == ARCH || mType == GARCH)
 	{
 		if(mCriteria == None) modelPointer = &ViGretl::fixedGarchModel;
+		else if(mCriteria == AutoCorrelation) modelPointer = &ViGretl::autocorrelationGarchModel;
+		else if(mType == ARCH && mCriteria) modelPointer = &ViGretl::bestArchModel;
 		else
 		{
 			LOG("Not implemented for GARCH yet"); exit(-1);
@@ -546,6 +548,49 @@ MODEL* ViGretl::autocorrelationModel(DATASET *data)
 	return (this->*fixedModelPointer)(data);
 }
 
+MODEL* ViGretl::autocorrelationGarchModel(DATASET *data)
+{
+	static int error, i, archDegree, garchDegree, size;
+
+	size = data->t2 + 1;
+
+	error = 0; // We have to set this manually, because gretl doesn't
+	gretl_matrix *matrix = acf_matrix(data->Z[1], qMax(MAXIMUM_TEST_AR_DEGREE, MAXIMUM_TEST_MA_DEGREE), NULL, size, &error);
+
+	// ************************************* NEED to adapt this for ARIMA and GARCH
+	if(error) return (this->*fixedModelPointer)(data);
+cout<<"*******************"<<endl;
+	garchDegree = 0;
+	qreal acf = 0, acfConfidenceLevel;
+	for(i = 0; i < matrix->rows; ++i)
+	{
+		acfConfidenceLevel = 1.96 * qSqrt((1 + (2 * acf)) / size);
+		if(qAbs(gretl_matrix_get(matrix, i, 0)) < acfConfidenceLevel)
+		{
+			garchDegree = i;
+			break;
+		}
+		acf += qPow(gretl_matrix_get(matrix, i, 0), 2);
+	}
+
+	archDegree = 0;
+	qreal pacfConfidenceLevel = 1.96 / qSqrt(size - 1);
+	for(i = 0; i < matrix->rows; ++i)
+	{
+		if(qAbs(gretl_matrix_get(matrix, i, 1)) < pacfConfidenceLevel)
+		{
+			archDegree = i;
+			break;
+		}
+	}
+
+	gretl_matrix_free(matrix);
+
+	mGretlParameters[2] = archDegree;
+	mGretlParameters[1] = garchDegree;
+	return (this->*fixedModelPointer)(data);
+}
+
 MODEL* ViGretl::bestModel(DATASET *data)
 {
 	if(mArDegree != 0 && mMaDegree == 0) // AR model
@@ -602,6 +647,32 @@ MODEL* ViGretl::bestModel(DATASET *data)
 		free(parameters);
 		return bestModel;
 	}
+}
+
+MODEL* ViGretl::bestArchModel(DATASET *data)
+{
+		qreal score, minScore = DBL_MAX;
+		MODEL *bestModel = NULL;
+		int *parameters = gretl_list_copy(mGretlParameters);
+		parameters[1] = 0;
+
+		for(int i = 1; i <= MAXIMUM_TEST_AR_DEGREE; ++i)
+		{
+			parameters[2] = i;
+			MODEL *tempModel = gretl_model_new();
+			(this->*estimatePointer)(tempModel, data, parameters);
+			score = (this->*orderPointer)(tempModel);
+			if(score < minScore)
+			{
+				minScore = score;
+				gretl_model_free(bestModel);
+				bestModel = tempModel;
+			}
+			else gretl_model_free(tempModel);
+		}
+
+		free(parameters);
+		return bestModel;
 }
 
 void ViGretl::estimateArima(MODEL *model, DATASET *data, int *parameters)

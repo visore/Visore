@@ -127,7 +127,9 @@ class ViGretl
 		MODEL* fixedGarchModel(DATASET *data);
 
 		MODEL* autocorrelationModel(DATASET *data);
+		MODEL* autocorrelationGarchModel(DATASET *data);
 		MODEL* bestModel(DATASET *data);
+		MODEL* bestArchModel(DATASET *data);
 
 		void estimateArima(MODEL *model, DATASET *data, int *parameters);
 		void estimateGarch(MODEL *model, DATASET *data, int *parameters);

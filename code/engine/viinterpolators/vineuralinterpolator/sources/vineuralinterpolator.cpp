@@ -331,6 +331,60 @@ bool ViNeuralInterpolator::interpolateIncremental(const qreal *leftSamples, cons
 		outputSamples[counter] = output[counter];
 	}
 
+	/*int count = qMin(mInputs, mOutputs);
+	
+	qreal inputMean = 0;
+	for(counter = 0; counter < count; ++counter)
+	{
+		inputMean += (leftSamples + (leftSize - count))[counter];
+	}
+	inputMean /= count;
+	
+	qreal outputMean = 0;
+	for(counter = 0; counter < count; ++counter)
+	{
+		outputMean += (outputSamples + (outputSize - count))[counter];
+	}
+	outputMean /= count;
+
+
+	qreal r = 0;
+	for(counter = 0; counter < count; ++counter)
+	{
+		r += ((leftSamples + (leftSize - count))[counter] - inputMean) * ((outputSamples + (outputSize - count))[counter] - outputMean);
+	}
+
+	qreal divide1 = 0, divide2 = 0;
+	for(counter = 0; counter < count; ++counter)
+	{
+		divide1 += qPow((leftSamples + (leftSize - count))[counter] - inputMean, 2);
+		divide2 += qPow((outputSamples + (outputSize - count))[counter] - outputMean, 2);
+		//cout<<(leftSamples + (leftSize - count))[counter]<<"\t"<<(outputSamples + (outputSize - count))[counter]<<endl;
+	}
+	//cout<<endl<<endl;
+
+	r /= (qSqrt(divide1) * qSqrt(divide2));
+
+	static int c1 = 0;
+	static qreal rr1 = 0;
+	static int c2 = 0;
+	static qreal rr2= 0;
+
+	if(qIsNaN(r)) return;
+
+	if(r < 0)
+	{
+		++c1;
+		rr1 += r;
+	}
+	else
+	{
+		++c2;
+		rr2 += r;
+	}
+
+	cout <<" pppppppppppppppppppppppppppppppp:   " << r << "\t\t"<< (rr1/c1)<<"\t"<< (rr2/c2) <<endl;
+*/
 	/*ViFann *network = mNetworks.first();
 	int counter = 0;
 	int total = mInputs + mOutputs;
@@ -413,6 +467,98 @@ bool ViNeuralInterpolator::interpolateMaximumBatch(const qreal *leftSamples, con
 	{
 		outputSamples[i] = output[i];
 	}
+
+/*
+
+
+
+
+
+
+
+
+
+	static int c1 = 0;
+	static qreal rr1 = 0;
+	static int c2 = 0;
+	static qreal rr2= 0;
+
+	int leftOffset, windowSize, halfSteps, counter;
+	int trainCount = 2048;
+	int stepSize = 1;
+
+	counter = 0;
+	windowSize = mInputs + mOutputs;
+	if(trainCount > 0)
+	{
+		halfSteps = trainCount * stepSize;
+		leftOffset = leftSize - halfSteps - windowSize;
+	}
+	if(trainCount <= 0 || leftOffset < 0)
+	{
+		trainCount = floor((leftSize - windowSize) / qreal(stepSize));
+		halfSteps = trainCount * stepSize;
+		leftOffset = leftSize - halfSteps - windowSize;
+	}
+
+
+	while(devideBatch((qreal*) leftSamples, leftSize, leftOffset, mInput, mInputs, output, mOutputs))
+	{
+		leftOffset += stepSize;
+		++counter;
+
+		int count = qMin(mInputs, mOutputs);
+
+		qreal inputMean = 0;
+		for(int i = 0; i < count; ++i)
+		{
+			inputMean += mInput[i];
+		}
+		inputMean /= count;
+
+		qreal outputMean = 0;
+		for(int i = 0; i < count; ++i)
+		{
+			outputMean += output[i];
+		}
+		outputMean /= count;
+
+
+		qreal r = 0;
+		for(int i = 0; i < count; ++i)
+		{
+			r += (mInput[i] - inputMean) * (output[i] - outputMean);
+		}
+
+		qreal divide1 = 0, divide2 = 0;
+		for(int i = 0; i < count; ++i)
+		{
+			divide1 += qPow(mInput[i] - inputMean, 2);
+			divide2 += qPow(output[i] - outputMean, 2);
+		}
+
+		r /= (qSqrt(divide1) * qSqrt(divide2));
+
+		if(qIsNaN(r)) return;
+		if(r < 0)
+		{
+			++c1;
+			rr1 += r;
+		}
+		else
+		{
+			++c2;
+			rr2 += r;
+		}
+
+	}
+
+
+
+
+
+
+	cout <<" pppppppppppppppppppppppppppppppp:\t\t" << "\t\t"<< (rr1/c1)<<"\t"<< (rr2/c2) <<endl;*/
 }
 
 void ViNeuralInterpolator::trainSeparateBatch(const qreal *leftSamples, const int &leftSize, const qreal *rightSamples, const int &rightSize, const int &outputSize, int trainCount, const int &stepSize)

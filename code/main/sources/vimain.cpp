@@ -9,6 +9,7 @@
 #include <vipredictorbenchmarker.h>
 #include <viinterpolatorbenchmarker.h>
 #include <vinoisedetectorbenchmarker.h>
+#include <vistatistician.h>
 
 #include <viinterpolatorbatcher.h>
 #include <vinoisebatcher.h>
@@ -39,16 +40,19 @@ int main(int argc, char *argv[])
     //bool BENCH = false;
 
 	//ViBenchmarker bench;
-	//ViPredictorBenchmarker bench;
-	ViInterpolatorBenchmarker bench;
+//	ViPredictorBenchmarker bench;
+	//ViInterpolatorBenchmarker bench;
 	//ViNoiseDetectorBenchmarker bench;
+
+	ViStatistician stat;
 
 //	ViInterpolatorBatcher bench;
 	//ViNoiseBatcher bench;
 
 	if(BENCH)
 	{
-		bench.benchmark(arg);
+		//bench.benchmark(arg);
+		stat.run(arg);
 	}
 	else
 	{

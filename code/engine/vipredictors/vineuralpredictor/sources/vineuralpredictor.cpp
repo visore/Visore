@@ -97,8 +97,8 @@ void ViNeuralPredictor::initializeIncrementalSet(const int &channelCount, const 
 	mNetwork1->setActivation(ViFann::Elliot);
 	mNetwork1->setWeights(ViFann::Random);
 	mNetwork1->setLearningRate(0.01);
-	mNetwork1->setStopEpochs(1);
-	mNetwork1->setStopMse(0.000000);
+	//mNetwork1->setStopEpochs(1);
+	//mNetwork1->setStopMse(0.000000);
 	if(!mNetwork1->isValid())
 	{
 		LOG("Invalid neural network.", QtFatalMsg);
@@ -111,8 +111,8 @@ void ViNeuralPredictor::initializeIncrementalSet(const int &channelCount, const 
 	mNetwork2->setActivation(ViFann::Elliot);
 	mNetwork2->setWeights(ViFann::Random);
 	mNetwork2->setLearningRate(0.01);
-	mNetwork2->setStopEpochs(1);
-	mNetwork2->setStopMse(0.000000);
+	//mNetwork2->setStopEpochs(1);
+	//mNetwork2->setStopMse(0.000000);
 	if(!mNetwork2->isValid())
 	{
 		LOG("Invalid neural network.", QtFatalMsg);
@@ -122,7 +122,8 @@ void ViNeuralPredictor::initializeIncrementalSet(const int &channelCount, const 
 	mInput = new qreal[mInputs];
 	mOutput = new qreal[mOutputs];
 
-	setWindowSize(mWindowSize + mOutputs);
+	ViPredictor::setWindowSize(mWindowSize + mOutputs);
+	setOffset(mWindowSize + mOutputs);
 }
 
 void ViNeuralPredictor::initializeIncrementalRecurrent(const int &channelCount, const int &predictionCount)
@@ -147,8 +148,8 @@ void ViNeuralPredictor::initializeIncrementalRecurrent(const int &channelCount, 
 	mNetwork1->setActivation(ViFann::Elliot);
 	mNetwork1->setWeights(ViFann::Random);
 	mNetwork1->setLearningRate(0.01);
-	mNetwork1->setStopEpochs(1);
-	mNetwork1->setStopMse(0.000000);
+	//mNetwork1->setStopEpochs(1);
+	//mNetwork1->setStopMse(0.000000);
 	if(!mNetwork1->isValid())
 	{
 		LOG("Invalid neural network.", QtFatalMsg);
@@ -161,8 +162,8 @@ void ViNeuralPredictor::initializeIncrementalRecurrent(const int &channelCount, 
 	mNetwork2->setActivation(ViFann::Elliot);
 	mNetwork2->setWeights(ViFann::Random);
 	mNetwork2->setLearningRate(0.01);
-	mNetwork2->setStopEpochs(1);
-	mNetwork2->setStopMse(0.000000);
+	//mNetwork2->setStopEpochs(1);
+	//mNetwork2->setStopMse(0.000000);
 	if(!mNetwork2->isValid())
 	{
 		LOG("Invalid neural network.", QtFatalMsg);
@@ -172,7 +173,8 @@ void ViNeuralPredictor::initializeIncrementalRecurrent(const int &channelCount, 
 	mInput = new qreal[mInputs];
 	mOutput = new qreal[mOutputs];
 
-	setWindowSize(mWindowSize + 2);
+	ViPredictor::setWindowSize(mInputs + 1);
+	setOffset(mInputs);
 }
 
 bool ViNeuralPredictor::predict(const qreal *samples, const int &size, qreal *predictedSamples, const int &predictionCount, ViError *error, const int &channel)
@@ -195,17 +197,17 @@ bool ViNeuralPredictor::predictIncrementalSet(const qreal *samples, const int &s
 
 	int counter = 0;
 
-	network->run(samples + mOutputs, mOutput);
-	for(counter = 0; counter < predictionCount; ++counter)
-	{
-		predictedSamples[counter] = mOutput[counter];
-	}
-
 	for(counter = 0; counter < mOutputs; ++counter)
 	{
 		mOutput[counter] = samples[counter + mInputs];
 	}
 	network->train(samples, mOutput);
+
+	network->run(samples + mOutputs, mOutput);
+	for(counter = 0; counter < predictionCount; ++counter)
+	{
+		predictedSamples[counter] = mOutput[counter];
+	}
 
 	return true;
 }
@@ -221,7 +223,7 @@ bool ViNeuralPredictor::predictIncrementalRecurrent(const qreal *samples, const 
 
 	for(i = 0; i < mInputs; ++i)
 	{
-		mInput[i] = samples[i + 1];
+		mInput[i] = samples[i];
 	}
 	network->run(mInput, mOutput);
 	out = predictedSamples[0] = mOutput[0];
